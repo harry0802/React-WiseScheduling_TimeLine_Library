@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src"
+  },
+  "include": ["src", "src/features/meter-data/TimelyElectricityConsumption.js"]
+}

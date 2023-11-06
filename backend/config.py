@@ -5,14 +5,19 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
+    # CORS for JSON
+    CORS_HEADERS = 'Content-Type'
+
     # Change the secret key in production run.
     SECRET_KEY = os.environ.get("SECRET_KEY", os.urandom(24))
     DEBUG = False
 
     # JWT Extended config
     JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", os.urandom(24))
-    ## Set the token to expire every week
+    # Set the token to expire every week
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7)
+
+    SCHEDULER_API_ENABLED = True
 
 
 class DevelopmentConfig(Config):

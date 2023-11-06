@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
+    load_dotenv(dotenv_path=dotenv_path, override=True)
 
 ##
 
@@ -17,7 +17,13 @@ from app.models.user import User, Role, Permission
 
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
+app.logger.setLevel(os.getenv("LOGLEVEL","INFO"))
 migrate = Migrate(app, db)
+
+
+@app.route('/flask-health-check')
+def flask_health_check():
+    return "success"
 
 
 @app.shell_context_processor
