@@ -83,7 +83,7 @@ services:
       - '${REACT_APP_PORT}:3000'
     networks:
       - frontnet
-    depends_on:cooling
+    depends_on:
       backend:
         condition: service_healthy
 
