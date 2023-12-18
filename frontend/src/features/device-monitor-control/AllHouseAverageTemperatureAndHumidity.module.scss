@@ -1,0 +1,56 @@
+
+.CircleBox {
+  width: 100%;
+  color: #fff;
+}
+
+.Circle {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.title {
+  text-align: center;
+  padding-top: 8px;
+  font-size: 30px;
+}
+
+.Box {
+  // border: 1px solid #fff;
+  border-radius: 4px;
+  background: #1D253C;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  position: relative;
+}
+
+.showValue {
+  position: absolute;
+  display: flex;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+}
+
+
+
+
+.tempVlaue,
+.hunVlaue {
+  text-align: center;
+  margin-left: 10px;
+}
+
+.tempVlaue {
+  color: #FE5A57;
+}
+
+.hunVlaue {
+  color: #55AFF7;
+}

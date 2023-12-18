@@ -1,0 +1,171 @@
+.inductionTestValueBox {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 20px;
+}
+
+
+.title {
+  color: #FFF;
+  font-size: 18px;
+  font-weight: 400;
+  display: flex;
+  height: 50px;
+}
+
+.title:hover {
+  color: rgb(138, 192, 226);
+}
+
+.title:hover {
+  color: rgb(138, 192, 226);
+}
+
+.monitorPageValue {
+  position: relative;
+  top: 13px;
+  left: 0px;
+  font-size: 50px;
+  color:#FF5959;
+}
+.monitorHumPageValue {
+  position: relative;
+  top: 13px;
+  left: 0px;
+  font-size: 50px;
+  color:#57B3FD;
+}
+
+.PageValue {
+  position: relative;
+  top: -20px;
+}
+
+.TempUnit {
+  font-size: 18px;
+  color:#FF5959;
+
+}
+
+.HumUnit {
+  font-size: 18px;
+  color: #57B3FD;
+
+}
+
+.tempValues {
+  border: none;
+  background-color: #0C1421;
+  color: #FFF;
+  font-size: 50px;
+  width: 160px;
+
+}
+
+.temperature:hover {
+  color: rgb(138, 192, 226);
+}
+
+.edit {
+  position: relative;
+  left: 20px;
+  margin-left: 25px;
+  font-size: 20px;
+  width: 60px;
+  height: 30px;
+  text-align: center;
+}
+
+.CircleBox {
+  width: 350px;
+  height: 350px;
+  position: relative;
+  top: -20px;
+  text-align: center;
+  color: #fff;
+
+  // border: 1px solid #fff;
+}
+
+.ValueBox {
+  display: flex;
+  position: absolute;
+  top: 53%;
+  left: 22%;
+
+}
+.box1{
+  padding: 10px;
+}
+.box2{
+  color: #FE5A57;
+}
+.box3{
+  color: #57B3FD;
+}
+.NoEditValue, .EditInput{
+  font-size: 50px;
+  width: 200px;
+  height: 75px;
+  color: #FE5A57;
+  margin-top: 33px;
+}
+.EditInput{
+  width: 150px;
+}
+.Title{
+  
+  color: #FFF;
+
+}
+.btn{
+  color: #57B3FD;
+}
+.blinking {
+  animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+
+@media (max-width: 900px) {
+
+  .title {
+    color: #FFF;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .temperature{
+    margin-left: 10px;
+    width: 250px;
+
+  }
+
+  .monitorPageValue ,.NoEditValue, .EditInput ,.monitorHumPageValue{
+
+    font-size: 24px;
+
+  }
+  .EditInput{
+    margin-left: 20px;
+    width: 100px;
+    height: 40px;
+  }
+
+  .unit ,.HumUnit{
+    font-size: 14px;
+  }
+
+  .tempValues {
+    font-size: 24px;
+    width: 100px;
+  }
+
+}

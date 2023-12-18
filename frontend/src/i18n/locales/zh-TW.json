@@ -1,0 +1,160 @@
+{
+  "app": {
+    "ts": "雙肩智慧",
+    "ts-internal": "雙肩內部系統"
+  },
+  "nav": {
+    "dashboard": "首頁",
+    "user-management": "帳號管理",
+    "customer-management": "客戶管理",
+    "construction-management": "工程管理",
+    "device-monitor-control":"設備監控",
+    "meter-data":"電錶數據"
+  },
+  "common": {
+    "cancel": "取消",
+    "confirm": "確認",
+    "create-file": "建檔",
+    "creation": "建立時間",
+    "modified": "更新時間",
+    "search": "搜尋",
+    "sort": "排序",
+    "search-keyword": "請輸入關鍵字查詢",
+    "enabled":"使用權限",
+    "next-page": "下一筆",
+    "last-page": "上一筆",
+    "download": "下載",
+    "delete": "刪除",
+    "clear-keyword": "清除關鍵字"
+  },
+  "customer": {
+    "title": {
+      "customer-list": "客戶資料",
+      "create-customer": "新增客戶"
+    },
+    "customer-type": {
+      "all": "所有類型",
+      "company": "公司",
+      "individual": "個人"
+    },
+    "customer-group": {
+      "all": "所有群組",
+      "commercial": "商業客戶",
+      "government": "政府機關",
+      "individual": "個人",
+      "non profit": "非營利組織"
+    },
+    "field": {
+      "basic-info": "基本資訊",
+      "customer-name": "客戶名稱",
+      "name": "客戶編號",
+      "customer-type": "客戶類型",
+      "customer-group": "客戶群組",
+      "tax-id": "統一編號",
+      "contact-person": "客戶聯絡人",
+      "contact-phone": "客戶聯絡人手機"
+    },
+    "success": {
+      "create": "客戶資料新增成功~",
+      "update": "客戶資料更新成功~"
+    },
+    "error": {
+      "customer-name-required": "寫上那條惡龍~",
+      "customer-name-invalid-length": "請輸入大於2小於32個中英文字~",
+      "tax-id-invalid": "哎呀呀~這個統編好像有點不對勁喔~",
+      "contact-person-invalid-length": "請輸入大於2小於32個中英文字~"
+    }
+  },
+  "cd": {
+    "title": {
+      "construction-demand-management": "工程需求管理",
+      "create-cd": "新增需求"
+    },
+    "status": {
+      "all": "所有狀態",
+      "open": "新建立",
+      "quotation": "報價中",
+      "converted": "已成案",
+      "lost": "已流失",
+      "replied": "已回覆",
+      "closed": "已關閉"
+    },
+    "field": {
+      "basic-info": "基本資訊",
+      "title": "需求標題",
+      "name": "需求編號",
+      "status": "需求狀態",
+      "customer-name": "客戶名稱",
+      "owner": "我方負責人",
+      "contact-person": "客戶聯絡人",
+      "contact-phone": "客戶聯絡人手機",
+      "members": "需求成員",
+      "desc": "需求描述",
+      "upload-file": "上傳檔案",
+      "add-file": "新增檔案",
+      "remove-file": "移除檔案",
+      "add-member": "新增成員",
+      "select-member": "選擇成員",
+      "remove-member": "移除成員",
+      "created-by": "建檔人員",
+      "member": "成員",
+      "attachment": "附件"
+    },
+    "success": {
+      "create": "需求新增成功~",
+      "update": "需求更新成功~"
+    },
+    "error": {
+      "title-required": "寫上標題, 要不然人家不知道你要幹嘛~",
+      "title-invalid-length": "請輸入大於2小於32個中英文字~",
+      "customer-required": "寫上那條惡龍"
+      
+    }
+  },
+  "project": {
+    "title": {
+      "project-management": "專案管理與任務分配"
+    }
+  },
+  "user": {
+    "title": {
+      "create-user": "新增使用者",
+      "edit-user": "修改使用者",
+      "user-list":"使用者資料"
+    },
+    "status": {
+      "enabled": "正常使用",
+      "disabled": "停止使用"
+    },
+    "field": {
+      "roles": "角色",
+      "basic-info": "基本資料",
+      "title": "需求標題",
+      "name": "需求編號",
+      "status": "需求狀態",
+      "user-name": "使用者名稱",
+      "user-email": "電子信箱",
+      "owner": "我方負責人",
+      "contact-person": "客戶聯絡人",
+      "contact-phone": "客戶聯絡人手機",
+      "members": "需求成員",
+      "desc": "需求描述",
+      "add-file": "新增檔案",
+      "add-member": "新增成員",
+      "select-member": "選擇成員",
+      "remove-member": "移除成員",
+      "created-by": "建檔人員",
+      "member": "成員",
+      "attachment": "附件"
+    },
+    "success": {
+      "create": "需求新增成功~"
+    },
+    "error": {
+      "email-required": "他長得不像電子信箱~想跟你互加為好友~~",
+      "phone-required": "安安~可以跟你加個電話嗎?哎呀呀~這個號碼好像不對勁喔~",
+      "password-required": "請寫下8個~24個大小寫符號與字數的組合讓他更強壯~",
+      "name-invalid-length": "他看起來不像人類~能告訴我你的芳名嗎~"
+    }
+  }
+}

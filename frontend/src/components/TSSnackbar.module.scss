@@ -1,0 +1,9 @@
+@import 'styles/variables';
+
+.snackbar {
+  .snackbarContent {
+    height: 80px;
+    background-color: #EEEEEE;
+    color: $palette-text-primary;
+  }
+}

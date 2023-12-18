@@ -1,0 +1,80 @@
+.info{
+  margin-top: 125px;
+  font-size: 120px;
+  text-align: center;
+  height: 100vh;
+  background-color: #0C1421;
+
+}
+.valueBox{
+  width: 800px;
+  // background-color: red;
+  padding: 10px;
+  margin: auto;
+}
+.values{
+  font-size: 46px;
+  font-family: "Noto Sans",sans-serif;
+  display: flex;
+  justify-content: space-between;
+  margin:0
+}
+button{
+  width: 70px;
+  height: 40px;
+  margin: 0 10px;
+}
+.title{
+  text-align: start;
+  width: 250px;
+  margin-right: 150px;
+}
+.box1{
+  display: flex;
+}
+.value{
+  width: 150px;
+  text-align: end;
+}
+input{
+  background-color: #121212;
+  border: none;
+  color: #8f8f8f;
+  width: 150px;
+  font-size: 46px;
+  text-align: right;
+  font-family: "Noto Sans",sans-serif;
+}
+.rightAlign{
+  text-align: right;
+
+}
+/* 隐藏输入框默认的上下按钮 */
+// input[type="number"] {
+//   /* Firefox */
+//   -moz-appearance: textfield;
+// }
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  /* Webkit/Blink */
+  -webkit-appearance: none;
+  margin: 0;
+}
+.save{
+  color: red;
+}
+button{
+  font-size: 24px;
+}
+.ok:hover , .cancel:hover{
+  color: #fff;
+}
+.Title ,.Content {
+  color: #fff;
+}
+.DialogBtn{
+  
+    color: #57B3FD;
+  
+}

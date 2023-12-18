@@ -1,0 +1,76 @@
+.on-water{
+  background: linear-gradient(180deg, #2F93F5 0%, #4ED6ED 100%);
+
+}
+.on-water:hover{
+  background: linear-gradient(180deg, #004990 0%, #4ED6ED 100%);
+
+}
+.off-water{
+  background: linear-gradient(180deg, #555 0%, #D3D3D3 100%);
+
+
+}
+.off-water:hover{
+  background: linear-gradient(180deg, #232323 0%, #D3D3D3 100%);
+
+
+}
+.water-curtain-system-box1 {
+  color: #ffffff;
+  height: 100%;
+  border-radius: 10px;
+  position: relative;
+  // overflow: scroll;
+
+  .system-left {
+
+    padding: 15px;
+
+    .title {
+      width: 100%;
+      font-family: 'Roboto';
+
+    }
+
+    .unmber {
+      width: 100%;
+    }
+
+  
+  }
+
+  img {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-right: -20px;
+  }
+
+
+
+}
+
+.off-state {
+  background: linear-gradient(180deg, #555 0%, #D3D3D3 100%);
+}
+
+.off-state:hover {
+  background: linear-gradient(180deg, #232323 0%, #D3D3D3 100%);
+}
+
+.On-state:hover {
+  background: linear-gradient(180deg, #004990 0%, #4ED6ED 100%);
+}
+
+
+.water-dropicon{
+  position: relative;
+  font-size: 250px;
+
+}
+
+@media (max-width:1920px) {
+
+  
+}
