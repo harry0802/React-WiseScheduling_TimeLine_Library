@@ -14,8 +14,7 @@ from app import create_app, db
 
 # Import models
 from app.models.user import User, Role, Permission
-import app.models.register_setting
-import app.models.device
+
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
 app.logger.setLevel(os.getenv("LOGLEVEL","INFO"))

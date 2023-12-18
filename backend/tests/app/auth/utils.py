@@ -11,16 +11,7 @@ class LoginSchema(Schema):
     - Password (Str)
     """
 
-    username = fields.Str(
-        validate=[
-            Length(min=4, max=15),
-            Regexp(
-                r"^([A-Za-z0-9_](?:(?:[A-Za-z0-9_]|(?:\.(?!\.))){0,28}(?:[A-Za-z0-9_]))?)$",
-                error="Invalid username!",
-            ),
-        ],
-    )
-    email = fields.Email(validate=[Length(max=64)])
+    email = fields.Email(required=True, validate=[Length(max=64)])
     password = fields.Str(required=True, validate=[Length(min=8, max=128)])
 
 

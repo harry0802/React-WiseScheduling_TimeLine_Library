@@ -15,12 +15,6 @@ flask-jwt-extended = "*"
 flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
 python-dotenv = "*"
-gunicorn = "*"
-mysqlclient = "==2.1.0"
-flask-apscheduler = "*"
-pymodbustcp = "*"
-paho-mqtt = "*"
-requests = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.9"

@@ -18,8 +18,7 @@ class AuthDto:
     auth_login = api.model(
         "Login data",
         {
-            "username": fields.String,
-            "email": fields.String,
+            "email": fields.String(required=True),
             "password": fields.String(required=True),
         },
     )

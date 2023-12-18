@@ -29,7 +29,7 @@ class AuthLogin(Resource):
             200: ("Logged in", auth_success),
             400: "Validations failed.",
             403: "Incorrect password or incomplete credentials.",
-            404: "Username or Email does not match any account.",
+            404: "Email does not match any account.",
         },
     )
     @api.expect(auth_login, validate=True)
@@ -39,7 +39,7 @@ class AuthLogin(Resource):
         login_data = request.get_json()
 
         # Validate data
-        if (errors := login_schema.validate(login_data)):
+        if (errors := login_schema.validate(login_data)) :
             return validation_error(False, errors), 400
 
         return AuthService.login(login_data)
@@ -67,7 +67,7 @@ class AuthRegister(Resource):
         register_data = request.get_json()
 
         # Validate data
-        if (errors := register_schema.validate(register_data)):
+        if (errors := register_schema.validate(register_data)) :
             return validation_error(False, errors), 400
 
         return AuthService.register(register_data)

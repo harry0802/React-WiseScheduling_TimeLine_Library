@@ -14,27 +14,15 @@ class AuthService:
     @staticmethod
     def login(data):
         # Assign vars
-        username = data.get('username')
-        email = data.get("email")
+        email = data["email"]
         password = data["password"]
 
         try:
-            if (not username and not email):
-                return err_resp(
-                    "Neither username nor email is given to log in.",
-                    "no_username_email_400",
-                    400
-                )
-
             # Fetch user data
-            user = User.query.filter_by(username=username).first()
-            if not user:
-                user = User.query.filter_by(email=email).first()
-
-            if not user:
+            if not (user := User.query.filter_by(email=email).first()):
                 return err_resp(
-                    "The username or email you have entered does not match any account.",
-                    "account_404",
+                    "The email you have entered does not match any account.",
+                    "email_404",
                     404,
                 )
 
@@ -61,12 +49,12 @@ class AuthService:
     def register(data):
         # Assign vars
 
-        # Required values
+        ## Required values
         email = data["email"]
         username = data["username"]
         password = data["password"]
 
-        # Optional
+        ## Optional
         data_name = data.get("name")
 
         # Check if the email is taken

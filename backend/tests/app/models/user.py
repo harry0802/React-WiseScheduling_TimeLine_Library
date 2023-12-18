@@ -22,7 +22,6 @@ class Role(Model):
     default = Column(db.Boolean, default=False, index=True)
     permissions = Column(db.Integer)
     description = Column(db.String(50))
-    ts_permissions = Column(db.JSON)
 
     users = db.relationship("User", backref="role", lazy="dynamic")
 
