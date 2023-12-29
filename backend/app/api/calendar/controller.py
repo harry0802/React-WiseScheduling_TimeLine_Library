@@ -12,12 +12,6 @@ from .schemas import CalendarSchema
 api = CalendarDto.api
 control_schema = CalendarSchema()
 
-
-def update_calendar():
-    """Update calendar"""
-    print("update_calendar")
-    return CalendarService.update_calendar()
-
 """API Documentation
 1. Get the current calendar
 Get /api/calendar/{date}

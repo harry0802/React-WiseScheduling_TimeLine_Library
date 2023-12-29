@@ -8,6 +8,11 @@ class Config:
     # CORS for JSON
     CORS_HEADERS = 'Content-Type'
 
+    # SERVER
+    SERVER_NAME = os.environ.get("SERVER_NAME", "localhost:5000")
+    # SERVER_HOST = os.environ.get("SERVER_HOST", "localhost")
+    # SERVER_PORT = os.environ.get("SERVER_PORT", 5000)
+
     # Change the secret key in production run.
     SECRET_KEY = os.environ.get("SECRET_KEY", os.urandom(24))
     DEBUG = False
