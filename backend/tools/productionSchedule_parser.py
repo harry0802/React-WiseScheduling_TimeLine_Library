@@ -8,7 +8,7 @@ from datetime import datetime
 # parse data from excel file, and insert into database
 
 table_name = 'productionSchedule'
-ServerName = os.getenv('SERVER_NAME', 'http://localhost:5000')
+ServerName = 'http://localhost:5000'
 api_url = f"{ServerName}/api/productionSchedule"
 column_names = [
     # 'id',

@@ -9,7 +9,7 @@ class Config:
     CORS_HEADERS = 'Content-Type'
 
     # SERVER
-    SERVER_NAME = os.environ.get("SERVER_NAME", "localhost:5000")
+    # SERVER_NAME = os.environ.get("SERVER_NAME", "localhost:5000")
     # SERVER_HOST = os.environ.get("SERVER_HOST", "localhost")
     # SERVER_PORT = os.environ.get("SERVER_PORT", 5000)
 
