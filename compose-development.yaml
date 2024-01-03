@@ -26,6 +26,7 @@ services:
   
   backend:
     build: backend
+    image: gunicorn_flask
     restart: always
     ports:
       - '${FLASK_RUN_PORT}:5000'
