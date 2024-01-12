@@ -15,12 +15,23 @@ from .extensions import bcrypt, cors, db, jwt, ma, scheduler
 from config import config_by_name
 import os
 
+from werkzeug.routing import BaseConverter
+class IntListConverter(BaseConverter):
+    regex = r'\[\s*\d+\s*(,\s*\d+\s*)*\]\s*'
+
+    def to_python(self, value):
+        return [int(x) for x in value.strip('][').split(',')]
+
+    def to_url(self, value):
+        return '['+','.join(str(x) for x in value)+']'
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config_by_name[config_name])
+    app.url_map.converters['int_list'] = IntListConverter
 
     register_extensions(app)
 

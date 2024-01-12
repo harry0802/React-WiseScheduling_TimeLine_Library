@@ -202,9 +202,12 @@ class productionScheduleService:
     def get_productionSchedule(id):
         try:
             # Get the current productionSchedule
-            if not (productionSchedule_db := productionSchedule.query
-                    .filter(productionSchedule.id == id)
-                    .first()):
+            productionSchedule_db = productionSchedule.query.filter(
+                    productionSchedule.id == id
+                ).first()
+
+            if productionSchedule_db is None:
+                return err_resp("productionSchedule not found", "productionSchedule_404", 404)
                 productionSchedule_db = []
             
             productionSchedule_dto = productionSchedule_schema.dump(productionSchedule_db)
@@ -231,7 +234,7 @@ class productionScheduleService:
             resp = message(True, "productionSchedule has been updated..")
             resp["data"] = productionSchedule_dto
 
-            return resp, 201
+            return resp, 200
 
         except Exception as error:
             current_app.logger.error(error)
@@ -256,7 +259,34 @@ class productionScheduleService:
             resp = message(True, "productionSchedule has been updated..")
             resp["data"] = productionSchedule_dto
 
-            return resp, 201
+            return resp, 200
+
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()
+    
+    @staticmethod
+    def update_productionSchedules(ids, payload):
+        try:
+            productionSchedule_db = productionSchedule.query.filter(
+                productionSchedule.id.in_(ids)
+            ).all()
+            if productionSchedule_db is None or len(productionSchedule_db) == 0:
+                return err_resp("productionSchedule not found", "productionSchedule_404", 404)
+            else:
+                for prodSchedule in productionSchedule_db:
+                    prodSchedule = complete_productionSchedule(prodSchedule, payload)
+            selected_ids = [prodSchedule.id for prodSchedule in productionSchedule_db]
+
+            db.session.add_all(productionSchedule_db)
+            db.session.flush()
+            db.session.commit()
+
+            productionSchedule_dto = productionSchedule_schema.dump(productionSchedule_db, many=True)
+            resp = message(True, f"productionSchedule {selected_ids} has been updated..")
+            resp["data"] = productionSchedule_dto
+
+            return resp, 200
 
         except Exception as error:
             current_app.logger.error(error)
@@ -280,3 +310,22 @@ class productionScheduleService:
             current_app.logger.error(error)
             return internal_err_resp()
 
+    @staticmethod
+    def delete_productionSchedules(ids):
+        try:
+            productionSchedule_db = productionSchedule.query.filter(
+                productionSchedule.id.in_(ids)
+            ).all()
+            if productionSchedule_db is None or len(productionSchedule_db) == 0:
+                return err_resp("productionSchedule not found", "productionSchedule_404", 404)
+            selected_ids = [prodSchedule.id for prodSchedule in productionSchedule_db]
+
+            for prodSchedule in productionSchedule_db:
+                db.session.delete(prodSchedule)
+            db.session.commit()
+
+            return message(True, f"productionSchedule {selected_ids} has been deleted.."), 200
+
+        except Exception as error:
+            current_app.logger.error(error)
+            return internal_err_resp()

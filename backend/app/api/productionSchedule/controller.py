@@ -12,7 +12,6 @@ from .schemas import productionScheduleSchema
 api = productionScheduleDto.api
 control_schema = productionScheduleSchema()
 
-
 """API Documentation
 1. Get productionSchedules
 Get /api/productionSchedule/?page={page}&size={size}&sort={sort}&xx_filter={xx_filter}
@@ -115,3 +114,35 @@ class productionScheduleController(Resource):
     )
     def delete(self, id):
         return productionScheduleService.delete_productionSchedule(id)
+
+@api.route("/<int_list:ids>")
+@api.param("ids", "ids of the productionSchedule", required=True, default="[1,2,3]", type="int_list")
+class productionScheduleController(Resource):
+    control_input = productionScheduleDto.productionSchedule_put
+    control_resp = productionScheduleDto.control_resp
+
+    @api.doc(
+        "Update the current productionSchedules",
+        responses={
+            200: ("productionSchedules data successfully updated", control_resp),
+            404: "productionSchedules not found",
+        },
+    )
+    @api.expect(control_input, validate=True)
+    def put(self, ids):
+        payload = api.payload
+        remove_props = ["id"]
+        for prop in remove_props:
+            payload.pop(prop, None)
+        return productionScheduleService.update_productionSchedules(ids, payload)
+
+
+    @api.doc(
+        "delete the current productionSchedules",
+        responses={
+            200: ("productionSchedules data successfully deleted", control_resp),
+            404: "productionSchedules not found",
+        },
+    )
+    def delete(self, ids):
+        return productionScheduleService.delete_productionSchedules(ids)
