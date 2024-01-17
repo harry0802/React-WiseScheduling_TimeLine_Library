@@ -1,0 +1,239 @@
+.editable-cell {
+  position: relative;
+}
+
+.editable-cell-value-wrap {
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.editable-row:hover .editable-cell-value-wrap {
+  padding: 4px 11px;
+  border: 1px solid #8F8F8F;
+  border-radius: 2px;
+}
+
+.editable-row,
+.ant-table-wrapper {
+  background: linear-gradient(275deg, #162343 7.95%, #363C4B 56.8%, #5C5C5C 95.13%);
+  color: #fff;
+
+}
+
+.ant-table-wrapper .ant-table-tbody .ant-table-row>.ant-table-cell-row-hover {
+  background: #aadff5;
+
+}
+
+.ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected>.ant-table-cell {
+  background: none;
+}
+
+.box {
+  padding: 20px;
+}
+
+.ant-table-wrapper .ant-table {
+  background: none;
+}
+
+
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+1):nth-child(-n+2) {
+  background: #186C98;
+  border: 1px solid #8F8F8F;
+  color: #E1E7F5;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+
+
+}
+
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+3):nth-child(-n+6) {
+  background: #C88400;
+  color: #E1E7F5;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  border: 1px solid #8F8F8F;
+
+
+}
+
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+7):nth-child(-n+14) {
+  background: #981846;
+  color: #E1E7F5;
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  border: 1px solid #8F8F8F;
+
+
+}
+
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+15):nth-child(-n+16) {
+  background: #5E0C29;
+  color: #E1E7F5;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  border: 1px solid #8F8F8F;
+
+
+}
+
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+17):nth-child(-n+23) {
+  background: #186C98;
+  color: #E1E7F5;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  border: 1px solid #8F8F8F;
+
+
+}
+
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(24) {
+  background: #18983C;
+  color: #E1E7F5;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  border: 1px solid #8F8F8F;
+
+
+}
+
+
+.ant-table-wrapper .ant-table.ant-table-bordered>.ant-table-container {
+  border: 1px solid #8F8F8F;
+
+}
+
+.ant-table-wrapper .ant-table-cell-fix-left {
+
+  background: #595959;
+}
+
+.ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  background-color: transparent;
+  /* or use 'initial' if needed */
+  color: #fff;
+}
+
+
+:where(.css-dev-only-do-not-override-dkbvqv)[class*=" ant-select"] [class^="ant-select"] {
+  color: #21bfee;
+  padding: 0;
+  text-align: center;
+  background-color: none;
+}
+
+:where(.css-dev-only-do-not-override-dkbvqv)[class*=" ant-select"] [class*=" ant-select"] {
+  color: #fff;
+}
+
+.ant-pagination-prev,
+.ant-pagination-next {
+  background-color: #fff;
+}
+
+.ant-table-wrapper .ant-table-tbody>tr>td {
+  border-bottom: 1px solid #f8f8f8;
+  padding: 8px;
+}
+
+.ant-table-wrapper td.ant-table-column-sort {
+  background: none;
+}
+
+.title-box {
+  display: flex;
+  justify-content: space-between;
+
+  .title {
+    color: #FFF;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    /* 100% */
+  }
+
+  .btn-box {
+    display: flex;
+    margin-bottom: 20px;
+
+
+
+    .add {
+      width: 35px;
+      height: 35px;
+      border-radius: 35px;
+      margin-top: 3px;
+      position: relative;
+      margin-left: 10px;
+      border: 1px solid #fff;
+      background: #186C98;
+
+   
+
+
+    }
+
+    .normal-action {
+      width: 35px;
+      height: 35px;
+      border-radius: 35px;
+      margin-top: 3px;
+      position: relative;
+      margin-left: 10px;
+      background-color: #18983C;
+      border: 1px solid #fff;
+
+    }
+    .pause {
+      width: 35px;
+      height: 35px;
+      border-radius: 35px;
+      border: 1px solid #fff;
+      margin-top: 3px;
+      position: relative;
+      margin-left: 10px;
+      background-color: #F39838;
+
+
+    }
+
+    .delete {
+      width: 35px;
+      height: 35px;
+      border-radius: 30px;
+      border: 1px solid #fff;
+      background-color: #F00;
+      box-shadow: 3px 3px 6px 1px rgba(0, 0, 0, 0.25);
+      margin-top: 3px;
+      position: relative;
+
+
+    }
+  }
+
+  /* 在這裡修改 icon 的顏色 */
+  .ant-picker .ant-picker-suffix{
+
+    color: #4270B8;
+  } 
+
+
+}
+.ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected > .ant-table-cell {
+  background: #595959;
+}
