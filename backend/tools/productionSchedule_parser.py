@@ -4,10 +4,10 @@ import sys, getopt
 import logging
 import requests
 from openpyxl import load_workbook
-from datetime import datetime
+from datetime import datetime, date
 
 # parse data from excel file, and insert into database
-
+debug = False
 table_name = 'productionSchedule'
 ServerName = 'http://localhost:5000'
 api_url = f"{ServerName}/api/productionSchedule"
@@ -81,25 +81,29 @@ def type_transform(obj):
                     ) else value
 
 def main():
+    global debug
+    success = 0
+    fail = 0
     #### main procedure start here ####
     # get cli parameters
     file_name = sys.argv[1]
     sheet_idx = sys.argv[2]
     wb = load_workbook(file_name, data_only=True)
     sheet = wb.worksheets[int(sheet_idx)]
-    format = '%Y/%m/%d'
     #sheet = wb[sheet_name]
     # get data from excel
     for row_ori in sheet.iter_rows(min_row=5, max_col=24, values_only=True):
         # column_name and row mapping
         row = dict(zip(column_names, row_ori))
-        print(f"row: {row_ori}")
+        if debug:
+            print(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print(f"row_ori: {row_ori}")
         # if row['productionArea'] is None:
         #     continue
         #default values
-        row['productionArea']= '+++++++++' if row['productionArea'] is None else row['productionArea']
-        row['moldWorkDays'] = -999999 if row['moldWorkDays'] is None else row['moldWorkDays']
-        row['status'] = '@@@@@@@@@@@@' if row['status'] is None else row['status']
+        # row['productionArea']= '+++++++++' if row['productionArea'] is None else row['productionArea']
+        # row['moldWorkDays'] = -999999 if row['moldWorkDays'] is None else row['moldWorkDays']
+        # row['status'] = '@@@@@@@@@@@@' if row['status'] is None else row['status']
         # convert data type
         type_transform(row)
         # convert data format
@@ -119,10 +123,16 @@ def main():
         empty_cols = [key for key, value in row.items() if value is None ]
         for key in empty_cols:
             row.pop(key, None)
-        print(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         ret = requests.post(api_url, json=row)
-        print(ret.json())
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        if debug:
+            print(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print(ret.json())
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        if ret.json().get('status'):
+            success += 1
+        else:
+            fail += 1
+    print(f"success: {success}, fail: {fail}")
 
 def usage():
     print('usage: {} [-h] file_name sheet_idx'.format(sys.argv[0]))
@@ -141,4 +151,7 @@ if __name__ == '__main__':
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
+    if len(args) < 2:
+        usage()
+        sys.exit()
     main()

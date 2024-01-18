@@ -34,7 +34,7 @@ depends_on = None
     actualOnMachineDate = Column(db.Date, nullable=True)
     moldWorkDays = Column(db.Integer)
     workDays = Column(db.Integer)
-    #預計完工日
+    #預計完成日
     planFinishDate = Column(db.Date)
     actualFinishDate = Column(db.Date, nullable=True)
     comment = Column(db.Text, nullable=True)
@@ -60,31 +60,31 @@ def upgrade():
     metadata = sa.MetaData()
     # seq_autoinc = sa.Sequence('seq_autoinc', metadata=metadata)
     productionSchedule_table = op.create_table('productionSchedule',
-       sa.Column('id', sa.Integer(), nullable=False),
-       sa.Column('productionArea', sa.String(length=255), nullable=False),
-       sa.Column('machineSN', sa.String(length=255), nullable=False),
+       sa.Column('id', sa.Integer(), nullable=True),
+       sa.Column('productionArea', sa.String(length=255), nullable=True),
+       sa.Column('machineSN', sa.String(length=255), nullable=True),
        sa.Column('serialNumber', sa.String(length=255), nullable=True),
        sa.Column('workOrderSN', sa.String(length=255), nullable=False),
        sa.Column('productSN', sa.String(length=255), nullable=False),
        sa.Column('productName', sa.String(length=255), nullable=False),
        sa.Column('workOrderQuantity', sa.Integer(), nullable=False),
        sa.Column('workOrderDate', sa.Date(), nullable=False),
-       sa.Column('moldingSecond', sa.Integer(), nullable=False),
-       sa.Column('hourlyCapacity', sa.Integer(), nullable=False),
-       sa.Column('dailyCapacity', sa.Integer(), nullable=False),
-       sa.Column('planOnMachineDate', sa.Date(), nullable=False),
+       sa.Column('moldingSecond', sa.Integer(), nullable=True),
+       sa.Column('hourlyCapacity', sa.Integer(), nullable=True),
+       sa.Column('dailyCapacity', sa.Integer(), nullable=True),
+       sa.Column('planOnMachineDate', sa.Date(), nullable=True),
        sa.Column('actualOnMachineDate', sa.Date(), nullable=True),
-       sa.Column('moldWorkDays', sa.Integer(), nullable=False),
-       sa.Column('workDays', sa.Integer(), nullable=False),
-       sa.Column('planFinishDate', sa.Date(), nullable=False),
+       sa.Column('moldWorkDays', sa.Integer(), nullable=True),
+       sa.Column('workDays', sa.Integer(), nullable=True),
+       sa.Column('planFinishDate', sa.Date(), nullable=True),
        sa.Column('actualFinishDate', sa.Date(), nullable=True),
        sa.Column('comment', sa.Text(), nullable=True),
-       sa.Column('dailyWorkingHours', sa.Integer(), nullable=False),
-       sa.Column('moldCavity', sa.Integer(), nullable=False),
-       sa.Column('week', sa.Integer(), nullable=False),
-       sa.Column('singleOrDoubleColor', sa.String(length=255), nullable=False),
-       sa.Column('conversionRate', sa.Float(), nullable=False),
-       sa.Column('status', sa.String(length=255), nullable=False),
+       sa.Column('dailyWorkingHours', sa.Integer(), nullable=True),
+       sa.Column('moldCavity', sa.Integer(), nullable=True),
+       sa.Column('week', sa.Integer(), nullable=True),
+       sa.Column('singleOrDoubleColor', sa.String(length=255), nullable=True),
+       sa.Column('conversionRate', sa.DECIMAL(precision=5, scale=3), nullable=True),
+       sa.Column('status', sa.String(length=255), nullable=True),
        sa.PrimaryKeyConstraint('id')
     )
 
