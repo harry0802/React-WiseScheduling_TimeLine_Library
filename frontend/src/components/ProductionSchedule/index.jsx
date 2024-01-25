@@ -585,13 +585,22 @@ const ProductionSchedule = (props) => {
       setDataSource(updatedData);
 
       // Perform the actual update on the server side
-      await UpdateProductionSchedule({ id: row.id, data: row });
+      const response = await UpdateProductionSchedule({ id: row.id, data: row });
 
       // If the server update is successful, show a success message
-      message.success('修改數據成功');
+      // message.success('修改數據成功123');
+      if (response.success) {
+        message.success('修改數據成功');
+        // 如果需要执行其他操作，可以在此处添加逻辑
+        // ...
+      } else {
+        message.error('修改數據失敗');
+        // 如果需要执行其他操作，可以在此处添加逻辑
+        // ...
+      }
     } catch (error) {
       // Handle the error (e.g., display an error message to the user, revert changes, etc.)
-      console.error('Error updating production schedule:', error);
+      message.error('修改數據失敗');
     }
   };
 
