@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { Table, Select, Form, Input, Button, message, Modal, Tooltip } from 'antd';
-import { Link } from "react-router-dom";
 import {
   useGetProductionScheduleQuery,
   // useDelProductionScheduleMutation,
@@ -315,7 +314,7 @@ const ProductionSchedule = (props) => {
       name: record.name,
     }),
   };
-  console.log('rowSelection:', rowSelection); // 添加这行代码进行输出
+  // console.log('rowSelection:', rowSelection); // 添加这行代码进行输出
 
 
   const { Option } = Select;
@@ -354,8 +353,8 @@ const ProductionSchedule = (props) => {
   useEffect(() => {
     if (isSuccess) {
       const { data: dataSource, meta } = data;
-      console.log('dataSource', dataSource);
-      
+      // console.log('dataSource', dataSource);
+
       setTotalPage(meta.total_count);
       setDataSource(dataSource);
     }
@@ -565,13 +564,16 @@ const ProductionSchedule = (props) => {
 
   ];
 
-
+  // console.log('dataSource', dataSource);
   // 編輯
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
+  // 根据需要定义转换函数
 
   const handleSave = async (row) => {
     try {
       // Check if there are changes in the data
+      // console.log('row:', row);
+
       const isDataChanged = Object.keys(row).some((key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]);
 
       if (!isDataChanged) {
@@ -579,28 +581,22 @@ const ProductionSchedule = (props) => {
         // message.info('No changes detected.');
         return;
       }
-
       // Perform the optimistic update on the client side
       const updatedData = dataSource.map((item) => (item.id === row.id ? { ...item, ...row } : item));
+      // console.log('updatedData',updatedData)
       setDataSource(updatedData);
 
       // Perform the actual update on the server side
       const response = await UpdateProductionSchedule({ id: row.id, data: row });
+      // console.log('response', response);
 
-      // If the server update is successful, show a success message
-      // message.success('修改數據成功123');
-      if (response.success) {
+      if (!response.error) {
         message.success('修改數據成功');
-        // 如果需要执行其他操作，可以在此处添加逻辑
-        // ...
-      } else {
-        message.error('修改數據失敗');
-        // 如果需要执行其他操作，可以在此处添加逻辑
-        // ...
+
       }
     } catch (error) {
       // Handle the error (e.g., display an error message to the user, revert changes, etc.)
-      message.error('修改數據失敗');
+      message.error('修改數據失敗321');
     }
   };
 
