@@ -157,22 +157,11 @@ def complete_productionSchedule(db_obj, payload):
     today = datetime.date(datetime.now())
     if payload.get("status") is not None: #manual status
         db_obj.status = payload["status"]
-    else:
-        if db_obj.status in ["xxx1", "xxx2"]: #manual status
-            pass
-        elif db_obj.actualFinishDate is None:
-            if db_obj.planFinishDate > today:
-                db_obj.status = "on-going"
-            elif db_obj.planFinishDate == today:
-                db_obj.status = "on-going"
-            else:
-                db_obj.status = "delay"
-        elif db_obj.actualFinishDate <= db_obj.planFinishDate:
-            db_obj.status = "finish"
-        elif db_obj.actualFinishDate > db_obj.planFinishDate:
-            db_obj.status = "delay-finish"
-        elif db_obj.actualFinishDate == db_obj.planFinishDate:
-            db_obj.status = "finish"
+    elif db_obj.status is None:
+        if db_obj.actualOnMachineDate is None:
+            db_obj.status = "尚未上機"
+        elif db_obj.actualFinishDate is not None:
+            db_obj.status = "Done"
     return db_obj
 
 class productionScheduleService:
