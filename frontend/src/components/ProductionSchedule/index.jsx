@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faPlus, faFileExport, faTrashCan } from '@fortawesome/free-solid-svg-icons';
-import { Table, Select, Form, Input, Button, message, Modal } from 'antd';
+import { faPlay, faPause, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { Table, Select, Form, Input, Button, message, Modal, Tooltip } from 'antd';
 import { Link } from "react-router-dom";
 import {
   useGetProductionScheduleQuery,
@@ -220,13 +220,13 @@ const ProductionSchedule = (props) => {
           // setDataSource(updatedDataSource);
           // 清0
           // setSelectedRowKeys([]);
-                // 將勾選的欄位更改其屬性 status 值為"暫停動作"
-                await cancelStaus(stringIds);
-  
-                // 清空勾選
-                // setSelectedRowKeys([]);
-        
-                message.success('目前狀態已變為暫停生產!!');
+          // 將勾選的欄位更改其屬性 status 值為"暫停動作"
+          await cancelStaus(stringIds);
+
+          // 清空勾選
+          // setSelectedRowKeys([]);
+
+          message.success('目前狀態已變為暫停生產!!');
 
         } catch (error) {
           console.error('Error deleting production schedule:', error);
@@ -244,7 +244,7 @@ const ProductionSchedule = (props) => {
       return;
     }
     const stringIds = JSON.stringify(selectedRowKeys);
-  
+
     // 显示确认对话框
     Modal.confirm({
       title: '確認暫停生產',
@@ -255,10 +255,10 @@ const ProductionSchedule = (props) => {
         try {
           // 將勾選的欄位更改其屬性 status 值為"暫停動作"
           await pauseStaus(stringIds);
-  
+
           // 清空勾選
           // setSelectedRowKeys([]);
-  
+
           message.success('目前狀態已變為暫停生產!!');
         } catch (error) {
           console.error('Error pausing production schedules:', error);
@@ -266,7 +266,7 @@ const ProductionSchedule = (props) => {
       },
     });
   };
-  
+
   const [actionStaus] = useActionStausMutation();
 
   // 勾選令機具開始動作
@@ -277,7 +277,7 @@ const ProductionSchedule = (props) => {
       return;
     }
     const stringIds = JSON.stringify(selectedRowKeys);
-  
+
     // 显示确认对话框
     Modal.confirm({
       title: '確認啟動動作',
@@ -288,10 +288,10 @@ const ProductionSchedule = (props) => {
         try {
           // 將勾選的欄位更改其屬性 status 值為"啟動動作"
           await actionStaus(stringIds);
-  
+
           // 清空勾選
           // setSelectedRowKeys([]);
-  
+
           message.success('目前狀態已變為on-going');
         } catch (error) {
           console.error('Error starting production schedules:', error);
@@ -299,7 +299,7 @@ const ProductionSchedule = (props) => {
       },
     });
   };
-  
+
   // 勾選設定
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -355,6 +355,7 @@ const ProductionSchedule = (props) => {
     if (isSuccess) {
       const { data: dataSource, meta } = data;
       console.log('dataSource', dataSource);
+      
       setTotalPage(meta.total_count);
       setDataSource(dataSource);
     }
@@ -805,12 +806,12 @@ const ProductionSchedule = (props) => {
   return (
     <div>
       <div className='box'>
-        <ul style={{ display: 'flex', marginBottom: '10px' }}>
+        {/* <ul style={{ display: 'flex', marginBottom: '10px' }}>
           <li style={{ marginRight: '10px' }}>
             <Link to="/">登入頁面</Link>
           </li>
 
-        </ul>
+        </ul> */}
         <div className='title-box'>
           <div className='title'>
             生產計劃排程表
@@ -823,33 +824,44 @@ const ProductionSchedule = (props) => {
             >
               {allWeekOptions}
             </Select>
+            <Tooltip title="取消生產">
 
-            <button
-              className='delete'
-              onClick={deleteChecked}
-            >
-              <FontAwesomeIcon icon={faTrashCan} style={{ color: '#fff' }} />
-            </button>
+              <button
+                className='delete'
+                onClick={deleteChecked}
+              >
+                <FontAwesomeIcon icon={faTrashCan} style={{ color: '#fff' }} />
+              </button>
+            </Tooltip>
+            <Tooltip title="開始生產">
 
-            <button
-              className="normal-action"
-              onClick={actionChecked}
-            >
-              <FontAwesomeIcon icon={faPlay} style={{ color: '#fff' }} />
-            </button>
-            <button
-              className="pause"
-              onClick={pauseChecked}
-            >
-              <FontAwesomeIcon icon={faPause} style={{ color: '#fff' }} />
-            </button>
 
-            <button
-              className='add'
-              onClick={handleAdd}
-            >
-              <FontAwesomeIcon icon={faPlus} style={{ color: '#fff' }} />
-            </button>
+              <button
+                className="normal-action"
+                onClick={actionChecked}
+              >
+                <FontAwesomeIcon icon={faPlay} style={{ color: '#fff' }} />
+              </button>
+            </Tooltip>
+            <Tooltip title="暫停生產">
+
+              <button
+                className="pause"
+                onClick={pauseChecked}
+              >
+                <FontAwesomeIcon icon={faPause} style={{ color: '#fff' }} />
+              </button>
+            </Tooltip>
+            <Tooltip title="新增製令單">
+
+              <button
+                className='add'
+                onClick={handleAdd}
+              >
+                <FontAwesomeIcon icon={faPlus} style={{ color: '#fff' }} />
+              </button>
+            </Tooltip>
+
           </div>
 
         </div>
@@ -882,7 +894,6 @@ const ProductionSchedule = (props) => {
         {
           (dataSource.length > 0) &&
           <Button key="downloadExcel" type="ghost" onClick={exportToExcel} className='exportBtn'>
-            {/* <FontAwesomeIcon icon={faFileExport} style={{ color: 'black' }} /> */}
             匯出
           </Button>
         }
