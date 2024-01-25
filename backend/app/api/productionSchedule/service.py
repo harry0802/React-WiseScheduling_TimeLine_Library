@@ -117,31 +117,53 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("singleOrDoubleColor") is not None else db_obj.singleOrDoubleColor
     db_obj.conversionRate = payload["conversionRate"] \
         if payload.get("conversionRate") is not None else db_obj.conversionRate
-    
-    #每小時產能(drop decimal)
-    db_obj.hourlyCapacity = (60 * 60) * (1/db_obj.moldingSecond) * db_obj.moldCavity
-    db_obj.hourlyCapacity = math.floor(db_obj.hourlyCapacity)
-    #每日產能(drop decimal)
-    db_obj.dailyCapacity = db_obj.hourlyCapacity * db_obj.dailyWorkingHours * db_obj.conversionRate
-    db_obj.dailyCapacity = math.floor(db_obj.dailyCapacity)
-    #工作天數(unconditional round up)
-    db_obj.workDays = db_obj.workOrderQuantity / db_obj.dailyCapacity
-    db_obj.workDays = math.ceil(db_obj.workDays)
-    #預計完成日(shift by holiday)
+    db_obj.status = payload["status"] \
+        if payload.get("status") is not None else db_obj.status
+    #datetime type transform
     db_obj.planOnMachineDate = date.fromisoformat(db_obj.planOnMachineDate) if type(db_obj.planOnMachineDate) == str else db_obj.planOnMachineDate
-    db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
+    #預估產能相關
+    # Required: workOrderQuantity, moldingSecond, dailyWorkingHours, moldCavity, conversionRate
+    if (
+        type(db_obj.workOrderQuantity) != int or db_obj.workOrderQuantity <= 0
+        or type(db_obj.moldingSecond) != int or db_obj.moldingSecond <= 0
+        or type(db_obj.dailyWorkingHours) != int or db_obj.dailyWorkingHours <= 0
+        or type(db_obj.moldCavity) != int or db_obj.moldCavity <= 0
+        or type(db_obj.moldWorkDays) != int or db_obj.moldWorkDays <= 0
+        or type(db_obj.conversionRate) != float or db_obj.conversionRate <= 0
+        ):
+        logging.info(f"complete_productionSchedule:SKIP calculate capacity")
+    else:
+        #每小時產能(drop decimal)
+        db_obj.hourlyCapacity = (60 * 60) * (1/db_obj.moldingSecond) * db_obj.moldCavity
+        db_obj.hourlyCapacity = math.floor(db_obj.hourlyCapacity)
+        #每日產能(drop decimal)
+        db_obj.dailyCapacity = db_obj.hourlyCapacity * db_obj.dailyWorkingHours * db_obj.conversionRate
+        db_obj.dailyCapacity = math.floor(db_obj.dailyCapacity)
+        #工作天數(unconditional round up)
+        db_obj.workDays = db_obj.workOrderQuantity / db_obj.dailyCapacity
+        db_obj.workDays = math.ceil(db_obj.workDays)
+        #預計完成日(shift by holiday)
+        db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
+        
     #周數
-    db_obj.week = db_obj.planFinishDate.isocalendar()[1]
+    if payload.get("week") is not None:
+        db_obj.week = payload["week"]
+    else:
+        #by 預計上機日
+        db_obj.week = db_obj.planOnMachineDate.isocalendar()[1] if db_obj.planOnMachineDate is not None else db_obj.week
+        #by 預計完成日
+        # db_obj.week = db_obj.planOnMachineDate.isocalendar()[1]
     #排程狀態
+    today = datetime.date(datetime.now())
     if payload.get("status") is not None: #manual status
         db_obj.status = payload["status"]
     else:
         if db_obj.status in ["xxx1", "xxx2"]: #manual status
             pass
         elif db_obj.actualFinishDate is None:
-            if db_obj.planFinishDate > datetime.date.today():
+            if db_obj.planFinishDate > today:
                 db_obj.status = "on-going"
-            elif db_obj.planFinishDate == datetime.date.today():
+            elif db_obj.planFinishDate == today:
                 db_obj.status = "on-going"
             else:
                 db_obj.status = "delay"
