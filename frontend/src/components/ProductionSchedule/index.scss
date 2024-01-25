@@ -1,3 +1,25 @@
+
+.ant-table-wrapper .ant-table-pagination.ant-pagination {
+  margin: 20px 0 0 0;
+
+}
+.exportBtn{
+  position: absolute;
+  bottom:30px;
+  display: inline-flex;
+  padding: 5px 16px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+  background: #4270B8;
+  color: #FFF;
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 142.857% */  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
 .editable-cell {
   position: relative;
 }
@@ -12,7 +34,10 @@
   border: 1px solid #8F8F8F;
   border-radius: 2px;
 }
-
+.box {
+  position: relative;
+  margin-bottom: 10px;
+}
 .editable-row,
 .ant-table-wrapper {
   background: linear-gradient(275deg, #162343 7.95%, #363C4B 56.8%, #5C5C5C 95.13%);
@@ -35,10 +60,13 @@
 
 .ant-table-wrapper .ant-table {
   background: none;
+  color: #E1E7F5;
+  font-size: 16px;
+
 }
 
 
-.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+1):nth-child(-n+2) {
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+1):nth-child(-n+3) {
   background: #186C98;
   border: 1px solid #8F8F8F;
   color: #E1E7F5;
@@ -50,7 +78,7 @@
 
 }
 
-.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+3):nth-child(-n+6) {
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+4):nth-child(-n+8) {
   background: #C88400;
   color: #E1E7F5;
   font-size: 14px;
@@ -62,7 +90,7 @@
 
 }
 
-.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+7):nth-child(-n+14) {
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+9):nth-child(-n+16) {
   background: #981846;
   color: #E1E7F5;
   font-family: Roboto;
@@ -75,7 +103,7 @@
 
 }
 
-.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+15):nth-child(-n+16) {
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+17):nth-child(-n+18) {
   background: #5E0C29;
   color: #E1E7F5;
   font-size: 14px;
@@ -87,7 +115,7 @@
 
 }
 
-.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+17):nth-child(-n+23) {
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+19):nth-child(-n+24) {
   background: #186C98;
   color: #E1E7F5;
   font-size: 14px;
@@ -99,7 +127,7 @@
 
 }
 
-.ant-table-wrapper .ant-table-thead>tr>th:nth-child(24) {
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(25) {
   background: #18983C;
   color: #E1E7F5;
   font-size: 14px;
@@ -130,7 +158,7 @@
 
 
 :where(.css-dev-only-do-not-override-dkbvqv)[class*=" ant-select"] [class^="ant-select"] {
-  color: #21bfee;
+  color: #F39838;
   padding: 0;
   text-align: center;
   background-color: none;
@@ -183,7 +211,7 @@
       border: 1px solid #fff;
       background: #186C98;
 
-   
+
 
 
     }
@@ -199,6 +227,7 @@
       border: 1px solid #fff;
 
     }
+
     .pause {
       width: 35px;
       height: 35px;
@@ -227,13 +256,43 @@
   }
 
   /* 在這裡修改 icon 的顏色 */
-  .ant-picker .ant-picker-suffix{
+  .ant-picker .ant-picker-suffix {
 
     color: #4270B8;
-  } 
+  }
 
 
 }
-.ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected > .ant-table-cell {
-  background: #595959;
+
+.ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected>.ant-table-cell {
+  background: #4F9AB1;
+}
+
+.ant-pagination .ant-pagination-item a {
+  display: block;
+  padding: 0 6px;
+  color: #fff;
+  background: none;
+
+}
+
+.ant-pagination .ant-pagination-options-quick-jumper {
+  display: inline-block;
+  height: 32px;
+  margin-inline-start: 8px;
+  line-height: 32px;
+  vertical-align: top;
+  color: #fff;
+}
+
+.ant-pagination .ant-pagination-item-active {
+  font-weight: 600;
+  background-color: #F39838;
+  color: #fff;
+  border-color: #1677ff;
+
+}
+
+.ant-pagination .ant-pagination-item {
+  border-radius: 15px;
 }

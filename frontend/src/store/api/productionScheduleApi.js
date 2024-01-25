@@ -49,7 +49,7 @@ const productionScheduleApi = createApi({
                     return {
                         url: `productionSchedule/${ids}`,
                         method: 'put',
-                        body: { status: "暫停運作中" }
+                        body: { status: "暫停生產" }
                     };
                 },
                 invalidatesTags: ((result, error, ids) =>
@@ -60,22 +60,33 @@ const productionScheduleApi = createApi({
                     return {
                         url: `productionSchedule/${ids}`,
                         method: 'put',
-                        body: { status: "正常運作中" }
+                        body: { status: "On-going" }
+                    };
+                },
+                invalidatesTags: ((result, error, ids) =>
+                    [{ type: 'productionSchedule', id: ids.status }])
+            }),
+            cancelStaus: build.mutation({
+                query(ids) {
+                    return {
+                        url: `productionSchedule/${ids}`,
+                        method: 'put',
+                        body: { status: "取消生產" }
                     };
                 },
                 invalidatesTags: ((result, error, ids) =>
                     [{ type: 'productionSchedule', id: ids.status }])
             }),
             updateProductionSchedule: build.mutation({
-                query(id) {
+                query(pack) {
                     return {
-                        url: `productionSchedule/${id}`,
+                        url: `productionSchedule/${pack.id}`,
                         method: 'put',
-                        body: { data }
+                        body: pack.data
                     };
                 },
-                invalidatesTags: ((result, error, id) =>
-                    [{ type: 'productionSchedule', }])
+                invalidatesTags: ((result, error) =>
+                    [{ type: 'productionSchedule' }])
             }),
 
 
@@ -89,6 +100,7 @@ export const {
     useAddProductionScheduleMutation,
     useDelProductionScheduleMutation,
     usePauseStausMutation,
+    useCancelStausMutation,
     useActionStausMutation,
     useUpdateProductionScheduleMutation
 } = productionScheduleApi;
