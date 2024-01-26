@@ -528,10 +528,17 @@ const ProductionSchedule = (props) => {
     },
     {
       title: '上下機工作日',
-      dataIndex: 'actualFinishDate',
+      dataIndex: 'moldWorkDays',
       editable: true,
       width: 100,
-      type:"date"
+      type:"number",
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
 
     },
     {
@@ -627,18 +634,21 @@ const ProductionSchedule = (props) => {
       dataIndex: 'singleOrDoubleColor',
       editable: true,
       width: 70,
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
     },
     {
       title: '轉換率 ',
       dataIndex: 'conversionRate',
       editable: true,
       width: 60,
-      type: "float",
-      rule:
-      {
-        type: 'number',
-        message: '請輸入有效數字',
-      },
+      type: "number",
+
 
     },
 
@@ -847,6 +857,9 @@ const ProductionSchedule = (props) => {
           items['width'] = 25;
           break;
         case 'planFinishDate':
+          items['width'] = 25;
+          break;
+        case 'moldWorkDays':
           items['width'] = 25;
           break;
         case 'actualFinishDate':
