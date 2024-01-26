@@ -41,7 +41,7 @@ class productionScheduleController(Resource):
     @api.param("page", "Page number")
     @api.param("size", "Size of the page")
     @api.param("sort", "Sort by a column")
-    @api.param("status_filter", "on-going, finish, delay, delay-finish, all")
+    @api.param("status_filter", "尚未完成, On-going, Done, 暫停生產, 取消生產, all")
     @api.param("week_filter", "(planFinishDate) week number")
     @api.param("year_filter", "(planFinishDate) year number")
     @api.param("month_filter", "(planFinishDate) month number")

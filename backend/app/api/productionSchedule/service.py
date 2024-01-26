@@ -146,13 +146,13 @@ def complete_productionSchedule(db_obj, payload):
         db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
         
     #周數
-    if payload.get("week") is not None:
+    if payload.get("week") is not None and False: #waiting for frontend has its own week calculation
         db_obj.week = payload["week"]
     else:
         #by 預計上機日
         db_obj.week = db_obj.planOnMachineDate.isocalendar()[1] if db_obj.planOnMachineDate is not None else db_obj.week
         #by 預計完成日
-        # db_obj.week = db_obj.planOnMachineDate.isocalendar()[1]
+        # db_obj.week = db_obj.planFinishDate.isocalendar()[1] if db_obj.planFinishDate is not None else db_obj.week
     #排程狀態
     today = datetime.date(datetime.now())
     if payload.get("status") is not None: #manual status
@@ -160,6 +160,8 @@ def complete_productionSchedule(db_obj, payload):
     elif db_obj.status is None:
         if db_obj.actualOnMachineDate is None:
             db_obj.status = "尚未上機"
+        elif db_obj.status == "尚未上機" and db_obj.actualOnMachineDate is not None:
+            db_obj.status = "On-going"
         elif db_obj.actualFinishDate is not None:
             db_obj.status = "Done"
     return db_obj
