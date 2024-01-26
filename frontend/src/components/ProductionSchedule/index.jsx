@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
-import { Table, Select, Form, Input, Button, message, Modal, Tooltip } from 'antd';
+import { Table, Select, Form, Input, Button, message, Modal, Tooltip, DatePicker } from 'antd';
 import {
   useGetProductionScheduleQuery,
   // useDelProductionScheduleMutation,
@@ -15,6 +15,7 @@ import './index.scss';
 // import SimpleDemo from './SimpleDemo';
 import { saveAs } from 'file-saver';
 import Exceljs from 'exceljs';
+import moment from 'moment';
 
 // 表單編輯設置
 const EditableContext = React.createContext(null);
@@ -120,6 +121,7 @@ const ProductionSchedule = (props) => {
     };
     setPagination(newPagination);
   };
+  // 選擇日期
 
 
   // 新增項目
@@ -163,7 +165,7 @@ const ProductionSchedule = (props) => {
               };
 
               // 添加製令單
-              const addedItem  = await addProductionSchedule(newData);
+              const addedItem = await addProductionSchedule(newData);
 
               // Refetch 数据以获取更新后的列表
               refetch();
@@ -172,7 +174,7 @@ const ProductionSchedule = (props) => {
               setPagination({ ...pagination, page: 1 });
               // 获取新增数据的 ID
               const newId = addedItem.data.data.id;
-              // console.log('newId',newId)
+              console.log('newId', newId);
               // 将新增数据的 ID 添加到 selectedRowKeys 中
               setSelectedRowKeys([...selectedRowKeys, newId]);
 
@@ -290,7 +292,7 @@ const ProductionSchedule = (props) => {
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
 
-        setSelectedRowKeys(selectedRowKeys); // 更新選中的行
+      setSelectedRowKeys(selectedRowKeys); // 更新選中的行
 
     },
     getCheckboxProps: (record) => ({
@@ -447,6 +449,8 @@ const ProductionSchedule = (props) => {
       dataIndex: 'workOrderDate',
       width: 100,
       editable: true,
+      type:"date"
+
       // rule:
       // {
       //   required: true,
@@ -511,18 +515,24 @@ const ProductionSchedule = (props) => {
       dataIndex: 'planOnMachineDate',
       editable: true,
       width: 100,
+      type:"date"
+
     },
     {
       title: '預計完成日',
       dataIndex: 'planFinishDate',
       editable: true,
       width: 100,
+      type:"date"
+
     },
     {
       title: '上下機工作日',
       dataIndex: 'actualFinishDate',
       editable: true,
       width: 100,
+      type:"date"
+
     },
     {
       title: '日工時',
@@ -543,12 +553,17 @@ const ProductionSchedule = (props) => {
       dataIndex: 'actualOnMachineDate',
       editable: true,
       width: 100,
+      type:"date"
+
+
     },
     {
       title: '實際完成日',
       dataIndex: 'actualFinishDate',
       editable: true,
       width: 100,
+      type:"date"
+
     },
     {
       title: '週別',
