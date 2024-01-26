@@ -30,7 +30,7 @@ const EditableRow = ({ id, ...props }) => {
   );
 };
 
-const EditableCell = ({ title, editable, children, dataIndex, rule, record, handleSave, ...restProps }) => {
+const EditableCell = ({ title, editable, children, dataIndex, rule, type, record, handleSave, ...restProps }) => {
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
@@ -62,7 +62,7 @@ const EditableCell = ({ title, editable, children, dataIndex, rule, record, hand
   };
 
   let childNode = children;
-  console.log("RRRRRRRRRR", rule);
+
   if (editable) {
     childNode = editing ? (
       <Form.Item
@@ -72,7 +72,7 @@ const EditableCell = ({ title, editable, children, dataIndex, rule, record, hand
         name={dataIndex}
         rules={[rule]}
       >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} />
+        <Input ref={inputRef} onPressEnter={save} onBlur={save} type={type} />
       </Form.Item>
     ) : (
       <div
@@ -94,6 +94,7 @@ const EditableCell = ({ title, editable, children, dataIndex, rule, record, hand
 
 const ProductionSchedule = (props) => {
   // 設定初始當前頁面以及分頁一頁有幾個資料
+
   const [pagination, setPagination] = useState({
     current: 1, /*當前分頁位址*/
     pageSize: 10, // 默认值为 10
@@ -111,14 +112,13 @@ const ProductionSchedule = (props) => {
 
   //page參數是為Table裡配置pagination取得的當前分頁 
   const handleTableChange = (page, size) => {
-    // console.log('size66666', size);
-    // console.log('pagee66666', page);
+
     const newPagination = {
       ...pagination,
       page: size !== pagination.pageSize ? 1 : +page,
       pageSize: size,
-    }; setPagination(newPagination);
-    // console.log(first)
+    };
+    setPagination(newPagination);
   };
 
 
@@ -145,7 +145,6 @@ const ProductionSchedule = (props) => {
     if ((weekFilter == "") || (weekFilter == null)) {
 
       try {
-        // 显示确认对话框
         Modal.confirm({
           title: '確認新增',
           content: '確定要新增製令單嗎？',
@@ -164,10 +163,18 @@ const ProductionSchedule = (props) => {
               };
 
               // 添加製令單
-              const addedItem = await addProductionSchedule(newData);
+              const addedItem  = await addProductionSchedule(newData);
 
               // Refetch 数据以获取更新后的列表
               refetch();
+
+              // 將分頁設置為第一頁
+              setPagination({ ...pagination, page: 1 });
+              // 获取新增数据的 ID
+              const newId = addedItem.data.data.id;
+              // console.log('newId',newId)
+              // 将新增数据的 ID 添加到 selectedRowKeys 中
+              setSelectedRowKeys([...selectedRowKeys, newId]);
 
             } catch (error) {
               console.error('新增製令單時發生錯誤:', error);
@@ -206,20 +213,8 @@ const ProductionSchedule = (props) => {
       cancelText: '取消',
       onOk: async () => {
         try {
-          // Delete the selected production schedules
-          // await delProductionSchedule(stringIds);
-          // message.success('已取消生產該筆單據');
 
-          // Filter out the deleted items from the current dataSource
-          // const updatedDataSource = dataSource.filter((item) => !selectedRowKeys.includes(item.id));
-          // setDataSource(updatedDataSource);
-          // 清0
-          // setSelectedRowKeys([]);
-          // 將勾選的欄位更改其屬性 status 值為"暫停動作"
           await cancelStaus(stringIds);
-
-          // 清空勾選
-          // setSelectedRowKeys([]);
 
           message.success('目前狀態已變為暫停生產!!');
 
@@ -251,9 +246,6 @@ const ProductionSchedule = (props) => {
           // 將勾選的欄位更改其屬性 status 值為"暫停動作"
           await pauseStaus(stringIds);
 
-          // 清空勾選
-          // setSelectedRowKeys([]);
-
           message.success('目前狀態已變為暫停生產!!');
         } catch (error) {
           console.error('Error pausing production schedules:', error);
@@ -273,7 +265,6 @@ const ProductionSchedule = (props) => {
     }
     const stringIds = JSON.stringify(selectedRowKeys);
 
-    // 显示确认对话框
     Modal.confirm({
       title: '確認啟動動作',
       content: '確定要啟動所選項目的動作嗎？',
@@ -298,11 +289,9 @@ const ProductionSchedule = (props) => {
   // 勾選設定
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      selectedRowKeys,
 
         setSelectedRowKeys(selectedRowKeys); // 更新選中的行
 
-      // console.log(`selectedRowKeysId: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
     },
     getCheckboxProps: (record) => ({
       disabled: record.name === 'Disabled User',
@@ -310,7 +299,6 @@ const ProductionSchedule = (props) => {
       name: record.name,
     }),
   };
-  // console.log('rowSelection:', rowSelection); // 添加这行代码进行输出
 
 
   const { Option } = Select;
@@ -379,7 +367,7 @@ const ProductionSchedule = (props) => {
     fetchData();
 
 
-  }, [weekFilter, refetchExport, needExportDataIsSuccess, needExportDataSource, isSuccess, data]);
+  }, [weekFilter, refetchExport, needExportDataIsSuccess, needExportDataSource, isSuccess, data], refetch);
 
 
   const defaultColumns = [
@@ -405,6 +393,11 @@ const ProductionSchedule = (props) => {
       width: 80,
       fixed: true,
       editable: true,
+      // rule:
+      // {
+      //   required: true,
+      //   message: `is required.`,
+      // }
 
     },
 
@@ -414,11 +407,11 @@ const ProductionSchedule = (props) => {
       dataIndex: 'productName',
       // fixed: true,
       editable: true,
-      rule:
-      {
-        required: true,
-        message: `is required.`,
-      }
+      // rule:
+      // {
+      //   required: true,
+      //   message: `is required.`,
+      // }
     },
     {
       title: '產品編號',
@@ -426,11 +419,11 @@ const ProductionSchedule = (props) => {
       dataIndex: 'productSN',
       // fixed: true,
       editable: true,
-      rule:
-      {
-        required: true,
-        message: `is required.`,
-      }
+      // rule:
+      // {
+      //   required: true,
+      //   message: `is required.`,
+      // }
     },
     {
       title: '製令數量',
@@ -441,6 +434,7 @@ const ProductionSchedule = (props) => {
       rule:
       {
         type: 'integer',
+        // required: true,
         message: '請輸入整數',
         transform: value => (value ? Number(value) : undefined), // Transform the value to a number
 
@@ -453,6 +447,11 @@ const ProductionSchedule = (props) => {
       dataIndex: 'workOrderDate',
       width: 100,
       editable: true,
+      // rule:
+      // {
+      //   required: true,
+      //   message: `is required.`,
+      // }
     },
     {
       title: '成型秒數',
@@ -592,7 +591,7 @@ const ProductionSchedule = (props) => {
         transform: value => (value ? Number(value) : undefined), // Transform the value to a number
 
       },
-      
+
     },
     {
       title: '工作天數',
@@ -637,15 +636,12 @@ const ProductionSchedule = (props) => {
 
   ];
 
-  // console.log('dataSource', dataSource);
   // 編輯
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
-  // 根据需要定义转换函数
 
   const handleSave = async (row) => {
     try {
       // Check if there are changes in the data
-      // console.log('row:', row);
 
       const isDataChanged = Object.keys(row).some((key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]);
 
@@ -656,12 +652,10 @@ const ProductionSchedule = (props) => {
       }
       // Perform the optimistic update on the client side
       const updatedData = dataSource.map((item) => (item.id === row.id ? { ...item, ...row } : item));
-      // console.log('updatedData',updatedData)
       setDataSource(updatedData);
 
       // Perform the actual update on the server side
       const response = await UpdateProductionSchedule({ id: row.id, data: row });
-      // console.log('response', response);
 
       if (!response.error) {
         message.success('修改數據成功');
@@ -719,13 +713,13 @@ const ProductionSchedule = (props) => {
         editable: col.editable,
         dataIndex: col.dataIndex,
         rule: col.rule,
+        type: col.type,
         title: col.title,
         handleSave,
       }),
     };
   });
 
-  // console.log('weekFilter', weekFilter);
   // 匯出功能
   const exportToExcel = () => {
     const workbook = new Exceljs.Workbook();
@@ -888,12 +882,7 @@ const ProductionSchedule = (props) => {
   return (
     <div>
       <div className='box'>
-        {/* <ul style={{ display: 'flex', marginBottom: '10px' }}>
-          <li style={{ marginRight: '10px' }}>
-            <Link to="/">登入頁面</Link>
-          </li>
 
-        </ul> */}
         <div className='title-box'>
           <div className='title'>
             生產計劃排程表
