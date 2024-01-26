@@ -15,6 +15,7 @@ import './index.scss';
 // import SimpleDemo from './SimpleDemo';
 import { saveAs } from 'file-saver';
 import Exceljs from 'exceljs';
+
 // 表單編輯設置
 const EditableContext = React.createContext(null);
 
@@ -29,7 +30,7 @@ const EditableRow = ({ id, ...props }) => {
   );
 };
 
-const EditableCell = ({ title, editable, children, dataIndex, record, handleSave, ...restProps }) => {
+const EditableCell = ({ title, editable, children, dataIndex, rule, record, handleSave, ...restProps }) => {
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
@@ -61,7 +62,7 @@ const EditableCell = ({ title, editable, children, dataIndex, record, handleSave
   };
 
   let childNode = children;
-
+  console.log("RRRRRRRRRR", rule);
   if (editable) {
     childNode = editing ? (
       <Form.Item
@@ -69,12 +70,7 @@ const EditableCell = ({ title, editable, children, dataIndex, record, handleSave
           margin: 0,
         }}
         name={dataIndex}
-      // rules={[
-      //   {
-      //     required: true,
-      //     message: `${title} is required.`,
-      //   },
-      // ]}
+        rules={[rule]}
       >
         <Input ref={inputRef} onPressEnter={save} onBlur={save} />
       </Form.Item>
@@ -115,8 +111,8 @@ const ProductionSchedule = (props) => {
 
   //page參數是為Table裡配置pagination取得的當前分頁 
   const handleTableChange = (page, size) => {
-    console.log('size66666', size);
-    console.log('pagee66666', page);
+    // console.log('size66666', size);
+    // console.log('pagee66666', page);
     const newPagination = {
       ...pagination,
       page: size !== pagination.pageSize ? 1 : +page,
@@ -395,6 +391,7 @@ const ProductionSchedule = (props) => {
       fixed: true,
       editable: false,
 
+
     },
     {
       title: '狀態 ',
@@ -408,6 +405,7 @@ const ProductionSchedule = (props) => {
       width: 80,
       fixed: true,
       editable: true,
+
     },
 
     {
@@ -416,6 +414,11 @@ const ProductionSchedule = (props) => {
       dataIndex: 'productName',
       // fixed: true,
       editable: true,
+      rule:
+      {
+        required: true,
+        message: `is required.`,
+      }
     },
     {
       title: '產品編號',
@@ -423,13 +426,27 @@ const ProductionSchedule = (props) => {
       dataIndex: 'productSN',
       // fixed: true,
       editable: true,
+      rule:
+      {
+        required: true,
+        message: `is required.`,
+      }
     },
     {
       title: '製令數量',
       dataIndex: 'workOrderQuantity',
       editable: true,
       width: 80,
-      type: "number",
+      type: 'number',
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
+
+
     },
     {
       title: '製令開立日期',
@@ -443,6 +460,13 @@ const ProductionSchedule = (props) => {
       editable: true,
       width: 80,
       type: "number",
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
     },
     {
       title: '穴數',
@@ -450,6 +474,13 @@ const ProductionSchedule = (props) => {
       editable: true,
       width: 50,
       type: "number",
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
     },
     {
       title: '生產區域',
@@ -500,6 +531,13 @@ const ProductionSchedule = (props) => {
       editable: true,
       width: 60,
       type: "number",
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
     },
     {
       title: '實際上機日',
@@ -519,6 +557,13 @@ const ProductionSchedule = (props) => {
       editable: true,
       width: 50,
       type: "number",
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
     },
     {
       title: '產能小時',
@@ -526,6 +571,13 @@ const ProductionSchedule = (props) => {
       editable: true,
       width: 70,
       type: "number",
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
     },
     {
       title: '日產能',
@@ -533,6 +585,14 @@ const ProductionSchedule = (props) => {
       editable: true,
       width: 60,
       type: "number",
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
+      
     },
     {
       title: '工作天數',
@@ -540,6 +600,13 @@ const ProductionSchedule = (props) => {
       editable: true,
       width: 70,
       type: "number",
+      rule:
+      {
+        type: 'integer',
+        message: '請輸入整數',
+        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
+
+      },
     },
     {
       title: '單雙射',
@@ -553,6 +620,12 @@ const ProductionSchedule = (props) => {
       editable: true,
       width: 60,
       type: "float",
+      rule:
+      {
+        type: 'number',
+        message: '請輸入有效數字',
+      },
+
     },
 
     {
@@ -593,10 +666,13 @@ const ProductionSchedule = (props) => {
       if (!response.error) {
         message.success('修改數據成功');
 
+      } else {
+        message.error('修改數據失敗!!!');
+
       }
     } catch (error) {
       // Handle the error (e.g., display an error message to the user, revert changes, etc.)
-      message.error('修改數據失敗321');
+      message.error('修改數據失敗!!!!');
     }
   };
 
@@ -642,6 +718,7 @@ const ProductionSchedule = (props) => {
         record,
         editable: col.editable,
         dataIndex: col.dataIndex,
+        rule: col.rule,
         title: col.title,
         handleSave,
       }),
@@ -875,6 +952,7 @@ const ProductionSchedule = (props) => {
             components={components}
             rowClassName={() => 'editable-row'}
             bordered
+            striped={true}
             rowKey="id"  // 在這裡指定 'id' 作為每一行的唯一標識
             dataSource={dataSource}
             columns={columns}
