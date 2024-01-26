@@ -1,11 +1,11 @@
-
 .ant-table-wrapper .ant-table-pagination.ant-pagination {
   margin: 20px 0 0 0;
 
 }
-.exportBtn{
+
+.exportBtn {
   position: absolute;
-  bottom:30px;
+  bottom: 30px;
   display: inline-flex;
   padding: 5px 16px;
   justify-content: center;
@@ -17,7 +17,9 @@
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
-  line-height: 20px; /* 142.857% */  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  line-height: 20px;
+  /* 142.857% */
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
 
 .editable-cell {
@@ -34,10 +36,14 @@
   border: 1px solid #8F8F8F;
   border-radius: 2px;
 }
+
 .box {
   position: relative;
   margin-bottom: 10px;
+  padding: 20px;
+
 }
+
 .editable-row,
 .ant-table-wrapper {
   background: linear-gradient(275deg, #162343 7.95%, #363C4B 56.8%, #5C5C5C 95.13%);
@@ -50,13 +56,11 @@
 
 }
 
-.ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected>.ant-table-cell {
-  background: none;
-}
+// .ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected>.ant-table-cell {
+//   background: none;
+// }
 
-.box {
-  padding: 20px;
-}
+
 
 .ant-table-wrapper .ant-table {
   background: none;
@@ -78,8 +82,20 @@
 
 }
 
-.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+4):nth-child(-n+8) {
-  background: #C88400;
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(4) {
+  background: #402085;
+  color: #E1E7F5;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  border: 1px solid #8F8F8F;
+
+
+}
+
+.ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+5):nth-child(-n+8) {
+  background: #186C98;
   color: #E1E7F5;
   font-size: 14px;
   font-style: normal;
@@ -91,7 +107,7 @@
 }
 
 .ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+9):nth-child(-n+16) {
-  background: #981846;
+  background: #402085;
   color: #E1E7F5;
   font-family: Roboto;
   font-size: 14px;
@@ -115,6 +131,11 @@
 
 }
 
+.editable-row tr:nth-child(odd) {
+  background-color: #ea0a0a;
+  /* 设置奇数行背景色 */
+}
+
 .ant-table-wrapper .ant-table-thead>tr>th:nth-child(n+19):nth-child(-n+24) {
   background: #186C98;
   color: #E1E7F5;
@@ -128,7 +149,7 @@
 }
 
 .ant-table-wrapper .ant-table-thead>tr>th:nth-child(25) {
-  background: #18983C;
+  background: #402085;
   color: #E1E7F5;
   font-size: 14px;
   font-style: normal;
@@ -263,6 +284,7 @@
 
 
 }
+
 
 .ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected>.ant-table-cell {
   background: #4F9AB1;
