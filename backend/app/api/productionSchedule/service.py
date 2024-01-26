@@ -91,17 +91,17 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("productSN") is not None else db_obj.productSN
     db_obj.productName = payload["productName"] \
         if payload.get("productName") is not None else db_obj.productName
-    db_obj.workOrderQuantity = payload["workOrderQuantity"] \
+    db_obj.workOrderQuantity = int(payload["workOrderQuantity"]) \
         if payload.get("workOrderQuantity") is not None else db_obj.workOrderQuantity
     db_obj.workOrderDate = date.fromisoformat(payload["workOrderDate"]) \
         if payload.get("workOrderDate") is not None else db_obj.workOrderDate
-    db_obj.moldingSecond = payload["moldingSecond"] \
+    db_obj.moldingSecond = int(payload["moldingSecond"]) \
         if payload.get("moldingSecond") is not None else db_obj.moldingSecond
     db_obj.planOnMachineDate = date.fromisoformat(payload["planOnMachineDate"]) \
         if payload.get("planOnMachineDate") is not None else db_obj.planOnMachineDate
     db_obj.actualOnMachineDate = date.fromisoformat(payload["actualOnMachineDate"]) \
         if payload.get("actualOnMachineDate") is not None else db_obj.actualOnMachineDate
-    db_obj.moldWorkDays = payload["moldWorkDays"] \
+    db_obj.moldWorkDays = int(payload["moldWorkDays"]) \
         if payload.get("moldWorkDays") is not None else db_obj.moldWorkDays
     db_obj.planFinishDate = date.fromisoformat(payload["planFinishDate"]) \
         if payload.get("planFinishDate") is not None else db_obj.planFinishDate
@@ -109,13 +109,13 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("actualFinishDate") is not None else db_obj.actualFinishDate
     db_obj.comment = payload["comment"] \
         if payload.get("comment") is not None else db_obj.comment
-    db_obj.dailyWorkingHours = payload["dailyWorkingHours"] \
+    db_obj.dailyWorkingHours = int(payload["dailyWorkingHours"]) \
         if payload.get("dailyWorkingHours") is not None else db_obj.dailyWorkingHours
-    db_obj.moldCavity = payload["moldCavity"] \
+    db_obj.moldCavity = int(payload["moldCavity"]) \
         if payload.get("moldCavity") is not None else db_obj.moldCavity
     db_obj.singleOrDoubleColor = payload["singleOrDoubleColor"] \
         if payload.get("singleOrDoubleColor") is not None else db_obj.singleOrDoubleColor
-    db_obj.conversionRate = payload["conversionRate"] \
+    db_obj.conversionRate = float(payload["conversionRate"]) \
         if payload.get("conversionRate") is not None else db_obj.conversionRate
     db_obj.status = payload["status"] \
         if payload.get("status") is not None else db_obj.status
@@ -131,17 +131,21 @@ def complete_productionSchedule(db_obj, payload):
         or type(db_obj.moldWorkDays) != int or db_obj.moldWorkDays <= 0
         or type(db_obj.conversionRate) != float or db_obj.conversionRate <= 0
         ):
-        logging.info(f"complete_productionSchedule:SKIP calculate capacity")
+        logging.debug(f"complete_productionSchedule:SKIP calculate capacity")
     else:
         #每小時產能(drop decimal)
+        logging.debug(f"complete_productionSchedule:SKIP calculate capacity")
         db_obj.hourlyCapacity = (60 * 60) * (1/db_obj.moldingSecond) * db_obj.moldCavity
         db_obj.hourlyCapacity = math.floor(db_obj.hourlyCapacity)
+        logging.debug(f"hourlyCapacity: {db_obj.hourlyCapacity}")
         #每日產能(drop decimal)
         db_obj.dailyCapacity = db_obj.hourlyCapacity * db_obj.dailyWorkingHours * db_obj.conversionRate
         db_obj.dailyCapacity = math.floor(db_obj.dailyCapacity)
+        logging.debug(f"dailyCapacity: {db_obj.dailyCapacity}")
         #工作天數(unconditional round up)
         db_obj.workDays = db_obj.workOrderQuantity / db_obj.dailyCapacity
         db_obj.workDays = math.ceil(db_obj.workDays)
+        logging.debug(f"workDays: {db_obj.workDays}")
         #預計完成日(shift by holiday)
         db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
         
