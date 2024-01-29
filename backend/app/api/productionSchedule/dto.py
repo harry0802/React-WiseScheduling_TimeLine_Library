@@ -1,19 +1,21 @@
 from flask_restx import Namespace, fields
 from .schemas import productionScheduleSchema
 class NullableString(fields.String):
-    __schema_type__ = [fields.String.__schema_type__, 'string', 'null']
-    __schema_example__ = 'nullable string'
+    def __init__(self, **kwargs):
+        super(NullableString, self).__init__(**kwargs)
+        self.skip_none = True
 class NullableInteger(fields.Integer):
-    #accept the string type cause the technical reason (from frontend)
-    __schema_type__ = [fields.Integer.__schema_type__, 'string', 'null']
-    __schema_example__ = 'nullable integer'
-class NullableDate(fields.Date):
-    __schema_type__ = [fields.Date.__schema_type__, 'string', 'null']
-    __schema_example__ = 'nullable date'
+    def __init__(self, **kwargs):
+        super(NullableInteger, self).__init__(**kwargs)
+        self.skip_none = True
+class NullableDateTime(fields.DateTime):
+    def __init__(self, **kwargs):
+        super(NullableDateTime, self).__init__(**kwargs)
+        self.skip_none = True
 class NullableFloat(fields.Float):
-    #accept the string type cause the technical reason (from frontend)
-    __schema_type__ = [fields.Float.__schema_type__, 'string', 'null']
-    __schema_example__ = 'nullable float'
+    def __init__(self, **kwargs):
+        super(NullableFloat, self).__init__(**kwargs)
+        self.skip_none = True
 class productionScheduleDto:
 
     api = Namespace("productionSchedule", description="productionSchedule related operations.")
@@ -32,12 +34,12 @@ class productionScheduleDto:
             "workOrderQuantity": fields.Integer(required=True, description="productionSchedule workOrderQuantity", example=1000),
             "workOrderDate": fields.Date(required=True, description="productionSchedule workOrderDate"),
             "moldingSecond": NullableInteger(required=False, description="productionSchedule moldingSecond", example=30),
-            "planOnMachineDate": NullableDate(required=False, description="productionSchedule planOnMachineDate"),
-            "actualOnMachineDate": NullableDate(required=False, description="productionSchedule actualOnMachineDate"),
+            "planOnMachineDate": NullableDateTime(required=False, description="productionSchedule planOnMachineDate"),
+            "actualOnMachineDate": NullableDateTime(required=False, description="productionSchedule actualOnMachineDate"),
             "moldWorkDays": NullableInteger(required=False, description="productionSchedule moldWorkDays", example=1),
             "workDays": NullableInteger(required=False, description="productionSchedule workDays", example=1),
-            "planFinishDate": NullableDate(required=False, description="productionSchedule planFinishDate"),
-            "actualFinishDate": NullableDate(required=False, description="productionSchedule actualFinishDate"),
+            "planFinishDate": NullableDateTime(required=False, description="productionSchedule planFinishDate"),
+            "actualFinishDate": NullableDateTime(required=False, description="productionSchedule actualFinishDate"),
             "comment": NullableString(required=False, description="productionSchedule comment"),
             "dailyWorkingHours": NullableInteger(required=False, description="productionSchedule dailyWorkingHours", example=8),
             "moldCavity": NullableInteger(required=False, description="productionSchedule moldCavity", example=2),
@@ -62,12 +64,12 @@ class productionScheduleDto:
             "workOrderQuantity": fields.Integer(required=True, description="productionSchedule workOrderQuantity", example=1000),
             "workOrderDate": fields.Date(required=True, description="productionSchedule workOrderDate"),
             "moldingSecond": NullableInteger(required=False, description="productionSchedule moldingSecond", example=30),
-            "planOnMachineDate": NullableDate(required=False, description="productionSchedule planOnMachineDate"),
-            "actualOnMachineDate": NullableDate(required=False, description="productionSchedule actualOnMachineDate"),
+            "planOnMachineDate": NullableDateTime(required=False, description="productionSchedule planOnMachineDate"),
+            "actualOnMachineDate": NullableDateTime(required=False, description="productionSchedule actualOnMachineDate"),
             "moldWorkDays": NullableInteger(required=False, description="productionSchedule moldWorkDays", example=1),
             "workDays": NullableInteger(required=False, description="productionSchedule workDays", example=1),
-            "planFinishDate": NullableDate(required=False, description="productionSchedule planFinishDate"),
-            "actualFinishDate": NullableDate(required=False, description="productionSchedule actualFinishDate"),
+            "planFinishDate": NullableDateTime(required=False, description="productionSchedule planFinishDate"),
+            "actualFinishDate": NullableDateTime(required=False, description="productionSchedule actualFinishDate"),
             "comment": NullableString(required=False, description="productionSchedule comment"),
             "dailyWorkingHours": NullableInteger(required=False, description="productionSchedule dailyWorkingHours", example=8),
             "moldCavity": NullableInteger(required=False, description="productionSchedule moldCavity", example=2),
@@ -90,14 +92,14 @@ class productionScheduleDto:
             "productSN": NullableString(required=False, description="productionSchedule productSN", example="PROD-00001-01"),
             "productName": NullableString(required=False, description="productionSchedule productName", example="PROD_NAME-01"),
             "workOrderQuantity": NullableInteger(required=False, description="productionSchedule workOrderQuantity", example=1000),
-            "workOrderDate": NullableDate(required=False, description="productionSchedule workOrderDate"),
+            "workOrderDate": NullableDateTime(required=False, description="productionSchedule workOrderDate"),
             "moldingSecond": NullableInteger(required=False, description="productionSchedule moldingSecond", example=30),
-            "planOnMachineDate": NullableDate(required=False, description="productionSchedule planOnMachineDate"),
-            "actualOnMachineDate": NullableDate(required=False, description="productionSchedule actualOnMachineDate"),
+            "planOnMachineDate": NullableDateTime(required=False, description="productionSchedule planOnMachineDate"),
+            "actualOnMachineDate": NullableDateTime(required=False, description="productionSchedule actualOnMachineDate"),
             "moldWorkDays": NullableInteger(required=False, description="productionSchedule moldWorkDays", example=1),
             "workDays": NullableInteger(required=False, description="productionSchedule workDays", example=1),
-            "planFinishDate": NullableDate(required=False, description="productionSchedule planFinishDate"),
-            "actualFinishDate": NullableDate(required=False, description="productionSchedule actualFinishDate"),
+            "planFinishDate": NullableDateTime(required=False, description="productionSchedule planFinishDate"),
+            "actualFinishDate": NullableDateTime(required=False, description="productionSchedule actualFinishDate"),
             "comment": NullableString(required=False, description="productionSchedule comment"),
             "dailyWorkingHours": NullableInteger(required=False, description="productionSchedule dailyWorkingHours", example=8),
             "moldCavity": NullableInteger(required=False, description="productionSchedule moldCavity", example=2),
