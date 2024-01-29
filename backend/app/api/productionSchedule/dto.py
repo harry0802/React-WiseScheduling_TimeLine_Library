@@ -1,21 +1,19 @@
 from flask_restx import Namespace, fields
 from .schemas import productionScheduleSchema
 class NullableString(fields.String):
-    def __init__(self, **kwargs):
-        super(NullableString, self).__init__(**kwargs)
-        self.skip_none = True
+    __schema_type__ = [fields.String.__schema_type__, 'string', 'null']
+    __schema_example__ = 'string or null'
 class NullableInteger(fields.Integer):
-    def __init__(self, **kwargs):
-        super(NullableInteger, self).__init__(**kwargs)
-        self.skip_none = True
+    #accept the string type cause the technical reason (from frontend)
+    __schema_type__ = [fields.Integer.__schema_type__, 'string', 'null']
+    __schema_example__ = '1'
 class NullableDateTime(fields.DateTime):
-    def __init__(self, **kwargs):
-        super(NullableDateTime, self).__init__(**kwargs)
-        self.skip_none = True
+    __schema_type__ = [fields.DateTime.__schema_type__, 'string', 'null']
+    __schema_example__ = '2024-01-01'
 class NullableFloat(fields.Float):
-    def __init__(self, **kwargs):
-        super(NullableFloat, self).__init__(**kwargs)
-        self.skip_none = True
+    #accept the string type cause the technical reason (from frontend)
+    __schema_type__ = [fields.Float.__schema_type__, 'string', 'null']
+    __schema_example__ = '0.95'
 class productionScheduleDto:
 
     api = Namespace("productionSchedule", description="productionSchedule related operations.")
@@ -88,7 +86,7 @@ class productionScheduleDto:
             "productionArea": NullableString(required=False, description="productionSchedule productionArea", example="A"),
             "machineSN": NullableString(required=False, description="productionSchedule machineSN", example="A1"),
             # "serialNumber": NullableString(required=False, description="productionSchedule serialNumber", example="1"),
-            "workOrderSN": NullableString(required=False, description="productionSchedule workOrderSN", example="2023122800001"),
+            "workOrderSN": NullableString(required=False, description="productionSchedule workOrderSN", example='"2023122800001"'),
             "productSN": NullableString(required=False, description="productionSchedule productSN", example="PROD-00001-01"),
             "productName": NullableString(required=False, description="productionSchedule productName", example="PROD_NAME-01"),
             "workOrderQuantity": NullableInteger(required=False, description="productionSchedule workOrderQuantity", example=1000),
