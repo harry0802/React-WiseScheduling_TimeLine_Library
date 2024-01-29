@@ -205,6 +205,17 @@ const ProductionSchedule = (props) => {
       message.warning('請先勾選要取消生產的項目');
       return;
     }
+    // Get the selected rows' data
+    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+
+    // Check if the status is "Done" for any selected rows
+    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+
+    if (completedDocuments) {
+      message.warning('此單據已經完成，無法進行修改。');
+      return;
+    }
+
     const stringIds = JSON.stringify(selectedRowKeys);
 
     Modal.confirm({
@@ -230,8 +241,26 @@ const ProductionSchedule = (props) => {
   // 勾選令機具暫停動作
   const pauseChecked = () => {
     // Get the selected rows' ids
+
     if (selectedRowKeys.length === 0) {
       message.warning('請先勾選要暫停的項目');
+      return;
+    }
+    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+
+    // Check if the 'actualOnMachineDate' property exists in all selected rows
+    const missingActualOnMachineDate = selectedRowsData.some((row) => !row.actualOnMachineDate);
+
+    if (missingActualOnMachineDate) {
+      message.warning('請先填寫實際上機日!');
+      return;
+    }
+
+    // Check if the status is "Done" for any selected rows
+    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+
+    if (completedDocuments) {
+      message.warning('此單據已經完成，無法進行修改。');
       return;
     }
     const stringIds = JSON.stringify(selectedRowKeys);
@@ -262,6 +291,22 @@ const ProductionSchedule = (props) => {
     // Get the selected rows' ids
     if (selectedRowKeys.length === 0) {
       message.warning('請先勾選要啟動的項目');
+      return;
+    }
+    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+
+    // Check if the 'actualOnMachineDate' property exists in all selected rows
+    const missingActualOnMachineDate = selectedRowsData.some((row) => !row.actualOnMachineDate);
+
+    if (missingActualOnMachineDate) {
+      message.warning('請先填寫實際上機日!');
+      return;
+    }
+    // Check if the status is "Done" for any selected rows
+    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+
+    if (completedDocuments) {
+      message.warning('此單據已經完成，無法進行修改。');
       return;
     }
     const stringIds = JSON.stringify(selectedRowKeys);
@@ -448,7 +493,7 @@ const ProductionSchedule = (props) => {
       dataIndex: 'workOrderDate',
       width: 85,
       editable: true,
-      type:"date"
+      type: "date"
 
       // rule:
       // {
@@ -491,7 +536,7 @@ const ProductionSchedule = (props) => {
       render: (text, record) => (
         <Select
           defaultValue={text}
-          style={{ width: 90, background: 'none', borderColor:'#1677ff' }}
+          style={{ width: 90, background: 'none', borderColor: '#1677ff' }}
           onChange={(value) => handleProductionAreaChange(value, record)}
 
         >
@@ -514,7 +559,7 @@ const ProductionSchedule = (props) => {
       dataIndex: 'planOnMachineDate',
       editable: true,
       width: 80,
-      type:"date"
+      type: "date"
 
     },
     {
@@ -522,7 +567,7 @@ const ProductionSchedule = (props) => {
       dataIndex: 'planFinishDate',
       // editable: true,
       width: 60,
-      type:"date"
+      type: "date"
 
     },
     {
@@ -530,7 +575,7 @@ const ProductionSchedule = (props) => {
       dataIndex: 'moldWorkDays',
       editable: true,
       width: 70,
-      type:"number",
+      type: "number",
       rule:
       {
         type: 'integer',
@@ -559,7 +604,7 @@ const ProductionSchedule = (props) => {
       dataIndex: 'actualOnMachineDate',
       editable: true,
       width: 70,
-      type:"date"
+      type: "date"
 
 
     },
@@ -568,7 +613,7 @@ const ProductionSchedule = (props) => {
       dataIndex: 'actualFinishDate',
       editable: true,
       width: 70,
-      type:"date"
+      type: "date"
 
     },
     {
@@ -947,7 +992,7 @@ const ProductionSchedule = (props) => {
                 <FontAwesomeIcon icon={faPlus} style={{ color: '#fff' }} />
               </button>
             </Tooltip>
-      
+
 
           </div>
 
