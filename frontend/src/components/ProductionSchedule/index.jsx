@@ -15,7 +15,7 @@ import './index.scss';
 // import SimpleDemo from './SimpleDemo';
 import { saveAs } from 'file-saver';
 import Exceljs from 'exceljs';
-import moment from 'moment';
+import { debounce } from 'lodash'; // 引入 lodash 的 debounce 函數
 
 // 表單編輯設置
 const EditableContext = React.createContext(null);
@@ -173,10 +173,9 @@ const ProductionSchedule = (props) => {
               // 將分頁設置為第一頁
               setPagination({ ...pagination, page: 1 });
               // 获取新增数据的 ID
-              const newId = addedItem.data.data.id;
-              console.log('newId', newId);
-              // 将新增数据的 ID 添加到 selectedRowKeys 中
-              setSelectedRowKeys([...selectedRowKeys, newId]);
+              // const newId = addedItem.data.data.id;
+              // console.log('newId', newId);
+              // setSelectedRowKeys([...selectedRowKeys, newId]);
 
             } catch (error) {
               console.error('新增製令單時發生錯誤:', error);
@@ -377,7 +376,7 @@ const ProductionSchedule = (props) => {
     {
       title: '編號 ',
       dataIndex: 'id',
-      width: 60,
+      width: 40,
       fixed: true,
       editable: false,
 
@@ -387,12 +386,12 @@ const ProductionSchedule = (props) => {
       title: '狀態 ',
       dataIndex: 'status',
       fixed: true,
-      width: 80,
+      width: 55,
     },
     {
       title: '製令單號 ',
       dataIndex: 'workOrderSN',
-      width: 80,
+      width: 60,
       fixed: true,
       editable: true,
       // rule:
@@ -405,9 +404,9 @@ const ProductionSchedule = (props) => {
 
     {
       title: '產品名稱',
-      width: 80,
+      width: 120,
       dataIndex: 'productName',
-      // fixed: true,
+      fixed: true,
       editable: true,
       // rule:
       // {
@@ -417,7 +416,7 @@ const ProductionSchedule = (props) => {
     },
     {
       title: '產品編號',
-      width: 80,
+      width: 60,
       dataIndex: 'productSN',
       // fixed: true,
       editable: true,
@@ -431,7 +430,7 @@ const ProductionSchedule = (props) => {
       title: '製令數量',
       dataIndex: 'workOrderQuantity',
       editable: true,
-      width: 80,
+      width: 60,
       type: 'number',
       rule:
       {
@@ -447,7 +446,7 @@ const ProductionSchedule = (props) => {
     {
       title: '製令開立日期',
       dataIndex: 'workOrderDate',
-      width: 100,
+      width: 85,
       editable: true,
       type:"date"
 
@@ -461,7 +460,7 @@ const ProductionSchedule = (props) => {
       title: '成型秒數',
       dataIndex: 'moldingSecond',
       editable: true,
-      width: 80,
+      width: 60,
       type: "number",
       rule:
       {
@@ -475,7 +474,7 @@ const ProductionSchedule = (props) => {
       title: '穴數',
       dataIndex: 'moldCavity',
       editable: true,
-      width: 50,
+      width: 40,
       type: "number",
       rule:
       {
@@ -488,11 +487,11 @@ const ProductionSchedule = (props) => {
     {
       title: '生產區域',
       dataIndex: 'productionArea',
-      width: 80,
+      width: 65,
       render: (text, record) => (
         <Select
           defaultValue={text}
-          style={{ width: 90, background: 'none', color: '#fff' }}
+          style={{ width: 90, background: 'none', borderColor:'#1677ff' }}
           onChange={(value) => handleProductionAreaChange(value, record)}
 
         >
@@ -508,21 +507,21 @@ const ProductionSchedule = (props) => {
       title: '機台編號',
       dataIndex: 'machineSN',
       editable: true,
-      width: 80,
+      width: 55,
     },
     {
       title: '預計上機日',
       dataIndex: 'planOnMachineDate',
       editable: true,
-      width: 100,
+      width: 80,
       type:"date"
 
     },
     {
       title: '預計完成日',
       dataIndex: 'planFinishDate',
-      editable: true,
-      width: 100,
+      // editable: true,
+      width: 60,
       type:"date"
 
     },
@@ -530,7 +529,7 @@ const ProductionSchedule = (props) => {
       title: '上下機工作日',
       dataIndex: 'moldWorkDays',
       editable: true,
-      width: 100,
+      width: 70,
       type:"number",
       rule:
       {
@@ -545,7 +544,7 @@ const ProductionSchedule = (props) => {
       title: '日工時',
       dataIndex: 'dailyWorkingHours',
       editable: true,
-      width: 60,
+      width: 45,
       type: "number",
       rule:
       {
@@ -559,7 +558,7 @@ const ProductionSchedule = (props) => {
       title: '實際上機日',
       dataIndex: 'actualOnMachineDate',
       editable: true,
-      width: 100,
+      width: 70,
       type:"date"
 
 
@@ -568,15 +567,15 @@ const ProductionSchedule = (props) => {
       title: '實際完成日',
       dataIndex: 'actualFinishDate',
       editable: true,
-      width: 100,
+      width: 70,
       type:"date"
 
     },
     {
       title: '週別',
       dataIndex: 'week',
-      editable: true,
-      width: 50,
+      // editable: true,
+      width: 40,
       type: "number",
       rule:
       {
@@ -589,8 +588,8 @@ const ProductionSchedule = (props) => {
     {
       title: '產能小時',
       dataIndex: 'hourlyCapacity',
-      editable: true,
-      width: 70,
+      // editable: true,
+      width: 50,
       type: "number",
       rule:
       {
@@ -603,8 +602,8 @@ const ProductionSchedule = (props) => {
     {
       title: '日產能',
       dataIndex: 'dailyCapacity',
-      editable: true,
-      width: 60,
+      // editable: true,
+      width: 40,
       type: "number",
       rule:
       {
@@ -618,8 +617,8 @@ const ProductionSchedule = (props) => {
     {
       title: '工作天數',
       dataIndex: 'workDays',
-      editable: true,
-      width: 70,
+      // editable: true,
+      width: 50,
       type: "number",
       rule:
       {
@@ -633,7 +632,7 @@ const ProductionSchedule = (props) => {
       title: '單雙射',
       dataIndex: 'singleOrDoubleColor',
       editable: true,
-      width: 70,
+      width: 40,
       rule:
       {
         type: 'integer',
@@ -646,7 +645,7 @@ const ProductionSchedule = (props) => {
       title: '轉換率 ',
       dataIndex: 'conversionRate',
       editable: true,
-      width: 60,
+      width: 50,
       type: "number",
 
 
@@ -905,7 +904,12 @@ const ProductionSchedule = (props) => {
   }
 
 
-
+  // 防抖函數，延遲 500 毫秒執行
+  const debouncedHandleDelete = debounce(deleteChecked, 500);
+  const debouncedHandleAction = debounce(actionChecked, 500);
+  const debouncedHandlePause = debounce(pauseChecked, 500);
+  const debouncedHandleAdd = debounce(handleAdd, 500);
+  const debouncedExportToExcel = debounce(exportToExcel, 500);
 
   return (
     <div>
@@ -924,42 +928,26 @@ const ProductionSchedule = (props) => {
               {allWeekOptions}
             </Select>
             <Tooltip title="取消生產">
-
-              <button
-                className='delete'
-                onClick={deleteChecked}
-              >
+              <button className='delete' onClick={debouncedHandleDelete}>
                 <FontAwesomeIcon icon={faTrashCan} style={{ color: '#fff' }} />
               </button>
             </Tooltip>
             <Tooltip title="開始生產">
-
-
-              <button
-                className="normal-action"
-                onClick={actionChecked}
-              >
+              <button className="normal-action" onClick={debouncedHandleAction}>
                 <FontAwesomeIcon icon={faPlay} style={{ color: '#fff' }} />
               </button>
             </Tooltip>
             <Tooltip title="暫停生產">
-
-              <button
-                className="pause"
-                onClick={pauseChecked}
-              >
+              <button className="pause" onClick={debouncedHandlePause}>
                 <FontAwesomeIcon icon={faPause} style={{ color: '#fff' }} />
               </button>
             </Tooltip>
             <Tooltip title="新增製令單">
-
-              <button
-                className='add'
-                onClick={handleAdd}
-              >
+              <button className='add' onClick={debouncedHandleAdd}>
                 <FontAwesomeIcon icon={faPlus} style={{ color: '#fff' }} />
               </button>
             </Tooltip>
+      
 
           </div>
 
@@ -967,7 +955,7 @@ const ProductionSchedule = (props) => {
         {isSuccess &&
           <Table
             components={components}
-            rowClassName={() => 'editable-row'}
+            rowClassName={() => "rowClassName1"}
             bordered
             striped={true}
             rowKey="id"  // 在這裡指定 'id' 作為每一行的唯一標識
@@ -993,7 +981,7 @@ const ProductionSchedule = (props) => {
         }
         {
           (dataSource.length > 0) &&
-          <Button key="downloadExcel" type="ghost" onClick={exportToExcel} className='exportBtn'>
+          <Button key="downloadExcel" type="ghost" onClick={debouncedExportToExcel} className='exportBtn'>
             匯出
           </Button>
         }
