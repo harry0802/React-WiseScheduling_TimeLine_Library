@@ -436,7 +436,7 @@ const ProductionSchedule = (props) => {
     {
       title: '製令單號 ',
       dataIndex: 'workOrderSN',
-      width: 60,
+      width: 120,
       fixed: true,
       editable: true,
       // rule:
@@ -461,7 +461,7 @@ const ProductionSchedule = (props) => {
     },
     {
       title: '產品編號',
-      width: 60,
+      width: 120,
       dataIndex: 'productSN',
       // fixed: true,
       editable: true,
@@ -558,7 +558,7 @@ const ProductionSchedule = (props) => {
       title: '預計上機日',
       dataIndex: 'planOnMachineDate',
       editable: true,
-      width: 80,
+      width: 75,
       type: "date"
 
     },
@@ -566,7 +566,7 @@ const ProductionSchedule = (props) => {
       title: '預計完成日',
       dataIndex: 'planFinishDate',
       // editable: true,
-      width: 60,
+      width: 75,
       type: "date"
 
     },
@@ -603,7 +603,7 @@ const ProductionSchedule = (props) => {
       title: '實際上機日',
       dataIndex: 'actualOnMachineDate',
       editable: true,
-      width: 70,
+      width: 75,
       type: "date"
 
 
@@ -612,7 +612,7 @@ const ProductionSchedule = (props) => {
       title: '實際完成日',
       dataIndex: 'actualFinishDate',
       editable: true,
-      width: 70,
+      width: 75,
       type: "date"
 
     },
@@ -648,7 +648,7 @@ const ProductionSchedule = (props) => {
       title: '日產能',
       dataIndex: 'dailyCapacity',
       // editable: true,
-      width: 40,
+      width: 50,
       type: "number",
       rule:
       {
@@ -677,7 +677,7 @@ const ProductionSchedule = (props) => {
       title: '單雙射',
       dataIndex: 'singleOrDoubleColor',
       editable: true,
-      width: 40,
+      width: 60,
       rule:
       {
         type: 'integer',
@@ -700,7 +700,7 @@ const ProductionSchedule = (props) => {
       title: '備註 ',
       dataIndex: 'comment',
       editable: true,
-      width: 300,
+      width: 200,
     },
 
   ];

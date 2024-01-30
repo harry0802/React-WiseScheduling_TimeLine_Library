@@ -111,8 +111,11 @@
   background: linear-gradient(275deg, #162343 7.95%, #363C4B 56.8%, #5C5C5C 95.13%);
   color: #fff;
 
-  td {
+  td:nth-child(n+1):nth-child(-n+5) {
     background: #4D4F55;
+  }
+  td:nth-child(n+6):nth-child(-n+26) {
+    background: none;
   }
 }
 
@@ -132,7 +135,7 @@
     .editable-cell-value-wrap {
       width: auto;
       // padding-top:12px ;
-      // height: 16px;
+      height: 18px;
       border-radius: 2px;
       // border: 1px solid #1677ff;
 
