@@ -61,6 +61,9 @@
 
 }
 
+.ant-table-selection-column  {
+  width: 10px;
+}
 
 
 
@@ -93,7 +96,6 @@
   td {
 
     background: #626262;
-    z-index: 99;
   }
 }
 
@@ -108,11 +110,6 @@ span {
   // color: #1b1b1b;
   border: 1px solid #fff;
 
-
-  td {
-
-    // background: #aadff5;
-  }
 
 }
 
