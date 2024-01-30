@@ -344,6 +344,7 @@ const ProductionSchedule = (props) => {
       // Column configuration not to be checked
       name: record.name,
     }),
+  
   };
 
 
@@ -525,7 +526,7 @@ const ProductionSchedule = (props) => {
     {
       title: '製令開立日期',
       dataIndex: 'workOrderDate',
-      width: 85,
+      width: 60,
       editable: true,
       type: "date"
 
@@ -539,7 +540,7 @@ const ProductionSchedule = (props) => {
       title: '成型秒數',
       dataIndex: 'moldingSecond',
       editable: true,
-      width: 60,
+      width: 45,
       type: "number",
       rule:
       {
@@ -553,7 +554,7 @@ const ProductionSchedule = (props) => {
       title: '穴數',
       dataIndex: 'moldCavity',
       editable: true,
-      width: 40,
+      width: 30,
       type: "number",
       rule:
       {
@@ -566,7 +567,7 @@ const ProductionSchedule = (props) => {
     {
       title: '生產區域',
       dataIndex: 'productionArea',
-      width: 65,
+      width: 50,
       render: (text, record) => (
         <Select
           defaultValue={text}
@@ -586,13 +587,13 @@ const ProductionSchedule = (props) => {
       title: '機台編號',
       dataIndex: 'machineSN',
       editable: true,
-      width: 55,
+      width: 50,
     },
     {
       title: '預計上機日',
       dataIndex: 'planOnMachineDate',
       editable: true,
-      width: 75,
+      width: 60,
       type: "date"
 
     },
@@ -600,7 +601,7 @@ const ProductionSchedule = (props) => {
       title: '預計完成日',
       dataIndex: 'planFinishDate',
       // editable: true,
-      width: 75,
+      width: 60,
       type: "date"
 
     },
@@ -608,7 +609,7 @@ const ProductionSchedule = (props) => {
       title: '上下機工作日',
       dataIndex: 'moldWorkDays',
       editable: true,
-      width: 70,
+      width: 60,
       type: "number",
       rule:
       {
@@ -637,7 +638,7 @@ const ProductionSchedule = (props) => {
       title: '實際上機日',
       dataIndex: 'actualOnMachineDate',
       editable: true,
-      width: 75,
+      width: 60,
       type: "date"
 
 
@@ -646,7 +647,7 @@ const ProductionSchedule = (props) => {
       title: '實際完成日',
       dataIndex: 'actualFinishDate',
       editable: true,
-      width: 75,
+      width: 60,
       type: "date"
 
     },
@@ -711,20 +712,13 @@ const ProductionSchedule = (props) => {
       title: '單雙射',
       dataIndex: 'singleOrDoubleColor',
       editable: true,
-      width: 60,
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
-      },
+      width: 45,
     },
     {
       title: '轉換率 ',
       dataIndex: 'conversionRate',
       editable: true,
-      width: 50,
+      width: 40,
       type: "number",
 
 
@@ -1058,10 +1052,11 @@ const ProductionSchedule = (props) => {
               position: ['bottomCenter'],
 
             }}
-            scroll={{ x: 3800 }}
+            scroll={{ x: 3600 }}
             rowSelection={{
               type: selectionType,
               ...rowSelection,
+              columnWidth:'32px'
             }}
           />
         }
