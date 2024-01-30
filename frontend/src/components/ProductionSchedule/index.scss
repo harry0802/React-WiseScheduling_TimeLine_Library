@@ -69,6 +69,8 @@
   border-color: #fff;
   border-bottom: 1px solid #fff;
   border-top: 1px solid #fff;
+  z-index: 999;
+  
 
 }
 
@@ -91,9 +93,11 @@
   td {
 
     background: #626262;
+    z-index: 99;
   }
 }
-span{
+
+span {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -119,6 +123,7 @@ span{
   td:nth-child(n+1):nth-child(-n+5) {
     background: #4D4F55;
   }
+
   td:nth-child(n+6):nth-child(-n+26) {
     background: none;
   }
@@ -149,12 +154,14 @@ span{
 
   }
 }
+
 // 篩選箭頭
 .ant-select .ant-select-arrow .anticon {
   vertical-align: top;
   transition: transform 0.3s;
   // color: #1677ff;
 }
+
 .ant-table-wrapper .ant-table-tbody .ant-table-row:hover {
   border-left: 2px solid #fff;
 
@@ -181,7 +188,7 @@ span{
 .ant-table-wrapper .ant-table {
   background: none;
   color: #E1E7F5;
-  font-size: 16px;
+  font-size: 14px;
 
 }
 
@@ -493,3 +500,4 @@ span{
 :where(.css-dev-only-do-not-override-dkbvqv).ant-table-wrapper .ant-table.ant-table-bordered>.ant-table-container>.ant-table-summary>table>tfoot>tr>td {
   border-inline-end: 1px solid #8f8f8f;
 }
+
