@@ -26,6 +26,7 @@ services:
   
   backend:
     build: backend
+    image: gunicorn_flask
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "curl --silent --fail localhost:5000/flask-health-check || exit 1"]
