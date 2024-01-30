@@ -93,6 +93,11 @@
     background: #626262;
   }
 }
+span{
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .ant-table-wrapper .ant-table-tbody .ant-table-row:nth-child(odd):hover {
   // background: #aadff5;

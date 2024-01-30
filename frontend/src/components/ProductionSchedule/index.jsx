@@ -424,8 +424,6 @@ const ProductionSchedule = (props) => {
       width: 40,
       fixed: true,
       editable: false,
-
-
     },
     {
       title: '狀態 ',
@@ -436,9 +434,19 @@ const ProductionSchedule = (props) => {
     {
       title: '製令單號 ',
       dataIndex: 'workOrderSN',
-      width: 120,
+      width: 80,
       fixed: true,
       editable: true,
+      ellipsis: true,
+      render: (text) => (
+        // 使用 Tooltip 包裹超出部分的内容
+        <Tooltip title={text}>
+          {/* <span style={{background:'#fff'}} >{text}</span> */}
+          <span>{text}</span>
+        </Tooltip>
+      ),
+
+
       // rule:
       // {
       //   required: true,
@@ -449,10 +457,19 @@ const ProductionSchedule = (props) => {
 
     {
       title: '產品名稱',
-      width: 120,
       dataIndex: 'productName',
+      width: 80,
       fixed: true,
       editable: true,
+      ellipsis: true,
+      render: (text) => (
+        // 使用 Tooltip 包裹超出部分的内容
+        <Tooltip title={text}>
+          {/* <span style={{background:'#fff'}} >{text}</span> */}
+            <span>{text}</span>
+        </Tooltip>
+      ),
+
       // rule:
       // {
       //   required: true,
@@ -461,10 +478,18 @@ const ProductionSchedule = (props) => {
     },
     {
       title: '產品編號',
-      width: 120,
       dataIndex: 'productSN',
-      // fixed: true,
+      width: 80,
       editable: true,
+      ellipsis: true,
+      render: (text) => (
+        // 使用 Tooltip 包裹超出部分的内容
+        <Tooltip title={text} >
+          {/* <span style={{background:'#fff'}} >{text}</span> */}
+          
+          <span>{text}</span>
+        </Tooltip>
+      ),
       // rule:
       // {
       //   required: true,
@@ -701,6 +726,13 @@ const ProductionSchedule = (props) => {
       dataIndex: 'comment',
       editable: true,
       width: 200,
+      ellipsis: true,
+      render: (text) => (
+        // 使用 Tooltip 包裹超出部分的内容
+        <Tooltip title={text}>
+          <span>{text}</span>
+        </Tooltip>
+      ),
     },
 
   ];
