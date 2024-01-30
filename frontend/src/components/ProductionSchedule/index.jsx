@@ -458,7 +458,7 @@ const ProductionSchedule = (props) => {
     {
       title: '產品名稱',
       dataIndex: 'productName',
-      width: 80,
+      width: 150,
       fixed: true,
       editable: true,
       ellipsis: true,
@@ -725,7 +725,7 @@ const ProductionSchedule = (props) => {
       title: '備註 ',
       dataIndex: 'comment',
       editable: true,
-      width: 200,
+      width: 150,
       ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
@@ -1049,7 +1049,7 @@ const ProductionSchedule = (props) => {
               position: ['bottomCenter'],
 
             }}
-            scroll={{ x: 3300 }}
+            scroll={{ x: 3600 }}
             rowSelection={{
               type: selectionType,
               ...rowSelection,
