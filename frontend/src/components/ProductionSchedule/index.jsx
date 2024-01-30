@@ -421,20 +421,29 @@ const ProductionSchedule = (props) => {
     {
       title: '編號 ',
       dataIndex: 'id',
-      width: 40,
+      width: 30,
       fixed: true,
       editable: false,
+      render: (text) => (
+        // 使用 Tooltip 包裹超出部分的内容
+        <Tooltip title={text} >
+          {/* <span style={{background:'#fff'}} >{text}</span> */}
+          <span style={{textAlign:'center'}}> {text}</span>
+        </Tooltip>
+      ),
     },
     {
       title: '狀態 ',
       dataIndex: 'status',
       fixed: true,
-      width: 55,
+      width: 36,
+
     },
+    
     {
       title: '製令單號 ',
       dataIndex: 'workOrderSN',
-      width: 80,
+      width: 76,
       fixed: true,
       editable: true,
       ellipsis: true,
@@ -458,7 +467,7 @@ const ProductionSchedule = (props) => {
     {
       title: '產品名稱',
       dataIndex: 'productName',
-      width: 150,
+      width: 165,
       fixed: true,
       editable: true,
       ellipsis: true,
@@ -645,7 +654,7 @@ const ProductionSchedule = (props) => {
       title: '週別',
       dataIndex: 'week',
       // editable: true,
-      width: 40,
+      width: 30,
       type: "number",
       rule:
       {
@@ -673,7 +682,7 @@ const ProductionSchedule = (props) => {
       title: '日產能',
       dataIndex: 'dailyCapacity',
       // editable: true,
-      width: 50,
+      width: 40,
       type: "number",
       rule:
       {
@@ -725,7 +734,7 @@ const ProductionSchedule = (props) => {
       title: '備註 ',
       dataIndex: 'comment',
       editable: true,
-      width: 150,
+      width: 300,
       ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
@@ -1049,7 +1058,7 @@ const ProductionSchedule = (props) => {
               position: ['bottomCenter'],
 
             }}
-            scroll={{ x: 3600 }}
+            scroll={{ x: 3800 }}
             rowSelection={{
               type: selectionType,
               ...rowSelection,
