@@ -15,7 +15,7 @@ const productionScheduleApi = createApi({
                 query(arg) {
                     const { size, page, week_filter } = arg;
                     return {
-                        url: 'productionSchedule',
+                        url: 'productionSchedule/',
                         params: { 'size': size, 'page': page, 'week_filter': week_filter }
                     };
                 },
