@@ -181,7 +181,7 @@ class productionScheduleService:
             # Get the current productionSchedule
             # return f"productionScheduleService.get_productionSchedules({page}, {size}, {sort}, {status_filter}, {week_filter}, {year_filter}, {month_filter}})"
             query = productionSchedule.query
-            query = query.filter(productionSchedule.status == status_filter) if status_filter != "all" else query
+            query = query.filter(productionSchedule.status.in_(status_filter)) if "all" not in status_filter else query
             query = query.filter(productionSchedule.week == week_filter) if week_filter else query
             query = query.filter(extract('year', productionSchedule.planFinishDate) == year_filter) if year_filter else query
             query = query.filter(extract('month', productionSchedule.planFinishDate) == month_filter) if month_filter else query

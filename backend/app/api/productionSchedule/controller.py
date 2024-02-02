@@ -41,7 +41,10 @@ class productionScheduleController(Resource):
     @api.param("page", "Page number")
     @api.param("size", "Size of the page")
     @api.param("sort", "Sort by a column")
-    @api.param("status_filter", "尚未完成, On-going, Done, 暫停生產, 取消生產, all")
+    @api.param("status_filter", "尚未上機, On-going, Done, 暫停生產, 取消生產, all",
+            type="array",
+            items={"type": "string", "enum": ["尚未上機", "On-going", "Done", "暫停生產", "取消生產", "all"]}
+            )
     @api.param("week_filter", "(planFinishDate) week number")
     @api.param("year_filter", "(planFinishDate) year number")
     @api.param("month_filter", "(planFinishDate) month number")
@@ -50,6 +53,7 @@ class productionScheduleController(Resource):
         size = request.args.get('size', default=0, type=int)
         sort = request.args.get('sort', default="id", type=str)
         status_filter = request.args.get('status_filter', default="all", type=str)
+        status_filter = status_filter.split(",")
         week_filter = request.args.get('week_filter', default=None, type=int)
         year_filter = request.args.get('year_filter', default=None, type=int)
         month_filter = request.args.get('month_filter', default=None, type=int)
