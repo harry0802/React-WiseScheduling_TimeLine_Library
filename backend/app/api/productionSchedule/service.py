@@ -11,7 +11,6 @@ from app.utils import message, err_resp, internal_err_resp
 from app.models.productionSchedule import productionSchedule
 from .schemas import productionScheduleSchema
 from flask import url_for
-import logging
 from app.api.calendar.service import CalendarService
 from sqlalchemy import extract
 productionSchedule_schema = productionScheduleSchema()
@@ -74,9 +73,9 @@ def shift_by_holiday(start_date, end_date=datetime(1,1,1), workdays=1):
         final_end_date = new_end_date
     deltaDays = (final_end_date - start_date).days
     
-    print(f"shift_by_holiday: ")
-    print(f"start: {start_date}, workdays: {workdays},")
-    print(f"final_end: {final_end_date}, deltaDays: {deltaDays}, holiday_count: {holiday_list_2nd_count}")
+    current_app.logger.debug(f"shift_by_holiday: ")
+    current_app.logger.debug(f"start: {start_date}, workdays: {workdays},")
+    current_app.logger.debug(f"final_end: {final_end_date}, deltaDays: {deltaDays}, holiday_count: {holiday_list_2nd_count}")
     return final_end_date
     
 def complete_productionSchedule(db_obj, payload):
@@ -134,22 +133,28 @@ def complete_productionSchedule(db_obj, payload):
         or type(db_obj.moldWorkDays) != int or db_obj.moldWorkDays <= 0
         or type(db_obj.conversionRate) != float or db_obj.conversionRate <= 0
         ):
-        logging.debug(f"complete_productionSchedule:SKIP calculate capacity")
+        current_app.logger.debug(f"complete_productionSchedule:SKIP calculate capacity")
     else:
+        current_app.logger.debug(f"complete_productionSchedule:calculate capacity")
+        current_app.logger.debug(f"workOrderQuantity: {db_obj.workOrderQuantity}")
+        current_app.logger.debug(f"planOnMachineDate: {db_obj.planOnMachineDate}")
+        current_app.logger.debug(f"moldingSecond: {db_obj.moldingSecond}")
+        current_app.logger.debug(f"dailyWorkingHours: {db_obj.dailyWorkingHours}")
+        current_app.logger.debug(f"moldCavity: {db_obj.moldCavity}")
+        current_app.logger.debug(f"moldWorkDays: {db_obj.moldWorkDays}")
+        current_app.logger.debug(f"conversionRate: {db_obj.conversionRate}")
         #每小時產能(drop decimal)
-        logging.debug(f"{db_obj.workOrderQuantity}, {db_obj.planOnMachineDate},{db_obj.moldingSecond}, {db_obj.dailyWorkingHours},{db_obj.moldCavity}, {db_obj.moldWorkDays}, {db_obj.conversionRate}")
-        logging.debug(f"{type(db_obj.workOrderQuantity)}, {type(db_obj.planOnMachineDate)},{type(db_obj.moldingSecond)}, {type(db_obj.dailyWorkingHours)},{type(db_obj.moldCavity)}, {type(db_obj.moldWorkDays)}, {type(db_obj.conversionRate)}")
         db_obj.hourlyCapacity = (60 * 60) * (1/db_obj.moldingSecond) * db_obj.moldCavity
         db_obj.hourlyCapacity = math.floor(db_obj.hourlyCapacity)
-        logging.debug(f"hourlyCapacity: {db_obj.hourlyCapacity}")
+        current_app.logger.debug(f"hourlyCapacity: {db_obj.hourlyCapacity}")
         #每日產能(drop decimal)
         db_obj.dailyCapacity = db_obj.hourlyCapacity * db_obj.dailyWorkingHours * db_obj.conversionRate
         db_obj.dailyCapacity = math.floor(db_obj.dailyCapacity)
-        logging.debug(f"dailyCapacity: {db_obj.dailyCapacity}")
+        current_app.logger.debug(f"dailyCapacity: {db_obj.dailyCapacity}")
         #工作天數(unconditional round up)
         db_obj.workDays = db_obj.workOrderQuantity / db_obj.dailyCapacity
         db_obj.workDays = math.ceil(db_obj.workDays)
-        logging.debug(f"workDays: {db_obj.workDays}")
+        current_app.logger.debug(f"workDays: {db_obj.workDays}")
         #預計完成日(shift by holiday)
         db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
         
@@ -176,12 +181,11 @@ def complete_productionSchedule(db_obj, payload):
 
 class productionScheduleService:
     @staticmethod
-    def get_productionSchedules(page, size, sort, status_filter, week_filter=None, year_filter=None, month_filter=None):
+    def get_productionSchedules(page, size, sort, status_filter=["all"], week_filter=None, year_filter=None, month_filter=None):
         try:
             # Get the current productionSchedule
-            # return f"productionScheduleService.get_productionSchedules({page}, {size}, {sort}, {status_filter}, {week_filter}, {year_filter}, {month_filter}})"
             query = productionSchedule.query
-            query = query.filter(productionSchedule.status == status_filter) if status_filter != "all" else query
+            query = query.filter(productionSchedule.status.in_(status_filter)) if "all" not in status_filter else query
             query = query.filter(productionSchedule.week == week_filter) if week_filter else query
             query = query.filter(extract('year', productionSchedule.planFinishDate) == year_filter) if year_filter else query
             query = query.filter(extract('month', productionSchedule.planFinishDate) == month_filter) if month_filter else query
@@ -214,10 +218,9 @@ class productionScheduleService:
                 "total_count": total_count,
             }
             return resp, 200
-
+        # exception without handling should raise to the caller
         except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
+            raise error
         
     @staticmethod
     def get_productionSchedule(id):
@@ -236,16 +239,18 @@ class productionScheduleService:
             resp = message(True, "productionSchedule data sent")
             resp["data"] = productionSchedule_dto
             return resp, 200
-
+        # exception without handling should raise to the caller
         except Exception as error:
-            current_app.logger.error(f"error {productionSchedule_db}")
-            return internal_err_resp()
+            raise error
 
 
     @staticmethod
     def create_productionSchedule(payload):
         try:
             productionSchedule_db = productionSchedule()
+            # exception test
+            # payload.pop("workOrderQuantity", None)
+            # 10+"sfd"*10*"SAD"^234
             productionSchedule_db = complete_productionSchedule(productionSchedule_db, payload)
             db.session.add(productionSchedule_db)
             db.session.flush()
@@ -256,10 +261,9 @@ class productionScheduleService:
             resp["data"] = productionSchedule_dto
 
             return resp, 200
-
+        # exception without handling should raise to the caller
         except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
+            raise error
 
     @staticmethod
     def update_productionSchedule(id, payload):
@@ -281,10 +285,9 @@ class productionScheduleService:
             resp["data"] = productionSchedule_dto
 
             return resp, 200
-
+        # exception without handling should raise to the caller
         except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
+            raise error
     
     @staticmethod
     def update_productionSchedules(ids, payload):
@@ -306,12 +309,13 @@ class productionScheduleService:
             productionSchedule_dto = productionSchedule_schema.dump(productionSchedule_db, many=True)
             resp = message(True, f"productionSchedule {selected_ids} has been updated..")
             resp["data"] = productionSchedule_dto
-
+            resp["meta"] = {
+                "ids": selected_ids
+            }
             return resp, 200
-
+        # exception without handling should raise to the caller
         except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
+            raise error
 
     @staticmethod
     def delete_productionSchedule(id):
@@ -324,12 +328,11 @@ class productionScheduleService:
 
             db.session.delete(productionSchedule_db)
             db.session.commit()
-
-            return message(True, "productionSchedule has been deleted.."), 200
-
+            resp = message(True, "productionSchedule has been deleted..")
+            return resp, 200
+        # exception without handling should raise to the caller
         except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
+            raise error
 
     @staticmethod
     def delete_productionSchedules(ids):
@@ -344,9 +347,11 @@ class productionScheduleService:
             for prodSchedule in productionSchedule_db:
                 db.session.delete(prodSchedule)
             db.session.commit()
-
-            return message(True, f"productionSchedule {selected_ids} has been deleted.."), 200
-
+            resp = message(True, f"productionSchedule {selected_ids} has been deleted..")
+            resp["meta"] = {
+                "ids": selected_ids
+            }
+            return resp, 200
+        # exception without handling should raise to the caller
         except Exception as error:
-            current_app.logger.error(error)
-            return internal_err_resp()
+            raise error

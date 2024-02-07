@@ -11,7 +11,8 @@ if os.path.exists(dotenv_path):
 import click
 from flask_migrate import Migrate
 from app import create_app, db
-
+import logging
+from logging.handlers import TimedRotatingFileHandler
 # Import models
 from app.models.user import User, Role, Permission
 import app.models.register_setting
@@ -77,3 +78,23 @@ def site_map():
         endpoints.append(rule.endpoint)
     return {"GET links(limit params)": links, "endpoints": endpoints}
     # links is now a list of url, endpoint tuples
+#ref https://zhuanlan.zhihu.com/p/593593959
+if __name__ != '__main__':
+    # if we are not running directly, we set the loggers
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)    
+    # app.logger.info("__name__ != '__main__'~~~~~~~~~")
+
+if __name__ == '__main__':
+    app.debug = True
+    formatter = logging.Formatter(
+        "[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s][%(thread)d] - %(message)s")
+    handler = TimedRotatingFileHandler(
+        "flask.log", when="D", interval=1, backupCount=7,
+        encoding="UTF-8", delay=False, utc=False)
+
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+    # app.logger.info("Logging set up~~~~~~~~~")
