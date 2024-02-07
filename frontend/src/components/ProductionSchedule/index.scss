@@ -2,6 +2,16 @@
   margin: 20px 0 0 0;
 
 }
+// 篩選周別字體顏色
+:where(.css-dev-only-do-not-override-1rqnfsa).ant-select-single.ant-select-show-arrow .ant-select-selection-placeholder {
+  padding-inline-end: 18px;
+  color: #fff;
+}
+// 生產區域向下箭頭
+:where(.css-dev-only-do-not-override-1rqnfsa).ant-select .ant-select-arrow .anticon >svg {
+  vertical-align: top;
+  color: #fff;
+}
 
 .exportBtn {
   position: absolute;
@@ -72,7 +82,7 @@
   border-color: #fff;
   border-bottom: 1px solid #fff;
   border-top: 1px solid #fff;
-  z-index: 999;
+  // z-index: 999;
   
 
 }
@@ -440,9 +450,6 @@ span {
 }
 
 
-.ant-table-wrapper .ant-table-tbody .ant-table-row.ant-table-row-selected>.ant-table-cell {
-  background: #4F9AB1;
-}
 
 .ant-pagination .ant-pagination-item a {
   display: block;
