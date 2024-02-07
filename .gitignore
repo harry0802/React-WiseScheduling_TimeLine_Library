@@ -3,3 +3,4 @@ __pycache__
 .env
 nginx/whitelist.conf
 node_modules
+backend/flask.log

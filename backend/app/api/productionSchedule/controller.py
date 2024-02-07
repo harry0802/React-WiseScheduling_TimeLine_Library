@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import request
 from flask_restx import Resource
 
-from app.utils import validation_error
+from app.utils import controller_entrance_log
 
 from .service import productionScheduleService
 from .dto import productionScheduleDto
@@ -48,9 +48,10 @@ class productionScheduleController(Resource):
     @api.param("week_filter", "(planFinishDate) week number")
     @api.param("year_filter", "(planFinishDate) year number")
     @api.param("month_filter", "(planFinishDate) month number")
+    @controller_entrance_log(description="Get productionSchedules")
     def get(self):
         page = request.args.get('page', default=1, type=int)
-        size = request.args.get('size', default=0, type=int)
+        size = request.args.get('size', default=10, type=int)
         sort = request.args.get('sort', default="id", type=str)
         status_filter = request.args.get('status_filter', default="all", type=str)
         status_filter = status_filter.split(",")
@@ -70,6 +71,7 @@ class productionScheduleController(Resource):
         },
     )
     @api.expect(control_input, validate=True)
+    @controller_entrance_log(description="Create the current productionSchedule")
     def post(self):
         payload = api.payload
         return productionScheduleService.create_productionSchedule(payload)
@@ -90,7 +92,7 @@ class productionScheduleController(Resource):
             404: "productionSchedule not found",
         },
     )
-
+    @controller_entrance_log(description="Get a specific productionSchedule")
     def get(self, id):
         return productionScheduleService.get_productionSchedule(id)
 
@@ -102,6 +104,7 @@ class productionScheduleController(Resource):
         },
     )
     @api.expect(control_input, validate=True)
+    @controller_entrance_log(description="update the current productionSchedule")
     def put(self, id):
         payload = api.payload
         remove_props = ["id"]
@@ -116,6 +119,7 @@ class productionScheduleController(Resource):
             404: "productionSchedule not found",
         },
     )
+    @controller_entrance_log(description="delete the current productionSchedule")
     def delete(self, id):
         return productionScheduleService.delete_productionSchedule(id)
 
@@ -133,6 +137,7 @@ class productionScheduleController(Resource):
         },
     )
     @api.expect(control_input, validate=True)
+    @controller_entrance_log(description="Update the current productionSchedules")
     def put(self, ids):
         payload = api.payload
         remove_props = ["id"]
@@ -148,5 +153,6 @@ class productionScheduleController(Resource):
             404: "productionSchedules not found",
         },
     )
+    @controller_entrance_log(description="delete the current productionSchedules")
     def delete(self, ids):
         return productionScheduleService.delete_productionSchedules(ids)
