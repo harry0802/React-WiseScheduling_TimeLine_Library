@@ -539,7 +539,7 @@ const ProductionSchedule = (props) => {
       title: '製令數量',
       dataIndex: 'workOrderQuantity',
       editable: true,
-      width: 60,
+      width: 50,
       type: 'number',
       rule:
       {
@@ -653,7 +653,7 @@ const ProductionSchedule = (props) => {
       title: '日工時',
       dataIndex: 'dailyWorkingHours',
       editable: true,
-      width: 45,
+      width: 35,
       type: "number",
       rule:
       {
@@ -699,7 +699,7 @@ const ProductionSchedule = (props) => {
       title: '產能小時',
       dataIndex: 'hourlyCapacity',
       // editable: true,
-      width: 50,
+      width: 40,
       type: "number",
       rule:
       {
@@ -713,7 +713,7 @@ const ProductionSchedule = (props) => {
       title: '日產能',
       dataIndex: 'dailyCapacity',
       // editable: true,
-      width: 40,
+      width: 36,
       type: "number",
       rule:
       {
@@ -728,7 +728,7 @@ const ProductionSchedule = (props) => {
       title: '工作天數',
       dataIndex: 'workDays',
       // editable: true,
-      width: 50,
+      width: 40,
       type: "number",
       rule:
       {
@@ -743,7 +743,7 @@ const ProductionSchedule = (props) => {
       title: '單雙射',
       dataIndex: 'singleOrDoubleColor',
       editable: true,
-      width: 45,
+      width: 40,
     },
     {
       title: '轉換率 ',
