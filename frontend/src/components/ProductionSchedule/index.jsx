@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
-import { Table, Select, Form, Input, Button, message, Modal, Tooltip, DatePicker } from 'antd';
+import { Table, Select, Form, Input, Button, message, Modal, Tooltip } from 'antd';
+
 import {
   useGetProductionScheduleQuery,
   // useDelProductionScheduleMutation,
@@ -344,7 +345,7 @@ const ProductionSchedule = (props) => {
       // Column configuration not to be checked
       name: record.name,
     }),
-  
+
   };
 
 
@@ -402,13 +403,41 @@ const ProductionSchedule = (props) => {
 
     }
     const fetchData = async () => {
-      // 重新抓取數據
       await refetchExport(refetchParams);
 
       if (needExportDataIsSuccess) {
         const { data } = needExportDataSource;
-        setNeedExportData(data);
+  
+        // 在获取到最新的 dataSource 后，检查 moldingSecond 和 moldCavity 是否有值
+        const newDataWithHourlyCapacity = data.map((item) => {
+          if (item.moldingSecond && item.moldCavity) {
+            // 计算新的 hourlyCapacity，并使用 Math.floor() 進行無条件捨去
+            const newHourlyCapacity = Math.floor((3600 / item.moldingSecond) * item.moldCavity);
+            // 更新 dataSource 中的 hourlyCapacity
+            return { ...item, hourlyCapacity: newHourlyCapacity };
+          }
+          return item;
+        });
+  
+        // 更新 dataSource
+        setDataSource(newDataWithHourlyCapacity);
+  
+        // 在这里处理 hourlyCapacity 更新后的逻辑
+        const newDataWithDailyCapacity = newDataWithHourlyCapacity.map((item) => {
+          if (item.hourlyCapacity !== null && item.conversionRate !== null) {
+            // 计算新的 dailyCapacity，并使用 Math.floor() 進行無条件捨去
+            const newDailyCapacity = Math.floor(item.hourlyCapacity * 8 * item.conversionRate);
+            // 更新 dataSource 中的 dailyCapacity
+            return { ...item, dailyCapacity: newDailyCapacity };
+          }
+          return item;
+        });
+  
+        // 更新 dataSource
+        setDataSource(newDataWithDailyCapacity);
       }
+    
+      
     };
 
     fetchData();
@@ -429,7 +458,7 @@ const ProductionSchedule = (props) => {
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text} >
           {/* <span style={{background:'#fff'}} >{text}</span> */}
-          <span style={{textAlign:'center'}}> {text}</span>
+          <span style={{ textAlign: 'center' }}> {text}</span>
         </Tooltip>
       ),
     },
@@ -440,7 +469,7 @@ const ProductionSchedule = (props) => {
       width: 36,
 
     },
-    
+
     {
       title: '製令單號 ',
       dataIndex: 'workOrderSN',
@@ -476,7 +505,7 @@ const ProductionSchedule = (props) => {
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
           {/* <span style={{background:'#fff'}} >{text}</span> */}
-            <span>{text}</span>
+          <span>{text}</span>
         </Tooltip>
       ),
 
@@ -496,7 +525,7 @@ const ProductionSchedule = (props) => {
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text} >
           {/* <span style={{background:'#fff'}} >{text}</span> */}
-          
+
           <span>{text}</span>
         </Tooltip>
       ),
@@ -606,7 +635,7 @@ const ProductionSchedule = (props) => {
 
     },
     {
-      title: '上下機工作日',
+      title: '上下模工作日',
       dataIndex: 'moldWorkDays',
       editable: true,
       width: 60,
@@ -639,7 +668,8 @@ const ProductionSchedule = (props) => {
       dataIndex: 'actualOnMachineDate',
       editable: true,
       width: 60,
-      type: "date"
+      // type: "dateTime"
+      type: 'date'
 
 
     },
@@ -708,6 +738,7 @@ const ProductionSchedule = (props) => {
 
       },
     },
+
     {
       title: '單雙射',
       dataIndex: 'singleOrDoubleColor',
@@ -723,6 +754,27 @@ const ProductionSchedule = (props) => {
 
 
     },
+    // 合併
+    // {
+    //   dataIndex: 'Process',
+    //   key: 'Process',
+    //   title: '製程',
+    //   children: [
+    //     {
+    //       title: '單雙射',
+    //       dataIndex: 'singleOrDoubleColor',
+    //       editable: true,
+    //       width: 45,
+    //     },
+    //     {
+    //       title: '轉換率 ',
+    //       dataIndex: 'conversionRate',
+    //       editable: true,
+    //       width: 40,
+    //       type: "number",
+    //     },
+    //   ]
+    // },
 
     {
       title: '備註 ',
@@ -739,6 +791,7 @@ const ProductionSchedule = (props) => {
     },
 
   ];
+  console.log('dataSource', dataSource);
 
   // 編輯
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
@@ -748,7 +801,8 @@ const ProductionSchedule = (props) => {
       // Check if there are changes in the data
 
       const isDataChanged = Object.keys(row).some((key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]);
-
+      // 当从服务器获取到 hourlyCapacity 时，检查 conversionRate 是否有值
+  
       if (!isDataChanged) {
         // If there are no changes, you can choose to return or show a message
         // message.info('No changes detected.');
@@ -768,6 +822,7 @@ const ProductionSchedule = (props) => {
         message.error('修改數據失敗!!!');
 
       }
+
     } catch (error) {
       // Handle the error (e.g., display an error message to the user, revert changes, etc.)
       message.error('修改數據失敗!!!!');
@@ -1056,7 +1111,7 @@ const ProductionSchedule = (props) => {
             rowSelection={{
               type: selectionType,
               ...rowSelection,
-              columnWidth:'32px'
+              columnWidth: '32px'
             }}
           />
         }
