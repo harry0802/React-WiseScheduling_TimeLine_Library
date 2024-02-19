@@ -601,7 +601,7 @@ const ProductionSchedule = (props) => {
       const newDataWithDailyCapacity = newDataWithHourlyCapacity.map((item) => {
         if (item.hourlyCapacity !== null && item.conversionRate !== null) {
           // 计算新的 dailyCapacity，并使用 Math.floor() 進行無条件捨去
-          const newDailyCapacity = Math.floor(item.hourlyCapacity * 8 * item.conversionRate);
+          const newDailyCapacity = Math.floor(item.hourlyCapacity * item.dailyWorkingHours * item.conversionRate);
           // 更新 dataSource 中的 dailyCapacity
           return { ...item, dailyCapacity: newDailyCapacity };
         }
