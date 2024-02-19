@@ -18,6 +18,7 @@ import { saveAs } from 'file-saver';
 import Exceljs from 'exceljs';
 import { debounce } from 'lodash'; // 引入 lodash 的 debounce 函數
 
+
 // 表單編輯設置
 const EditableContext = React.createContext(null);
 
@@ -95,356 +96,6 @@ const EditableCell = ({ title, editable, children, dataIndex, rule, type, record
 
 
 const ProductionSchedule = (props) => {
-  // 設定初始當前頁面以及分頁一頁有幾個資料
-
-  const [pagination, setPagination] = useState({
-    current: 1, /*當前分頁位址*/
-    pageSize: 10, // 默认值为 10
-    pageSizeOptions: ['10', '20', '50', '100'],/*分頁數量*/
-  });
-  const [totalPage, setTotalPage] = useState(1);/*總分頁*/
-  const [dataSource, setDataSource] = useState([]);/*回傳資料*/
-
-  const { data, isLoading, isSuccess, refetch } = useGetProductionScheduleQuery({
-    size: pagination.pageSizeOptions,/*分頁數量*/
-    page: pagination.current,/*想取得的分頁位址*/
-    enabled: true, // 確保自動觸發一次查詢
-
-  });
-
-  //page參數是為Table裡配置pagination取得的當前分頁 
-  const handleTableChange = (page, size) => {
-
-    const newPagination = {
-      ...pagination,
-      page: size !== pagination.pageSize ? 1 : +page,
-      pageSize: size,
-    };
-    setPagination(newPagination);
-  };
-  // 選擇日期
-
-
-  // 新增項目
-  const [addProductionSchedule] = useAddProductionScheduleMutation();
-  // 置令單創建日期
-  const formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  const [nowDate, setNowDate] = useState(formatDate(new Date())); // 初始值为当前日期
-
-
-
-  // 新增製令單
-  const handleAdd = async () => {
-    if (selectedRowKeys.length > 0) {
-      message.warning('請先取消勾選增製令單才能新增項目');
-      return;
-    }
-
-    if ((weekFilter == "") || (weekFilter == null)) {
-
-      try {
-        Modal.confirm({
-          title: '確認新增',
-          content: '確定要新增製令單嗎？',
-          okText: '確定',
-          cancelText: '取消',
-          onOk: async () => {
-            try {
-              message.success('新增製令單成功');
-
-              const newData = {
-                workOrderSN: "",
-                productSN: "",
-                productName: "",
-                workOrderQuantity: 1000,
-                workOrderDate: nowDate,
-              };
-
-              // 添加製令單
-              const addedItem = await addProductionSchedule(newData);
-
-              // Refetch 数据以获取更新后的列表
-              refetch();
-
-              // 將分頁設置為第一頁
-              setPagination({ ...pagination, page: 1 });
-              // 获取新增数据的 ID
-              // const newId = addedItem.data.data.id;
-              // console.log('newId', newId);
-              // setSelectedRowKeys([...selectedRowKeys, newId]);
-
-            } catch (error) {
-              console.error('新增製令單時發生錯誤:', error);
-            }
-          },
-        });
-      } catch (error) {
-        console.error('處理新增製令單時發生錯誤:', error);
-      }
-    } else {
-      message.warning('請先選擇全部周別後,再進行新增製令單的動作');
-      return;
-    }
-  };
-
-  const [selectionType, setSelectionType] = useState('checkbox');
-
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 追蹤選中的行的 id
-
-  // const [delProductionSchedule] = useDelProductionScheduleMutation();
-  const [pauseStaus] = usePauseStausMutation();
-  const [cancelStaus] = useCancelStausMutation();
-  //勾選刪除
-  const deleteChecked = async () => {
-    // Get the selected rows' ids
-    if (selectedRowKeys.length === 0) {
-      message.warning('請先勾選要取消生產的項目');
-      return;
-    }
-    // Get the selected rows' data
-    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
-
-    // Check if the status is "Done" for any selected rows
-    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
-
-    if (completedDocuments) {
-      message.warning('此單據已經完成，無法進行修改。');
-      return;
-    }
-
-    const stringIds = JSON.stringify(selectedRowKeys);
-
-    Modal.confirm({
-      title: '確認刪除',
-      content: '確定要取消生產選中的項目嗎？',
-      okText: '確定',
-      cancelText: '取消',
-      onOk: async () => {
-        try {
-
-          await cancelStaus(stringIds);
-
-          message.success('目前狀態已變為暫停生產!!');
-
-        } catch (error) {
-          console.error('Error deleting production schedule:', error);
-        }
-      },
-    });
-  };
-
-
-  // 勾選令機具暫停動作
-  const pauseChecked = () => {
-    // Get the selected rows' ids
-
-    if (selectedRowKeys.length === 0) {
-      message.warning('請先勾選要暫停的項目');
-      return;
-    }
-    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
-
-    // Check if the 'actualOnMachineDate' property exists in all selected rows
-    const missingActualOnMachineDate = selectedRowsData.some((row) => !row.actualOnMachineDate);
-
-    if (missingActualOnMachineDate) {
-      message.warning('請先填寫實際上機日!');
-      return;
-    }
-
-    // Check if the status is "Done" for any selected rows
-    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
-
-    if (completedDocuments) {
-      message.warning('此單據已經完成，無法進行修改。');
-      return;
-    }
-    const stringIds = JSON.stringify(selectedRowKeys);
-
-    // 显示确认对话框
-    Modal.confirm({
-      title: '確認暫停生產',
-      content: '確定要將所選項目的暫停生產嗎？',
-      okText: '確定',
-      cancelText: '取消',
-      onOk: async () => {
-        try {
-          // 將勾選的欄位更改其屬性 status 值為"暫停動作"
-          await pauseStaus(stringIds);
-
-          message.success('目前狀態已變為暫停生產!!');
-        } catch (error) {
-          console.error('Error pausing production schedules:', error);
-        }
-      },
-    });
-  };
-
-  const [actionStaus] = useActionStausMutation();
-
-  // 勾選令機具開始動作
-  const actionChecked = () => {
-    // Get the selected rows' ids
-    if (selectedRowKeys.length === 0) {
-      message.warning('請先勾選要啟動的項目');
-      return;
-    }
-    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
-
-    // Check if the 'actualOnMachineDate' property exists in all selected rows
-    const missingActualOnMachineDate = selectedRowsData.some((row) => !row.actualOnMachineDate);
-
-    if (missingActualOnMachineDate) {
-      message.warning('請先填寫實際上機日!');
-      return;
-    }
-    // Check if the status is "Done" for any selected rows
-    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
-
-    if (completedDocuments) {
-      message.warning('此單據已經完成，無法進行修改。');
-      return;
-    }
-    const stringIds = JSON.stringify(selectedRowKeys);
-
-    Modal.confirm({
-      title: '確認啟動動作',
-      content: '確定要啟動所選項目的動作嗎？',
-      okText: '確定',
-      cancelText: '取消',
-      onOk: async () => {
-        try {
-          // 將勾選的欄位更改其屬性 status 值為"啟動動作"
-          await actionStaus(stringIds);
-
-          // 清空勾選
-          // setSelectedRowKeys([]);
-
-          message.success('目前狀態已變為on-going');
-        } catch (error) {
-          console.error('Error starting production schedules:', error);
-        }
-      },
-    });
-  };
-
-  // 勾選設定
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-
-      setSelectedRowKeys(selectedRowKeys); // 更新選中的行
-
-    },
-    getCheckboxProps: (record) => ({
-      disabled: record.name === 'Disabled User',
-      // Column configuration not to be checked
-      name: record.name,
-    }),
-
-  };
-
-
-  const { Option } = Select;
-  const allWeekOptions = [
-    <Option key={0} value={''} label="全部周別">
-      全部周別
-    </Option>,
-    ...[...Array(52).keys()].map((week) => (
-      <Option key={week + 1} value={week + 1} label={`第${week + 1}周`}>
-        第{week + 1}周
-      </Option>
-    ))
-  ];
-
-
-  // 周別篩選
-  const [weekFilter, setWeekFilter] = useState(null); // State to store the selected week filter
-
-  const { data: filterData, isSuccess: filterIsSuccess } = useGetProductionScheduleQuery({
-    week_filter: weekFilter ? (weekFilter).toString() : null, size: pagination.pageSizeOptions,
-    page: 1,
-
-  });
-
-
-  // console.log('dataSource', dataSource);
-
-  // 定義需要重新抓取的參數
-  const [needExportData, setNeedExportData] = useState(null);
-  const refetchParams = weekFilter !== null ? { week_filter: weekFilter.toString() } : {};
-
-  const { data: needExportDataSource, isSuccess: needExportDataIsSuccess, refetch: refetchExport } = useGetProductionScheduleQuery({
-    ...refetchParams,
-  });
-
-  useEffect(() => {
-    if (isSuccess) {
-      const { data: dataSource, meta } = data;
-      // console.log('dataSource', dataSource);
-
-      setTotalPage(meta.total_count);
-      setDataSource(dataSource);
-    }
-
-    if (filterIsSuccess && weekFilter !== null) {
-      const { data: filterDataSource, meta } = filterData;
-      const newPagination = {
-        ...pagination,
-        page: 1,
-      };
-      setPagination(newPagination);
-      setTotalPage(meta.total_count);
-      setDataSource(filterDataSource);
-
-    }
-    const fetchData = async () => {
-      await refetchExport(refetchParams);
-
-      if (needExportDataIsSuccess) {
-        const { data } = needExportDataSource;
-  
-        // 在获取到最新的 dataSource 后，检查 moldingSecond 和 moldCavity 是否有值
-        const newDataWithHourlyCapacity = data.map((item) => {
-          if (item.moldingSecond && item.moldCavity) {
-            // 计算新的 hourlyCapacity，并使用 Math.floor() 進行無条件捨去
-            const newHourlyCapacity = Math.floor((3600 / item.moldingSecond) * item.moldCavity);
-            // 更新 dataSource 中的 hourlyCapacity
-            return { ...item, hourlyCapacity: newHourlyCapacity };
-          }
-          return item;
-        });
-  
-        // 更新 dataSource
-        setDataSource(newDataWithHourlyCapacity);
-  
-        // 在这里处理 hourlyCapacity 更新后的逻辑
-        const newDataWithDailyCapacity = newDataWithHourlyCapacity.map((item) => {
-          if (item.hourlyCapacity !== null && item.conversionRate !== null) {
-            // 计算新的 dailyCapacity，并使用 Math.floor() 進行無条件捨去
-            const newDailyCapacity = Math.floor(item.hourlyCapacity * 8 * item.conversionRate);
-            // 更新 dataSource 中的 dailyCapacity
-            return { ...item, dailyCapacity: newDailyCapacity };
-          }
-          return item;
-        });
-  
-        // 更新 dataSource
-        setDataSource(newDataWithDailyCapacity);
-      }
-    
-      
-    };
-
-    fetchData();
-
-
-  }, [weekFilter, refetchExport, needExportDataIsSuccess, needExportDataSource, isSuccess, data], refetch);
-
 
   const defaultColumns = [
 
@@ -754,28 +405,6 @@ const ProductionSchedule = (props) => {
 
 
     },
-    // 合併
-    // {
-    //   dataIndex: 'Process',
-    //   key: 'Process',
-    //   title: '製程',
-    //   children: [
-    //     {
-    //       title: '單雙射',
-    //       dataIndex: 'singleOrDoubleColor',
-    //       editable: true,
-    //       width: 45,
-    //     },
-    //     {
-    //       title: '轉換率 ',
-    //       dataIndex: 'conversionRate',
-    //       editable: true,
-    //       width: 40,
-    //       type: "number",
-    //     },
-    //   ]
-    // },
-
     {
       title: '備註 ',
       dataIndex: 'comment',
@@ -791,96 +420,208 @@ const ProductionSchedule = (props) => {
     },
 
   ];
-  console.log('dataSource', dataSource);
+  // 設定初始當前頁面以及分頁一頁有幾個資料
 
-  // 編輯
-  const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
+  const [pagination, setPagination] = useState({
+    page: 1, /*當前分頁位址*/
+    pageSize: 10, // 默认值为 10
+  });
+  const [totalCurrent, setTotalCurrent] = useState(1);/*總數據量*/
+  const [dataSource, setDataSource] = useState([]);/*回傳資料*/
+  // 周別篩選
+  const [weekFilter, setWeekFilter] = useState(null); // State to store the selected week filter
+  const [yearFilter, setYearsFilter] = useState(null); // State to store the selected year filter
+  const [monthFilter, setMonthFilter] = useState(null); // State to store the selected month filter
+  const [statusFilter, setStatusFilter] = useState('all'); // State to store the selected status filter
+  // 
+  const [loading, setLoading] = useState(false);
 
-  const handleSave = async (row) => {
-    try {
-      // Check if there are changes in the data
+  const { data, isLoading, isSuccess, refetch } = useGetProductionScheduleQuery({
+    size: pagination.pageSize,/*分頁數量*/
+    page: pagination.page,/*想取得的分頁位址*/
+    week_filter: weekFilter ? (weekFilter).toString() : null,
+    year_filter: yearFilter ? (yearFilter).toString() : null,
+    month_filter: monthFilter ? (monthFilter).toString() : null,
+    status_filter: statusFilter ? statusFilter : 'all',
+    size: pagination.pageSize,
 
-      const isDataChanged = Object.keys(row).some((key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]);
-      // 当从服务器获取到 hourlyCapacity 时，检查 conversionRate 是否有值
-  
-      if (!isDataChanged) {
-        // If there are no changes, you can choose to return or show a message
-        // message.info('No changes detected.');
-        return;
-      }
-      // Perform the optimistic update on the client side
-      const updatedData = dataSource.map((item) => (item.id === row.id ? { ...item, ...row } : item));
-      setDataSource(updatedData);
+  });
+  // 分頁相關設定
+  const handleTableChange = (page, size) => {
+    const newPagination = {
+      ...pagination,
+      // page:當前分頁,
+      page: size !== pagination.pageSize ? 1 : +page,
+      // pageSize:分頁大小(10,20,50,100),
+      pageSize: size,
+    };
 
-      // Perform the actual update on the server side
-      const response = await UpdateProductionSchedule({ id: row.id, data: row });
-
-      if (!response.error) {
-        message.success('修改數據成功');
-
-      } else {
-        message.error('修改數據失敗!!!');
-
-      }
-
-    } catch (error) {
-      // Handle the error (e.g., display an error message to the user, revert changes, etc.)
-      message.error('修改數據失敗!!!!');
+    if (size !== pagination?.pageSize) {
+      setDataSource([]);
+      // setPagination(newPagination);
     }
+    setPagination(newPagination);
+
+
   };
 
+  // 周別篩選內部值設定
+  const { Option } = Select;
+  const allWeekOptions = [
+    <Option key={0} value={''} label="全部周別">
+      全部周別
+    </Option>,
+    ...[...Array(52).keys()].map((week) => (
+      <Option key={week + 1} value={week + 1} label={`第${week + 1}周`}>
+        第{week + 1}周
+      </Option>
+    ))
+  ];
+  const allMonthOptions = [
+    <Option key={0} value={''} label="全部月份">
+      全部月份
+    </Option>,
+    <Option key={1} value={1} label="1">
+      1
+    </Option>,
+    <Option key={2} value={2} label="2">
+      2
+    </Option>,
+    <Option key={3} value={3} label="3">
+      3
+    </Option>,
+    <Option key={4} value={4} label="4">
+      4
+    </Option>,
+    <Option key={5} value={5} label="5">
+      5
+    </Option>,
+    <Option key={6} value={6} label="6">
+      6
+    </Option>,
+    <Option key={7} value={7} label="7">
+      7
+    </Option>,
+    <Option key={8} value={8} label="8">
+      8
+    </Option>,
+    <Option key={9} value={9} label="9">
+      9
+    </Option>,
+    <Option key={10} value={10} label="10">
+      10
+    </Option>,
+    <Option key={11} value={11} label="11">
+      11
+    </Option>,
+    <Option key={12} value={12} label="12">
+      12
+    </Option>,
 
-  const handleProductionAreaChange = async (value, record) => {
-    try {
-      // Assuming `record` has an `id` field, update the corresponding data on the client side
-      const updatedData = dataSource.map((item) => {
-        if (item.id === record.id) {
-          return { ...item, productionArea: value };
+  ];
+  const allStatusOptions = [
+    <Option key={0} value={'all'} label="所有狀態">
+      所有狀態
+    </Option>,
+    <Option key={1} value={'尚未上機'} label="尚未上機">
+      尚未上機
+    </Option>,
+    <Option key={2} value={'On-going'} label="On-going">
+      On-going
+    </Option>,
+    <Option key={3} value={'Done'} label="Done">
+      Done
+    </Option>,
+    <Option key={4} value={'暫停生產'} label="暫停生產">
+      暫停生產
+    </Option>,
+    <Option key={5} value={'取消生產'} label="取消生產">
+      取消生產
+    </Option>,
+
+  ];
+  const allYearsOptions = [
+    <Option key={0} value={''} label="全部年份">
+      全部年份
+    </Option>,
+    <Option key={2023} value={2023} label="2023">
+      2023
+    </Option>,
+    <Option key={2024} value={2024} label="2024">
+      2024
+    </Option>,
+    <Option key={2025} value={2025} label="2025">
+      2025
+    </Option>,
+    <Option key={2026} value={2026} label="2026">
+      2026
+    </Option>,
+    <Option key={2027} value={2027} label="2027">
+      2027
+    </Option>,
+
+  ];
+  // 新增 exportData 狀態
+  const [needExportData, setNeedExportData] = useState([]);
+  // API匯出exportData
+  const { data: exportData, isSuccess: exportIsSuccess, refetch: exportRefetch } = useGetProductionScheduleQuery({
+    size: 10000000,
+    week_filter: weekFilter ? (weekFilter).toString() : null,
+    year_filter: yearFilter ? (yearFilter).toString() : null,
+    month_filter: monthFilter ? (monthFilter).toString() : null,
+    status_filter: statusFilter ? statusFilter : 'all',
+
+  });
+
+  useEffect(() => {
+    if (isSuccess) {
+      setLoading(true);
+
+      const { data: dataSource, meta } = data;
+      // 設定總量
+      setDataSource(dataSource);
+      setLoading(false);
+      setTotalCurrent(meta.total_count);
+
+      // 在获取到最新的 dataSource 后，检查 moldingSecond 和 moldCavity 是否有值
+      const newDataWithHourlyCapacity = dataSource.map((item) => {
+        if (item.moldingSecond && item.moldCavity) {
+          // 计算新的 hourlyCapacity，并使用 Math.floor() 進行無条件捨去
+          const newHourlyCapacity = Math.floor((3600 / item.moldingSecond) * item.moldCavity);
+          // 更新 dataSource 中的 hourlyCapacity
+          return { ...item, hourlyCapacity: newHourlyCapacity };
         }
         return item;
       });
-      setDataSource(updatedData);
 
-      // Send a request to the server to update the data
-      await UpdateProductionSchedule({ id: record.id, data: { productionArea: value } });
+      // 更新 dataSource
+      setDataSource(newDataWithHourlyCapacity);
 
-      // If the server update is successful, no action is needed
-      message.success('修改數據成功');
-    } catch (error) {
-      // Handle the error (e.g., display a message to the user, revert changes, etc.)
-      console.error('Error updating production area:', error);
+      // 在这里处理 hourlyCapacity 更新后的逻辑
+      const newDataWithDailyCapacity = newDataWithHourlyCapacity.map((item) => {
+        if (item.hourlyCapacity !== null && item.conversionRate !== null) {
+          // 计算新的 dailyCapacity，并使用 Math.floor() 進行無条件捨去
+          const newDailyCapacity = Math.floor(item.hourlyCapacity * 8 * item.conversionRate);
+          // 更新 dataSource 中的 dailyCapacity
+          return { ...item, dailyCapacity: newDailyCapacity };
+        }
+        return item;
+      });
+
+      // 更新 dataSource
+      setDataSource(newDataWithDailyCapacity);
     }
-  };
-
-  const components = {
-    body: {
-      row: EditableRow,
-      cell: EditableCell,
-    },
-  };
-
-  const columns = defaultColumns.map((col) => {
-    if (!col.editable) {
-      return col;
+    if (exportIsSuccess) {
+      const { data } = exportData;
+      setNeedExportData(data);
     }
+  }, [weekFilter, yearFilter, monthFilter,statusFilter, isSuccess, data, exportData]);
 
-    return {
-      ...col,
-      key: col.dataIndex, // 添加了這一行，使用 dataIndex 作為 key
-      onCell: (record) => ({
-        record,
-        editable: col.editable,
-        dataIndex: col.dataIndex,
-        rule: col.rule,
-        type: col.type,
-        title: col.title,
-        handleSave,
-      }),
-    };
-  });
 
   // 匯出功能
   const exportToExcel = () => {
+
+
     const workbook = new Exceljs.Workbook();
     const worksheet = workbook.addWorksheet('Sheet1');
 
@@ -892,7 +633,8 @@ const ProductionSchedule = (props) => {
     // titleRow2.font = { bold: true, color: { argb: '00ffffff' } }; // 设置标题行样式
 
     // 添加数据行
-    worksheet.addRows(dataSource);
+
+    worksheet.addRows(needExportData);
 
     // 设置表头样式
     let headerStyle = {
@@ -937,7 +679,9 @@ const ProductionSchedule = (props) => {
       });
       saveAs(blob, 'ProductionSchedule.xlsx');
     });
+
   };
+
   const getExcelColumns = () => {
     return columns.map((item) => {
       let items = {
@@ -1034,10 +778,321 @@ const ProductionSchedule = (props) => {
     });
   };
 
+  // 新增項目
+  const [addProductionSchedule] = useAddProductionScheduleMutation();
+  // 置令單創建日期
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const [nowDate, setNowDate] = useState(formatDate(new Date())); // 初始值为当前日期
+
+
+
+  // 新增製令單
+  const handleAdd = async () => {
+    if (selectedRowKeys.length > 0) {
+      message.warning('請先取消勾選增製令單才能新增項目');
+      return;
+    }
+
+    if ((weekFilter == "") || (weekFilter == null)) {
+
+      try {
+        Modal.confirm({
+          title: '確認新增',
+          content: '確定要新增製令單嗎？',
+          okText: '確定',
+          cancelText: '取消',
+          onOk: async () => {
+            try {
+              message.success('新增製令單成功');
+
+              const newData = {
+                workOrderSN: "",
+                productSN: "",
+                productName: "",
+                workOrderQuantity: 1000,
+                workOrderDate: nowDate,
+              };
+
+              // 添加製令單
+              const addedItem = await addProductionSchedule(newData);
+
+              // Refetch 数据以获取更新后的列表
+              refetch();
+
+              // 將分頁設置為第一頁
+              setPagination({ ...pagination, page: 1 });
+              // 获取新增数据的 ID
+              // const newId = addedItem.data.data.id;
+              // console.log('newId', newId);
+              // setSelectedRowKeys([...selectedRowKeys, newId]);
+
+            } catch (error) {
+              console.error('新增製令單時發生錯誤:', error);
+            }
+          },
+        });
+      } catch (error) {
+        console.error('處理新增製令單時發生錯誤:', error);
+      }
+    } else {
+      message.warning('請先選擇全部周別後,再進行新增製令單的動作');
+      return;
+    }
+  };
+
+  const [selectionType, setSelectionType] = useState('checkbox');
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 追蹤選中的行的 id
+
+  // const [delProductionSchedule] = useDelProductionScheduleMutation();
+  const [pauseStaus] = usePauseStausMutation();
+  const [cancelStaus] = useCancelStausMutation();
+  //勾選刪除
+  const deleteChecked = async () => {
+    // Get the selected rows' ids
+    if (selectedRowKeys.length === 0) {
+      message.warning('請先勾選要取消生產的項目');
+      return;
+    }
+    // Get the selected rows' data
+    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+
+    // Check if the status is "Done" for any selected rows
+    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+
+    if (completedDocuments) {
+      message.warning('此單據已經完成，無法進行修改。');
+      return;
+    }
+
+    const stringIds = JSON.stringify(selectedRowKeys);
+
+    Modal.confirm({
+      title: '確認刪除',
+      content: '確定要取消生產選中的項目嗎？',
+      okText: '確定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+
+          await cancelStaus(stringIds);
+
+          message.success('目前狀態已變為暫停生產!!');
+
+        } catch (error) {
+          console.error('Error deleting production schedule:', error);
+        }
+      },
+    });
+  };
+
+
+  // 勾選令機具暫停動作
+  const pauseChecked = () => {
+    // Get the selected rows' ids
+
+    if (selectedRowKeys.length === 0) {
+      message.warning('請先勾選要暫停的項目');
+      return;
+    }
+    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+
+    // Check if the 'actualOnMachineDate' property exists in all selected rows
+    const missingActualOnMachineDate = selectedRowsData.some((row) => !row.actualOnMachineDate);
+
+    if (missingActualOnMachineDate) {
+      message.warning('請先填寫實際上機日!');
+      return;
+    }
+
+    // Check if the status is "Done" for any selected rows
+    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+
+    if (completedDocuments) {
+      message.warning('此單據已經完成，無法進行修改。');
+      return;
+    }
+    const stringIds = JSON.stringify(selectedRowKeys);
+
+    // 显示确认对话框
+    Modal.confirm({
+      title: '確認暫停生產',
+      content: '確定要將所選項目的暫停生產嗎？',
+      okText: '確定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          // 將勾選的欄位更改其屬性 status 值為"暫停動作"
+          await pauseStaus(stringIds);
+
+          message.success('目前狀態已變為暫停生產!!');
+        } catch (error) {
+          console.error('Error pausing production schedules:', error);
+        }
+      },
+    });
+  };
+
+  const [actionStaus] = useActionStausMutation();
+
+  // 勾選令機具開始動作
+  const actionChecked = () => {
+    // Get the selected rows' ids
+    if (selectedRowKeys.length === 0) {
+      message.warning('請先勾選要啟動的項目');
+      return;
+    }
+    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+
+    // Check if the 'actualOnMachineDate' property exists in all selected rows
+    const missingActualOnMachineDate = selectedRowsData.some((row) => !row.actualOnMachineDate);
+
+    if (missingActualOnMachineDate) {
+      message.warning('請先填寫實際上機日!');
+      return;
+    }
+    // Check if the status is "Done" for any selected rows
+    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+
+    if (completedDocuments) {
+      message.warning('此單據已經完成，無法進行修改。');
+      return;
+    }
+    const stringIds = JSON.stringify(selectedRowKeys);
+
+    Modal.confirm({
+      title: '確認啟動動作',
+      content: '確定要啟動所選項目的動作嗎？',
+      okText: '確定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          // 將勾選的欄位更改其屬性 status 值為"啟動動作"
+          await actionStaus(stringIds);
+
+          // 清空勾選
+          // setSelectedRowKeys([]);
+
+          message.success('目前狀態已變為on-going');
+        } catch (error) {
+          console.error('Error starting production schedules:', error);
+        }
+      },
+    });
+  };
+
+  // 勾選設定
+  const rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+
+      setSelectedRowKeys(selectedRowKeys); // 更新選中的行
+
+    },
+    getCheckboxProps: (record) => ({
+      disabled: record.name === 'Disabled User',
+      // Column configuration not to be checked
+      name: record.name,
+    }),
+
+  };
+
+
+  // 編輯
+  const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
+
+  const handleSave = async (row) => {
+    try {
+      // Check if there are changes in the data
+
+      const isDataChanged = Object.keys(row).some((key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]);
+      // 当从服务器获取到 hourlyCapacity 时，检查 conversionRate 是否有值
+
+      if (!isDataChanged) {
+        // If there are no changes, you can choose to return or show a message
+        // message.info('No changes detected.');
+        return;
+      }
+      // Perform the optimistic update on the client side
+      const updatedData = dataSource.map((item) => (item.id === row.id ? { ...item, ...row } : item));
+      setDataSource(updatedData);
+
+      // Perform the actual update on the server side
+      const response = await UpdateProductionSchedule({ id: row.id, data: row });
+
+      if (!response.error) {
+        message.success('修改數據成功');
+
+      } else {
+        message.error('修改數據失敗!!!');
+
+      }
+
+    } catch (error) {
+      // Handle the error (e.g., display an error message to the user, revert changes, etc.)
+      message.error('修改數據失敗!!!!');
+    }
+  };
+
+
+  const handleProductionAreaChange = async (value, record) => {
+    try {
+      // Assuming `record` has an `id` field, update the corresponding data on the client side
+      const updatedData = dataSource.map((item) => {
+        if (item.id === record.id) {
+          return { ...item, productionArea: value };
+        }
+        return item;
+      });
+      setDataSource(updatedData);
+
+      // Send a request to the server to update the data
+      await UpdateProductionSchedule({ id: record.id, data: { productionArea: value } });
+
+      // If the server update is successful, no action is needed
+      message.success('修改數據成功');
+    } catch (error) {
+      // Handle the error (e.g., display a message to the user, revert changes, etc.)
+      console.error('Error updating production area:', error);
+    }
+  };
+
+  const components = {
+    body: {
+      row: EditableRow,
+      cell: EditableCell,
+    },
+  };
+
+  const columns = defaultColumns.map((col) => {
+    if (!col.editable) {
+      return col;
+    }
+
+    return {
+      ...col,
+      key: col.dataIndex, // 添加了這一行，使用 dataIndex 作為 key
+      onCell: (record) => ({
+        record,
+        editable: col.editable,
+        dataIndex: col.dataIndex,
+        rule: col.rule,
+        type: col.type,
+        title: col.title,
+        handleSave,
+      }),
+    };
+  });
+
+
+
   if (isLoading) {
     return <p>Loading...</p>;
   }
-
 
   // 防抖函數，延遲 500 毫秒執行
   const debouncedHandleDelete = debounce(deleteChecked, 500);
@@ -1055,12 +1110,40 @@ const ProductionSchedule = (props) => {
             生產計劃排程表
           </div>
           <div className='btn-box'>
+            {/* 篩選周 */}
             <Select
               placeholder="全部周別"
               style={{ width: 120, marginRight: '15px' }}
               onChange={(value) => setWeekFilter(value)}
             >
               {allWeekOptions}
+            </Select>
+            {/* 篩選年 */}
+
+            <Select
+              placeholder="全部年份"
+              style={{ width: 120, marginRight: '15px' }}
+              onChange={(value) => setYearsFilter(value)}
+            >
+              {allYearsOptions}
+            </Select>
+            {/* 篩選月 */}
+
+            <Select
+              placeholder="全部月份"
+              style={{ width: 120, marginRight: '15px' }}
+              onChange={(value) => setMonthFilter(value)}
+            >
+              {allMonthOptions}
+            </Select>
+            {/* 篩選狀態 */}
+
+            <Select
+              placeholder="所有狀態"
+              style={{ width: 120, marginRight: '15px' }}
+              onChange={(value) => setStatusFilter(value)}
+            >
+              {allStatusOptions}
             </Select>
             <Tooltip title="取消生產">
               <button className='delete' onClick={debouncedHandleDelete}>
@@ -1097,16 +1180,17 @@ const ProductionSchedule = (props) => {
             dataSource={dataSource}
             columns={columns}
             pagination={{
-              total: totalPage,
+              total: totalCurrent, // 確保這個值正確反映你的實際數據總數
               current: pagination.page, /*當前分頁位址*/
               showSizeChanger: true,
+              pageSize: pagination.pageSize,
               showQuickJumper: true,
-              showSizeChanger: true,
-              pageSizeOptions: pagination.pageSizeOptions,
               onChange: handleTableChange,
               position: ['bottomCenter'],
 
             }}
+
+            loading={loading}
             scroll={{ x: 3600 }}
             rowSelection={{
               type: selectionType,
@@ -1126,5 +1210,4 @@ const ProductionSchedule = (props) => {
   );
 };
 
-export default ProductionSchedule
-  ;
+export default ProductionSchedule;
