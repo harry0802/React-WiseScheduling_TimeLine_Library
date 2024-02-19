@@ -13,10 +13,16 @@ const productionScheduleApi = createApi({
         return {
             getProductionSchedule: build.query({
                 query(arg) {
-                    const { size, page, week_filter } = arg;
+                    const { size, page, week_filter, year_filter, month_filter,status_filter } = arg;
                     return {
                         url: 'productionSchedule/',
-                        params: { 'size': size, 'page': page, 'week_filter': week_filter }
+                        params: {
+                            'size': size, 'page': page,
+                            'week_filter': week_filter,
+                            'year_filter': year_filter,
+                            'month_filter': month_filter,
+                            'status_filter':status_filter
+                        }
                     };
                 },
                 transformResponse(baseQueryReturnValue, meta, arg) {
