@@ -81,10 +81,19 @@ def site_map():
 #ref https://zhuanlan.zhihu.com/p/593593959
 if __name__ != '__main__':
     # if we are not running directly, we set the loggers
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)    
-    # app.logger.info("__name__ != '__main__'~~~~~~~~~")
+    # Use Gunicorn's loggers
+    # gunicorn_logger = logging.getLogger('gunicorn.error')
+    # app.logger.handlers = gunicorn_logger.handlers
+    # app.logger.setLevel(gunicorn_logger.level)
+    
+    # use flask's loggers
+    formatter = logging.Formatter(
+        "[%(asctime)s][%(filename)s:%(lineno)d][%(levelname)s] - %(message)s")
+    handler = TimedRotatingFileHandler(
+        "log/flask.log", when="D", interval=1, backupCount=7,
+        encoding="UTF-8", delay=False, utc=False, )
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
 
 if __name__ == '__main__':
     app.debug = True
@@ -93,8 +102,8 @@ if __name__ == '__main__':
     handler = TimedRotatingFileHandler(
         "flask.log", when="D", interval=1, backupCount=7,
         encoding="UTF-8", delay=False, utc=False)
-
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
+
     app.run(host='0.0.0.0', port=5000, debug=True)
     # app.logger.info("Logging set up~~~~~~~~~")

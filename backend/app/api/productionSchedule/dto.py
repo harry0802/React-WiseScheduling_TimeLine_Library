@@ -107,7 +107,7 @@ class productionScheduleDto:
             "moldingSecond": NullableInteger(required=False, description="moldingSecond", example=30, min=0, max=86400),
             "planOnMachineDate": NullableDateTime(required=False, description="planOnMachineDate", example="2023-12-28"),
             "actualOnMachineDate": NullableDateTime(required=False, description="actualOnMachineDate", example="2023-12-28T00:00:00.000+08:00"),
-            "moldWorkDays": NullableInteger(required=False, description="moldWorkDays", example=1, min=0, max=1000),
+            "moldWorkDays": NullableInteger(required=False, description="moldWorkDays", example=1, min=0, max=1000, default=0),
             "workDays": NullableInteger(required=False, description="workDays", example=1, min=0, max=1000),
             "planFinishDate": NullableDateTime(required=False, description="planFinishDate", example="2023-12-28"),
             "actualFinishDate": NullableDateTime(required=False, description="actualFinishDate", example="2023-12-28T00:00:00.000+08:00"),

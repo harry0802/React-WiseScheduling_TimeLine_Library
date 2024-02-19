@@ -104,6 +104,7 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("actualOnMachineDate") is not None else db_obj.actualOnMachineDate
     db_obj.moldWorkDays = int(payload["moldWorkDays"]) \
         if payload.get("moldWorkDays") is not None else db_obj.moldWorkDays
+    db_obj.moldWorkDays = 0 if db_obj.moldWorkDays is None else db_obj.moldWorkDays
     db_obj.planFinishDate = datetime.fromisoformat(payload["planFinishDate"]) \
         if payload.get("planFinishDate") is not None else db_obj.planFinishDate
     db_obj.actualFinishDate = datetime.fromisoformat(payload["actualFinishDate"]) \
@@ -130,7 +131,7 @@ def complete_productionSchedule(db_obj, payload):
         or type(db_obj.moldingSecond) != int or db_obj.moldingSecond <= 0
         or type(db_obj.dailyWorkingHours) != int or db_obj.dailyWorkingHours <= 0
         or type(db_obj.moldCavity) != int or db_obj.moldCavity <= 0
-        or type(db_obj.moldWorkDays) != int or db_obj.moldWorkDays <= 0
+        or type(db_obj.moldWorkDays) != int or db_obj.moldWorkDays < 0
         or type(db_obj.conversionRate) != float or db_obj.conversionRate <= 0
         ):
         current_app.logger.debug(f"complete_productionSchedule:SKIP calculate capacity")

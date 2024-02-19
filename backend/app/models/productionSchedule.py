@@ -54,7 +54,7 @@ class productionSchedule(Model):
     dailyCapacity = Column(db.Integer)
     planOnMachineDate = Column(db.Date)
     actualOnMachineDate = Column(db.Date, nullable=True)
-    moldWorkDays = Column(db.Integer)
+    moldWorkDays = Column(db.Integer, default=0)
     workDays = Column(db.Integer)
     planFinishDate = Column(db.Date)
     actualFinishDate = Column(db.Date, nullable=True)
