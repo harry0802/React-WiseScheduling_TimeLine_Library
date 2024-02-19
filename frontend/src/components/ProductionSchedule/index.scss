@@ -305,15 +305,13 @@ span {
 
 
 :where(.css-dev-only-do-not-override-dkbvqv)[class*=" ant-select"] [class^="ant-select"] {
-  color: #F39838;
+  color: #fff;
   padding: 0;
   text-align: center;
   background-color: none;
 }
 
-:where(.css-dev-only-do-not-override-dkbvqv)[class*=" ant-select"] [class*=" ant-select"] {
-  color: #fff;
-}
+
 
 .ant-pagination-prev,
 .ant-pagination-next {
