@@ -526,17 +526,17 @@ const ProductionSchedule = (props) => {
     <Option key={1} value={'尚未上機'} label="尚未上機">
       尚未上機
     </Option>,
-    <Option key={2} value={'On-going'} label="On-going">
-      On-going
+    <Option key={2} value={'on-going'} label="正在生產">
+      正在生產
     </Option>,
-    <Option key={3} value={'Done'} label="Done">
-      Done
+    <Option key={3} value={'Done'} label="已經完成">
+      已經完成
     </Option>,
     <Option key={4} value={'暫停生產'} label="暫停生產">
       暫停生產
     </Option>,
-    <Option key={5} value={'取消生產'} label="取消生產">
-      取消生產
+    <Option key={5} value={'刪除此筆'} label="刪除此筆">
+      刪除此筆
     </Option>,
 
   ];
@@ -856,7 +856,7 @@ const ProductionSchedule = (props) => {
   const deleteChecked = async () => {
     // Get the selected rows' ids
     if (selectedRowKeys.length === 0) {
-      message.warning('請先勾選要取消生產的項目');
+      message.warning('請先勾選要刪除此筆的項目');
       return;
     }
     // Get the selected rows' data
