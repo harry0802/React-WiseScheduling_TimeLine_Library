@@ -1102,7 +1102,7 @@ const ProductionSchedule = (props) => {
   const debouncedExportToExcel = debounce(exportToExcel, 500);
 
   return (
-    <div>
+    <div className='production-schedule'>
       <div className='box'>
 
         <div className='title-box'>
