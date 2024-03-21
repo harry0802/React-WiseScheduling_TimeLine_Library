@@ -435,7 +435,7 @@ const ProductionAssignment = (props) => {
                 <Select
                   className="status-filter"
                   placeholder="所有狀態"
-                  style={{ width: 180, height: 60 }}
+                  // style={{ width: 120, height: 30 }}
                   // onChange={(value) => setStatusFilter(value)}
                 >
                   {allStatusOptions}
@@ -445,7 +445,7 @@ const ProductionAssignment = (props) => {
                 <Select
                   className="expiry-filter"
                   placeholder="全部期限"
-                  style={{ width: 180, height: 60 }}
+                  // style={{ width: 120, height: 30 }}
                   onChange={(value) => setExpiryFilter(value)}
                 >
                   {allExpiryOptions}
@@ -455,7 +455,7 @@ const ProductionAssignment = (props) => {
                 <Select
                   className="keyword-type-filter"
                   placeholder="製令單號"
-                  style={{ width: 180, height: 60 }}
+                  // style={{ width: 120, height: 30 }}
                   onChange={(value) => setKeywordTypeFilter(value)}
                 >
                   {allKeywordTypeOptions}
@@ -464,7 +464,7 @@ const ProductionAssignment = (props) => {
                 <Input
                   className="keyword-search"
                   placeholder="請輸入關鍵字查詢..."
-                  style={{ width: 260, marginRight: "15px" }}
+                  style={{ width: 160 }}
                   suffix={<SearchOutlined />}
                 ></Input>
               </div>
@@ -523,7 +523,7 @@ const ProductionAssignment = (props) => {
             className="btn-new"
             type="default"
             shape="circle"
-            icon={<CompressIcon sx={{ fontSize: 64 }} />}
+            icon={<CompressIcon sx={{ fontSize: 36 }} />}
             onClick={throttleHandleAdd}
           />
         </Tooltip>

@@ -13,15 +13,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-height: 60px;
+    max-height: 30px;
 
     .title {
       color: #fff;
       text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-      font-size: 2.215rem;
+      font-size: 1.5rem;
       font-style: normal;
       font-weight: 400;
-      line-height: 20px;
     }
 
     .btn-box {
@@ -30,8 +29,8 @@
       }
 
       .ant-btn {
-        min-width: 60px;
-        min-height: 60px;
+        min-width: 30px;
+        min-height: 30px;
       }
 
       .ant-btn > span {
@@ -53,12 +52,8 @@
     display: flex;
   }
 
-  .start-date {
-    margin-left: 60px;
-  }
-
   .ant-picker {
-    width: 180px;
+    width: 115px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     border-top-left-radius: 2px;
@@ -69,25 +64,26 @@
 
   .ant-picker .ant-picker-input > input {
     color: #8f8f8f;
-    font-size: 1.5rem;
+    // font-size: 1rem;
   }
 
   .date-to {
     color: #8f8f8f;
     font-weight: 900;
-    font-size: 2.5rem;
+    font-size: 1rem;
   }
 
   .week-no {
+    width: 38px;
     border: 1px solid #fff;
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
     background-color: #fff;
     display: flex;
     align-items: center;
-    padding: 5px 10px 5px 5px;
+    // padding: 2px;
     color: #8f8f8f;
-    font-size: 1.5rem;
+    font-size: 0.875rem;
     font-family: "Roboto", sans-serif;
   }
 
@@ -97,7 +93,7 @@
 
   .filter-section {
     display: flex;
-    gap: 30px;
+    gap: 15px;
   }
 
   // 搜尋條件篩選
@@ -110,7 +106,7 @@
   .ant-select-dropdown .ant-select-item,
   .ant-select-selection-item {
     color: #8f8f8f;
-    font-size: 1.5rem;
+    // font-size: 1rem;
     font-style: normal;
     font-weight: 400;
   }
@@ -140,7 +136,6 @@
     border-bottom-left-radius: 0;
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
-    font-size: 1.5rem;
   }
 
   // 新增母批按鈕
@@ -152,8 +147,8 @@
 
   .btn-new {
     position: fixed;
-    width: 100px;
-    height: 100px;
+    width: 45px;
+    height: 45px;
     bottom: 60px;
     right: 60px;
     display: flex;
@@ -201,14 +196,14 @@
     background: #186c98;
     border: 1px solid #8f8f8f;
     color: #ffffff;
-    font-size: 1.5rem;
+    // font-size: 1rem;
     font-style: normal;
     font-weight: 400;
   }
 
   .ant-table-wrapper .ant-table-tbody > tr > td {
     color: #8f8f8f;
-    font-size: 1.25rem;
+    // font-size: 1rem;
     font-style: normal;
     font-weight: 400;
     border-bottom: 1px solid #8f8f8f;
@@ -234,7 +229,7 @@
   // enlarge checkbox
   .ant-checkbox-inner,
   .ant-checkbox-input {
-    transform: scale(1.5);
+    transform: scale(1.2);
   }
 
   // set the color to red for the defective quantity column
@@ -276,6 +271,6 @@
   align-items: center;
 
   p {
-    font-size: 1.5rem;
+    font-size: 1rem;
   }
 }
