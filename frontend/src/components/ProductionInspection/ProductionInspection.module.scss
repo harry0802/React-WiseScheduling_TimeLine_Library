@@ -1,0 +1,103 @@
+.tabContainer {
+  flex: 1;
+  background-color: transparent;
+  border-bottom: 1px solid #8f8f8f;
+}
+
+.tabs {
+  :global(.MuiButtonBase-root) {
+    color: #ffffff;
+    font-size: 1.2rem;
+  }
+  :global(.Mui-selected) {
+    color: #8ac0e2;
+  }
+  :global(.MuiSvgIcon-root) {
+    font-size: 2rem;
+  }
+}
+
+.inspection {
+  margin-top: 30px;
+  padding: 30px;
+
+  .head {
+    h1 {
+      color: #fff;
+      font-size: 3rem;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 20px;
+    }
+  }
+
+  .inner {
+    display: flex;
+    gap: 60px;
+    margin-top: 120px;
+    padding-left: 5%;
+    font-size: 2.125rem;
+    color: #ffffff;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+
+    span {
+      margin-right: 30px;
+    }
+
+    .qty {
+      display: flex;
+      align-items: center;
+    }
+  }
+}
+
+.muiTextField {
+  label {
+    color: #ffffff;
+    &:global(.Mui-focused) {
+      color: #ffffff;
+    }
+  }
+
+  :global(.MuiOutlinedInput-root) {
+    fieldset {
+      border-color: #e0e3e7;
+    }
+
+    &:hover fieldset {
+      border-color: #b2bac2;
+    }
+
+    &:global(.Mui-focused) fieldset {
+      border-color: #b2bac2;
+    }
+  }
+}
+
+.sign {
+  display: flex;
+  margin-left: 5%;
+  width: 350px;
+  height: 62px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid #8ac0e2;
+  background: linear-gradient(269deg, #73d5bf 13.23%, #8ac0e2 77.6%);
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.records {
+  max-width: 60%;
+}
+
+.quantityInput {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}

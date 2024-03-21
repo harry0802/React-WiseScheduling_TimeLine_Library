@@ -6,6 +6,7 @@ import ProductionAssignmentPage from "./pages/ProductionAssignmentPage";
 import LeaderSignPage from "./pages/LeaderSignPage";
 import ProductionDetailPage from "./pages/ProductionDetailPage";
 import OperatorSignPage from "./pages/OperatorSignPage";
+import ProductionInspectionPage from "./pages/ProductionInspectionPage";
 // import SimpleDemo from "./components/ProductionSchedule/SimpleDemo";
 import LoginPage from "./pages/LoginPage";
 
@@ -30,6 +31,10 @@ const App = () => {
             element={<ProductionDetailPage />}
           />
           <Route path={"/OperatorSignPage"} element={<OperatorSignPage />} />
+          <Route
+            path={"/ProductionInspectionPage"}
+            element={<ProductionInspectionPage />}
+          />
           {/* <Route path={"/SimpleDemo"} element={<SimpleDemo />} /> */}
         </Routes>
       </div>

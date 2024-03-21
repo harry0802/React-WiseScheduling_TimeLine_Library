@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table, Button, message, Modal, Tooltip } from "antd";
-import dayjs from "dayjs";
 import {
   CheckOutlined,
   PauseOutlined,
   CaretRightOutlined,
 } from "@ant-design/icons";
+import { useLotStore } from "../../store/zustand/store";
 
 import {
   useGetProductionAssignmentQuery,
@@ -42,24 +42,18 @@ const ProductionDetail = (props) => {
   const defaultColumns = [
     {
       title: "NO",
+      dataIndex: "no",
       width: "5%",
-      fixed: true,
-      render: (text, object, index) => {
-        return (index + 1).toString().padStart(2, "0");
-      },
     },
     {
       title: "狀態",
       dataIndex: "status",
-      fixed: true,
       width: "6%",
     },
     {
       title: "製令單號",
-      dataIndex: "workOrderSN",
+      dataIndex: "lotName",
       width: "8%",
-      fixed: true,
-      ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
@@ -71,8 +65,6 @@ const ProductionDetail = (props) => {
       title: "模具編號",
       dataIndex: "tmpNo",
       width: "8%",
-      fixed: true,
-      ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
@@ -84,8 +76,6 @@ const ProductionDetail = (props) => {
       title: "產品名稱",
       dataIndex: "productName",
       width: "20%",
-      fixed: true,
-      ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
@@ -128,6 +118,8 @@ const ProductionDetail = (props) => {
   const [dataSource, setDataSource] = useState([]); /*回傳資料*/
   const [showUnfinished, setShowUnfinished] = useState(false);
   const [loading, setLoading] = useState(false);
+  const lots = useLotStore((state) => state.lots);
+  const updateLots = useLotStore((state) => state.updateLots);
 
   const isLoading = false;
   const isSuccess = true;
@@ -184,7 +176,7 @@ const ProductionDetail = (props) => {
       serialNumber: 1,
       tmpNo: 1,
       status: "尚未上機",
-      workOrderSN: "ABCD-0000",
+      lotName: "ABCD0001",
       productName: "LotName-001",
       workOrderQuantity: 21000,
       productionQuantity: null,
@@ -196,13 +188,14 @@ const ProductionDetail = (props) => {
       operator2: null,
       start_time: null,
       end_time: null,
+      children: null,
     },
     {
       key: 2,
       serialNumber: 2,
       tmpNo: 2,
       status: "尚未上機",
-      workOrderSN: "ABCD-0000",
+      lotName: "ABCD0002",
       productName: "LotName-002",
       workOrderQuantity: 21000,
       productionQuantity: 21031,
@@ -223,7 +216,7 @@ const ProductionDetail = (props) => {
           serialNumber: 3,
           tmpNo: null,
           status: null,
-          workOrderSN: "ABCD-0000",
+          lotName: "ABCD0002-001",
           productName: "LotName-002",
           workOrderQuantity: null,
           productionQuantity: 7121,
@@ -241,7 +234,7 @@ const ProductionDetail = (props) => {
           serialNumber: 3,
           tmpNo: null,
           status: null,
-          workOrderSN: "ABCD-0000",
+          lotName: "ABCD0002-002",
           productName: "LotName-002",
           workOrderQuantity: null,
           productionQuantity: 7003,
@@ -259,31 +252,13 @@ const ProductionDetail = (props) => {
           serialNumber: 3,
           tmpNo: null,
           status: null,
-          workOrderSN: "ABCD-0000",
+          lotName: "ABCD0002-003",
           productName: "LotName-002",
           workOrderQuantity: null,
           productionQuantity: 6907,
           defectiveQuantity: 333,
           productionDefectiveRate: 0.2,
           unfinishedQuantity: 0,
-          leader: null,
-          operator1: "Tom",
-          operator2: "Jerry",
-          start_time: "2024-03-01 12:00",
-          end_time: "2024-03-01 17:00",
-        },
-        {
-          key: 6,
-          serialNumber: 3,
-          tmpNo: null,
-          status: null,
-          workOrderSN: "ABCD-0000",
-          productName: "LotName-002",
-          workOrderQuantity: null,
-          productionQuantity: 1000,
-          defectiveQuantity: 200,
-          productionDefectiveRate: 0.2,
-          unfinishedQuantity: 20000,
           leader: null,
           operator1: "Tom",
           operator2: "Jerry",
@@ -297,7 +272,7 @@ const ProductionDetail = (props) => {
       serialNumber: 2,
       tmpNo: 2,
       status: "尚未上機",
-      workOrderSN: "ABCD-0000",
+      lotName: "ABCD0003",
       productName: "LotName-002",
       workOrderQuantity: 21000,
       productionQuantity: 1000,
@@ -318,7 +293,7 @@ const ProductionDetail = (props) => {
           serialNumber: 3,
           tmpNo: null,
           status: null,
-          workOrderSN: "ABCD-0000",
+          lotName: "ABCD0003-001",
           productName: "LotName-002",
           workOrderQuantity: null,
           productionQuantity: 1000,
@@ -335,10 +310,15 @@ const ProductionDetail = (props) => {
     },
   ];
 
-  const fakeDataTwo = fakeData.map((item) => {
+  let currentClass = " group-gray ";
+  const fakeDataTwo = fakeData.map((item, idx) => {
+    let no = 0;
     let operators = "";
     let period = "";
     let children = null;
+
+    // generate serial number with padding zero
+    no = (idx + 1).toString().padStart(2, "0");
 
     // combine leader and start time in operators and period
     if (item.leader != null) {
@@ -350,6 +330,12 @@ const ProductionDetail = (props) => {
       });
     }
 
+    // set group-white class to the first item and its children, set group-gray to the second item and its children, set group-white to the third item and its children, and so on
+    let className = "";
+    currentClass =
+      currentClass === " group-white " ? " group-gray " : " group-white ";
+    className = currentClass;
+
     // combine operators and start time, end time in children array
     if (item.children != null) {
       children = item.children.map((child) => {
@@ -357,17 +343,24 @@ const ProductionDetail = (props) => {
           ...child,
           operators: child.operator1 + "\n" + child.operator2,
           period: child.start_time + "\n" + child.end_time,
+          className: currentClass,
         };
       });
     }
 
     return {
       ...item,
+      no: no,
+      className: className,
       operators: operators,
       period: period,
       children: children,
     };
   });
+
+  useEffect(() => {
+    updateLots(fakeData);
+  }, []);
 
   // Complete
   const handleComplete = () => {
@@ -447,6 +440,7 @@ const ProductionDetail = (props) => {
             loading={loading}
             pagination={false}
             rowClassName={(record, index) => {
+              let className = "";
               // set color to red if there is any unfinished quantity
               if (
                 showUnfinished &&
@@ -454,8 +448,13 @@ const ProductionDetail = (props) => {
                   (record.children === null &&
                     record.unfinishedQuantity === null))
               ) {
-                return "unfinished-row";
+                className += " unfinished-row ";
               }
+
+              // group the same color to the same group
+              className += record.className;
+
+              return className;
             }}
           />
         )}

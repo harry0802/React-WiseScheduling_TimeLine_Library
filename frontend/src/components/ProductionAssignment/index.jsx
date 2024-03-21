@@ -5,7 +5,6 @@ import {
   ConfigProvider,
   Table,
   Select,
-  Form,
   Input,
   Button,
   message,
@@ -27,7 +26,7 @@ import {
 } from "../../store/api/productionAssignmentApi";
 import "./index.scss";
 
-import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
+import { debounce, throttle } from "lodash"; // 引入 lodash 的 debounce 函數
 
 const ProductionAssignment = (props) => {
   // 如果沒有機台資訊，則導向機台選擇頁面
@@ -39,7 +38,6 @@ const ProductionAssignment = (props) => {
   const defaultColumns = [
     {
       title: "NO",
-      // dataIndex: 'id',
       width: "4%",
       fixed: true,
       render: (text, object, index) => {
@@ -119,7 +117,6 @@ const ProductionAssignment = (props) => {
   ];
 
   const machineNo = useMachineNoStore((state) => state.machineNo);
-  console.log("machineNo: ", machineNo);
   // 設定初始當前頁面以及分頁一頁有幾個資料
   const [pagination, setPagination] = useState({
     page: 1 /*當前分頁位址*/,
@@ -323,7 +320,7 @@ const ProductionAssignment = (props) => {
   });
 
   // Search
-  const actionSearch = () => {
+  const handleSearch = () => {
     // check if the start date is earlier than the end date
     if (dayjs(startDate).isAfter(dayjs(endDate))) {
       Modal.info({
@@ -350,60 +347,30 @@ const ProductionAssignment = (props) => {
     // });
   };
 
-  const [selectionType, setSelectionType] = useState("checkbox");
-
   const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 追蹤選中的行的 id
 
-  // 勾選令機具開始動作
+  // 產生母批
   const [actionStaus] = useActionStausMutation();
-  const actionChecked = () => {
+  const handleAdd = () => {
     // Get the selected rows' ids
     if (selectedRowKeys.length === 0) {
-      message.warning("請先勾選要啟動的項目");
+      message.warning("請先勾選製令單");
       return;
     }
-    const selectedRowsData = dataSource.filter((row) =>
+
+    const selectedRowsData = fakeDataTwo.filter((row) =>
       selectedRowKeys.includes(row.id)
     );
+    // TODO...
+    // 1. 選取的製令單必須屬於同一個模具
+    // 2. 若有暫停生產的母批，產生新母批時必須與暫停的母批 同一個模具
+    // 3. 尚未上機的製令單需比對是否有相同的母批
 
-    // Check if the 'actualOnMachineDate' property exists in all selected rows
-    const missingActualOnMachineDate = selectedRowsData.some(
-      (row) => !row.actualOnMachineDate
-    );
-
-    if (missingActualOnMachineDate) {
-      message.warning("請先填寫實際上機日!");
-      return;
-    }
-    // Check if the status is "Done" for any selected rows
-    const completedDocuments = selectedRowsData.some(
-      (row) => row.status === "Done"
-    );
-
-    if (completedDocuments) {
-      message.warning("此單據已經完成，無法進行修改。");
-      return;
-    }
     const stringIds = JSON.stringify(selectedRowKeys);
+    console.log("stringIds: ", stringIds);
 
-    Modal.confirm({
-      title: "確認啟動動作",
-      content: "確定要啟動所選項目的動作嗎？",
-      okText: "確定",
-      cancelText: "取消",
-      onOk: async () => {
-        try {
-          // 將勾選的欄位更改其屬性 status 值為"啟動動作"
-          await actionStaus(stringIds);
-
-          // 清空勾選
-          // setSelectedRowKeys([]);
-
-          message.success("目前狀態已變為正在生產");
-        } catch (error) {
-          console.error("Error starting production schedules:", error);
-        }
-      },
+    navigate("/LeaderSignPage", {
+      state: { action: "new", selectedWorkOrder: selectedRowsData },
     });
   };
 
@@ -414,8 +381,6 @@ const ProductionAssignment = (props) => {
     },
     getCheckboxProps: (record) => ({
       disabled: record.status === "正在生產" || record.status === "已經完成",
-      // Column configuration not to be checked
-      status: record.status,
     }),
   };
 
@@ -423,11 +388,9 @@ const ProductionAssignment = (props) => {
     return <p>Loading...</p>;
   }
 
-  // 防抖函數，延遲 500 毫秒執行
-  // const debouncedHandleDelete = debounce(deleteChecked, 500);
-  // const debouncedHandleAction = debounce(actionChecked, 500);
-  // const debouncedHandlePause = debounce(pauseChecked, 500);
-  // const debouncedHandleAdd = debounce(handleAdd, 500);
+  // 節流函數，500 毫秒內不重複執行
+  const throttleHandleSearch = throttle(handleSearch, 500);
+  const throttleHandleAdd = debounce(handleAdd, 500);
 
   return (
     <ConfigProvider
@@ -511,7 +474,7 @@ const ProductionAssignment = (props) => {
                     type="primary"
                     shape="circle"
                     icon={<SearchOutlined />}
-                    onClick={actionSearch}
+                    onClick={throttleHandleSearch}
                   />
                 </Tooltip>
               </div>
@@ -546,7 +509,6 @@ const ProductionAssignment = (props) => {
                 return className;
               }}
               rowSelection={{
-                type: selectionType,
                 ...rowSelection,
               }}
               columns={defaultColumns}
@@ -562,9 +524,7 @@ const ProductionAssignment = (props) => {
             type="default"
             shape="circle"
             icon={<CompressIcon sx={{ fontSize: 64 }} />}
-            onClick={() =>
-              navigate("/LeaderSignPage", { state: { action: "new" } })
-            }
+            onClick={throttleHandleAdd}
           />
         </Tooltip>
       </div>

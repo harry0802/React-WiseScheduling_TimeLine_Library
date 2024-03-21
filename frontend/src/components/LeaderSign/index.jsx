@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import checkImage from "../../assets/check.png";
 import stopImage from "../../assets/stop.png";
 import { styled } from "@mui/material/styles";
+import { useLotStore } from "../../store/zustand/store";
 
 const CssTextField = styled(TextField)({
   "& label.Mui-focused": {
@@ -42,25 +43,40 @@ const LeaderSign = (props) => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const action = location.state ? location.state.action : null; // new: 從製令單列表頁面過來要新增母批, continue: 從機台選擇頁面過來要繼續進行正在生產的母批, complete: 完成母批, stop: 暫停母批
+  const action = location.state.action ? location.state.action : null; // new: 從製令單列表頁面過來要新增母批, continue: 從機台選擇頁面過來要繼續進行正在生產的母批, complete: 完成母批, stop: 暫停母批
+  const selectedWorkOrder = location.state.selectedWorkOrder
+    ? location.state.selectedWorkOrder
+    : null; // 要新增母批的製令單號清單
   console.log("action: ", action);
-  const [error, setError] = useState(false);
+  console.log("selectedWorkOrder: ", selectedWorkOrder);
+  const [error, setError] = useState(false); // 是否顯示帳號錯誤訊息
+  const lots = useLotStore((state) => state.lots); // 該機台的母批及子批清單
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    var isValidate = false;
+    var isValidate = true;
 
     const data = new FormData(e.currentTarget);
     console.log({
-      operator1: data.get("operator1"),
-      operator2: data.get("operator2"),
+      leader: data.get("leader"),
     });
 
-    // if (isValidate) {
-    //   navigate("/");
-    // } else {
-    //   setError(true);
-    // }
+    if (isValidate) {
+      if (action === "new") {
+        // 新增母批，並更新lots state
+        const newLots = [
+          {
+            lotName: "A123456789",
+            product: "產品A",
+            startTime: new Date().toLocaleString(),
+            quantity: 100,
+            badQuantity: 0,
+          },
+        ];
+      }
+    } else {
+      setError(true);
+    }
 
     navigate("/ProductionDetailPage");
   };
@@ -112,10 +128,10 @@ const LeaderSign = (props) => {
           width: "350px",
           borderRadius: "5px",
         }}
-        id="username"
+        id="leader"
         label="帳號"
-        name="username"
-        autoComplete="username"
+        name="leader"
+        autoComplete="leader"
         variant="outlined"
         margin="normal"
         inputProps={{ style: { fontSize: "24px", color: "#FFF" } }} // font size of input text

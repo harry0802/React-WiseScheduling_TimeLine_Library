@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
+import { useLotStore } from "../../store/zustand/store";
 
 const CssTextField = styled(TextField)({
   "& label.Mui-focused": {
@@ -42,10 +43,12 @@ const CssBox = styled(Box)({
 const OperatorSign = (props) => {
   const navigate = useNavigate();
   const [error, setError] = useState(false);
+  const lots = useLotStore((state) => state.lots);
+  console.log("lots", lots);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    var isValidate = false;
+    var isValidate = true;
 
     const data = new FormData(e.currentTarget);
     console.log({
@@ -54,7 +57,7 @@ const OperatorSign = (props) => {
     });
 
     if (isValidate) {
-      navigate("/");
+      navigate("/ProductionInspectionPage");
     } else {
       setError(true);
     }
@@ -117,7 +120,7 @@ const OperatorSign = (props) => {
             marginTop: "30px",
           }}
         >
-          請輸入產線工作人員2帳號(非必填)
+          請輸入產線工作人員2帳號
         </Typography>
 
         {/* 帳號 */}

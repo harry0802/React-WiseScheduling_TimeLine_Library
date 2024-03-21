@@ -119,13 +119,13 @@
     border-bottom: 1px solid #8f8f8f;
   }
 
-  // stripe
-  .ant-table-wrapper .ant-table-tbody .ant-table-row:nth-child(odd) {
+  // set the same color to the same group
+  .ant-table-wrapper .ant-table-tbody .group-white {
     td {
       background: #ededed;
     }
   }
-  .ant-table-wrapper .ant-table-tbody .ant-table-row:nth-child(even) {
+  .ant-table-wrapper .ant-table-tbody .group-gray {
     td {
       background: #d7d7d7;
     }
