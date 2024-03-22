@@ -4,6 +4,7 @@ import { Unstable_NumberInput as BaseNumberInput } from "@mui/base/Unstable_Numb
 import { styled } from "@mui/system";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
+import { useLotStore } from "../../store/zustand/store";
 
 const NumberInput = React.forwardRef(function CustomNumberInput(props, ref) {
   return (
@@ -30,7 +31,11 @@ const NumberInput = React.forwardRef(function CustomNumberInput(props, ref) {
 });
 
 export default function QuantityInput(props) {
-  const { label, lotName, type } = props;
+  var lots = useLotStore((state) => state.lots);
+  const updateLotsByInspection = useLotStore(
+    (state) => state.updateLotsByInspection
+  );
+  const { label, lotName, schema } = props;
   return (
     <div className={styles.quantityInput}>
       <label>{label}</label>
@@ -41,7 +46,8 @@ export default function QuantityInput(props) {
         onChange={(event, newValue) => {
           console.log(`the new value is ${newValue}`);
           console.log("lotName: ", lotName);
-          console.log("type: ", type);
+          console.log("schema: ", schema);
+          updateLotsByInspection(lotName, schema, newValue);
         }}
       />
     </div>
@@ -86,7 +92,7 @@ const StyledInputRoot = styled("div")(
 
 const StyledInput = styled("input")(
   () => `
-  font-size: 2.125rem;
+  font-size: 1.5rem;
   font-family: inherit;
   font-weight: 400;
   line-height: 1.375;
@@ -99,7 +105,7 @@ const StyledInput = styled("input")(
   padding: 10px 12px;
   outline: 0;
   min-width: 0;
-  width: 4rem;
+  width: 2.5rem;
   text-align: center;
 
   &:hover {
@@ -119,7 +125,7 @@ const StyledInput = styled("input")(
 
 const StyledButton = styled("button")(
   () => `
-  font-size: 3rem;
+  font-size: 1.5rem;
   box-sizing: border-box;
   line-height: 1.5;
   border: 1px solid;
@@ -127,8 +133,8 @@ const StyledButton = styled("button")(
   border-color: #186C98;
   background: #186C98;
   color: #FFFFFF;
-  width: 60px;
-  height: 60px;
+  width: 45px;
+  height: 45px;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;

@@ -9,6 +9,73 @@ import Grid from "@mui/material/Grid";
 import QuantityInput from "./QuantityInput";
 import { useLotStore } from "../../store/zustand/store";
 
+const InspectionList = [
+  {
+    lable: "色差",
+    schema: "colorDifference",
+  },
+  {
+    lable: "氣泡",
+    schema: "bubble",
+  },
+  {
+    lable: "油汙",
+    schema: "oilStain",
+  },
+  {
+    lable: "變形",
+    schema: "deformation",
+  },
+  {
+    lable: "雜質",
+    schema: "impurity",
+  },
+  {
+    lable: "毛邊",
+    schema: "burr",
+  },
+  {
+    lable: "縮水",
+    schema: "shrinkage",
+  },
+  {
+    lable: "壓克",
+    schema: "pressure",
+  },
+  {
+    lable: "黑點",
+    schema: "blackSpot",
+  },
+  {
+    lable: "缺料",
+    schema: "shortage",
+  },
+  {
+    lable: "溢料",
+    schema: "overflow",
+  },
+  {
+    lable: "刮傷",
+    schema: "scratch",
+  },
+  {
+    lable: "破洞",
+    schema: "hole",
+  },
+  {
+    lable: "流痕",
+    schema: "flowMark",
+  },
+  {
+    lable: "包封",
+    schema: "encapsulation",
+  },
+  {
+    lable: "其他",
+    schema: "other",
+  },
+];
+
 const TabPanel = (props) => {
   const {
     children,
@@ -19,6 +86,7 @@ const TabPanel = (props) => {
     operator2,
     startTime,
     quatity,
+    lotName,
     ...other
   } = props;
 
@@ -57,7 +125,7 @@ const TabPanel = (props) => {
               </div>
               <div>
                 <span>不良數量</span>
-                <span>{quatity}</span>
+                <span></span>
               </div>
               <div className={styles.qty}>
                 <span>良品數量</span>
@@ -81,25 +149,15 @@ const TabPanel = (props) => {
                 spacing={{ xs: 2, md: 3 }}
                 columns={{ xs: 4, sm: 8, md: 12 }}
               >
-                <Grid item xs={2} sm={4} md={4}>
-                  <QuantityInput
-                    label="色差"
-                    lotName="ABCD0001-001"
-                    type="colorDifference"
-                  />
-                </Grid>
-                <Grid item xs={2} sm={4} md={4}>
-                  <QuantityInput label="氣泡" />
-                </Grid>
-                <Grid item xs={2} sm={4} md={4}>
-                  <QuantityInput label="油汙" />
-                </Grid>
-                <Grid item xs={2} sm={4} md={4}>
-                  <QuantityInput label="變形" />
-                </Grid>
-                <Grid item xs={2} sm={4} md={4}>
-                  <QuantityInput label="雜質" />
-                </Grid>
+                {InspectionList.map((item, index) => (
+                  <Grid item xs={2} sm={4} md={4} key={index}>
+                    <QuantityInput
+                      label={item.lable}
+                      lotName={lotName}
+                      schema={item.schema}
+                    />
+                  </Grid>
+                ))}
               </Grid>
             </div>
           </div>
@@ -152,32 +210,25 @@ const ProductionInspection = () => {
           ))}
         </Tabs>
       </div>
-      {/* map lots to TabPanels*/}
-      {lots.map((lot, index) => (
-        <TabPanel
-          key={index}
-          value={tabValue}
-          index={index}
-          product={lot.productName}
-          operator1={lot.operator1}
-          operator2={lot.operator2}
-          startTime={lot.startTime}
-          quatity={lot.quantity}
-        >
-          Item One
-        </TabPanel>
-      ))}
-      {/* <TabPanel
-        value={tabValue}
-        index={0}
-        product="產品一號的名稱請精簡以方便管理"
-        operator1="李第一"
-        operator2="張零二"
-        startTime="2024/01/01 08:00"
-        quatity="21000"
-      >
-        Item One
-      </TabPanel> */}
+      {/* map the last item of the lots's children to TabPanels*/}
+      {lots.map((lot, index) => {
+        if (lot.children != null && lot.children.length > 0) {
+          const lastItem = lot.children[lot.children.length - 1];
+          return (
+            <TabPanel
+              key={index}
+              value={tabValue}
+              index={index}
+              product={lot.productName}
+              operator1={lastItem.operator1}
+              operator2={lastItem.operator2}
+              startTime={lastItem.start_time}
+              quatity={lot.workOrderQuantity}
+              lotName={lastItem.lotName}
+            ></TabPanel>
+          );
+        }
+      })}
       <Button
         className={styles.sign}
         sx={{
@@ -187,7 +238,7 @@ const ProductionInspection = () => {
           fontSize: "24px",
         }}
       >
-        確認
+        交班
       </Button>
     </Box>
   );

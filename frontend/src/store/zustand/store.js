@@ -23,6 +23,22 @@ export const useLotStore = create(
         set((state, newLots) => ({ lots: state.lots.append(newLots) })),
       removeAllLots: () => set({ lots: [] }),
       updateLots: (newLots) => set({ lots: newLots }),
+      updateLotsByInspection: (lotName, schema, newValue) => {
+        const newLots = get().lots.map((lot) => {
+          // find lot's children by lotName and update the schema's value
+          if (lot.lotName === lotName.split("-")[0]) {
+            const newChildren = lot.children.map((child) => {
+              if (child.lotName === lotName) {
+                return { ...child, [schema]: newValue };
+              }
+              return child;
+            });
+            return { ...lot, children: newChildren };
+          }
+          return lot;
+        });
+        set({ lots: newLots });
+      },
     }),
     {
       name: "lots-storage", // name of the item in the storage (must be unique)

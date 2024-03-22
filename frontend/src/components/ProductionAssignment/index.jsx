@@ -38,7 +38,7 @@ const ProductionAssignment = (props) => {
   const defaultColumns = [
     {
       title: "NO",
-      width: "4%",
+      width: "5%",
       fixed: true,
       render: (text, object, index) => {
         return (index + 1).toString().padStart(2, "0");
@@ -48,7 +48,7 @@ const ProductionAssignment = (props) => {
       title: "狀態",
       dataIndex: "status",
       fixed: true,
-      width: "6%",
+      width: "8%",
     },
     {
       title: "製令單號",
@@ -66,7 +66,7 @@ const ProductionAssignment = (props) => {
     {
       title: "模具編號",
       dataIndex: "tmpNo",
-      width: "10%",
+      width: "8%",
       fixed: true,
       ellipsis: true,
       render: (text) => (
@@ -92,27 +92,27 @@ const ProductionAssignment = (props) => {
     {
       title: "製令數量",
       dataIndex: "workOrderQuantity",
-      width: "10%",
+      width: "8%",
     },
     {
       title: "良品數量",
       dataIndex: "productionQuantity",
-      width: "10%",
+      width: "8%",
     },
     {
       title: "不良數",
       dataIndex: "formatedDefectiveQty",
-      width: "10%",
+      width: "8%",
     },
     {
       title: "預計上機日",
       dataIndex: "planOnMachineDate",
-      width: "10%",
+      width: "12%",
     },
     {
       title: "實際上機日",
       dataIndex: "actualOnMachineDate",
-      width: "10%",
+      width: "12%",
     },
   ];
 
