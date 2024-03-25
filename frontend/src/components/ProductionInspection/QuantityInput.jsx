@@ -44,9 +44,6 @@ export default function QuantityInput(props) {
         min={1}
         max={999}
         onChange={(event, newValue) => {
-          console.log(`the new value is ${newValue}`);
-          console.log("lotName: ", lotName);
-          console.log("schema: ", schema);
           updateLotsByInspection(lotName, schema, newValue);
         }}
       />

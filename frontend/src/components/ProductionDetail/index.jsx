@@ -451,14 +451,14 @@ const ProductionDetail = (props) => {
                   (record.children === null &&
                     record.unfinishedQuantity === null))
               ) {
-                className += styles.unfinishedRow;
+                className += ` ${styles.unfinishedRow} `;
               }
 
               // group the same color to the same group
               className +=
                 record.className === " groupWhite "
-                  ? styles.groupWhite
-                  : styles.groupGray;
+                  ? ` ${styles.groupWhite} `
+                  : ` ${styles.groupGray} `;
 
               return className;
             }}

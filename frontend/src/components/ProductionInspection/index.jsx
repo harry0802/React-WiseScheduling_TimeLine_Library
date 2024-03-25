@@ -204,7 +204,6 @@ const ProductionInspection = () => {
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const lots = useLotStore((state) => state.lots);
-  console.log("lots", lots);
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
   };

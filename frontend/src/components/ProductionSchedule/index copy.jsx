@@ -1,11 +1,16 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faTrashCan, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { Form, Input, Table, Select, DatePicker } from 'antd';
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlay,
+  faPause,
+  faTrashCan,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
+import { Form, Input, Table, Select, DatePicker } from "antd";
 import { Link } from "react-router-dom";
 import { useGetProductionScheduleQuery } from "../../store/api/productionScheduleApi";
 
-import './index.scss';
+import "./index.scss";
 
 const EditableContext = React.createContext(null);
 
@@ -55,7 +60,7 @@ const EditableCell = ({
         ...values,
       });
     } catch (errInfo) {
-      console.log('Save failed:', errInfo);
+      console.log("Save failed:", errInfo);
     }
   };
 
@@ -94,18 +99,18 @@ const EditableCell = ({
 };
 
 const ProductionSchedule = () => {
-
-
-  const { data: ProductionScheduleData,meta, isSuccess } = useGetProductionScheduleQuery(page,size);
-  console.log('ProductionScheduleData', ProductionScheduleData);
+  const {
+    data: ProductionScheduleData,
+    meta,
+    isSuccess,
+  } = useGetProductionScheduleQuery(page, size);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const onSelectChange = (newSelectedRowKeys) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
   const fetchRecords = (page, pageSize) => {
     setLoading(true);
-    useGetProductionScheduleQuery(page,pageSize);
+    useGetProductionScheduleQuery(page, pageSize);
     setDataSource(ProductionScheduleData);
     setTotalPassengers(meta.totalpages);
     setLoading(false);
@@ -128,194 +133,156 @@ const ProductionSchedule = () => {
     },
   };
   const defaultColumns = [
-
     {
-      title: '編號 ',
-      dataIndex: 'id',
+      title: "編號 ",
+      dataIndex: "id",
       width: 80,
       fixed: true,
       editable: true,
     },
     {
-      title: '製令單號 ',
-      dataIndex: 'workOrderSN',
+      title: "製令單號 ",
+      dataIndex: "workOrderSN",
       width: 170,
       fixed: true,
       editable: true,
     },
     {
-      title: '產品名稱',
+      title: "產品名稱",
       width: 180,
-      dataIndex: 'productName',
+      dataIndex: "productName",
       fixed: true,
       editable: true,
     },
     {
-      title: '置令數量',
-      dataIndex: 'workOrderQuantity',
+      title: "置令數量",
+      dataIndex: "workOrderQuantity",
       editable: true,
       width: 150,
-
     },
     {
-      title: '置令開立日期',
-      dataIndex: 'workOrderDate',
+      title: "置令開立日期",
+      dataIndex: "workOrderDate",
       width: 150,
       editable: true,
-
     },
     {
-      title: '成型秒數',
-      dataIndex: 'moldingSecond',
+      title: "成型秒數",
+      dataIndex: "moldingSecond",
       editable: true,
       width: 100,
-
-
     },
     {
-      title: '穴數',
-      dataIndex: 'moldCavity',
+      title: "穴數",
+      dataIndex: "moldCavity",
       editable: true,
       width: 70,
-
-
     },
     {
-      title: '生產區域                     ',
-      dataIndex: 'productionArea',
+      title: "生產區域                     ",
+      dataIndex: "productionArea",
       width: 130,
 
       render: (text, record) => (
         <Select
           defaultValue={text}
-          style={{ width: 90, background: 'none', color: '#fff' }}
+          style={{ width: 90, background: "none", color: "#fff" }}
         >
           <Option value="A">A</Option>
           <Option value="B">B</Option>
           <Option value="C">C</Option>
         </Select>
       ),
-
     },
     {
-      title: '機台編號      ',
-      dataIndex: 'machineSN',
+      title: "機台編號      ",
+      dataIndex: "machineSN",
       editable: true,
       width: 100,
-
-
     },
     {
-      title: '預計上機日',
-      dataIndex: 'planFinishDate',
+      title: "預計上機日",
+      dataIndex: "planFinishDate",
       editable: true,
       width: 150,
-
-
     },
     {
-      title: '預計完成日',
-      dataIndex: 'planFinishDate',
+      title: "預計完成日",
+      dataIndex: "planFinishDate",
       editable: true,
       width: 150,
-
-
     },
     {
-      title: '上下機工作日',
-      dataIndex: 'actualFinishDate',
+      title: "上下機工作日",
+      dataIndex: "actualFinishDate",
       editable: true,
       width: 150,
-
-
     },
     {
-      title: '日工時',
-      dataIndex: 'dailyWorkingHours',
+      title: "日工時",
+      dataIndex: "dailyWorkingHours",
       editable: true,
       width: 100,
-
-
     },
     {
-      title: '實際上機日',
-      dataIndex: 'actualOnMachineDate',
+      title: "實際上機日",
+      dataIndex: "actualOnMachineDate",
       editable: true,
       width: 150,
-
-
     },
     {
-      title: '實際完成日',
-      dataIndex: 'actualFinishDate',
+      title: "實際完成日",
+      dataIndex: "actualFinishDate",
       editable: true,
       width: 150,
-
-
     },
     {
-      title: '週別',
-      dataIndex: 'week',
+      title: "週別",
+      dataIndex: "week",
       editable: true,
       width: 80,
-
-
     },
     {
-      title: '產能小時',
-      dataIndex: 'hourlyCapacity',
+      title: "產能小時",
+      dataIndex: "hourlyCapacity",
       editable: true,
       width: 100,
-
-
     },
     {
-      title: '日產能',
-      dataIndex: 'dailyCapacity',
+      title: "日產能",
+      dataIndex: "dailyCapacity",
       editable: true,
       width: 100,
-
-
     },
     {
-      title: '工作天數',
-      dataIndex: 'workDays',
+      title: "工作天數",
+      dataIndex: "workDays",
       editable: true,
       width: 100,
-
-
     },
     {
-      title: '單雙射',
-      dataIndex: 'singleOrDoubleColor',
+      title: "單雙射",
+      dataIndex: "singleOrDoubleColor",
       editable: true,
       width: 100,
-
-
     },
     {
-      title: '轉換率 ',
-      dataIndex: 'conversionRate',
+      title: "轉換率 ",
+      dataIndex: "conversionRate",
       editable: true,
       width: 100,
-
-
     },
     {
-      title: '狀態 ',
-      dataIndex: 'status',
+      title: "狀態 ",
+      dataIndex: "status",
       editable: true,
       width: 150,
-
-
     },
     {
-      title: '備註 ',
-      dataIndex: 'comment',
+      title: "備註 ",
+      dataIndex: "comment",
       editable: true,
-
     },
-
   ];
 
   const columns = defaultColumns.map((col) => {
@@ -335,78 +302,69 @@ const ProductionSchedule = () => {
     };
   });
 
-
   return (
     <div>
-      <div className='box'>
-        <ul style={{ display: 'flex', marginBottom: '10px' }}>
-          <li style={{ marginRight: '10px' }}>
+      <div className="box">
+        <ul style={{ display: "flex", marginBottom: "10px" }}>
+          <li style={{ marginRight: "10px" }}>
             <Link to="/">登入頁面</Link>
           </li>
-
         </ul>
-        <div className='title-box'>
-          <div className='title'>
-            生產計劃排程表
-          </div>
-          <div className='btn-box'>
+        <div className="title-box">
+          <div className="title">生產計劃排程表</div>
+          <div className="btn-box">
             <DatePicker.RangePicker
-              style={{ marginRight: '10px', height: '30px', marginTop: '5px', width: '500px' }}
-
+              style={{
+                marginRight: "10px",
+                height: "30px",
+                marginTop: "5px",
+                width: "500px",
+              }}
             />
             <Input.Search
               placeholder="搜尋..."
-              style={{ marginRight: '15px', marginTop: '5px', width: '200px' }}
+              style={{ marginRight: "15px", marginTop: "5px", width: "200px" }}
             />
-            <button
-              className='delete'
-            >
-              <FontAwesomeIcon icon={faTrashCan} style={{ color: '#fff' }} />
+            <button className="delete">
+              <FontAwesomeIcon icon={faTrashCan} style={{ color: "#fff" }} />
             </button>
 
-            <button className="active" >
-              <FontAwesomeIcon icon={faPlay} style={{ color: '#fff' }} />
+            <button className="active">
+              <FontAwesomeIcon icon={faPlay} style={{ color: "#fff" }} />
             </button>
-            <button className="faPause"  >
-              <FontAwesomeIcon icon={faPause} style={{ color: '#fff' }} />
+            <button className="faPause">
+              <FontAwesomeIcon icon={faPause} style={{ color: "#fff" }} />
             </button>
 
-            <button
-
-              className='add'
-            >
-              <FontAwesomeIcon icon={faPlus} style={{ color: '#fff' }} />
+            <button className="add">
+              <FontAwesomeIcon icon={faPlus} style={{ color: "#fff" }} />
             </button>
           </div>
-
         </div>
-        {
-          isSuccess && <Table
+        {isSuccess && (
+          <Table
             components={components}
-            rowClassName={() => 'editable-row'}
+            rowClassName={() => "editable-row"}
             bordered
             rowSelection
             dataSource={ProductionScheduleData}
             columns={columns}
             pagination={{
-              total:totalpages,
+              total: totalpages,
               pageSize: 10,
-              position: ['bottomCenter'],
+              position: ["bottomCenter"],
               onChange: (page, pageSize) => {
                 fetchRecords(page, pageSize);
-              }
+              },
             }}
             scroll={{
               x: 3300,
             }}
           />
-
-        }
-
+        )}
       </div>
     </div>
   );
 };
 
-export default ProductionSchedule
-  ;
+export default ProductionSchedule;

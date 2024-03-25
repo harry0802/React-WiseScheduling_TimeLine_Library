@@ -47,8 +47,6 @@ const LeaderSign = (props) => {
   const selectedWorkOrder = location.state.selectedWorkOrder
     ? location.state.selectedWorkOrder
     : null; // 要新增母批的製令單號清單
-  console.log("action: ", action);
-  console.log("selectedWorkOrder: ", selectedWorkOrder);
   const [error, setError] = useState(false); // 是否顯示帳號錯誤訊息
   const lots = useLotStore((state) => state.lots); // 該機台的母批及子批清單
 
@@ -57,9 +55,6 @@ const LeaderSign = (props) => {
     var isValidate = true;
 
     const data = new FormData(e.currentTarget);
-    console.log({
-      leader: data.get("leader"),
-    });
 
     if (isValidate) {
       if (action === "new") {

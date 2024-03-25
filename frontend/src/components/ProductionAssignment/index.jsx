@@ -367,7 +367,6 @@ const ProductionAssignment = (props) => {
     // 3. 尚未上機的製令單需比對是否有相同的母批
 
     const stringIds = JSON.stringify(selectedRowKeys);
-    console.log("stringIds: ", stringIds);
 
     navigate("/LeaderSignPage", {
       state: { action: "new", selectedWorkOrder: selectedRowsData },

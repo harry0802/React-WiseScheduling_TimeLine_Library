@@ -194,7 +194,6 @@ const MachineSelect = (props) => {
                           : "machine-box"
                       }
                       onClick={() => {
-                        console.log("click", item.machine_number);
                         updateMachineNo(item.machine_number);
                         navigate("/ProductionAssignmentPage");
                       }}
