@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from "./ProductionInspection.module.scss";
+import styles from "./index.module.scss";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -7,7 +7,10 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import QuantityInput from "./QuantityInput";
+import { Modal } from "antd";
 import { useLotStore } from "../../store/zustand/store";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const InspectionList = [
   {
@@ -130,7 +133,8 @@ const TabPanel = (props) => {
               <div className={styles.qty}>
                 <span>良品數量</span>
                 <TextField
-                  className={styles.muiTextField}
+                  className="muiTextField"
+                  // sx={{ width: "200px" }}
                   id="productionQuantity"
                   label="數量*"
                   type="number"
@@ -138,8 +142,13 @@ const TabPanel = (props) => {
                   autoComplete="productionQuantity"
                   variant="outlined"
                   margin="normal"
-                  inputProps={{ style: { fontSize: "34px", color: "#FFF" } }} // font size of input text
-                  InputLabelProps={{ style: { fontSize: "34px" } }} // font size of input label
+                  inputProps={{ style: { fontSize: "16px", color: "#FFF" } }} // font size of input text
+                  InputLabelProps={{ style: { fontSize: "16px" } }} // font size of input label
+                  error={false}
+                  helperText={false ? "" : ""}
+                  FormHelperTextProps={{
+                    style: { fontSize: "16px", color: "#E61F19" },
+                  }}
                 />
               </div>
             </div>
@@ -175,6 +184,24 @@ const a11yProps = (index) => {
 };
 
 const ProductionInspection = () => {
+  // 防止使用者回上一頁
+  useEffect(() => {
+    window.history.pushState(null, "", document.URL);
+    window.onpopstate = function () {
+      window.history.pushState(null, "", document.URL);
+      Modal.info({
+        width: "800px",
+        content: <p>您無法回到上一頁，請完成此生產階段，並"換班"交接</p>,
+        okText: "確定",
+        onOk() {},
+      });
+    };
+    return () => {
+      window.onpopstate = null;
+    };
+  }, []);
+
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const lots = useLotStore((state) => state.lots);
   console.log("lots", lots);
@@ -230,15 +257,18 @@ const ProductionInspection = () => {
         }
       })}
       <Button
-        className={styles.sign}
+        className="sign"
         sx={{
           textAlign: "end",
-          marginTop: "60px",
+          marginTop: "30px",
           color: "#FFFFFF",
-          fontSize: "24px",
+          fontSize: "16px",
+        }}
+        onClick={() => {
+          navigate("/OperatorSignPage", { state: { action: "endChildLot" } });
         }}
       >
-        交班
+        換班
       </Button>
     </Box>
   );

@@ -1,0 +1,16 @@
+:global(.ant-layout-header) {
+  background: transparent;
+  padding: 0 20px;
+}
+
+.inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tools {
+  * {
+    margin-left: 15px;
+  }
+}

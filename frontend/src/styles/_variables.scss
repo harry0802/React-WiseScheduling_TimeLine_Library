@@ -1,6 +1,15 @@
-$palette-primary-main: #186C98;
-$palette-primary-light: #739BB0;
-$palette-primary-contrast-text: #E1E7F5;
-$palette-text-primary: #8F8F8F;
-$palette-light-background: #ECEAEA;
+$palette-primary-main: #186c98;
+$palette-primary-light: #739bb0;
+$palette-primary-contrast-text: #e1e7f5;
+$palette-text-primary: #8f8f8f;
+$palette-light-background: #eceaea;
 $palette-dark-background: #515357;
+
+// 576px for portrait phones
+// 768px for tablets
+// 992px for laptops
+// 1200px for large devices
+$screen-xs: 576px;
+$screen-sm: 768px;
+$screen-md: 992px;
+$screen-lg: 1200px;

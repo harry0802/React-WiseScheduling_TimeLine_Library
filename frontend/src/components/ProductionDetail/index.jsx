@@ -16,7 +16,7 @@ import {
   useAddProductionAssignmentMutation,
   useUpdateProductionAssignmentMutation,
 } from "../../store/api/productionAssignmentApi";
-import "./index.scss";
+import styles from "./index.module.scss";
 
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
 
@@ -35,6 +35,9 @@ const ProductionDetail = (props) => {
         okText: "確定",
         onOk() {},
       });
+    };
+    return () => {
+      window.onpopstate = null;
     };
   }, []);
 
@@ -310,7 +313,7 @@ const ProductionDetail = (props) => {
     },
   ];
 
-  let currentClass = " group-gray ";
+  let currentClass = " groupGray ";
   const fakeDataTwo = fakeData.map((item, idx) => {
     let no = 0;
     let operators = "";
@@ -330,10 +333,10 @@ const ProductionDetail = (props) => {
       });
     }
 
-    // set group-white class to the first item and its children, set group-gray to the second item and its children, set group-white to the third item and its children, and so on
+    // set groupWhite class to the first item and its children, set groupGray to the second item and its children, set groupWhite to the third item and its children, and so on
     let className = "";
     currentClass =
-      currentClass === " group-white " ? " group-gray " : " group-white ";
+      currentClass === " groupWhite " ? " groupGray " : " groupWhite ";
     className = currentClass;
 
     // combine operators and start time, end time in children array
@@ -400,13 +403,13 @@ const ProductionDetail = (props) => {
   // const debouncedHandleAdd = debounce(handleAdd, 500);
 
   return (
-    <div className="prodution-detail">
-      <div className="box">
-        <div className="title-box">
-          <div className="title">{"A2"}機台製令單生產明細</div>
+    <div className={styles.produtionDetail}>
+      <div className={styles.box}>
+        <div className={styles.titleBox}>
+          <div className={styles.title}>{"A2"}機台製令單生產明細</div>
 
-          <div className="filter-section">
-            <div className="btn-box">
+          <div>
+            <div>
               <Tooltip title="完成">
                 <Button
                   type="primary"
@@ -417,7 +420,7 @@ const ProductionDetail = (props) => {
               </Tooltip>
               <Tooltip title="暫停">
                 <Button
-                  className="btn-pause"
+                  className={styles.btnPause}
                   type="default"
                   shape="circle"
                   icon={<PauseOutlined />}
@@ -448,11 +451,14 @@ const ProductionDetail = (props) => {
                   (record.children === null &&
                     record.unfinishedQuantity === null))
               ) {
-                className += " unfinished-row ";
+                className += styles.unfinishedRow;
               }
 
               // group the same color to the same group
-              className += record.className;
+              className +=
+                record.className === " groupWhite "
+                  ? styles.groupWhite
+                  : styles.groupGray;
 
               return className;
             }}
@@ -461,11 +467,15 @@ const ProductionDetail = (props) => {
       </div>
       <Tooltip title="開始">
         <Button
-          className="btn-start"
+          className={styles.btnStart}
           type="default"
           shape="circle"
           icon={<CaretRightOutlined />}
-          onClick={() => navigate("/OperatorSignPage")}
+          onClick={() =>
+            navigate("/OperatorSignPage", {
+              state: { action: "startChildLot" },
+            })
+          }
         />
       </Tooltip>
     </div>

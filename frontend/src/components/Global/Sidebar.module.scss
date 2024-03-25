@@ -1,0 +1,23 @@
+:global(.ant-layout) :global(.ant-layout-sider) {
+  background: none;
+}
+
+:global(.ant-menu-dark) {
+  background: none;
+}
+
+:global(.ant-menu-dark):global(.ant-menu-inline)
+  :global(.ant-menu-sub):global(.ant-menu-inline) {
+  background: none;
+}
+
+.sidebar {
+  padding-top: 14px;
+  .bugerMenu {
+    text-align: right;
+
+    svg {
+      fill: #ffffff;
+    }
+  }
+}

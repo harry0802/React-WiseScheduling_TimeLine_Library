@@ -1,3 +1,5 @@
+@import "../../styles/variables.scss";
+
 .prodution-assignment {
   * {
     box-sizing: border-box;
@@ -16,21 +18,20 @@
     max-height: 30px;
 
     .title {
+      font-size: 1rem;
       color: #fff;
       text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-      font-size: 1rem;
       font-style: normal;
       font-weight: 400;
+
+      @media (min-width: $screen-lg) {
+        font-size: 1.5rem;
+      }
     }
 
     .btn-box {
       .ant-btn-primary {
         background-color: #83bf45;
-      }
-
-      .ant-btn {
-        min-width: 30px;
-        min-height: 30px;
       }
 
       .ant-btn > span {
@@ -60,11 +61,18 @@
     border-bottom-left-radius: 2px;
     box-shadow: none;
     font-family: "Roboto", sans-serif;
+
+    @media (min-width: $screen-lg) {
+      width: 125px;
+    }
   }
 
   .ant-picker .ant-picker-input > input {
-    color: #8f8f8f;
     font-size: 0.75rem;
+    color: #8f8f8f;
+    @media (min-width: $screen-lg) {
+      font-size: 1rem;
+    }
   }
 
   .date-to {
@@ -74,6 +82,7 @@
   }
 
   .week-no {
+    font-size: 0.75rem;
     width: 34px;
     border: 1px solid #fff;
     border-top-right-radius: 2px;
@@ -81,10 +90,13 @@
     background-color: #fff;
     display: flex;
     align-items: center;
-    // padding: 2px;
     color: #8f8f8f;
-    font-size: 0.75rem;
     font-family: "Roboto", sans-serif;
+
+    @media (min-width: $screen-lg) {
+      font-size: 1rem;
+      width: 45px;
+    }
   }
 
   .ant-table-wrapper .ant-table-pagination.ant-pagination {
@@ -102,13 +114,23 @@
     align-content: center;
   }
 
+  .ant-select {
+    @media (min-width: $screen-lg) {
+      height: 35.14px;
+    }
+  }
+
   .ant-select .ant-select-selection-placeholder,
   .ant-select-dropdown .ant-select-item,
   .ant-select-selection-item {
-    color: #8f8f8f;
     font-size: 0.75rem;
+    color: #8f8f8f;
     font-style: normal;
     font-weight: 400;
+
+    @media (min-width: $screen-lg) {
+      font-size: 1rem;
+    }
   }
 
   // 狀態篩選器
@@ -146,14 +168,19 @@
   }
 
   .btn-new {
-    position: fixed;
     width: 45px;
     height: 45px;
+    position: fixed;
     bottom: 60px;
     right: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    @media (min-width: $screen-lg) {
+      width: 60px;
+      height: 60px;
+    }
   }
 
   // Table
@@ -193,20 +220,28 @@
   }
 
   .ant-table-wrapper .ant-table-thead > tr > th {
+    font-size: 0.75rem;
     background: #186c98;
     border: 1px solid #8f8f8f;
     color: #ffffff;
-    font-size: 0.75rem;
     font-style: normal;
     font-weight: 400;
+
+    @media (min-width: $screen-lg) {
+      font-size: 1rem;
+    }
   }
 
   .ant-table-wrapper .ant-table-tbody > tr > td {
-    color: #8f8f8f;
     font-size: 0.75rem;
+    color: #8f8f8f;
     font-style: normal;
     font-weight: 400;
     border-bottom: 1px solid #8f8f8f;
+
+    @media (min-width: $screen-lg) {
+      font-size: 1rem;
+    }
   }
 
   // stripe

@@ -1,5 +1,5 @@
 import * as React from "react";
-import styles from "./ProductionInspection.module.scss";
+import styles from "./index.module.scss";
 import { Unstable_NumberInput as BaseNumberInput } from "@mui/base/Unstable_NumberInput";
 import { styled } from "@mui/system";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -42,7 +42,7 @@ export default function QuantityInput(props) {
       <NumberInput
         aria-label="Quantity Input"
         min={1}
-        max={99}
+        max={999}
         onChange={(event, newValue) => {
           console.log(`the new value is ${newValue}`);
           console.log("lotName: ", lotName);
@@ -92,17 +92,16 @@ const StyledInputRoot = styled("div")(
 
 const StyledInput = styled("input")(
   () => `
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-family: inherit;
   font-weight: 400;
-  line-height: 1.375;
   color: #8F8F8F;
   background: #EDEDED;
   border: 1px solid #8F8F8F;
   box-shadow: 0px 2px 4px rgba(0,0,0, 0.05);
   border-radius: 8px;
   margin: 0 8px;
-  padding: 10px 12px;
+  padding: 6px 6px;
   outline: 0;
   min-width: 0;
   width: 2.5rem;
@@ -125,7 +124,7 @@ const StyledInput = styled("input")(
 
 const StyledButton = styled("button")(
   () => `
-  font-size: 1.5rem;
+  font-size: 1rem;
   box-sizing: border-box;
   line-height: 1.5;
   border: 1px solid;
@@ -133,8 +132,8 @@ const StyledButton = styled("button")(
   border-color: #186C98;
   background: #186C98;
   color: #FFFFFF;
-  width: 45px;
-  height: 45px;
+  width: 30px;
+  height: 30px;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;

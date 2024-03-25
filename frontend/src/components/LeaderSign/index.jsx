@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import "./index.scss";
+import styles from "./index.module.scss";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
@@ -86,7 +86,7 @@ const LeaderSign = (props) => {
       component="form"
       noValidate
       onSubmit={handleSubmit}
-      className="leader-sign"
+      className={styles.leaderSign}
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -97,22 +97,14 @@ const LeaderSign = (props) => {
       }}
     >
       {action === "complete" && (
-        <img
-          style={{ width: "240px", height: "168px" }}
-          src={checkImage}
-          alt="完成"
-        />
+        <img style={{ width: "150px" }} src={checkImage} alt="完成" />
       )}
       {action === "stop" && (
-        <img
-          style={{ width: "169px", height: "192px" }}
-          src={stopImage}
-          alt="暫停"
-        />
+        <img style={{ width: "120px" }} src={stopImage} alt="暫停" />
       )}
 
       <Typography
-        variant="h5"
+        variant="h6"
         component="h2"
         sx={{
           color: "#FFFFFF",
@@ -123,23 +115,20 @@ const LeaderSign = (props) => {
       </Typography>
 
       {/* 帳號 */}
-      <CssTextField
-        sx={{
-          width: "350px",
-          borderRadius: "5px",
-        }}
+      <TextField
+        className="muiTextField"
         id="leader"
         label="帳號"
         name="leader"
         autoComplete="leader"
         variant="outlined"
         margin="normal"
-        inputProps={{ style: { fontSize: "24px", color: "#FFF" } }} // font size of input text
-        InputLabelProps={{ style: { fontSize: "24px" } }} // font size of input label
+        inputProps={{ style: { fontSize: "16px", color: "#FFF" } }} // font size of input text
+        InputLabelProps={{ style: { fontSize: "16px" } }} // font size of input label
         error={error}
         helperText={error ? "您並無權限閱覽" : ""}
         FormHelperTextProps={{
-          style: { fontSize: "22px", color: "#E61F19" },
+          style: { fontSize: "16px", color: "#E61F19" },
         }}
       />
 
@@ -148,9 +137,9 @@ const LeaderSign = (props) => {
         className="sign"
         sx={{
           textAlign: "end",
-          marginTop: "60px",
+          marginTop: "30px",
           color: "#FFFFFF",
-          fontSize: "24px",
+          fontSize: "16px",
         }}
       >
         確認
@@ -161,7 +150,7 @@ const LeaderSign = (props) => {
           sx={{
             color: "#8F8F8F",
             marginTop: "30px",
-            fontSize: "24px",
+            fontSize: "16px",
             textDecoration: "underline",
           }}
           onClick={() => navigate(-1)}
@@ -175,7 +164,7 @@ const LeaderSign = (props) => {
           sx={{
             color: "#8F8F8F",
             marginTop: "30px",
-            fontSize: "24px",
+            fontSize: "18px",
             textDecoration: "underline",
           }}
           onClick={() => navigate("/ProductionDetailPage")}
