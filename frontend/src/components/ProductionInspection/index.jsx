@@ -90,6 +90,7 @@ const TabPanel = (props) => {
     startTime,
     quatity,
     lotName,
+    defectiveQuantity,
     ...other
   } = props;
 
@@ -128,7 +129,7 @@ const TabPanel = (props) => {
               </div>
               <div>
                 <span>不良數量</span>
-                <span></span>
+                <span>{defectiveQuantity}</span>
               </div>
               <div className={styles.qty}>
                 <span>良品數量</span>
@@ -251,6 +252,7 @@ const ProductionInspection = () => {
               startTime={lastItem.start_time}
               quatity={lot.workOrderQuantity}
               lotName={lastItem.lotName}
+              defectiveQuantity={lastItem.defectiveQuantity}
             ></TabPanel>
           );
         }

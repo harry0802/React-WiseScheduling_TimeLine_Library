@@ -44,6 +44,7 @@ export default function QuantityInput(props) {
         aria-label="Quantity Input"
         min={0}
         max={999}
+        defaultValue={0}
         onChange={(event, newValue) => {
           updateLotsByInspection(lotName, schema, newValue);
         }}

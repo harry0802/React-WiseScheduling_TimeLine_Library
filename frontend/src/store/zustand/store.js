@@ -28,8 +28,32 @@ export const useLotStore = create(
           // find lot's children by lotName and update the schema's value
           if (lot.lotName === lotName.split("-")[0]) {
             const newChildren = lot.children.map((child) => {
+              var totalDefectiveQuantity = 0;
               if (child.lotName === lotName) {
-                return { ...child, [schema]: newValue };
+                totalDefectiveQuantity =
+                  child.colorDifference +
+                  child.deformation +
+                  child.shrinkage +
+                  child.shortage +
+                  child.hole +
+                  child.bubble +
+                  child.impurity +
+                  child.pressure +
+                  child.overflow +
+                  child.flowMark +
+                  child.oilStain +
+                  child.burr +
+                  child.blackSpot +
+                  child.scratch +
+                  child.encapsulation +
+                  child.other -
+                  child[schema] +
+                  newValue;
+                return {
+                  ...child,
+                  [schema]: newValue,
+                  defectiveQuantity: totalDefectiveQuantity,
+                };
               }
               return child;
             });
