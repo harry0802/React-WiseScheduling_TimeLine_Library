@@ -5,7 +5,6 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
 import { useLotStore } from "../../store/zustand/store";
 
 const OperatorSign = (props) => {

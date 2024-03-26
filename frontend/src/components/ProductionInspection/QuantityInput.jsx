@@ -16,6 +16,7 @@ const NumberInput = React.forwardRef(function CustomNumberInput(props, ref) {
         decrementButton: StyledButton,
       }}
       slotProps={{
+        input: { inputMode: "none" },
         incrementButton: {
           children: <AddIcon fontSize="large" />,
           className: "increment",
@@ -41,7 +42,7 @@ export default function QuantityInput(props) {
       <label>{label}</label>
       <NumberInput
         aria-label="Quantity Input"
-        min={1}
+        min={0}
         max={999}
         onChange={(event, newValue) => {
           updateLotsByInspection(lotName, schema, newValue);
