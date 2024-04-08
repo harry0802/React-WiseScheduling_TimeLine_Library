@@ -7,6 +7,7 @@ from .device.controller import api as device_ns
 from .house.controller import api as house_ns
 from .calendar.controller import api as calendar_ns
 from .productionSchedule.controller import api as productionSchedule_ns
+from .productionReport.controller import api as productionReport_ns
 from app.api.calendar.service import CalendarService
 from app.api.productionSchedule.service import shift_by_holiday
 import click
@@ -31,6 +32,7 @@ api.add_namespace(user_ns)
 # api.add_namespace(house_ns)
 api.add_namespace(calendar_ns)
 api.add_namespace(productionSchedule_ns)
+api.add_namespace(productionReport_ns)
 
 @api_bp.cli.command('update_calendar')
 def update_calendar():

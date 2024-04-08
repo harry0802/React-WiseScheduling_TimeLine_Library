@@ -1,5 +1,6 @@
 from app import db
 from sqlalchemy.orm import synonym
+from app.service.customType import TimestampDatetime
 Column = db.Column
 Model = db.Model 
 relationship = db.relationship
@@ -40,24 +41,26 @@ relationship = db.relationship
 class productionSchedule(Model):
     __tablename__ = "productionSchedule"
     id = Column(db.Integer , primary_key = True)
+    productionSchedule_id = synonym("id") # 用於Schema出現相同名稱時的區別
     productionArea = Column(db.String(255))
     machineSN = Column(db.String(255))
     serialNumber = synonym("id")
     # serialNumber = Column(db.String(255))
     workOrderSN = Column(db.String(255))
+    moldNo = Column(db.String(255))
     productSN = Column(db.String(255))
     productName = Column(db.String(255))
     workOrderQuantity = Column(db.Integer)
-    workOrderDate = Column(db.Date)
+    workOrderDate = Column(TimestampDatetime)
     moldingSecond = Column(db.Integer)
     hourlyCapacity = Column(db.Integer)
     dailyCapacity = Column(db.Integer)
-    planOnMachineDate = Column(db.Date)
-    actualOnMachineDate = Column(db.Date, nullable=True)
+    planOnMachineDate = Column(TimestampDatetime)
+    actualOnMachineDate = Column(TimestampDatetime, nullable=True)
     moldWorkDays = Column(db.Integer, default=0)
     workDays = Column(db.Integer)
-    planFinishDate = Column(db.Date)
-    actualFinishDate = Column(db.Date, nullable=True)
+    planFinishDate = Column(TimestampDatetime)
+    actualFinishDate = Column(TimestampDatetime, nullable=True)
     comment = Column(db.Text, nullable=True)
     dailyWorkingHours = Column(db.Integer)
     moldCavity = Column(db.Integer)

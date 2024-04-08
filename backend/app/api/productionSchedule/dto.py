@@ -76,7 +76,7 @@ class NullableDateTime(fields.DateTime):
         schema = super(NullableDateTime, self).schema()
         schema['pattern'] = self.pattern
         return schema
-
+    
 class NullableFloat(fields.Float):
     #accept the string type cause the technical reason (from frontend)
     # https://stackoverflow.com/questions/12643009/regular-expression-for-floating-point-numbers
@@ -100,16 +100,17 @@ class productionScheduleDto:
                                         validate=Length(min=1, max=1)),
             "serialNumber": NullableString(required=False, description="serialNumber", example="1"),
             "workOrderSN": fields.String(required=False, description="workOrderSN", example="2023122800001"),
+            "moldNo": fields.String(required=False, description="moldNo", example="AGS-01001"),
             "productSN": fields.String(required=False, description="productSN", example="PROD-00001-01"),
             "productName": fields.String(required=False, description="productName", example="PROD_NAME-01"),
             "workOrderQuantity": StringInteger(required=False, description="workOrderQuantity", example=1000, min=0, max=1000000, type=["integer", "string"], pattern="^[0-9]+$"),
-            "workOrderDate": StringDateTime(required=False, description="workOrderDate", example="2023-12-28"),
+            "workOrderDate": StringDateTime(required=False, description="workOrderDate", example="2023-12-28T00:00:00.000+08:00"),
             "moldingSecond": NullableInteger(required=False, description="moldingSecond", example=30, min=0, max=86400),
-            "planOnMachineDate": NullableDateTime(required=False, description="planOnMachineDate", example="2023-12-28"),
+            "planOnMachineDate": NullableDateTime(required=False, description="planOnMachineDate", example="2023-12-28T00:00:00.000+08:00"),
             "actualOnMachineDate": NullableDateTime(required=False, description="actualOnMachineDate", example="2023-12-28T00:00:00.000+08:00"),
             "moldWorkDays": NullableInteger(required=False, description="moldWorkDays", example=1, min=0, max=1000, default=0),
             "workDays": NullableInteger(required=False, description="workDays", example=1, min=0, max=1000),
-            "planFinishDate": NullableDateTime(required=False, description="planFinishDate", example="2023-12-28"),
+            "planFinishDate": NullableDateTime(required=False, description="planFinishDate", example="2023-12-28T00:00:00.000+08:00"),
             "actualFinishDate": NullableDateTime(required=False, description="actualFinishDate", example="2023-12-28T00:00:00.000+08:00"),
             "comment": NullableString(required=False, description="comment"),
             "dailyWorkingHours": NullableInteger(required=False, description="dailyWorkingHours", example=8,min=0, max=24),
@@ -130,7 +131,7 @@ class productionScheduleDto:
     post_obj = copy.deepcopy(base_obj)
     pop_list = ["id", "serialNumber"]
     required_list = ["workOrderSN", "productSN", "productName", "workOrderQuantity", "workOrderDate"]
-    not_required_list = []
+    not_required_list = ["moldNo"]
     for attr in [item for item in pop_list]:
         post_obj.pop(attr)
     for key in post_obj:
@@ -197,5 +198,25 @@ class productionScheduleDto:
         {
             "status": fields.Boolean,
             "message": fields.String,
+        }
+    )
+
+    # machineSN 
+    # Get model
+    machineSN_object = api.model(
+        "machineSN object",
+        {
+            "productionArea": NullableString(required=False, description="productionArea", example="A"),
+            "machineSN": NullableString(required=False, description="machineSN", example="A1",
+                                        validate=Length(min=1, max=1)),
+        }
+    )
+
+    machineSN_resp = api.model(
+        "machineSN response",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "data": fields.Nested(machineSN_object),
         }
     )

@@ -23,6 +23,8 @@ Get /api/productionSchedule/{id}
 Put /api/productionSchedule/{id}
 4. delete a productionSchedule record by id
 Delete /api/productionSchedule/{id}
+5. Get machineSN
+Get /api/productionSchedule/machineSN
 """
 
 @api.route("/")
@@ -156,3 +158,20 @@ class productionScheduleController(Resource):
     @controller_entrance_log(description="delete the current productionSchedules")
     def delete(self, ids):
         return productionScheduleService.delete_productionSchedules(ids)
+
+@api.route("/machineSN")
+class productionScheduleController(Resource):
+    machineSN_object = productionScheduleDto.machineSN_object
+    machineSN_resp = productionScheduleDto.machineSN_resp
+
+    @api.doc(
+        "Get machineSNs",
+        responses={
+            200: ("machineSN data successfully sent", machineSN_resp),
+            404: "machineSN not found",
+        },
+    )
+    @controller_entrance_log(description="Get machineSNs")
+    def get(self):
+        return productionScheduleService.get_machineSNs()
+    

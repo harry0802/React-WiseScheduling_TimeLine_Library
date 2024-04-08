@@ -21,6 +21,7 @@ depends_on = None
     machineSN = Column(db.String(200))
     serialNumber = Column(db.Integer)
     workOrderSN = Column(db.String(200))
+    moldNo = Column(db.String(200))
     productSN = Column(db.String(200))
     productName = Column(db.String(200))
     workOrderQuantity = Column(db.Integer)
@@ -65,19 +66,20 @@ def upgrade():
        sa.Column('machineSN', sa.String(length=255), nullable=True),
        sa.Column('serialNumber', sa.String(length=255), nullable=True),
        sa.Column('workOrderSN', sa.String(length=255), nullable=False),
+       sa.Column('moldNo', sa.String(length=255), nullable=False),
        sa.Column('productSN', sa.String(length=255), nullable=False),
        sa.Column('productName', sa.String(length=255), nullable=False),
        sa.Column('workOrderQuantity', sa.Integer(), nullable=False),
-       sa.Column('workOrderDate', sa.DateTime(), nullable=False),
+       sa.Column('workOrderDate', sa.Integer(), nullable=False),
        sa.Column('moldingSecond', sa.Integer(), nullable=True),
        sa.Column('hourlyCapacity', sa.Integer(), nullable=True),
        sa.Column('dailyCapacity', sa.Integer(), nullable=True),
-       sa.Column('planOnMachineDate', sa.DateTime(), nullable=True),
-       sa.Column('actualOnMachineDate', sa.DateTime(), nullable=True),
+       sa.Column('planOnMachineDate', sa.Integer(), nullable=True),
+       sa.Column('actualOnMachineDate', sa.Integer(), nullable=True),
        sa.Column('moldWorkDays', sa.Integer(), nullable=True),
        sa.Column('workDays', sa.Integer(), nullable=True),
-       sa.Column('planFinishDate', sa.DateTime(), nullable=True),
-       sa.Column('actualFinishDate', sa.DateTime(), nullable=True),
+       sa.Column('planFinishDate', sa.Integer(), nullable=True),
+       sa.Column('actualFinishDate', sa.Integer(), nullable=True),
        sa.Column('comment', sa.Text(), nullable=True),
        sa.Column('dailyWorkingHours', sa.Integer(), nullable=True),
        sa.Column('moldCavity', sa.Integer(), nullable=True),

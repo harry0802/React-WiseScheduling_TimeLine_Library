@@ -4,6 +4,7 @@ import math
 from operator import and_
 
 import requests
+from app.models.molds import molds
 from flask import current_app
 
 from app import db
@@ -19,7 +20,7 @@ productionSchedule_schema = productionScheduleSchema()
 def isHoliday(obj, start, end, api_version = "api.calendar_calendar_controller"):
     if api_version == "api.calendar_calendar_controller":
         if type(obj['date']) == str:
-            event_date = date.fromisoformat(obj['date'])
+            event_date = datetime.fromisoformat(obj['date'])
         else:
             event_date = obj['date']
         # date = date.fromisoformat(obj['date'], '%Y-%m-%d')
@@ -77,7 +78,18 @@ def shift_by_holiday(start_date, end_date=datetime(1,1,1), workdays=1):
     current_app.logger.debug(f"start: {start_date}, workdays: {workdays},")
     current_app.logger.debug(f"final_end: {final_end_date}, deltaDays: {deltaDays}, holiday_count: {holiday_list_2nd_count}")
     return final_end_date
+
+def update_moldNo_by_productName(productName):
+    try:
+        query = molds.query.filter(molds.product_name == productName)
+        mold_db = query.first()
+        if mold_db is None:
+            return ""
+        return mold_db.mold_no
+    except Exception as error:
+            raise error
     
+
 def complete_productionSchedule(db_obj, payload):
     format = '%Y-%m-%d'
     db_obj.productionArea = payload["productionArea"] \
@@ -88,6 +100,8 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("serialNumber") is not None else db_obj.serialNumber
     db_obj.workOrderSN = payload["workOrderSN"] \
         if payload.get("workOrderSN") is not None else db_obj.workOrderSN
+    db_obj.moldNo = payload["moldNo"] \
+        if payload.get("moldNo") is not None else db_obj.moldNo
     db_obj.productSN = payload["productSN"] \
         if payload.get("productSN") is not None else db_obj.productSN
     db_obj.productName = payload["productName"] \
@@ -144,6 +158,8 @@ def complete_productionSchedule(db_obj, payload):
         current_app.logger.debug(f"moldCavity: {db_obj.moldCavity}")
         current_app.logger.debug(f"moldWorkDays: {db_obj.moldWorkDays}")
         current_app.logger.debug(f"conversionRate: {db_obj.conversionRate}")
+        #從molds資料表拿到moldNo
+        db_obj.moldNo = update_moldNo_by_productName(db_obj.productName)
         #每小時產能(drop decimal)
         db_obj.hourlyCapacity = (60 * 60) * (1/db_obj.moldingSecond) * db_obj.moldCavity
         db_obj.hourlyCapacity = math.floor(db_obj.hourlyCapacity)
@@ -238,6 +254,20 @@ class productionScheduleService:
             productionSchedule_dto = productionSchedule_schema.dump(productionSchedule_db)
 
             resp = message(True, "productionSchedule data sent")
+            resp["data"] = productionSchedule_dto
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+        
+
+    @staticmethod
+    def get_machineSNs():
+        try:
+            machineSN_db = productionSchedule.query.with_entities(productionSchedule.machineSN, productionSchedule.productionArea).distinct(productionSchedule.machineSN).all()
+            productionSchedule_dto = productionSchedule_schema.dump(machineSN_db, many=True)
+
+            resp = message(True, "machineSN data sent")
             resp["data"] = productionSchedule_dto
             return resp, 200
         # exception without handling should raise to the caller
