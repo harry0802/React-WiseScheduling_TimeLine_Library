@@ -2,6 +2,7 @@ from datetime import datetime, date, timedelta
 import json
 import math
 from operator import and_
+import sys
 
 import requests
 from app.models.molds import molds
@@ -198,14 +199,17 @@ def complete_productionSchedule(db_obj, payload):
 
 class productionScheduleService:
     @staticmethod
-    def get_productionSchedules(page, size, sort, status_filter=["all"], week_filter=None, year_filter=None, month_filter=None):
+    def get_productionSchedules(page, size, sort, status_filter=["all"], week_filter=None, year_filter=None, month_filter=None, machineSNs=[]):
         try:
+            machineSNs = machineSNs.split(",") if machineSNs else None
+            
             # Get the current productionSchedule
             query = productionSchedule.query
             query = query.filter(productionSchedule.status.in_(status_filter)) if "all" not in status_filter else query
             query = query.filter(productionSchedule.week == week_filter) if week_filter else query
             query = query.filter(extract('year', productionSchedule.planFinishDate) == year_filter) if year_filter else query
             query = query.filter(extract('month', productionSchedule.planFinishDate) == month_filter) if month_filter else query
+            query = query.filter(productionSchedule.machineSN.in_(machineSNs)) if machineSNs else query
 
             if hasattr(productionSchedule, sort):
                 query = query.order_by(getattr(productionSchedule, sort).desc())

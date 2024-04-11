@@ -43,7 +43,6 @@ class productionReportController(Resource):
         },
     )
     @api.param("machineSN", "machineSN")
-    @api.param("machineSNs", "machineSN List", default="A1,B2,C3")
     @api.param("start_planOnMachineDate", "Search range from planOnMachineDate")
     @api.param("end_planOnMachineDate", "Search range to planOnMachineDate")
     @api.param("status", "尚未上機, On-going, Done, 暫停生產, all")
@@ -53,16 +52,15 @@ class productionReportController(Resource):
     @controller_entrance_log(description="Get productionReports")
     def get(self):
         machineSN = request.args.get('machineSN', default=None, type=str)
-        machineSNs = request.args.get('machineSNs', default=None, type=str)
-        start_planOnMachineDate = request.args.get('start_planOnMachineDate', default=(datetime.now() - timedelta(days=14)).isoformat(), type=str)
-        end_planOnMachineDate = request.args.get('end_planOnMachineDate', default=datetime.now().isoformat(), type=str)
+        start_planOnMachineDate = request.args.get('start_planOnMachineDate', default=None, type=str)
+        end_planOnMachineDate = request.args.get('end_planOnMachineDate', default=None, type=str)
         status = request.args.get('status', default="all", type=str)
         expiry = request.args.get('expiry', default="無限期", type=str)
         workOrderSN = request.args.get('workOrderSN', default=None, type=str)
         productName = request.args.get('productName', default=None, type=str)
 
         return productionReportService.get_workOrders(
-            machineSN=machineSN, machineSNs=machineSNs, start_planOnMachineDate=start_planOnMachineDate, 
+            machineSN=machineSN, start_planOnMachineDate=start_planOnMachineDate, 
             end_planOnMachineDate=end_planOnMachineDate, status=status, expiry=expiry, workOrderSN=workOrderSN, productName=productName)
     
 

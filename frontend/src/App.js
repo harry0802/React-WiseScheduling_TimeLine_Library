@@ -4,7 +4,7 @@ import Topbar from "./components/Global/Topbar";
 import Sidebar from "./components/Global/Sidebar";
 import ProductionSchedulePage from "./pages/ProductionSchedulePage";
 import MachineSelectPage from "./pages/MachineSelectPage";
-import ProductionAssignmentPage from "./pages/ProductionAssignmentPage";
+import ProductionReportPage from "./pages/ProductionReportPage";
 import LeaderSignPage from "./pages/LeaderSignPage";
 import ProductionDetailPage from "./pages/ProductionDetailPage";
 import OperatorSignPage from "./pages/OperatorSignPage";
@@ -34,8 +34,8 @@ const App = () => {
                 element={<MachineSelectPage />}
               />
               <Route
-                path={"/ProductionAssignmentPage"}
-                element={<ProductionAssignmentPage />}
+                path={"/ProductionReportPage"}
+                element={<ProductionReportPage />}
               />
               <Route path={"/LeaderSignPage"} element={<LeaderSignPage />} />
               <Route

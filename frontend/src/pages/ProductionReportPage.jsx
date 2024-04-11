@@ -1,14 +1,14 @@
 import React from "react";
-import OperatorSign from "../components/OperatorSign";
+import ProductionReport from "../components/ProductionReport";
 import { MachineStoreValidator } from "../components/Global/MachineStoreValidator";
 
-const OperatorSignPage = () => {
+const ProductionReportPage = () => {
   return (
     <div>
       <MachineStoreValidator />
-      <OperatorSign />
+      <ProductionReport />
     </div>
   );
 };
 
-export default OperatorSignPage;
+export default ProductionReportPage;

@@ -13,7 +13,7 @@ from app.models.productionReport import productionReport
 from .schemas import productionReportSchema, productionScheduleReportSchema
 from flask import url_for
 from app.api.calendar.service import CalendarService
-from sqlalchemy import extract
+from sqlalchemy import extract, or_
 from app.models.productionSchedule import productionSchedule
 productionReport_schema = productionReportSchema()
 productionScheduleReport_schema = productionScheduleReportSchema()
@@ -129,61 +129,73 @@ def complete_productionReport(mode, db_obj, payload):
         if payload.get("OEE") is not None else db_obj.OEE
     
     # 不良數(formula) = sum(色差, 變形, 縮水, 缺料, 破洞, 氣泡, 雜質, 壓克, 溢料, 流痕, 油污, 毛邊, 黑點, 刮傷, 包封, 其它)
-    db_obj.defectiveQuantity = sum([
-        db_obj.colorDifference, db_obj.deformation, db_obj.shrinkage, db_obj.shortage,
-        db_obj.hole, db_obj.bubble, db_obj.impurity, db_obj.pressure, db_obj.overflow,
-        db_obj.flowMark, db_obj.oilStain, db_obj.burr, db_obj.blackSpot, db_obj.scratch,
-        db_obj.encapsulation, db_obj.other
-    ])
+    if (db_obj.colorDifference and db_obj.deformation and db_obj.shrinkage and db_obj.shortage and db_obj.hole 
+        and db_obj.bubble and db_obj.impurity and db_obj.pressure and db_obj.overflow and db_obj.flowMark and db_obj.oilStain 
+        and db_obj.burr and db_obj.blackSpot and db_obj.scratch and db_obj.encapsulation and db_obj.other):
+        db_obj.defectiveQuantity = sum([
+            db_obj.colorDifference, db_obj.deformation, db_obj.shrinkage, db_obj.shortage,
+            db_obj.hole, db_obj.bubble, db_obj.impurity, db_obj.pressure, db_obj.overflow,
+            db_obj.flowMark, db_obj.oilStain, db_obj.burr, db_obj.blackSpot, db_obj.scratch,
+            db_obj.encapsulation, db_obj.other
+        ])
     current_app.logger.debug(f"defectiveQuantity: {db_obj.defectiveQuantity}")
-
+    
     # 模數/1H(formula) = floor((1/成型秒數) * 60 * 60 * 穴數)
-    db_obj.moldModulePerHour = math.floor((1/db_obj.moldingSecond) * 60 * 60 * db_obj.moldCavity)
-    current_app.logger.debug(f"moldModulePerHour: {db_obj.moldModulePerHour}")
+    if (db_obj.moldingSecond and db_obj.moldCavity):
+        db_obj.moldModulePerHour = math.floor((1/db_obj.moldingSecond) * 60 * 60 * db_obj.moldCavity)
+        current_app.logger.debug(f"moldModulePerHour: {db_obj.moldModulePerHour}")
 
+    # 工時(formula) = (結束時間 - 開始時間).hours
     if (db_obj.startTime and db_obj.endTime):
-        # 工時(formula) = (結束時間 - 開始時間).hours
         db_obj.workingHours = (db_obj.endTime - db_obj.startTime).total_seconds() / 3600
         current_app.logger.debug(f"workingHours: {db_obj.workingHours}")
 
-        # 預計生產數量(formula) = 模數/1H * 工時
+    # 預計生產數量(formula) = 模數/1H * 工時
+    if (db_obj.moldModulePerHour and db_obj.workingHours):
         db_obj.planProductionQuantity = db_obj.moldModulePerHour * db_obj.workingHours
         current_app.logger.debug(f"planProductionQuantity: {db_obj.planProductionQuantity}")
 
-        # 生產數差異值(formula) = (生產數量 + 不良數) - 預計生產數量
+    # 生產數差異值(formula) = (生產數量 + 不良數) - 預計生產數量
+    if (db_obj.productionQuantity and db_obj.defectiveQuantity and db_obj.planProductionQuantity):
         db_obj.productionQuantityDifference = (db_obj.productionQuantity + db_obj.defectiveQuantity) - db_obj.planProductionQuantity
         current_app.logger.debug(f"productionQuantityDifference: {db_obj.productionQuantityDifference}")
 
-        # 生產不良率(formula) = 不良數 / (生產數量 + 不良數) * 100%
+    # 生產不良率(formula) = 不良數 / (生產數量 + 不良數) * 100%
+    if (db_obj.productionQuantity and db_obj.defectiveQuantity):
         db_obj.productionDefectiveRate = round(db_obj.defectiveQuantity / (db_obj.productionQuantity + db_obj.defectiveQuantity) * 100, 2)
         current_app.logger.debug(f"productionDefectiveRate: {db_obj.productionDefectiveRate}")
 
-        # 生產良率(formula) = 1 - 生產不良率
+    # 生產良率(formula) = 1 - 生產不良率
+    if (db_obj.productionDefectiveRate):
         db_obj.productionYield = 1 - db_obj.productionDefectiveRate
         current_app.logger.debug(f"productionYield: {db_obj.productionYield}")
 
-        # 機台生產數量(formula) = 機台生產模數 * 穴數
+    # 機台生產數量(formula) = 機台生產模數 * 穴數
+    if (db_obj.machineProductionModule and db_obj.moldCavity):
         db_obj.machineProductionQuantity = db_obj.machineProductionModule * db_obj.moldCavity
         current_app.logger.debug(f"machineProductionQuantity: {db_obj.machineProductionQuantity}")
 
-        # 實際不良率(產能漏失率)(formula) = (機台生產數量 - 生產數量) / 機台生產數量
+    # 實際不良率(產能漏失率)(formula) = (機台生產數量 - 生產數量) / 機台生產數量
+    if (db_obj.machineProductionQuantity and db_obj.productionQuantity):
         db_obj.machineDefectiveRate = (db_obj.machineProductionQuantity - db_obj.productionQuantity) / db_obj.machineProductionQuantity
         current_app.logger.debug(f"machineDefectiveRate: {db_obj.machineDefectiveRate}")
 
-        # 稼動率(formula) = machine working time in 24hr in IoT record / 24
+    # 稼動率(formula) = machine working time in 24hr in IoT record / 24
 
 
-        # 產能效率(formula) = (生產數量 + 不良數) / 預計生產數量        
+    # 產能效率(formula) = (生產數量 + 不良數) / 預計生產數量        
+    if (db_obj.productionQuantity and db_obj.defectiveQuantity and db_obj.planProductionQuantity):
         db_obj.productionEfficiency = (db_obj.productionQuantity + db_obj.defectiveQuantity) / db_obj.planProductionQuantity
         current_app.logger.debug(f"productionEfficiency: {db_obj.productionEfficiency}")
 
-        # OEE(formula) = 稼動率 * 產能效率 * 生產良率
+    # OEE(formula) = 稼動率 * 產能效率 * 生產良率
+    if (db_obj.utilizationRate and db_obj.productionEfficiency and db_obj.productionYield):
         db_obj.OEE = db_obj.utilizationRate * db_obj.productionEfficiency * db_obj.productionYield
         current_app.logger.debug(f"OEE: {db_obj.OEE}")
         
-        # 機台生產模數 = from IoT record get (2nd module - 1st module) by the 結束時間 and 開始時間
+    # 機台生產模數 = from IoT record get (2nd module - 1st module) by the 結束時間 and 開始時間
         
-        # 機台模式 = from IoT record get the mode by the 開始時間
+    # 機台模式 = from IoT record get the mode by the 開始時間
 
     # 母批
     if (mode == "motherLot"):
@@ -232,40 +244,43 @@ def complete_productionReport(mode, db_obj, payload):
             else:
                 db_obj.serialNumber = max([child.serialNumber for child in childLots]) + 1
             db_obj.lotName = f"{db_obj.workOrderSN}-{db_obj.serialNumber:03d}"
-    # 尚未完成數量 = 製令數量 - 生產數量
-    db_obj.unfinishedQuantity = db_obj.workOrderQuantity - db_obj.productionQuantity
+    
+    if (db_obj.workOrderQuantity and db_obj.productionQuantity):
+        # 尚未完成數量 = 製令數量 - 生產數量
+        db_obj.unfinishedQuantity = db_obj.workOrderQuantity - db_obj.productionQuantity
     return db_obj
 
 
 class productionReportService:
     @staticmethod
-    def get_workOrders(start_planOnMachineDate, end_planOnMachineDate, machineSN=None, machineSNs=[], status="all", workOrderSN=None, 
+    def get_workOrders(start_planOnMachineDate, end_planOnMachineDate, machineSN=None, status="all", workOrderSN=None, 
                               productName=None, expiry="無期限"):
         try:
             # transform the ISO format datetime to UNIX timestamp
             start_planOnMachineDate = datetime.fromisoformat(start_planOnMachineDate) \
-                if start_planOnMachineDate else datetime.fromisoformat((datetime.now() - timedelta(days=14)).isoformat())
+                if start_planOnMachineDate else None
             end_planOnMachineDate = datetime.fromisoformat(end_planOnMachineDate) \
-                if end_planOnMachineDate else datetime.fromisoformat(datetime.now().isoformat())
-            machineSNs = machineSNs.split(",") if machineSNs else None
+                if end_planOnMachineDate else None
 
             query = productionSchedule.query
-            query = query.with_entities(productionSchedule.productionSchedule_id, productionSchedule.machineSN,
+            query = query.with_entities(productionSchedule.productionSchedule_id, productionSchedule.machineSN, productionSchedule.moldNo,
                                         productionSchedule.workOrderSN, productionSchedule.productSN, productionSchedule.productName,
                                         productionSchedule.workOrderQuantity, productionSchedule.planOnMachineDate,
-                                        productionSchedule.actualOnMachineDate, productionSchedule.status, productionReport.productionReport_id, productionReport.productionQuantity,
-                                        productionReport.defectiveQuantity, productionReport.unfinishedQuantity, productionReport.colorDifference,
+                                        productionSchedule.actualOnMachineDate, productionSchedule.status, 
+                                        productionReport.productionReport_id, productionReport.productionQuantity,
+                                        productionReport.defectiveQuantity, productionReport.productionDefectiveRate, 
+                                        productionReport.unfinishedQuantity, productionReport.colorDifference,
                                         productionReport.deformation, productionReport.shrinkage, productionReport.shortage,
                                         productionReport.hole, productionReport.bubble, productionReport.impurity, productionReport.pressure,
                                         productionReport.overflow, productionReport.flowMark, productionReport.oilStain, productionReport.burr,
                                         productionReport.blackSpot, productionReport.scratch, productionReport.encapsulation, productionReport.other,
                                         productionReport.leader, productionReport.operator1, productionReport.operator2, productionReport.startTime,
                                         productionReport.endTime)
-            query = query.join(productionReport, productionSchedule.workOrderSN == productionReport.workOrderSN, isouter = True)
+            query = query.join(productionReport, productionSchedule.workOrderSN == productionReport.workOrderSN, isouter = True) # left outer join
+            query = query.filter(or_(productionReport.serialNumber == 0, productionReport.serialNumber == None))
             query = query.filter(productionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
                     if start_planOnMachineDate and end_planOnMachineDate else query
             query = query.filter(productionSchedule.machineSN == machineSN) if machineSN else query
-            query = query.filter(productionSchedule.machineSN.in_(machineSNs)) if machineSNs else query
             query = query.filter(productionSchedule.status == status) if status != "all" else query
             query = query.filter(productionSchedule.workOrderSN.like(f"%{workOrderSN}%")) if workOrderSN else query
             query = query.filter(productionSchedule.productName.like(f"%{productName}%")) if productName else query
@@ -274,13 +289,15 @@ class productionReportService:
                 # 預計完成日前七天，該單尚未完成，為即將到期
                 query = query.filter(productionSchedule.status != "Done", 
                                      productionSchedule.planFinishDate.between(datetime.now(), datetime.now() + timedelta(days=7)))
-            elif (expiry == "已過期"):
+            elif (expiry == "已經過期"):
                 # 過了預計完成日，該單尚未完成，就是已經過期
                 query = query.filter(productionSchedule.status != "Done",
                                      productionSchedule.planFinishDate < datetime.now())
             
             query = query.order_by(productionSchedule.id.desc())
             productionReport_db = query.all()
+            print("query: ", query, file=sys.stderr)
+            # print(f"productionReport_db: {productionReport_db}", file=sys.stderr)
             if not (productionReport_db):
                 productionReport_db = []
 

@@ -9,13 +9,13 @@ import {
 import { useLotStore } from "../../store/zustand/store";
 
 import {
-  useGetProductionAssignmentQuery,
+  useGetProductionReportQuery,
   usePauseStausMutation,
   useCancelStausMutation,
   useActionStausMutation,
-  useAddProductionAssignmentMutation,
-  useUpdateProductionAssignmentMutation,
-} from "../../store/api/productionAssignmentApi";
+  useAddProductionReportMutation,
+  useUpdateProductionReportMutation,
+} from "../../store/api/productionReportApi";
 import styles from "./index.module.scss";
 
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
@@ -126,7 +126,7 @@ const ProductionDetail = (props) => {
 
   const isLoading = false;
   const isSuccess = true;
-  // const { data, isLoading, isSuccess, refetch } = useGetProductionAssignmentQuery({
+  // const { data, isLoading, isSuccess, refetch } = useGetProductionReportQuery({
   //   start_date: startDate,
   //   end_date: endDate,
   //   status_filter: statusFilter ? statusFilter : 'all',
@@ -573,7 +573,7 @@ const ProductionDetail = (props) => {
                   icon={<PauseOutlined />}
                   onClick={() =>
                     navigate("/LeaderSignPage", {
-                      state: { action: "stop" },
+                      state: { action: "pause" },
                     })
                   }
                 />

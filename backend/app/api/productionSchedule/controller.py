@@ -50,6 +50,7 @@ class productionScheduleController(Resource):
     @api.param("week_filter", "(planFinishDate) week number")
     @api.param("year_filter", "(planFinishDate) year number")
     @api.param("month_filter", "(planFinishDate) month number")
+    @api.param("machineSNs", "machineSN List", default="A1,B2,C3")
     @controller_entrance_log(description="Get productionSchedules")
     def get(self):
         page = request.args.get('page', default=1, type=int)
@@ -60,10 +61,11 @@ class productionScheduleController(Resource):
         week_filter = request.args.get('week_filter', default=None, type=int)
         year_filter = request.args.get('year_filter', default=None, type=int)
         month_filter = request.args.get('month_filter', default=None, type=int)
+        machineSNs = request.args.get('machineSNs', default=None, type=str)
 
         return productionScheduleService.get_productionSchedules(
             page=page, size=size, sort=sort, status_filter=status_filter,
-            week_filter=week_filter, year_filter=year_filter, month_filter=month_filter)
+            week_filter=week_filter, year_filter=year_filter, month_filter=month_filter, machineSNs=machineSNs)
     
     @api.doc(
         "Create the current productionSchedule",

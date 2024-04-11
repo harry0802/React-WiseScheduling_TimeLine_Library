@@ -10,7 +10,7 @@ import { useLotStore } from "../../store/zustand/store";
 const OperatorSign = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const action = location.state.action ? location.state.action : null; // startChildLot: 開始子批生產，endChildLot: 結束子批生產
+  const action = location.state ? location.state.action : null; // startChildLot: 開始子批生產，endChildLot: 結束子批生產
   const [error, setError] = useState(false);
   const lots = useLotStore((state) => state.lots);
 

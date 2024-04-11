@@ -1,14 +1,15 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export const useMachineNoStore = create(
+export const useMachineSNStore = create(
   persist(
     (set, get) => ({
-      machineNo: 0,
-      updateMachineNo: (newmachineNo) => set({ machineNo: newmachineNo }),
+      // machineSN_Store: 0,
+      updateMachineSN: (newmachineSN_Store) =>
+        set({ machineSN_Store: newmachineSN_Store }),
     }),
     {
-      name: "machineNo-storage", // name of the item in the storage (must be unique)
+      name: "machineSN_Store-storage", // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
     }
   )

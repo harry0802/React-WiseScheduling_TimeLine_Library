@@ -71,6 +71,7 @@ class productionReport(Model):
     material = Column(db.String(255))
     moldCavity = Column(db.Integer)
     leader = Column(db.String(255))
+    # leader = Column(db.JSON)
     operator1 = Column(db.String(255))
     operator2 = Column(db.String(255))
     productionQuantity = Column(db.Integer)

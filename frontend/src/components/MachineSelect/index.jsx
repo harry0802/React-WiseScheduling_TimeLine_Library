@@ -1,155 +1,127 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMachineNoStore } from "../../store/zustand/store";
+import { useMachineSNStore } from "../../store/zustand/store";
 import { ConfigProvider, Select, Col, Row } from "antd";
 import CircularProgress from "@mui/material/CircularProgress";
 import "./index.scss";
-
-import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
+import {
+  useGetMachinesQuery,
+  useGetProductionScheduleByMachinesQuery,
+} from "../../store/api/productionScheduleApi";
+import { WORKORDER_STATUS } from "../../config/enum";
 
 const MachineSelect = (props) => {
   const navigate = useNavigate();
-  const [dataSource, setDataSource] = useState([]); /*回傳資料*/
-  // 搜尋條件篩選
   const { Option } = Select;
-  let areaRef = useRef("a"); // 地區
+  const [skip, setSkip] = useState(true);
+  const [machineFilter, setMachineFilter] = useState(""); // 機台過濾條件
+  let areaRef = useRef("A"); // 地區
   const [machineList, setMachineList] = useState([]); // 機台清單
-  const updateMachineNo = useMachineNoStore((state) => state.updateMachineNo);
-
+  let machineDataRef = useRef([]); // 格式化後的機台資料
+  const updateMachineSN = useMachineSNStore((state) => state.updateMachineSN); // 更新機台編號至Zustand store
   const [loading, setLoading] = useState(false);
 
-  const isLoading = false;
-  const isSuccess = true;
-  // const { data, isLoading, isSuccess, refetch } = useGetProductionAssignmentQuery({
-  //   start_date: startDate,
-  //   end_date: endDate,
-  //   status_filter: statusFilter ? statusFilter : 'all',
-
-  // });
-
   // 地區下拉選單
+  const areaOptions = [
+    { value: "A", label: "A區" },
+    { value: "B", label: "B區" },
+    { value: "C", label: "C區" },
+    { value: "D", label: "D區" },
+  ];
   const allAreaOptions = [
-    <Option key={0} value={"a"} label="A區">
-      A區
-    </Option>,
-    <Option key={1} value={"b"} label="B區">
-      B區
-    </Option>,
-    <Option key={2} value={"c"} label="C區">
-      C區
-    </Option>,
-    <Option key={3} value={"d"} label="D區">
-      D區
-    </Option>,
+    areaOptions.map((item, index) => (
+      <Option key={index} value={item.value} label={item.label}>
+        {item.label}
+      </Option>
+    )),
   ];
 
-  // useEffect(() => {
-  //   if (isSuccess) {
-  //     setLoading(true);
+  // 取得機台資料
+  const {
+    data: machineData,
+    isLoading: machineIsLoading,
+    isSuccess: machineIsSuccess,
+    refetch: machineRefetch,
+  } = useGetMachinesQuery();
 
-  //     const { data: dataSource, meta } = data;
-  //     // 設定總量
-  //     setDataSource(dataSource);
-  //     setLoading(false);
-  //     setTotalCurrent(meta.total_count);
-
-  //     // // 在获取到最新的 dataSource 后，检查 moldingSecond 和 moldCavity 是否有值
-  //     // const newDataWithHourlyCapacity = dataSource.map((item) => {
-  //     //   if (item.moldingSecond && item.moldCavity) {
-  //     //     // 计算新的 hourlyCapacity，并使用 Math.floor() 進行無条件捨去
-  //     //     const newHourlyCapacity = Math.floor((3600 / item.moldingSecond) * item.moldCavity);
-  //     //     // 更新 dataSource 中的 hourlyCapacity
-  //     //     return { ...item, hourlyCapacity: newHourlyCapacity };
-  //     //   }
-  //     //   return item;
-  //     // });
-
-  //     // // 更新 dataSource
-  //     // setDataSource(newDataWithHourlyCapacity);
-
-  //     // // 在这里处理 hourlyCapacity 更新后的逻辑
-  //     // const newDataWithDailyCapacity = newDataWithHourlyCapacity.map((item) => {
-  //     //   if (item.hourlyCapacity !== null && item.conversionRate !== null) {
-  //     //     // 计算新的 dailyCapacity，并使用 Math.floor() 進行無条件捨去
-  //     //     const newDailyCapacity = Math.floor(item.hourlyCapacity * item.dailyWorkingHours * item.conversionRate);
-  //     //     // 更新 dataSource 中的 dailyCapacity
-  //     //     return { ...item, dailyCapacity: newDailyCapacity };
-  //     //   }
-  //     //   return item;
-  //     // });
-
-  //     // // 更新 dataSource
-  //     // setDataSource(newDataWithDailyCapacity);
-  //   }
-  // }, [statusFilter, isSuccess, data]);
-
-  const fakeMachineList = [
+  // 取得正在生產的製令單資料
+  const {
+    data: productionScheduleData,
+    isSuccess: productionScheduleIsSuccess,
+    isLoading: productionScheduleIsLoading,
+    refetch: productionScheduleRefetch,
+  } = useGetProductionScheduleByMachinesQuery(
     {
-      area: "a",
-      machines: [
-        { machine_number: "A01", status: "active" },
-        { machine_number: "A02", status: null },
-        { machine_number: "A03", status: null },
-        { machine_number: "A04", status: null },
-        { machine_number: "A05", status: null },
-        { machine_number: "A06", status: null },
-        { machine_number: "A07", status: null },
-      ],
+      machineSNs: machineFilter,
+      status_filter: WORKORDER_STATUS.ON_GOING,
     },
-    {
-      area: "b",
-      machines: [
-        { machine_number: "B01", status: null },
-        { machine_number: "B02", status: null },
-        { machine_number: "B03", status: null },
-        { machine_number: "B04", status: null },
-        { machine_number: "B05", status: null },
-        { machine_number: "B06", status: null },
-      ],
-    },
-    {
-      area: "c",
-      machines: [
-        { machine_number: "C01", status: null },
-        { machine_number: "C02", status: null },
-        { machine_number: "C03", status: null },
-        { machine_number: "C04", status: null },
-        { machine_number: "C05", status: "active" },
-      ],
-    },
-    {
-      area: "d",
-      machines: [
-        { machine_number: "D01", status: null },
-        { machine_number: "D02", status: null },
-        { machine_number: "D03", status: null },
-        { machine_number: "D04", status: null },
-      ],
-    },
-  ];
+    { skip }
+  );
 
-  const changeMachineList = () => {
-    let list = fakeMachineList.filter((item) => item.area === areaRef.current);
-    setMachineList(list[0].machines);
+  useEffect(() => {
+    if (machineIsSuccess) {
+      const machine_filter = machineData.map((item) => {
+        return item.machineSN;
+      });
+      setMachineFilter(machine_filter.join(","));
+      setSkip((prev) => !prev);
+    }
+  }, [machineIsSuccess]);
+
+  // 將 machine data 格式化成以下格式
+  // {
+  //     area: "a",
+  //     machines: [
+  //       { machine_number: "A01", status: "active" },
+  //       { machine_number: "A02", status: null },
+  //     ],
+  // },
+  const formatMachineData = () => {
+    const tempData = areaOptions.map((item) => {
+      const machines = machineData.filter(
+        (machine) => machine.productionArea === item.value
+      );
+      return {
+        area: item.value,
+        machines: machines,
+      };
+    });
+    const formattedData = tempData.map((item) => {
+      const machines = item.machines.map((machine) => {
+        // add status to machine and set it to active if machine.machineSN is in productionScheduleData
+        return productionScheduleData.some(
+          (bMachine) => bMachine.machineSN === machine.machineSN
+        )
+          ? { ...machine, status: "active" }
+          : { ...machine, status: null };
+      });
+      return { ...item, machines: machines };
+    });
+    return formattedData;
   };
 
   useEffect(() => {
-    changeMachineList();
-  }, []); // Pass an empty array to only call the function once on mount.
+    if (machineIsSuccess && productionScheduleIsSuccess) {
+      machineDataRef.current = formatMachineData();
+      console.log("machineDataRef.current", machineDataRef.current);
+      changeMachineList();
+    }
+  }, [machineIsSuccess, productionScheduleIsSuccess]);
 
-  if (isLoading) {
+  const changeMachineList = () => {
+    let list = machineDataRef.current.filter(
+      (item) => item.area === areaRef.current
+    );
+    setMachineList(list[0].machines);
+  };
+
+  if (machineIsLoading || productionScheduleIsLoading) {
     return (
       <div>
         <CircularProgress />
       </div>
     );
   }
-
-  // 防抖函數，延遲 500 毫秒執行
-  // const debouncedHandleDelete = debounce(deleteChecked, 500);
-  // const debouncedHandleAction = debounce(actionChecked, 500);
-  // const debouncedHandlePause = debounce(pauseChecked, 500);
-  // const debouncedHandleAdd = debounce(handleAdd, 500);
 
   return (
     <ConfigProvider
@@ -170,7 +142,7 @@ const MachineSelect = (props) => {
               {/* 篩選地區 */}
               <Select
                 className="area-filter"
-                defaultValue="a"
+                defaultValue="A"
                 style={{ width: 180, height: 60 }}
                 onChange={(value) => {
                   areaRef.current = value;
@@ -194,11 +166,17 @@ const MachineSelect = (props) => {
                           : "machine-box"
                       }
                       onClick={() => {
-                        updateMachineNo(item.machine_number);
-                        navigate("/ProductionAssignmentPage");
+                        updateMachineSN(item.machineSN);
+                        if (item.status === "active") {
+                          navigate("/LeaderSignPage", {
+                            state: { action: "continue" },
+                          });
+                        } else {
+                          navigate("/ProductionReportPage");
+                        }
                       }}
                     >
-                      <h1>{item.machine_number}</h1>
+                      <h1>{item.machineSN}</h1>
                       {item.status === "active" ? (
                         <p>正在運作...</p>
                       ) : (
