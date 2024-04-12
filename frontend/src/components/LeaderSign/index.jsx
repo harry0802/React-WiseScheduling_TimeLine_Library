@@ -5,13 +5,17 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { notification } from "antd";
 import checkImage from "../../assets/check.png";
 import pauseImage from "../../assets/pause.png";
-import { useMachineSNStore, useLotStore } from "../../store/zustand/store";
+import { useMachineSNStore } from "../../store/zustand/store";
 import {
+  useGetProductionReportQuery,
   useAddMotherLotsMutation,
   useUpdateMotherLotsMutation,
 } from "../../store/api/productionReportApi";
+import { useDoneStausMutation } from "../../store/api/productionScheduleApi";
+import { WORKORDER_STATUS, LEADER_ACTION } from "../../config/enum";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -24,15 +28,35 @@ const LeaderSign = (props) => {
   const location = useLocation();
   const machineSN_Store = useMachineSNStore((state) => state.machineSN_Store); // 從zustand store 取得機台編號
   const action = location.state ? location.state.action : null; // new: 從製令單列表頁面過來要新增母批, continue: 從機台選擇頁面過來要繼續進行正在生產的母批, complete: 完成母批, pause: 暫停母批
-  const selectedWorkOrder = location.state
-    ? location.state.selectedWorkOrder
-    : null; // 要新增母批的製令單號清單
+  const newWorkOrders = location.state ? location.state.newWorkOrders : null; // 要新增母批的製令單號清單
+  const completedWorkOrders = location.state
+    ? location.state.completedWorkOrders
+    : null; // 要完成的母批清單
+  const pausedWorkOrders = location.state
+    ? location.state.pausedWorkOrders
+    : null; // 要暫停的母批清單
+  const [skip, setSkip] = useState(true);
   const [error, setError] = useState(false); // 是否顯示帳號錯誤訊息
   const [errorMsg, setErrorMsg] = useState(""); // 錯誤訊息
-  const lots = useLotStore((state) => state.lots); // 該機台的母批及子批清單
   const [addMotherLots, motherLotsMutationResult] = useAddMotherLotsMutation(); // 新增母批
   const [updateMotherLots, updateMotherLotsMutationResult] =
     useUpdateMotherLotsMutation(); // 更新母批
+  const [doneStaus] = useDoneStausMutation(); // 更新製令單狀態
+
+  // 取得該機台正在生產的製令單資料
+  const {
+    data: continuedWorkOrders,
+    isLoading,
+    isSuccess,
+    refetch,
+  } = useGetProductionReportQuery(
+    {
+      machineSN: machineSN_Store,
+      status: WORKORDER_STATUS.ON_GOING,
+      motherOnly: true,
+    },
+    { skip: skip }
+  );
 
   useEffect(() => {
     // 每次進入此頁面時，都要檢查是否有action，若無則返回機台選擇頁面
@@ -42,14 +66,23 @@ const LeaderSign = (props) => {
     switch (action) {
       case "new":
         // 如果action是new，但沒有傳入要新增母批的製令單號清單，則返回製令單列表頁面。有的話，等產線管理者輸入帳號後批次新增母批。
-        if (!selectedWorkOrder) {
+        if (!newWorkOrders) {
           navigate("/RroductionReportPage");
         }
         break;
       case "continue":
-        // 如果action是continue，但lot state沒有正在生產的母批，則返回機台選擇頁面。有的話，等產線管理者輸入帳號後更新正在生產的母批。
-        if (lots.length === 0) {
-          navigate("/MachineSelectPage");
+        setSkip(false);
+        break;
+      case "complete":
+        // 如果action是complete，但沒有傳入要完成的母批清單，則返回生產明細列表頁面。有的話，等產線管理者輸入帳號後批次完成母批。
+        if (!completedWorkOrders) {
+          navigate("/ProductionDetailPage");
+        }
+        break;
+      case "pause":
+        // 如果action是pause，但沒有傳入要暫停的母批清單，則返回生產明細列表頁面。有的話，等產線管理者輸入帳號後批次暫停母批。
+        if (!pausedWorkOrders) {
+          navigate("/ProductionDetailPage");
         }
         break;
       default:
@@ -57,34 +90,16 @@ const LeaderSign = (props) => {
     }
   }, []);
 
-  // 若母批已存在，則更新正在生產的母批，例如暫停生產的母批
-  const handleUpdateMotherLots = async (data) => {
-    const updatedProductionReports = selectedWorkOrder
-      .filter((workOrder) => workOrder.productionReport_id != null)
-      .map((workOrder) => {
-        let leader = JSON.parse(workOrder.leader);
-        leader.push({
-          leader: data.get("leader"),
-          log_time: dayjs.tz(new Date(), TZ).format(),
-        });
-        leader = JSON.stringify(leader);
-        return {
-          id: workOrder.productionReport_id,
-          leader: leader,
-        };
-      });
-    const updatedItem = await updateMotherLots(updatedProductionReports);
-  };
-
   const actionNew = async (data) => {
     // 新增母批
     const leader = JSON.stringify([
       {
         leader: data.get("leader"),
         log_time: dayjs.tz(new Date(), TZ).format(),
+        action: LEADER_ACTION.NEW,
       },
     ]);
-    const newProductionReports = selectedWorkOrder
+    const newProductionReports = newWorkOrders
       .filter((workOrder) => workOrder.productionReport_id === null)
       .map((workOrder) => {
         return {
@@ -96,14 +111,121 @@ const LeaderSign = (props) => {
           leader: leader,
         };
       });
-    const addedItem = await addMotherLots(newProductionReports);
-    handleUpdateMotherLots(data);
-    navigate("/ProductionDetailPage");
+    // await addMotherLots(newProductionReports);
+    // 更新母批
+    const updatedProductionReports = newWorkOrders
+      .filter((workOrder) => workOrder.productionReport_id != null)
+      .map((workOrder) => {
+        let leader = JSON.parse(workOrder.leader);
+        leader.push({
+          leader: data.get("leader"),
+          log_time: dayjs.tz(new Date(), TZ).format(),
+          action: LEADER_ACTION.CONTINUE,
+        });
+        leader = JSON.stringify(leader);
+        return {
+          id: workOrder.productionReport_id,
+          leader: leader,
+        };
+      });
+    // await updateMotherLots(updatedProductionReports);
+    const productionSchedule_ids = JSON.stringify(
+      newWorkOrders.map((workOrder) => {
+        return workOrder.productionSchedule_id;
+      })
+    );
+    navigate("/ProductionDetailPage", {
+      state: { productionSchedule_ids: productionSchedule_ids },
+    });
   };
 
   const actionContinue = async (data) => {
-    handleUpdateMotherLots(data);
+    const updatedProductionReports = continuedWorkOrders
+      .filter((workOrder) => workOrder.productionReport_id != null)
+      .map((workOrder) => {
+        let leader = JSON.parse(workOrder.leader);
+        leader.push({
+          leader: data.get("leader"),
+          log_time: dayjs.tz(new Date(), TZ).format(),
+          action: LEADER_ACTION.CONTINUE,
+        });
+        leader = JSON.stringify(leader);
+        return {
+          id: workOrder.productionReport_id,
+          leader: leader,
+        };
+      });
+    await updateMotherLots(updatedProductionReports);
     navigate("/ProductionDetailPage");
+  };
+
+  const actionComplete = async (data) => {
+    // 更新母批
+    const updatedProductionReports = completedWorkOrders
+      .filter((workOrder) => workOrder.productionReport_id != null)
+      .map((workOrder) => {
+        let leader = JSON.parse(workOrder.leader);
+        leader.push({
+          leader: data.get("leader"),
+          log_time: dayjs.tz(new Date(), TZ).format(),
+          action: LEADER_ACTION.COMPLETE,
+        });
+        leader = JSON.stringify(leader);
+        return {
+          id: workOrder.productionReport_id,
+          leader: leader,
+          endTime: dayjs.tz(new Date(), TZ).format(),
+        };
+      });
+    await updateMotherLots(updatedProductionReports);
+    // 更新製令單狀態為Done
+    const updatedProductionSchedules = completedWorkOrders.map((workOrder) => {
+      return {
+        id: workOrder.productionSchedule_id,
+      };
+    });
+    const updatedIds = Json.stringify(updatedProductionSchedules);
+    await doneStaus(updatedIds);
+    notification.success({
+      description: "已完成階段工作",
+      placement: "bottomRight",
+      duration: 5,
+    });
+    navigate("/ProductionReportPage");
+  };
+
+  const actionPause = async (data) => {
+    // 更新母批
+    const updatedProductionReports = pausedWorkOrders
+      .filter((workOrder) => workOrder.productionReport_id != null)
+      .map((workOrder) => {
+        let leader = JSON.parse(workOrder.leader);
+        leader.push({
+          leader: data.get("leader"),
+          log_time: dayjs.tz(new Date(), TZ).format(),
+          action: LEADER_ACTION.PAUSE,
+        });
+        leader = JSON.stringify(leader);
+        return {
+          id: workOrder.productionReport_id,
+          leader: leader,
+        };
+      });
+    await updateMotherLots(updatedProductionReports);
+    // 更新製令單狀態為暫停
+    const updatedProductionSchedules = pausedWorkOrders.map((workOrder) => {
+      return {
+        id: workOrder.productionSchedule_id,
+      };
+    });
+    const updatedIds = JSON.stringify(updatedProductionSchedules);
+    await pauseStaus(updatedIds);
+    notification.success({
+      description: "已暫停該階段工作",
+      placement: "bottomRight",
+      duration: 5,
+    });
+    navigate("/ProductionReportPage");
   };
 
   const handleSubmit = async (e) => {
@@ -125,8 +247,10 @@ const LeaderSign = (props) => {
         actionContinue(data);
         break;
       case "complete":
+        actionComplete(data);
         break;
       case "pause":
+        actionPause(data);
         break;
       default:
         break;

@@ -1,29 +1,23 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Table, Button, message, Modal, Tooltip } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Table, Button, Modal, Tooltip } from "antd";
 import {
   CheckOutlined,
   PauseOutlined,
   CaretRightOutlined,
 } from "@ant-design/icons";
-import { useLotStore } from "../../store/zustand/store";
-
-import {
-  useGetProductionReportQuery,
-  usePauseStausMutation,
-  useCancelStausMutation,
-  useActionStausMutation,
-  useAddProductionReportMutation,
-  useUpdateProductionReportMutation,
-} from "../../store/api/productionReportApi";
+import { useMachineSNStore, useLotStore } from "../../store/zustand/store";
+import { useGetProductionReportQuery } from "../../store/api/productionReportApi";
 import styles from "./index.module.scss";
-
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
+import { TZ } from "../../config/config";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const ProductionDetail = (props) => {
-  // 如果沒有機台資訊，則導向機台選擇頁面，有的話，則列出該機台所有[尚未上機, 暫停生產, 正在生產]的母批並更新lot state
-  // TODO....
-
   // 防止使用者回上一頁
   useEffect(() => {
     window.history.pushState(null, "", document.URL);
@@ -66,7 +60,7 @@ const ProductionDetail = (props) => {
     },
     {
       title: "模具編號",
-      dataIndex: "tmpNo",
+      dataIndex: "moldNo",
       width: "8%",
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
@@ -118,60 +112,110 @@ const ProductionDetail = (props) => {
     },
   ];
   const navigate = useNavigate();
+  const location = useLocation();
+  // const productionSchedule_ids = location.state
+  //   ? location.state.productionSchedule_ids
+  //   : null; // 要準備生產的製令單id
+  const productionSchedule_ids = "3,4,5";
+  // 從zustand store 取得機台編號
+  const machineSN_Store = useMachineSNStore((state) => state.machineSN_Store);
   const [dataSource, setDataSource] = useState([]); /*回傳資料*/
   const [showUnfinished, setShowUnfinished] = useState(false);
   const [loading, setLoading] = useState(false);
-  const lots = useLotStore((state) => state.lots);
+  // const lots = useLotStore((state) => state.lots);
   const updateLots = useLotStore((state) => state.updateLots);
 
-  const isLoading = false;
-  const isSuccess = true;
-  // const { data, isLoading, isSuccess, refetch } = useGetProductionReportQuery({
-  //   start_date: startDate,
-  //   end_date: endDate,
-  //   status_filter: statusFilter ? statusFilter : 'all',
+  if (productionSchedule_ids === null) {
+    navigate("/MachineSelectPage");
+  }
 
-  // });
+  // 取得製令單/母批資料
+  const {
+    data: workOrders,
+    isLoading,
+    isSuccess,
+    refetch,
+  } = useGetProductionReportQuery({
+    productionSchedule_ids: productionSchedule_ids,
+  });
 
-  // useEffect(() => {
-  //   if (isSuccess) {
-  //     setLoading(true);
+  useEffect(() => {
+    if (isSuccess) {
+      // 將母批和子批分開，並且將子批放入母批的children中
+      const motherLots = workOrders.filter((item) => item.serialNumber === 0);
+      const childLots = workOrders.filter((item) => item.serialNumber !== 0);
+      const nestedLots = motherLots.map((motherLot) => {
+        const children = childLots.filter(
+          (childLot) => childLot.workOrderSN === motherLot.workOrderSN
+        );
+        return {
+          ...motherLot,
+          children: children.length > 0 ? children : null,
+        };
+      });
 
-  //     const { data: dataSource, meta } = data;
-  //     // 設定總量
-  //     setDataSource(dataSource);
-  //     setLoading(false);
-  //     setTotalCurrent(meta.total_count);
+      let currentClass = " groupGray ";
+      const formattedworkOrders = nestedLots.map((item, m_idx) => {
+        let key = 0; // for antd table key
+        let no = 0;
+        let operators = "";
+        let period = "";
+        let children = null;
 
-  //     // // 在获取到最新的 dataSource 后，检查 moldingSecond 和 moldCavity 是否有值
-  //     // const newDataWithHourlyCapacity = dataSource.map((item) => {
-  //     //   if (item.moldingSecond && item.moldCavity) {
-  //     //     // 计算新的 hourlyCapacity，并使用 Math.floor() 進行無条件捨去
-  //     //     const newHourlyCapacity = Math.floor((3600 / item.moldingSecond) * item.moldCavity);
-  //     //     // 更新 dataSource 中的 hourlyCapacity
-  //     //     return { ...item, hourlyCapacity: newHourlyCapacity };
-  //     //   }
-  //     //   return item;
-  //     // });
+        key = m_idx + 1;
+        // generate serial number with padding zero
+        no = (m_idx + 1).toString().padStart(2, "0");
+        // combine leader and start time in operators and period
+        if (item.leader != null) {
+          operators = JSON.parse(item.leader).map((leader) => {
+            return `${leader.leader}\n`;
+          });
+          period = JSON.parse(item.leader).map((leader) => {
+            return `${dayjs(leader.log_time)
+              .tz(TZ)
+              .format("YYYY-MM-DD HH:MM")} ${leader.action}\n`;
+          });
+        }
+        // set groupWhite class to the first item and its children, set groupGray to the second item and its children, set groupWhite to the third item and its children, and so on
+        let className = "";
+        currentClass =
+          currentClass === " groupWhite " ? " groupGray " : " groupWhite ";
+        className = currentClass;
+        // combine operators and start time, end time in children array
+        if (item.children != null) {
+          children = item.children.map((child, idx) => {
+            return {
+              key: idx + (m_idx + 1) * 100,
+              lotName: child.lotName,
+              productionQuantity: child.productionQuantity,
+              defectiveQuantity: child.defectiveQuantity,
+              unfinishedQuantity: child.unfinishedQuantity,
+              operators: `${child.operator1}\n${child.operator2}`,
+              period: `${dayjs(child.start_time)
+                .tz(TZ)
+                .format("YYYY-MM-DD HH:MM")}\n${dayjs(child.end_time)
+                .tz(TZ)
+                .format("YYYY-MM-DD HH:MM")}`,
+              className: currentClass,
+            };
+          });
+        }
+        return {
+          ...item,
+          key: key,
+          no: no,
+          className: className,
+          operators: operators,
+          period: period,
+          children: children,
+        };
+      });
+      console.log("formattedworkOrders", formattedworkOrders);
+      setDataSource(formattedworkOrders);
+    }
+  }, [isSuccess, workOrders]);
 
-  //     // // 更新 dataSource
-  //     // setDataSource(newDataWithHourlyCapacity);
-
-  //     // // 在这里处理 hourlyCapacity 更新后的逻辑
-  //     // const newDataWithDailyCapacity = newDataWithHourlyCapacity.map((item) => {
-  //     //   if (item.hourlyCapacity !== null && item.conversionRate !== null) {
-  //     //     // 计算新的 dailyCapacity，并使用 Math.floor() 進行無条件捨去
-  //     //     const newDailyCapacity = Math.floor(item.hourlyCapacity * item.dailyWorkingHours * item.conversionRate);
-  //     //     // 更新 dataSource 中的 dailyCapacity
-  //     //     return { ...item, dailyCapacity: newDailyCapacity };
-  //     //   }
-  //     //   return item;
-  //     // });
-
-  //     // // 更新 dataSource
-  //     // setDataSource(newDataWithDailyCapacity);
-  //   }
-  // }, [statusFilter, isSuccess, data]);
+  console.log("workOrders", workOrders);
 
   const fakeData = [
     {
@@ -459,7 +503,6 @@ const ProductionDetail = (props) => {
       ],
     },
   ];
-
   let currentClass = " groupGray ";
   const fakeDataTwo = fakeData.map((item, idx) => {
     let no = 0;
@@ -514,13 +557,12 @@ const ProductionDetail = (props) => {
 
   // Complete
   const handleComplete = () => {
-    const isComplete = fakeDataTwo.every((item) => {
+    const isComplete = dataSource.every((item) => {
       return item.unfinishedQuantity === 0;
     });
 
     if (!isComplete) {
       Modal.confirm({
-        width: "800px",
         content: (
           <p>
             仍有製令單未符合製令數量，一旦結單無法再執行此單，需重開製令單，您確定要完成此生產階段?
@@ -553,7 +595,9 @@ const ProductionDetail = (props) => {
     <div className={styles.produtionDetail}>
       <div className={styles.box}>
         <div className={styles.titleBox}>
-          <div className={styles.title}>{"A2"}機台製令單生產明細</div>
+          <div className={styles.title}>
+            {machineSN_Store}機台製令單生產明細
+          </div>
 
           <div>
             <div>
@@ -586,7 +630,7 @@ const ProductionDetail = (props) => {
           <Table
             style={{ whiteSpace: "pre" }}
             columns={defaultColumns}
-            dataSource={fakeDataTwo}
+            dataSource={dataSource}
             loading={loading}
             pagination={false}
             rowClassName={(record, index) => {

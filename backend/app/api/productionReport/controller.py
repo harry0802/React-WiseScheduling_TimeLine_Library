@@ -49,6 +49,8 @@ class productionReportController(Resource):
     @api.param("expiry", "無限期, 即將到期, 已經過期")
     @api.param("workOrderSN", "workOrderSN")
     @api.param("productName", "productName")
+    @api.param("motherOnly", "是否只顯示母批")
+    @api.param("productionSchedule_ids", "productionSchedule_ids")
     @controller_entrance_log(description="Get productionReports")
     def get(self):
         machineSN = request.args.get('machineSN', default=None, type=str)
@@ -58,10 +60,13 @@ class productionReportController(Resource):
         expiry = request.args.get('expiry', default="無限期", type=str)
         workOrderSN = request.args.get('workOrderSN', default=None, type=str)
         productName = request.args.get('productName', default=None, type=str)
+        motherOnly = request.args.get('motherOnly', default=False, type=bool)
+        productionSchedule_ids = request.args.get('productionSchedule_ids', default=None, type=str)
 
         return productionReportService.get_workOrders(
             machineSN=machineSN, start_planOnMachineDate=start_planOnMachineDate, 
-            end_planOnMachineDate=end_planOnMachineDate, status=status, expiry=expiry, workOrderSN=workOrderSN, productName=productName)
+            end_planOnMachineDate=end_planOnMachineDate, status=status, expiry=expiry, workOrderSN=workOrderSN,
+            productName=productName, motherOnly=motherOnly, productionSchedule_ids=productionSchedule_ids)
     
 
 @api.route("/motherLot")

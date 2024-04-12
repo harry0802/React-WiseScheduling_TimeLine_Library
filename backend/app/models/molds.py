@@ -6,6 +6,7 @@ relationship = db.relationship
 
 class molds(Model):
     __tablename__ = "molds"
+    __bind_key__ = "mold"
     id = Column(db.Integer, primary_key=True)
     mold_file_no = Column(db.String(255), unique=True, nullable=False)
     mold_no = Column(db.String(255), unique=True, nullable=False)
@@ -54,7 +55,7 @@ class molds(Model):
 
 
     def __init__(self, **kwargs):
-        super(mold, self).__init__(**kwargs)
+        super(molds, self).__init__(**kwargs)
 
     def __repr__(self):
         return f"<>"

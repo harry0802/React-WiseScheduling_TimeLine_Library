@@ -20,6 +20,8 @@ const productionReportApi = createApi({
             expiry,
             workOrderSN,
             productName,
+            motherOnly,
+            productionSchedule_ids,
           } = arg;
           return {
             url: "productionReport/",
@@ -31,13 +33,15 @@ const productionReportApi = createApi({
               expiry: expiry,
               workOrderSN: workOrderSN,
               productName: productName,
+              motherOnly: motherOnly,
+              productionSchedule_ids: productionSchedule_ids,
             },
           };
         },
         transformResponse(baseQueryReturnValue, meta, arg) {
           return baseQueryReturnValue.data;
         },
-
+        keepUnusedDataFor: 60 * 30, // set cache time to half hour if the query paramaters are the same
         providesTags: [{ type: "productionReport" }],
       }),
       addMotherLots: build.mutation({

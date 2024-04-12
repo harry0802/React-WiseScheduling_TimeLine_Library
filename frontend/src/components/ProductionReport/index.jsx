@@ -1,17 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useMachineSNStore } from "../../store/zustand/store";
 import { Table, Select, Input, Button, Modal, Tooltip, DatePicker } from "antd";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
 import { SearchOutlined } from "@ant-design/icons";
 import CompressIcon from "@mui/icons-material/Compress";
 import { useGetProductionReportQuery } from "../../store/api/productionReportApi";
 import "./index.scss";
 import { WORKORDER_STATUS } from "../../config/enum";
-import { TZ } from "../../config/config";
 import { debounce, throttle } from "lodash"; // 引入 lodash 的 debounce 函數
+import { TZ } from "../../config/config";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -104,15 +104,14 @@ const ProductionReport = (props) => {
   const navigate = useNavigate();
   // 搜尋條件篩選
   const { Option } = Select;
-  // 日期
-  const startDateRef = useRef(
+  const [startDate, setStartDate] = useState(
     new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)
   );
-  const endDateRef = useRef(new Date());
-  const statusRef = useRef(WORKORDER_STATUS.ALL); // 狀態
-  const expiryRef = useRef("無限期"); // 期限
-  const keywordTypeRef = useRef("workOrderSN");
-  const keywordRef = useRef(""); // 關鍵字
+  const [endDate, setEndDate] = useState(new Date());
+  const [statusState, setStatusState] = useState(WORKORDER_STATUS.ALL);
+  const [expiryState, setExpiryState] = useState("無限期");
+  const [keywordTypeState, setKeywordTypeState] = useState("workOrderSN");
+  const [keywordState, setKeywordState] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 追蹤選中的行的 id
   const [loading, setLoading] = useState(false);
 
@@ -140,10 +139,10 @@ const ProductionReport = (props) => {
     </Option>,
     <Option
       key={4}
-      value={WORKORDER_STATUS.CANCEL}
-      label={WORKORDER_STATUS.CANCEL}
+      value={WORKORDER_STATUS.PAUSE}
+      label={WORKORDER_STATUS.PAUSE}
     >
-      {WORKORDER_STATUS.CANCEL}
+      {WORKORDER_STATUS.PAUSE}
     </Option>,
   ];
 
@@ -191,12 +190,13 @@ const ProductionReport = (props) => {
     isSuccess,
     refetch,
   } = useGetProductionReportQuery({
-    start_planOnMachineDate: formatDateTime(startDateRef.current, "start"),
-    end_planOnMachineDate: formatDateTime(endDateRef.current, "end"),
+    start_planOnMachineDate: formatDateTime(startDate, "start"),
+    end_planOnMachineDate: formatDateTime(endDate, "end"),
     machineSN: machineSN_Store,
-    status: statusRef.current,
-    expiry: expiryRef.current,
-    [keywordTypeRef.current]: keywordRef.current,
+    status: statusState,
+    expiry: expiryState,
+    [keywordTypeState]: keywordState,
+    motherOnly: true,
   });
 
   console.log("workOrderList", workOrderList);
@@ -239,28 +239,8 @@ const ProductionReport = (props) => {
     const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     return weekNo;
   };
-  const [startWeekNo, setStartWeekNo] = useState(
-    getWeekNumber(startDateRef.current)
-  ); // 週數
-  const [endWeekNo, setEndWeekNo] = useState(getWeekNumber(endDateRef.current)); // 週數
-
-  // Search
-  const handleSearch = () => {
-    // check if the start date is earlier than the end date
-    if (
-      dayjs(startDateRef.current).isAfter(dayjs(endDateRef.current)) ||
-      startDateRef.current === "" ||
-      endDateRef.current === ""
-    ) {
-      Modal.info({
-        content: <p>請將時間，調整成合理的區間範圍</p>,
-        okText: "確定",
-        onOk() {},
-      });
-      return;
-    }
-    refetch();
-  };
+  const [startWeekNo, setStartWeekNo] = useState(getWeekNumber(startDate)); // 週數
+  const [endWeekNo, setEndWeekNo] = useState(getWeekNumber(endDate)); // 週數
 
   // 產生母批
   const handleAdd = () => {
@@ -290,10 +270,8 @@ const ProductionReport = (props) => {
       });
       return;
     }
-
-    const stringIds = JSON.stringify(selectedRowKeys);
     navigate("/LeaderSignPage", {
-      state: { action: "new", selectedWorkOrder: selectedRowsData },
+      state: { action: "new", newWorkOrders: selectedRowsData },
     });
   };
 
@@ -314,7 +292,6 @@ const ProductionReport = (props) => {
   }
 
   // 節流函數，500 毫秒內不重複執行
-  const throttleHandleSearch = throttle(handleSearch, 500);
   const throttleHandleAdd = debounce(handleAdd, 500);
 
   return (
@@ -325,10 +302,10 @@ const ProductionReport = (props) => {
           <div className="filter-section">
             <div className="start-date">
               <DatePicker
-                defaultValue={dayjs(startDateRef.current)}
+                defaultValue={dayjs(startDate)}
                 format="YYYY/MM/DD"
                 onChange={(date, dateString) => {
-                  startDateRef.current = dateString;
+                  setStartDate(dateString);
                   setStartWeekNo(getWeekNumber(dateString));
                 }}
               />
@@ -337,10 +314,10 @@ const ProductionReport = (props) => {
             <span className="date-to">~</span>
             <div className="end-date">
               <DatePicker
-                defaultValue={dayjs(endDateRef.current)}
+                defaultValue={dayjs(endDate)}
                 format="YYYY/MM/DD"
                 onChange={(date, dateString) => {
-                  endDateRef.current = dateString;
+                  setEndDate(dateString);
                   setEndWeekNo(getWeekNumber(dateString));
                 }}
               />
@@ -353,7 +330,7 @@ const ProductionReport = (props) => {
                 className="status-filter"
                 placeholder="所有狀態"
                 style={{ width: 120 }}
-                onChange={(value) => (statusRef.current = value)}
+                onChange={(value) => setStatusState(value)}
               >
                 {allStatusOptions}
               </Select>
@@ -363,7 +340,7 @@ const ProductionReport = (props) => {
                 className="expiry-filter"
                 placeholder="無限期"
                 style={{ width: 120 }}
-                onChange={(value) => (expiryRef.current = value)}
+                onChange={(value) => setExpiryState(value)}
               >
                 {allExpiryOptions}
               </Select>
@@ -373,7 +350,7 @@ const ProductionReport = (props) => {
                 className="keyword-type-filter"
                 placeholder="製令單號"
                 style={{ width: 120 }}
-                onChange={(value) => (keywordTypeRef.current = value)}
+                onChange={(value) => setKeywordTypeState(value)}
               >
                 {allKeywordTypeOptions}
               </Select>
@@ -383,18 +360,8 @@ const ProductionReport = (props) => {
                 placeholder="請輸入關鍵字查詢..."
                 style={{ width: 160 }}
                 suffix={<SearchOutlined />}
-                onInput={(e) => (keywordRef.current = e.target.value)}
+                onInput={(e) => setKeywordState(e.target.value)}
               ></Input>
-            </div>
-            <div className="btn-box">
-              <Tooltip title="搜尋">
-                <Button
-                  type="primary"
-                  shape="circle"
-                  icon={<SearchOutlined />}
-                  onClick={throttleHandleSearch}
-                />
-              </Tooltip>
             </div>
           </div>
         </div>

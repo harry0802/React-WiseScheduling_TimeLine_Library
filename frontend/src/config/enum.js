@@ -7,3 +7,10 @@ export const WORKORDER_STATUS = {
   PAUSE: "暫停生產",
   CANCEL: "取消生產",
 };
+
+export const LEADER_ACTION = {
+  NEW: "開始",
+  CONTINUE: "紀錄",
+  COMPLETE: "完成",
+  PAUSE: "暫停",
+};

@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/dist/query/react";
 
 import { API_BASE } from "./apiConfig";
+import { WORKORDER_STATUS } from "../../config/enum";
 
 const productionScheduleApi = createApi({
   reducerPath: "productionScheduleApi",
@@ -87,7 +88,7 @@ const productionScheduleApi = createApi({
           return {
             url: `productionSchedule/${ids}`,
             method: "put",
-            body: { status: "暫停生產" },
+            body: { status: WORKORDER_STATUS.PAUSE },
           };
         },
         invalidatesTags: (result, error, ids) => [
@@ -99,7 +100,19 @@ const productionScheduleApi = createApi({
           return {
             url: `productionSchedule/${ids}`,
             method: "put",
-            body: { status: "On-going" },
+            body: { status: WORKORDER_STATUS.ON_GOING },
+          };
+        },
+        invalidatesTags: (result, error, ids) => [
+          { type: "productionSchedule", id: ids.status },
+        ],
+      }),
+      doneStaus: build.mutation({
+        query(ids) {
+          return {
+            url: `productionSchedule/${ids}`,
+            method: "put",
+            body: { status: WORKORDER_STATUS.DONE },
           };
         },
         invalidatesTags: (result, error, ids) => [
@@ -111,7 +124,7 @@ const productionScheduleApi = createApi({
           return {
             url: `productionSchedule/${ids}`,
             method: "put",
-            body: { status: "取消生產" },
+            body: { status: WORKORDER_STATUS.CANCEL },
           };
         },
         invalidatesTags: (result, error, ids) => [
@@ -141,6 +154,7 @@ export const {
   usePauseStausMutation,
   useCancelStausMutation,
   useActionStausMutation,
+  useDoneStausMutation,
   useUpdateProductionScheduleMutation,
 } = productionScheduleApi;
 

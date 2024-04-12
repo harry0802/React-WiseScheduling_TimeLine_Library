@@ -31,6 +31,9 @@ class DevelopmentConfig(Config):
         "DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_BINDS = {
+        "mold": os.environ.get("MOLD_DATABASE_URL"),
+    }
 
     # Add logger
 
@@ -50,6 +53,9 @@ class ProductionConfig(Config):
         "DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data.sqlite")
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_BINDS = {
+        "mold": os.environ.get("MOLD_DATABASE_URL"),
+    }
 
 
 config_by_name = dict(
