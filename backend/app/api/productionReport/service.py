@@ -1,20 +1,14 @@
-from datetime import datetime, date, timedelta
-import json
+from datetime import datetime, timedelta
 import math
 from operator import and_
 import sys
-
-import requests
 from flask import current_app
-
 from app import db
 from app.utils import message, err_resp, internal_err_resp
 from app.models.productionReport import productionReport
 from app.models.molds import molds
 from .schemas import productionReportSchema, productionScheduleReportSchema
-from flask import url_for
-from app.api.calendar.service import CalendarService
-from sqlalchemy import extract, or_
+from sqlalchemy import or_
 from app.models.productionSchedule import productionSchedule
 productionReport_schema = productionReportSchema()
 productionScheduleReport_schema = productionScheduleReportSchema()
@@ -23,17 +17,16 @@ productionScheduleReport_schema = productionScheduleReportSchema()
 def find_childLots_by_workOrderSN(workOrderSN):
     # get the child lots by the workOrderSN and serialNumber != 0
     try:
-        childLots = productionReport.query.filter(
-            and_(
-                productionReport.workOrderSN == workOrderSN,
-                productionReport.serialNumber != 0
-            )
-        ).all()
-        
+        query = productionReport.query
+        query = query.filter(
+            productionReport.workOrderSN == workOrderSN,
+            productionReport.serialNumber != 0
+        )
+        childLots = query.all()
         return childLots
     except Exception as error:
         raise error
-    
+
 
 def complete_productionReport(mode, db_obj, payload):
     db_obj.startTime = datetime.fromisoformat(payload["startTime"]) \
@@ -210,27 +203,31 @@ def complete_productionReport(mode, db_obj, payload):
         # each item of 異常 = sum(the item of child lots)
         childLots = find_childLots_by_workOrderSN(db_obj.workOrderSN)
         if len(childLots) > 0:
-            db_obj.productionQuantity = sum([child.productionQuantity for child in childLots])
-            db_obj.defectiveQuantity = sum([child.defectiveQuantity for child in childLots])
-            db_obj.workingHours = sum([child.workingHours for child in childLots])
-            db_obj.planProductionQuantity = sum([child.planProductionQuantity for child in childLots])
-            db_obj.productionQuantityDifference = sum([child.productionQuantityDifference for child in childLots])
-            db_obj.colorDifference = sum([child.colorDifference for child in childLots])
-            db_obj.deformation = sum([child.deformation for child in childLots])
-            db_obj.shrinkage = sum([child.shrinkage for child in childLots])
-            db_obj.shortage = sum([child.shortage for child in childLots])
-            db_obj.hole = sum([child.hole for child in childLots])
-            db_obj.bubble = sum([child.bubble for child in childLots])
-            db_obj.impurity = sum([child.impurity for child in childLots])
-            db_obj.pressure = sum([child.pressure for child in childLots])
-            db_obj.overflow = sum([child.overflow for child in childLots])
-            db_obj.flowMark = sum([child.flowMark for child in childLots])
-            db_obj.oilStain = sum([child.oilStain for child in childLots])
-            db_obj.burr = sum([child.burr for child in childLots])
-            db_obj.blackSpot = sum([child.blackSpot for child in childLots])
-            db_obj.scratch = sum([child.scratch for child in childLots])
-            db_obj.encapsulation = sum([child.encapsulation for child in childLots])
-            db_obj.other = sum([child.other for child in childLots])
+            db_obj.productionQuantity = sum([child.productionQuantity for child in childLots if child.productionQuantity])
+            db_obj.defectiveQuantity = sum([child.defectiveQuantity for child in childLots if child.defectiveQuantity])
+            db_obj.workingHours = sum([child.workingHours for child in childLots if child.workingHours])
+            db_obj.planProductionQuantity = sum([child.planProductionQuantity for child in childLots if child.planProductionQuantity])
+            db_obj.productionQuantityDifference = sum([child.productionQuantityDifference for child in childLots if child.productionQuantityDifference])
+            db_obj.colorDifference = sum([child.colorDifference for child in childLots if child.colorDifference])
+            db_obj.deformation = sum([child.deformation for child in childLots if child.deformation])
+            db_obj.shrinkage = sum([child.shrinkage for child in childLots if child.shrinkage])
+            db_obj.shortage = sum([child.shortage for child in childLots if child.shortage])
+            db_obj.hole = sum([child.hole for child in childLots if child.hole])
+            db_obj.bubble = sum([child.bubble for child in childLots if child.bubble])
+            db_obj.impurity = sum([child.impurity for child in childLots if child.impurity])
+            db_obj.pressure = sum([child.pressure for child in childLots if child.pressure])
+            db_obj.overflow = sum([child.overflow for child in childLots if child.overflow])
+            db_obj.flowMark = sum([child.flowMark for child in childLots if child.flowMark])
+            db_obj.oilStain = sum([child.oilStain for child in childLots if child.oilStain])
+            db_obj.burr = sum([child.burr for child in childLots if child.burr])
+            db_obj.blackSpot = sum([child.blackSpot for child in childLots if child.blackSpot])
+            db_obj.scratch = sum([child.scratch for child in childLots if child.scratch])
+            db_obj.encapsulation = sum([child.encapsulation for child in childLots if child.encapsulation])
+            db_obj.other = sum([child.other for child in childLots if child.other])
+        if (db_obj.workOrderQuantity and db_obj.productionQuantity):
+            # 尚未完成數量 = 製令數量 - 生產數量
+            temp_unfinished = db_obj.workOrderQuantity - db_obj.productionQuantity
+            db_obj.unfinishedQuantity = 0 if temp_unfinished < 0 else temp_unfinished
         
     elif (mode == "childLot"):
         # 子批
@@ -238,17 +235,20 @@ def complete_productionReport(mode, db_obj, payload):
         # 製令單號 is the same as the mother lot
         # 製令數量 is the same as the mother lot
         # LotName = 製令單號 + "-" + the serialNumber with 3 zero padding
+        childLots = find_childLots_by_workOrderSN(db_obj.workOrderSN)
         if db_obj.lotName is None or db_obj.lotName == "":
-            childLots = find_childLots_by_workOrderSN(db_obj.workOrderSN)
             if len(childLots) == 0:
                 db_obj.serialNumber = 1
             else:
                 db_obj.serialNumber = max([child.serialNumber for child in childLots]) + 1
             db_obj.lotName = f"{db_obj.workOrderSN}-{db_obj.serialNumber:03d}"
-    
-    if (db_obj.workOrderQuantity and db_obj.productionQuantity):
-        # 尚未完成數量 = 製令數量 - 生產數量
-        db_obj.unfinishedQuantity = db_obj.workOrderQuantity - db_obj.productionQuantity
+        # 尚未完成數量 = 製令數量 - 所有子批生產數量
+        if (db_obj.workOrderQuantity and db_obj.productionQuantity):
+            allChildProductionQuantity = 0
+            if len(childLots) > 0:
+                allChildProductionQuantity = sum([child.productionQuantity for child in childLots if child.lotName != db_obj.lotName])
+            temp_unfinished = db_obj.workOrderQuantity - db_obj.productionQuantity - allChildProductionQuantity
+            db_obj.unfinishedQuantity = 0 if temp_unfinished < 0 else temp_unfinished
     return db_obj
 
 
@@ -308,7 +308,7 @@ class productionReportService:
             query = query.filter(or_(productionReport.serialNumber == 0, productionReport.serialNumber == None)) if bool(motherOnly) else query
             query = query.filter(productionSchedule.productionSchedule_id.in_(productionSchedule_ids)) if productionSchedule_ids else query
             
-            query = query.order_by(productionSchedule.id.desc())
+            query = query.order_by(productionSchedule.id.desc(), productionReport.id.asc())
             productionReport_db = query.all()
             print("query: ", query, file=sys.stderr)
             if not (productionReport_db):

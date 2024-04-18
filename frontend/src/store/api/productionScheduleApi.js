@@ -1,7 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/dist/query/react";
-
 import { API_BASE } from "./apiConfig";
 import { WORKORDER_STATUS } from "../../config/enum";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { TZ } from "../../config/config";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const productionScheduleApi = createApi({
   reducerPath: "productionScheduleApi",
@@ -100,7 +105,9 @@ const productionScheduleApi = createApi({
           return {
             url: `productionSchedule/${ids}`,
             method: "put",
-            body: { status: WORKORDER_STATUS.ON_GOING },
+            body: {
+              status: WORKORDER_STATUS.ON_GOING,
+            },
           };
         },
         invalidatesTags: (result, error, ids) => [
@@ -112,7 +119,10 @@ const productionScheduleApi = createApi({
           return {
             url: `productionSchedule/${ids}`,
             method: "put",
-            body: { status: WORKORDER_STATUS.DONE },
+            body: {
+              status: WORKORDER_STATUS.DONE,
+              actualFinishDate: dayjs.tz(new Date(), TZ).format(),
+            },
           };
         },
         invalidatesTags: (result, error, ids) => [
@@ -141,6 +151,16 @@ const productionScheduleApi = createApi({
         },
         invalidatesTags: (result, error) => [{ type: "productionSchedule" }],
       }),
+      updateProductionSchedules: build.mutation({
+        query(pack) {
+          return {
+            url: `productionSchedule/${pack.ids}`,
+            method: "put",
+            body: pack.data,
+          };
+        },
+        invalidatesTags: (result, error) => [{ type: "productionSchedule" }],
+      }),
     };
   },
 });
@@ -156,6 +176,7 @@ export const {
   useActionStausMutation,
   useDoneStausMutation,
   useUpdateProductionScheduleMutation,
+  useUpdateProductionSchedulesMutation,
 } = productionScheduleApi;
 
 export default productionScheduleApi;

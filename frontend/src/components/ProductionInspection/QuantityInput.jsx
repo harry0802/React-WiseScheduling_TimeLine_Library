@@ -46,6 +46,9 @@ export default function QuantityInput(props) {
         max={999}
         defaultValue={0}
         onChange={(event, newValue) => {
+          if (newValue < 0 || newValue === "" || newValue === undefined) {
+            newValue = 0;
+          }
           updateLotsByInspection(lotName, schema, newValue);
         }}
       />

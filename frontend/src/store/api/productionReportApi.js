@@ -74,55 +74,20 @@ const productionReportApi = createApi({
         },
         invalidatesTags: [{ type: "productionReport" }],
       }),
-      delProductionReport: build.mutation({
-        query(ids) {
+      updateChildLots: build.mutation({
+        query(data) {
           return {
-            url: `productionReport/${ids}`,
-            method: "delete",
-          };
-        },
-        providesTags: [{ type: "productionReport" }],
-      }),
-      pauseStaus: build.mutation({
-        query(ids) {
-          return {
-            url: `productionReport/${ids}`,
+            url: "productionReport/childLot",
             method: "put",
-            body: { status: "暫停生產" },
+            body: data,
           };
         },
-        invalidatesTags: (result, error, ids) => [
-          { type: "productionReport", id: ids.status },
-        ],
+        invalidatesTags: [{ type: "productionReport" }],
       }),
-      actionStaus: build.mutation({
-        query(ids) {
-          return {
-            url: `productionReport/${ids}`,
-            method: "put",
-            body: { status: "On-going" },
-          };
-        },
-        invalidatesTags: (result, error, ids) => [
-          { type: "productionReport", id: ids.status },
-        ],
-      }),
-      cancelStaus: build.mutation({
-        query(ids) {
-          return {
-            url: `productionReport/${ids}`,
-            method: "put",
-            body: { status: "取消生產" },
-          };
-        },
-        invalidatesTags: (result, error, ids) => [
-          { type: "productionReport", id: ids.status },
-        ],
-      }),
-      updateProductionReport: build.mutation({
+      updateProductionReports: build.mutation({
         query(pack) {
           return {
-            url: `productionReport/${pack.id}`,
+            url: `productionReport/${pack.ids}`,
             method: "put",
             body: pack.data,
           };
@@ -138,11 +103,8 @@ export const {
   useAddMotherLotsMutation,
   useAddChildLotsMutation,
   useUpdateMotherLotsMutation,
-  useDelProductionReportMutation,
-  usePauseStausMutation,
-  useCancelStausMutation,
-  useActionStausMutation,
-  useUpdateProductionReportMutation,
+  useUpdateChildLotsMutation,
+  useUpdateProductionReportsMutation,
 } = productionReportApi;
 
 export default productionReportApi;

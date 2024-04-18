@@ -199,8 +199,6 @@ const ProductionReport = (props) => {
     motherOnly: true,
   });
 
-  console.log("workOrderList", workOrderList);
-
   useEffect(() => {
     if (isSuccess) {
       const formattedworkOrderList = workOrderList.map((item) => {

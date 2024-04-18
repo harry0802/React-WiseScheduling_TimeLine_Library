@@ -1,15 +1,18 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Table, Button, Modal, Tooltip } from "antd";
 import {
   CheckOutlined,
   PauseOutlined,
   CaretRightOutlined,
 } from "@ant-design/icons";
-import { useMachineSNStore, useLotStore } from "../../store/zustand/store";
+import {
+  useMachineSNStore,
+  useProductionScheduleIdsStore,
+  useLotStore,
+} from "../../store/zustand/store";
 import { useGetProductionReportQuery } from "../../store/api/productionReportApi";
 import styles from "./index.module.scss";
-import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
 import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -112,20 +115,17 @@ const ProductionDetail = (props) => {
     },
   ];
   const navigate = useNavigate();
-  const location = useLocation();
-  // const productionSchedule_ids = location.state
-  //   ? location.state.productionSchedule_ids
-  //   : null; // 要準備生產的製令單id
-  const productionSchedule_ids = "3,4,5";
+  const productionScheduleIdsStore = useProductionScheduleIdsStore(
+    (state) => state.productionScheduleIdsStore
+  ); // 要準備生產的製令單id
   // 從zustand store 取得機台編號
   const machineSN_Store = useMachineSNStore((state) => state.machineSN_Store);
   const [dataSource, setDataSource] = useState([]); /*回傳資料*/
   const [showUnfinished, setShowUnfinished] = useState(false);
   const [loading, setLoading] = useState(false);
-  // const lots = useLotStore((state) => state.lots);
   const updateLots = useLotStore((state) => state.updateLots);
 
-  if (productionSchedule_ids === null) {
+  if (productionScheduleIdsStore === null) {
     navigate("/MachineSelectPage");
   }
 
@@ -136,7 +136,7 @@ const ProductionDetail = (props) => {
     isSuccess,
     refetch,
   } = useGetProductionReportQuery({
-    productionSchedule_ids: productionSchedule_ids,
+    productionSchedule_ids: productionScheduleIdsStore,
   });
 
   useEffect(() => {
@@ -153,6 +153,7 @@ const ProductionDetail = (props) => {
           children: children.length > 0 ? children : null,
         };
       });
+      updateLots(nestedLots); // 更新 zustand store
 
       let currentClass = " groupGray ";
       const formattedworkOrders = nestedLots.map((item, m_idx) => {
@@ -217,344 +218,6 @@ const ProductionDetail = (props) => {
 
   console.log("workOrders", workOrders);
 
-  const fakeData = [
-    {
-      key: 1,
-      serialNumber: 1,
-      tmpNo: 1,
-      status: "尚未上機",
-      lotName: "ABCD0001",
-      productName: "LotName-001",
-      workOrderQuantity: 21000,
-      productionQuantity: null,
-      colorDifference: 0,
-      deformation: 0,
-      shrinkage: 0,
-      shortage: 0,
-      hole: 0,
-      bubble: 0,
-      impurity: 0,
-      pressure: 0,
-      overflow: 0,
-      flowMark: 0,
-      oilStain: 0,
-      burr: 0,
-      blackSpot: 0,
-      scratch: 0,
-      encapsulation: 0,
-      other: 0,
-      defectiveQuantity: null,
-      productionDefectiveRate: null,
-      unfinishedQuantity: null,
-      leader: [{ leader: "Martin", leader_start_time: "2024-03-01 17:00" }],
-      operator1: null,
-      operator2: null,
-      start_time: null,
-      end_time: null,
-      children: [
-        {
-          key: 9,
-          serialNumber: 11,
-          tmpNo: null,
-          status: null,
-          lotName: "ABCD0001-001",
-          productName: "LotName-001",
-          workOrderQuantity: null,
-          productionQuantity: null,
-          colorDifference: 0,
-          deformation: 0,
-          shrinkage: 0,
-          shortage: 0,
-          hole: 0,
-          bubble: 0,
-          impurity: 0,
-          pressure: 0,
-          overflow: 0,
-          flowMark: 0,
-          oilStain: 0,
-          burr: 0,
-          blackSpot: 0,
-          scratch: 0,
-          encapsulation: 0,
-          other: 0,
-          defectiveQuantity: null,
-          productionDefectiveRate: null,
-          unfinishedQuantity: null,
-          leader: null,
-          operator1: "Tom",
-          operator2: "Jerry",
-          start_time: "2024-03-01 12:00",
-          end_time: "2024-03-01 17:00",
-        },
-      ],
-    },
-    {
-      key: 2,
-      serialNumber: 2,
-      tmpNo: 2,
-      status: "尚未上機",
-      lotName: "ABCD0002",
-      productName: "LotName-002",
-      workOrderQuantity: 21000,
-      productionQuantity: 21031,
-      colorDifference: 0,
-      deformation: 0,
-      shrinkage: 0,
-      shortage: 0,
-      hole: 0,
-      bubble: 0,
-      impurity: 0,
-      pressure: 0,
-      overflow: 0,
-      flowMark: 0,
-      oilStain: 0,
-      burr: 0,
-      blackSpot: 0,
-      scratch: 0,
-      encapsulation: 0,
-      other: 0,
-      defectiveQuantity: 880,
-      productionDefectiveRate: 0.0418,
-      unfinishedQuantity: 0,
-      leader: [
-        { leader: "Martin", leader_start_time: "2024-03-01 17:00" },
-        { leader: "John", leader_start_time: "2024-03-02 17:00" },
-      ],
-      operator1: null,
-      operator2: null,
-      start_time: null,
-      end_time: null,
-      children: [
-        {
-          key: 3,
-          serialNumber: 3,
-          tmpNo: null,
-          status: null,
-          lotName: "ABCD0002-001",
-          productName: "LotName-002",
-          workOrderQuantity: null,
-          productionQuantity: 7121,
-          colorDifference: 0,
-          deformation: 0,
-          shrinkage: 0,
-          shortage: 0,
-          hole: 0,
-          bubble: 0,
-          impurity: 0,
-          pressure: 0,
-          overflow: 0,
-          flowMark: 0,
-          oilStain: 0,
-          burr: 0,
-          blackSpot: 0,
-          scratch: 0,
-          encapsulation: 0,
-          other: 0,
-          defectiveQuantity: 310,
-          productionDefectiveRate: 0.2,
-          unfinishedQuantity: 13879,
-          leader: null,
-          operator1: "Tom",
-          operator2: "Jerry",
-          start_time: "2024-03-01 12:00",
-          end_time: "2024-03-01 17:00",
-        },
-        {
-          key: 4,
-          serialNumber: 3,
-          tmpNo: null,
-          status: null,
-          lotName: "ABCD0002-002",
-          productName: "LotName-002",
-          workOrderQuantity: null,
-          productionQuantity: 7003,
-          colorDifference: 0,
-          deformation: 0,
-          shrinkage: 0,
-          shortage: 0,
-          hole: 0,
-          bubble: 0,
-          impurity: 0,
-          pressure: 0,
-          overflow: 0,
-          flowMark: 0,
-          oilStain: 0,
-          burr: 0,
-          blackSpot: 0,
-          scratch: 0,
-          encapsulation: 0,
-          other: 0,
-          defectiveQuantity: 237,
-          productionDefectiveRate: 0.2,
-          unfinishedQuantity: 6870,
-          leader: null,
-          operator1: "Tom",
-          operator2: "Jerry",
-          start_time: "2024-03-01 12:00",
-          end_time: "2024-03-01 17:00",
-        },
-        {
-          key: 5,
-          serialNumber: 3,
-          tmpNo: null,
-          status: null,
-          lotName: "ABCD0002-003",
-          productName: "LotName-002",
-          workOrderQuantity: null,
-          productionQuantity: 6907,
-          colorDifference: 0,
-          deformation: 0,
-          shrinkage: 0,
-          shortage: 0,
-          hole: 0,
-          bubble: 0,
-          impurity: 0,
-          pressure: 0,
-          overflow: 0,
-          flowMark: 0,
-          oilStain: 0,
-          burr: 0,
-          blackSpot: 0,
-          scratch: 0,
-          encapsulation: 0,
-          other: 0,
-          defectiveQuantity: 333,
-          productionDefectiveRate: 0.2,
-          unfinishedQuantity: 0,
-          leader: null,
-          operator1: "Tom",
-          operator2: "Jerry",
-          start_time: "2024-03-01 12:00",
-          end_time: "2024-03-01 17:00",
-        },
-      ],
-    },
-    {
-      key: 7,
-      serialNumber: 2,
-      tmpNo: 2,
-      status: "尚未上機",
-      lotName: "ABCD0003",
-      productName: "LotName-003",
-      workOrderQuantity: 21000,
-      productionQuantity: 1000,
-      colorDifference: 0,
-      deformation: 0,
-      shrinkage: 0,
-      shortage: 0,
-      hole: 0,
-      bubble: 0,
-      impurity: 0,
-      pressure: 0,
-      overflow: 0,
-      flowMark: 0,
-      oilStain: 0,
-      burr: 0,
-      blackSpot: 0,
-      scratch: 0,
-      encapsulation: 0,
-      other: 0,
-      defectiveQuantity: 200,
-      productionDefectiveRate: 0.2,
-      unfinishedQuantity: 20000,
-      leader: [
-        { leader: "Martin", leader_start_time: "2024-03-01 17:00" },
-        { leader: "John", leader_start_time: "2024-03-02 17:00" },
-      ],
-      operator1: null,
-      operator2: null,
-      start_time: null,
-      end_time: null,
-      children: [
-        {
-          key: 8,
-          serialNumber: 3,
-          tmpNo: null,
-          status: null,
-          lotName: "ABCD0003-001",
-          productName: "LotName-003",
-          workOrderQuantity: null,
-          productionQuantity: 1000,
-          colorDifference: 0,
-          deformation: 0,
-          shrinkage: 0,
-          shortage: 0,
-          hole: 0,
-          bubble: 0,
-          impurity: 0,
-          pressure: 0,
-          overflow: 0,
-          flowMark: 0,
-          oilStain: 0,
-          burr: 0,
-          blackSpot: 0,
-          scratch: 0,
-          encapsulation: 0,
-          other: 0,
-          defectiveQuantity: 200,
-          productionDefectiveRate: 0.2,
-          unfinishedQuantity: 20000,
-          leader: null,
-          operator1: "Tom",
-          operator2: "Jerry",
-          start_time: "2024-03-01 12:00",
-          end_time: "2024-03-01 17:00",
-        },
-      ],
-    },
-  ];
-  let currentClass = " groupGray ";
-  const fakeDataTwo = fakeData.map((item, idx) => {
-    let no = 0;
-    let operators = "";
-    let period = "";
-    let children = null;
-
-    // generate serial number with padding zero
-    no = (idx + 1).toString().padStart(2, "0");
-
-    // combine leader and start time in operators and period
-    if (item.leader != null) {
-      operators = item.leader.map((leader) => {
-        return leader.leader + "\n";
-      });
-      period = item.leader.map((leader) => {
-        return leader.leader_start_time + "\n";
-      });
-    }
-
-    // set groupWhite class to the first item and its children, set groupGray to the second item and its children, set groupWhite to the third item and its children, and so on
-    let className = "";
-    currentClass =
-      currentClass === " groupWhite " ? " groupGray " : " groupWhite ";
-    className = currentClass;
-
-    // combine operators and start time, end time in children array
-    if (item.children != null) {
-      children = item.children.map((child) => {
-        return {
-          ...child,
-          operators: child.operator1 + "\n" + child.operator2,
-          period: child.start_time + "\n" + child.end_time,
-          className: currentClass,
-        };
-      });
-    }
-
-    return {
-      ...item,
-      no: no,
-      className: className,
-      operators: operators,
-      period: period,
-      children: children,
-    };
-  });
-
-  useEffect(() => {
-    updateLots(fakeData);
-  }, []);
-
   // Complete
   const handleComplete = () => {
     const isComplete = dataSource.every((item) => {
@@ -574,7 +237,9 @@ const ProductionDetail = (props) => {
           setShowUnfinished(true);
         },
         onOk() {
-          navigate("/LeaderSignPage", { state: { action: "complete" } });
+          navigate("/LeaderSignPage", {
+            state: { action: "complete", completedWorkOrders: workOrders },
+          });
         },
       });
       return;
@@ -584,12 +249,6 @@ const ProductionDetail = (props) => {
   if (isLoading) {
     return <p>Loading...</p>;
   }
-
-  // 防抖函數，延遲 500 毫秒執行
-  // const debouncedHandleDelete = debounce(deleteChecked, 500);
-  // const debouncedHandleAction = debounce(actionChecked, 500);
-  // const debouncedHandlePause = debounce(pauseChecked, 500);
-  // const debouncedHandleAdd = debounce(handleAdd, 500);
 
   return (
     <div className={styles.produtionDetail}>
@@ -617,7 +276,10 @@ const ProductionDetail = (props) => {
                   icon={<PauseOutlined />}
                   onClick={() =>
                     navigate("/LeaderSignPage", {
-                      state: { action: "pause" },
+                      state: {
+                        action: "pause",
+                        pausedWorkOrders: workOrders,
+                      },
                     })
                   }
                 />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./index.module.scss";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
@@ -7,10 +7,16 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import QuantityInput from "./QuantityInput";
-import { Modal } from "antd";
+import { Modal, notification } from "antd";
 import { useLotStore } from "../../store/zustand/store";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useUpdateChildLotsMutation } from "../../store/api/productionReportApi";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import { TZ } from "../../config/config";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const InspectionList = [
   {
@@ -91,9 +97,12 @@ const TabPanel = (props) => {
     quatity,
     lotName,
     defectiveQuantity,
+    productionQuantity,
     ...other
   } = props;
-
+  const updateLotsByProductionQuantity = useLotStore(
+    (state) => state.updateLotsByProductionQuantity
+  );
   return (
     <div
       role="tabpanel"
@@ -136,19 +145,21 @@ const TabPanel = (props) => {
                 <TextField
                   className="muiTextField"
                   // sx={{ width: "200px" }}
-                  id="productionQuantity"
+                  id={`productionQuantity${index}`}
                   label="數量*"
                   type="number"
-                  name="productionQuantity"
-                  autoComplete="productionQuantity"
+                  name={`productionQuantity${index}`}
+                  autoComplete={`productionQuantity${index}`}
+                  value={productionQuantity}
                   variant="outlined"
                   margin="normal"
                   inputProps={{ style: { fontSize: "16px", color: "#FFF" } }} // font size of input text
                   InputLabelProps={{ style: { fontSize: "16px" } }} // font size of input label
-                  error={false}
-                  helperText={false ? "" : ""}
                   FormHelperTextProps={{
                     style: { fontSize: "16px", color: "#E61F19" },
+                  }}
+                  onChange={(event) => {
+                    updateLotsByProductionQuantity(lotName, event.target.value);
                   }}
                 />
               </div>
@@ -191,7 +202,6 @@ const ProductionInspection = () => {
     window.onpopstate = function () {
       window.history.pushState(null, "", document.URL);
       Modal.info({
-        width: "800px",
         content: <p>您無法回到上一頁，請完成此生產階段，並"換班"交接</p>,
         okText: "確定",
         onOk() {},
@@ -205,8 +215,58 @@ const ProductionInspection = () => {
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const lots = useLotStore((state) => state.lots);
+  const [updateChildLots, updateChildLotsMutationResult] =
+    useUpdateChildLotsMutation(); // 更新子批
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
+  };
+
+  const handleSubmit = async () => {
+    // check if TextField if empty
+    const emptyTextField = lots.filter((lot) => {
+      return (
+        lot.children[lot.children.length - 1].productionQuantity === null ||
+        lot.children[lot.children.length - 1].productionQuantity === ""
+      );
+    });
+    if (emptyTextField.length > 0) {
+      Modal.error({
+        content: (
+          <div>
+            <p>請填寫以下產品的良品數量：</p>
+            {emptyTextField.map((lot, idx) => {
+              return <p key={idx}>{lot.productName}</p>;
+            })}
+          </div>
+        ),
+        okText: "確定",
+        onOk() {},
+      });
+      return;
+    }
+
+    // get the last child from each lot
+    const childLots = lots.map((lot) => {
+      const lastChild = lot.children[lot.children.length - 1];
+      return {
+        ...lastChild,
+        id: lastChild.id || lastChild.productionReport_id,
+      };
+    });
+    console.log("childLots", childLots);
+    await updateChildLots(childLots)
+      .unwrap()
+      .then((payload) => {
+        navigate("/OperatorSignPage", { state: { action: "endChildLot" } });
+      })
+      .catch((error) => {
+        console.error("rejected", error);
+        notification.error({
+          description: "暫時無法更新，請稍後再試",
+          placement: "bottomRight",
+          duration: 5,
+        });
+      });
   };
 
   return (
@@ -233,7 +293,15 @@ const ProductionInspection = () => {
         >
           {/* map lots to Tabs*/}
           {lots.map((lot, index) => (
-            <Tab key={index} label={lot.productName} {...a11yProps(index)} />
+            <Tab
+              key={index}
+              label={
+                lot.productName.length > 5
+                  ? lot.productName.substring(0, 5) + "..."
+                  : lot.productName
+              }
+              {...a11yProps(index)}
+            />
           ))}
         </Tabs>
       </div>
@@ -249,10 +317,17 @@ const ProductionInspection = () => {
               product={lot.productName}
               operator1={lastItem.operator1}
               operator2={lastItem.operator2}
-              startTime={lastItem.start_time}
+              startTime={dayjs(lastItem.startTime)
+                .tz(TZ)
+                .format("YYYY-MM-DD HH:mm:ss")}
               quatity={lot.workOrderQuantity}
               lotName={lastItem.lotName}
-              defectiveQuantity={lastItem.defectiveQuantity}
+              defectiveQuantity={
+                lastItem.defectiveQuantity ? lastItem.defectiveQuantity : ""
+              }
+              productionQuantity={
+                lastItem.productionQuantity ? lastItem.productionQuantity : ""
+              }
             ></TabPanel>
           );
         }
@@ -265,9 +340,7 @@ const ProductionInspection = () => {
           color: "#FFFFFF",
           fontSize: "16px",
         }}
-        onClick={() => {
-          navigate("/OperatorSignPage", { state: { action: "endChildLot" } });
-        }}
+        onClick={() => handleSubmit()}
       >
         換班
       </Button>

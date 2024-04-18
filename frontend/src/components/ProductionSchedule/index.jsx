@@ -1,23 +1,40 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faPlus, faTrashCan } from '@fortawesome/free-solid-svg-icons';
-import { Table, Select, Form, Input, Button, message, Modal, Tooltip } from 'antd';
-
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlay,
+  faPause,
+  faPlus,
+  faTrashCan,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  Table,
+  Select,
+  Form,
+  Input,
+  Button,
+  message,
+  Modal,
+  Tooltip,
+} from "antd";
+import { WORKORDER_STATUS } from "../../config/enum";
 import {
   useGetProductionScheduleQuery,
-  // useDelProductionScheduleMutation,
   usePauseStausMutation,
   useCancelStausMutation,
   useActionStausMutation,
   useAddProductionScheduleMutation,
-  useUpdateProductionScheduleMutation
+  useUpdateProductionScheduleMutation,
 } from "../../store/api/productionScheduleApi";
-import './index.scss';
-// import SimpleDemo from './SimpleDemo';
-import { saveAs } from 'file-saver';
-import Exceljs from 'exceljs';
-import { debounce } from 'lodash'; // 引入 lodash 的 debounce 函數
-
+import "./index.scss";
+import { saveAs } from "file-saver";
+import Exceljs from "exceljs";
+import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
+import { TZ } from "../../config/config";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // 表單編輯設置
 const EditableContext = React.createContext(null);
@@ -33,7 +50,17 @@ const EditableRow = ({ id, ...props }) => {
   );
 };
 
-const EditableCell = ({ title, editable, children, dataIndex, rule, type, record, handleSave, ...restProps }) => {
+const EditableCell = ({
+  title,
+  editable,
+  children,
+  dataIndex,
+  rule,
+  type,
+  record,
+  handleSave,
+  ...restProps
+}) => {
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
@@ -60,7 +87,7 @@ const EditableCell = ({ title, editable, children, dataIndex, rule, type, record
         ...values,
       });
     } catch (errInfo) {
-      console.log('Save failed:', errInfo);
+      console.log("Save failed:", errInfo);
     }
   };
 
@@ -93,37 +120,31 @@ const EditableCell = ({ title, editable, children, dataIndex, rule, type, record
   return <td {...restProps}>{childNode}</td>;
 };
 
-
-
 const ProductionSchedule = (props) => {
-
   const defaultColumns = [
-
     {
-      title: '編號 ',
-      dataIndex: 'id',
+      title: "編號 ",
+      dataIndex: "id",
       width: 30,
       fixed: true,
       editable: false,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
-        <Tooltip title={text} >
+        <Tooltip title={text}>
           {/* <span style={{background:'#fff'}} >{text}</span> */}
-          <span style={{ textAlign: 'center' }}> {text}</span>
+          <span style={{ textAlign: "center" }}> {text}</span>
         </Tooltip>
       ),
     },
     {
-      title: '狀態 ',
-      dataIndex: 'status',
+      title: "狀態 ",
+      dataIndex: "status",
       fixed: true,
       width: 36,
-
     },
-
     {
-      title: '製令單號 ',
-      dataIndex: 'workOrderSN',
+      title: "製令單號 ",
+      dataIndex: "workOrderSN",
       width: 76,
       fixed: true,
       editable: true,
@@ -135,19 +156,15 @@ const ProductionSchedule = (props) => {
           <span>{text}</span>
         </Tooltip>
       ),
-
-
       // rule:
       // {
       //   required: true,
       //   message: `is required.`,
       // }
-
     },
-
     {
-      title: '產品名稱',
-      dataIndex: 'productName',
+      title: "產品名稱",
+      dataIndex: "productName",
       width: 165,
       fixed: true,
       editable: true,
@@ -159,7 +176,6 @@ const ProductionSchedule = (props) => {
           <span>{text}</span>
         </Tooltip>
       ),
-
       // rule:
       // {
       //   required: true,
@@ -167,14 +183,14 @@ const ProductionSchedule = (props) => {
       // }
     },
     {
-      title: '產品編號',
-      dataIndex: 'productSN',
+      title: "產品編號",
+      dataIndex: "productSN",
       width: 80,
       editable: true,
       ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
-        <Tooltip title={text} >
+        <Tooltip title={text}>
           {/* <span style={{background:'#fff'}} >{text}</span> */}
 
           <span>{text}</span>
@@ -187,28 +203,24 @@ const ProductionSchedule = (props) => {
       // }
     },
     {
-      title: '製令數量',
-      dataIndex: 'workOrderQuantity',
+      title: "製令數量",
+      dataIndex: "workOrderQuantity",
       editable: true,
       width: 50,
-      type: 'number',
-      rule:
-      {
-        type: 'integer',
+      type: "number",
+      rule: {
+        type: "integer",
         // required: true,
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
-
-
     },
     {
-      title: '製令開立日期',
-      dataIndex: 'workOrderDate',
+      title: "製令開立日期",
+      dataIndex: "workOrderDate",
       width: 60,
       editable: true,
-      type: "date"
+      type: "date",
 
       // rule:
       // {
@@ -217,43 +229,38 @@ const ProductionSchedule = (props) => {
       // }
     },
     {
-      title: '成型秒數',
-      dataIndex: 'moldingSecond',
+      title: "成型秒數",
+      dataIndex: "moldingSecond",
       editable: true,
       width: 45,
       type: "number",
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+      rule: {
+        type: "integer",
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
     },
     {
-      title: '穴數',
-      dataIndex: 'moldCavity',
+      title: "穴數",
+      dataIndex: "moldCavity",
       editable: true,
       width: 30,
       type: "number",
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+      rule: {
+        type: "integer",
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
     },
     {
-      title: '生產區域',
-      dataIndex: 'productionArea',
+      title: "生產區域",
+      dataIndex: "productionArea",
       width: 50,
       render: (text, record) => (
         <Select
           defaultValue={text}
-          style={{ width: 90, background: 'none', borderColor: '#1677ff' }}
+          style={{ width: 90, background: "none", borderColor: "#1677ff" }}
           onChange={(value) => handleProductionAreaChange(value, record)}
-
         >
           <Option value="A">A</Option>
           <Option value="B">B</Option>
@@ -261,153 +268,126 @@ const ProductionSchedule = (props) => {
           <Option value="D">D</Option>
         </Select>
       ),
-
     },
     {
-      title: '機台編號',
-      dataIndex: 'machineSN',
+      title: "機台編號",
+      dataIndex: "machineSN",
       editable: true,
       width: 50,
     },
     {
-      title: '預計上機日',
-      dataIndex: 'planOnMachineDate',
+      title: "預計上機日",
+      dataIndex: "planOnMachineDate",
       editable: true,
       width: 60,
-      type: "date"
-
+      type: "date",
     },
     {
-      title: '預計完成日',
-      dataIndex: 'planFinishDate',
+      title: "預計完成日",
+      dataIndex: "planFinishDate",
       // editable: true,
       width: 60,
-      type: "date"
-
+      type: "date",
     },
     {
-      title: '上下模工作日',
-      dataIndex: 'moldWorkDays',
+      title: "上下模工作日",
+      dataIndex: "moldWorkDays",
       editable: true,
       width: 60,
       type: "number",
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+      rule: {
+        type: "integer",
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
-
     },
     {
-      title: '日工時',
-      dataIndex: 'dailyWorkingHours',
+      title: "日工時",
+      dataIndex: "dailyWorkingHours",
       editable: true,
       width: 35,
       type: "number",
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+      rule: {
+        type: "integer",
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
     },
     {
-      title: '實際上機日',
-      dataIndex: 'actualOnMachineDate',
+      title: "實際上機日",
+      dataIndex: "actualOnMachineDate",
       editable: true,
       width: 60,
       // type: "dateTime"
-      type: 'date'
-
-
+      type: "date",
     },
     {
-      title: '實際完成日',
-      dataIndex: 'actualFinishDate',
+      title: "實際完成日",
+      dataIndex: "actualFinishDate",
       editable: true,
       width: 60,
-      type: "date"
-
+      type: "date",
     },
     {
-      title: '週別',
-      dataIndex: 'week',
-      // editable: true,
+      title: "週別",
+      dataIndex: "week",
       width: 30,
       type: "number",
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+      rule: {
+        type: "integer",
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
     },
     {
-      title: '產能小時',
-      dataIndex: 'hourlyCapacity',
-      // editable: true,
+      title: "產能小時",
+      dataIndex: "hourlyCapacity",
       width: 40,
       type: "number",
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+      rule: {
+        type: "integer",
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
     },
     {
-      title: '日產能',
-      dataIndex: 'dailyCapacity',
-      // editable: true,
+      title: "日產能",
+      dataIndex: "dailyCapacity",
       width: 36,
       type: "number",
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+      rule: {
+        type: "integer",
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
-
     },
     {
-      title: '工作天數',
-      dataIndex: 'workDays',
-      // editable: true,
+      title: "工作天數",
+      dataIndex: "workDays",
       width: 40,
       type: "number",
-      rule:
-      {
-        type: 'integer',
-        message: '請輸入整數',
-        transform: value => (value ? Number(value) : undefined), // Transform the value to a number
-
+      rule: {
+        type: "integer",
+        message: "請輸入整數",
+        transform: (value) => (value ? Number(value) : undefined), // Transform the value to a number
       },
     },
-
     {
-      title: '單雙射',
-      dataIndex: 'singleOrDoubleColor',
+      title: "單雙射",
+      dataIndex: "singleOrDoubleColor",
       editable: true,
       width: 40,
     },
     {
-      title: '轉換率 ',
-      dataIndex: 'conversionRate',
+      title: "轉換率 ",
+      dataIndex: "conversionRate",
       editable: true,
       width: 40,
       type: "number",
-
-
     },
     {
-      title: '備註 ',
-      dataIndex: 'comment',
+      title: "備註 ",
+      dataIndex: "comment",
       editable: true,
       width: 300,
       ellipsis: true,
@@ -418,34 +398,33 @@ const ProductionSchedule = (props) => {
         </Tooltip>
       ),
     },
-
   ];
   // 設定初始當前頁面以及分頁一頁有幾個資料
-
   const [pagination, setPagination] = useState({
-    page: 1, /*當前分頁位址*/
+    page: 1 /*當前分頁位址*/,
     pageSize: 10, // 默认值为 10
   });
-  const [totalCurrent, setTotalCurrent] = useState(1);/*總數據量*/
-  const [dataSource, setDataSource] = useState([]);/*回傳資料*/
+  const [totalCurrent, setTotalCurrent] = useState(1); /*總數據量*/
+  const [dataSource, setDataSource] = useState([]); /*回傳資料*/
   // 周別篩選
   const [weekFilter, setWeekFilter] = useState(null); // State to store the selected week filter
   const [yearFilter, setYearsFilter] = useState(null); // State to store the selected year filter
   const [monthFilter, setMonthFilter] = useState(null); // State to store the selected month filter
-  const [statusFilter, setStatusFilter] = useState('all'); // State to store the selected status filter
-  // 
+  const [statusFilter, setStatusFilter] = useState("all"); // State to store the selected status filter
+  //
   const [loading, setLoading] = useState(false);
 
-  const { data, isLoading, isSuccess, refetch } = useGetProductionScheduleQuery({
-    size: pagination.pageSize,/*分頁數量*/
-    page: pagination.page,/*想取得的分頁位址*/
-    week_filter: weekFilter ? (weekFilter).toString() : null,
-    year_filter: yearFilter ? (yearFilter).toString() : null,
-    month_filter: monthFilter ? (monthFilter).toString() : null,
-    status_filter: statusFilter ? statusFilter : 'all',
-    size: pagination.pageSize,
-
-  });
+  const { data, isLoading, isSuccess, refetch } = useGetProductionScheduleQuery(
+    {
+      size: pagination.pageSize /*分頁數量*/,
+      page: pagination.page /*想取得的分頁位址*/,
+      week_filter: weekFilter ? weekFilter.toString() : null,
+      year_filter: yearFilter ? yearFilter.toString() : null,
+      month_filter: monthFilter ? monthFilter.toString() : null,
+      status_filter: statusFilter ? statusFilter : "all",
+      size: pagination.pageSize,
+    }
+  );
   // 分頁相關設定
   const handleTableChange = (page, size) => {
     const newPagination = {
@@ -461,116 +440,82 @@ const ProductionSchedule = (props) => {
       // setPagination(newPagination);
     }
     setPagination(newPagination);
-
-
   };
 
   // 周別篩選內部值設定
   const { Option } = Select;
   const allWeekOptions = [
-    <Option key={0} value={''} label="全部周別">
+    <Option key={0} value={""} label="全部周別">
       全部周別
     </Option>,
     ...[...Array(52).keys()].map((week) => (
       <Option key={week + 1} value={week + 1} label={`第${week + 1}周`}>
         第{week + 1}周
       </Option>
-    ))
+    )),
   ];
   const allMonthOptions = [
-    <Option key={0} value={''} label="全部月份">
+    <Option key={0} value={""} label="全部月份">
       全部月份
     </Option>,
-    <Option key={1} value={1} label="1">
-      1
-    </Option>,
-    <Option key={2} value={2} label="2">
-      2
-    </Option>,
-    <Option key={3} value={3} label="3">
-      3
-    </Option>,
-    <Option key={4} value={4} label="4">
-      4
-    </Option>,
-    <Option key={5} value={5} label="5">
-      5
-    </Option>,
-    <Option key={6} value={6} label="6">
-      6
-    </Option>,
-    <Option key={7} value={7} label="7">
-      7
-    </Option>,
-    <Option key={8} value={8} label="8">
-      8
-    </Option>,
-    <Option key={9} value={9} label="9">
-      9
-    </Option>,
-    <Option key={10} value={10} label="10">
-      10
-    </Option>,
-    <Option key={11} value={11} label="11">
-      11
-    </Option>,
-    <Option key={12} value={12} label="12">
-      12
-    </Option>,
-
+    ...[...Array(12).keys()].map((month) => (
+      <Option key={month + 1} value={month + 1} label={`${month + 1}月`}>
+        {month + 1}月
+      </Option>
+    )),
   ];
   const allStatusOptions = [
-    <Option key={0} value={'all'} label="所有狀態">
+    <Option key={0} value={"all"} label="所有狀態">
       所有狀態
     </Option>,
-    <Option key={1} value={'尚未上機'} label="尚未上機">
-      尚未上機
+    <Option
+      key={1}
+      value={WORKORDER_STATUS.NOT_YET}
+      label={WORKORDER_STATUS.NOT_YET}
+    >
+      {WORKORDER_STATUS.NOT_YET}
     </Option>,
-    <Option key={2} value={'on-going'} label="正在生產">
-      正在生產
+    <Option
+      key={2}
+      value={WORKORDER_STATUS.ON_GOING}
+      label={WORKORDER_STATUS.ON_GOING}
+    >
+      {WORKORDER_STATUS.ON_GOING}
     </Option>,
-    <Option key={3} value={'Done'} label="已經完成">
-      已經完成
+    <Option key={3} value={WORKORDER_STATUS.DONE} label={WORKORDER_STATUS.DONE}>
+      {WORKORDER_STATUS.DONE}
     </Option>,
-    <Option key={4} value={'暫停生產'} label="暫停生產">
-      暫停生產
+    <Option
+      key={4}
+      value={WORKORDER_STATUS.PAUSE}
+      label={WORKORDER_STATUS.PAUSE}
+    >
+      {WORKORDER_STATUS.PAUSE}
     </Option>,
-    <Option key={5} value={'刪除此筆'} label="刪除此筆">
-      刪除此筆
-    </Option>,
-
   ];
   const allYearsOptions = [
-    <Option key={0} value={''} label="全部年份">
+    <Option key={0} value={""} label="全部年份">
       全部年份
     </Option>,
-    <Option key={2023} value={2023} label="2023">
-      2023
-    </Option>,
-    <Option key={2024} value={2024} label="2024">
-      2024
-    </Option>,
-    <Option key={2025} value={2025} label="2025">
-      2025
-    </Option>,
-    <Option key={2026} value={2026} label="2026">
-      2026
-    </Option>,
-    <Option key={2027} value={2027} label="2027">
-      2027
-    </Option>,
-
+    ...[...Array(11).keys()].map((year) => (
+      <Option key={year + 2023} value={year + 2023} label={`${year + 2023}年`}>
+        {year + 2023}年
+      </Option>
+    )),
   ];
   // 新增 exportData 狀態
   const [needExportData, setNeedExportData] = useState([]);
   // API匯出exportData
-  const { data: exportData, isSuccess: exportIsSuccess, refetch: exportRefetch } = useGetProductionScheduleQuery({
+  const {
+    data: exportData,
+    isSuccess: exportIsSuccess,
+    refetch: exportRefetch,
+  } = useGetProductionScheduleQuery({
     size: 10000000,
-    week_filter: weekFilter ? (weekFilter).toString() : null,
-    year_filter: yearFilter ? (yearFilter).toString() : null,
-    month_filter: monthFilter ? (monthFilter).toString() : null,
-    status_filter: statusFilter ? statusFilter : 'all',
-
+    week_filter: weekFilter ? weekFilter.toString() : null,
+    year_filter: yearFilter ? yearFilter.toString() : null,
+    month_filter: monthFilter ? monthFilter.toString() : null,
+    status_filter: statusFilter ? statusFilter : "all",
   });
 
   useEffect(() => {
@@ -587,7 +532,9 @@ const ProductionSchedule = (props) => {
       const newDataWithHourlyCapacity = dataSource.map((item) => {
         if (item.moldingSecond && item.moldCavity) {
           // 计算新的 hourlyCapacity，并使用 Math.floor() 進行無条件捨去
-          const newHourlyCapacity = Math.floor((3600 / item.moldingSecond) * item.moldCavity);
+          const newHourlyCapacity = Math.floor(
+            (3600 / item.moldingSecond) * item.moldCavity
+          );
           // 更新 dataSource 中的 hourlyCapacity
           return { ...item, hourlyCapacity: newHourlyCapacity };
         }
@@ -601,7 +548,9 @@ const ProductionSchedule = (props) => {
       const newDataWithDailyCapacity = newDataWithHourlyCapacity.map((item) => {
         if (item.hourlyCapacity !== null && item.conversionRate !== null) {
           // 计算新的 dailyCapacity，并使用 Math.floor() 進行無条件捨去
-          const newDailyCapacity = Math.floor(item.hourlyCapacity * item.dailyWorkingHours * item.conversionRate);
+          const newDailyCapacity = Math.floor(
+            item.hourlyCapacity * item.dailyWorkingHours * item.conversionRate
+          );
           // 更新 dataSource 中的 dailyCapacity
           return { ...item, dailyCapacity: newDailyCapacity };
         }
@@ -610,20 +559,68 @@ const ProductionSchedule = (props) => {
 
       // 更新 dataSource
       setDataSource(newDataWithDailyCapacity);
+
+      // convert dates to ISO format
+      const newDataWithISODate = newDataWithDailyCapacity.map((item) => {
+        const newItem = { ...item };
+        newItem.workOrderDate = item.workOrderDate
+          ? dayjs(item.workOrderDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        newItem.planOnMachineDate = item.planOnMachineDate
+          ? dayjs(item.planOnMachineDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        newItem.planFinishDate = item.planFinishDate
+          ? dayjs(item.planFinishDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        newItem.actualOnMachineDate = item.actualOnMachineDate
+          ? dayjs(item.actualOnMachineDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        newItem.actualFinishDate = item.actualFinishDate
+          ? dayjs(item.actualFinishDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        return newItem;
+      });
+      // 更新 dataSource
+      setDataSource(newDataWithISODate);
     }
     if (exportIsSuccess) {
       const { data } = exportData;
-      setNeedExportData(data);
+      // convert dates to ISO format
+      const newDataWithISODate = exportData.data.map((item) => {
+        const newItem = { ...item };
+        newItem.workOrderDate = item.workOrderDate
+          ? dayjs(item.workOrderDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        newItem.planOnMachineDate = item.planOnMachineDate
+          ? dayjs(item.planOnMachineDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        newItem.planFinishDate = item.planFinishDate
+          ? dayjs(item.planFinishDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        newItem.actualOnMachineDate = item.actualOnMachineDate
+          ? dayjs(item.actualOnMachineDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        newItem.actualFinishDate = item.actualFinishDate
+          ? dayjs(item.actualFinishDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        return newItem;
+      });
+      setNeedExportData(newDataWithISODate);
     }
-  }, [weekFilter, yearFilter, monthFilter,statusFilter, isSuccess, data, exportData]);
-
+  }, [
+    weekFilter,
+    yearFilter,
+    monthFilter,
+    statusFilter,
+    isSuccess,
+    data,
+    exportData,
+  ]);
 
   // 匯出功能
   const exportToExcel = () => {
-
-
     const workbook = new Exceljs.Workbook();
-    const worksheet = workbook.addWorksheet('Sheet1');
+    const worksheet = workbook.addWorksheet("Sheet1");
 
     // 设置表格列
     worksheet.columns = getExcelColumns();
@@ -633,34 +630,33 @@ const ProductionSchedule = (props) => {
     // titleRow2.font = { bold: true, color: { argb: '00ffffff' } }; // 设置标题行样式
 
     // 添加数据行
-
     worksheet.addRows(needExportData);
 
     // 设置表头样式
     let headerStyle = {
       font: {
-        name: 'Arial',
+        name: "Arial",
         size: 14,
         // bold: true,
         // color: { argb: '00ffffff' },
       },
       fill: {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: '#fff',
+        type: "pattern",
+        pattern: "solid",
+        fgColor: "#fff",
       },
       alignment: {
         wrapText: true,
-        vertical: 'middle',
-        horizontal: 'center',
+        vertical: "middle",
+        horizontal: "center",
       },
       border: {
-        top: { style: 'double' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
+        top: { style: "double" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
       },
-      width: 300
+      width: 300,
     };
 
     // 填充表头样式
@@ -675,11 +671,10 @@ const ProductionSchedule = (props) => {
     // 将工作簿写入缓冲区，并保存为Excel文件
     workbook.xlsx.writeBuffer().then((buffer) => {
       let blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      saveAs(blob, 'ProductionSchedule.xlsx');
+      saveAs(blob, "ProductionSchedule.xlsx");
     });
-
   };
 
   const getExcelColumns = () => {
@@ -690,88 +685,88 @@ const ProductionSchedule = (props) => {
         style: {
           font: { size: 11 },
           border: {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' },
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
           },
           alignment: {
             wrapText: true,
-            vertical: 'middle',
-            horizontal: 'center',
+            vertical: "middle",
+            horizontal: "center",
           },
         },
       };
       // 添加其他样式配置...
       switch (item.dataIndex) {
-        case 'id':
-          items['width'] = 10;
+        case "id":
+          items["width"] = 10;
           break;
-        case 'workOrderSN':
-          items['width'] = 25;
+        case "workOrderSN":
+          items["width"] = 25;
           break;
-        case 'productName':
-          items['width'] = 25;
+        case "productName":
+          items["width"] = 25;
           break;
-        case 'workOrderQuantity':
-          items['width'] = 15;
+        case "workOrderQuantity":
+          items["width"] = 15;
           break;
-        case 'workOrderDate':
-          items['width'] = 25;
+        case "workOrderDate":
+          items["width"] = 25;
           break;
-        case 'moldingSecond':
-          items['width'] = 15;
+        case "moldingSecond":
+          items["width"] = 15;
           break;
-        case 'moldCavity':
-          items['width'] = 10;
+        case "moldCavity":
+          items["width"] = 10;
           break;
-        case 'productionArea':
-          items['width'] = 15;
+        case "productionArea":
+          items["width"] = 15;
           break;
-        case 'machineSN':
-          items['width'] = 25;
+        case "machineSN":
+          items["width"] = 25;
           break;
-        case 'planOnMachineDate':
-          items['width'] = 25;
+        case "planOnMachineDate":
+          items["width"] = 25;
           break;
-        case 'planFinishDate':
-          items['width'] = 25;
+        case "planFinishDate":
+          items["width"] = 25;
           break;
-        case 'moldWorkDays':
-          items['width'] = 25;
+        case "moldWorkDays":
+          items["width"] = 25;
           break;
-        case 'actualFinishDate':
-          items['width'] = 25;
+        case "actualFinishDate":
+          items["width"] = 25;
           break;
-        case 'dailyWorkingHours':
-          items['width'] = 10;
+        case "dailyWorkingHours":
+          items["width"] = 10;
           break;
-        case 'actualOnMachineDate':
-          items['width'] = 25;
+        case "actualOnMachineDate":
+          items["width"] = 25;
           break;
-        case 'week':
-          items['width'] = 10;
+        case "week":
+          items["width"] = 10;
           break;
-        case 'hourlyCapacity':
-          items['width'] = 15;
+        case "hourlyCapacity":
+          items["width"] = 15;
           break;
-        case 'dailyCapacity':
-          items['width'] = 10;
+        case "dailyCapacity":
+          items["width"] = 10;
           break;
-        case 'workDays':
-          items['width'] = 15;
+        case "workDays":
+          items["width"] = 15;
           break;
-        case 'singleOrDoubleColor':
-          items['width'] = 10;
+        case "singleOrDoubleColor":
+          items["width"] = 10;
           break;
-        case 'conversionRate':
-          items['width'] = 10;
+        case "conversionRate":
+          items["width"] = 10;
           break;
-        case 'status':
-          items['width'] = 15;
+        case "status":
+          items["width"] = 15;
           break;
-        case 'comment':
-          items['width'] = 10;
+        case "comment":
+          items["width"] = 10;
           break;
       }
       return items;
@@ -783,32 +778,29 @@ const ProductionSchedule = (props) => {
   // 置令單創建日期
   const formatDate = (date) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
   const [nowDate, setNowDate] = useState(formatDate(new Date())); // 初始值为当前日期
 
-
-
   // 新增製令單
   const handleAdd = async () => {
     if (selectedRowKeys.length > 0) {
-      message.warning('請先取消勾選增製令單才能新增項目');
+      message.warning("請先取消勾選增製令單才能新增項目");
       return;
     }
 
-    if ((weekFilter == "") || (weekFilter == null)) {
-
+    if (weekFilter == "" || weekFilter == null) {
       try {
         Modal.confirm({
-          title: '確認新增',
-          content: '確定要新增製令單嗎？',
-          okText: '確定',
-          cancelText: '取消',
+          title: "確認新增",
+          content: "確定要新增製令單嗎？",
+          okText: "確定",
+          cancelText: "取消",
           onOk: async () => {
             try {
-              message.success('新增製令單成功');
+              message.success("新增製令單成功");
 
               const newData = {
                 workOrderSN: "",
@@ -830,109 +822,111 @@ const ProductionSchedule = (props) => {
               // const newId = addedItem.data.data.id;
               // console.log('newId', newId);
               // setSelectedRowKeys([...selectedRowKeys, newId]);
-
             } catch (error) {
-              console.error('新增製令單時發生錯誤:', error);
+              console.error("新增製令單時發生錯誤:", error);
             }
           },
         });
       } catch (error) {
-        console.error('處理新增製令單時發生錯誤:', error);
+        console.error("處理新增製令單時發生錯誤:", error);
       }
     } else {
-      message.warning('請先選擇全部周別後,再進行新增製令單的動作');
+      message.warning("請先選擇全部周別後,再進行新增製令單的動作");
       return;
     }
   };
 
-  const [selectionType, setSelectionType] = useState('checkbox');
-
+  const [selectionType, setSelectionType] = useState("checkbox");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 追蹤選中的行的 id
-
-  // const [delProductionSchedule] = useDelProductionScheduleMutation();
   const [pauseStaus] = usePauseStausMutation();
   const [cancelStaus] = useCancelStausMutation();
   //勾選刪除
   const deleteChecked = async () => {
     // Get the selected rows' ids
     if (selectedRowKeys.length === 0) {
-      message.warning('請先勾選要刪除此筆的項目');
+      message.warning("請先勾選要刪除的單據");
       return;
     }
     // Get the selected rows' data
-    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+    const selectedRowsData = dataSource.filter((row) =>
+      selectedRowKeys.includes(row.id)
+    );
 
     // Check if the status is "Done" for any selected rows
-    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+    const completedDocuments = selectedRowsData.some(
+      (row) => row.status === "Done"
+    );
 
     if (completedDocuments) {
-      message.warning('此單據已經完成，無法進行修改。');
+      message.warning("此單據已經完成，無法進行修改。");
       return;
     }
 
     const stringIds = JSON.stringify(selectedRowKeys);
 
     Modal.confirm({
-      title: '確認刪除',
-      content: '確定要取消生產選中的項目嗎？',
-      okText: '確定',
-      cancelText: '取消',
+      title: "確認刪除",
+      content: "確定要刪除生產選中的項目嗎？",
+      okText: "確定",
+      cancelText: "取消",
       onOk: async () => {
         try {
-
           await cancelStaus(stringIds);
-
-          message.success('目前狀態已變為暫停生產!!');
-
+          message.success("刪除成功!!");
         } catch (error) {
-          console.error('Error deleting production schedule:', error);
+          console.error("Error deleting production schedule:", error);
         }
       },
     });
   };
-
 
   // 勾選令機具暫停動作
   const pauseChecked = () => {
     // Get the selected rows' ids
 
     if (selectedRowKeys.length === 0) {
-      message.warning('請先勾選要暫停的項目');
+      message.warning("請先勾選要暫停的項目");
       return;
     }
-    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+    const selectedRowsData = dataSource.filter((row) =>
+      selectedRowKeys.includes(row.id)
+    );
 
     // Check if the 'actualOnMachineDate' property exists in all selected rows
-    const missingActualOnMachineDate = selectedRowsData.some((row) => !row.actualOnMachineDate);
+    const missingActualOnMachineDate = selectedRowsData.some(
+      (row) => !row.actualOnMachineDate
+    );
 
     if (missingActualOnMachineDate) {
-      message.warning('請先填寫實際上機日!');
+      message.warning("請先填寫實際上機日!");
       return;
     }
 
     // Check if the status is "Done" for any selected rows
-    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+    const completedDocuments = selectedRowsData.some(
+      (row) => row.status === "Done"
+    );
 
     if (completedDocuments) {
-      message.warning('此單據已經完成，無法進行修改。');
+      message.warning("此單據已經完成，無法進行修改。");
       return;
     }
     const stringIds = JSON.stringify(selectedRowKeys);
 
     // 显示确认对话框
     Modal.confirm({
-      title: '確認暫停生產',
-      content: '確定要將所選項目的暫停生產嗎？',
-      okText: '確定',
-      cancelText: '取消',
+      title: "確認暫停生產",
+      content: "確定要將所選項目的暫停生產嗎？",
+      okText: "確定",
+      cancelText: "取消",
       onOk: async () => {
         try {
           // 將勾選的欄位更改其屬性 status 值為"暫停動作"
           await pauseStaus(stringIds);
 
-          message.success('目前狀態已變為暫停生產!!');
+          message.success("目前狀態已變為暫停生產!!");
         } catch (error) {
-          console.error('Error pausing production schedules:', error);
+          console.error("Error pausing production schedules:", error);
         }
       },
     });
@@ -944,32 +938,38 @@ const ProductionSchedule = (props) => {
   const actionChecked = () => {
     // Get the selected rows' ids
     if (selectedRowKeys.length === 0) {
-      message.warning('請先勾選要啟動的項目');
+      message.warning("請先勾選要啟動的項目");
       return;
     }
-    const selectedRowsData = dataSource.filter((row) => selectedRowKeys.includes(row.id));
+    const selectedRowsData = dataSource.filter((row) =>
+      selectedRowKeys.includes(row.id)
+    );
 
     // Check if the 'actualOnMachineDate' property exists in all selected rows
-    const missingActualOnMachineDate = selectedRowsData.some((row) => !row.actualOnMachineDate);
+    const missingActualOnMachineDate = selectedRowsData.some(
+      (row) => !row.actualOnMachineDate
+    );
 
     if (missingActualOnMachineDate) {
-      message.warning('請先填寫實際上機日!');
+      message.warning("請先填寫實際上機日!");
       return;
     }
     // Check if the status is "Done" for any selected rows
-    const completedDocuments = selectedRowsData.some((row) => row.status === 'Done');
+    const completedDocuments = selectedRowsData.some(
+      (row) => row.status === "Done"
+    );
 
     if (completedDocuments) {
-      message.warning('此單據已經完成，無法進行修改。');
+      message.warning("此單據已經完成，無法進行修改。");
       return;
     }
     const stringIds = JSON.stringify(selectedRowKeys);
 
     Modal.confirm({
-      title: '確認啟動動作',
-      content: '確定要啟動所選項目的動作嗎？',
-      okText: '確定',
-      cancelText: '取消',
+      title: "確認啟動動作",
+      content: "確定要啟動所選項目的動作嗎？",
+      okText: "確定",
+      cancelText: "取消",
       onOk: async () => {
         try {
           // 將勾選的欄位更改其屬性 status 值為"啟動動作"
@@ -978,9 +978,9 @@ const ProductionSchedule = (props) => {
           // 清空勾選
           // setSelectedRowKeys([]);
 
-          message.success('目前狀態已變為on-going');
+          message.success("目前狀態已變為on-going");
         } catch (error) {
-          console.error('Error starting production schedules:', error);
+          console.error("Error starting production schedules:", error);
         }
       },
     });
@@ -989,18 +989,14 @@ const ProductionSchedule = (props) => {
   // 勾選設定
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-
       setSelectedRowKeys(selectedRowKeys); // 更新選中的行
-
     },
     getCheckboxProps: (record) => ({
-      disabled: record.name === 'Disabled User',
+      disabled: record.name === "Disabled User",
       // Column configuration not to be checked
       name: record.name,
     }),
-
   };
-
 
   // 編輯
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
@@ -1008,8 +1004,9 @@ const ProductionSchedule = (props) => {
   const handleSave = async (row) => {
     try {
       // Check if there are changes in the data
-
-      const isDataChanged = Object.keys(row).some((key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]);
+      const isDataChanged = Object.keys(row).some(
+        (key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]
+      );
       // 当从服务器获取到 hourlyCapacity 时，检查 conversionRate 是否有值
 
       if (!isDataChanged) {
@@ -1018,26 +1015,44 @@ const ProductionSchedule = (props) => {
         return;
       }
       // Perform the optimistic update on the client side
-      const updatedData = dataSource.map((item) => (item.id === row.id ? { ...item, ...row } : item));
+      const updatedData = dataSource.map((item) =>
+        item.id === row.id ? { ...item, ...row } : item
+      );
       setDataSource(updatedData);
-
+      console.log("before row", row);
+      // convert dates to ISO format
+      row.workOrderDate = row.workOrderDate
+        ? dayjs.tz(row.workOrderDate, TZ).format()
+        : null;
+      row.planOnMachineDate = row.planOnMachineDate
+        ? dayjs.tz(row.planOnMachineDate, TZ).format()
+        : null;
+      row.planFinishDate = row.planFinishDate
+        ? dayjs.tz(row.planFinishDate, TZ).format()
+        : null;
+      row.actualOnMachineDate = row.actualOnMachineDate
+        ? dayjs.tz(row.actualOnMachineDate, TZ).format()
+        : null;
+      row.actualFinishDate = row.actualFinishDate
+        ? dayjs.tz(row.actualFinishDate, TZ).format()
+        : null;
+      console.log("after row", row);
       // Perform the actual update on the server side
-      const response = await UpdateProductionSchedule({ id: row.id, data: row });
+      const response = await UpdateProductionSchedule({
+        id: row.id,
+        data: row,
+      });
 
       if (!response.error) {
-        message.success('修改數據成功');
-
+        message.success("修改數據成功");
       } else {
-        message.error('修改數據失敗!!!');
-
+        message.error("修改數據失敗!!!");
       }
-
     } catch (error) {
       // Handle the error (e.g., display an error message to the user, revert changes, etc.)
-      message.error('修改數據失敗!!!!');
+      message.error("修改數據失敗!!!!");
     }
   };
-
 
   const handleProductionAreaChange = async (value, record) => {
     try {
@@ -1051,13 +1066,16 @@ const ProductionSchedule = (props) => {
       setDataSource(updatedData);
 
       // Send a request to the server to update the data
-      await UpdateProductionSchedule({ id: record.id, data: { productionArea: value } });
+      await UpdateProductionSchedule({
+        id: record.id,
+        data: { productionArea: value },
+      });
 
       // If the server update is successful, no action is needed
-      message.success('修改數據成功');
+      message.success("修改數據成功");
     } catch (error) {
       // Handle the error (e.g., display a message to the user, revert changes, etc.)
-      console.error('Error updating production area:', error);
+      console.error("Error updating production area:", error);
     }
   };
 
@@ -1088,8 +1106,6 @@ const ProductionSchedule = (props) => {
     };
   });
 
-
-
   if (isLoading) {
     return <p>Loading...</p>;
   }
@@ -1102,18 +1118,15 @@ const ProductionSchedule = (props) => {
   const debouncedExportToExcel = debounce(exportToExcel, 500);
 
   return (
-    <div className='production-schedule'>
-      <div className='box'>
-
-        <div className='title-box'>
-          <div className='title'>
-            生產計劃排程表
-          </div>
-          <div className='btn-box'>
+    <div className="production-schedule">
+      <div className="box">
+        <div className="title-box">
+          <div className="title">生產計劃排程表</div>
+          <div className="btn-box">
             {/* 篩選周 */}
             <Select
               placeholder="全部周別"
-              style={{ width: 120, marginRight: '15px' }}
+              style={{ width: 120, marginRight: "15px" }}
               onChange={(value) => setWeekFilter(value)}
             >
               {allWeekOptions}
@@ -1122,7 +1135,7 @@ const ProductionSchedule = (props) => {
 
             <Select
               placeholder="全部年份"
-              style={{ width: 120, marginRight: '15px' }}
+              style={{ width: 120, marginRight: "15px" }}
               onChange={(value) => setYearsFilter(value)}
             >
               {allYearsOptions}
@@ -1131,7 +1144,7 @@ const ProductionSchedule = (props) => {
 
             <Select
               placeholder="全部月份"
-              style={{ width: 120, marginRight: '15px' }}
+              style={{ width: 120, marginRight: "15px" }}
               onChange={(value) => setMonthFilter(value)}
             >
               {allMonthOptions}
@@ -1140,71 +1153,70 @@ const ProductionSchedule = (props) => {
 
             <Select
               placeholder="所有狀態"
-              style={{ width: 120, marginRight: '15px' }}
+              style={{ width: 120, marginRight: "15px" }}
               onChange={(value) => setStatusFilter(value)}
             >
               {allStatusOptions}
             </Select>
             <Tooltip title="取消生產">
-              <button className='delete' onClick={debouncedHandleDelete}>
-                <FontAwesomeIcon icon={faTrashCan} style={{ color: '#fff' }} />
+              <button className="delete" onClick={debouncedHandleDelete}>
+                <FontAwesomeIcon icon={faTrashCan} style={{ color: "#fff" }} />
               </button>
             </Tooltip>
             <Tooltip title="開始生產">
               <button className="normal-action" onClick={debouncedHandleAction}>
-                <FontAwesomeIcon icon={faPlay} style={{ color: '#fff' }} />
+                <FontAwesomeIcon icon={faPlay} style={{ color: "#fff" }} />
               </button>
             </Tooltip>
             <Tooltip title="暫停生產">
               <button className="pause" onClick={debouncedHandlePause}>
-                <FontAwesomeIcon icon={faPause} style={{ color: '#fff' }} />
+                <FontAwesomeIcon icon={faPause} style={{ color: "#fff" }} />
               </button>
             </Tooltip>
             <Tooltip title="新增製令單">
-              <button className='add' onClick={debouncedHandleAdd}>
-                <FontAwesomeIcon icon={faPlus} style={{ color: '#fff' }} />
+              <button className="add" onClick={debouncedHandleAdd}>
+                <FontAwesomeIcon icon={faPlus} style={{ color: "#fff" }} />
               </button>
             </Tooltip>
-
-
           </div>
-
         </div>
-        {isSuccess &&
+        {isSuccess && (
           <Table
             components={components}
             rowClassName={() => "rowClassName1"}
             bordered
             striped={true}
-            rowKey="id"  // 在這裡指定 'id' 作為每一行的唯一標識
+            rowKey="id" // 在這裡指定 'id' 作為每一行的唯一標識
             dataSource={dataSource}
             columns={columns}
             pagination={{
               total: totalCurrent, // 確保這個值正確反映你的實際數據總數
-              current: pagination.page, /*當前分頁位址*/
+              current: pagination.page /*當前分頁位址*/,
               showSizeChanger: true,
               pageSize: pagination.pageSize,
               showQuickJumper: true,
               onChange: handleTableChange,
-              position: ['bottomCenter'],
-
+              position: ["bottomCenter"],
             }}
-
             loading={loading}
             scroll={{ x: 3600 }}
             rowSelection={{
               type: selectionType,
               ...rowSelection,
-              columnWidth: '32px'
+              columnWidth: "32px",
             }}
           />
-        }
-        {
-          (dataSource.length > 0) &&
-          <Button key="downloadExcel" type="ghost" onClick={debouncedExportToExcel} className='exportBtn'>
+        )}
+        {dataSource.length > 0 && (
+          <Button
+            key="downloadExcel"
+            type="ghost"
+            onClick={debouncedExportToExcel}
+            className="exportBtn"
+          >
             匯出
           </Button>
-        }
+        )}
       </div>
     </div>
   );

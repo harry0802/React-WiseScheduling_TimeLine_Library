@@ -44,10 +44,8 @@ def shift_by_holiday(start_date, end_date=datetime(1,1,1), workdays=1):
     # get the holiday list (twice of workdays)
     # to avoid the holiday list is not enough in final check
     # the calendar_api
-    start_date = start_date.replace(tzinfo=None)
-    end_date = end_date.replace(tzinfo=None)
+    end_date = end_date.replace(tzinfo=start_date.tzinfo)
     deltaDays = max(workdays, (end_date - start_date).days)
-
 
     # calendar_api = url_for("api.calendar_calendar_controller",
     #                         _scheme="http",
@@ -159,8 +157,6 @@ def complete_productionSchedule(db_obj, payload):
         current_app.logger.debug(f"moldCavity: {db_obj.moldCavity}")
         current_app.logger.debug(f"moldWorkDays: {db_obj.moldWorkDays}")
         current_app.logger.debug(f"conversionRate: {db_obj.conversionRate}")
-        #從molds資料表拿到moldNo
-        db_obj.moldNo = update_moldNo_by_productName(db_obj.productName)
         #每小時產能(drop decimal)
         db_obj.hourlyCapacity = (60 * 60) * (1/db_obj.moldingSecond) * db_obj.moldCavity
         db_obj.hourlyCapacity = math.floor(db_obj.hourlyCapacity)
@@ -175,7 +171,10 @@ def complete_productionSchedule(db_obj, payload):
         current_app.logger.debug(f"workDays: {db_obj.workDays}")
         #預計完成日(shift by holiday)
         db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
-        
+    
+    #從molds資料表拿到moldNo
+    if db_obj.moldNo is None or db_obj.moldNo == "":
+        db_obj.moldNo = update_moldNo_by_productName(db_obj.productName)
     #周數
     if payload.get("week") is not None and False: #waiting for frontend has its own week calculation
         db_obj.week = payload["week"]

@@ -8,13 +8,19 @@ import Typography from "@mui/material/Typography";
 import { notification } from "antd";
 import checkImage from "../../assets/check.png";
 import pauseImage from "../../assets/pause.png";
-import { useMachineSNStore } from "../../store/zustand/store";
+import {
+  useMachineSNStore,
+  useProductionScheduleIdsStore,
+} from "../../store/zustand/store";
 import {
   useGetProductionReportQuery,
   useAddMotherLotsMutation,
   useUpdateMotherLotsMutation,
 } from "../../store/api/productionReportApi";
-import { useDoneStausMutation } from "../../store/api/productionScheduleApi";
+import {
+  useDoneStausMutation,
+  usePauseStausMutation,
+} from "../../store/api/productionScheduleApi";
 import { WORKORDER_STATUS, LEADER_ACTION } from "../../config/enum";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -27,6 +33,9 @@ const LeaderSign = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const machineSN_Store = useMachineSNStore((state) => state.machineSN_Store); // 從zustand store 取得機台編號
+  const updateProductionScheduleIdsStore = useProductionScheduleIdsStore(
+    (state) => state.updateProductionScheduleIds
+  );
   const action = location.state ? location.state.action : null; // new: 從製令單列表頁面過來要新增母批, continue: 從機台選擇頁面過來要繼續進行正在生產的母批, complete: 完成母批, pause: 暫停母批
   const newWorkOrders = location.state ? location.state.newWorkOrders : null; // 要新增母批的製令單號清單
   const completedWorkOrders = location.state
@@ -38,10 +47,12 @@ const LeaderSign = (props) => {
   const [skip, setSkip] = useState(true);
   const [error, setError] = useState(false); // 是否顯示帳號錯誤訊息
   const [errorMsg, setErrorMsg] = useState(""); // 錯誤訊息
-  const [addMotherLots, motherLotsMutationResult] = useAddMotherLotsMutation(); // 新增母批
+  const [addMotherLots, addMotherLotsMutationResult] =
+    useAddMotherLotsMutation(); // 新增母批
   const [updateMotherLots, updateMotherLotsMutationResult] =
     useUpdateMotherLotsMutation(); // 更新母批
   const [doneStaus] = useDoneStausMutation(); // 更新製令單狀態
+  const [pauseStaus] = usePauseStausMutation(); // 更新製令單狀態
 
   // 取得該機台正在生產的製令單資料
   const {
@@ -111,12 +122,12 @@ const LeaderSign = (props) => {
           leader: leader,
         };
       });
-    // await addMotherLots(newProductionReports);
+    await addMotherLots(newProductionReports);
     // 更新母批
     const updatedProductionReports = newWorkOrders
       .filter((workOrder) => workOrder.productionReport_id != null)
       .map((workOrder) => {
-        let leader = JSON.parse(workOrder.leader);
+        let leader = workOrder.leader ? JSON.parse(workOrder.leader) : [];
         leader.push({
           leader: data.get("leader"),
           log_time: dayjs.tz(new Date(), TZ).format(),
@@ -128,20 +139,20 @@ const LeaderSign = (props) => {
           leader: leader,
         };
       });
-    // await updateMotherLots(updatedProductionReports);
+    await updateMotherLots(updatedProductionReports);
     const productionSchedule_ids = JSON.stringify(
       newWorkOrders.map((workOrder) => {
         return workOrder.productionSchedule_id;
       })
     );
-    navigate("/ProductionDetailPage", {
-      state: { productionSchedule_ids: productionSchedule_ids },
-    });
+    updateProductionScheduleIdsStore(productionSchedule_ids);
+    navigate("/ProductionDetailPage");
   };
 
   const actionContinue = async (data) => {
+    console.log("continuedWorkOrders", continuedWorkOrders);
     const updatedProductionReports = continuedWorkOrders
-      .filter((workOrder) => workOrder.productionReport_id != null)
+      .filter((workOrder) => workOrder.serialNumber === 0)
       .map((workOrder) => {
         let leader = JSON.parse(workOrder.leader);
         leader.push({
@@ -156,13 +167,19 @@ const LeaderSign = (props) => {
         };
       });
     await updateMotherLots(updatedProductionReports);
+    const productionSchedule_ids = JSON.stringify(
+      continuedWorkOrders.map((workOrder) => {
+        return workOrder.productionSchedule_id;
+      })
+    );
+    updateProductionScheduleIdsStore(productionSchedule_ids);
     navigate("/ProductionDetailPage");
   };
 
   const actionComplete = async (data) => {
     // 更新母批
     const updatedProductionReports = completedWorkOrders
-      .filter((workOrder) => workOrder.productionReport_id != null)
+      .filter((workOrder) => workOrder.serialNumber === 0)
       .map((workOrder) => {
         let leader = JSON.parse(workOrder.leader);
         leader.push({
@@ -177,27 +194,47 @@ const LeaderSign = (props) => {
           endTime: dayjs.tz(new Date(), TZ).format(),
         };
       });
-    await updateMotherLots(updatedProductionReports);
-    // 更新製令單狀態為Done
-    const updatedProductionSchedules = completedWorkOrders.map((workOrder) => {
-      return {
-        id: workOrder.productionSchedule_id,
-      };
+    await updateMotherLots(updatedProductionReports)
+      .unwrap()
+      .then((payload) => {})
+      .catch((error) => {
+        console.error("rejected", error);
+        notification.error({
+          description: "暫時無法更新，請稍後再試",
+          placement: "bottomRight",
+          duration: 5,
+        });
+      });
+    // 更新製令單實際完成日以及狀態為Done
+    const updatedProductionSchedules = new Set();
+    completedWorkOrders.forEach((workOrder) => {
+      updatedProductionSchedules.add(workOrder.productionSchedule_id);
     });
-    const updatedIds = Json.stringify(updatedProductionSchedules);
-    await doneStaus(updatedIds);
-    notification.success({
-      description: "已完成階段工作",
-      placement: "bottomRight",
-      duration: 5,
-    });
-    navigate("/ProductionReportPage");
+    const updatedIds = JSON.stringify(Array.from(updatedProductionSchedules));
+    await doneStaus(updatedIds)
+      .unwrap()
+      .then((payload) => {
+        notification.success({
+          description: "已完成階段工作",
+          placement: "bottomRight",
+          duration: 5,
+        });
+        navigate("/ProductionReportPage");
+      })
+      .catch((error) => {
+        console.error("rejected", error);
+        notification.error({
+          description: "暫時無法更新，請稍後再試",
+          placement: "bottomRight",
+          duration: 5,
+        });
+      });
   };
 
   const actionPause = async (data) => {
     // 更新母批
     const updatedProductionReports = pausedWorkOrders
-      .filter((workOrder) => workOrder.productionReport_id != null)
+      .filter((workOrder) => workOrder.serialNumber === 0)
       .map((workOrder) => {
         let leader = JSON.parse(workOrder.leader);
         leader.push({
@@ -211,21 +248,41 @@ const LeaderSign = (props) => {
           leader: leader,
         };
       });
-    await updateMotherLots(updatedProductionReports);
+    await updateMotherLots(updatedProductionReports)
+      .unwrap()
+      .then((payload) => {})
+      .catch((error) => {
+        console.error("rejected", error);
+        notification.error({
+          description: "暫時無法更新，請稍後再試",
+          placement: "bottomRight",
+          duration: 5,
+        });
+      });
     // 更新製令單狀態為暫停
-    const updatedProductionSchedules = pausedWorkOrders.map((workOrder) => {
-      return {
-        id: workOrder.productionSchedule_id,
-      };
+    const updatedProductionSchedules = new Set();
+    pausedWorkOrders.forEach((workOrder) => {
+      updatedProductionSchedules.add(workOrder.productionSchedule_id);
     });
-    const updatedIds = JSON.stringify(updatedProductionSchedules);
-    await pauseStaus(updatedIds);
-    notification.success({
-      description: "已暫停該階段工作",
-      placement: "bottomRight",
-      duration: 5,
-    });
-    navigate("/ProductionReportPage");
+    const updatedIds = JSON.stringify(Array.from(updatedProductionSchedules));
+    await pauseStaus(updatedIds)
+      .unwrap()
+      .then((payload) => {
+        notification.success({
+          description: "已暫停該階段工作",
+          placement: "bottomRight",
+          duration: 5,
+        });
+        navigate("/ProductionReportPage");
+      })
+      .catch((error) => {
+        console.error("rejected", error);
+        notification.error({
+          description: "暫時無法更新，請稍後再試",
+          placement: "bottomRight",
+          duration: 5,
+        });
+      });
   };
 
   const handleSubmit = async (e) => {
@@ -278,7 +335,6 @@ const LeaderSign = (props) => {
       {action === "pause" && (
         <img style={{ width: "120px" }} src={pauseImage} alt="暫停" />
       )}
-
       <Typography
         variant="h6"
         component="h2"
@@ -307,7 +363,6 @@ const LeaderSign = (props) => {
           style: { fontSize: "16px", color: "#E61F19" },
         }}
       />
-
       <Button
         type="submit"
         className="sign"
@@ -320,34 +375,18 @@ const LeaderSign = (props) => {
       >
         確認
       </Button>
-      {(action === "new" || action === "continue") && (
-        <Button
-          variant="text"
-          sx={{
-            color: "#8F8F8F",
-            marginTop: "30px",
-            fontSize: "16px",
-            textDecoration: "underline",
-          }}
-          onClick={() => navigate(-1)}
-        >
-          取消
-        </Button>
-      )}
-      {(action === "complete" || action === "pause") && (
-        <Button
-          variant="text"
-          sx={{
-            color: "#8F8F8F",
-            marginTop: "30px",
-            fontSize: "18px",
-            textDecoration: "underline",
-          }}
-          onClick={() => navigate("/ProductionDetailPage")}
-        >
-          取消
-        </Button>
-      )}
+      <Button
+        variant="text"
+        sx={{
+          color: "#8F8F8F",
+          marginTop: "30px",
+          fontSize: "16px",
+          textDecoration: "underline",
+        }}
+        onClick={() => navigate(-1)}
+      >
+        取消
+      </Button>
     </Box>
   );
 };

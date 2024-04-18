@@ -70,7 +70,7 @@ class productionReportDto:
     #POST model
     post_obj = copy.deepcopy(base_obj)
     pop_list = ["id", "serialNumber"]
-    required_list = ["workOrderSN", "workOrderQuantity", "lotName"]
+    required_list = ["workOrderSN", "workOrderQuantity"]
     not_required_list = []
     for attr in [item for item in pop_list]:
         post_obj.pop(attr)

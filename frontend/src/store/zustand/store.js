@@ -9,7 +9,20 @@ export const useMachineSNStore = create(
         set({ machineSN_Store: newmachineSN_Store }),
     }),
     {
-      name: "machineSN_Store-storage", // name of the item in the storage (must be unique)
+      name: "machineSN", // name of the item in the storage (must be unique)
+      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
+    }
+  )
+);
+
+export const useProductionScheduleIdsStore = create(
+  persist(
+    (set, get) => ({
+      updateProductionScheduleIds: (productionScheduleIdsStore) =>
+        set({ productionScheduleIdsStore: productionScheduleIdsStore }),
+    }),
+    {
+      name: "psIds", // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
     }
   )
@@ -27,8 +40,8 @@ export const useLotStore = create(
       updateLotsByInspection: (lotName, schema, newValue) => {
         const newLots = get().lots.map((lot) => {
           // find lot's children by lotName and update the schema's value
-          if (lot.lotName === lotName.split("-")[0]) {
-            const newChildren = lot.children.map((child) => {
+          if (lot.lotName === lotName?.split("-")[0]) {
+            const updatedChildren = lot.children.map((child) => {
               var totalDefectiveQuantity = 0;
               if (child.lotName === lotName) {
                 totalDefectiveQuantity =
@@ -58,7 +71,25 @@ export const useLotStore = create(
               }
               return child;
             });
-            return { ...lot, children: newChildren };
+            return { ...lot, children: updatedChildren };
+          }
+          return lot;
+        });
+        set({ lots: newLots });
+      },
+      updateLotsByProductionQuantity: (lotName, newValue) => {
+        const newLots = get().lots.map((lot) => {
+          if (lot.lotName === lotName?.split("-")[0]) {
+            const updatedChildren = lot.children.map((child) => {
+              if (child.lotName === lotName) {
+                return {
+                  ...child,
+                  productionQuantity: Number(newValue),
+                };
+              }
+              return child;
+            });
+            return { ...lot, children: updatedChildren };
           }
           return lot;
         });
@@ -66,7 +97,7 @@ export const useLotStore = create(
       },
     }),
     {
-      name: "lots-storage", // name of the item in the storage (must be unique)
+      name: "lots", // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
     }
   )
