@@ -207,12 +207,12 @@ const ProductionReport = (props) => {
           formatedDefectiveQty = `${item.defectiveQuantity}(${item.productionDefectiveRate}%)`;
         }
         // 將日期轉換成當地時區
-        const planOnMachineDate = dayjs(item.planOnMachineDate)
-          .tz(TZ)
-          .format("YYYY-MM-DD");
-        const actualOnMachineDate = dayjs(item.actualOnMachineDate)
-          .tz(TZ)
-          .format("YYYY-MM-DD");
+        const planOnMachineDate = item.planOnMachineDate
+          ? dayjs(item.planOnMachineDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
+        const actualOnMachineDate = item.actualOnMachineDate
+          ? dayjs(item.actualOnMachineDate).tz(TZ).format("YYYY-MM-DD")
+          : "";
         return {
           ...item,
           formatedDefectiveQty: formatedDefectiveQty,
@@ -256,10 +256,23 @@ const ProductionReport = (props) => {
       selectedRowKeys.includes(row.productionSchedule_id)
     );
     // 選取的製令單必須屬於同一個模具
+    let isMoldNoEmpty = false;
     const moldNoSet = new Set();
     selectedRowsData.forEach((row) => {
+      if (row.moldNo === "") {
+        isMoldNoEmpty = true;
+        return;
+      }
       moldNoSet.add(row.moldNo);
     });
+    if (isMoldNoEmpty) {
+      Modal.info({
+        content: <p>所選製令單必須有模具編號</p>,
+        okText: "確定",
+        onOk() {},
+      });
+      return;
+    }
     if (moldNoSet.size > 1) {
       Modal.info({
         content: <p>所選製令單必須屬於同一個模具</p>,

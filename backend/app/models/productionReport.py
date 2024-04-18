@@ -70,7 +70,7 @@ class productionReport(Model):
     workOrderQuantity = Column(db.Integer)
     material = Column(db.String(255))
     moldCavity = Column(db.Integer)
-    leader = Column(db.Text)
+    leader = Column(db.String(64000))
     operator1 = Column(db.String(255))
     operator2 = Column(db.String(255))
     productionQuantity = Column(db.Integer)

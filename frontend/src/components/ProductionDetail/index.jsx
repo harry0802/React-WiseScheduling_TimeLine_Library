@@ -174,7 +174,7 @@ const ProductionDetail = (props) => {
           period = JSON.parse(item.leader).map((leader) => {
             return `${dayjs(leader.log_time)
               .tz(TZ)
-              .format("YYYY-MM-DD HH:MM")} ${leader.action}\n`;
+              .format("YYYY-MM-DD HH:mm")} ${leader.action}\n`;
           });
         }
         // set groupWhite class to the first item and its children, set groupGray to the second item and its children, set groupWhite to the third item and its children, and so on
@@ -194,9 +194,9 @@ const ProductionDetail = (props) => {
               operators: `${child.operator1}\n${child.operator2}`,
               period: `${dayjs(child.start_time)
                 .tz(TZ)
-                .format("YYYY-MM-DD HH:MM")}\n${dayjs(child.end_time)
+                .format("YYYY-MM-DD HH:mm")}\n${dayjs(child.end_time)
                 .tz(TZ)
-                .format("YYYY-MM-DD HH:MM")}`,
+                .format("YYYY-MM-DD HH:mm")}`,
               className: currentClass,
             };
           });
@@ -211,12 +211,9 @@ const ProductionDetail = (props) => {
           children: children,
         };
       });
-      console.log("formattedworkOrders", formattedworkOrders);
       setDataSource(formattedworkOrders);
     }
   }, [isSuccess, workOrders]);
-
-  console.log("workOrders", workOrders);
 
   // Complete
   const handleComplete = () => {
@@ -257,7 +254,6 @@ const ProductionDetail = (props) => {
           <div className={styles.title}>
             {machineSN_Store}機台製令單生產明細
           </div>
-
           <div>
             <div>
               <Tooltip title="完成">
@@ -306,13 +302,11 @@ const ProductionDetail = (props) => {
               ) {
                 className += ` ${styles.unfinishedRow} `;
               }
-
               // group the same color to the same group
               className +=
                 record.className === " groupWhite "
                   ? ` ${styles.groupWhite} `
                   : ` ${styles.groupGray} `;
-
               return className;
             }}
           />
