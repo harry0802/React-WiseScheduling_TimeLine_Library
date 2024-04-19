@@ -316,15 +316,12 @@ const ProductionSchedule = (props) => {
     {
       title: "實際上機日",
       dataIndex: "actualOnMachineDate",
-      editable: true,
       width: 60,
-      // type: "dateTime"
       type: "date",
     },
     {
       title: "實際完成日",
       dataIndex: "actualFinishDate",
-      editable: true,
       width: 60,
       type: "date",
     },
