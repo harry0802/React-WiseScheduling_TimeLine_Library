@@ -77,7 +77,7 @@ class productionReportController(Resource):
     control_resp = productionReportDto.productionReport_resp
 
     @api.doc(
-        "Create single or multiple productionReports",
+        "Create single or multiple motherLots",
         responses={
             200: ("productionReport data successfully created", control_resp),
             404: "productionReport created failed",
@@ -111,7 +111,7 @@ class productionReportController(Resource):
     control_resp = productionReportDto.productionReport_resp
 
     @api.doc(
-        "Create single or multiple productionReports",
+        "Create single or multiple childLots",
         responses={
             200: ("productionReport data successfully created", control_resp),
             404: "productionReport created failed",

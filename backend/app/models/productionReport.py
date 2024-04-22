@@ -58,7 +58,7 @@ relationship = db.relationship
 
 """
 
-class productionReport(Model):
+class ProductionReport(Model):
     __tablename__ = "productionReport"
     id = Column(db.Integer , primary_key = True)
     productionReport_id = synonym("id") # 用於Schema出現相同名稱時的區別
@@ -113,7 +113,7 @@ class productionReport(Model):
 
 
     def __init__(self, **kwargs):
-        super(productionReport, self).__init__(**kwargs)
+        super(ProductionReport, self).__init__(**kwargs)
 
     def __repr__(self):
         return f"<>"

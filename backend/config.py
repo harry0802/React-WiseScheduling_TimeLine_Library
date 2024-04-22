@@ -32,7 +32,8 @@ class DevelopmentConfig(Config):
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_BINDS = {
-        "mold": os.environ.get("MOLD_DATABASE_URL"),
+        "mold": os.environ.get("MOLD_DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")),
+        "opcua": os.environ.get("OPCUA_DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")),
     }
 
     # Add logger
@@ -54,7 +55,8 @@ class ProductionConfig(Config):
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_BINDS = {
-        "mold": os.environ.get("MOLD_DATABASE_URL"),
+        "mold": os.environ.get("MOLD_DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")),
+        "opcua": os.environ.get("OPCUA_DATABASE_URL", "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")),
     }
 
 

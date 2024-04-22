@@ -38,7 +38,7 @@ relationship = db.relationship
     planFinishDate = workOrderDate + datetime.timedelta(days=workDays+moldWorkDays)
 """
 
-class productionSchedule(Model):
+class ProductionSchedule(Model):
     __tablename__ = "productionSchedule"
     id = Column(db.Integer , primary_key = True)
     productionSchedule_id = synonym("id") # 用於Schema出現相同名稱時的區別
@@ -74,7 +74,7 @@ class productionSchedule(Model):
 
 
     def __init__(self, **kwargs):
-        super(productionSchedule, self).__init__(**kwargs)
+        super(ProductionSchedule, self).__init__(**kwargs)
 
     def __repr__(self):
         return f"<>"

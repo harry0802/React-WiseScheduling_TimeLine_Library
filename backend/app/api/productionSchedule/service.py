@@ -10,7 +10,7 @@ from flask import current_app
 
 from app import db
 from app.utils import message, err_resp, internal_err_resp
-from app.models.productionSchedule import productionSchedule
+from app.models.productionSchedule import ProductionSchedule
 from .schemas import productionScheduleSchema
 from flask import url_for
 from app.api.calendar.service import CalendarService
@@ -203,17 +203,17 @@ class productionScheduleService:
             machineSNs = machineSNs.split(",") if machineSNs else None
             
             # Get the current productionSchedule
-            query = productionSchedule.query
-            query = query.filter(productionSchedule.status.in_(status_filter)) if "all" not in status_filter else query
-            query = query.filter(productionSchedule.week == week_filter) if week_filter else query
-            query = query.filter(extract('year', productionSchedule.planFinishDate) == year_filter) if year_filter else query
-            query = query.filter(extract('month', productionSchedule.planFinishDate) == month_filter) if month_filter else query
-            query = query.filter(productionSchedule.machineSN.in_(machineSNs)) if machineSNs else query
+            query = ProductionSchedule.query
+            query = query.filter(ProductionSchedule.status.in_(status_filter)) if "all" not in status_filter else query
+            query = query.filter(ProductionSchedule.week == week_filter) if week_filter else query
+            query = query.filter(extract('year', ProductionSchedule.planFinishDate) == year_filter) if year_filter else query
+            query = query.filter(extract('month', ProductionSchedule.planFinishDate) == month_filter) if month_filter else query
+            query = query.filter(ProductionSchedule.machineSN.in_(machineSNs)) if machineSNs else query
 
-            if hasattr(productionSchedule, sort):
-                query = query.order_by(getattr(productionSchedule, sort).desc())
+            if hasattr(ProductionSchedule, sort):
+                query = query.order_by(getattr(ProductionSchedule, sort).desc())
             else:
-                query = query.order_by(productionSchedule.id.desc())
+                query = query.order_by(ProductionSchedule.id.desc())
             if size:
                 pagination = query.paginate(page=page, per_page=size)
                 productionSchedule_db = pagination.items
@@ -233,7 +233,7 @@ class productionScheduleService:
             resp["meta"] = {
                 "page": page,
                 "size": size,
-                "sort": sort if hasattr(productionSchedule, sort) else "id",
+                "sort": sort if hasattr(ProductionSchedule, sort) else "id",
                 "total_pages": total_pages,
                 "total_count": total_count,
             }
@@ -246,8 +246,8 @@ class productionScheduleService:
     def get_productionSchedule(id):
         try:
             # Get the current productionSchedule
-            productionSchedule_db = productionSchedule.query.filter(
-                    productionSchedule.id == id
+            productionSchedule_db = ProductionSchedule.query.filter(
+                    ProductionSchedule.id == id
                 ).first()
 
             if productionSchedule_db is None:
@@ -267,7 +267,7 @@ class productionScheduleService:
     @staticmethod
     def get_machineSNs():
         try:
-            machineSN_db = productionSchedule.query.with_entities(productionSchedule.machineSN, productionSchedule.productionArea).distinct(productionSchedule.machineSN).all()
+            machineSN_db = ProductionSchedule.query.with_entities(ProductionSchedule.machineSN, ProductionSchedule.productionArea).distinct(ProductionSchedule.machineSN).all()
             productionSchedule_dto = productionSchedule_schema.dump(machineSN_db, many=True)
 
             resp = message(True, "machineSN data sent")
@@ -281,7 +281,7 @@ class productionScheduleService:
     @staticmethod
     def create_productionSchedule(payload):
         try:
-            productionSchedule_db = productionSchedule()
+            productionSchedule_db = ProductionSchedule()
             # exception test
             # payload.pop("workOrderQuantity", None)
             # 10+"sfd"*10*"SAD"^234
@@ -302,8 +302,8 @@ class productionScheduleService:
     @staticmethod
     def update_productionSchedule(id, payload):
         try:
-            productionSchedule_db = productionSchedule.query.filter(
-                    productionSchedule.id == id
+            productionSchedule_db = ProductionSchedule.query.filter(
+                    ProductionSchedule.id == id
                 ).first()
             if productionSchedule_db is None:
                 return err_resp("productionSchedule not found", "productionSchedule_404", 404)
@@ -326,8 +326,8 @@ class productionScheduleService:
     @staticmethod
     def update_productionSchedules(ids, payload):
         try:
-            productionSchedule_db = productionSchedule.query.filter(
-                productionSchedule.id.in_(ids)
+            productionSchedule_db = ProductionSchedule.query.filter(
+                ProductionSchedule.id.in_(ids)
             ).all()
             if productionSchedule_db is None or len(productionSchedule_db) == 0:
                 return err_resp("productionSchedule not found", "productionSchedule_404", 404)
@@ -354,8 +354,8 @@ class productionScheduleService:
     @staticmethod
     def delete_productionSchedule(id):
         try:
-            productionSchedule_db = productionSchedule.query.filter(
-                productionSchedule.id == id
+            productionSchedule_db = ProductionSchedule.query.filter(
+                ProductionSchedule.id == id
             ).first()
             if productionSchedule_db is None:
                 return err_resp("productionSchedule not found", "productionSchedule_404", 404)  
@@ -371,8 +371,8 @@ class productionScheduleService:
     @staticmethod
     def delete_productionSchedules(ids):
         try:
-            productionSchedule_db = productionSchedule.query.filter(
-                productionSchedule.id.in_(ids)
+            productionSchedule_db = ProductionSchedule.query.filter(
+                ProductionSchedule.id.in_(ids)
             ).all()
             if productionSchedule_db is None or len(productionSchedule_db) == 0:
                 return err_resp("productionSchedule not found", "productionSchedule_404", 404)

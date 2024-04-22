@@ -1,26 +1,82 @@
 from datetime import datetime, timedelta
 import math
-from operator import and_
 import sys
 from flask import current_app
 from app import db
 from app.utils import message, err_resp, internal_err_resp
-from app.models.productionReport import productionReport
+from app.models.productionReport import ProductionReport
 from app.models.molds import molds
+from app.models.injector import Injector
+from app.models.injectorOee15m import InjectorOee15m
 from .schemas import productionReportSchema, productionScheduleReportSchema
 from sqlalchemy import or_
-from app.models.productionSchedule import productionSchedule
+from app.models.productionSchedule import ProductionSchedule
 productionReport_schema = productionReportSchema()
 productionScheduleReport_schema = productionScheduleReportSchema()
+
+def get_sum_of_run_from_injector_oee_15m(machineSN, endTime):
+    # SELECT sum(run) FROM opcua.injector_oee_15m WHERE machine_name = '機台號碼' AND timestamp BETWEEN '母批/子批結束時間 - 24小時' AND '母批/子批結束時間'
+    try:
+        query = InjectorOee15m.query
+        query = query.filter(
+            InjectorOee15m.timestamp.between(endTime - timedelta(hours=24), endTime),
+            InjectorOee15m.machine_name == machineSN.lower()
+        )
+        sum_of_run = query.with_entities(db.func.sum(InjectorOee15m.run)).scalar()
+        return sum_of_run
+    except Exception as error:
+        raise error
+    
+
+def get_current_modulus_from_injector(machineSN, startTime, endTime):
+    # SELECT current_modulus FROM opcua.injector WHERE last_updated <= '母批/子批結束時間' AND name = '機台號碼' ORDER BY last_updated DESC LIMIT 1;
+    # SELECT current_modulus FROM opcua.injector WHERE last_updated >= '母批/子批開始時間' AND name = '機台號碼' ORDER BY last_updated ASC LIMIT 1;
+    try:
+        query = Injector.query
+        query = query.filter(
+            Injector.last_updated <= endTime,
+            Injector.name == machineSN.lower()
+        )
+        query = query.order_by(Injector.last_updated.desc())
+        end_current_modulus = query.with_entities(Injector.current_modulus).first()
+        end_current_modulus = int(end_current_modulus[0]) if end_current_modulus else 0
+
+        query = Injector.query
+        query = query.filter(
+            Injector.last_updated >= startTime,
+            Injector.name == machineSN.lower()
+        )
+        query = query.order_by(Injector.last_updated.asc())
+        start_current_modulus = query.with_entities(Injector.current_modulus).first()
+        start_current_modulus = int(start_current_modulus[0]) if start_current_modulus else 0
+        return start_current_modulus, end_current_modulus
+    except Exception as error:
+        raise error
+
+    
+def get_operating_mode_from_injector(machineSN, startTime):
+    # SELECT operating_mode FROM opcua.injector WHERE last_updated >= '母批/子批開始時間 - 10秒' AND name = '機台號碼' ORDER BY last_updated ASC LIMIT 1;
+    try:
+        query = Injector.query
+        query = query.filter(
+            Injector.last_updated >= startTime - timedelta(seconds=10),
+            Injector.name == machineSN.lower()
+        )
+        query = query.order_by(Injector.last_updated.asc())
+        operating_mode = query.with_entities(Injector.operating_mode).first()
+        operating_mode = operating_mode[0] if operating_mode else ""
+        return operating_mode
+    except Exception as error:
+        raise error
 
 
 def find_childLots_by_workOrderSN(workOrderSN):
     # get the child lots by the workOrderSN and serialNumber != 0
     try:
-        query = productionReport.query
+        query = ProductionReport.query
         query = query.filter(
-            productionReport.workOrderSN == workOrderSN,
-            productionReport.serialNumber != 0
+            ProductionReport.workOrderSN == workOrderSN,
+            ProductionReport.serialNumber != 0
         )
         childLots = query.all()
         return childLots
@@ -175,7 +231,10 @@ def complete_productionReport(mode, db_obj, payload):
         current_app.logger.debug(f"machineDefectiveRate: {db_obj.machineDefectiveRate}")
 
     # 稼動率(formula) = machine working time in 24hr in IoT record / 24
-
+    if (db_obj.machineSN and db_obj.endTime
+        and (db_obj.utilizationRate is None)):
+        db_obj.utilizationRate = get_sum_of_run_from_injector_oee_15m(db_obj.machineSN, db_obj.endTime) / 24
+        current_app.logger.debug(f"utilizationRate: {db_obj.utilizationRate}")
 
     # 產能效率(formula) = (生產數量 + 不良數) / 預計生產數量        
     if (db_obj.productionQuantity and db_obj.defectiveQuantity and db_obj.planProductionQuantity):
@@ -188,8 +247,18 @@ def complete_productionReport(mode, db_obj, payload):
         current_app.logger.debug(f"OEE: {db_obj.OEE}")
         
     # 機台生產模數 = from IoT record get (2nd module - 1st module) by the 結束時間 and 開始時間
+    if (db_obj.machineSN and db_obj.startTime and db_obj.endTime 
+        and (db_obj.machineProductionModule is None)):
+        startModulus, endModulus = get_current_modulus_from_injector(db_obj.machineSN, db_obj.startTime, db_obj.endTime)
+        if (startModulus and endModulus):
+            db_obj.machineProductionModule = endModulus - startModulus
+            current_app.logger.debug(f"machineProductionModule: {db_obj.machineProductionModule}")
         
     # 機台模式 = from IoT record get the mode by the 開始時間
+    if (db_obj.machineSN and db_obj.startTime
+        and (db_obj.machineMode is None or db_obj.machineMode == "")):
+        db_obj.machineMode = get_operating_mode_from_injector(db_obj.machineSN, db_obj.startTime)
+        current_app.logger.debug(f"machineMode: {db_obj.machineMode}")
 
     # 母批
     if (mode == "motherLot"):
@@ -275,40 +344,40 @@ class productionReportService:
                 if end_planOnMachineDate else None
             productionSchedule_ids = [int(id) for id in productionSchedule_ids.replace("[", "").replace("]", "").split(",")] if productionSchedule_ids else None
 
-            query = productionSchedule.query
-            query = query.with_entities(productionSchedule.productionSchedule_id, productionSchedule.machineSN, productionSchedule.moldNo,
-                                        productionSchedule.workOrderSN, productionSchedule.productSN, productionSchedule.productName,
-                                        productionSchedule.workOrderQuantity, productionSchedule.planOnMachineDate, productionSchedule.planFinishDate,
-                                        productionSchedule.actualOnMachineDate, productionSchedule.status, 
-                                        productionReport.productionReport_id, productionReport.serialNumber, productionReport.lotName,
-                                        productionReport.productionQuantity, productionReport.defectiveQuantity,  
-                                        productionReport.productionDefectiveRate, productionReport.unfinishedQuantity, productionReport.colorDifference,
-                                        productionReport.deformation, productionReport.shrinkage, productionReport.shortage,
-                                        productionReport.hole, productionReport.bubble, productionReport.impurity, productionReport.pressure,
-                                        productionReport.overflow, productionReport.flowMark, productionReport.oilStain, productionReport.burr,
-                                        productionReport.blackSpot, productionReport.scratch, productionReport.encapsulation, productionReport.other,
-                                        productionReport.leader, productionReport.operator1, productionReport.operator2, productionReport.startTime,
-                                        productionReport.endTime)
-            query = query.join(productionReport, productionSchedule.workOrderSN == productionReport.workOrderSN, isouter = True) # left outer join
+            query = ProductionSchedule.query
+            query = query.with_entities(ProductionSchedule.productionSchedule_id, ProductionSchedule.machineSN, ProductionSchedule.moldNo,
+                                        ProductionSchedule.workOrderSN, ProductionSchedule.productSN, ProductionSchedule.productName,
+                                        ProductionSchedule.workOrderQuantity, ProductionSchedule.planOnMachineDate, ProductionSchedule.planFinishDate,
+                                        ProductionSchedule.actualOnMachineDate, ProductionSchedule.status, 
+                                        ProductionReport.productionReport_id, ProductionReport.serialNumber, ProductionReport.lotName,
+                                        ProductionReport.productionQuantity, ProductionReport.defectiveQuantity,  
+                                        ProductionReport.productionDefectiveRate, ProductionReport.unfinishedQuantity, ProductionReport.colorDifference,
+                                        ProductionReport.deformation, ProductionReport.shrinkage, ProductionReport.shortage,
+                                        ProductionReport.hole, ProductionReport.bubble, ProductionReport.impurity, ProductionReport.pressure,
+                                        ProductionReport.overflow, ProductionReport.flowMark, ProductionReport.oilStain, ProductionReport.burr,
+                                        ProductionReport.blackSpot, ProductionReport.scratch, ProductionReport.encapsulation, ProductionReport.other,
+                                        ProductionReport.leader, ProductionReport.operator1, ProductionReport.operator2, ProductionReport.startTime,
+                                        ProductionReport.endTime)
+            query = query.join(ProductionReport, ProductionSchedule.workOrderSN == ProductionReport.workOrderSN, isouter = True) # left outer join
             
-            query = query.filter(productionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
+            query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
                     if start_planOnMachineDate and end_planOnMachineDate else query
-            query = query.filter(productionSchedule.machineSN == machineSN) if machineSN else query
-            query = query.filter(productionSchedule.status == status) if status != "all" else query
-            query = query.filter(productionSchedule.workOrderSN.like(f"%{workOrderSN}%")) if workOrderSN else query
-            query = query.filter(productionSchedule.productName.like(f"%{productName}%")) if productName else query
+            query = query.filter(ProductionSchedule.machineSN == machineSN) if machineSN else query
+            query = query.filter(ProductionSchedule.status == status) if status != "all" else query
+            query = query.filter(ProductionSchedule.workOrderSN.like(f"%{workOrderSN}%")) if workOrderSN else query
+            query = query.filter(ProductionSchedule.productName.like(f"%{productName}%")) if productName else query
             if (expiry == "即將到期"):
                 # 預計完成日前七天，該單尚未完成，為即將到期
-                query = query.filter(productionSchedule.status != "Done", 
-                                     productionSchedule.planFinishDate.between(datetime.now(), datetime.now() + timedelta(days=7)))
+                query = query.filter(ProductionSchedule.status != "Done", 
+                                     ProductionSchedule.planFinishDate.between(datetime.now(), datetime.now() + timedelta(days=7)))
             elif (expiry == "已經過期"):
                 # 過了預計完成日，該單尚未完成，就是已經過期
-                query = query.filter(productionSchedule.status != "Done",
-                                     productionSchedule.planFinishDate < datetime.now())
-            query = query.filter(or_(productionReport.serialNumber == 0, productionReport.serialNumber == None)) if bool(motherOnly) else query
-            query = query.filter(productionSchedule.productionSchedule_id.in_(productionSchedule_ids)) if productionSchedule_ids else query
+                query = query.filter(ProductionSchedule.status != "Done",
+                                     ProductionSchedule.planFinishDate < datetime.now())
+            query = query.filter(or_(ProductionReport.serialNumber == 0, ProductionReport.serialNumber == None)) if bool(motherOnly) else query
+            query = query.filter(ProductionSchedule.productionSchedule_id.in_(productionSchedule_ids)) if productionSchedule_ids else query
             
-            query = query.order_by(productionSchedule.id.desc(), productionReport.id.asc())
+            query = query.order_by(ProductionSchedule.id.desc(), ProductionReport.id.asc())
             productionReport_db = query.all()
             print("query: ", query, file=sys.stderr)
             if not (productionReport_db):
@@ -328,8 +397,8 @@ class productionReportService:
     def get_productionReport(id):
         try:
             # Get the current productionReport
-            productionReport_db = productionReport.query.filter(
-                    productionReport.id == id
+            productionReport_db = ProductionReport.query.filter(
+                    ProductionReport.id == id
                 ).first()
 
             if productionReport_db is None:
@@ -349,7 +418,7 @@ class productionReportService:
     @staticmethod
     def create_productionReport(payload):
         try:
-            productionReport_db = productionReport()
+            productionReport_db = ProductionReport()
             productionReport_db = complete_productionReport(productionReport_db, payload)
             db.session.add(productionReport_db)
             db.session.flush()
@@ -371,7 +440,7 @@ class productionReportService:
         try:
             productionReport_db_list = []
             for data in payload:
-                productionReport_db_list.append(complete_productionReport(mode, productionReport(), data))
+                productionReport_db_list.append(complete_productionReport(mode, ProductionReport(), data))
             db.session.add_all(productionReport_db_list)
             db.session.flush()
             db.session.commit()
@@ -389,8 +458,8 @@ class productionReportService:
     @staticmethod
     def update_productionReport(id, payload):
         try:
-            productionReport_db = productionReport.query.filter(
-                    productionReport.id == id
+            productionReport_db = ProductionReport.query.filter(
+                    ProductionReport.id == id
                 ).first()
             if productionReport_db is None:
                 return err_resp("productionReport not found", "productionReport_404", 404)
@@ -417,8 +486,8 @@ class productionReportService:
         try:
             productionReport_db_list = []
             for data in payload:
-                productionReport_db = productionReport.query.filter(
-                    productionReport.id == data["id"]
+                productionReport_db = ProductionReport.query.filter(
+                    ProductionReport.id == data["id"]
                 ).first()
                 if productionReport_db is None:
                     return err_resp("productionReport not found", "productionReport_404", 404)
@@ -444,9 +513,9 @@ class productionReportService:
         try:
             productionReport_db_list = []
             for data in payload:
-                productionReport_db = productionReport.query.filter(
-                    productionReport.serialNumber == 0,
-                    productionReport.workOrderSN == data["workOrderSN"]
+                productionReport_db = ProductionReport.query.filter(
+                    ProductionReport.serialNumber == 0,
+                    ProductionReport.workOrderSN == data["workOrderSN"]
                 ).first()
                 if productionReport_db is None:
                     return err_resp("productionReport not found", "productionReport_404", 404)
@@ -466,8 +535,8 @@ class productionReportService:
     @staticmethod
     def update_productionReports_samePayload(ids, payload):
         try:
-            productionReport_db = productionReport.query.filter(
-                productionReport.id.in_(ids)
+            productionReport_db = ProductionReport.query.filter(
+                ProductionReport.id.in_(ids)
             ).all()
             if productionReport_db is None or len(productionReport_db) == 0:
                 return err_resp("productionReport not found", "productionReport_404", 404)
@@ -495,8 +564,8 @@ class productionReportService:
     @staticmethod
     def delete_productionReport(id):
         try:
-            productionReport_db = productionReport.query.filter(
-                productionReport.id == id
+            productionReport_db = ProductionReport.query.filter(
+                ProductionReport.id == id
             ).first()
             if productionReport_db is None:
                 return err_resp("productionReport not found", "productionReport_404", 404)  
@@ -513,8 +582,8 @@ class productionReportService:
     @staticmethod
     def delete_productionReports(ids):
         try:
-            productionReport_db = productionReport.query.filter(
-                productionReport.id.in_(ids)
+            productionReport_db = ProductionReport.query.filter(
+                ProductionReport.id.in_(ids)
             ).all()
             if productionReport_db is None or len(productionReport_db) == 0:
                 return err_resp("productionReport not found", "productionReport_404", 404)

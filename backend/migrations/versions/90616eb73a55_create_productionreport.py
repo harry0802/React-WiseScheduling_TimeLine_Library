@@ -28,7 +28,7 @@ def upgrade():
     sa.Column('workOrderQuantity', sa.Integer(), nullable=True),
     sa.Column('material', sa.String(length=255), nullable=True),
     sa.Column('moldCavity', sa.Integer(), nullable=True),
-    sa.Column('leader', sa.String(length=255), nullable=True),
+    sa.Column('leader', sa.String(length=64000), nullable=True),
     sa.Column('operator1', sa.String(length=255), nullable=True),
     sa.Column('operator2', sa.String(length=255), nullable=True),
     sa.Column('productionQuantity', sa.Integer(), nullable=True),
