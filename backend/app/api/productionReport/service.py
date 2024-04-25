@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import math
 import sys
 from flask import current_app
@@ -29,12 +29,15 @@ def get_sum_of_run_from_injector_oee_15m(machineSN, endTime):
     
 
 def get_current_modulus_from_injector(machineSN, startTime, endTime):
-    # SELECT current_modulus FROM opcua.injector WHERE last_updated <= '母批/子批結束時間' AND name = '機台號碼' ORDER BY last_updated DESC LIMIT 1;
-    # SELECT current_modulus FROM opcua.injector WHERE last_updated >= '母批/子批開始時間' AND name = '機台號碼' ORDER BY last_updated ASC LIMIT 1;
+    # SELECT current_modulus FROM opcua.injector WHERE last_updated BETWEEN '母批/子批結束時間 - 1分鐘' AND '母批/子批結束時間' AND name = '機台號碼' ORDER BY last_updated DESC LIMIT 1;
+    # SELECT current_modulus FROM opcua.injector WHERE last_updated BETWEEN '母批/子批開始時間' AND '母批/子批開始時間 + 1分鐘' AND name = '機台號碼' ORDER BY last_updated ASC LIMIT 1;
     try:
+        # convert startTime to user's local timezone according to the endTime
+        startTime = startTime.astimezone(timezone(endTime.tzinfo.utcoffset(startTime)))
+
         query = Injector.query
         query = query.filter(
-            Injector.last_updated <= endTime,
+            Injector.last_updated.between(endTime - timedelta(minutes=1), endTime),
             Injector.name == machineSN.lower()
         )
         query = query.order_by(Injector.last_updated.desc())
@@ -43,7 +46,7 @@ def get_current_modulus_from_injector(machineSN, startTime, endTime):
 
         query = Injector.query
         query = query.filter(
-            Injector.last_updated >= startTime,
+            Injector.last_updated.between(startTime, startTime + timedelta(minutes=1)),
             Injector.name == machineSN.lower()
         )
         query = query.order_by(Injector.last_updated.asc())
@@ -233,7 +236,9 @@ def complete_productionReport(mode, db_obj, payload):
     # 稼動率(formula) = machine working time in 24hr in IoT record / 24
     if (db_obj.machineSN and db_obj.endTime
         and (db_obj.utilizationRate is None)):
-        db_obj.utilizationRate = get_sum_of_run_from_injector_oee_15m(db_obj.machineSN, db_obj.endTime) / 24
+        sum_of_run = get_sum_of_run_from_injector_oee_15m(db_obj.machineSN, db_obj.endTime)
+        if sum_of_run is not None:
+            db_obj.utilizationRate = sum_of_run / 24
         current_app.logger.debug(f"utilizationRate: {db_obj.utilizationRate}")
 
     # 產能效率(formula) = (生產數量 + 不良數) / 預計生產數量        
@@ -256,7 +261,7 @@ def complete_productionReport(mode, db_obj, payload):
         
     # 機台模式 = from IoT record get the mode by the 開始時間
     if (db_obj.machineSN and db_obj.startTime
-        and (db_obj.machineMode is None or db_obj.machineMode == "")):
+        and (db_obj.machineMode is None)):
         db_obj.machineMode = get_operating_mode_from_injector(db_obj.machineSN, db_obj.startTime)
         current_app.logger.debug(f"machineMode: {db_obj.machineMode}")
 
@@ -293,10 +298,12 @@ def complete_productionReport(mode, db_obj, payload):
             db_obj.scratch = sum([child.scratch for child in childLots if child.scratch])
             db_obj.encapsulation = sum([child.encapsulation for child in childLots if child.encapsulation])
             db_obj.other = sum([child.other for child in childLots if child.other])
-        if (db_obj.workOrderQuantity and db_obj.productionQuantity):
+        if (db_obj.productionQuantity):
             # 尚未完成數量 = 製令數量 - 生產數量
             temp_unfinished = db_obj.workOrderQuantity - db_obj.productionQuantity
             db_obj.unfinishedQuantity = 0 if temp_unfinished < 0 else temp_unfinished
+        else:
+            db_obj.unfinishedQuantity = db_obj.workOrderQuantity
         
     elif (mode == "childLot"):
         # 子批
@@ -312,7 +319,7 @@ def complete_productionReport(mode, db_obj, payload):
                 db_obj.serialNumber = max([child.serialNumber for child in childLots]) + 1
             db_obj.lotName = f"{db_obj.workOrderSN}-{db_obj.serialNumber:03d}"
         # 尚未完成數量 = 製令數量 - 所有子批生產數量
-        if (db_obj.workOrderQuantity and db_obj.productionQuantity):
+        if (db_obj.productionQuantity):
             allChildProductionQuantity = 0
             if len(childLots) > 0:
                 allChildProductionQuantity = sum([child.productionQuantity for child in childLots if child.lotName != db_obj.lotName])
@@ -379,7 +386,6 @@ class productionReportService:
             
             query = query.order_by(ProductionSchedule.id.desc(), ProductionReport.id.asc())
             productionReport_db = query.all()
-            print("query: ", query, file=sys.stderr)
             if not (productionReport_db):
                 productionReport_db = []
 

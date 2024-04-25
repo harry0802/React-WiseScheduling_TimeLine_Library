@@ -1,2 +1,52 @@
 // get user's timezone
 export const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+export const PRODUCTION_AREA = [
+  { value: "A", label: "A" },
+  { value: "B", label: "B" },
+  { value: "C", label: "C" },
+  { value: "D", label: "D" },
+];
+
+// machine list
+export const MACHINE_LIST = [
+  { productionArea: "A", machineSN: "A1", singleOrDoubleColor: "雙" },
+  { productionArea: "A", machineSN: "A2", singleOrDoubleColor: "單" },
+  { productionArea: "A", machineSN: "A3", singleOrDoubleColor: "單" },
+  { productionArea: "A", machineSN: "A4", singleOrDoubleColor: "單" },
+  { productionArea: "A", machineSN: "A5", singleOrDoubleColor: "單" },
+  { productionArea: "A", machineSN: "A6", singleOrDoubleColor: "單" },
+  { productionArea: "A", machineSN: "A7", singleOrDoubleColor: "單" },
+  { productionArea: "A", machineSN: "A8", singleOrDoubleColor: "單" },
+  { productionArea: "A", machineSN: "A9", singleOrDoubleColor: "單" },
+  { productionArea: "A", machineSN: "A10", singleOrDoubleColor: "單" },
+  { productionArea: "B", machineSN: "B1", singleOrDoubleColor: "單" },
+  { productionArea: "B", machineSN: "B2", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B3", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B4", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B5", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B6", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B7", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B8", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B9", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B10", singleOrDoubleColor: "雙" },
+  { productionArea: "B", machineSN: "B11", singleOrDoubleColor: "單" },
+  { productionArea: "C", machineSN: "C1", singleOrDoubleColor: "雙" },
+  { productionArea: "C", machineSN: "C2", singleOrDoubleColor: "單" },
+  { productionArea: "C", machineSN: "C3", singleOrDoubleColor: "單" },
+  { productionArea: "C", machineSN: "C4", singleOrDoubleColor: "單" },
+  { productionArea: "C", machineSN: "C5", singleOrDoubleColor: "單" },
+  { productionArea: "C", machineSN: "C6", singleOrDoubleColor: "單" },
+  { productionArea: "C", machineSN: "C7", singleOrDoubleColor: "單" },
+  { productionArea: "C", machineSN: "C8", singleOrDoubleColor: "單" },
+  { productionArea: "C", machineSN: "C9", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D1", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D2", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D3", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D4", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D5", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D6", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D7", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D8", singleOrDoubleColor: "單" },
+  { productionArea: "D", machineSN: "D9", singleOrDoubleColor: "單" },
+];

@@ -1,11 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useMachineSNStore } from "../../store/zustand/store";
-import { Table, Select, Input, Button, Modal, Tooltip, DatePicker } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Table, Button, Modal, Tooltip } from "antd";
 import CompressIcon from "@mui/icons-material/Compress";
 import { useGetProductionReportQuery } from "../../store/api/productionReportApi";
 import "./index.scss";
+import RefreshButton from "../Global/RefreshButton";
+import StatusInfoIcon from "../Global/StatusInfoIcon";
+import FilterBar from "./FilterBar";
 import { WORKORDER_STATUS } from "../../config/enum";
 import { debounce, throttle } from "lodash"; // 引入 lodash 的 debounce 函數
 import { TZ } from "../../config/config";
@@ -27,7 +29,12 @@ const ProductionReport = (props) => {
       },
     },
     {
-      title: "狀態",
+      title: (
+        <>
+          狀態
+          <StatusInfoIcon />
+        </>
+      ),
       dataIndex: "status",
       fixed: true,
       width: "8%",
@@ -103,11 +110,12 @@ const ProductionReport = (props) => {
   const [dataSource, setDataSource] = useState([]); // 製令單資料，用於 Table 的 dataSource
   const navigate = useNavigate();
   // 搜尋條件篩選
-  const { Option } = Select;
   const [startDate, setStartDate] = useState(
     new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)
   );
-  const [endDate, setEndDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(
+    new Date(new Date().getTime() + 28 * 24 * 60 * 60 * 1000)
+  );
   const [statusState, setStatusState] = useState(WORKORDER_STATUS.ALL);
   const [expiryState, setExpiryState] = useState("無限期");
   const [keywordTypeState, setKeywordTypeState] = useState("workOrderSN");
@@ -115,67 +123,13 @@ const ProductionReport = (props) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 追蹤選中的行的 id
   const [loading, setLoading] = useState(false);
 
-  // 製令單狀態
-  const allStatusOptions = [
-    <Option key={0} value={WORKORDER_STATUS.ALL} label={WORKORDER_STATUS.ALL}>
-      所有狀態
-    </Option>,
-    <Option
-      key={1}
-      value={WORKORDER_STATUS.NOT_YET}
-      label={WORKORDER_STATUS.NOT_YET}
-    >
-      {WORKORDER_STATUS.NOT_YET}
-    </Option>,
-    <Option
-      key={2}
-      value={WORKORDER_STATUS.ON_GOING}
-      label={WORKORDER_STATUS.ON_GOING}
-    >
-      {WORKORDER_STATUS.ON_GOING}
-    </Option>,
-    <Option key={3} value={WORKORDER_STATUS.DONE} label={WORKORDER_STATUS.DONE}>
-      {WORKORDER_STATUS.DONE}
-    </Option>,
-    <Option
-      key={4}
-      value={WORKORDER_STATUS.PAUSE}
-      label={WORKORDER_STATUS.PAUSE}
-    >
-      {WORKORDER_STATUS.PAUSE}
-    </Option>,
-  ];
-
-  // 製令單期限
-  const allExpiryOptions = [
-    <Option key={0} value={"無限期"} label="無限期">
-      無限期
-    </Option>,
-    <Option key={1} value={"即將到期"} label="即將到期">
-      即將到期
-    </Option>,
-    <Option key={2} value={"已經過期"} label="已經過期">
-      已經過期
-    </Option>,
-  ];
-
-  // 關鍵字搜尋類型
-  const allKeywordTypeOptions = [
-    <Option key={0} value={"workOrderSN"} label="workOrderSN">
-      製令單號
-    </Option>,
-    <Option key={1} value={"productName"} label="productName">
-      產品名稱
-    </Option>,
-  ];
-
   const formatDateTime = (date, type) => {
     if (!date) {
       switch (type) {
         case "start":
           date = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
         case "end":
-          date = new Date();
+          date = new Date(new Date().getTime() + 28 * 24 * 60 * 60 * 1000);
         default:
           break;
       }
@@ -223,22 +177,6 @@ const ProductionReport = (props) => {
       setDataSource(formattedworkOrderList);
     }
   }, [isSuccess, workOrderList]);
-
-  // 查詢條件
-  // 日期換算成週數
-  const getWeekNumber = (date) => {
-    if (!date) return "";
-    date = new Date(date);
-    const d = new Date(
-      Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-    );
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
-    return weekNo;
-  };
-  const [startWeekNo, setStartWeekNo] = useState(getWeekNumber(startDate)); // 週數
-  const [endWeekNo, setEndWeekNo] = useState(getWeekNumber(endDate)); // 週數
 
   // 產生母批
   const handleAdd = () => {
@@ -309,72 +247,24 @@ const ProductionReport = (props) => {
     <div className="prodution-assignment">
       <div className="box">
         <div className="title-box">
-          <div className="title">{machineSN_Store}機台產線派工系統</div>
-          <div className="filter-section">
-            <div className="start-date">
-              <DatePicker
-                defaultValue={dayjs(startDate)}
-                format="YYYY/MM/DD"
-                onChange={(date, dateString) => {
-                  setStartDate(dateString);
-                  setStartWeekNo(getWeekNumber(dateString));
-                }}
-              />
-              <div className="week-no">{startWeekNo} 週</div>
-            </div>
-            <span className="date-to">~</span>
-            <div className="end-date">
-              <DatePicker
-                defaultValue={dayjs(endDate)}
-                format="YYYY/MM/DD"
-                onChange={(date, dateString) => {
-                  setEndDate(dateString);
-                  setEndWeekNo(getWeekNumber(dateString));
-                }}
-              />
-              <div className="week-no">{endWeekNo} 週</div>
-            </div>
-
-            <div className="select-box">
-              {/* 篩選狀態 */}
-              <Select
-                className="status-filter"
-                placeholder="所有狀態"
-                style={{ width: 120 }}
-                onChange={(value) => setStatusState(value)}
-              >
-                {allStatusOptions}
-              </Select>
-
-              {/* 篩選期限 */}
-              <Select
-                className="expiry-filter"
-                placeholder="無限期"
-                style={{ width: 120 }}
-                onChange={(value) => setExpiryState(value)}
-              >
-                {allExpiryOptions}
-              </Select>
-
-              {/* 篩選關鍵字搜尋類型 */}
-              <Select
-                className="keyword-type-filter"
-                placeholder="製令單號"
-                style={{ width: 120 }}
-                onChange={(value) => setKeywordTypeState(value)}
-              >
-                {allKeywordTypeOptions}
-              </Select>
-
-              <Input
-                className="keyword-search"
-                placeholder="請輸入關鍵字查詢..."
-                style={{ width: 160 }}
-                suffix={<SearchOutlined />}
-                onInput={(e) => setKeywordState(e.target.value)}
-              ></Input>
-            </div>
+          <div className="title">
+            {machineSN_Store}機台產線派工系統
+            <RefreshButton />
           </div>
+          <FilterBar
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            statusState={statusState}
+            setStatusState={setStatusState}
+            expiryState={expiryState}
+            setExpiryState={setExpiryState}
+            keywordTypeState={keywordTypeState}
+            setKeywordTypeState={setKeywordTypeState}
+            keywordState={keywordState}
+            setKeywordState={setKeywordState}
+          />
         </div>
 
         {isSuccess && (

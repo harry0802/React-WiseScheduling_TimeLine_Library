@@ -112,7 +112,6 @@ const OperatorSign = (props) => {
         },
       };
     }
-    console.log("args", args);
     await updateProductionSchedules(args)
       .unwrap()
       .then((payload) => {
@@ -195,13 +194,7 @@ const OperatorSign = (props) => {
     } else {
       setErrorOperator1(false);
     }
-    if (data.get("operator2") === "") {
-      setErrorOperator2(true);
-      setErrorMsgOperator2("請輸入人員2帳號");
-      isValidate = false;
-    } else {
-      setErrorOperator2(false);
-    }
+
     if (!isValidate) {
       return;
     }

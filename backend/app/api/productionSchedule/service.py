@@ -90,7 +90,7 @@ def update_moldNo_by_productName(productName):
     
 
 def complete_productionSchedule(db_obj, payload):
-    format = '%Y-%m-%d'
+    isProductNameChanged = False
     db_obj.productionArea = payload["productionArea"] \
         if payload.get("productionArea") is not None else db_obj.productionArea
     db_obj.machineSN = payload["machineSN"] \
@@ -103,6 +103,8 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("moldNo") is not None else db_obj.moldNo
     db_obj.productSN = payload["productSN"] \
         if payload.get("productSN") is not None else db_obj.productSN
+    if payload.get("productName") is not None and db_obj.productName != payload["productName"]:
+        isProductNameChanged = True
     db_obj.productName = payload["productName"] \
         if payload.get("productName") is not None else db_obj.productName
     db_obj.workOrderQuantity = int(payload["workOrderQuantity"]) \
@@ -173,7 +175,7 @@ def complete_productionSchedule(db_obj, payload):
         db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
     
     #從molds資料表拿到moldNo
-    if db_obj.moldNo is None or db_obj.moldNo == "":
+    if db_obj.moldNo is None or db_obj.moldNo == "" or isProductNameChanged:
         db_obj.moldNo = update_moldNo_by_productName(db_obj.productName)
     #周數
     if payload.get("week") is not None and False: #waiting for frontend has its own week calculation
@@ -198,16 +200,33 @@ def complete_productionSchedule(db_obj, payload):
 
 class productionScheduleService:
     @staticmethod
-    def get_productionSchedules(page, size, sort, status_filter=["all"], week_filter=None, year_filter=None, month_filter=None, machineSNs=[]):
+    def get_productionSchedules(page, size, sort, start_planOnMachineDate, end_planOnMachineDate, machineSN=None, status="all", workOrderSN=None, 
+                              productName=None, expiry="無期限", machineSNs=[]):
         try:
+            # transform the ISO format datetime to UNIX timestamp
+            start_planOnMachineDate = datetime.fromisoformat(start_planOnMachineDate) \
+                if start_planOnMachineDate else None
+            end_planOnMachineDate = datetime.fromisoformat(end_planOnMachineDate) \
+                if end_planOnMachineDate else None
             machineSNs = machineSNs.split(",") if machineSNs else None
-            
+
             # Get the current productionSchedule
             query = ProductionSchedule.query
-            query = query.filter(ProductionSchedule.status.in_(status_filter)) if "all" not in status_filter else query
-            query = query.filter(ProductionSchedule.week == week_filter) if week_filter else query
-            query = query.filter(extract('year', ProductionSchedule.planFinishDate) == year_filter) if year_filter else query
-            query = query.filter(extract('month', ProductionSchedule.planFinishDate) == month_filter) if month_filter else query
+            query = query.filter(ProductionSchedule.status != "取消生產")
+            query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
+                    if start_planOnMachineDate and end_planOnMachineDate else query
+            query = query.filter(ProductionSchedule.machineSN == machineSN) if machineSN else query
+            query = query.filter(ProductionSchedule.status == status) if status != "all" else query
+            query = query.filter(ProductionSchedule.workOrderSN.like(f"%{workOrderSN}%")) if workOrderSN else query
+            query = query.filter(ProductionSchedule.productName.like(f"%{productName}%")) if productName else query
+            if (expiry == "即將到期"):
+                # 預計完成日前七天，該單尚未完成，為即將到期
+                query = query.filter(ProductionSchedule.status != "Done", 
+                                     ProductionSchedule.planFinishDate.between(datetime.now(), datetime.now() + timedelta(days=7)))
+            elif (expiry == "已經過期"):
+                # 過了預計完成日，該單尚未完成，就是已經過期
+                query = query.filter(ProductionSchedule.status != "Done",
+                                     ProductionSchedule.planFinishDate < datetime.now())
             query = query.filter(ProductionSchedule.machineSN.in_(machineSNs)) if machineSNs else query
 
             if hasattr(ProductionSchedule, sort):
@@ -223,6 +242,7 @@ class productionScheduleService:
                 productionSchedule_db = query.all()
                 total_pages = 1
                 total_count = len(productionSchedule_db)
+
             if not (productionSchedule_db):
                 productionSchedule_db = []
             
@@ -267,7 +287,12 @@ class productionScheduleService:
     @staticmethod
     def get_machineSNs():
         try:
-            machineSN_db = ProductionSchedule.query.with_entities(ProductionSchedule.machineSN, ProductionSchedule.productionArea).distinct(ProductionSchedule.machineSN).all()
+            query = ProductionSchedule.query
+            query = query.with_entities(ProductionSchedule.machineSN, ProductionSchedule.productionArea)
+            query = query.filter(ProductionSchedule.status != "取消生產")
+            query = query.distinct(ProductionSchedule.machineSN)
+            query = query.order_by(ProductionSchedule.machineSN)
+            machineSN_db = query.all()
             productionSchedule_dto = productionSchedule_schema.dump(machineSN_db, many=True)
 
             resp = message(True, "machineSN data sent")

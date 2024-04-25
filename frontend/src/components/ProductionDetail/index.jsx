@@ -13,6 +13,7 @@ import {
 } from "../../store/zustand/store";
 import { useGetProductionReportQuery } from "../../store/api/productionReportApi";
 import styles from "./index.module.scss";
+import RefreshButton from "../Global/RefreshButton";
 import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -253,6 +254,7 @@ const ProductionDetail = (props) => {
         <div className={styles.titleBox}>
           <div className={styles.title}>
             {machineSN_Store}機台製令單生產明細
+            <RefreshButton />
           </div>
           <div>
             <div>

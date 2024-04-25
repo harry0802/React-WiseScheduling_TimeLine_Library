@@ -98,6 +98,7 @@ const TabPanel = (props) => {
     lotName,
     defectiveQuantity,
     productionQuantity,
+    unfinishedQuantity,
     ...other
   } = props;
   const updateLotsByProductionQuantity = useLotStore(
@@ -135,6 +136,10 @@ const TabPanel = (props) => {
               <div>
                 <span>製令數量</span>
                 <span>{quatity}</span>
+              </div>
+              <div>
+                <span>未完成數量</span>
+                <span>{unfinishedQuantity}</span>
               </div>
               <div>
                 <span>不良數量</span>
@@ -327,6 +332,9 @@ const ProductionInspection = () => {
               }
               productionQuantity={
                 lastItem.productionQuantity ? lastItem.productionQuantity : ""
+              }
+              unfinishedQuantity={
+                lot.unfinishedQuantity ? lot.unfinishedQuantity : ""
               }
             ></TabPanel>
           );

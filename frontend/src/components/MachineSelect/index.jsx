@@ -9,6 +9,8 @@ import {
   useGetProductionScheduleByMachinesQuery,
 } from "../../store/api/productionScheduleApi";
 import { WORKORDER_STATUS } from "../../config/enum";
+import { PRODUCTION_AREA } from "../../config/config";
+import RefreshButton from "../Global/RefreshButton";
 
 const MachineSelect = (props) => {
   const navigate = useNavigate();
@@ -22,14 +24,9 @@ const MachineSelect = (props) => {
   const [loading, setLoading] = useState(false);
 
   // 地區下拉選單
-  const areaOptions = [
-    { value: "A", label: "A區" },
-    { value: "B", label: "B區" },
-    { value: "C", label: "C區" },
-    { value: "D", label: "D區" },
-  ];
+
   const allAreaOptions = [
-    areaOptions.map((item, index) => (
+    PRODUCTION_AREA.map((item, index) => (
       <Option key={index} value={item.value} label={item.label}>
         {item.label}
       </Option>
@@ -53,7 +50,7 @@ const MachineSelect = (props) => {
   } = useGetProductionScheduleByMachinesQuery(
     {
       machineSNs: machineFilter,
-      status_filter: WORKORDER_STATUS.ON_GOING,
+      status: WORKORDER_STATUS.ON_GOING,
     },
     { skip }
   );
@@ -77,7 +74,7 @@ const MachineSelect = (props) => {
   //     ],
   // },
   const formatMachineData = () => {
-    const tempData = areaOptions.map((item) => {
+    const tempData = PRODUCTION_AREA.map((item) => {
       const machines = machineData.filter(
         (machine) => machine.productionArea === item.value
       );
@@ -136,7 +133,10 @@ const MachineSelect = (props) => {
       <div className="machine-select">
         <div className="box">
           <div className="title-box">
-            <div className="title">產線派工系統-機台選擇</div>
+            <div className="title">
+              產線派工系統-機台選擇
+              <RefreshButton />
+            </div>
 
             <div className="filter-section">
               {/* 篩選地區 */}

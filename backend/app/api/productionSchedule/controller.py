@@ -1,4 +1,5 @@
 from datetime import datetime
+import sys
 from flask import request
 from flask_restx import Resource
 
@@ -43,29 +44,30 @@ class productionScheduleController(Resource):
     @api.param("page", "Page number")
     @api.param("size", "Size of the page")
     @api.param("sort", "Sort by a column")
-    @api.param("status_filter", "尚未上機, On-going, Done, 暫停生產, 取消生產, all",
-            type="array",
-            items={"type": "string", "enum": ["尚未上機", "On-going", "Done", "暫停生產", "取消生產", "all"]}
-            )
-    @api.param("week_filter", "(planFinishDate) week number")
-    @api.param("year_filter", "(planFinishDate) year number")
-    @api.param("month_filter", "(planFinishDate) month number")
+    @api.param("start_planOnMachineDate", "Search range from planOnMachineDate")
+    @api.param("end_planOnMachineDate", "Search range to planOnMachineDate")
+    @api.param("status", "尚未上機, On-going, Done, 暫停生產, all")
+    @api.param("expiry", "無限期, 即將到期, 已經過期")
+    @api.param("workOrderSN", "workOrderSN")
+    @api.param("productName", "productName")
     @api.param("machineSNs", "machineSN List", default="A1,B2,C3")
     @controller_entrance_log(description="Get productionSchedules")
     def get(self):
         page = request.args.get('page', default=1, type=int)
         size = request.args.get('size', default=10, type=int)
         sort = request.args.get('sort', default="id", type=str)
-        status_filter = request.args.get('status_filter', default="all", type=str)
-        status_filter = status_filter.split(",")
-        week_filter = request.args.get('week_filter', default=None, type=int)
-        year_filter = request.args.get('year_filter', default=None, type=int)
-        month_filter = request.args.get('month_filter', default=None, type=int)
+        start_planOnMachineDate = request.args.get('start_planOnMachineDate', default=None, type=str)
+        end_planOnMachineDate = request.args.get('end_planOnMachineDate', default=None, type=str)
+        status = request.args.get('status', default="all", type=str)
+        expiry = request.args.get('expiry', default="無限期", type=str)
+        workOrderSN = request.args.get('workOrderSN', default=None, type=str)
+        productName = request.args.get('productName', default=None, type=str)
         machineSNs = request.args.get('machineSNs', default=None, type=str)
 
         return productionScheduleService.get_productionSchedules(
-            page=page, size=size, sort=sort, status_filter=status_filter,
-            week_filter=week_filter, year_filter=year_filter, month_filter=month_filter, machineSNs=machineSNs)
+            page=page, size=size, sort=sort, start_planOnMachineDate=start_planOnMachineDate,
+            end_planOnMachineDate=end_planOnMachineDate, status=status, expiry=expiry,workOrderSN=workOrderSN,
+            productName=productName, machineSNs=machineSNs)
     
     @api.doc(
         "Create the current productionSchedule",

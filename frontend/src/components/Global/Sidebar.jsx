@@ -6,7 +6,7 @@ import {
   LeftOutlined,
   RightOutlined,
 } from "@ant-design/icons";
-import { Layout, Menu, Button, theme } from "antd";
+import { Layout, Menu, Button } from "antd";
 import styles from "./Sidebar.module.scss";
 
 const { Sider } = Layout;

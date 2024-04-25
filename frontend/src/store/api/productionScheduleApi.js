@@ -21,20 +21,24 @@ const productionScheduleApi = createApi({
           const {
             size,
             page,
-            week_filter,
-            year_filter,
-            month_filter,
-            status_filter,
+            start_planOnMachineDate,
+            end_planOnMachineDate,
+            status,
+            expiry,
+            workOrderSN,
+            productName,
           } = arg;
           return {
             url: "productionSchedule/",
             params: {
               size: size,
               page: page,
-              week_filter: week_filter,
-              year_filter: year_filter,
-              month_filter: month_filter,
-              status_filter: status_filter,
+              start_planOnMachineDate: start_planOnMachineDate,
+              end_planOnMachineDate: end_planOnMachineDate,
+              status: status,
+              expiry: expiry,
+              workOrderSN: workOrderSN,
+              productName: productName,
             },
           };
         },
@@ -46,12 +50,12 @@ const productionScheduleApi = createApi({
       }),
       getProductionScheduleByMachines: build.query({
         query(arg) {
-          const { machineSNs, status_filter } = arg;
+          const { machineSNs, status } = arg;
           return {
             url: "productionSchedule/",
             params: {
               machineSNs: machineSNs,
-              status_filter: status_filter,
+              status: status,
             },
           };
         },

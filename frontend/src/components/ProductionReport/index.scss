@@ -18,6 +18,9 @@
     max-height: 30px;
 
     .title {
+      display: flex;
+      align-items: center;
+      gap: 15px;
       font-size: 1rem;
       color: #fff;
       text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -47,117 +50,8 @@
     }
   }
 
-  // 日期選擇器
-  .start-date,
-  .end-date {
-    display: flex;
-  }
-
-  .ant-picker {
-    width: 110px;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-    box-shadow: none;
-    font-family: "Roboto", sans-serif;
-
-    @media (min-width: $screen-lg) {
-      width: 125px;
-    }
-  }
-
-  .ant-picker .ant-picker-input > input {
-    font-size: 0.75rem;
-    color: #8f8f8f;
-    @media (min-width: $screen-lg) {
-      font-size: 1rem;
-    }
-  }
-
-  .date-to {
-    color: #8f8f8f;
-    font-weight: 900;
-    font-size: 1rem;
-  }
-
-  .week-no {
-    font-size: 0.75rem;
-    width: 34px;
-    border: 1px solid #fff;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    background-color: #fff;
-    display: flex;
-    align-items: center;
-    color: #8f8f8f;
-    font-family: "Roboto", sans-serif;
-
-    @media (min-width: $screen-lg) {
-      font-size: 1rem;
-      width: 45px;
-    }
-  }
-
   .ant-table-wrapper .ant-table-pagination.ant-pagination {
     margin: 20px 0 0 0;
-  }
-
-  .filter-section {
-    display: flex;
-    gap: 15px;
-  }
-
-  // 搜尋條件篩選
-  .select-box {
-    display: flex;
-    align-content: center;
-  }
-
-  .ant-select {
-    @media (min-width: $screen-lg) {
-      height: 35.14px;
-    }
-  }
-
-  .ant-select .ant-select-selection-placeholder,
-  .ant-select-dropdown .ant-select-item,
-  .ant-select-selection-item {
-    font-size: 0.75rem;
-    color: #8f8f8f;
-    font-style: normal;
-    font-weight: 400;
-
-    @media (min-width: $screen-lg) {
-      font-size: 1rem;
-    }
-  }
-
-  // 狀態篩選器
-  .ant-select-dropdown
-    .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-    background-color: #8bc1e3;
-  }
-
-  .status-filter.ant-select-single .ant-select-selector {
-    border-top-left-radius: 2px;
-    border-bottom-left-radius: 2px;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  //期限篩選器, 關鍵字搜尋類型篩選器
-  .expiry-filter.ant-select-single .ant-select-selector,
-  .keyword-type-filter.ant-select-single .ant-select-selector {
-    border-radius: 0;
-  }
-
-  // 關鍵字搜尋
-  .keyword-search.ant-input-affix-wrapper {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
   }
 
   // 新增母批按鈕
@@ -230,6 +124,13 @@
     @media (min-width: $screen-lg) {
       font-size: 1rem;
     }
+  }
+
+  // set the second column of the table to display flex
+  .ant-table-wrapper .ant-table-thead > tr > th:nth-child(3) {
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
 
   .ant-table-wrapper .ant-table-tbody > tr > td {

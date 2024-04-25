@@ -1,0 +1,19 @@
+.refreshButton {
+  :global(.ant-btn-default) {
+    background-color: #186c98;
+    border-color: #186c98;
+    color: #fff;
+  }
+
+  :global(.ant-btn.ant-btn-icon-only) {
+    width: 45px;
+  }
+
+  .btnRefresh {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
