@@ -83,6 +83,16 @@ const productionScheduleApi = createApi({
         },
         invalidatesTags: [{ type: "productionSchedule" }],
       }),
+      addProductionSchedules: build.mutation({
+        query(data) {
+          return {
+            url: "productionSchedule/createProductionSchedules",
+            method: "post",
+            body: data,
+          };
+        },
+        invalidatesTags: [{ type: "productionSchedules" }],
+      }),
       delProductionSchedule: build.mutation({
         query(ids) {
           return {
@@ -174,6 +184,7 @@ export const {
   useGetProductionScheduleByMachinesQuery,
   useGetMachinesQuery,
   useAddProductionScheduleMutation,
+  useAddProductionSchedulesMutation,
   useDelProductionScheduleMutation,
   usePauseStausMutation,
   useCancelStausMutation,

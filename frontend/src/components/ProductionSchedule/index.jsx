@@ -1,11 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faPlay,
-  faPause,
-  faPlus,
-  faTrashCan,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import {
   Table,
   Select,
@@ -22,9 +18,7 @@ import { WORKORDER_STATUS } from "../../config/enum";
 import { PRODUCTION_AREA, MACHINE_LIST } from "../../config/config";
 import {
   useGetProductionScheduleQuery,
-  usePauseStausMutation,
   useCancelStausMutation,
-  useActionStausMutation,
   useAddProductionScheduleMutation,
   useUpdateProductionScheduleMutation,
 } from "../../store/api/productionScheduleApi";
@@ -152,6 +146,7 @@ const EditableCell = ({
 };
 
 const ProductionSchedule = (props) => {
+  const navigate = useNavigate();
   const { Option } = Select;
   const [defaultColumns, setDefaultColumns] = useState([
     {
@@ -1173,6 +1168,15 @@ const ProductionSchedule = (props) => {
             匯出
           </Button>
         )}
+        <Button
+          type="ghost"
+          onClick={() => {
+            navigate("/ImportProductionSchedulePage");
+          }}
+          className="importBtn"
+        >
+          匯入
+        </Button>
       </div>
     </div>
   );

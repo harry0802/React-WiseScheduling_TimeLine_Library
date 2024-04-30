@@ -323,6 +323,26 @@ class productionScheduleService:
         # exception without handling should raise to the caller
         except Exception as error:
             raise error
+        
+    # create multiple productionSchedules
+    @staticmethod
+    def create_productionSchedules(payload):
+        try:
+            productionSchedule_db_list = []
+            for data in payload:
+                productionSchedule_db_list.append(complete_productionSchedule(ProductionSchedule(), data))
+            db.session.add_all(productionSchedule_db_list)
+            db.session.flush()
+            db.session.commit()
+
+            productionSchedule_dto = productionSchedule_schema.dump(productionSchedule_db_list, many=True)
+            resp = message(True, "productionSchedules have been created..")
+            resp["data"] = productionSchedule_dto
+
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
 
     @staticmethod
     def update_productionSchedule(id, payload):

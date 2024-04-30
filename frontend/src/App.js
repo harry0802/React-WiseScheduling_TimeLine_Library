@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import Topbar from "./components/Global/Topbar";
 import Sidebar from "./components/Global/Sidebar";
 import ProductionSchedulePage from "./pages/ProductionSchedulePage";
+import ImportProductionSchedulePage from "./pages/ImportProductionSchedulePage";
 import MachineSelectPage from "./pages/MachineSelectPage";
 import ProductionReportPage from "./pages/ProductionReportPage";
 import LeaderSignPage from "./pages/LeaderSignPage";
@@ -28,6 +29,10 @@ const App = () => {
               <Route
                 path={"/ProductionSchedulePage"}
                 element={<ProductionSchedulePage />}
+              />
+              <Route
+                path={"/ImportProductionSchedulePage"}
+                element={<ImportProductionSchedulePage />}
               />
               <Route
                 path={"/MachineSelectPage"}

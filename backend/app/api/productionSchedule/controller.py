@@ -80,7 +80,26 @@ class productionScheduleController(Resource):
     @controller_entrance_log(description="Create the current productionSchedule")
     def post(self):
         payload = api.payload
-        return productionScheduleService.create_productionSchedule(payload)
+        return productionScheduleService.create_productionSchedules(payload)
+    
+
+@api.route("/createProductionSchedules")
+class productionScheduleController(Resource):
+    control_input = productionScheduleDto.productionSchedule_post
+    control_resp = productionScheduleDto.control_resp
+
+    @api.doc(
+        "Create single or multiple productionSchedules",
+        responses={
+            200: ("productionSchedules data successfully created", control_resp),
+            404: "productionSchedules not found",
+        },
+    )
+    @api.expect([control_input], validate=True)
+    @controller_entrance_log(description="Create single or multiple productionSchedules")
+    def post(self):
+        payload = api.payload
+        return productionScheduleService.create_productionSchedules(payload)
 
 
 
