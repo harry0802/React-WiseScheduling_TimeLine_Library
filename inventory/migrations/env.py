@@ -100,7 +100,6 @@ def run_migrations_online():
         context.configure(
             connection=connection,
             target_metadata=get_metadata(),
-            version_table='alembic_version_inventory',
             **conf_args
         )
 

@@ -145,6 +145,7 @@ services:
       - FLASK_ENV=${FLASK_ENV}
       - LOGLEVEL=${LOGLEVEL}
       - DATABASE_URL=${DATABASE_URL}
+      - ALEMBIC_VERSION_INVENTORY=${ALEMBIC_VERSION_INVENTORY}
     depends_on:
       db:
         condition: service_healthy
