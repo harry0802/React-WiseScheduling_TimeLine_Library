@@ -17,7 +17,7 @@ class LtMoldInventoryController(Resource):
             404: "LtMoldInventory not found!",
         },
     )
-    @api.expect([ltmoldinventory_input], validate=True)
+    @api.expect(ltmoldinventory_input, validate=True)
     @controller_entrance_log(description="Insert or update LtMoldInventory")
     def post(self):
         payload = api.payload

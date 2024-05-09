@@ -26,21 +26,20 @@ class LtMoldInventoryService:
     def insert_update_ltmoldinventory(payload):
         try:
             isnert_update_obj_list = []
-            for data in payload:
-                # convert data["finalinventory"] to UTC time
-                converted_finalinventory = datetime.fromisoformat(data["finalinventory"])
-                converted_finalinventory = converted_finalinventory.astimezone(pytz.utc).strftime("%Y-%m-%d")
-                select_result = db.session.execute(
-                    db.select(LtMoldInventory)
-                    .where(func.FROM_UNIXTIME(LtMoldInventory.finalinventory).cast(Date) == converted_finalinventory) # 將資料庫中的finalinventory轉換成日期格式
-                    .where(LtMoldInventory.rfidno == data['rfidno'])
-                ).scalar_one_or_none()
+            # convert payload["finalinventory"] to UTC time
+            converted_finalinventory = datetime.fromisoformat(payload["finalinventory"])
+            converted_finalinventory = converted_finalinventory.astimezone(pytz.utc).strftime("%Y-%m-%d")
+            select_result = db.session.execute(
+                db.select(LtMoldInventory)
+                .where(func.FROM_UNIXTIME(LtMoldInventory.finalinventory).cast(Date) == converted_finalinventory) # 將資料庫中的finalinventory轉換成日期格式
+                .where(LtMoldInventory.rfidno == payload['rfidno'])
+            ).scalar_one_or_none()
 
-                if not (select_result):
-                    isnert_update_obj = format_insert_update_obj(LtMoldInventory(), data)
-                else:
-                    isnert_update_obj = format_insert_update_obj(select_result, data)
-                isnert_update_obj_list.append(isnert_update_obj)
+            if not (select_result):
+                isnert_update_obj = format_insert_update_obj(LtMoldInventory(), payload)
+            else:
+                isnert_update_obj = format_insert_update_obj(select_result, payload)
+            isnert_update_obj_list.append(isnert_update_obj)
 
             db.session.add_all(isnert_update_obj_list)
             db.session.flush()
