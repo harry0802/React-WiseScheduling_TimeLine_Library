@@ -17,7 +17,7 @@ from logging.handlers import TimedRotatingFileHandler
 from flask import url_for
 
 app = create_app(os.getenv("FLASK_CONFIG") or "default")
-app.logger.setLevel(os.getenv("LOGLEVEL","INFO"))
+# app.logger.setLevel(os.getenv("LOGLEVEL","INFO"))
 migrate = Migrate(app, db, version_table=os.getenv("ALEMBIC_VERSION_INVENTORY","alembic"))
 
 
