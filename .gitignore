@@ -5,3 +5,6 @@ nginx/whitelist.conf
 node_modules
 backend/flask.log*
 backend/log/flask.log*
+inventory/flask.log*
+inventory/log/flask.log*
+

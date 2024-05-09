@@ -19,8 +19,9 @@ class LtMoldMapService:
                 return err_resp("LtMoldMap not found!!!", "404", 404)
             else:
                 dump_data = ltmoldmap_schema.dump(select_result, many=True)
-                resp = message(True, "LtMoldMap data sent")
-                resp["data"] = dump_data
+                # resp = message(True, "LtMoldMap data sent")
+                # resp["data"] = dump_data
+                resp = dump_data
                 return resp, 200
 
         except Exception as error:
