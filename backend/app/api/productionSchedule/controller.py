@@ -80,7 +80,7 @@ class productionScheduleController(Resource):
     @controller_entrance_log(description="Create the current productionSchedule")
     def post(self):
         payload = api.payload
-        return productionScheduleService.create_productionSchedules(payload)
+        return productionScheduleService.create_productionSchedule(payload)
     
 
 @api.route("/createProductionSchedules")
