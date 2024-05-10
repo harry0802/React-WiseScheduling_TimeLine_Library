@@ -16,7 +16,7 @@ export default function RefreshButton() {
           className={styles.btnRefresh}
           type="default"
           shape="circle"
-          icon={<RefreshIcon sx={{ fontSize: 36 }} />}
+          icon={<RefreshIcon className={styles.refreshIcon} />}
           onClick={throttleRefresh}
         />
       </Tooltip>

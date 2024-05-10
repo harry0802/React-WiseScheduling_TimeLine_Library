@@ -19,10 +19,6 @@
     cursor: col-resize;
   }
 
-  .ant-table-wrapper .ant-table-pagination.ant-pagination {
-    margin: 20px 0 0 0;
-  }
-
   .editable-cell {
     position: relative;
   }
@@ -183,7 +179,7 @@
   .ant-table-wrapper .ant-table-thead > tr > th:nth-child(5),
   .ant-table-wrapper .ant-table-tbody > tr > td:nth-child(5) {
     //put shadow on the right side of the cell
-    box-shadow: 10px 0px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 5px 0px 10px rgba(0, 0, 0, 0.5);
   }
 
   .ant-table-wrapper
@@ -274,11 +270,6 @@
     background-color: #f00 !important;
   }
 
-  .ant-pagination-prev,
-  .ant-pagination-next {
-    background-color: #fff;
-  }
-
   .ant-table-wrapper td.ant-table-column-sort {
     background: none;
   }
@@ -346,16 +337,28 @@
       }
     }
 
-    /* 在這裡修改 icon 的顏色 */
+    // 在這裡修改 icon 的顏色
     .ant-picker .ant-picker-suffix {
       color: #4270b8;
     }
   }
 
+  // Pagination
+  .ant-table-wrapper .ant-table-pagination.ant-pagination {
+    margin-top: 88px;
+  }
+
+  .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination .ant-pagination-next .ant-pagination-item-link {
+    color: #8f8f8f;
+  }
+
   .ant-pagination .ant-pagination-item a {
     display: block;
     padding: 0 6px;
-    color: #fff;
+    font-size: 1rem;
+    color: #8f8f8f;
+    font-weight: 600;
     background: none;
   }
 
@@ -369,19 +372,24 @@
   }
 
   .ant-pagination .ant-pagination-item-active {
-    font-weight: 600;
     background-color: #f39838;
+    border-color: #f39838;
+  }
+
+  .ant-pagination .ant-pagination-item-active a {
     color: #fff;
-    border-color: #1677ff;
   }
 
   .ant-pagination .ant-pagination-item {
     border-radius: 15px;
+    min-width: 28px;
+    height: 28px;
+    line-height: unset;
   }
 
-  .exportBtn {
+  %btn-shared {
     position: absolute;
-    bottom: 30px;
+    bottom: 86px;
     display: inline-flex;
     padding: 5px 16px;
     justify-content: center;
@@ -407,32 +415,12 @@
     }
   }
 
+  .exportBtn {
+    @extend %btn-shared;
+  }
+
   .importBtn {
-    position: absolute;
-    bottom: 30px;
-    left: 5%;
-    display: inline-flex;
-    padding: 5px 16px;
-    justify-content: center;
-    align-items: center;
-    border-radius: 15px;
-    background: #83bf45;
-    color: #fff;
-    font-family: Roboto;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px;
-    box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
-
-    &:hover {
-      background-color: #6fc1ae;
-      border-color: #6fc1ae;
-    }
-
-    &:active {
-      background-color: #8bc1e3;
-      border-color: #8bc1e3;
-    }
+    @extend %btn-shared;
+    left: 6%;
   }
 }

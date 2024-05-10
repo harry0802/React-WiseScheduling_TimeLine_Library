@@ -481,7 +481,7 @@ const ProductionSchedule = (props) => {
   // 設定初始當前頁面以及分頁一頁有幾個資料
   const [pagination, setPagination] = useState({
     page: 1 /*當前分頁位址*/,
-    pageSize: 10, // 默认值为 10
+    pageSize: 20, // 默认值为 10
   });
   const [totalCurrent, setTotalCurrent] = useState(1); /*總數據量*/
   const [dataSource, setDataSource] = useState([]); /*回傳資料*/
@@ -1143,11 +1143,13 @@ const ProductionSchedule = (props) => {
             pagination={{
               total: totalCurrent, // 確保這個值正確反映你的實際數據總數
               current: pagination.page /*當前分頁位址*/,
-              showSizeChanger: true,
+              defaultPageSize: pagination.pageSize,
               pageSize: pagination.pageSize,
-              showQuickJumper: true,
-              onChange: handleTableChange,
+              showSizeChanger: false,
+              showLessItems: true,
+              showQuickJumper: false,
               position: ["bottomCenter"],
+              onChange: handleTableChange,
             }}
             loading={loading}
             scroll={{ x: 3000 }}

@@ -154,7 +154,7 @@ export default function FilterBar({
         <Input
           className={styles.keywordSearch}
           placeholder="請輸入關鍵字查詢..."
-          style={{ width: 160 }}
+          style={{ width: 180 }}
           suffix={<SearchOutlined />}
           onInput={(e) => setKeywordState(e.target.value)}
         ></Input>

@@ -1,3 +1,5 @@
+@import "../../styles/variables.scss";
+
 .refreshButton {
   :global(.ant-btn-default) {
     background-color: #186c98;
@@ -6,14 +8,31 @@
   }
 
   :global(.ant-btn.ant-btn-icon-only) {
-    width: 45px;
+    width: 30px;
+
+    @media (min-width: $screen-lg) {
+      width: 45px;
+    }
   }
 
   .btnRefresh {
-    width: 45px;
-    height: 45px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    @media (min-width: $screen-lg) {
+      width: 45px;
+      height: 45px;
+    }
+  }
+
+  .refreshIcon {
+    font-size: 1.5rem;
+
+    @media (min-width: $screen-lg) {
+      font-size: 2.25rem;
+    }
   }
 }
