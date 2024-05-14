@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "./index.module.scss";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
@@ -11,6 +11,7 @@ import { Modal, notification } from "antd";
 import { useLotStore } from "../../store/zustand/store";
 import { useNavigate } from "react-router-dom";
 import { useUpdateChildLotsMutation } from "../../store/api/productionReportApi";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -18,74 +19,76 @@ import { TZ } from "../../config/config";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const InspectionList = [
-  {
-    lable: "色差",
-    schema: "colorDifference",
-  },
-  {
-    lable: "氣泡",
-    schema: "bubble",
-  },
-  {
-    lable: "油汙",
-    schema: "oilStain",
-  },
-  {
-    lable: "變形",
-    schema: "deformation",
-  },
-  {
-    lable: "雜質",
-    schema: "impurity",
-  },
-  {
-    lable: "毛邊",
-    schema: "burr",
-  },
-  {
-    lable: "縮水",
-    schema: "shrinkage",
-  },
-  {
-    lable: "壓克",
-    schema: "pressure",
-  },
-  {
-    lable: "黑點",
-    schema: "blackSpot",
-  },
-  {
-    lable: "缺料",
-    schema: "shortage",
-  },
-  {
-    lable: "溢料",
-    schema: "overflow",
-  },
-  {
-    lable: "刮傷",
-    schema: "scratch",
-  },
-  {
-    lable: "破洞",
-    schema: "hole",
-  },
-  {
-    lable: "流痕",
-    schema: "flowMark",
-  },
-  {
-    lable: "包封",
-    schema: "encapsulation",
-  },
-  {
-    lable: "其他",
-    schema: "other",
-  },
-];
-
 const TabPanel = (props) => {
+  const { t } = useTranslation(); // i18n 語言切換
+
+  const InspectionList = [
+    {
+      lable: `${t("productionReport.inspection.colorDifference")}`,
+      schema: "colorDifference",
+    },
+    {
+      lable: `${t("productionReport.inspection.bubble")}`,
+      schema: "bubble",
+    },
+    {
+      lable: `${t("productionReport.inspection.oilStain")}`,
+      schema: "oilStain",
+    },
+    {
+      lable: `${t("productionReport.inspection.deformation")}`,
+      schema: "deformation",
+    },
+    {
+      lable: `${t("productionReport.inspection.impurity")}`,
+      schema: "impurity",
+    },
+    {
+      lable: `${t("productionReport.inspection.burr")}`,
+      schema: "burr",
+    },
+    {
+      lable: `${t("productionReport.inspection.shrinkage")}`,
+      schema: "shrinkage",
+    },
+    {
+      lable: `${t("productionReport.inspection.pressure")}`,
+      schema: "pressure",
+    },
+    {
+      lable: `${t("productionReport.inspection.blackSpot")}`,
+      schema: "blackSpot",
+    },
+    {
+      lable: `${t("productionReport.inspection.shortage")}`,
+      schema: "shortage",
+    },
+    {
+      lable: `${t("productionReport.inspection.overflow")}`,
+      schema: "overflow",
+    },
+    {
+      lable: `${t("productionReport.inspection.scratch")}`,
+      schema: "scratch",
+    },
+    {
+      lable: `${t("productionReport.inspection.hole")}`,
+      schema: "hole",
+    },
+    {
+      lable: `${t("productionReport.inspection.flowMark")}`,
+      schema: "flowMark",
+    },
+    {
+      lable: `${t("productionReport.inspection.encapsulation")}`,
+      schema: "encapsulation",
+    },
+    {
+      lable: `${t("productionReport.inspection.other")}`,
+      schema: "other",
+    },
+  ];
+
   const {
     children,
     value,
@@ -101,9 +104,11 @@ const TabPanel = (props) => {
     unfinishedQuantity,
     ...other
   } = props;
+
   const updateLotsByProductionQuantity = useLotStore(
     (state) => state.updateLotsByProductionQuantity
   );
+
   return (
     <div
       role="tabpanel"
@@ -122,36 +127,36 @@ const TabPanel = (props) => {
           <div className={styles.inner}>
             <div className={styles.info}>
               <div>
-                <span>人員1</span>
+                <span>{t("productionReport.inspection.operator1")}</span>
                 <span>{operator1}</span>
               </div>
               <div>
-                <span>人員2</span>
+                <span>{t("productionReport.inspection.operator2")}</span>
                 <span>{operator2}</span>
               </div>
               <div>
-                <span>開始時間</span>
+                <span>{t("productionReport.inspection.startTime")}</span>
                 <span>{startTime}</span>
               </div>
               <div>
-                <span>製令數量</span>
+                <span>{t("productionReport.table.workOrderQuantity")}</span>
                 <span>{quatity}</span>
               </div>
               <div>
-                <span>未完成數量</span>
+                <span>{t("productionReport.table.unfinishedQuantity")}</span>
                 <span>{unfinishedQuantity}</span>
               </div>
               <div>
-                <span>不良數量</span>
+                <span>{t("productionReport.table.formatedDefectiveQty")}</span>
                 <span>{defectiveQuantity}</span>
               </div>
               <div className={styles.qty}>
-                <span>良品數量</span>
+                <span>{t("productionReport.table.productionQuantity")}</span>
                 <TextField
                   className="muiTextField"
                   // sx={{ width: "200px" }}
                   id={`productionQuantity${index}`}
-                  label="數量*"
+                  label={t("productionReport.inspection.count")}
                   type="number"
                   name={`productionQuantity${index}`}
                   autoComplete={`productionQuantity${index}`}
@@ -172,7 +177,7 @@ const TabPanel = (props) => {
             <div className={styles.records}>
               <Grid
                 container
-                spacing={{ xs: 2, md: 3 }}
+                spacing={{ xs: 2, md: 4 }}
                 columns={{ xs: 4, sm: 8, md: 12 }}
               >
                 {InspectionList.map((item, index) => (
@@ -201,14 +206,15 @@ const a11yProps = (index) => {
 };
 
 const ProductionInspection = () => {
+  const { t } = useTranslation(); // i18n 語言切換
   // 防止使用者回上一頁
   useEffect(() => {
     window.history.pushState(null, "", document.URL);
     window.onpopstate = function () {
       window.history.pushState(null, "", document.URL);
       Modal.info({
-        content: <p>您無法回到上一頁，請完成此生產階段，並"換班"交接</p>,
-        okText: "確定",
+        content: <p>{t("productionReport.inspection.forbidden")}</p>,
+        okText: `${t("common.okBtn")}`,
         onOk() {},
       });
     };
@@ -244,7 +250,7 @@ const ProductionInspection = () => {
             })}
           </div>
         ),
-        okText: "確定",
+        okText: `${t("common.okBtn")}`,
         onOk() {},
       });
       return;
@@ -267,7 +273,7 @@ const ProductionInspection = () => {
       .catch((error) => {
         console.error("rejected", error);
         notification.error({
-          description: "暫時無法更新，請稍後再試",
+          description: `${t("common.updatingError")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -350,7 +356,7 @@ const ProductionInspection = () => {
         }}
         onClick={() => handleSubmit()}
       >
-        換班
+        {t("productionReport.inspection.shiftChange")}
       </Button>
     </Box>
   );

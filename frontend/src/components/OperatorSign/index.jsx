@@ -13,6 +13,7 @@ import {
 } from "../../store/api/productionReportApi";
 import { useUpdateProductionSchedulesMutation } from "../../store/api/productionScheduleApi";
 import { WORKORDER_STATUS } from "../../config/enum";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -21,6 +22,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const OperatorSign = (props) => {
+  const { t } = useTranslation(); // i18n 語言切換
   const navigate = useNavigate();
   const location = useLocation();
   const action = location.state ? location.state.action : null; // startChildLot: 開始子批生產，endChildLot: 結束子批生產
@@ -79,7 +81,7 @@ const OperatorSign = (props) => {
       .catch((error) => {
         console.error("rejected", error);
         notification.error({
-          description: "暫時無法更新，請稍後再試",
+          description: `${t("common.updatingError")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -120,7 +122,7 @@ const OperatorSign = (props) => {
       .catch((error) => {
         console.error("rejected", error);
         notification.error({
-          description: "暫時無法更新，請稍後再試",
+          description: `${t("common.updatingError")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -134,14 +136,18 @@ const OperatorSign = (props) => {
     const lastChildLot = lotStore[0].children[lotStore[0].children.length - 1];
     if (lastChildLot.operator1 !== data.get("operator1")) {
       setErrorOperator1(true);
-      setErrorMsgOperator1("人員1帳號與開始的人員1不符合");
+      setErrorMsgOperator1(
+        `${t("productionReport.operatorSign.operator1UsernameUnmatched")}`
+      );
       isValidate = false;
     } else {
       setErrorOperator1(false);
     }
     if (lastChildLot.operator2 !== data.get("operator2")) {
       setErrorOperator2(true);
-      setErrorMsgOperator2("人員2帳號與開始的人員2不符合");
+      setErrorMsgOperator2(
+        `${t("productionReport.operatorSign.operator2UsernameUnmatched")}`
+      );
       isValidate = false;
     } else {
       setErrorOperator2(false);
@@ -176,7 +182,7 @@ const OperatorSign = (props) => {
       .catch((error) => {
         console.error("rejected", error);
         notification.error({
-          description: "暫時無法更新，請稍後再試",
+          description: `${t("common.updatingError")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -189,7 +195,9 @@ const OperatorSign = (props) => {
     const data = new FormData(e.currentTarget);
     if (data.get("operator1") === "") {
       setErrorOperator1(true);
-      setErrorMsgOperator1("請輸入人員1帳號");
+      setErrorMsgOperator1(
+        `${t("productionReport.operatorSign.operator1UsernameError")}`
+      );
       isValidate = false;
     } else {
       setErrorOperator1(false);
@@ -228,14 +236,14 @@ const OperatorSign = (props) => {
             color: "#FFFFFF",
           }}
         >
-          請輸入產線工作人員1帳號，正式進行作業(必填)
+          {t("productionReport.operatorSign.operator1Title")}
         </Typography>
 
         {/* 帳號 */}
         <TextField
           className="muiTextField"
           id="operator1"
-          label="人員1帳號*"
+          label={t("productionReport.operatorSign.operator1Username")}
           name="operator1"
           autoComplete="operator1"
           variant="outlined"
@@ -257,14 +265,14 @@ const OperatorSign = (props) => {
             color: "#FFFFFF",
           }}
         >
-          請輸入產線工作人員2帳號
+          {t("productionReport.operatorSign.operator2Title")}
         </Typography>
 
         {/* 帳號 */}
         <TextField
           className="muiTextField"
           id="operator2"
-          label="人員2帳號"
+          label={t("productionReport.operatorSign.operator2Username")}
           name="operator2"
           autoComplete="operator2"
           variant="outlined"
@@ -289,7 +297,7 @@ const OperatorSign = (props) => {
           fontSize: "16px",
         }}
       >
-        確認
+        {t("common.submitBtn")}
       </Button>
       <Button
         variant="text"
@@ -301,7 +309,7 @@ const OperatorSign = (props) => {
         }}
         onClick={() => navigate(-1)}
       >
-        取消
+        {t("common.cancelBtn")}
       </Button>
     </Box>
   );

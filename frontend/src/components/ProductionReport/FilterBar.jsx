@@ -3,6 +3,7 @@ import { Select, Input, DatePicker } from "antd";
 import { WORKORDER_STATUS } from "../../config/enum";
 import { SearchOutlined } from "@ant-design/icons";
 import styles from "./FilterBar.module.scss";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -23,59 +24,60 @@ export default function FilterBar({
   keywordState,
   setKeywordState,
 }) {
+  const { t } = useTranslation(); // i18n 語言切換
   const { Option } = Select;
 
   // 製令單狀態
   const allStatusOptions = [
     <Option key={0} value={WORKORDER_STATUS.ALL} label={WORKORDER_STATUS.ALL}>
-      所有狀態
+      {t("productionReport.filterBar.allStatus")}
     </Option>,
     <Option
       key={1}
       value={WORKORDER_STATUS.NOT_YET}
       label={WORKORDER_STATUS.NOT_YET}
     >
-      {WORKORDER_STATUS.NOT_YET}
+      {t("productionReport.filterBar.notYet")}
     </Option>,
     <Option
       key={2}
       value={WORKORDER_STATUS.ON_GOING}
       label={WORKORDER_STATUS.ON_GOING}
     >
-      {WORKORDER_STATUS.ON_GOING}
+      {t("productionReport.filterBar.onGoing")}
     </Option>,
     <Option key={3} value={WORKORDER_STATUS.DONE} label={WORKORDER_STATUS.DONE}>
-      {WORKORDER_STATUS.DONE}
+      {t("productionReport.filterBar.done")}
     </Option>,
     <Option
       key={4}
       value={WORKORDER_STATUS.PAUSE}
       label={WORKORDER_STATUS.PAUSE}
     >
-      {WORKORDER_STATUS.PAUSE}
+      {t("productionReport.filterBar.pause")}
     </Option>,
   ];
 
   // 製令單期限
   const allExpiryOptions = [
     <Option key={0} value={"無限期"} label="無限期">
-      無限期
+      {t("productionReport.filterBar.unlimited")}
     </Option>,
     <Option key={1} value={"即將到期"} label="即將到期">
-      即將到期
+      {t("productionReport.filterBar.expiring")}
     </Option>,
     <Option key={2} value={"已經過期"} label="已經過期">
-      已經過期
+      {t("productionReport.filterBar.expired")}
     </Option>,
   ];
 
   // 關鍵字搜尋類型
   const allKeywordTypeOptions = [
     <Option key={0} value={"workOrderSN"} label="workOrderSN">
-      製令單號
+      {t("productionReport.filterBar.workOrderSN")}
     </Option>,
     <Option key={1} value={"productName"} label="productName">
-      產品名稱
+      {t("productionReport.filterBar.productName")}
     </Option>,
   ];
 
@@ -105,7 +107,9 @@ export default function FilterBar({
             setStartWeekNo(getWeekNumber(dateString));
           }}
         />
-        <div className={styles.weekNo}>{startWeekNo} 週</div>
+        <div className={styles.weekNo}>
+          {startWeekNo} {t("productionReport.filterBar.week")}
+        </div>
       </div>
       <span className={styles.dateTo}>~</span>
       <div className={styles.endDate}>
@@ -117,14 +121,16 @@ export default function FilterBar({
             setEndWeekNo(getWeekNumber(dateString));
           }}
         />
-        <div className={styles.weekNo}>{endWeekNo} 週</div>
+        <div className={styles.weekNo}>
+          {endWeekNo} {t("productionReport.filterBar.week")}
+        </div>
       </div>
 
       <div className={styles.selectBox}>
         {/* 篩選狀態 */}
         <Select
           className={styles.statusFilter}
-          placeholder="所有狀態"
+          placeholder={t("productionReport.filterBar.allStatus")}
           style={{ width: 120 }}
           onChange={(value) => setStatusState(value)}
         >
@@ -134,7 +140,7 @@ export default function FilterBar({
         {/* 篩選期限 */}
         <Select
           className={styles.expiryFilter}
-          placeholder="無限期"
+          placeholder={t("productionReport.filterBar.unlimited")}
           style={{ width: 120 }}
           onChange={(value) => setExpiryState(value)}
         >
@@ -144,7 +150,7 @@ export default function FilterBar({
         {/* 篩選關鍵字搜尋類型 */}
         <Select
           className={styles.keywordTypeFilter}
-          placeholder="製令單號"
+          placeholder={t("productionReport.filterBar.workOrderSN")}
           style={{ width: 120 }}
           onChange={(value) => setKeywordTypeState(value)}
         >
@@ -153,7 +159,7 @@ export default function FilterBar({
 
         <Input
           className={styles.keywordSearch}
-          placeholder="請輸入關鍵字查詢..."
+          placeholder={t("productionReport.filterBar.keyword")}
           style={{ width: 180 }}
           suffix={<SearchOutlined />}
           onInput={(e) => setKeywordState(e.target.value)}

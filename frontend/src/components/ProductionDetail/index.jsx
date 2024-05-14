@@ -14,6 +14,7 @@ import {
 import { useGetProductionReportQuery } from "../../store/api/productionReportApi";
 import styles from "./index.module.scss";
 import RefreshButton from "../Global/RefreshButton";
+import { useTranslation } from "react-i18next";
 import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -22,6 +23,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const ProductionDetail = (props) => {
+  const { t } = useTranslation(); // i18n 語言切換
   // 防止使用者回上一頁
   useEffect(() => {
     window.history.pushState(null, "", document.URL);
@@ -29,8 +31,8 @@ const ProductionDetail = (props) => {
       window.history.pushState(null, "", document.URL);
       Modal.info({
         width: "800px",
-        content: <p>您無法回到上一頁，請"暫停"或"完成"此生產階段</p>,
-        okText: "確定",
+        content: <p>{t("productionReport.detail.forbidden")}</p>,
+        okText: `${t("common.okBtn")}`,
         onOk() {},
       });
     };
@@ -47,12 +49,12 @@ const ProductionDetail = (props) => {
       width: "5%",
     },
     {
-      title: "狀態",
+      title: `${t("productionReport.table.status")}`,
       dataIndex: "status",
       width: "6%",
     },
     {
-      title: "製令單號",
+      title: `${t("productionReport.table.workOrderSN")}`,
       dataIndex: "lotName",
       width: "8%",
       render: (text) => (
@@ -63,7 +65,7 @@ const ProductionDetail = (props) => {
       ),
     },
     {
-      title: "模具編號",
+      title: `${t("productionReport.table.moldNo")}`,
       dataIndex: "moldNo",
       width: "8%",
       render: (text) => (
@@ -74,7 +76,7 @@ const ProductionDetail = (props) => {
       ),
     },
     {
-      title: "產品名稱",
+      title: `${t("productionReport.table.productName")}`,
       dataIndex: "productName",
       width: "20%",
       render: (text) => (
@@ -85,32 +87,32 @@ const ProductionDetail = (props) => {
       ),
     },
     {
-      title: "製令數量",
+      title: `${t("productionReport.table.workOrderQuantity")}`,
       dataIndex: "workOrderQuantity",
       width: "8%",
     },
     {
-      title: "良品數量",
+      title: `${t("productionReport.table.productionQuantity")}`,
       dataIndex: "productionQuantity",
       width: "8%",
     },
     {
-      title: "不良數",
+      title: `${t("productionReport.table.formatedDefectiveQty")}`,
       dataIndex: "defectiveQuantity",
       width: "8%",
     },
     {
-      title: "未完成數量",
+      title: `${t("productionReport.table.unfinishedQuantity")}`,
       dataIndex: "unfinishedQuantity",
       width: "8%",
     },
     {
-      title: "負責人員",
+      title: `${t("productionReport.table.operators")}`,
       dataIndex: "operators",
       width: "10%",
     },
     {
-      title: "生產區間",
+      title: `${t("productionReport.table.period")}`,
       dataIndex: "period",
       width: "10%",
     },
@@ -224,13 +226,9 @@ const ProductionDetail = (props) => {
 
     if (!isComplete) {
       Modal.confirm({
-        content: (
-          <p>
-            仍有製令單未符合製令數量，一旦結單無法再執行此單，需重開製令單，您確定要完成此生產階段?
-          </p>
-        ),
-        cancelText: "取消",
-        okText: "確定",
+        content: <p>{t("productionReport.detail.completePopMsg")}</p>,
+        cancelText: `${t("common.cancelBtn")}`,
+        okText: `${t("common.okBtn")}`,
         onCancel() {
           setShowUnfinished(true);
         },
@@ -253,7 +251,8 @@ const ProductionDetail = (props) => {
       <div className={styles.box}>
         <div className={styles.titleBox}>
           <div className={styles.title}>
-            {machineSN_Store}機台製令單生產明細
+            {machineSN_Store}
+            {t("productionReport.detail.title")}
             <RefreshButton />
           </div>
           <div>

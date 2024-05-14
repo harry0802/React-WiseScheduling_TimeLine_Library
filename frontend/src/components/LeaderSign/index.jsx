@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./index.module.scss";
 import Button from "@mui/material/Button";
@@ -22,6 +22,7 @@ import {
   usePauseStausMutation,
 } from "../../store/api/productionScheduleApi";
 import { WORKORDER_STATUS, LEADER_ACTION } from "../../config/enum";
+import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -30,6 +31,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const LeaderSign = (props) => {
+  const { t } = useTranslation(); // i18n 語言切換
   const navigate = useNavigate();
   const location = useLocation();
   const machineSN_Store = useMachineSNStore((state) => state.machineSN_Store); // 從zustand store 取得機台編號
@@ -200,7 +202,7 @@ const LeaderSign = (props) => {
       .catch((error) => {
         console.error("rejected", error);
         notification.error({
-          description: "暫時無法更新，請稍後再試",
+          description: `${t("common.updatingError")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -215,7 +217,7 @@ const LeaderSign = (props) => {
       .unwrap()
       .then((payload) => {
         notification.success({
-          description: "已完成階段工作",
+          description: `${t("productionReport.leaderSign.completeMsg")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -224,7 +226,7 @@ const LeaderSign = (props) => {
       .catch((error) => {
         console.error("rejected", error);
         notification.error({
-          description: "暫時無法更新，請稍後再試",
+          description: `${t("common.updatingError")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -254,7 +256,7 @@ const LeaderSign = (props) => {
       .catch((error) => {
         console.error("rejected", error);
         notification.error({
-          description: "暫時無法更新，請稍後再試",
+          description: `${t("common.updatingError")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -269,7 +271,7 @@ const LeaderSign = (props) => {
       .unwrap()
       .then((payload) => {
         notification.success({
-          description: "已暫停該階段工作",
+          description: `${t("productionReport.leaderSign.pauseMsg")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -278,7 +280,7 @@ const LeaderSign = (props) => {
       .catch((error) => {
         console.error("rejected", error);
         notification.error({
-          description: "暫時無法更新，請稍後再試",
+          description: `${t("common.updatingError")}`,
           placement: "bottomRight",
           duration: 5,
         });
@@ -290,7 +292,7 @@ const LeaderSign = (props) => {
     const data = new FormData(e.currentTarget);
     if (data.get("leader") === "") {
       setError(true);
-      setErrorMsg("請輸入帳號");
+      setErrorMsg(`${t("productionReport.leaderSign.usernameError")}`);
       return;
     } else {
       setError(false);
@@ -335,6 +337,7 @@ const LeaderSign = (props) => {
       {action === "pause" && (
         <img style={{ width: "120px" }} src={pauseImage} alt="暫停" />
       )}
+      {/* Placeholder comment */}
       <Typography
         variant="h6"
         component="h2"
@@ -343,14 +346,18 @@ const LeaderSign = (props) => {
           marginTop: "30px",
         }}
       >
-        請輸入該產線管理者帳號，完成該工作階段
+        {(action === "new" || action === "continue") &&
+          t("productionReport.leaderSign.title")}
+        {action === "complete" &&
+          t("productionReport.leaderSign.completeTitle")}
+        {action === "pause" && t("productionReport.leaderSign.pauseTitle")}
       </Typography>
 
       {/* 帳號 */}
       <TextField
         className="muiTextField"
         id="leader"
-        label="帳號"
+        label={t("productionReport.leaderSign.username")}
         name="leader"
         autoComplete="leader"
         variant="outlined"
@@ -373,7 +380,7 @@ const LeaderSign = (props) => {
           fontSize: "16px",
         }}
       >
-        確認
+        {t("common.submitBtn")}
       </Button>
       <Button
         variant="text"
@@ -385,7 +392,7 @@ const LeaderSign = (props) => {
         }}
         onClick={() => navigate(-1)}
       >
-        取消
+        {t("common.cancelBtn")}
       </Button>
     </Box>
   );

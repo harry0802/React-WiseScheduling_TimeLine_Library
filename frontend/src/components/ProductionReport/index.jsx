@@ -10,6 +10,7 @@ import StatusInfoIcon from "../Global/StatusInfoIcon";
 import FilterBar from "./FilterBar";
 import { WORKORDER_STATUS } from "../../config/enum";
 import { debounce, throttle } from "lodash"; // 引入 lodash 的 debounce 函數
+import { useTranslation } from "react-i18next";
 import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -18,6 +19,8 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const ProductionReport = (props) => {
+  const { t } = useTranslation(); // i18n 語言切換
+
   // 資料表欄位
   const defaultColumns = [
     {
@@ -31,7 +34,7 @@ const ProductionReport = (props) => {
     {
       title: (
         <>
-          狀態
+          {t("productionReport.table.status")}
           <StatusInfoIcon />
         </>
       ),
@@ -40,7 +43,7 @@ const ProductionReport = (props) => {
       width: "8%",
     },
     {
-      title: "製令單號",
+      title: `${t("productionReport.table.workOrderSN")}`,
       dataIndex: "workOrderSN",
       width: "10%",
       fixed: true,
@@ -53,7 +56,7 @@ const ProductionReport = (props) => {
       ),
     },
     {
-      title: "模具編號",
+      title: `${t("productionReport.table.moldNo")}`,
       dataIndex: "moldNo",
       width: "8%",
       fixed: true,
@@ -66,7 +69,7 @@ const ProductionReport = (props) => {
       ),
     },
     {
-      title: "產品名稱",
+      title: `${t("productionReport.table.productName")}`,
       dataIndex: "productName",
       width: "20%",
       fixed: true,
@@ -79,27 +82,27 @@ const ProductionReport = (props) => {
       ),
     },
     {
-      title: "製令數量",
+      title: `${t("productionReport.table.workOrderQuantity")}`,
       dataIndex: "workOrderQuantity",
       width: "8%",
     },
     {
-      title: "良品數量",
+      title: `${t("productionReport.table.productionQuantity")}`,
       dataIndex: "productionQuantity",
       width: "8%",
     },
     {
-      title: "不良數",
+      title: `${t("productionReport.table.formatedDefectiveQty")}`,
       dataIndex: "formatedDefectiveQty",
       width: "8%",
     },
     {
-      title: "預計上機日",
+      title: `${t("productionReport.table.planOnMachineDate")}`,
       dataIndex: "planOnMachineDate",
       width: "12%",
     },
     {
-      title: "實際上機日",
+      title: `${t("productionReport.table.actualOnMachineDate")}`,
       dataIndex: "actualOnMachineDate",
       width: "12%",
     },
@@ -248,7 +251,8 @@ const ProductionReport = (props) => {
       <div className="box">
         <div className="title-box">
           <div className="title">
-            {machineSN_Store}機台產線派工系統
+            {machineSN_Store}
+            {t("productionReport.report.title")}
             <RefreshButton />
           </div>
           <FilterBar

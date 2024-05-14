@@ -3,158 +3,96 @@
     "ts": "雙肩智慧",
     "ts-internal": "雙肩內部系統"
   },
-  "nav": {
-    "dashboard": "首頁",
-    "user-management": "帳號管理",
-    "customer-management": "客戶管理",
-    "construction-management": "工程管理",
-    "device-monitor-control":"設備監控",
-    "meter-data":"電錶數據"
-  },
   "common": {
-    "cancel": "取消",
-    "confirm": "確認",
-    "create-file": "建檔",
-    "creation": "建立時間",
-    "modified": "更新時間",
-    "search": "搜尋",
-    "sort": "排序",
-    "search-keyword": "請輸入關鍵字查詢",
-    "enabled":"使用權限",
-    "next-page": "下一筆",
-    "last-page": "上一筆",
-    "download": "下載",
-    "delete": "刪除",
-    "clear-keyword": "清除關鍵字"
+    "submitBtn": "確認",
+    "okBtn": "確定",
+    "cancelBtn": "取消",
+    "updatingError": "暫時無法更新，請稍後再試"
   },
-  "customer": {
-    "title": {
-      "customer-list": "客戶資料",
-      "create-customer": "新增客戶"
+  "productionReport": {
+    "machineSelect": {
+      "title": "產線派工系統-機台選擇",
+      "onGoing": "正在運作",
+      "none": "目前無生產任何單據"
     },
-    "customer-type": {
-      "all": "所有類型",
-      "company": "公司",
-      "individual": "個人"
+    "report": {
+      "title": "機台產線派工系統"
     },
-    "customer-group": {
-      "all": "所有群組",
-      "commercial": "商業客戶",
-      "government": "政府機關",
-      "individual": "個人",
-      "non profit": "非營利組織"
+    "table": {
+      "status": "狀態",
+      "workOrderSN": "製令單號",
+      "moldNo": "模具編號",
+      "productName": "產品名稱",
+      "workOrderQuantity": "製令數量",
+      "productionQuantity": "良品數量",
+      "formatedDefectiveQty": "不良數",
+      "planOnMachineDate": "預計上機日",
+      "actualOnMachineDate": "實際上機日",
+      "unfinishedQuantity": "未完成數量",
+      "operators": "負責人員",
+      "period": "生產區間"
     },
-    "field": {
-      "basic-info": "基本資訊",
-      "customer-name": "客戶名稱",
-      "name": "客戶編號",
-      "customer-type": "客戶類型",
-      "customer-group": "客戶群組",
-      "tax-id": "統一編號",
-      "contact-person": "客戶聯絡人",
-      "contact-phone": "客戶聯絡人手機"
+    "filterBar": {
+      "week": "週",
+      "allStatus": "所有狀態",
+      "notYet": "尚未上機",
+      "onGoing": "On-going",
+      "done": "Done",
+      "pause": "暫停生產",
+      "unlimited": "無限期",
+      "expiring": "即將到期",
+      "expired": "已經過期",
+      "workOrderSN": "製令單號",
+      "productName": "產品名稱",
+      "keyword": "請輸入關鍵字查詢 ..."
     },
-    "success": {
-      "create": "客戶資料新增成功~",
-      "update": "客戶資料更新成功~"
+    "leaderSign": {
+      "title": "請輸入該產線管理者帳號",
+      "completeitle": "請輸入該產線管理者帳號，完成工作階段",
+      "pauseTitle": "請輸入該產線管理者帳號，暫停工作階段",
+      "username": "輸入帳號",
+      "usernameError": "請輸入帳號",
+      "password": "輸入密碼",
+      "completeMsg": "工作階段已完成",
+      "pauseMsg": "工作階段已暫停"
     },
-    "error": {
-      "customer-name-required": "寫上那條惡龍~",
-      "customer-name-invalid-length": "請輸入大於2小於32個中英文字~",
-      "tax-id-invalid": "哎呀呀~這個統編好像有點不對勁喔~",
-      "contact-person-invalid-length": "請輸入大於2小於32個中英文字~"
-    }
-  },
-  "cd": {
-    "title": {
-      "construction-demand-management": "工程需求管理",
-      "create-cd": "新增需求"
+    "detail": {
+      "title": "機台製令單生產明細",
+      "completePopMsg": "仍有製令單未符合製令數量，一旦結單無法再執行此單，需重開製令單，您確定要完成此生產階段?",
+      "forbidden": "您無法回到上一頁，請\"暫停\"或\"完成\"此生產階段"
     },
-    "status": {
-      "all": "所有狀態",
-      "open": "新建立",
-      "quotation": "報價中",
-      "converted": "已成案",
-      "lost": "已流失",
-      "replied": "已回覆",
-      "closed": "已關閉"
+    "operatorSign": {
+      "operator1Title": "請輸入產線工作人員1帳號，正式進行作業(必填)",
+      "operator1Username": "人員1帳號*",
+      "operator1UsernameError": "請輸入人員1帳號*",
+      "operator1UsernameUnmatched": "人員1帳號與開始的人員1不符合",
+      "operator2Title": "請輸入產線工作人員2帳號",
+      "operator2Username": "人員2帳號*",
+      "operator2UsernameUnmatched": "人員2帳號與開始的人員2不符合"
     },
-    "field": {
-      "basic-info": "基本資訊",
-      "title": "需求標題",
-      "name": "需求編號",
-      "status": "需求狀態",
-      "customer-name": "客戶名稱",
-      "owner": "我方負責人",
-      "contact-person": "客戶聯絡人",
-      "contact-phone": "客戶聯絡人手機",
-      "members": "需求成員",
-      "desc": "需求描述",
-      "upload-file": "上傳檔案",
-      "add-file": "新增檔案",
-      "remove-file": "移除檔案",
-      "add-member": "新增成員",
-      "select-member": "選擇成員",
-      "remove-member": "移除成員",
-      "created-by": "建檔人員",
-      "member": "成員",
-      "attachment": "附件"
-    },
-    "success": {
-      "create": "需求新增成功~",
-      "update": "需求更新成功~"
-    },
-    "error": {
-      "title-required": "寫上標題, 要不然人家不知道你要幹嘛~",
-      "title-invalid-length": "請輸入大於2小於32個中英文字~",
-      "customer-required": "寫上那條惡龍"
-      
-    }
-  },
-  "project": {
-    "title": {
-      "project-management": "專案管理與任務分配"
-    }
-  },
-  "user": {
-    "title": {
-      "create-user": "新增使用者",
-      "edit-user": "修改使用者",
-      "user-list":"使用者資料"
-    },
-    "status": {
-      "enabled": "正常使用",
-      "disabled": "停止使用"
-    },
-    "field": {
-      "roles": "角色",
-      "basic-info": "基本資料",
-      "title": "需求標題",
-      "name": "需求編號",
-      "status": "需求狀態",
-      "user-name": "使用者名稱",
-      "user-email": "電子信箱",
-      "owner": "我方負責人",
-      "contact-person": "客戶聯絡人",
-      "contact-phone": "客戶聯絡人手機",
-      "members": "需求成員",
-      "desc": "需求描述",
-      "add-file": "新增檔案",
-      "add-member": "新增成員",
-      "select-member": "選擇成員",
-      "remove-member": "移除成員",
-      "created-by": "建檔人員",
-      "member": "成員",
-      "attachment": "附件"
-    },
-    "success": {
-      "create": "需求新增成功~"
-    },
-    "error": {
-      "email-required": "他長得不像電子信箱~想跟你互加為好友~~",
-      "phone-required": "安安~可以跟你加個電話嗎?哎呀呀~這個號碼好像不對勁喔~",
-      "password-required": "請寫下8個~24個大小寫符號與字數的組合讓他更強壯~",
-      "name-invalid-length": "他看起來不像人類~能告訴我你的芳名嗎~"
+    "inspection": {
+      "colorDifference": "色差",
+      "bubble": "氣泡",
+      "oilStain": "油汙",
+      "deformation": "變形",
+      "impurity": "雜質",
+      "burr": "毛邊",
+      "shrinkage": "縮水",
+      "pressure": "壓克",
+      "blackSpot": "黑點",
+      "shortage": "缺料",
+      "overflow": "溢料",
+      "scratch": "刮傷",
+      "hole": "破洞",
+      "flowMark": "流痕",
+      "encapsulation": "包封",
+      "other": "其他",
+      "operator1": "人員1",
+      "operator2": "人員2",
+      "startTime": "開始時間",
+      "count": "數量*",
+      "shiftChange": "換班",
+      "forbidden": "您無法回到上一頁，請完成此生產階段，並\"換班\"交接"
     }
   }
 }

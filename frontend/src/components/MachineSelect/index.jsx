@@ -11,8 +11,10 @@ import {
 import { WORKORDER_STATUS } from "../../config/enum";
 import { PRODUCTION_AREA } from "../../config/config";
 import RefreshButton from "../Global/RefreshButton";
+import { useTranslation } from "react-i18next";
 
 const MachineSelect = (props) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { Option } = Select;
   const [skip, setSkip] = useState(true);
@@ -134,7 +136,7 @@ const MachineSelect = (props) => {
         <div className="box">
           <div className="title-box">
             <div className="title">
-              產線派工系統-機台選擇
+              {t("productionReport.machineSelect.title")}
               <RefreshButton />
             </div>
 
@@ -178,9 +180,9 @@ const MachineSelect = (props) => {
                     >
                       <h1>{item.machineSN}</h1>
                       {item.status === "active" ? (
-                        <p>正在運作...</p>
+                        <p>{t("productionReport.machineSelect.onGoing")}...</p>
                       ) : (
-                        <p>目前無生產任何單據</p>
+                        <p>{t("productionReport.machineSelect.none")}</p>
                       )}
                     </div>
                   </Col>

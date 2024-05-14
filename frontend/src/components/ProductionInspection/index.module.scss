@@ -79,6 +79,14 @@
 
 .quantityInput {
   display: flex;
-  gap: 15px;
   align-items: center;
+  height: 48px;
+
+  label {
+    width: 50px;
+
+    @media (min-width: $screen-lg) {
+      width: 80px;
+    }
+  }
 }
