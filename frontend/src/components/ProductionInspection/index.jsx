@@ -177,7 +177,7 @@ const TabPanel = (props) => {
             <div className={styles.records}>
               <Grid
                 container
-                spacing={{ xs: 2, md: 4 }}
+                spacing={{ xs: 2, md: 3 }}
                 columns={{ xs: 4, sm: 8, md: 12 }}
               >
                 {InspectionList.map((item, index) => (

@@ -34,8 +34,10 @@ const ProductionReport = (props) => {
     {
       title: (
         <>
-          {t("productionReport.table.status")}
-          <StatusInfoIcon />
+          <div>
+            {t("productionReport.table.status")}
+            <StatusInfoIcon />
+          </div>
         </>
       ),
       dataIndex: "status",

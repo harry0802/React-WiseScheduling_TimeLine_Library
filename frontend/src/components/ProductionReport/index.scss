@@ -130,9 +130,14 @@
 
   // set the second column of the table to display flex
   .ant-table-wrapper .ant-table-thead > tr > th:nth-child(3) {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    div {
+      display: flex;
+      align-items: center;
+
+      @media (min-width: $screen-lg) {
+        gap: 5px;
+      }
+    }
   }
 
   .ant-table-wrapper .ant-table-tbody > tr > td {
