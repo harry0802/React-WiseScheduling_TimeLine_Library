@@ -1,22 +1,24 @@
 import React from "react";
 import { Button, Modal, Tooltip } from "antd";
 import InfoIcon from "@mui/icons-material/Info";
-
-const showInfo = () => {
-  Modal.info({
-    content: (
-      <p>
-        1.若預計完成日前七天未完單，狀態欄反黃提醒
-        2.若已經過了預計完成日，狀態欄則會反紅警示
-        3.暫停單據，字體顏色較不明顯，但仍舊能與其他單據合併重新生產
-      </p>
-    ),
-    okText: "確定",
-    onOk() {},
-  });
-};
+import { useTranslation } from "react-i18next";
 
 export default function StatusInfoIcon() {
+  const { t } = useTranslation();
+  const showInfo = () => {
+    Modal.info({
+      content: (
+        <p>
+          {t("productionReport.statusInfoIcon.description1")} <br />
+          {t("productionReport.statusInfoIcon.description2")} <br />
+          {t("productionReport.statusInfoIcon.description3")}
+        </p>
+      ),
+      okText: "確定",
+      onOk() {},
+    });
+  };
+
   return (
     <Tooltip title="狀態欄位說明">
       <Button

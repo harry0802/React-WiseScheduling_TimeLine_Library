@@ -34,7 +34,7 @@ const ProductionReport = (props) => {
     {
       title: (
         <>
-          <div>
+          <div className="status-column">
             {t("productionReport.table.status")}
             <StatusInfoIcon />
           </div>
@@ -42,7 +42,7 @@ const ProductionReport = (props) => {
       ),
       dataIndex: "status",
       fixed: true,
-      width: "8%",
+      width: "10%",
     },
     {
       title: `${t("productionReport.table.workOrderSN")}`,
@@ -73,7 +73,7 @@ const ProductionReport = (props) => {
     {
       title: `${t("productionReport.table.productName")}`,
       dataIndex: "productName",
-      width: "20%",
+      width: "12%",
       fixed: true,
       ellipsis: true,
       render: (text) => (
@@ -86,27 +86,27 @@ const ProductionReport = (props) => {
     {
       title: `${t("productionReport.table.workOrderQuantity")}`,
       dataIndex: "workOrderQuantity",
-      width: "8%",
+      width: "9%",
     },
     {
       title: `${t("productionReport.table.productionQuantity")}`,
       dataIndex: "productionQuantity",
-      width: "8%",
+      width: "12%",
     },
     {
       title: `${t("productionReport.table.formatedDefectiveQty")}`,
       dataIndex: "formatedDefectiveQty",
-      width: "8%",
+      width: "10%",
     },
     {
       title: `${t("productionReport.table.planOnMachineDate")}`,
       dataIndex: "planOnMachineDate",
-      width: "12%",
+      width: "11%",
     },
     {
       title: `${t("productionReport.table.actualOnMachineDate")}`,
       dataIndex: "actualOnMachineDate",
-      width: "12%",
+      width: "11%",
     },
   ];
 
@@ -218,7 +218,7 @@ const ProductionReport = (props) => {
     }
     if (moldNoSet.size > 1) {
       Modal.info({
-        content: <p>所選製令單必須屬於同一個模具</p>,
+        content: <p>{t("productionReport.report.moldUnmatchedMsg")}</p>,
         okText: "確定",
         onOk() {},
       });

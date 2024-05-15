@@ -46,17 +46,17 @@ const ProductionDetail = (props) => {
     {
       title: "NO",
       dataIndex: "no",
-      width: "5%",
+      width: "3%",
     },
     {
       title: `${t("productionReport.table.status")}`,
       dataIndex: "status",
-      width: "6%",
+      width: "8%",
     },
     {
       title: `${t("productionReport.table.workOrderSN")}`,
       dataIndex: "lotName",
-      width: "8%",
+      width: "10%",
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
@@ -67,7 +67,7 @@ const ProductionDetail = (props) => {
     {
       title: `${t("productionReport.table.moldNo")}`,
       dataIndex: "moldNo",
-      width: "8%",
+      width: "10%",
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
@@ -78,7 +78,7 @@ const ProductionDetail = (props) => {
     {
       title: `${t("productionReport.table.productName")}`,
       dataIndex: "productName",
-      width: "20%",
+      width: "15%",
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
@@ -109,12 +109,12 @@ const ProductionDetail = (props) => {
     {
       title: `${t("productionReport.table.operators")}`,
       dataIndex: "operators",
-      width: "10%",
+      width: "8%",
     },
     {
       title: `${t("productionReport.table.period")}`,
       dataIndex: "period",
-      width: "10%",
+      width: "12%",
     },
   ];
   const navigate = useNavigate();
@@ -287,6 +287,7 @@ const ProductionDetail = (props) => {
 
         {isSuccess && (
           <Table
+            tableLayout="fixed"
             style={{ whiteSpace: "pre" }}
             columns={defaultColumns}
             dataSource={dataSource}

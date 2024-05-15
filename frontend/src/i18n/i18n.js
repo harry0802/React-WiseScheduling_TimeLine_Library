@@ -17,7 +17,6 @@ i18n
         translation: vi_VN,
       },
     },
-    lng: "zh-TW",
     interpolation: {
       escapeValue: false,
     },

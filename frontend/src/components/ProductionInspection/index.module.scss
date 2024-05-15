@@ -1,4 +1,9 @@
 @import "../../styles/variables.scss";
+
+:global(.css-18uunte) {
+  padding: 0 20px 20px 20px !important;
+}
+
 .tabContainer {
   flex: 1;
   background-color: transparent;
@@ -27,7 +32,7 @@
 
   .head {
     h1 {
-      font-size: 1rem;
+      font-size: 1.25rem;
       color: #fff;
       font-style: normal;
       font-weight: 400;
@@ -42,8 +47,7 @@
   .inner {
     font-size: 1rem;
     display: flex;
-    gap: 30px;
-    margin-top: 30px;
+    margin-top: 15px;
     padding-left: 15px;
     color: #ffffff;
 
@@ -56,7 +60,7 @@
     display: flex;
     flex-direction: column;
     gap: 30px;
-    width: 50%;
+    width: 30%;
 
     span {
       margin-right: 15px;
@@ -73,9 +77,9 @@
   }
 }
 
-// .records {
-//   max-width: 60%;
-// }
+.records {
+  max-width: 70%;
+}
 
 .quantityInput {
   display: flex;
@@ -83,7 +87,7 @@
   height: 48px;
 
   label {
-    width: 50px;
+    width: 65px;
 
     @media (min-width: $screen-lg) {
       width: 80px;

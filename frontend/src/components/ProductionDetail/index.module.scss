@@ -114,6 +114,15 @@
     content: none;
   }
 
+  :global(.ant-table-wrapper) :global(.ant-table-cell),
+  :global(.ant-table-wrapper) :global(.ant-table-thead) > tr > th {
+    padding: 10px 4px;
+    @media (min-width: $screen-lg) {
+      padding: 16px 16px;
+    }
+  }
+
+  // Table header
   :global(.ant-table-wrapper) :global(.ant-table-thead) > tr > th {
     font-size: 0.75rem;
     background: #186c98;

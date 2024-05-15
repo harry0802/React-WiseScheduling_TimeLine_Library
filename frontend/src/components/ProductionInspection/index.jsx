@@ -154,7 +154,7 @@ const TabPanel = (props) => {
                 <span>{t("productionReport.table.productionQuantity")}</span>
                 <TextField
                   className="muiTextField"
-                  // sx={{ width: "200px" }}
+                  sx={{ width: "200px" }}
                   id={`productionQuantity${index}`}
                   label={t("productionReport.inspection.count")}
                   type="number"
@@ -177,7 +177,7 @@ const TabPanel = (props) => {
             <div className={styles.records}>
               <Grid
                 container
-                spacing={{ xs: 2, md: 3 }}
+                spacing={{ xs: 2, md: 2 }}
                 columns={{ xs: 4, sm: 8, md: 12 }}
               >
                 {InspectionList.map((item, index) => (

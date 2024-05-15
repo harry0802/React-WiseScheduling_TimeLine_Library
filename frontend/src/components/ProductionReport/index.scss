@@ -115,6 +115,16 @@
     content: none;
   }
 
+  // Table cell
+  .ant-table-wrapper .ant-table-cell,
+  .ant-table-wrapper .ant-table-thead > tr > th {
+    padding: 10px 4px;
+    @media (min-width: $screen-lg) {
+      padding: 16px 16px;
+    }
+  }
+
+  // Table header
   .ant-table-wrapper .ant-table-thead > tr > th {
     font-size: 0.75rem;
     background: #186c98;
@@ -133,9 +143,20 @@
     div {
       display: flex;
       align-items: center;
+      gap: 5px;
+    }
+  }
 
+  .status-column {
+    .ant-btn.ant-btn-circle.ant-btn {
+      min-width: 15px;
+      width: 15px;
+      height: 24px;
+    }
+    .MuiSvgIcon-root {
+      font-size: 1rem;
       @media (min-width: $screen-lg) {
-        gap: 5px;
+        font-size: 1.5rem;
       }
     }
   }

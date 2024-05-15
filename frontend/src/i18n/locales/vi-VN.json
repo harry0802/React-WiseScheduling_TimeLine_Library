@@ -12,19 +12,25 @@
             "none": "Hiện chưa có tài liệu sản xuất."
         },
         "report": {
-            "title": "H.thống đ.phối d.chuyền sx"
+            "title": "H.thống đ.phối d.chuyền sx",
+            "moldUnmatchedMsg": "Sản phẩm bạn chọn không cùng khuôn, vui lòng xác nhận!!"
+        },
+        "statusInfoIcon": {
+            "description1": "1. Trước 7d dkiến chưa hthành đơn, trthái vàng nhắc nhở",
+            "description2": "2. Quá tg dkiến, trthái đỏ cảnh báo",
+            "description3": "3. Tdừng đơn, màu k đậm, nhưng đơn cũ vẫn cthể hợp vào đơn mới sx"
         },
         "table": {
             "status": "Trạng thái",
             "workOrderSN": "Mã đơn",
-            "moldNo": "模具編號",
+            "moldNo": "Mã khuôn",
             "productName": "Tên sản phẩm",
             "workOrderQuantity": "SL của đơn",
-            "productionQuantity": "SL s.phẩm đạt",
+            "productionQuantity": "Sp đạt",
             "formatedDefectiveQty": "Số không đạt",
             "planOnMachineDate": "Ngày d.kiến lên",
             "actualOnMachineDate": "Ngày lên th.tế",
-            "unfinishedQuantity": "SL chưa làm",
+            "unfinishedQuantity": "Chưa hthành",
             "operators": "NV phụ trách",
             "period": "Khoảng t.gian sx"
         },
@@ -34,7 +40,7 @@
             "notYet": "Chưa lên",
             "onGoing": "Đang SX",
             "done": "Đã đủ",
-            "pause": "暫停生產",
+            "pause": "tdừng SX",
             "unlimited": "Vô thời hạn",
             "expiring": "Đã đến hạn",
             "expired": "Đã hết hạn",
@@ -47,7 +53,7 @@
             "completeitle": "Nhập tk q.lý dây chuyền sx để h.thành g.đoạn công việc này.",
             "pauseTitle": "Nhập tk q.lý d.chuyền sx để tạm dừng g.đoạn sx.",
             "username": "Tk",
-            "usernameError": "請輸入帳號",
+            "usernameError": "Vui lòng nhập tài khoản quản lý dây chuyền sản xuất",
             "password": "輸入密碼",
             "completeMsg": "G.đoạn c.việc này đã h.thành",
             "pauseMsg": "C.việc ở g.đoạn này   đã bị tạm   dừng"
@@ -55,33 +61,33 @@
         "detail": {
             "title": "H.thống đ.phối d.chuyền sx",
             "completePopMsg": "Còn SL chưa h.thành. Sau khi đóng đơn, đơn hàng k thể tiếp tục và cần được mở lại. Chắc chắn muốn h.thành g.đoạn sx này ?",
-            "forbidden": "您無法回到上一頁，請\"暫停\"或\"完成\"此生產階段"
+            "forbidden": "K qlại được, tdừng hoặc hthành gđoạn sx"
         },
         "operatorSign": {
-            "operator1Title": "Nhập tk n.viên d.chuyền sx 1 để b.đầu vận hành (bắt buộc)",
-            "operator1Username": "Tk*",
-            "operator1UsernameError": "請輸入人員1帳號*",
+            "operator1Title": "Nhập tk n.viên d.chuyền sx 1 (bắt buộc)",
+            "operator1Username": "Nvsx(1)*",
+            "operator1UsernameError": "Tk nvsx 1",
             "operator1UsernameUnmatched": "人員1帳號與開始的人員1不符合",
-            "operator2Title": "請輸入產線工作人員2帳號",
-            "operator2Username": "Tk*",
+            "operator2Title": "Nhập tk n.viên d.chuyền sx 2",
+            "operator2Username": "Nvsx(2)",
             "operator2UsernameUnmatched": "人員2帳號與開始的人員2不符合"
         },
         "inspection": {
-            "colorDifference": "S.màu",
+            "colorDifference": "SMàu",
             "bubble": "Bọt khí",
-            "oilStain": "N.dầu",
-            "deformation": "B.dạng",
-            "impurity": "T.chất",
-            "burr": "Mã ben",
+            "oilStain": "NDầu",
+            "deformation": "BDạng",
+            "impurity": "TChất",
+            "burr": "MB en",
             "shrinkage": "Lõm",
-            "pressure": "Da khê",
-            "blackSpot": "Đ.đen",
-            "shortage": "Thiếu NL",
-            "overflow": "Thừa NL",
+            "pressure": "DKhê",
+            "blackSpot": "Đđen",
+            "shortage": "ThiếuN",
+            "overflow": "ThừaN",
             "scratch": "Xước",
-            "hole": "T.lỗ",
+            "hole": "TLỗ",
             "flowMark": "Vạch",
-            "encapsulation": "Bao phung",
+            "encapsulation": "Baofung",
             "other": "khác",
             "operator1": "nhân sự số 1",
             "operator2": "nhân sự số 2",

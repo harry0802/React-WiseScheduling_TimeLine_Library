@@ -70,7 +70,7 @@ def get_operating_mode_from_injector(machineSN, startTime):
         operating_mode = operating_mode[0] if operating_mode else ""
         return operating_mode
     except Exception as error:
-        raise error
+        return None
 
 
 def find_childLots_by_workOrderSN(workOrderSN):
