@@ -184,11 +184,6 @@ const ProductionSchedule = (props) => {
           <span>{text}</span>
         </Tooltip>
       ),
-      // rule:
-      // {
-      //   required: true,
-      //   message: `is required.`,
-      // }
     },
     {
       title: "產品名稱",
@@ -249,7 +244,15 @@ const ProductionSchedule = (props) => {
       editable: true,
       ellipsis: true,
       type: "date",
-
+      sorter: (a, b) => {
+        if (a.workOrderDate < b.workOrderDate) {
+          return -1;
+        }
+        if (a.workOrderDate > b.workOrderDate) {
+          return 1;
+        }
+        return 0;
+      },
       // rule:
       // {
       //   required: true,
@@ -302,6 +305,20 @@ const ProductionSchedule = (props) => {
           ,
         </Select>
       ),
+      filters: PRODUCTION_AREA.map((item, index) => {
+        return { text: item.value, value: item.value };
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => record.productionArea.startsWith(value),
+      sorter: (a, b) => {
+        if (a.productionArea < b.productionArea) {
+          return -1;
+        }
+        if (a.productionArea > b.productionArea) {
+          return 1;
+        }
+        return 0;
+      },
     },
     {
       title: "機台編號",
@@ -330,6 +347,20 @@ const ProductionSchedule = (props) => {
           })}
         </Select>
       ),
+      filters: MACHINE_LIST.map((item, index) => {
+        return { text: item.machineSN, value: item.machineSN };
+      }),
+      filterSearch: true,
+      onFilter: (value, record) => record.machineSN.startsWith(value),
+      sorter: (a, b) => {
+        if (a.machineSN < b.machineSN) {
+          return -1;
+        }
+        if (a.machineSN > b.machineSN) {
+          return 1;
+        }
+        return 0;
+      },
     },
     {
       title: "預計上機日",
@@ -338,6 +369,15 @@ const ProductionSchedule = (props) => {
       ellipsis: true,
       width: 60,
       type: "date",
+      sorter: (a, b) => {
+        if (a.planOnMachineDate < b.planOnMachineDate) {
+          return -1;
+        }
+        if (a.planOnMachineDate > b.planOnMachineDate) {
+          return 1;
+        }
+        return 0;
+      },
     },
     {
       title: "預計完成日",
@@ -345,6 +385,15 @@ const ProductionSchedule = (props) => {
       ellipsis: true,
       width: 60,
       type: "date",
+      sorter: (a, b) => {
+        if (a.planFinishDate < b.planFinishDate) {
+          return -1;
+        }
+        if (a.planFinishDate > b.planFinishDate) {
+          return 1;
+        }
+        return 0;
+      },
     },
     {
       title: "上下模工作日",
@@ -378,6 +427,15 @@ const ProductionSchedule = (props) => {
       ellipsis: true,
       width: 60,
       type: "date",
+      sorter: (a, b) => {
+        if (a.actualOnMachineDate < b.actualOnMachineDate) {
+          return -1;
+        }
+        if (a.actualOnMachineDate > b.actualOnMachineDate) {
+          return 1;
+        }
+        return 0;
+      },
     },
     {
       title: "實際完成日",
@@ -385,6 +443,15 @@ const ProductionSchedule = (props) => {
       ellipsis: true,
       width: 60,
       type: "date",
+      sorter: (a, b) => {
+        if (a.actualFinishDate < b.actualFinishDate) {
+          return -1;
+        }
+        if (a.actualFinishDate > b.actualFinishDate) {
+          return 1;
+        }
+        return 0;
+      },
     },
     {
       title: "週別",
@@ -539,6 +606,8 @@ const ProductionSchedule = (props) => {
     }
     setPagination(newPagination);
   };
+
+  const onChange = (filters, sorter) => {};
 
   // 新增 exportData 狀態
   const [needExportData, setNeedExportData] = useState([]);
@@ -1145,7 +1214,7 @@ const ProductionSchedule = (props) => {
               current: pagination.page /*當前分頁位址*/,
               defaultPageSize: pagination.pageSize,
               pageSize: pagination.pageSize,
-              showSizeChanger: false,
+              showSizeChanger: true,
               showLessItems: true,
               showQuickJumper: false,
               position: ["bottomCenter"],
@@ -1158,6 +1227,7 @@ const ProductionSchedule = (props) => {
               ...rowSelection,
               columnWidth: "32px",
             }}
+            onChange={onChange}
           />
         )}
         {dataSource.length > 0 && (
@@ -1175,7 +1245,9 @@ const ProductionSchedule = (props) => {
           onClick={() => {
             navigate("/ImportProductionSchedulePage");
           }}
-          className="importBtn"
+          className={
+            dataSource.length === 0 ? "importBtn-initial" : "importBtn"
+          }
         >
           匯入
         </Button>

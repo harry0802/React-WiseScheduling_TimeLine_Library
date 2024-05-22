@@ -55,6 +55,15 @@
     width: 10px;
   }
 
+  // sort icon color
+  .ant-table-wrapper .ant-table-column-sorter {
+    color: #ffffff;
+  }
+
+  .ant-table-wrapper .ant-table-filter-trigger {
+    color: #ffffff;
+  }
+
   .ant-table-wrapper .ant-table-thead > tr > th {
     border-inline-end: 1px solid #8f8f8f !important;
   }
@@ -417,6 +426,12 @@
 
   .exportBtn {
     @extend %btn-shared;
+  }
+
+  .importBtn-initial {
+    @extend %btn-shared;
+    left: 6%;
+    bottom: -38px;
   }
 
   .importBtn {
