@@ -233,12 +233,12 @@ def complete_productionReport(mode, db_obj, payload):
         db_obj.machineDefectiveRate = (db_obj.machineProductionQuantity - db_obj.productionQuantity) / db_obj.machineProductionQuantity
         current_app.logger.debug(f"machineDefectiveRate: {db_obj.machineDefectiveRate}")
 
-    # 稼動率(formula) = machine working time in 24hr in IoT record / 24
+    # 稼動率(formula) = machine working time in 24hr in IoT record / 1440分鐘(24小時)
     if (db_obj.machineSN and db_obj.endTime
         and (db_obj.utilizationRate is None)):
         sum_of_run = get_sum_of_run_from_injector_oee_15m(db_obj.machineSN, db_obj.endTime)
         if sum_of_run is not None:
-            db_obj.utilizationRate = sum_of_run / 24
+            db_obj.utilizationRate = round(sum_of_run / 1440, 2)
         current_app.logger.debug(f"utilizationRate: {db_obj.utilizationRate}")
 
     # 產能效率(formula) = (生產數量 + 不良數) / 預計生產數量        

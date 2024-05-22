@@ -161,14 +161,15 @@ calculation by formula:
 8. 機台生產數量(formula) = 機台生產模數 \* 穴數
 9. 實際不良率(產能漏失率)(formula) = (機台生產數量 - 生產數量) / 機台生產數量
 10. 稼動率(formula) = machine working time in 24hr in IoT record / 24 <br>
-    SELECT sum(run) FROM opcua.injector_oee_15m WHERE machine_name = '機台號碼' AND timestamp BETWEEN '母批/子批結束時間 - 24 小時' AND '母批/子批結束時間'
+    SELECT sum(run) FROM opcua.injector_oee_15m WHERE machine_name = '機台號碼' AND timestamp BETWEEN '母批/子批結束時間 - 24 小時' AND '母批/子批結束時間'<br>
+    請參考模具雲的稼動率計算：https://gitlab.com/Two.Shoulder.IT/laravel_orchid/-/blob/tiip/routes/web1.php?ref_type=heads#L75 <br>
 11. 產能效率(formula) = (生產數量 + 不良數) / 預計生產數量
-12. OEE(formula) = 稼動率 _ 產能效率 _ 生產良率
+12. OEE(formula) = 稼動率 \* 產能效率 \* 生產良率
 
 from IoT record:
 
 1.  機台生產模數 = from IoT record get (2nd module - 1st module) by the 結束時間 and 開始時間 <br>
-    SELECT current_modulus FROM opcua.injector WHERE last_updated <= '母批/子批結束時間' AND name = '機台號碼' ORDER BY last_updated DESC LIMIT 1;
+    SELECT current_modulus FROM opcua.injector WHERE last_updated <= '母批/子批結束時間' AND name = '機台號碼' ORDER BY last_updated DESC LIMIT 1; <br>
     SELECT current_modulus FROM opcua.injector WHERE last_updated >= '母批/子批開始時間' AND name = '機台號碼' ORDER BY last_updated ASC LIMIT 1;
 2.  機台模式 = from IoT record get the mode by the 開始時間 <br>
     SELECT operating_mode FROM opcua.injector WHERE last_updated >= '母批/子批開始時間 - 10 秒' AND name = '機台號碼' ORDER BY last_updated ASC LIMIT 1;
