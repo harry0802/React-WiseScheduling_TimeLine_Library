@@ -6,6 +6,7 @@ import sys
 
 import requests
 from app.models.molds import molds
+from app.models.products import products
 from flask import current_app
 
 from app import db
@@ -78,9 +79,9 @@ def shift_by_holiday(start_date, end_date=datetime(1,1,1), workdays=1):
     current_app.logger.debug(f"final_end: {final_end_date}, deltaDays: {deltaDays}, holiday_count: {holiday_list_2nd_count}")
     return final_end_date
 
-def update_moldNo_by_productName(productName):
+def update_moldNo_by_productName(productSN):
     try:
-        query = molds.query.filter(molds.product_name == productName)
+        query = products.query.filter(products.prod_no == productSN)
         mold_db = query.first()
         if mold_db is None:
             return ""
@@ -90,7 +91,7 @@ def update_moldNo_by_productName(productName):
     
 
 def complete_productionSchedule(db_obj, payload):
-    isProductNameChanged = False
+    isProductSNChanged = False
     db_obj.productionArea = payload["productionArea"] \
         if payload.get("productionArea") is not None else db_obj.productionArea
     db_obj.machineSN = payload["machineSN"] \
@@ -101,10 +102,10 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("workOrderSN") is not None else db_obj.workOrderSN
     db_obj.moldNo = payload["moldNo"] \
         if payload.get("moldNo") is not None else db_obj.moldNo
+    if payload.get("productSN") is not None and db_obj.productSN != payload["productSN"]:
+        isProductSNChanged = True
     db_obj.productSN = payload["productSN"] \
         if payload.get("productSN") is not None else db_obj.productSN
-    if payload.get("productName") is not None and db_obj.productName != payload["productName"]:
-        isProductNameChanged = True
     db_obj.productName = payload["productName"] \
         if payload.get("productName") is not None else db_obj.productName
     db_obj.workOrderQuantity = int(payload["workOrderQuantity"]) \
@@ -174,9 +175,9 @@ def complete_productionSchedule(db_obj, payload):
         #預計完成日(shift by holiday)
         db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
     
-    #從molds資料表拿到moldNo
-    if db_obj.moldNo is None or db_obj.moldNo == "" or isProductNameChanged:
-        db_obj.moldNo = update_moldNo_by_productName(db_obj.productName)
+    #從模具雲的products資料表拿到moldNo
+    if db_obj.moldNo is None or db_obj.moldNo == "" or isProductSNChanged:
+        db_obj.moldNo = update_moldNo_by_productName(db_obj.productSN)
     #周數
     if payload.get("week") is not None and False: #waiting for frontend has its own week calculation
         db_obj.week = payload["week"]
