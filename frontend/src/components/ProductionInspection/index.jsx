@@ -160,7 +160,7 @@ const TabPanel = (props) => {
                   type="number"
                   name={`productionQuantity${index}`}
                   autoComplete={`productionQuantity${index}`}
-                  value={productionQuantity}
+                  defaultValue={productionQuantity}
                   variant="outlined"
                   margin="normal"
                   inputProps={{ style: { fontSize: "16px", color: "#FFF" } }} // font size of input text
@@ -264,7 +264,6 @@ const ProductionInspection = () => {
         id: lastChild.id || lastChild.productionReport_id,
       };
     });
-    console.log("childLots", childLots);
     await updateChildLots(childLots)
       .unwrap()
       .then((payload) => {

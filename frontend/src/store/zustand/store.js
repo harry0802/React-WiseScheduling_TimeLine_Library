@@ -79,12 +79,14 @@ export const useLotStore = create(
       },
       updateLotsByProductionQuantity: (lotName, newValue) => {
         const newLots = get().lots.map((lot) => {
-          if (lot.lotName === lotName?.split("-")[0]) {
+          let split_lotName = lotName.split("-");
+          split_lotName.pop();
+          if (lot.lotName === split_lotName.join("-")) {
             const updatedChildren = lot.children.map((child) => {
               if (child.lotName === lotName) {
                 return {
                   ...child,
-                  productionQuantity: Number(newValue),
+                  productionQuantity: newValue != "" ? Number(newValue) : "",
                 };
               }
               return child;
