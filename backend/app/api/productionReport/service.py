@@ -5,7 +5,6 @@ from flask import current_app
 from app import db
 from app.utils import message, err_resp, internal_err_resp
 from app.models.productionReport import ProductionReport
-from app.models.molds import molds
 from app.models.injector import Injector
 from app.models.injectorOee15m import InjectorOee15m
 from .schemas import productionReportSchema, productionScheduleReportSchema
@@ -329,17 +328,6 @@ def complete_productionReport(mode, db_obj, payload):
 
 
 class productionReportService:
-    @staticmethod
-    # get data from molds
-    def get_mold_data():
-        try:
-            query = molds.query
-            data = query.first()
-            return data.mold_no
-        except Exception as error:
-            raise error
-            
-
     @staticmethod
     def get_workOrders(start_planOnMachineDate, end_planOnMachineDate, machineSN=None, status="all", workOrderSN=None, 
                               productName=None, expiry="無期限", motherOnly=False, productionSchedule_ids=None):
