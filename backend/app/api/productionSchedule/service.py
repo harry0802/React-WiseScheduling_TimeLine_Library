@@ -5,7 +5,6 @@ from operator import and_
 import sys
 
 import requests
-from app.models.molds import molds
 from app.models.products import products
 from flask import current_app
 
