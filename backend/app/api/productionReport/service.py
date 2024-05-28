@@ -321,7 +321,8 @@ def complete_productionReport(mode, db_obj, payload):
         if (db_obj.productionQuantity):
             allChildProductionQuantity = 0
             if len(childLots) > 0:
-                allChildProductionQuantity = sum([child.productionQuantity for child in childLots if child.lotName != db_obj.lotName])
+                allChildProductionQuantity = sum([child.productionQuantity if child.productionQuantity else 0 
+                                                  for child in childLots if child.lotName != db_obj.lotName])
             temp_unfinished = db_obj.workOrderQuantity - db_obj.productionQuantity - allChildProductionQuantity
             db_obj.unfinishedQuantity = 0 if temp_unfinished < 0 else temp_unfinished
     return db_obj
