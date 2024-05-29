@@ -370,7 +370,7 @@ class productionReportService:
                 # 過了預計完成日，該單尚未完成，就是已經過期
                 query = query.filter(ProductionSchedule.status != "Done",
                                      ProductionSchedule.planFinishDate < datetime.now())
-            query = query.filter(or_(ProductionReport.serialNumber == 0, ProductionReport.serialNumber == None)) if bool(motherOnly) else query
+            query = query.filter(or_(ProductionReport.serialNumber == 0, ProductionReport.serialNumber == None)) if motherOnly else query
             query = query.filter(ProductionSchedule.productionSchedule_id.in_(productionSchedule_ids)) if productionSchedule_ids else query
             
             query = query.order_by(ProductionSchedule.id.desc(), ProductionReport.id.asc())

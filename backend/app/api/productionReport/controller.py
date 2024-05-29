@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import sys
 from flask import request
 from flask_restx import Resource
+from flask_restx import inputs
 
 from app.utils import controller_entrance_log
 
@@ -60,7 +61,7 @@ class productionReportController(Resource):
         expiry = request.args.get('expiry', default="無限期", type=str)
         workOrderSN = request.args.get('workOrderSN', default=None, type=str)
         productName = request.args.get('productName', default=None, type=str)
-        motherOnly = request.args.get('motherOnly', default=False, type=bool)
+        motherOnly = request.args.get('motherOnly', default=False, type=inputs.boolean)
         productionSchedule_ids = request.args.get('productionSchedule_ids', default=None, type=str)
 
         return productionReportService.get_workOrders(
