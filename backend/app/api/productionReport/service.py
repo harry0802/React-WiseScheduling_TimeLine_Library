@@ -355,7 +355,7 @@ class productionReportService:
                                         ProductionReport.leader, ProductionReport.operator1, ProductionReport.operator2, ProductionReport.startTime,
                                         ProductionReport.endTime)
             query = query.join(ProductionReport, ProductionSchedule.workOrderSN == ProductionReport.workOrderSN, isouter = True) # left outer join
-            
+            query = query.filter(ProductionSchedule.status != "取消生產")
             query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
                     if start_planOnMachineDate and end_planOnMachineDate else query
             query = query.filter(ProductionSchedule.machineSN == machineSN) if machineSN else query
