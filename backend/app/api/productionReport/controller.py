@@ -92,7 +92,7 @@ class productionReportController(Resource):
         return productionReportService.create_productionReports("motherLot", payload)
 
     @api.doc(
-        "Update single or multiple productionReports",
+        "Update single or multiple motherLots",
         responses={
             200: ("productionReports data successfully updated", control_resp),
             404: "productionReports not found",
@@ -128,7 +128,7 @@ class productionReportController(Resource):
         return resp, code
 
     @api.doc(
-        "Update single or multiple productionReports",
+        "Update single or multiple childLots",
         responses={
             200: ("productionReports data successfully updated", control_resp),
             404: "productionReports not found",

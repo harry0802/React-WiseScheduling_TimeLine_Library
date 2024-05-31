@@ -41,7 +41,6 @@ relationship = db.relationship
 class ProductionSchedule(Model):
     __tablename__ = "productionSchedule"
     id = Column(db.Integer , primary_key = True)
-    productionSchedule_id = synonym("id") # 用於Schema出現相同名稱時的區別
     productionArea = Column(db.String(255))
     machineSN = Column(db.String(255))
     serialNumber = synonym("id")
@@ -69,6 +68,8 @@ class ProductionSchedule(Model):
     conversionRate = Column(db.Float)
     #status: on-going, finish, delay, delay-finish
     status = Column(db.String(255))
+    productionReport = db.relationship('ProductionReport', backref='productionSchedule', lazy=True)
+    
 
 
 

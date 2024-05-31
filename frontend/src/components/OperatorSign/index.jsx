@@ -56,6 +56,7 @@ const OperatorSign = (props) => {
         workOrderQuantity: lot.workOrderQuantity,
         operator1: data.get("operator1"),
         operator2: data.get("operator2"),
+        pschedule_id: lot.id, // set productionSchedule.id to productionReport's foreign key
       };
       childLots.push(childLot);
       if (lot.children === null) {
@@ -90,9 +91,7 @@ const OperatorSign = (props) => {
     // 更新製令單狀態為On-going
     const updatedProductionSchedules = new Set();
     lotStore.forEach((workOrder) => {
-      updatedProductionSchedules.add(
-        workOrder.id || workOrder.productionSchedule_id
-      );
+      updatedProductionSchedules.add(workOrder.id);
     });
     const updatedIds = JSON.stringify(Array.from(updatedProductionSchedules));
     console.log("updatedIds", updatedIds);
@@ -162,7 +161,7 @@ const OperatorSign = (props) => {
         const lastChildLot = lot.children[lot.children.length - 1];
         const childLot = {
           id: lastChildLot.id || lastChildLot.productionReport_id,
-          workOrderSN: lastChildLot.workOrderSN,
+          pschedule_id: lastChildLot.pschedule_id,
           endTime: dayjs.tz(new Date(), TZ).format(),
         };
         lot.children[lot.children.length - 1] = {

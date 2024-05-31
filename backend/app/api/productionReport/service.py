@@ -24,7 +24,9 @@ def get_sum_of_run_from_injector_oee_15m(machineSN, endTime):
         sum_of_run = query.with_entities(db.func.sum(InjectorOee15m.run)).scalar()
         return sum_of_run
     except Exception as error:
-        raise error
+        # log the error message
+        current_app.logger.error(f"get_sum_of_run_from_injector_oee_15m error: {error}")
+        return None
     
 
 def get_current_modulus_from_injector(machineSN, startTime, endTime):
@@ -53,7 +55,9 @@ def get_current_modulus_from_injector(machineSN, startTime, endTime):
         start_current_modulus = int(start_current_modulus[0]) if start_current_modulus else 0
         return start_current_modulus, end_current_modulus
     except Exception as error:
-        raise error
+        # log the error message
+        current_app.logger.error(f"get_current_modulus_from_injector error: {error}")
+        return None, None
 
     
 def get_operating_mode_from_injector(machineSN, startTime):
@@ -69,15 +73,17 @@ def get_operating_mode_from_injector(machineSN, startTime):
         operating_mode = operating_mode[0] if operating_mode else ""
         return operating_mode
     except Exception as error:
+        # log the error message
+        current_app.logger.error(f"get_operating_mode_from_injector error: {error}")
         return None
 
 
-def find_childLots_by_workOrderSN(workOrderSN):
-    # get the child lots by the workOrderSN and serialNumber != 0
+def find_childLots_by_pscheduleID(pschedule_id):
+    # get the child lots by the pschedule_id and serialNumber != 0
     try:
         query = ProductionReport.query
         query = query.filter(
-            ProductionReport.workOrderSN == workOrderSN,
+            ProductionReport.pschedule_id == pschedule_id,
             ProductionReport.serialNumber != 0
         )
         childLots = query.all()
@@ -87,6 +93,8 @@ def find_childLots_by_workOrderSN(workOrderSN):
 
 
 def complete_productionReport(mode, db_obj, payload):
+    db_obj.pschedule_id = int(payload["pschedule_id"]) \
+        if payload.get("pschedule_id") is not None else db_obj.pschedule_id
     db_obj.startTime = datetime.fromisoformat(payload["startTime"]) \
         if payload.get("startTime") is not None else db_obj.startTime
     db_obj.machineSN = payload["machineSN"] \
@@ -274,7 +282,8 @@ def complete_productionReport(mode, db_obj, payload):
         # 預計生產數量 = sum(預計生產數量 of child lots)
         # 生產數差異值 = sum(生產數差異值 of child lots)
         # each item of 異常 = sum(the item of child lots)
-        childLots = find_childLots_by_workOrderSN(db_obj.workOrderSN)
+        
+        childLots = find_childLots_by_pscheduleID(db_obj.pschedule_id)
         if len(childLots) > 0:
             db_obj.productionQuantity = sum([child.productionQuantity for child in childLots if child.productionQuantity])
             db_obj.defectiveQuantity = sum([child.defectiveQuantity for child in childLots if child.defectiveQuantity])
@@ -306,11 +315,11 @@ def complete_productionReport(mode, db_obj, payload):
         
     elif (mode == "childLot"):
         # 子批
-        # the serialNumber is auto increment and grouped by the workOrderSN
+        # the serialNumber is auto increment and grouped by the pschedule_id
         # 製令單號 is the same as the mother lot
         # 製令數量 is the same as the mother lot
         # LotName = 製令單號 + "-" + the serialNumber with 3 zero padding
-        childLots = find_childLots_by_workOrderSN(db_obj.workOrderSN)
+        childLots = find_childLots_by_pscheduleID(db_obj.pschedule_id)
         if db_obj.lotName is None or db_obj.lotName == "":
             if len(childLots) == 0:
                 db_obj.serialNumber = 1
@@ -341,7 +350,7 @@ class productionReportService:
             productionSchedule_ids = [int(id) for id in productionSchedule_ids.replace("[", "").replace("]", "").split(",")] if productionSchedule_ids else None
 
             query = ProductionSchedule.query
-            query = query.with_entities(ProductionSchedule.productionSchedule_id, ProductionSchedule.machineSN, ProductionSchedule.moldNo,
+            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.machineSN, ProductionSchedule.moldNo,
                                         ProductionSchedule.workOrderSN, ProductionSchedule.productSN, ProductionSchedule.productName,
                                         ProductionSchedule.workOrderQuantity, ProductionSchedule.planOnMachineDate, ProductionSchedule.planFinishDate,
                                         ProductionSchedule.actualOnMachineDate, ProductionSchedule.status, 
@@ -354,7 +363,7 @@ class productionReportService:
                                         ProductionReport.blackSpot, ProductionReport.scratch, ProductionReport.encapsulation, ProductionReport.other,
                                         ProductionReport.leader, ProductionReport.operator1, ProductionReport.operator2, ProductionReport.startTime,
                                         ProductionReport.endTime)
-            query = query.join(ProductionReport, ProductionSchedule.workOrderSN == ProductionReport.workOrderSN, isouter = True) # left outer join
+            query = query.join(ProductionReport, ProductionSchedule.id == ProductionReport.pschedule_id, isouter = True) # left outer join
             query = query.filter(ProductionSchedule.status != "取消生產")
             query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
                     if start_planOnMachineDate and end_planOnMachineDate else query
@@ -371,7 +380,7 @@ class productionReportService:
                 query = query.filter(ProductionSchedule.status != "Done",
                                      ProductionSchedule.planFinishDate < datetime.now())
             query = query.filter(or_(ProductionReport.serialNumber == 0, ProductionReport.serialNumber == None)) if motherOnly else query
-            query = query.filter(ProductionSchedule.productionSchedule_id.in_(productionSchedule_ids)) if productionSchedule_ids else query
+            query = query.filter(ProductionSchedule.id.in_(productionSchedule_ids)) if productionSchedule_ids else query
             
             query = query.order_by(ProductionSchedule.id.desc(), ProductionReport.id.asc())
             productionReport_db = query.all()
@@ -510,7 +519,7 @@ class productionReportService:
             for data in payload:
                 productionReport_db = ProductionReport.query.filter(
                     ProductionReport.serialNumber == 0,
-                    ProductionReport.workOrderSN == data["workOrderSN"]
+                    ProductionReport.pschedule_id == data["pschedule_id"]
                 ).first()
                 if productionReport_db is None:
                     return err_resp("productionReport not found", "productionReport_404", 404)

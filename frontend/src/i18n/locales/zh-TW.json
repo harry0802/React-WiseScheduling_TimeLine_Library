@@ -54,7 +54,7 @@
     },
     "leaderSign": {
       "title": "請輸入該產線管理者帳號",
-      "completeitle": "請輸入該產線管理者帳號，完成工作階段",
+      "completeTitle": "請輸入該產線管理者帳號，完成工作階段",
       "pauseTitle": "請輸入該產線管理者帳號，暫停工作階段",
       "username": "輸入帳號",
       "usernameError": "請輸入帳號",

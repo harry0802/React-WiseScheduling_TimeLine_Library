@@ -4,6 +4,7 @@ from marshmallow import Schema, fields
 
 class productionReportSchema(Schema):
     id = fields.Integer(dump_only=True)
+    pschedule_id = fields.Integer(dump_only=True)
     startTime = fields.DateTime(required=False)
     machineSN = fields.String(required=False)
     workOrderSN = fields.String(required=True)
@@ -52,7 +53,7 @@ class productionReportSchema(Schema):
     OEE = fields.Float(required=False)
     
 class productionScheduleReportSchema(Schema):
-    productionSchedule_id = fields.Integer(dump_only=True)
+    id = fields.Integer(dump_only=True) # productionSchedule.id
     productionReport_id = fields.Integer(dump_only=True)
     serialNumber = fields.Integer(required=False)
     machineSN = fields.String(required=False)

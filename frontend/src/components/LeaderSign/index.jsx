@@ -122,9 +122,21 @@ const LeaderSign = (props) => {
           lotName: workOrder.workOrderSN,
           workOrderQuantity: workOrder.workOrderQuantity,
           leader: leader,
+          pschedule_id: workOrder.id, // productionReport's foreign key
         };
       });
-    await addMotherLots(newProductionReports);
+    await addMotherLots(newProductionReports)
+      .unwrap()
+      .then((payload) => {})
+      .catch((error) => {
+        console.error("rejected", error);
+        notification.error({
+          description: `${t("common.updatingError")}`,
+          placement: "bottomRight",
+          duration: 5,
+        });
+      });
+
     // 更新母批
     const updatedProductionReports = newWorkOrders
       .filter((workOrder) => workOrder.productionReport_id != null)
@@ -144,7 +156,7 @@ const LeaderSign = (props) => {
     await updateMotherLots(updatedProductionReports);
     const productionSchedule_ids = JSON.stringify(
       newWorkOrders.map((workOrder) => {
-        return workOrder.productionSchedule_id;
+        return workOrder.id;
       })
     );
     updateProductionScheduleIdsStore(productionSchedule_ids);
@@ -171,7 +183,7 @@ const LeaderSign = (props) => {
     await updateMotherLots(updatedProductionReports);
     const productionSchedule_ids = JSON.stringify(
       continuedWorkOrders.map((workOrder) => {
-        return workOrder.productionSchedule_id;
+        return workOrder.id;
       })
     );
     updateProductionScheduleIdsStore(productionSchedule_ids);
@@ -210,7 +222,7 @@ const LeaderSign = (props) => {
     // 更新製令單實際完成日以及狀態為Done
     const updatedProductionSchedules = new Set();
     completedWorkOrders.forEach((workOrder) => {
-      updatedProductionSchedules.add(workOrder.productionSchedule_id);
+      updatedProductionSchedules.add(workOrder.id);
     });
     const updatedIds = JSON.stringify(Array.from(updatedProductionSchedules));
     await doneStaus(updatedIds)
@@ -264,7 +276,7 @@ const LeaderSign = (props) => {
     // 更新製令單狀態為暫停
     const updatedProductionSchedules = new Set();
     pausedWorkOrders.forEach((workOrder) => {
-      updatedProductionSchedules.add(workOrder.productionSchedule_id);
+      updatedProductionSchedules.add(workOrder.id);
     });
     const updatedIds = JSON.stringify(Array.from(updatedProductionSchedules));
     await pauseStaus(updatedIds)

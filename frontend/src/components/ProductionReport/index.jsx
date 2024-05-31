@@ -195,8 +195,8 @@ const ProductionReport = (props) => {
       return;
     }
 
-    const selectedRowsData = dataSource.filter((row) =>
-      selectedRowKeys.includes(row.productionSchedule_id)
+    const selectedRowsData = dataSource.filter(
+      (row) => selectedRowKeys.includes(row.id) // productionSchedule.id
     );
     // 選取的製令單必須屬於同一個模具
     let isMoldNoEmpty = false;
@@ -275,7 +275,7 @@ const ProductionReport = (props) => {
 
         {isSuccess && (
           <Table
-            rowKey={(record) => record.productionSchedule_id} // 在這裡指定 'productionSchedule_id' 作為每一行的唯一標識
+            rowKey={(record) => record.id} // 在這裡指定 'id' 作為每一行的唯一標識
             rowClassName={(record, index) => {
               var className = "";
               if (record.status === WORKORDER_STATUS.PAUSE) {

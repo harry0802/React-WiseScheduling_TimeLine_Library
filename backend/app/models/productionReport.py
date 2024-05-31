@@ -62,6 +62,7 @@ class ProductionReport(Model):
     __tablename__ = "productionReport"
     id = Column(db.Integer , primary_key = True)
     productionReport_id = synonym("id") # 用於Schema出現相同名稱時的區別
+    pschedule_id = db.Column(db.Integer, db.ForeignKey('productionSchedule.id'), nullable=False)
     startTime = Column(TimestampDatetime)
     machineSN = Column(db.String(255))
     workOrderSN = Column(db.String(255))
@@ -70,7 +71,7 @@ class ProductionReport(Model):
     workOrderQuantity = Column(db.Integer)
     material = Column(db.String(255))
     moldCavity = Column(db.Integer)
-    leader = Column(db.String(64000))
+    leader = Column(db.Text)
     operator1 = Column(db.String(255))
     operator2 = Column(db.String(255))
     productionQuantity = Column(db.Integer)

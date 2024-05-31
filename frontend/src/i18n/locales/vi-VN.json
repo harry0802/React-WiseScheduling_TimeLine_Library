@@ -50,7 +50,7 @@
         },
         "leaderSign": {
             "title": "Vui lòng nhập tài khoản quản lý dây chuyền sản xuất",
-            "completeitle": "Nhập tk q.lý dây chuyền sx để h.thành g.đoạn công việc này.",
+            "completeTitle": "Nhập tk q.lý dây chuyền sx để h.thành g.đoạn công việc này.",
             "pauseTitle": "Nhập tk q.lý d.chuyền sx để tạm dừng g.đoạn sx.",
             "username": "Tk",
             "usernameError": "Vui lòng nhập tài khoản quản lý dây chuyền sản xuất",
