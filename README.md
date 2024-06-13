@@ -1,8 +1,8 @@
 [toc]
 
-# Base Project
+# NMRF Framework
 
-Base Project 為專案開發的基本架構，包含了前端、後端、Docker 以及 NGINX 設定。開發新專案時，git clone 此專案到地端，重新命名專案名稱，接著以專案需求進行開發。
+NMRF Framework 為專案開發的基本架構，包含了NGINX、MARIADB、REACT(前端)、FLASK(後端)以及 Docker 設定。開發新專案時，git clone 此專案到地端，重新命名專案名稱，接著以專案需求進行開發。
 
 # Docker 設定
 
