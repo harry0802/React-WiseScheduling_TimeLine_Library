@@ -1,0 +1,8 @@
+.vscode/
+__pycache__
+.env
+*.sqlite
+nginx/whitelist.conf
+node_modules
+backend/flask.log*
+backend/log/flask.log*
