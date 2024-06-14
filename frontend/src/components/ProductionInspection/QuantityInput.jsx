@@ -37,6 +37,23 @@ export default function QuantityInput(props) {
     (state) => state.updateLotsByInspection
   );
   const { label, lotName, schema } = props;
+
+  // get the value according to the lotName and schema from the lots
+  const getInputValue = (lotName, schema) => {
+    let split_lotName = lotName.split("-");
+    split_lotName.pop();
+    let lot = lots.filter((lot) => lot.lotName === split_lotName.join("-"));
+    if (lot.length > 0) {
+      const childrenLots = lot[0].children.filter(
+        (child) => child.lotName === lotName
+      );
+      if (childrenLots.length > 0) {
+        return childrenLots[0][schema] === null ? 0 : childrenLots[0][schema];
+      }
+    }
+    return 0;
+  };
+
   return (
     <div className={styles.quantityInput}>
       <label>{label}</label>
@@ -44,7 +61,7 @@ export default function QuantityInput(props) {
         aria-label="Quantity Input"
         min={0}
         max={999}
-        defaultValue={0}
+        defaultValue={getInputValue(lotName, schema)}
         onChange={(event, newValue) => {
           if (newValue < 0 || newValue === "" || newValue === undefined) {
             newValue = 0;
