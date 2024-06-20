@@ -1,5 +1,8 @@
 // get user's timezone
 export const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+// 凌越ERP
+export const REACT_APP_LY_ERP_ON =
+  process.env.REACT_APP_LY_ERP_ON === "true" ? true : false;
 
 export const PRODUCTION_AREA = [
   { value: "A", label: "A" },

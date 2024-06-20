@@ -11,13 +11,20 @@ import {
   message,
   Modal,
   Tooltip,
+  AutoComplete,
 } from "antd";
 import { Resizable } from "react-resizable";
 import FilterBar from "../ProductionReport/FilterBar";
 import { WORKORDER_STATUS } from "../../config/enum";
-import { PRODUCTION_AREA, MACHINE_LIST } from "../../config/config";
+import {
+  PRODUCTION_AREA,
+  MACHINE_LIST,
+  REACT_APP_LY_ERP_ON,
+} from "../../config/config";
 import {
   useGetProductionScheduleQuery,
+  useGetWorkOrderSNsQuery,
+  useGetProductionScheduleThroughLYQuery,
   useCancelStausMutation,
   useAddProductionScheduleMutation,
   useUpdateProductionScheduleMutation,
@@ -84,6 +91,8 @@ const EditableCell = ({
   type,
   record,
   handleSave,
+  queryFromLY,
+  workOrderSNsFromLYState,
   ...restProps
 }) => {
   const [editing, setEditing] = useState(false);
@@ -103,6 +112,19 @@ const EditableCell = ({
     });
   };
 
+  const queryFromLYandSave = async () => {
+    try {
+      const values = await form.validateFields();
+      toggleEdit();
+      queryFromLY({
+        ...record,
+        ...values,
+      });
+    } catch (errInfo) {
+      console.log("queryFromLYandSave failed:", errInfo);
+    }
+  };
+
   const save = async () => {
     try {
       const values = await form.validateFields();
@@ -120,15 +142,37 @@ const EditableCell = ({
 
   if (editable) {
     childNode = editing ? (
-      <Form.Item
-        style={{
-          margin: 0,
-        }}
-        name={dataIndex}
-        rules={[rule]}
-      >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} type={type} />
-      </Form.Item>
+      dataIndex === "workOrderSN" && REACT_APP_LY_ERP_ON === true ? (
+        <Form.Item
+          style={{
+            margin: 0,
+          }}
+          name={dataIndex}
+          rules={[rule]}
+        >
+          <AutoComplete
+            ref={inputRef}
+            defaultValue={record[dataIndex]}
+            onBlur={queryFromLYandSave}
+            style={{ width: 140 }}
+            options={workOrderSNsFromLYState}
+            placeholder="輸入製令單號"
+            filterOption={(inputValue, option) =>
+              option.value.indexOf(inputValue) !== -1
+            }
+          />
+        </Form.Item>
+      ) : (
+        <Form.Item
+          style={{
+            margin: 0,
+          }}
+          name={dataIndex}
+          rules={[rule]}
+        >
+          <Input ref={inputRef} onPressEnter={save} onBlur={save} type={type} />
+        </Form.Item>
+      )
     ) : (
       <div
         className="editable-cell-value-wrap"
@@ -180,7 +224,6 @@ const ProductionSchedule = (props) => {
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
-          {/* <span style={{background:'#fff'}} >{text}</span> */}
           <span>{text}</span>
         </Tooltip>
       ),
@@ -190,7 +233,7 @@ const ProductionSchedule = (props) => {
       dataIndex: "productName",
       width: 125,
       fixed: true,
-      editable: true,
+      editable: REACT_APP_LY_ERP_ON === false,
       ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
@@ -209,7 +252,7 @@ const ProductionSchedule = (props) => {
       title: "產品編號",
       dataIndex: "productSN",
       width: 80,
-      editable: true,
+      editable: REACT_APP_LY_ERP_ON === false,
       ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
@@ -226,7 +269,7 @@ const ProductionSchedule = (props) => {
     {
       title: "製令數量",
       dataIndex: "workOrderQuantity",
-      editable: true,
+      editable: REACT_APP_LY_ERP_ON === false,
       ellipsis: true,
       width: 50,
       type: "number",
@@ -241,7 +284,7 @@ const ProductionSchedule = (props) => {
       title: "訂單交期",
       dataIndex: "workOrderDate",
       width: 60,
-      editable: true,
+      editable: REACT_APP_LY_ERP_ON === false,
       ellipsis: true,
       type: "date",
       sorter: (a, b) => {
@@ -606,6 +649,23 @@ const ProductionSchedule = (props) => {
     }
     setPagination(newPagination);
   };
+
+  // get distinct workOrderSNs from LY(凌越) ERP
+  const {
+    data: workOrderSNData,
+    isLoading: workOrderSNIsLoading,
+    isSuccess: workOrderSNIsSuccess,
+    refetch: workOrderSNRefetch,
+  } = useGetWorkOrderSNsQuery();
+  const [workOrderSNsFromLYState, setWorkOrderSNsFromLYState] = useState([]);
+  useEffect(() => {
+    if (workOrderSNIsSuccess) {
+      const workOrderSNOption = workOrderSNData.map((item) => {
+        return { value: item };
+      });
+      setWorkOrderSNsFromLYState(workOrderSNOption);
+    }
+  }, [workOrderSNIsSuccess, workOrderSNData]);
 
   const onChange = (filters, sorter) => {};
 
@@ -979,15 +1039,63 @@ const ProductionSchedule = (props) => {
   };
 
   // 編輯
+  // get production schedule through LY
+  const [lyQuery, setLyQuery] = useState({ id: null, workOrderSN: null });
+  const { data: lyData, isSuccess: lyIsSuccess } =
+    useGetProductionScheduleThroughLYQuery(
+      {
+        id: lyQuery.id,
+        workOrderSN: lyQuery.workOrderSN,
+      },
+      { skip: REACT_APP_LY_ERP_ON === false }
+    );
+  useEffect(() => {
+    if (lyIsSuccess) {
+      handleSave({ ...lyData });
+    }
+  }, [lyIsSuccess, lyData]);
+
+  const queryFromLY = (row) => {
+    if (
+      workOrderSNsFromLYState.some((item) => item.value === row.workOrderSN)
+    ) {
+      setLyQuery({
+        id: row.id,
+        workOrderSN: row.workOrderSN,
+      });
+    } else {
+      message.warning("凌越ERP查無此製令單號，請重新輸入。");
+    }
+  };
+
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
 
   const handleSave = async (row) => {
     try {
       // Check if there are changes in the data
-      const isDataChanged = Object.keys(row).some(
-        (key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]
-      );
-      // 当从服务器获取到 hourlyCapacity 时，检查 conversionRate 是否有值
+      const matchedData = dataSource.find((item) => item.id === row.id);
+      // Define date keys
+      const dateKeys = [
+        "workOrderDate",
+        "planOnMachineDate",
+        "planFinishDate",
+        "actualOnMachineDate",
+        "actualFinishDate",
+      ];
+      const isDataChanged = Object.keys(row).some((key) => {
+        // Check if the key is a date key and compare dates
+        if (dateKeys.includes(key)) {
+          const dataDate = matchedData[key]
+            ? dayjs(matchedData[key]).tz(TZ).format("YYYY-MM-DD")
+            : null;
+          const rowDate = row[key]
+            ? dayjs(row[key]).tz(TZ).format("YYYY-MM-DD")
+            : null;
+          return dataDate !== rowDate;
+        }
+        // For non-date keys, directly compare the values
+        return matchedData[key] !== row[key];
+      });
 
       if (!isDataChanged) {
         // If there are no changes, you can choose to return or show a message
@@ -1123,6 +1231,8 @@ const ProductionSchedule = (props) => {
       type: col.type,
       title: col.title,
       handleSave,
+      queryFromLY,
+      workOrderSNsFromLYState: workOrderSNsFromLYState,
     });
 
     return {

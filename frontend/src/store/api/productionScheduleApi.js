@@ -73,6 +73,30 @@ const productionScheduleApi = createApi({
         },
         providesTags: [{ type: "productionSchedule" }],
       }),
+      getWorkOrderSNs: build.query({
+        query: () => `/lyService/get_workOrderSNs`,
+
+        transformResponse(baseQueryReturnValue, meta, arg) {
+          return baseQueryReturnValue.data;
+        },
+        providesTags: [{ type: "productionSchedule" }],
+      }),
+      getProductionScheduleThroughLY: build.query({
+        query(arg) {
+          const { id, workOrderSN } = arg;
+          return {
+            url: "productionSchedule/getProductionScheduleThroughLY/",
+            params: {
+              id: id,
+              workOrderSN: workOrderSN,
+            },
+          };
+        },
+        transformResponse(baseQueryReturnValue, meta, arg) {
+          return baseQueryReturnValue.data;
+        },
+        providesTags: [{ type: "productionSchedule" }],
+      }),
       addProductionSchedule: build.mutation({
         query(data) {
           return {
@@ -183,6 +207,8 @@ export const {
   useGetProductionScheduleQuery,
   useGetProductionScheduleByMachinesQuery,
   useGetMachinesQuery,
+  useGetWorkOrderSNsQuery,
+  useGetProductionScheduleThroughLYQuery,
   useAddProductionScheduleMutation,
   useAddProductionSchedulesMutation,
   useDelProductionScheduleMutation,

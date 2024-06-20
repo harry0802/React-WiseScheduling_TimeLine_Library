@@ -102,7 +102,6 @@ class productionScheduleController(Resource):
         return productionScheduleService.create_productionSchedules(payload)
 
 
-
 @api.route("/<int:id>")
 @api.param("id", "id of the productionSchedule")
 class productionScheduleController(Resource):
@@ -148,6 +147,7 @@ class productionScheduleController(Resource):
     def delete(self, id):
         return productionScheduleService.delete_productionSchedule(id)
 
+
 @api.route("/<int_list:ids>")
 @api.param("ids", "ids of the productionSchedule", required=True, default="[1,2,3]", type="int_list")
 class productionScheduleController(Resource):
@@ -170,7 +170,6 @@ class productionScheduleController(Resource):
             payload.pop(prop, None)
         return productionScheduleService.update_productionSchedules(ids, payload)
 
-
     @api.doc(
         "delete the current productionSchedules",
         responses={
@@ -181,6 +180,28 @@ class productionScheduleController(Resource):
     @controller_entrance_log(description="delete the current productionSchedules")
     def delete(self, ids):
         return productionScheduleService.delete_productionSchedules(ids)
+
+
+@api.route("/getProductionScheduleThroughLY/")
+@api.param("id", "id of the productionSchedule", required=True)
+@api.param("workOrderSN", "workOrderSN", required=True)
+class productionScheduleController(Resource):
+    productionSchedule_resp = productionScheduleDto.productionSchedule_resp
+
+    @api.doc(
+        "Get single productionSchedule through LY",
+        responses={
+            200: ("productionSchedule data found", productionSchedule_resp),
+            404: "productionSchedule not found",
+        },
+    )
+    @controller_entrance_log(description="Get single productionSchedule through LY")
+    def get(self):
+        print("in getProductionScheduleThroughLY", file=sys.stderr)
+        id = request.args.get('id', default=None, type=int)
+        workOrderSN = request.args.get('workOrderSN', default=None, type=str)
+        return productionScheduleService.get_productionSchedule_through_LY(id, workOrderSN)
+
 
 @api.route("/machineSN")
 class productionScheduleController(Resource):

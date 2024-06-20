@@ -1,20 +1,14 @@
 from datetime import datetime, date, timedelta
-import json
 import math
-from operator import and_
 import sys
-
-import requests
 from app.models.products import products
+from app.models.ly0000AB import LY0000AB
 from flask import current_app
-
 from app import db
 from app.utils import message, err_resp, internal_err_resp
 from app.models.productionSchedule import ProductionSchedule
 from .schemas import productionScheduleSchema
-from flask import url_for
 from app.api.calendar.service import CalendarService
-from sqlalchemy import extract
 productionSchedule_schema = productionScheduleSchema()
 
 
@@ -301,6 +295,35 @@ class productionScheduleService:
         # exception without handling should raise to the caller
         except Exception as error:
             raise error
+    
+
+    @staticmethod
+    def get_productionSchedule_through_LY(id, workOrderSN):
+        print("workOrderSN:", workOrderSN, file=sys.stderr, flush=True)
+        current_app.logger.info(f"get_productionSchedule_through_LY: {workOrderSN}")
+        try:
+            ly0000AB_db = LY0000AB.query.filter(
+                    LY0000AB.MP_NO == workOrderSN
+                ).first()
+            if ly0000AB_db is None:
+                return err_resp("查無此製令單編號", "0000AB_404", 404)
+            else:
+                productionSchedule_db = ProductionSchedule.query.filter(
+                    ProductionSchedule.id == id
+                ).first()
+                productionSchedule_db.workOrderSN = ly0000AB_db.MP_NO
+                productionSchedule_db.productName = ly0000AB_db.MP_SKNM
+                productionSchedule_db.productSN = ly0000AB_db.MP_SKNO
+                productionSchedule_db.workOrderQuantity = ly0000AB_db.MP_AQTY
+                productionSchedule_db.workOrderDate = ly0000AB_db.MP_EDTE
+
+            productionSchedule_dto = productionSchedule_schema.dump(productionSchedule_db)
+            resp = message(True, "productionSchedule data sent")
+            resp["data"] = productionSchedule_dto
+            return resp, 200
+        except Exception as error:
+            raise error
+
 
 
     @staticmethod
@@ -395,7 +418,8 @@ class productionScheduleService:
         # exception without handling should raise to the caller
         except Exception as error:
             raise error
-
+        
+    
     @staticmethod
     def delete_productionSchedule(id):
         try:
