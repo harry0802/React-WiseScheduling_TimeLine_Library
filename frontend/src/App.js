@@ -11,6 +11,8 @@ import ProductionDetailPage from "./pages/ProductionDetailPage";
 import OperatorSignPage from "./pages/OperatorSignPage";
 import ProductionInspectionPage from "./pages/ProductionInspectionPage";
 import LoginPage from "./pages/LoginPage";
+import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
+
 import "./App.scss";
 import { Layout } from "antd";
 
@@ -54,6 +56,10 @@ const App = () => {
               <Route
                 path={"/ProductionInspectionPage"}
                 element={<ProductionInspectionPage />}
+              />
+              <Route
+                path={"/ProductionRecordPage"}
+                element={<ProductionRecordPage />}
               />
             </Routes>
           </div>

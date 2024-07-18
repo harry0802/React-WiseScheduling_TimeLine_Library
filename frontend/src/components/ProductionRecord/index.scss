@@ -1,0 +1,189 @@
+@import "../../styles/variables.scss";
+* {
+  box-sizing: border-box;
+}
+
+//c = Component
+button.ant-btn-default {
+  display: flex;
+  place-content: center center;
+  width: 35px;
+  height: 35px;
+  background-color: $palette-primary-main;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+
+  cursor: pointer;
+  & > svg {
+    align-self: center;
+  }
+}
+
+//  c-，Component
+
+.record {
+  &__container {
+    width: 100%;
+    padding: 19px;
+  }
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &__title {
+    color: #fff;
+    font-family: Roboto;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+  }
+}
+
+.record-actions {
+  display: flex;
+  place-content: center center;
+  gap: 10px;
+  &__button {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+.record-sections {
+  margin-top: 1.187rem;
+}
+
+.record .record-card {
+  width: 376px;
+  height: 300px;
+  border: 1px solid #8f8f8f;
+  border-radius: 10px;
+  background: linear-gradient(
+    121deg,
+    #8ac0e2 19.1%,
+    rgba(115, 213, 191, 0.2) 100%
+  );
+  cursor: pointer;
+  transition: background 0.4s;
+  & .ant-card-body {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    font-size: 1.12rem;
+    font-weight: 400;
+    line-height: 50px; /* 277.778% */
+    font-family: Roboto;
+  }
+
+  // 共用樣式
+  &__title,
+  &__subtitle,
+  &__buttonText {
+    display: block;
+    color: currentColor;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // 特殊樣式
+  &__title,
+  &__subtitle,
+  &__buttonText {
+    font-size: inherit;
+  }
+
+  &__subtitle {
+    margin-bottom: 20px;
+  }
+
+  &__content {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    color: currentColor;
+    font-size: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__buttonText {
+    margin-top: auto;
+    align-self: flex-start;
+    padding: 0;
+    text-decoration-line: underline;
+
+    &:hover {
+      color: currentColor;
+    }
+  }
+
+  &:hover {
+    border-color: #fff;
+    background: linear-gradient(122deg, #6ec0ad 18.5%, #20479c 97.71%);
+  }
+
+  &:active {
+    background: #8bc1e3;
+  }
+}
+
+.record-home {
+  overflow: hidden;
+  &__content {
+    display: grid;
+    grid-template-columns: repeat(4, 376px);
+    place-content: center center;
+    gap: 20px;
+  }
+}
+
+// paginations and  Antd dis style
+.record-paginations {
+  display: flex;
+  justify-content: center;
+  margin: 5.5rem auto 1rem auto;
+}
+
+.record-paginations .ant-pagination-item {
+  display: flex;
+  align-self: center;
+  justify-self: center;
+  min-width: unset;
+  width: 20px;
+  height: 20px;
+  padding: 0px 6px;
+  align-items: center;
+  justify-content: center;
+  color: $palette-text-primary;
+  border-radius: 50%;
+  border: none;
+
+  line-height: unset;
+  &.ant-pagination-item-active {
+    background: #f39838;
+    color: #fff;
+  }
+
+  & a {
+    text-align: center;
+    color: currentColor;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+  }
+}
+
+//  使用 :is 選取器 抓裡面的 right & left
+.record-sections
+  :is(.anticon-right, .anticon-left, .ant-pagination-item-ellipsis) {
+  color: #8f8f8f !important;
+  stroke-width: 5;
+}

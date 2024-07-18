@@ -101,6 +101,7 @@ services:
       - ./frontend/.:/app/
     ports:
       - "${REACT_APP_PORT}:3000"
+      # - 5500:5500
     networks:
       - frontnet
     depends_on:
