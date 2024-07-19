@@ -17,7 +17,6 @@ const initialState = {
   currentPage: 1,
   itemsPerPage: 10,
   total: 0,
-  // search data
 };
 
 function reducer(state, action) {

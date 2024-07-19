@@ -54,7 +54,7 @@ function ProductionRecordActions() {
     return () => {
       throttledHandleSearch.cancel();
     };
-  }, [userSearch, userSelect, throttledHandleSearch]);
+  }, [userSearch, userSelect]);
 
   return (
     <div className="record-actions">

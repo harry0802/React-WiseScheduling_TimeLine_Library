@@ -9,11 +9,13 @@ function ProductionRecordPaginations({
   pageSize,
   defaultCurrent = 1,
   handlePageChange,
+  current,
 }) {
   return (
     <Pagination
       className="record-paginations"
       itemActiveColorDisabled
+      current={current}
       defaultCurrent={defaultCurrent}
       total={total}
       defaultPageSize={pageSize}
@@ -36,6 +38,8 @@ function ProductionRecordHome() {
   function handleButtonClick() {
     alert("Button clicked!");
   }
+  console.log(currentPage);
+
   return (
     <div className="record-home">
       <div className="record-home__content">
@@ -51,7 +55,7 @@ function ProductionRecordHome() {
       </div>
 
       <ProductionRecordPaginations
-        defaultCurrent={currentPage}
+        current={currentPage}
         pageSize={itemsPerPage}
         total={total}
         handlePageChange={handlePageChange}
