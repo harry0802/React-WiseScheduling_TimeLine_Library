@@ -65,24 +65,24 @@ services:
       db:
         condition: service_healthy
 
-  # frontend:
-  #   image: node:19-alpine
-  #   tty: true
-  #   working_dir: /app
-  #   environment:
-  #     - REACT_APP_API_HOST=${REACT_APP_API_HOST}
-  #     - REACT_APP_API_PORT=${REACT_APP_API_PORT}
-  #   restart: always
-  #   command: sh init.sh
-  #   volumes:
-  #     - ./frontend/.:/app/
-  #   ports:
-  #     - "${REACT_APP_PORT}:3000"
-  #   networks:
-  #     - frontnet
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
+  frontend:
+    image: node:19-alpine
+    tty: true
+    working_dir: /app
+    environment:
+      - REACT_APP_API_HOST=${REACT_APP_API_HOST}
+      - REACT_APP_API_PORT=${REACT_APP_API_PORT}
+    restart: always
+    command: sh init.sh
+    volumes:
+      - ./frontend/.:/app/
+    ports:
+      - "${REACT_APP_PORT}:80"
+    networks:
+      - frontnet
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   db-data:
