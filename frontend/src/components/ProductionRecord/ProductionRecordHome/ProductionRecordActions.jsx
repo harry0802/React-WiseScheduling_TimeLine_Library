@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRecord } from "../ProductionRecordContext/ProductionRecordProvider.jsx";
 import "../index.scss";
 
 import { Select, Input, Space } from "antd";
@@ -8,6 +9,9 @@ import ProductionRecordButton from "../Utility/ProductionRecordButton.jsx";
 import { SearchOutlined } from "@ant-design/icons";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+
+import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
+
 const options = [
   { label: "產品名稱", value: "productName" },
   { label: "產品編號", value: "productNumber" },
@@ -16,8 +20,9 @@ const options = [
 ];
 
 function ProductionRecordActions() {
-  const [userSearch, setUserSearch] = useState(options[0].value);
-  const [userSelect, setUserSelect] = useState("");
+  const [userSearch, setUserSearch] = useState("");
+  const [userSelect, setUserSelect] = useState(options[0].value);
+  const { state, dispatch } = useRecord();
 
   function handleSearchChange(e) {
     setUserSearch((pS) => (pS = e.currentTarget.value));
@@ -26,6 +31,31 @@ function ProductionRecordActions() {
     setUserSelect((pS) => (pS = value));
   }
 
+  function handleSearch() {
+    const { data, itemsPerPage } = state || {};
+    if (!data || !userSelect) return;
+
+    // 三元判斷  空值回到原值
+    const filteredData = userSearch
+      ? data.filter((item) => item[userSelect]?.includes(userSearch))
+      : data;
+
+    dispatch({
+      type: "SET_FILTERED_DATA",
+      payload: { filteredData, itemsPerPage },
+    });
+  }
+
+  const throttledHandleSearch = debounce(handleSearch, 500);
+
+  useEffect(() => {
+    throttledHandleSearch();
+
+    return () => {
+      throttledHandleSearch.cancel();
+    };
+  }, [userSearch, userSelect, throttledHandleSearch]);
+
   return (
     <div className="record-actions">
       {/* 下拉 與 input 同組 */}
@@ -33,8 +63,8 @@ function ProductionRecordActions() {
       <Space>
         <Space.Compact>
           <Select
-            style={{ width: 135 }} // 設置 Select 組件的寬度
-            defaultValue={userSearch}
+            style={{ width: 135 }}
+            defaultValue={userSelect}
             options={options}
             onChange={handleSelectChange}
           />
@@ -48,7 +78,6 @@ function ProductionRecordActions() {
           />
         </Space.Compact>
       </Space>
-
       <div className="record-actions__button">
         <ProductionRecordButton>
           <MenuBookOutlinedIcon />

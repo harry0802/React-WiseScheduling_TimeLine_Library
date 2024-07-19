@@ -22,6 +22,8 @@ function ProductionRecordSections({ children }) {
 }
 
 function ProductionRecord() {
+  console.log(123);
+
   return (
     <ProductionRecordWarpper>
       <ProductionRecordHeader>
@@ -33,7 +35,6 @@ function ProductionRecord() {
 
       <ProductionRecordSections>
         <ProductionRecordHome />
-
         {/* output 放這裡  */}
       </ProductionRecordSections>
     </ProductionRecordWarpper>

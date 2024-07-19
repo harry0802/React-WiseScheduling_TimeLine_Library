@@ -17,6 +17,7 @@ const initialState = {
   currentPage: 1,
   itemsPerPage: 10,
   total: 0,
+  // search data
 };
 
 function reducer(state, action) {
@@ -48,6 +49,35 @@ function reducer(state, action) {
         ...state,
         displayedData: state.data.slice(newStartIndex, newEndIndex),
         itemsPerPage: action.payload,
+      };
+
+    case "SEARCH_DATA":
+      const filteredData = state.data.filter((item) =>
+        item[state.searchKey].includes(state.searchTerm)
+      );
+      return {
+        ...state,
+        displayedData: filteredData.slice(0, state.itemsPerPage),
+        total: filteredData.length,
+        currentPage: 1,
+      };
+
+    case "SET_FILTERED_DATA":
+      const { filteredData: filtered, itemsPerPage } = action.payload;
+      if (
+        !action.payload ||
+        !Array.isArray(filtered) ||
+        typeof itemsPerPage !== "number"
+      ) {
+        console.error("Invalid payload for SET_FILTERED_DATA action");
+        return state;
+      }
+
+      return {
+        ...state,
+        displayedData: filtered.slice(0, itemsPerPage),
+        total: filtered.length,
+        currentPage: 1,
       };
 
     default:

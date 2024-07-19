@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import Topbar from "./components/Global/Topbar";
-import Sidebar from "./components/Global/Sidebar";
+// import Sidebar from "./components/Global/Sidebar";
 import ProductionSchedulePage from "./pages/ProductionSchedulePage";
 import ImportProductionSchedulePage from "./pages/ImportProductionSchedulePage";
 import MachineSelectPage from "./pages/MachineSelectPage";
