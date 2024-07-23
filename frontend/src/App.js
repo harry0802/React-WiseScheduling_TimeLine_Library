@@ -13,6 +13,13 @@ import ProductionInspectionPage from "./pages/ProductionInspectionPage";
 import LoginPage from "./pages/LoginPage";
 import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
 
+//
+import ProductionRecordHome from "./components/ProductionRecord/ProductionRecordHome/ProductionRecordHome.jsx";
+import ProductionRecordAddInfo from "./components/ProductionRecord/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
+
+// context
+import { RecordAddInfoProvider } from "./components/ProductionRecord/ProductionRecordContext/RecordAddInfoProvider.jsx";
+
 import "./App.scss";
 import { Layout } from "antd";
 
@@ -57,10 +64,23 @@ const App = () => {
                 path={"/ProductionInspectionPage"}
                 element={<ProductionInspectionPage />}
               />
+
+              {/* ProductionRecordPage start */}
               <Route
                 path={"/ProductionRecordPage"}
                 element={<ProductionRecordPage />}
-              />
+              >
+                <Route index element={<ProductionRecordHome />} />
+                <Route
+                  path="addProductInfo"
+                  element={
+                    <RecordAddInfoProvider>
+                      <ProductionRecordAddInfo />
+                    </RecordAddInfoProvider>
+                  }
+                />
+              </Route>
+              {/* ProductionRecordPage end */}
             </Routes>
           </div>
         </Layout>

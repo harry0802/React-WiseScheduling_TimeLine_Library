@@ -1,15 +1,10 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import fakedata from "../data.json";
 
-/*
- * 1 分頁
- * 2 過濾搜尋
- * 3 進入到 detail  的 id
- * 4 添加功能
- */
-
 const RecordContext = createContext();
 const initialState = {
+  // page status
+  pageStatus: "",
   // fake Data
   data: null,
   displayedData: null,
@@ -21,6 +16,12 @@ const initialState = {
 
 function reducer(state, action) {
   switch (action.type) {
+    case "SET_PAGE_STATUS":
+      return {
+        ...state,
+        pageStatus: "",
+      };
+
     case "SET_DATA":
       return {
         ...state,

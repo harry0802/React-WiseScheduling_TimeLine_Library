@@ -38,8 +38,6 @@ function ProductionRecordHome() {
   function handleButtonClick() {
     alert("Button clicked!");
   }
-  console.log(currentPage);
-
   return (
     <div className="record-home">
       <div className="record-home__content">

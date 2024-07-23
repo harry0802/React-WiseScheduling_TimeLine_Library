@@ -20,8 +20,7 @@ button.ant-btn-default {
   }
 }
 
-//  c-，Component
-
+// Home page
 .record {
   &__container {
     width: 100%;
@@ -186,4 +185,146 @@ button.ant-btn-default {
   :is(.anticon-right, .anticon-left, .ant-pagination-item-ellipsis) {
   color: #8f8f8f !important;
   stroke-width: 5;
+}
+
+// Add info page
+
+//  product-content
+.product-content {
+  &__breadcrumb {
+    font-family: Roboto;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    color: #fff;
+    line-height: 20px;
+  }
+  &__sections > div {
+    margin-top: 20px;
+  }
+}
+
+// product-info
+.product-info {
+  display: flex;
+  flex-direction: column;
+  align-items: self-start;
+  padding: 30px 23px 82px 23px;
+
+  gap: 38px;
+  color: $palette-text-primary;
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 125% */
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid #fff;
+  background: #f1f1f1;
+
+  &__header {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__text {
+    height: 100%;
+    font-size: 14px;
+  }
+  &__text > p:not(:first-child) {
+    margin-top: 20px;
+  }
+}
+
+//  product-Drawer
+.ant-drawer-content-wrapper > .product-drawer {
+  color: #8f8f8f;
+  font-family: Roboto;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 111.111% */
+  border-radius: 10px 0px 0px 10px;
+  background: #ebecf0;
+  box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+// ant 原生 body
+.ant-drawer-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.product-drawer {
+  &__body {
+    margin-top: 50px;
+  }
+
+  &__footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: 30px;
+    & button {
+      width: 80px;
+      height: 40px;
+      padding: 9px 22px 10px 22px;
+      justify-content: center;
+      align-items: center;
+      border: none;
+      font-family: Roboto;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      border-radius: 30px;
+      cursor: pointer;
+    }
+  }
+  & .footer__drawerc--cancel {
+    color: #8f8f8f;
+    background: unset;
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    transition: all 0.2s;
+    &:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  & .footer__drawer--confirm {
+    color: #e1e7f5;
+    box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    background: #186c98;
+  }
+}
+
+//  Drawer :: InfoSectionsDialog
+.product-drawer__info {
+}
+
+.info__item {
+  display: flex;
+  flex-direction: column;
+  max-height: 62px;
+  gap: 9px;
+  padding: 0px 0px 19px 10px;
+  font-family: Inter;
+  line-height: 17px;
+
+  & :is(input, label) {
+    color: $palette-text-primary;
+  }
+
+  &:not(:first-child) {
+    margin-top: 20px;
+  }
+
+  > span {
+    font-size: 14px;
+  }
 }

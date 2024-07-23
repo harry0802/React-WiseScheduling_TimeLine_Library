@@ -50,7 +50,6 @@ function ProductionRecordActions() {
 
   useEffect(() => {
     throttledHandleSearch();
-
     return () => {
       throttledHandleSearch.cancel();
     };
