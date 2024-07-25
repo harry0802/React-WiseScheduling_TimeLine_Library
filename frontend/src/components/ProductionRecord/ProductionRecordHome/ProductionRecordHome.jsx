@@ -15,11 +15,11 @@ function ProductionRecordPaginations({
     <Pagination
       className="record-paginations"
       itemActiveColorDisabled
-      current={current}
-      defaultCurrent={defaultCurrent}
       total={total}
+      current={current}
       defaultPageSize={pageSize}
       onChange={handlePageChange}
+      defaultCurrent={defaultCurrent}
     />
   );
 }

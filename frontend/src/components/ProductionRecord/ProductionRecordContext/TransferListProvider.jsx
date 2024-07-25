@@ -14,12 +14,6 @@ function transferListReducer(state, action) {
       const currentIndex = state.checked.indexOf(action.value);
       const newChecked = [...state.checked];
 
-      //   if (currentIndex === -1) {
-      //     newChecked.push(action.value);
-      //   } else {
-      //     newChecked.splice(currentIndex, 1);
-      //   }
-
       ~currentIndex
         ? newChecked.splice(currentIndex, 1)
         : newChecked.push(action.value);
@@ -70,8 +64,8 @@ function TransferListProvider({ children }) {
         dispatch,
         handleToggle,
         handleToggleAll,
-        handleCheckedRight,
         handleCheckedLeft,
+        handleCheckedRight,
       }}
     >
       {children}

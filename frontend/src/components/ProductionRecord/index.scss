@@ -187,7 +187,7 @@ button.ant-btn-default {
   stroke-width: 5;
 }
 
-// Add info page
+//  Add info Page
 
 //  product-content
 .product-content {
@@ -239,6 +239,23 @@ button.ant-btn-default {
   }
 }
 
+// Accordion UI 套件
+
+.product-info > .accordion {
+  width: 100%;
+  color: #8f8f8f;
+  font-family: Roboto;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 125% */
+  & :is(.MuiAccordionSummary-content) {
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+//  Drawer UI 套件
 //  product-Drawer
 .ant-drawer-content-wrapper > .product-drawer {
   color: #8f8f8f;
@@ -257,6 +274,7 @@ button.ant-btn-default {
   flex-direction: column;
   height: 100%;
   width: 100%;
+  padding-bottom: 106px !important;
 }
 
 .product-drawer {
@@ -265,10 +283,17 @@ button.ant-btn-default {
   }
 
   &__footer {
-    margin-top: auto;
+    position: absolute;
     display: flex;
     justify-content: flex-end;
+    padding-top: 42px;
+    padding-bottom: 24px;
+    padding-right: 40px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     gap: 30px;
+    background: #ebecf0;
     & button {
       width: 80px;
       height: 40px;
@@ -328,6 +353,7 @@ button.ant-btn-default {
 }
 
 // AddInfomationsTransferList
+
 // 取消他自定義的格線系統 ， 這樣才能配合設計稿否則不可控
 // 盡量不使用  important , 使用頂級父層 + :is 下去找自定義 class 蓋過原生 ui
 .product-drawer__body :is(.transferList__container) {

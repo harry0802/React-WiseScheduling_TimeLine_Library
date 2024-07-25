@@ -47,7 +47,8 @@ SelectAllTransferList
 */
 
 function AddInfomationsTransferList({ type = "屬性" }) {
-  const { state, handleCheckedRight, handleCheckedLeft } = useTransferList();
+  const { state, handleCheckedRight, handleCheckedLeft } =
+    useTransferList() || {};
 
   const { left, right, checked } = state || {};
 
