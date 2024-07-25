@@ -1,16 +1,13 @@
+import { useState } from "react";
 import ProductContent from "../Utility/ProductContent.jsx";
 import ProductContextCard from "../Utility/ProductContextCard.jsx";
+import ProductDrawer from "../Utility/ProductDrawer.jsx";
 import AddInfoSections from "../ProductionRecordAddInfo/AddInfoSections.jsx";
 import AddIcon from "@mui/icons-material/Add";
-import ProductDrawer from "../Utility/ProductDrawer.jsx";
 import TextField from "@mui/material/TextField";
-
 import AddInfomationsTransferList from "./transferList/AddInfomationsTransferList.jsx";
-
 import { useRecordAddInfo } from "../ProductionRecordContext/RecordAddInfoProvider.jsx";
 import { TransferListProvider } from "../ProductionRecordContext/TransferListProvider.jsx";
-
-import { useState } from "react";
 
 function ProcessSectionsDialog() {
   const { processDrawer, setProcessDrawer } = useRecordAddInfo();
@@ -42,7 +39,8 @@ function ProcessSectionsDialog() {
           </div>
         </div>
 
-        <AddInfomationsTransferList />
+        <AddInfomationsTransferList type="模具" />
+        <AddInfomationsTransferList type="物料" />
       </ProductDrawer>
     </TransferListProvider>
   );

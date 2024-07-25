@@ -46,17 +46,23 @@ SelectAllTransferList
 
 */
 
-function AddInfomationsTransferList() {
+function AddInfomationsTransferList({ type = "屬性" }) {
   const { state, handleCheckedRight, handleCheckedLeft } = useTransferList();
 
   const { left, right, checked } = state || {};
 
   return (
-    <Grid container spacing={2} justifyContent="center" alignItems="center">
-      <Grid item>
-        <TransferListCustomList title="請選模具編號" items={left} />
+    <Grid
+      className="transferList__container"
+      container
+      spacing={3}
+      justifyContent="start"
+      alignItems="center"
+    >
+      <Grid className="transferList__item" item>
+        <TransferListCustomList title={`請選${type}編號`} items={left} />
       </Grid>
-      <Grid item>
+      <Grid className="transferList__button" item>
         <Grid container direction="column" alignItems="center">
           <Button
             sx={{ my: 0.5 }}
@@ -80,9 +86,9 @@ function AddInfomationsTransferList() {
           </Button>
         </Grid>
       </Grid>
-      <Grid item>
+      <Grid className="transferList__item" item>
         <TransferListCustomList
-          title="已選模具編號"
+          title={`已選${type}編號`}
           items={right}
           checked={checked}
         />

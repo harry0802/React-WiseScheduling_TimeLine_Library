@@ -1,3 +1,0 @@
-192.168.1.0/24 1; # allow by subnet
-192.168.0.1 1; # allow single IP
-0.0.0.0/0 1; # allow all

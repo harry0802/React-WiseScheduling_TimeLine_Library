@@ -94,10 +94,17 @@ services:
       - REACT_APP_API_PORT=${REACT_APP_API_PORT}
       # 凌越ERP
       - REACT_APP_LY_ERP_ON=${LY_ERP_ON}
+
+      #   # 啟用WATCHPACK_POLLING以實現熱重載
+      # - WATCHPACK_POLLING=true
+      #   # 設置WebSocket端口以匹配主機的映射端口
+      # - WDS_SOCKET_PORT=${REACT_APP_PORT}
+
     restart: always
     # command: npm install || npm start
     command: sh init.sh
     volumes:
+      # 綁定本地代碼目錄到容器內，實現代碼同步
       - ./frontend/.:/app/
     ports:
       - "${REACT_APP_PORT}:3000"
@@ -128,6 +135,8 @@ services:
       - backnet
       - frontnet
     environment:
+      # - CHOKIDAR_USEPOLLING=true
+      # # 啟用CHOKIDAR_USEPOLLING以實現熱重載
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - LOGLEVEL=${LOGLEVEL}

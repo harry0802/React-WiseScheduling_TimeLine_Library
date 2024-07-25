@@ -138,7 +138,7 @@ button.ant-btn-default {
   overflow: hidden;
   &__content {
     display: grid;
-    grid-template-columns: repeat(4, 376px);
+    grid-template-columns: repeat(auto-fit, 376px);
     place-content: center center;
     gap: 20px;
   }
@@ -305,9 +305,6 @@ button.ant-btn-default {
 
 //  Drawer :: InfoSectionsDialog
 
-.product-drawer__info {
-}
-
 .info__item {
   display: flex;
   flex-direction: column;
@@ -330,4 +327,35 @@ button.ant-btn-default {
   }
 }
 
-//
+// AddInfomationsTransferList
+// 取消他自定義的格線系統 ， 這樣才能配合設計稿否則不可控
+// 盡量不使用  important , 使用頂級父層 + :is 下去找自定義 class 蓋過原生 ui
+.product-drawer__body :is(.transferList__container) {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  margin-top: 21px;
+  padding-left: 10px;
+}
+
+.transferList__container {
+  & .transferList__item {
+    flex-grow: 1;
+  }
+  & .transferList__button {
+    margin: 0 18px;
+  }
+  //  原生 Ui 修改
+  & :is(.MuiGrid-item) {
+    padding: 0 !important;
+  }
+  & :is(.MuiPaper-elevation) {
+    width: 100% !important;
+    border: 1px solid #8f8f8f;
+    border-radius: 4px;
+  }
+  & :is(.MuiList-dense) {
+    width: 100%;
+    max-height: 182px;
+  }
+}

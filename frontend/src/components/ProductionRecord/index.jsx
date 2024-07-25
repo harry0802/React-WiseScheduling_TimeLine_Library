@@ -24,13 +24,15 @@ function ProductionRecordSections({ children }) {
 
 function ProductionRecord() {
   const location = useLocation();
-  const isNestedPage = location.pathname !== "/ProductionRecordPage/";
+  const isNestedPage =
+    location.pathname !== "/ProductionRecordPage" &&
+    location.pathname !== "/ProductionRecordPage/";
 
   return (
     <ProductionRecordWarpper>
       <ProductionRecordHeader>
         <div className="record-header__title">
-          <h3 className="record-header__title">產品履歷與BOM</h3>
+          <h3 className="record-header__title">產品履歷與BOM </h3>
         </div>
         {!isNestedPage && <ProductionRecordActions />}
       </ProductionRecordHeader>
