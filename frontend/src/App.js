@@ -16,10 +16,9 @@ import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
 //
 import ProductionRecordHome from "./components/ProductionRecord/ProductionRecordHome/ProductionRecordHome.jsx";
 import ProductionRecordAddInfo from "./components/ProductionRecord/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
-
+import ProductionRecordProcMaterials from "./components/ProductionRecord/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
 // context
-import { RecordAddInfoProvider } from "./components/ProductionRecord/ProductionRecordContext/RecordAddInfoProvider.jsx";
-
+import { RecordAddInfoProvider } from "./components/ProductionRecord/Context/RecordAddInfoProvider.jsx";
 import "./App.scss";
 import { Layout } from "antd";
 
@@ -78,6 +77,10 @@ const App = () => {
                       <ProductionRecordAddInfo />
                     </RecordAddInfoProvider>
                   }
+                />
+                <Route
+                  path="procMaterials"
+                  element={<ProductionRecordProcMaterials />}
                 />
               </Route>
               {/* ProductionRecordPage end */}

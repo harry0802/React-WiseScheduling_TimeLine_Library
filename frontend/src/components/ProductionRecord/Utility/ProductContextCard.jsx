@@ -1,12 +1,10 @@
 import ProductionRecordButton from "../Utility/ProductionRecordButton.jsx";
-import ProductDrawer from "../Utility/ProductDrawer.jsx";
-
-function ProductContextCard({ children, icon, title, OnClick }) {
+function ProductContextCard({ children, icon, title, OnClick, style }) {
   // pd =product
   // PdId =產品編號
 
   return (
-    <div className="product-info">
+    <div className={`product-info ${style}`}>
       <div className="product-info__header">
         <div className="header__title">
           <h3>{title}</h3>

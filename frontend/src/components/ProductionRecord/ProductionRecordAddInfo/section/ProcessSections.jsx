@@ -6,10 +6,11 @@ import ProcessAccordion from "../../ProductionRecordAddInfo/accordion/ProcessAcc
 import AddIcon from "@mui/icons-material/Add";
 import TextField from "@mui/material/TextField";
 import AddInfomationsTransferList from "../transferList/AddInfomationsTransferList.jsx";
-import { useRecordAddInfo } from "../../ProductionRecordContext/RecordAddInfoProvider.jsx";
-import { TransferListProvider } from "../../ProductionRecordContext/TransferListProvider.jsx";
-import { RedoRounded } from "@mui/icons-material";
+import { useRecordAddInfo } from "../../Context/RecordAddInfoProvider.jsx";
+import { TransferListProvider } from "../../Context/TransferListProvider.jsx";
+// import { RedoRounded } from "@mui/icons-material";
 
+// 滑動組件 製成材料選取功能
 function SectionsDialogTransferList({ type = "" }) {
   return (
     <TransferListProvider>
@@ -63,6 +64,7 @@ function ProcessSectionsListDetail(params) {
   );
 }
 
+// 手風琴
 function ProcessSectionsList() {
   return (
     <>
@@ -72,6 +74,7 @@ function ProcessSectionsList() {
   );
 }
 
+// main component
 function ProcessSections() {
   const { setProcessDrawer } = useRecordAddInfo();
   // 放置製程內容

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRecord } from "../ProductionRecordContext/ProductionRecordProvider.jsx";
+import { useRecord } from "../Context/ProductionRecordProvider.jsx";
 import "../index.scss";
 
 import { Select, Input, Space } from "antd";
