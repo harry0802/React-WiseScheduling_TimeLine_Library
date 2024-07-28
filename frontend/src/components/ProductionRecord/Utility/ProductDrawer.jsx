@@ -1,6 +1,8 @@
-import { Drawer, Button } from "antd";
+import { Drawer } from "antd";
 
 function ProductDrawer({ children, visible, onClose, title }) {
+  console.log(visible);
+
   return (
     <Drawer
       className="product-drawer"

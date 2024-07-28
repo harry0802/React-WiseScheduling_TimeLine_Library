@@ -19,6 +19,8 @@ import ProductionRecordAddInfo from "./components/ProductionRecord/ProductionRec
 import ProductionRecordProcMaterials from "./components/ProductionRecord/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
 // context
 import { RecordAddInfoProvider } from "./components/ProductionRecord/Context/RecordAddInfoProvider.jsx";
+import { ProcMaterialsProvider } from "./components/ProductionRecord/Context/ProcMaterialsProvider.jsx";
+
 import "./App.scss";
 import { Layout } from "antd";
 
@@ -80,7 +82,11 @@ const App = () => {
                 />
                 <Route
                   path="procMaterials"
-                  element={<ProductionRecordProcMaterials />}
+                  element={
+                    <ProcMaterialsProvider>
+                      <ProductionRecordProcMaterials />
+                    </ProcMaterialsProvider>
+                  }
                 />
               </Route>
               {/* ProductionRecordPage end */}
