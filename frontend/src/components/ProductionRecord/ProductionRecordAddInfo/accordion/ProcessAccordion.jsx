@@ -6,8 +6,10 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ProductionRecordButton from "../../Utility/ProductionRecordButton";
 import AddIcon from "@mui/icons-material/Add";
+
 function ProcessAccordion({ children, title }) {
   function handleButtonClick(e) {
+    /* 取消冒泡事件 */
     e.stopPropagation();
   }
 
@@ -18,11 +20,9 @@ function ProcessAccordion({ children, title }) {
         expandIcon={<ExpandMoreIcon />}
       >
         {title}
-        <span onClick={handleButtonClick}>
-          <ProductionRecordButton>
-            <AddIcon />
-          </ProductionRecordButton>
-        </span>
+        <ProductionRecordButton OnClick={handleButtonClick}>
+          <AddIcon />
+        </ProductionRecordButton>
       </AccordionSummary>
 
       <AccordionDetails className="accordion__content">

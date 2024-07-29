@@ -7,10 +7,10 @@ import TextField from "@mui/material/TextField";
 
 function InfoSectionsDialog() {
   const { infoDrawer, setInfoDrawer } = useRecordAddInfo();
-  const [oldPdNb, setoldPdNb] = useState("Hello World");
+  const [oldPdNb, setOldPdNb] = useState("Hello World");
 
   function handleChange(e) {
-    setoldPdNb(e.target.value);
+    setOldPdNb(e.target.value);
   }
 
   return (

@@ -28,7 +28,7 @@ body {
 // 組件樣式
 .procMaterials-context {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(771px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
 }
 
@@ -42,28 +42,31 @@ body {
   width: 100%;
   border: 1px solid $border-color;
 
-  :where(*) {
-    color: $font-color !important;
+  & :where(*) {
+    color: $font-color;
     font-family: $font-family;
     font-size: $font-size;
     font-style: normal;
     font-weight: 400;
     line-height: $line-height;
-    border-radius: 0 !important;
+    border-radius: 0;
     border: none;
+    border-radius: 0 !important;
+    border-start-end-radius: 0px;
   }
 
   :global(.ant-table-thead .ant-table-cell) {
     &::before {
       display: none;
     }
+    color: $font-color;
     padding: 10px;
     border-radius: 0;
     border-bottom: 1px solid $border-color;
     background: $background-color-thead;
   }
 
-  :global(.ant-table-tbody) {
+  &:global(.ant-table-tbody) {
     :not(:last-child) {
       border-right: 1px solid $border-color;
     }

@@ -9,7 +9,6 @@ import ProductionRecordButton from "../Utility/ProductionRecordButton.jsx";
 import { SearchOutlined } from "@ant-design/icons";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
 
 const options = [

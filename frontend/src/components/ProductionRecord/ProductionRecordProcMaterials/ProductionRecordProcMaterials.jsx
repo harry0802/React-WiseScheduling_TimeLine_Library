@@ -5,6 +5,10 @@ import { Table } from "antd";
 import styles from "./ProductionRecordProcMaterials.module.scss";
 import { useProcMaterials } from "../Context/ProcMaterialsProvider.jsx";
 import ProductDrawer from "../Utility/ProductDrawer.jsx";
+
+import ProductTextFieldInput from "../Utility/ProductTextFieldInput.jsx";
+import ProductTextFieldSelect from "../Utility/ProductTextFieldSelect.jsx";
+
 const productColumns = [
   {
     title: "編號",
@@ -57,7 +61,7 @@ const materialColumns = [
   {
     title: "編號",
     dataIndex: "id",
-    width: 70,
+    width: 50,
     key: "id",
   },
   {
@@ -128,7 +132,11 @@ function ProductionRecordProcMaterials() {
               title="新增製程編碼"
               visible={procManageDrawer}
               onClose={() => setProcManageDrawer(false)}
-            />
+            >
+              <ProductTextFieldInput />
+              <ProductTextFieldInput />
+              <ProductTextFieldSelect />
+            </ProductDrawer>
           </ProcMaterialsTable>
 
           <ProcMaterialsTable
@@ -141,7 +149,10 @@ function ProductionRecordProcMaterials() {
               title="新增物料種類編碼"
               visible={materialsManageDrawer}
               onClose={() => setMaterialsManageDrawer(false)}
-            />
+            >
+              <ProductTextFieldInput />
+              <ProductTextFieldInput />
+            </ProductDrawer>
           </ProcMaterialsTable>
         </div>
       </ProductContent>

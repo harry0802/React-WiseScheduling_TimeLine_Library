@@ -385,3 +385,30 @@ button.ant-btn-default {
     max-height: 182px;
   }
 }
+
+// TextField
+.MuiFormControl-root {
+  width: 100%;
+  color: #8f8f8f;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  font-size: 14px;
+  &:not(:last-child) {
+    margin-bottom: 21px;
+  }
+
+  & > label {
+    font-size: inherit;
+    color: currentColor;
+  }
+
+  & .MuiInputBase-root {
+    color: currentColor;
+    font-size: inherit;
+    input {
+      padding: 17px 9px;
+    }
+  }
+}

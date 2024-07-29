@@ -13,10 +13,12 @@ import ProductionInspectionPage from "./pages/ProductionInspectionPage";
 import LoginPage from "./pages/LoginPage";
 import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
 
-//
+//  ProductionRecordPage - > PATH
 import ProductionRecordHome from "./components/ProductionRecord/ProductionRecordHome/ProductionRecordHome.jsx";
 import ProductionRecordAddInfo from "./components/ProductionRecord/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
 import ProductionRecordProcMaterials from "./components/ProductionRecord/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
+import ProductionRecordinventoryManagement from "./components/ProductionRecord/ProductionRecordinventoryManagement/ProductionRecordinventoryManagement.jsx";
+
 // context
 import { RecordAddInfoProvider } from "./components/ProductionRecord/Context/RecordAddInfoProvider.jsx";
 import { ProcMaterialsProvider } from "./components/ProductionRecord/Context/ProcMaterialsProvider.jsx";
@@ -87,6 +89,10 @@ const App = () => {
                       <ProductionRecordProcMaterials />
                     </ProcMaterialsProvider>
                   }
+                />
+                <Route
+                  path="inventoryManagement"
+                  element={<ProductionRecordinventoryManagement />}
                 />
               </Route>
               {/* ProductionRecordPage end */}

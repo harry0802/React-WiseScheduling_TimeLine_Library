@@ -1,8 +1,7 @@
 import { Drawer } from "antd";
+import Box from "@mui/material/Box";
 
 function ProductDrawer({ children, visible, onClose, title }) {
-  console.log(visible);
-
   return (
     <Drawer
       className="product-drawer"
@@ -14,7 +13,11 @@ function ProductDrawer({ children, visible, onClose, title }) {
     >
       <div className="product-drawer__header">{title}</div>
 
-      <div className="product-drawer__body">{children}</div>
+      <div className="product-drawer__body">
+        <Box component="form" noValidate autoComplete="off">
+          {children}
+        </Box>
+      </div>
 
       <div className="product-drawer__footer">
         <button onClick={onClose} className="footer__drawerc--cancel">
