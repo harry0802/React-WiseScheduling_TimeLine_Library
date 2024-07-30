@@ -9,7 +9,7 @@ import ProductDrawer from "../../Utility/ProductDrawer.jsx";
 import ProductTextFieldInput from "../../Utility/ProductTextFieldInput.jsx";
 import ProductTextFieldSelect from "../../Utility/ProductTextFieldSelect.jsx";
 import { useRecord } from "../../Context/ProductionRecordProvider.jsx";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const productColumns = [
   {
@@ -35,30 +35,6 @@ const productColumns = [
   },
 ];
 
-const productData = [
-  {
-    key: "1",
-    id: "01",
-    code: "In-UJ01",
-    name: "商內-成品-UJ01",
-    description: "In-山姆內(商成)",
-  },
-  {
-    key: "2",
-    id: "02",
-    code: "In-UJ01",
-    name: "商內-成品-UJ01",
-    description: "In-山姆內(商成)",
-  },
-  {
-    key: "3",
-    id: "03",
-    code: "In-UJ01",
-    name: "商內-成品-UJ01",
-    description: "In-山姆內(商成)",
-  },
-];
-
 const materialColumns = [
   {
     title: "編號",
@@ -78,25 +54,50 @@ const materialColumns = [
   },
 ];
 
-const materialData = [
-  {
-    key: "1",
-    id: "01",
-    code: "Rm-1",
-    name: "原料1",
-  },
-  // ... more data items
-];
+const generateData = () => {
+  const generateProductData = () => {
+    const productData = [];
+    for (let i = 1; i <= 50; i++) {
+      productData.push({
+        key: i.toString(),
+        id: i.toString().padStart(2, "0"),
+        code: "In-UJ01",
+        name: "商內-成品-UJ01",
+        description: "In-山姆內(商成)",
+      });
+    }
+    return productData;
+  };
+
+  const generateMaterialData = () => {
+    const materialData = [];
+    for (let i = 1; i <= 50; i++) {
+      materialData.push({
+        key: i.toString(),
+        id: i.toString().padStart(2, "0"),
+        code: `Rm-${i}`,
+        name: `原料${i}`,
+      });
+    }
+    return materialData;
+  };
+
+  return {
+    productData: generateProductData(),
+    materialData: generateMaterialData(),
+  };
+};
 
 function ReusableTable({ columns, data }) {
   return (
     <Table
-      scroll={true}
-      sticky={true}
+      scroll
+      sticky
       className={styles["reusableTable"]}
       columns={columns}
       dataSource={data}
       pagination={false}
+      rowHoverable={false}
     />
   );
 }
@@ -120,7 +121,12 @@ function ProductionRecordProcMaterials() {
     setMaterialsManageDrawer,
   } = useProcMaterials();
 
+  const [procName, setProcName] = useState("");
+  const [procNumber, setProcNumber] = useState("");
+
   const { handlePageStatust } = useRecord();
+  const { productData, materialData } = generateData();
+
   useEffect(() => {
     handlePageStatust("製程與物料編碼維護");
   }, []);
@@ -139,8 +145,16 @@ function ProductionRecordProcMaterials() {
               visible={procManageDrawer}
               onClose={() => setProcManageDrawer(false)}
             >
-              <ProductTextFieldInput />
-              <ProductTextFieldInput />
+              <ProductTextFieldInput
+                label="製程名稱"
+                value={procName}
+                OnChange={(e) => setProcName(e.target.value)}
+              />
+              <ProductTextFieldInput
+                label="製程編號"
+                value={procNumber}
+                OnChange={(e) => setProcName(e.target.value)}
+              />
               <ProductTextFieldSelect />
             </ProductDrawer>
           </ProcMaterialsTable>

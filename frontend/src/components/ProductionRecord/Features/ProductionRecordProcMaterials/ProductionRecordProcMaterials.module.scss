@@ -78,6 +78,11 @@ body {
 }
 
 .reusableTable {
-  //   max-height: 200px;
+  max-height: 600px;
+  overflow: auto;
   //   overflow-y: auto;
+
+  & :global(.ant-table-tbody) > tr:hover > td {
+    background: none !important; /* Remove background on hover */
+  }
 }
