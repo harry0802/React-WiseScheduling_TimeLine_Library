@@ -10,6 +10,7 @@ function ProductDrawer({ children, visible, onClose, title }) {
       onClose={onClose}
       open={visible}
       closable={false}
+      destroyOnClose={true}
     >
       <div className="product-drawer__header">{title}</div>
 

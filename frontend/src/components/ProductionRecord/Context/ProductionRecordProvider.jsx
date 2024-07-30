@@ -4,7 +4,7 @@ import fakedata from "../data.json";
 const RecordContext = createContext();
 const initialState = {
   // page status
-  pageStatus: "",
+  pageStatus: "產品履歷與BOM",
   // fake Data
   data: null,
   displayedData: null,
@@ -19,7 +19,7 @@ function reducer(state, action) {
     case "SET_PAGE_STATUS":
       return {
         ...state,
-        pageStatus: "",
+        pageStatus: action.payload,
       };
 
     case "SET_DATA":
@@ -88,13 +88,17 @@ function reducer(state, action) {
 function ProductionRecordProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  function handlePageStatust(statu) {
+    dispatch({ type: "SET_PAGE_STATUS", payload: statu });
+  }
+
   // 這裡要串 API
   useEffect(function () {
     dispatch({ type: "SET_DATA", payload: fakedata });
   }, []);
 
   return (
-    <RecordContext.Provider value={{ state, dispatch }}>
+    <RecordContext.Provider value={{ state, dispatch, handlePageStatust }}>
       {children}
     </RecordContext.Provider>
   );

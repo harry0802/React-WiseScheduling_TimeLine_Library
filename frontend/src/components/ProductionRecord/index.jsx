@@ -1,7 +1,9 @@
 import "./index.scss";
-import ProductionRecordActions from "./ProductionRecordHome/ProductionRecordActions.jsx";
+import ProductionRecordActions from "./Features/ProductionRecordHome/ProductionRecordActions.jsx";
 import { Outlet } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+
+import { useRecord } from "../ProductionRecord/Context/ProductionRecordProvider.jsx";
 
 // wrapper
 function ProductionRecordWarpper({ children }) {
@@ -28,11 +30,13 @@ function ProductionRecord() {
     location.pathname !== "/ProductionRecordPage" &&
     location.pathname !== "/ProductionRecordPage/";
 
+  const { state } = useRecord();
+
   return (
     <ProductionRecordWarpper>
       <ProductionRecordHeader>
         <div className="record-header__title">
-          <h3 className="record-header__title">產品履歷與BOM </h3>
+          <h3 className="record-header__title">{state.pageStatus} </h3>
         </div>
         {!isNestedPage && <ProductionRecordActions />}
       </ProductionRecordHeader>

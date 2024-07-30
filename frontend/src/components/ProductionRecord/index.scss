@@ -58,7 +58,6 @@ button.ant-btn-default {
 }
 
 .record .record-card {
-  width: 376px;
   height: 300px;
   border: 1px solid #8f8f8f;
   border-radius: 10px;
@@ -68,7 +67,10 @@ button.ant-btn-default {
     rgba(115, 213, 191, 0.2) 100%
   );
   cursor: pointer;
-  transition: background 0.4s;
+  transition: all 0.2s ease-in-out, background 0s, transform 0.4s ease-in-out,
+    box-shadow 0.4s ease-in-out;
+  grid-column: span 6;
+
   & .ant-card-body {
     display: flex;
     flex-direction: column;
@@ -81,6 +83,17 @@ button.ant-btn-default {
     font-family: Roboto;
   }
 
+  & .ant-btn-link.record-card__buttonText,
+  & .ant-btn-link.record-card__buttonText:hover,
+  & .ant-btn-link.record-card__buttonText:active,
+  & .ant-btn-link.record-card__buttonText:focus {
+    color: inherit; /* Reset color */
+    background: none; /* Reset background */
+    border: none; /* Reset border */
+    box-shadow: none; /* Reset box-shadow */
+    text-decoration: none; /* Reset text decoration */
+  }
+
   // 共用樣式
   &__title,
   &__subtitle,
@@ -90,6 +103,11 @@ button.ant-btn-default {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    :hover {
+      color: #fff;
+      text-decoration: underline; /* Add underline on hover */
+    }
   }
 
   // 特殊樣式
@@ -136,10 +154,12 @@ button.ant-btn-default {
 
 .record-home {
   overflow: hidden;
+  width: 100%;
+
   &__content {
+    max-width: 100cqw;
     display: grid;
-    grid-template-columns: repeat(auto-fit, 376px);
-    place-content: center center;
+    grid-template-columns: repeat(12, 1fr);
     gap: 20px;
   }
 }
@@ -293,6 +313,7 @@ button.ant-btn-default {
     right: 0;
     bottom: 0;
     gap: 30px;
+    z-index: 2;
     background: #ebecf0;
     & button {
       width: 80px;
@@ -410,5 +431,17 @@ button.ant-btn-default {
     input {
       padding: 17px 9px;
     }
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .record .record-card {
+    grid-column: span 4;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+  .record .record-card {
+    grid-column: span 3;
   }
 }

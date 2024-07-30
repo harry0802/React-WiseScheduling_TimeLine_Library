@@ -14,10 +14,10 @@ import LoginPage from "./pages/LoginPage";
 import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
 
 //  ProductionRecordPage - > PATH
-import ProductionRecordHome from "./components/ProductionRecord/ProductionRecordHome/ProductionRecordHome.jsx";
-import ProductionRecordAddInfo from "./components/ProductionRecord/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
-import ProductionRecordProcMaterials from "./components/ProductionRecord/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
-import ProductionRecordinventoryManagement from "./components/ProductionRecord/ProductionRecordinventoryManagement/ProductionRecordinventoryManagement.jsx";
+import ProductionRecordHome from "./components/ProductionRecord/Features/ProductionRecordHome/ProductionRecordHome.jsx";
+import ProductionRecordAddInfo from "./components/ProductionRecord/Features/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
+import ProductionRecordProcMaterials from "./components/ProductionRecord/Features/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
+import ProductionRecordinventoryManagement from "./components/ProductionRecord/Features/ProductionRecordinventoryManagement/ProductionRecordinventoryManagement.jsx";
 
 // context
 import { RecordAddInfoProvider } from "./components/ProductionRecord/Context/RecordAddInfoProvider.jsx";

@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Table, Button, Checkbox } from "antd";
+import ProductionRecordButton from "../../../Utility/ProductionRecordButton.jsx";
 //import "./ControlledTable.css";
 import styles from "./ControlledTable.module.scss";
 
@@ -11,9 +12,7 @@ function ControlledTable({
   selectedRowKeys,
   onSelectChange,
   onRowClick,
-  onAddClick,
   onEditClick,
-  onDeleteClick,
 }) {
   // 行選擇配置
   const rowSelectionConfig = {
@@ -23,7 +22,7 @@ function ControlledTable({
 
   return (
     <div className={styles["controlled-table"]}>
-      <div className="controlled-table__content">
+      <div className={styles["controlled-table__content"]}>
         <Table
           columns={columns}
           dataSource={dataSource}
@@ -31,17 +30,13 @@ function ControlledTable({
           onRow={(record) => ({
             onClick: () => onRowClick(record),
           })}
-          pagination={false}
         />
       </div>
-      <div className="controlled-table__actions">
-        <Button type="primary" onClick={onAddClick}>
-          新增
-        </Button>
-        <Button onClick={onEditClick}>編輯</Button>
-        <Button danger onClick={onDeleteClick}>
-          刪除
-        </Button>
+
+      <div className={styles["controlled-table__actions"]}>
+        <ProductionRecordButton shape="round" OnClick={onEditClick}>
+          編輯
+        </ProductionRecordButton>
       </div>
     </div>
   );

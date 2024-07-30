@@ -1,13 +1,15 @@
-import ProductContent from "../Utility/ProductContent.jsx";
-import ProductContextCard from "../Utility/ProductContextCard.jsx";
-import AddIcon from "@mui/icons-material/Add";
-import { Table } from "antd";
 import styles from "./ProductionRecordProcMaterials.module.scss";
-import { useProcMaterials } from "../Context/ProcMaterialsProvider.jsx";
-import ProductDrawer from "../Utility/ProductDrawer.jsx";
+import { Table } from "antd";
+import { useProcMaterials } from "../../Context/ProcMaterialsProvider.jsx";
+import AddIcon from "@mui/icons-material/Add";
 
-import ProductTextFieldInput from "../Utility/ProductTextFieldInput.jsx";
-import ProductTextFieldSelect from "../Utility/ProductTextFieldSelect.jsx";
+import ProductContent from "../../Utility/ProductContent.jsx";
+import ProductContextCard from "../../Utility/ProductContextCard.jsx";
+import ProductDrawer from "../../Utility/ProductDrawer.jsx";
+import ProductTextFieldInput from "../../Utility/ProductTextFieldInput.jsx";
+import ProductTextFieldSelect from "../../Utility/ProductTextFieldSelect.jsx";
+import { useRecord } from "../../Context/ProductionRecordProvider.jsx";
+import { useEffect } from "react";
 
 const productColumns = [
   {
@@ -118,6 +120,10 @@ function ProductionRecordProcMaterials() {
     setMaterialsManageDrawer,
   } = useProcMaterials();
 
+  const { handlePageStatust } = useRecord();
+  useEffect(() => {
+    handlePageStatust("製程與物料編碼維護");
+  }, []);
   return (
     <div>
       <ProductContent title="製程與物料編碼">

@@ -1,8 +1,9 @@
 import ProductionRecordCard from "./ProductionRecordCard";
-import { useRecord } from "../Context/ProductionRecordProvider.jsx";
-import "../index.scss";
+import { useRecord } from "../../Context/ProductionRecordProvider.jsx";
+import "../../index.scss";
 import { Pagination } from "antd";
 
+import { useEffect } from "react";
 // 分頁器
 function ProductionRecordPaginations({
   total,
@@ -26,7 +27,7 @@ function ProductionRecordPaginations({
 
 // 首頁
 function ProductionRecordHome() {
-  const { state, dispatch } = useRecord();
+  const { state, dispatch, handlePageStatust } = useRecord();
   const { currentPage, itemsPerPage, total, displayedData } = state;
 
   function handlePageChange(page, pageSize) {
@@ -38,6 +39,10 @@ function ProductionRecordHome() {
   function handleButtonClick() {
     alert("Button clicked!");
   }
+
+  useEffect(() => {
+    handlePageStatust("產品履歷與BOM");
+  }, []);
   return (
     <div className="record-home">
       <div className="record-home__content">

@@ -10,7 +10,7 @@ function ProductionRecordButton({
   return (
     <Button
       onClick={OnClick}
-      className={`c-btn-primars${className}`}
+      className={`c-btn-primars ${className}`}
       shape={shape}
       icon={icon}
     >
