@@ -4,6 +4,8 @@ import "../../index.scss";
 import { Pagination } from "antd";
 
 import { useEffect } from "react";
+
+import { useNavigate } from "react-router-dom";
 // 分頁器
 function ProductionRecordPaginations({
   total,
@@ -29,6 +31,7 @@ function ProductionRecordPaginations({
 function ProductionRecordHome() {
   const { state, dispatch, handlePageStatust } = useRecord();
   const { currentPage, itemsPerPage, total, displayedData } = state;
+  const navigate = useNavigate();
 
   function handlePageChange(page, pageSize) {
     if (currentPage !== page) dispatch({ type: "SET_PAGE", payload: page });
@@ -37,7 +40,7 @@ function ProductionRecordHome() {
   }
 
   function handleButtonClick() {
-    alert("Button clicked!");
+    navigate("addProductInfo");
   }
 
   useEffect(() => {

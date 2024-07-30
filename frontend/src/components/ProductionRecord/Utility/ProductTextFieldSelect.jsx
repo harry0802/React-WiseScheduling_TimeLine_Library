@@ -1,24 +1,6 @@
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-
-const currencies = [
-  {
-    value: "USD",
-    label: "$",
-  },
-  {
-    value: "EUR",
-    label: "€",
-  },
-  {
-    value: "BTC",
-    label: "฿",
-  },
-  {
-    value: "JPY",
-    label: "¥",
-  },
-];
+import { styled } from "@mui/system";
 
 function ProductTextFieldSelect({
   label = "設定中...",
@@ -26,17 +8,27 @@ function ProductTextFieldSelect({
   value = "設定中...",
   option = [],
 }) {
+  console.log(option.length > 0);
+
   return (
-    <div>
-      <TextField select label={label} value={value} onChange={OnChange}>
-        {option.length > 0 ??
-          currencies.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-      </TextField>
-    </div>
+    <TextField
+      select
+      label={label}
+      value={value}
+      onChange={OnChange}
+      className="textField-select "
+    >
+      {option.length > 0 &&
+        option.map((opt) => (
+          <MenuItem
+            className="textField-select__menuItem"
+            key={opt.value}
+            value={opt.value}
+          >
+            {opt.label}
+          </MenuItem>
+        ))}
+    </TextField>
   );
 }
 

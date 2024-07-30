@@ -5,11 +5,12 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ProductionRecordButton from "../../../Utility/ProductionRecordButton";
-import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
 
-function ProcessAccordion({ children, title }) {
+function ProcessAccordion({ children, title, OnClick = null }) {
   function handleButtonClick(e) {
     /* 取消冒泡事件 */
+    if (OnClick != null) OnClick();
     e.stopPropagation();
   }
 
@@ -21,7 +22,7 @@ function ProcessAccordion({ children, title }) {
       >
         {title}
         <ProductionRecordButton OnClick={handleButtonClick}>
-          <AddIcon />
+          <EditIcon />
         </ProductionRecordButton>
       </AccordionSummary>
 

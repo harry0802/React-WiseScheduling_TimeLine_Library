@@ -58,9 +58,12 @@ function InfoSections() {
       icon={<EditIcon />}
     >
       <div className="product-info__text">
-        <p>產品編號 : </p>
-        <p>舊產品編號 : </p>
-        <p>產品名稱:　</p>
+        <p>產品編號 : XX-000-XXX</p>
+        <p>
+          舊產品編號 :
+          產品名稱字數請簡短，並且標題重點書寫明確以便後續好管理與閱讀
+        </p>
+        <p>產品名稱 : 我是客戶名稱 　</p>
       </div>
       <InfoSectionsDialog />
     </ProductContextCard>

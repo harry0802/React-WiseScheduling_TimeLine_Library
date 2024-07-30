@@ -88,6 +88,29 @@ const generateData = () => {
   };
 };
 
+const options = [
+  {
+    value: "In-ij廠內成型",
+    label: "In-ij廠內成型",
+  },
+  {
+    value: "Out-委外成型",
+    label: "Out-委外成型",
+  },
+  {
+    value: "In-BE-廠內後製程",
+    label: "In-BE-廠內後製程",
+  },
+  {
+    value: "Out-BE-委外後製程",
+    label: "Out-BE-委外後製程",
+  },
+  {
+    value: "In-TS廠內出貨檢驗",
+    label: "In-TS廠內出貨檢驗",
+  },
+];
+
 function ReusableTable({ columns, data }) {
   return (
     <Table
@@ -114,15 +137,20 @@ function ProcMaterialsTable({ children, title, columns, data, OnClick }) {
 }
 
 function ProductionRecordProcMaterials() {
+  const [procName, setProcName] = useState("資料設定中...");
+  const [procNumber, setProcNumber] = useState("資料設定中...");
+
+  const [materialName, setMaterialName] = useState("資料設定中...");
+  const [materialNumber, setMaterialNumber] = useState("資料設定中...");
+
+  const [userSelect, setUserSelect] = useState(options[0].value);
+
   const {
     procManageDrawer,
     setProcManageDrawer,
     materialsManageDrawer,
     setMaterialsManageDrawer,
   } = useProcMaterials();
-
-  const [procName, setProcName] = useState("");
-  const [procNumber, setProcNumber] = useState("");
 
   const { handlePageStatust } = useRecord();
   const { productData, materialData } = generateData();
@@ -153,9 +181,14 @@ function ProductionRecordProcMaterials() {
               <ProductTextFieldInput
                 label="製程編號"
                 value={procNumber}
-                OnChange={(e) => setProcName(e.target.value)}
+                OnChange={(e) => setProcNumber(e.target.value)}
               />
-              <ProductTextFieldSelect />
+              <ProductTextFieldSelect
+                label="製程類別"
+                value={userSelect}
+                option={options}
+                OnChange={(e) => setUserSelect(e.target.value)}
+              />
             </ProductDrawer>
           </ProcMaterialsTable>
 
@@ -170,8 +203,16 @@ function ProductionRecordProcMaterials() {
               visible={materialsManageDrawer}
               onClose={() => setMaterialsManageDrawer(false)}
             >
-              <ProductTextFieldInput />
-              <ProductTextFieldInput />
+              <ProductTextFieldInput
+                label="物料名稱"
+                value={materialName}
+                OnChange={(e) => setMaterialName(e.target.value)}
+              />
+              <ProductTextFieldInput
+                label="物料編號"
+                value={materialNumber}
+                OnChange={(e) => setMaterialNumber(e.target.value)}
+              />
             </ProductDrawer>
           </ProcMaterialsTable>
         </div>

@@ -66,9 +66,13 @@ function ProcessSectionsListDetail(params) {
 
 // 手風琴
 function ProcessSectionsList() {
+  const { setProcessDrawer } = useRecordAddInfo();
   return (
     <>
-      <ProcessAccordion title="製程1 廠內-成型-1I" />
+      <ProcessAccordion
+        title="製程1 廠內-成型-1I"
+        OnClick={() => setProcessDrawer(true)}
+      />
       <ProcessSectionsDialog />
     </>
   );
@@ -77,6 +81,7 @@ function ProcessSectionsList() {
 // main component
 function ProcessSections() {
   const { setProcessDrawer } = useRecordAddInfo();
+
   // 放置製程內容
   return (
     <>
