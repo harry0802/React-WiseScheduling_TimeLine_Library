@@ -5,7 +5,14 @@ function ProductTextFieldInput({
   OnChange = null,
   value = "設定中...",
 }) {
-  return <TextField value={value} label={label} onChange={OnChange} />;
+  return (
+    <TextField
+      className="c-textfield"
+      value={value}
+      label={label}
+      onChange={OnChange}
+    />
+  );
 }
 
 export default ProductTextFieldInput;

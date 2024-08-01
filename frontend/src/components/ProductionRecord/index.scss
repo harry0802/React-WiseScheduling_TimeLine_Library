@@ -20,6 +20,58 @@ button.ant-btn-default {
   }
 }
 
+/* ProductionRecordButton.scss */
+button.c-btn-primars {
+  background-color: #83bf45; // Normal background color
+  border: none;
+  color: white !important;
+  transition: background-color 0.3s, transform 0.1s;
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.25));
+
+  &:hover {
+    background-color: #6fc1ae !important; // Hovering background color
+    color: white !important;
+  }
+
+  &:active {
+    background-color: #8bc1e3 !important; // Pressing background color
+    color: white !important;
+  }
+
+  &--cancel {
+    color: #8f8f8f;
+    background: unset;
+    &:hover {
+      color: #6fc1ae;
+      text-decoration: underline;
+    }
+    &:active {
+      color: #8bc1e3;
+    }
+  }
+}
+
+.MuiFormControl-root {
+  transition: all 0.3s;
+  &:hover {
+    .MuiFormLabel-root,
+    .MuiOutlinedInput-root,
+    fieldset {
+      color: #4f9ab1;
+      border-color: #4f9ab1 !important;
+    }
+  }
+  .Mui-focused {
+    color: #8bc1e3 !important;
+    .MuiOutlinedInput-root,
+    .MuiFormLabel-root,
+    label,
+    fieldset {
+      color: #8bc1e3 !important;
+      border-color: #8bc1e3 !important;
+    }
+  }
+}
 // Home page
 .record {
   &__container {
@@ -359,10 +411,6 @@ button.ant-btn-default {
   padding: 0px 0px 19px 10px;
   font-family: Inter;
   line-height: 17px;
-
-  & :is(input, label) {
-    color: $palette-text-primary;
-  }
 
   &:not(:first-child) {
     margin-top: 20px;

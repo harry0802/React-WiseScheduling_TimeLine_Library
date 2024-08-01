@@ -1,7 +1,7 @@
 import { Drawer } from "antd";
 import Box from "@mui/material/Box";
 
-function ProductDrawer({ children, visible, onClose, title }) {
+function ProductDrawer({ visible, onClose, title, onSubmit, children }) {
   return (
     <Drawer
       className="product-drawer"
@@ -15,19 +15,20 @@ function ProductDrawer({ children, visible, onClose, title }) {
       <div className="product-drawer__header">{title}</div>
 
       <div className="product-drawer__body">
-        <Box component="form" noValidate autoComplete="off">
+        <Box component="div" noValidate autoComplete="off">
           {children}
         </Box>
       </div>
 
       <div className="product-drawer__footer">
-        <button onClick={onClose} className="footer__drawerc--cancel">
+        <button onClick={onClose} className="c-btn-primars--cancel">
           取消
         </button>
-        <button className="footer__drawer--confirm">確定</button>
+        <button onClick={onSubmit} className="c-btn-primars">
+          確定
+        </button>
       </div>
     </Drawer>
   );
 }
-
 export default ProductDrawer;

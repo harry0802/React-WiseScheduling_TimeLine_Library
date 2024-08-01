@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Form } from "antd";
 
 import ProductContextCard from "../../../Utility/ProductContextCard.jsx";
 import ProductDrawer from "../../../Utility/ProductDrawer.jsx";
@@ -8,7 +9,18 @@ import TextField from "@mui/material/TextField";
 import AddInfomationsTransferList from "../transferList/AddInfomationsTransferList.jsx";
 import { useRecordAddInfo } from "../../../Context/RecordAddInfoProvider.jsx";
 import { TransferListProvider } from "../../../Context/TransferListProvider.jsx";
+
+import ProductGroupForm from "../../../Utility/ProductGroupForm.jsx";
 // import { RedoRounded } from "@mui/icons-material";
+
+const items = [
+  {
+    item_code: "dnh75n",
+  },
+  {
+    item_code: "456def",
+  },
+];
 
 // 滑動組件 製成材料選取功能
 function SectionsDialogTransferList({ type = "" }) {
@@ -19,38 +31,54 @@ function SectionsDialogTransferList({ type = "" }) {
   );
 }
 
+function SectionsDialogAutoInput(params) {}
+
 // 可控組建 裡面的資料是要靈活的
 function ProcessSectionsDialog() {
   const { processDrawer, setProcessDrawer } = useRecordAddInfo();
   const [processName, setProcessName] = useState("XX-000-XXX");
   const [moldName, setMoldName] = useState("XX-000-XXX");
+  const [form] = Form.useForm();
+
+  const handleFormSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      console.log("Submitted Values:", values);
+      // closeDrawer(); // Close the drawer after successful submission
+    } catch (error) {
+      console.log("Validation Failed:", error);
+    }
+  };
 
   return (
-    <ProductDrawer
-      title="製程 1"
-      visible={processDrawer}
-      onClose={() => setProcessDrawer(false)}
-    >
-      <div className="product-drawer__info">
-        <div className="info__item">
-          <TextField
-            label="舊產品編號"
-            value={processName}
-            onChange={(e) => setProcessName(e.target.value)}
-          />
-        </div>
+    <Form form={form} initialValues={{ items }} layout="vertical">
+      <ProductDrawer
+        title="製程 1"
+        visible={processDrawer}
+        onClose={() => setProcessDrawer(false)}
+        onSubmit={handleFormSubmit}
+      >
+        <div className="product-drawer__info">
+          <div className="info__item">
+            <TextField
+              label="舊產品編號"
+              value={processName}
+              onChange={(e) => setProcessName(e.target.value)}
+            />
+          </div>
 
-        <div className="info__item">
-          <TextField
-            label="製具編號"
-            value={moldName}
-            onChange={(e) => setMoldName(e.target.value)}
-          />
+          <div className="info__item">
+            <TextField
+              label="製具編號"
+              value={moldName}
+              onChange={(e) => setMoldName(e.target.value)}
+            />
+          </div>
         </div>
-      </div>
-      <SectionsDialogTransferList type="模具" />
-      <SectionsDialogTransferList type="物料" />
-    </ProductDrawer>
+        <ProductGroupForm items={items} form={form} />
+        <SectionsDialogTransferList type="物料" />
+      </ProductDrawer>
+    </Form>
   );
 }
 // 手風琴折疊的內容
