@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form } from "antd";
+import { Button, Form } from "antd";
 
 import ProductContextCard from "../../../Utility/ProductContextCard.jsx";
 import ProductDrawer from "../../../Utility/ProductDrawer.jsx";
@@ -9,6 +9,7 @@ import TextField from "@mui/material/TextField";
 import AddInfomationsTransferList from "../transferList/AddInfomationsTransferList.jsx";
 import { useRecordAddInfo } from "../../../Context/RecordAddInfoProvider.jsx";
 import { TransferListProvider } from "../../../Context/TransferListProvider.jsx";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import ProductGroupForm from "../../../Utility/ProductGroupForm.jsx";
 // import { RedoRounded } from "@mui/icons-material";
@@ -31,8 +32,6 @@ function SectionsDialogTransferList({ type = "" }) {
   );
 }
 
-function SectionsDialogAutoInput(params) {}
-
 // 可控組建 裡面的資料是要靈活的
 function ProcessSectionsDialog() {
   const { processDrawer, setProcessDrawer } = useRecordAddInfo();
@@ -43,10 +42,10 @@ function ProcessSectionsDialog() {
   const handleFormSubmit = async () => {
     try {
       const values = await form.validateFields();
-      console.log("Submitted Values:", values);
+      alert("Submitted Values:", values);
       // closeDrawer(); // Close the drawer after successful submission
     } catch (error) {
-      console.log("Validation Failed:", error);
+      alert("Validation Failed:", error);
     }
   };
 
@@ -57,6 +56,14 @@ function ProcessSectionsDialog() {
         visible={processDrawer}
         onClose={() => setProcessDrawer(false)}
         onSubmit={handleFormSubmit}
+        headericon={
+          <Button
+            style={{ borderRadius: "50%" }}
+            className="ant-btn-default c-btn-primars--delete"
+          >
+            <DeleteIcon />
+          </Button>
+        }
       >
         <div className="product-drawer__info">
           <div className="info__item">

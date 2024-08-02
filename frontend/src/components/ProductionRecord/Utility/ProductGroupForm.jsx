@@ -1,55 +1,62 @@
-import { Form, Input, Button, Space, Drawer } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { Form, Input, Button, Space } from "antd";
+import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
 import React from "react";
-
-// Order items array
-const items = [
-  {
-    item_code: "dnh75n",
-  },
-  {
-    item_code: "456def",
-  },
-];
 
 // Purchase Order Form Component
 function ProductGroupForm({ items, form }) {
   return (
-    <>
-      <h3>Order Items</h3>
-      <Form.List name="items">
-        {(fields, { add, remove }) => (
-          <>
-            {fields.map(({ key, name, ...restField }) => (
-              <Space
-                key={key}
-                style={{ display: "flex", marginBottom: 8 }}
-                align="baseline"
+    <div className="groupForm">
+      <div className="groupForm-item">
+        <Form.List name="items">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key, name, ...restField }) => (
+                <Space key={key} className="groupForm__content">
+                  <Form.Item
+                    {...restField}
+                    name={[name, "item_code"]}
+                    label={`模具編號${name + 1}`} // Custom label for each item
+                    className="groupForm__input"
+                  >
+                    <Input placeholder="XXX-00XX-XXXD" />
+                  </Form.Item>
+                  {key > 0 && (
+                    <CloseIcon
+                      className="groupForm__button--remove"
+                      onClick={() => remove(name)}
+                    />
+                  )}
+                </Space>
+              ))}
+
+              <Form.Item
+                className="groupForm__addition"
+                style={{ marginTop: 8 }}
               >
-                <Form.Item
-                  {...restField}
-                  name={[name, "item_code"]}
-                  rules={[{ required: true, message: "Item code is required" }]}
+                <Button
+                  className=""
+                  type="circle"
+                  onClick={() => add()}
+                  icon={
+                    <AddIcon
+                      className="c-btn-primars"
+                      style={{
+                        width: "30px",
+                        height: "30px",
+                        borderRadius: "50%",
+                      }}
+                    />
+                  }
                 >
-                  <Input placeholder="Item Code" />
-                </Form.Item>
-                <MinusCircleOutlined onClick={() => remove(name)} />
-              </Space>
-            ))}
-            <Form.Item>
-              <Button
-                type="dashed"
-                onClick={() => add()}
-                block
-                icon={<PlusOutlined />}
-              >
-                Add item
-              </Button>
-            </Form.Item>
-          </>
-        )}
-      </Form.List>
-    </>
+                  新增模具
+                </Button>
+              </Form.Item>
+            </>
+          )}
+        </Form.List>
+      </div>
+    </div>
   );
 }
 

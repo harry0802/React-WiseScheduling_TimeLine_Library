@@ -24,6 +24,7 @@ function ProductionRecordActions() {
   const [userSelect, setUserSelect] = useState(options[0].value);
   const { state, dispatch } = useRecord();
   const navigate = useNavigate();
+
   function handleSearchChange(e) {
     setUserSearch((pS) => (pS = e.currentTarget.value));
   }
@@ -57,8 +58,6 @@ function ProductionRecordActions() {
 
   return (
     <div className="record-actions">
-      {/* 下拉 與 input 同組 */}
-
       <ProductDropdownSearch
         options={options}
         userSelect={userSelect}

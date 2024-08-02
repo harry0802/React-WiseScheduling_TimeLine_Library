@@ -2,7 +2,7 @@ import "./index.scss";
 import ProductionRecordActions from "./Features/ProductionRecordHome/ProductionRecordActions.jsx";
 import { Outlet } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+import InventoryManagementActions from "./Features/ProductionRecordinventoryManagement/InventoryManagementActions.jsx";
 import { useRecord } from "../ProductionRecord/Context/ProductionRecordProvider.jsx";
 
 // wrapper
@@ -26,9 +26,13 @@ function ProductionRecordSections({ children }) {
 
 function ProductionRecord() {
   const location = useLocation();
-  const isNestedPage =
-    location.pathname !== "/ProductionRecordPage" &&
-    location.pathname !== "/ProductionRecordPage/";
+  const isHomePage =
+    location.pathname === "/ProductionRecordPage" &&
+    location.pathname === "/ProductionRecordPage/";
+  console.log(location);
+
+  const isInventoryPage =
+    location.pathname === "/ProductionRecordPage/inventoryManagement";
 
   const { state } = useRecord();
 
@@ -38,7 +42,8 @@ function ProductionRecord() {
         <div className="record-header__title">
           <h3 className="record-header__title">{state.pageStatus} </h3>
         </div>
-        {!isNestedPage && <ProductionRecordActions />}
+        {isHomePage && <ProductionRecordActions />}
+        {isInventoryPage && <InventoryManagementActions />}
       </ProductionRecordHeader>
 
       <ProductionRecordSections>

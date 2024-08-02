@@ -4,7 +4,8 @@
 }
 
 //c = Component
-button.ant-btn-default {
+button.ant-btn-default,
+.ant-btn-default {
   display: flex;
   place-content: center center;
   width: 35px;
@@ -21,7 +22,8 @@ button.ant-btn-default {
 }
 
 /* ProductionRecordButton.scss */
-button.c-btn-primars {
+button.c-btn-primars,
+.c-btn-primars {
   background-color: #83bf45; // Normal background color
   border: none;
   color: white !important;
@@ -47,6 +49,18 @@ button.c-btn-primars {
     }
     &:active {
       color: #8bc1e3;
+    }
+  }
+  &--delete {
+    background-color: #eb0004; // Normal background color
+    color: #fff !important;
+    &:hover {
+      color: #fff !important;
+      background-color: #e8686a !important; // Hovering background color
+    }
+    &:active {
+      color: #fff !important;
+      background-color: #be090c !important;
     }
   }
 }
@@ -339,6 +353,7 @@ button.c-btn-primars {
   border-radius: 10px 0px 0px 10px;
   background: #ebecf0;
   box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  padding-bottom: 106px !important;
 }
 // ant 原生 body
 .ant-drawer-body {
@@ -346,10 +361,13 @@ button.c-btn-primars {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  padding-bottom: 106px !important;
 }
 
 .product-drawer {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
   &__body {
     margin-top: 50px;
   }
@@ -408,7 +426,6 @@ button.c-btn-primars {
   flex-direction: column;
   max-height: 62px;
   gap: 9px;
-  padding: 0px 0px 19px 10px;
   font-family: Inter;
   line-height: 17px;
 
@@ -430,7 +447,6 @@ button.c-btn-primars {
   padding: 0;
   margin: 0;
   margin-top: 21px;
-  padding-left: 10px;
 }
 
 .transferList__container {
@@ -452,6 +468,123 @@ button.c-btn-primars {
   & :is(.MuiList-dense) {
     width: 100%;
     max-height: 182px;
+  }
+}
+
+// Variables
+$border-color: #8f8f8f;
+$highlight-color: #83bf45;
+$font-size: 18px;
+$background-color: #fff;
+$padding-standard: 8px 10px 14px;
+$border-radius: 4px;
+
+// Mixins
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin button-style($width, $height, $color) {
+  width: $width !important;
+  height: $height !important;
+  stroke-width: 1;
+  color: $color;
+  stroke: $color;
+  cursor: pointer;
+}
+
+@mixin border-box {
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+}
+
+// ProductGroupForm
+.groupForm {
+  @include border-box;
+
+  background: $background-color;
+  font-size: $font-size;
+  color: $border-color;
+  overflow: hidden;
+  grid-column: 0;
+  margin-top: 21px;
+  // Form item container with overflow control
+  &-item {
+    position: relative;
+    height: max(250px);
+    overflow-y: auto;
+  }
+
+  // Ant Design overrides for structure adjustments
+  .ant-row {
+    @include flex-column;
+  }
+
+  .ant-space {
+    gap: 0;
+
+    &-item:has(.groupForm__input) {
+      width: 100%;
+    }
+  }
+
+  .ant-form-item-label {
+    align-self: flex-start;
+
+    label {
+      color: $border-color;
+      height: 17px;
+    }
+  }
+
+  // Form content container with border separation
+  &__content {
+    width: 100%;
+    position: relative;
+    display: flex;
+    border-bottom: 1px solid $border-color;
+  }
+
+  // Input field styling with padding and border settings
+  &__input {
+    padding: $padding-standard;
+    margin-bottom: 0;
+
+    input {
+      width: 100%;
+      border: none;
+      color: $border-color;
+
+      &:not(:first-child) {
+        border-bottom: 1px solid $border-color;
+      }
+    }
+  }
+
+  // Remove button styling using a mixin for consistency
+  &__button--remove {
+    margin-right: 12px;
+    @include button-style(35px, 35px, $highlight-color);
+  }
+
+  // Add button container with sticky positioning
+  &__addition {
+    position: sticky;
+    z-index: 1;
+    text-align: center;
+    bottom: 0;
+    margin-bottom: 0;
+    background: $background-color;
+    padding-bottom: 5px;
+    .ant-btn {
+      display: inline-flex;
+      align-items: center;
+      height: auto;
+      font-size: 18px;
+      color: $border-color;
+      font-weight: 400;
+    }
   }
 }
 

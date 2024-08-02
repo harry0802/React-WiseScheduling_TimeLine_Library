@@ -1,7 +1,14 @@
 import { Drawer } from "antd";
 import Box from "@mui/material/Box";
 
-function ProductDrawer({ visible, onClose, title, onSubmit, children }) {
+function ProductDrawer({
+  visible,
+  onClose,
+  title,
+  onSubmit,
+  children,
+  headericon = null,
+}) {
   return (
     <Drawer
       className="product-drawer"
@@ -12,7 +19,10 @@ function ProductDrawer({ visible, onClose, title, onSubmit, children }) {
       closable={false}
       destroyOnClose={true}
     >
-      <div className="product-drawer__header">{title}</div>
+      <div className="product-drawer__header">
+        <div>{title}</div>
+        {!!headericon && headericon}
+      </div>
 
       <div className="product-drawer__body">
         <Box component="div" noValidate autoComplete="off">
