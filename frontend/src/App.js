@@ -14,14 +14,14 @@ import LoginPage from "./pages/LoginPage";
 import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
 
 //  ProductionRecordPage - > PATH
-import ProductionRecordHome from "./components/ProductionRecord/Features/ProductionRecordHome/ProductionRecordHome.jsx";
-import ProductionRecordAddInfo from "./components/ProductionRecord/Features/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
-import ProductionRecordProcMaterials from "./components/ProductionRecord/Features/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
-import ProductionRecordinventoryManagement from "./components/ProductionRecord/Features/ProductionRecordinventoryManagement/ProductionRecordinventoryManagement.jsx";
+import ProductionRecordHome from "./components/ProductionRecord/features/ProductionRecordHome/ProductionRecordHome.jsx";
+import ProductionRecordAddInfo from "./components/ProductionRecord/features/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
+import ProductionRecordProcMaterials from "./components/ProductionRecord/features/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
+import ProductionRecordinventoryManagement from "./components/ProductionRecord/features/ProductionRecordinventoryManagement/ProductionRecordinventoryManagement.jsx";
 
 // context
-import { RecordAddInfoProvider } from "./components/ProductionRecord/Context/RecordAddInfoProvider.jsx";
-import { ProcMaterialsProvider } from "./components/ProductionRecord/Context/ProcMaterialsProvider.jsx";
+import { RecordAddInfoProvider } from "./components/ProductionRecord/context/RecordAddInfoProvider.jsx";
+import { ProcMaterialsProvider } from "./components/ProductionRecord/context/ProcMaterialsProvider.jsx";
 
 import "./App.scss";
 import { Layout } from "antd";

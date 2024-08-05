@@ -1,14 +1,14 @@
 import styles from "./ProductionRecordProcMaterials.module.scss";
 import { Table } from "antd";
-import { useProcMaterials } from "../../Context/ProcMaterialsProvider.jsx";
+import { useProcMaterials } from "../../context/ProcMaterialsProvider.jsx";
 import AddIcon from "@mui/icons-material/Add";
 
-import ProductContent from "../../Utility/ProductContent.jsx";
-import ProductContextCard from "../../Utility/ProductContextCard.jsx";
-import ProductDrawer from "../../Utility/ProductDrawer.jsx";
-import ProductTextFieldInput from "../../Utility/ProductTextFieldInput.jsx";
-import ProductTextFieldSelect from "../../Utility/ProductTextFieldSelect.jsx";
-import { useRecord } from "../../Context/ProductionRecordProvider.jsx";
+import ProductContent from "../../utility/ProductContent.jsx";
+import ProductContextCard from "../../utility/ProductContextCard.jsx";
+import ProductDrawer from "../../utility/ProductDrawer.jsx";
+import ProductTextFieldInput from "../../utility/ProductTextFieldInput.jsx";
+import ProductTextFieldSelect from "../../utility/ProductTextFieldSelect.jsx";
+import { useRecord } from "../../context/ProductionRecordProvider.jsx";
 import { useEffect, useState } from "react";
 
 const productColumns = [

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useRecordAddInfo } from "../../../Context/RecordAddInfoProvider.jsx";
-import ProductContextCard from "../../../Utility/ProductContextCard.jsx";
-import ProductDrawer from "../../../Utility/ProductDrawer.jsx";
+import { useRecordAddInfo } from "../../../context/RecordAddInfoProvider.jsx";
+import ProductContextCard from "../../../utility/ProductContextCard.jsx";
+import ProductDrawer from "../../../utility/ProductDrawer.jsx";
 import EditIcon from "@mui/icons-material/Edit";
 import TextField from "@mui/material/TextField";
 

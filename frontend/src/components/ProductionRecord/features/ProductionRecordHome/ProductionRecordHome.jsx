@@ -1,5 +1,5 @@
 import ProductionRecordCard from "./ProductionRecordCard";
-import { useRecord } from "../../Context/ProductionRecordProvider.jsx";
+import { useRecord } from "../../context/ProductionRecordProvider.jsx";
 import "../../index.scss";
 import { Pagination } from "antd";
 

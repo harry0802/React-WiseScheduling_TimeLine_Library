@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRecord } from "../../Context/ProductionRecordProvider.jsx";
+import { useRecord } from "../../context/ProductionRecordProvider.jsx";
 import "../../index.scss";
 
-import ProductionRecordButton from "../../Utility/ProductionRecordButton.jsx";
+import ProductionRecordButton from "../../utility/ProductionRecordButton.jsx";
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
 
-import ProductDropdownSearch from "../../Utility/ProductDropdownSearch.jsx";
+import ProductDropdownSearch from "../../utility/ProductDropdownSearch.jsx";
 
 // UI Icon
 import ScienceIcon from "@mui/icons-material/Science";

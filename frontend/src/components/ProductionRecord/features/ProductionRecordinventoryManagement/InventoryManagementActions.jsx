@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ProductDropdownSearch from "../../Utility/ProductDropdownSearch.jsx";
+import ProductDropdownSearch from "../../utility/ProductDropdownSearch";
 const options = [
   { label: "物料編號", value: "materialNumber" },
   { label: "物料名稱", value: "materialName" },

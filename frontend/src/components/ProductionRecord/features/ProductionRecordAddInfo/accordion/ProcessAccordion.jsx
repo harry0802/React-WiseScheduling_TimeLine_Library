@@ -4,8 +4,8 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ProductionRecordButton from "../../../Utility/ProductionRecordButton";
 import EditIcon from "@mui/icons-material/Edit";
+import ProductionRecordButton from "../../../utility/ProductionRecordButton";
 
 function ProcessAccordion({ children, title, OnClick = null }) {
   function handleButtonClick(e) {

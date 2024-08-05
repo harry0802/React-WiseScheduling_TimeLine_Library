@@ -1,5 +1,5 @@
+import { ProductionRecordProvider } from "../components/ProductionRecord/context/ProductionRecordProvider.jsx";
 import ProductionRecord from "../components/ProductionRecord/index.jsx";
-import { ProductionRecordProvider } from "../components/ProductionRecord/Context/ProductionRecordProvider.jsx";
 function ProductionRecordPage() {
   return (
     <div>

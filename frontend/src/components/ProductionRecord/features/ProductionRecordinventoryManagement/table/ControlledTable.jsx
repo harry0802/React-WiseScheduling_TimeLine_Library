@@ -1,9 +1,9 @@
 import React from "react";
 
 import { Table, Button, Checkbox } from "antd";
-import ProductionRecordButton from "../../../Utility/ProductionRecordButton.jsx";
 //import "./ControlledTable.css";
 import styles from "./ControlledTable.module.scss";
+import ProductionRecordButton from "../../../utility/ProductionRecordButton";
 
 // 控制表格組件，用於展示和管理表格數據
 function ControlledTable({

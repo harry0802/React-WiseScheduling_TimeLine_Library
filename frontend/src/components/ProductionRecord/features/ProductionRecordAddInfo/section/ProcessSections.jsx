@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Button, Form } from "antd";
 
-import ProductContextCard from "../../../Utility/ProductContextCard.jsx";
-import ProductDrawer from "../../../Utility/ProductDrawer.jsx";
-import ProcessAccordion from "../../ProductionRecordAddInfo/accordion/ProcessAccordion.jsx";
+import ProductContextCard from "../../../utility/ProductContextCard.jsx";
+import ProductDrawer from "../../../utility/ProductDrawer.jsx";
+import ProcessAccordion from "../accordion/ProcessAccordion.jsx";
 import AddIcon from "@mui/icons-material/Add";
 import TextField from "@mui/material/TextField";
 import AddInfomationsTransferList from "../transferList/AddInfomationsTransferList.jsx";
-import { useRecordAddInfo } from "../../../Context/RecordAddInfoProvider.jsx";
-import { TransferListProvider } from "../../../Context/TransferListProvider.jsx";
+import { useRecordAddInfo } from "../../../context/RecordAddInfoProvider.jsx";
+import { TransferListProvider } from "../../../context/TransferListProvider.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import ProductGroupForm from "../../../Utility/ProductGroupForm.jsx";
+import ProductGroupForm from "../../../utility/ProductGroupForm.jsx";
 // import { RedoRounded } from "@mui/icons-material";
 
 const items = [

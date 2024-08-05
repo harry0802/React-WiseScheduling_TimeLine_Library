@@ -13,7 +13,7 @@ import {
 import {
   intersection,
   useTransferList,
-} from "../../../Context/TransferListProvider.jsx";
+} from "../../../context/TransferListProvider.jsx";
 
 function TransferListCustomList({ title, items }) {
   const numberOfChecked = (items) => intersection(checked, items).length;

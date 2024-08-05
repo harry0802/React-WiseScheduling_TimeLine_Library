@@ -1,9 +1,11 @@
 import "./index.scss";
-import ProductionRecordActions from "./Features/ProductionRecordHome/ProductionRecordActions.jsx";
+import ProductionRecordActions from "./features/ProductionRecordHome/ProductionRecordActions.jsx";
 import { Outlet } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import InventoryManagementActions from "./Features/ProductionRecordinventoryManagement/InventoryManagementActions.jsx";
-import { useRecord } from "../ProductionRecord/Context/ProductionRecordProvider.jsx";
+import InventoryManagementActions from "./features/ProductionRecordinventoryManagement/InventoryManagementActions.jsx";
+import ProductNotification from "./utility/ProductNotification";
+
+import { useRecord } from "./context/ProductionRecordProvider";
 
 // wrapper
 function ProductionRecordWarpper({ children }) {
@@ -16,7 +18,15 @@ function ProductionRecordWarpper({ children }) {
 
 // wrapper -> header
 function ProductionRecordHeader({ children }) {
-  return <div className="record-header">{children}</div>;
+  const { state } = useRecord();
+  return (
+    <div className="record-header">
+      <div className="record-header__title">
+        <h3 className="record-header__title">{state.pageStatus} </h3>
+      </div>
+      {children}
+    </div>
+  );
 }
 
 // sections
@@ -28,26 +38,20 @@ function ProductionRecord() {
   const location = useLocation();
   const isHomePage =
     location.pathname === "/ProductionRecordPage" &&
-    location.pathname === "/ProductionRecordPage/";
-  console.log(location);
-
+    location.pathname === "/ProductionRecordPage";
   const isInventoryPage =
     location.pathname === "/ProductionRecordPage/inventoryManagement";
-
-  const { state } = useRecord();
 
   return (
     <ProductionRecordWarpper>
       <ProductionRecordHeader>
-        <div className="record-header__title">
-          <h3 className="record-header__title">{state.pageStatus} </h3>
-        </div>
         {isHomePage && <ProductionRecordActions />}
         {isInventoryPage && <InventoryManagementActions />}
       </ProductionRecordHeader>
 
       <ProductionRecordSections>
         <Outlet />
+        <ProductNotification />
       </ProductionRecordSections>
     </ProductionRecordWarpper>
   );

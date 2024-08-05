@@ -8,8 +8,8 @@ button.ant-btn-default,
 .ant-btn-default {
   display: flex;
   place-content: center center;
-  width: 35px;
-  height: 35px;
+  width: 2.1875rem;
+  height: 2.1875rem;
   background-color: $palette-primary-main;
   color: #fff;
   border: none;
@@ -102,10 +102,10 @@ button.c-btn-primars,
   &__title {
     color: #fff;
     font-family: Roboto;
-    font-size: 20px;
+    font-size: 1.25rem;
     font-style: normal;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 1.25rem;
   }
 }
 
@@ -184,7 +184,7 @@ button.c-btn-primars,
   }
 
   &__subtitle {
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
   }
 
   &__content {
@@ -226,7 +226,7 @@ button.c-btn-primars,
     max-width: 100cqw;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    gap: 20px;
+    gap: 1.25rem;
   }
 }
 
@@ -242,8 +242,8 @@ button.c-btn-primars,
   align-self: center;
   justify-self: center;
   min-width: unset;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   padding: 0px 6px;
   align-items: center;
   justify-content: center;
@@ -260,7 +260,7 @@ button.c-btn-primars,
   & a {
     text-align: center;
     color: currentColor;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-style: normal;
     font-weight: 400;
   }
@@ -279,14 +279,14 @@ button.c-btn-primars,
 .product-content {
   &__breadcrumb {
     font-family: Roboto;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-style: normal;
     font-weight: 400;
     color: #fff;
-    line-height: 20px;
+    line-height: 1.25rem;
   }
   &__sections > div {
-    margin-top: 20px;
+    margin-top: 1.25rem;
   }
 }
 
@@ -295,7 +295,7 @@ button.c-btn-primars,
   display: flex;
   flex-direction: column;
   align-items: self-start;
-  padding: 30px 23px 82px 23px;
+  padding: 1.875rem 1.4375rem 5.125rem 1.4375rem;
 
   gap: 38px;
   color: $palette-text-primary;
@@ -303,7 +303,7 @@ button.c-btn-primars,
   font-size: 16px;
   font-style: normal;
   font-weight: 600;
-  line-height: 20px; /* 125% */
+  line-height: 1.25rem; /* 125% */
   background: #fff;
   border-radius: 4px;
   border: 1px solid #fff;
@@ -318,10 +318,10 @@ button.c-btn-primars,
 
   &__text {
     height: 100%;
-    font-size: 14px;
+    font-size: 0.875rem;
   }
   &__text > p:not(:first-child) {
-    margin-top: 20px;
+    margin-top: 1.25rem;
   }
 }
 
@@ -334,10 +334,10 @@ button.c-btn-primars,
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
-  line-height: 20px; /* 125% */
+  line-height: 1.25rem; /* 125% */
   & :is(.MuiAccordionSummary-content) {
     align-items: center;
-    gap: 20px;
+    gap: 1.25rem;
   }
 }
 
@@ -349,11 +349,11 @@ button.c-btn-primars,
   font-size: 18px;
   font-style: normal;
   font-weight: 400;
-  line-height: 20px; /* 111.111% */
+  line-height: 1.25rem; /* 111.111% */
   border-radius: 10px 0px 0px 10px;
   background: #ebecf0;
   box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  padding-bottom: 106px !important;
+  padding-bottom: 6.625rem !important;
 }
 // ant 原生 body
 .ant-drawer-body {
@@ -369,26 +369,26 @@ button.c-btn-primars,
     justify-content: space-between;
   }
   &__body {
-    margin-top: 50px;
+    margin-top: 3.125rem;
   }
 
   &__footer {
     position: absolute;
     display: flex;
     justify-content: flex-end;
-    padding-top: 42px;
-    padding-bottom: 24px;
-    padding-right: 40px;
+    padding-top: 2.625rem;
+    padding-bottom: 1.5rem;
+    padding-right: 2.5rem;
     left: 0;
     right: 0;
     bottom: 0;
-    gap: 30px;
+    gap: 1.875rem;
     z-index: 2;
     background: #ebecf0;
     & button {
-      width: 80px;
-      height: 40px;
-      padding: 9px 22px 10px 22px;
+      width: 5rem;
+      height: 2.5rem;
+      padding: 0.5625rem 1.375rem 0.625rem 1.375rem;
       justify-content: center;
       align-items: center;
       border: none;
@@ -397,7 +397,7 @@ button.c-btn-primars,
       font-style: normal;
       font-weight: 400;
       line-height: normal;
-      border-radius: 30px;
+      border-radius: 1.875rem;
       cursor: pointer;
     }
   }
@@ -424,17 +424,17 @@ button.c-btn-primars,
 .info__item {
   display: flex;
   flex-direction: column;
-  max-height: 62px;
+  max-height: 3.875rem;
   gap: 9px;
   font-family: Inter;
-  line-height: 17px;
+  line-height: 1.0625rem;
 
   &:not(:first-child) {
-    margin-top: 20px;
+    margin-top: 1.25rem;
   }
 
   > span {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 }
 
@@ -454,7 +454,7 @@ button.c-btn-primars,
     flex-grow: 1;
   }
   & .transferList__button {
-    margin: 0 18px;
+    margin: 0 1.125rem;
   }
   //  原生 Ui 修改
   & :is(.MuiGrid-item) {
@@ -467,7 +467,7 @@ button.c-btn-primars,
   }
   & :is(.MuiList-dense) {
     width: 100%;
-    max-height: 182px;
+    max-height: 11.375rem;
   }
 }
 
@@ -476,7 +476,7 @@ $border-color: #8f8f8f;
 $highlight-color: #83bf45;
 $font-size: 18px;
 $background-color: #fff;
-$padding-standard: 8px 10px 14px;
+$padding-standard: 8px 10px 0.875rem;
 $border-radius: 4px;
 
 // Mixins
@@ -508,7 +508,7 @@ $border-radius: 4px;
   color: $border-color;
   overflow: hidden;
   grid-column: 0;
-  margin-top: 21px;
+  margin-top: 1.3125rem;
   // Form item container with overflow control
   &-item {
     position: relative;
@@ -534,7 +534,7 @@ $border-radius: 4px;
 
     label {
       color: $border-color;
-      height: 17px;
+      height: 1.0625rem;
     }
   }
 
@@ -596,7 +596,7 @@ $border-radius: 4px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-  font-size: 14px;
+  font-size: 0.875rem;
   &:not(:last-child) {
     margin-bottom: 21px;
   }
@@ -610,8 +610,29 @@ $border-radius: 4px;
     color: currentColor;
     font-size: inherit;
     input {
-      padding: 17px 9px;
+      padding: 1.0625rem 0.5625rem;
     }
+  }
+}
+
+.notificationStyle {
+  background: rgba(238, 238, 238, 0.9);
+  padding: 1.5rem 1.4375rem 1.5625rem 1.125rem;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+
+  & .ant-notification-notice-message {
+    color: #8f8f8f !important;
+    font-family: Roboto;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  &__icon {
+    width: 2.5rem;
+    height: 1.9375rem;
   }
 }
 

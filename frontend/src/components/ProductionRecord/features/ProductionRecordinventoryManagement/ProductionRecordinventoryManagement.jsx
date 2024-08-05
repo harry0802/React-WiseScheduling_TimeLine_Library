@@ -1,12 +1,12 @@
-import ProductContent from "../../Utility/ProductContent.jsx";
+import ProductContent from "../../utility/ProductContent.jsx";
 import { Checkbox } from "antd";
 import useTableSettings from "./table/useTableSettings.jsx";
 import ControlledTable from "./table/ControlledTable.jsx";
-import ProductDrawer from "../../Utility/ProductDrawer.jsx";
+import ProductDrawer from "../../utility/ProductDrawer.jsx";
 import { useState } from "react";
 
 import InventoryManagementRadioGroup from "./radioGroup/InventoryManagementRadioGroup.jsx";
-import { useRecord } from "../../Context/ProductionRecordProvider.jsx";
+import { useRecord } from "../../context/ProductionRecordProvider.jsx";
 import { useEffect } from "react";
 
 const initialData = Array.from({ length: 100 }, (_, index) => ({
