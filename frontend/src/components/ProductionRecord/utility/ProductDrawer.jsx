@@ -1,5 +1,6 @@
 import { Drawer } from "antd";
 import Box from "@mui/material/Box";
+import { memo } from "react";
 
 function ProductDrawer({
   visible,
@@ -41,4 +42,4 @@ function ProductDrawer({
     </Drawer>
   );
 }
-export default ProductDrawer;
+export default memo(ProductDrawer);

@@ -1,108 +1,120 @@
 import ProductContent from "../../utility/ProductContent.jsx";
-import { Checkbox } from "antd";
-import useTableSettings from "./table/useTableSettings.jsx";
 import ControlledTable from "./table/ControlledTable.jsx";
 import ProductDrawer from "../../utility/ProductDrawer.jsx";
-import { useState } from "react";
-
+import { useEffect } from "react";
 import InventoryManagementRadioGroup from "./radioGroup/InventoryManagementRadioGroup.jsx";
 import { useRecord } from "../../context/ProductionRecordProvider.jsx";
-import { useEffect } from "react";
+import ProductionRecordButton from "../../utility/ProductionRecordButton.jsx";
+import useInventoryStore from "../../slice/InventorySlice.jsx";
+import useNotification from "../../hook/useNotification.js";
+
+// Fake data for demonstration purposes
+const columns = [
+  { title: "編號", dataIndex: "id", key: "id", width: 70 },
+  {
+    title: "物料編號",
+    dataIndex: "customer",
+    key: "customer",
+    width: 200,
+    sorter: (a, b) => a.productNumber.localeCompare(b.productNumber),
+  },
+  {
+    title: "物料種類",
+    dataIndex: "productNumber",
+    key: "productNumber",
+    width: 200,
+  },
+  { title: "物料名稱", dataIndex: "quantity", key: "quantity", width: 600 },
+  { title: "數量", dataIndex: "amount", key: "amount", width: 200 },
+  { title: "單位", dataIndex: "date", key: "date", width: 150 },
+];
 
 const initialData = Array.from({ length: 100 }, (_, index) => ({
-  key: `${index}`,
-  id: index + 1,
+  key: index,
+  id: index,
   productNumber: `PN-${index + 1}`,
   customer: `Customer ${index + 1}`,
   quantity: Math.floor(Math.random() * 1000),
   amount: (Math.random() * 10000).toFixed(2),
   date: new Date().toISOString().split("T")[0],
-  selected: false,
 }));
 
-const columns = [
-  { title: "編號", dataIndex: "id", key: "id", with: 70 },
-  {
-    title: "物料種類",
-    dataIndex: "productNumber",
-    key: "productNumber",
-    with: 200,
-  },
-  { title: "物料編號", dataIndex: "customer", key: "customer", with: 200 },
-  { title: "物料名稱", dataIndex: "quantity", key: "quantity", with: 600 },
-  { title: "數量", dataIndex: "amount", key: "amount", with: 200 },
-  { title: "單位", dataIndex: "date", key: "date", with: 150 },
-];
-
-const generateData = () => {
-  const types = ["原物料", "色母", "色粉", "包材", "其他用料", "膠頭"];
-  const data = [];
-
-  for (let i = 0; i < 100; i++) {
-    const type = types[i % types.length];
-    const id = Math.floor(i / types.length) + 1;
-    data.push(`${type}${id}`);
-  }
-
-  return data;
-};
+const radioData = Array.from({ length: 10 }, (_, i) => `類型${i + 1}`);
 
 function InventoryManagementTable() {
-  const [managetDrawer, setManagetDrawer] = useState(false);
-  const [selectedValue, setSelectedValue] = useState("");
   const { handlePageStatust } = useRecord();
-
-  const { state, editRow, setSelectedKeys } = useTableSettings(initialData);
-
-  // 處理行選擇變更
-  const handleSelectChange = (selectedRowKeys) =>
-    setSelectedKeys(selectedRowKeys);
-
-  // 處理行點擊事件
-  const handleRowClick = (record) => console.log("Row clicked:", record);
-
-  // 處理編輯按鈕點擊事件
-  const handleEditClick = () => {
-    const editedRow = { ...state.dataSource[0], productNumber: "PN-Edited" };
-    editRow(editedRow);
+  const { notifySuccess } = useNotification();
+  // Access Zustand store
+  const {
+    dataSource,
+    selectedRowKeys,
+    drawerVisible,
+    selectedProductNumber,
+    setData,
+    setSelectedKeys,
+    setDrawerVisible,
+    setSelectedProductNumber,
+    handleEditClick,
+    handleSave,
+  } = useInventoryStore();
+  // Handle row click
+  const onRowClick = (record) => {
+    const isSelected = selectedRowKeys.includes(record.id);
+    const newSelectedRowKeys = isSelected
+      ? selectedRowKeys.filter((selectedId) => selectedId !== record.id) // Deselect if already selected
+      : [...selectedRowKeys, record.id]; // Select if not already selected
+    setSelectedKeys(newSelectedRowKeys); // Trigger the onSelectChange function with updated selection
   };
-  const handleRadioChange = (event) => {
-    setSelectedValue(event.target.value);
+
+  const handleSaveAndNotify = async () => {
+    handleSave();
+    setTimeout(() => notifySuccess(), 200);
   };
 
-  const radioData = generateData();
-
+  // Initialize data when the component mounts
   useEffect(() => {
     handlePageStatust("原物料分類");
+    setData(initialData);
   }, []);
 
   return (
-    <div>
+    <>
       <ControlledTable
         columns={columns}
-        dataSource={state.dataSource}
-        selectedRowKeys={state.selectedRowKeys}
-        onSelectChange={handleSelectChange}
-        onRowClick={handleRowClick}
+        dataSource={dataSource}
+        selectedRowKeys={selectedRowKeys}
+        onSelectChange={setSelectedKeys}
+        onRowClick={onRowClick}
         title="產品列表"
-        onEditClick={() => setManagetDrawer(true)}
-      />
+      >
+        <ProductionRecordButton
+          shape="round"
+          OnClick={handleEditClick}
+          disabled={selectedRowKeys.length === 0}
+        >
+          編輯
+        </ProductionRecordButton>
+        <button onClick={notifySuccess}>13</button>
+      </ControlledTable>
+
       <ProductDrawer
         title="原物料分類"
-        visible={managetDrawer}
-        onClose={() => setManagetDrawer(false)}
+        visible={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        onSubmit={handleSaveAndNotify}
       >
         <InventoryManagementRadioGroup
           data={radioData}
-          value={selectedValue}
-          onChange={handleRadioChange}
+          value={selectedProductNumber}
+          onChange={(e) => setSelectedProductNumber(e.target.value)}
         />
+        {/* <button onClick={handleSave}>保存</button> */}
       </ProductDrawer>
-    </div>
+    </>
   );
 }
 
-function ProductionRecordinventoryManagement() {
+function ProductionRecordInventoryManagement() {
   return (
     <ProductContent title="製程資料維護">
       <InventoryManagementTable />
@@ -110,4 +122,4 @@ function ProductionRecordinventoryManagement() {
   );
 }
 
-export default ProductionRecordinventoryManagement;
+export default ProductionRecordInventoryManagement;

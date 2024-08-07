@@ -3,8 +3,8 @@
 // 變量定義
 $font-color: #8f8f8f;
 $font-family: Roboto, sans-serif;
-$font-size: 14px;
-$line-height: 20px; // 142.857%
+$font-size: 0.875rem;
+$line-height: 1.25rem; // 142.857%
 $border-color: #8f8f8f;
 $background-color-thead: #cdcdcd;
 $background-color-even-row: #dfdfdf;
@@ -28,8 +28,8 @@ body {
 // 組件樣式
 .procMaterials-context {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(18.75rem, 1fr));
+  gap: 1.25rem;
 
   // 表格樣式
   :global(.ant-table-wrapper) {
@@ -78,7 +78,7 @@ body {
 }
 
 .reusableTable {
-  max-height: 520px;
+  max-height: 32.5rem;
   overflow: auto;
   //   overflow-y: auto;
 

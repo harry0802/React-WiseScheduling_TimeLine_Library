@@ -4,7 +4,29 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Unstable_Grid2";
 import styles from "./InventoryManagementRadioGroup.module.scss";
+/* ASCII 
+InventoryManagementRadioGroup
+│
+├── RadioGroup
+│   └── Grid (Container)
+│       ├── Grid Item
+│       │   └── RadioItem
+│       │       └── FormControlLabel
+│       │           ├── Radio
+│       │           └── Label
+│       ├── Grid Item
+│       │   └── RadioItem
+│       │       └── FormControlLabel
+│       │           ├── Radio
+│       │           └── Label
+│       ├── ...
+│       └── Grid Item
+│           └── RadioItem
+│               └── FormControlLabel
+│                   ├── Radio
+│                   └── Label
 
+*/
 function RadioItem({ item }) {
   return (
     <FormControlLabel

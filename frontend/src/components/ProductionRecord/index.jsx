@@ -36,9 +36,11 @@ function ProductionRecordSections({ children }) {
 
 function ProductionRecord() {
   const location = useLocation();
+
   const isHomePage =
     location.pathname === "/ProductionRecordPage" &&
     location.pathname === "/ProductionRecordPage";
+
   const isInventoryPage =
     location.pathname === "/ProductionRecordPage/inventoryManagement";
 

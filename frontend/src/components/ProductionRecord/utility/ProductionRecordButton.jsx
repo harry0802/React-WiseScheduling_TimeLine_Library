@@ -6,6 +6,7 @@ function ProductionRecordButton({
   OnClick = null,
   className = "",
   icon,
+  disabled,
 }) {
   return (
     <Button
@@ -13,6 +14,7 @@ function ProductionRecordButton({
       className={`c-btn-primars ${className}`}
       shape={shape}
       icon={icon}
+      disabled={!!disabled ? disabled : null}
     >
       {children}
     </Button>

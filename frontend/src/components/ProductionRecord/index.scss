@@ -24,7 +24,7 @@ button.ant-btn-default,
 /* ProductionRecordButton.scss */
 button.c-btn-primars,
 .c-btn-primars {
-  background-color: #83bf45; // Normal background color
+  background-color: #83bf45 !important; // Normal background color
   border: none;
   color: white !important;
   transition: background-color 0.3s, transform 0.1s;
