@@ -1,4 +1,4 @@
-from app.api.productionSchedule.dto import NullableDateTime, NullableFloat, NullableInteger, NullableString, StringDateTime, StringInteger
+from app.service.customField import *
 from flask_restx import Namespace, fields
 from .schemas import productionReportSchema
 from marshmallow.validate import Length, Range

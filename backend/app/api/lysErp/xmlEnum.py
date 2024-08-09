@@ -7,6 +7,7 @@ class DataKind(Enum):
         000005=員工基本資料 (Employee) \n
         000009=目前庫存(廠內倉) (CurrentInventory) \n
         00000D=客戶基本資料 (Customer) \n
+        00000R=產品結構 (ProductStructure) \n
         0000AB=廠內製令單 (FactoryProductionOrder) \n
         0000AC=加工製令單 (ProcessingProductionOrder) \n
         0000AD=代工製令單 (SubcontractingProductionOrder) \n
@@ -27,6 +28,7 @@ class DataKind(Enum):
     Employee = '000005'
     CurrentInventory = '000009'
     Customer = '00000D'
+    ProductStructure = '00000R'
     FactoryProductionOrder = '0000AB'
     ProcessingProductionOrder = '0000AC'
     SubcontractingProductionOrder = '0000AD'
@@ -43,8 +45,90 @@ class DataKind(Enum):
     SubcontractingReturnOrder = '0000BL'
 
 
-class Ixmlda0000AB(Enum):
-    """ MP_NO	nvarchar	22	單據編號 \n
+class Ixmlda00000R_Title(Enum):
+    """
+        BM_USKNO	NVARCHAR	30	成品編號
+        BM_USKNM	NVARCHAR	60	成品名稱
+        BM_STDTIME	FLOAT	8	標準工時
+        BM_REM	NTEXT	16	備注
+        BM_CODE	NVARCHAR	25	結構代號
+        BM_UNIT	NVARCHAR	8	基本單位
+        BM_SPEC	NTEXT		規格
+        BM_NVCH	NVARCHAR	30	版本別
+        BM_STOP	BIT	1	是否停用
+        BM_CHECK	BIT	1	是否審核
+        BM_CHECKER	NVARCHAR	40	審核人員
+        BM_CHKDATE	DATETIME     	8	審核日期
+        BM_BDATE	DATETIME	8	生效日
+        BM_STOPDATE	DATETIME     	8	停用日期
+        BM_KEY           	BIT	1	是否關鍵配方
+        BM_MAKER	NVARCHAR	40	製單人員
+        BM_CDATE	DATETIME	8	建檔日期
+        BM_BIMTYPE	INT	4	電子簽核狀態
+    """
+    BM_USKNO = 'BM_USKNO'
+    BM_USKNM = 'BM_USKNM'
+    BM_STDTIME = 'BM_STDTIME'
+    BM_REM = 'BM_REM'
+    BM_CODE = 'BM_CODE'
+    BM_UNIT = 'BM_UNIT'
+    BM_SPEC = 'BM_SPEC'
+    BM_NVCH = 'BM_NVCH'
+    BM_STOP = 'BM_STOP'
+    BM_CHECK = 'BM_CHECK'
+    BM_CHECKER = 'BM_CHECKER'
+    BM_CHKDATE = 'BM_CHKDATE'
+    BM_BDATE = 'BM_BDATE'
+    BM_STOPDATE = 'BM_STOPDATE'
+    BM_KEY = 'BM_KEY'
+    BM_MAKER = 'BM_MAKER'
+    BM_CDATE = 'BM_CDATE'
+    BM_BIMTYPE = 'BM_BIMTYPE'
+    
+
+class Ixmlda00000R_Detail(Enum):
+    """
+        BD_USKNO	NVARCHAR	30	成品編號
+        BD_DSKNO	NVARCHAR	30	原料編號
+        BD_DSKNM	NVARCHAR	60	原料名稱
+        BD_BNUM	FLOAT	8	成品基數
+        BD_QTY	FLOAT	8	成品基數所需要的原料的用量
+        BD_RATE	FLOAT	8	成品基數所需原料的損耗率
+        BD_CJNAME	NVARCHAR	100	材積
+        BD_PLACE	NVARCHAR	255	插件位置
+        BD_REM	NTEXT	16	備注
+        BD_WEIGHT	FLOAT	8	重量
+        BD_UNIT	NVARCHAR	8	基本單位
+        BD_UNITFG	BIT	1	是否輔助單位
+        BD_RQTY         	FLOAT	8	輔助單位對應基本單位數量
+        BD_CODE	NVARCHAR	10	產品結構代碼
+        BD_MCODE	NVARCHAR	10	半成品結構代碼
+        BD_SPEC	NTEXT		規格
+        BD_PARTFG	BIT		是否主要零件
+    """
+    BD_USKNO = 'BD_USKNO'
+    BD_DSKNO = 'BD_DSKNO'
+    BD_DSKNM = 'BD_DSKNM'
+    BD_BNUM = 'BD_BNUM'
+    BD_QTY = 'BD_QTY'
+    BD_RATE = 'BD_RATE'
+    BD_CJNAME = 'BD_CJNAME'
+    BD_PLACE = 'BD_PLACE'
+    BD_REM = 'BD_REM'
+    BD_WEIGHT = 'BD_WEIGHT'
+    BD_UNIT = 'BD_UNIT'
+    BD_UNITFG = 'BD_UNITFG'
+    BD_RQTY = 'BD_RQTY'
+    BD_CODE = 'BD_CODE'
+    BD_MCODE = 'BD_MCODE'
+    BD_SPEC = 'BD_SPEC'
+    BD_PARTFG = 'BD_PARTFG'
+
+    
+class Ixmlda0000AB_Title(Enum):
+    """ 
+        0000AB_廠內製令單抬頭資料檔 \n
+        MP_NO	nvarchar	22	單據編號 \n
         MP_DATE	datetime	8	單據日期 \n
         MP_BDTE	datetime	8	開工日期 \n
         MP_EDTE	datetime	8	預設完工日期 \n
