@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import React from "react";
 
 // Purchase Order Form Component
-function ProductGroupForm({ items, form }) {
+function ProductGroupForm() {
   return (
     <div className="groupForm">
       <div className="groupForm-item">
@@ -21,12 +21,11 @@ function ProductGroupForm({ items, form }) {
                   >
                     <Input placeholder="XXX-00XX-XXXD" />
                   </Form.Item>
-                  {key > 0 && (
-                    <CloseIcon
-                      className="groupForm__button--remove"
-                      onClick={() => remove(name)}
-                    />
-                  )}
+
+                  <CloseIcon
+                    className="groupForm__button--remove"
+                    onClick={() => remove(name)}
+                  />
                 </Space>
               ))}
 
@@ -35,7 +34,6 @@ function ProductGroupForm({ items, form }) {
                 style={{ marginTop: 8 }}
               >
                 <Button
-                  className=""
                   type="circle"
                   onClick={() => add()}
                   icon={

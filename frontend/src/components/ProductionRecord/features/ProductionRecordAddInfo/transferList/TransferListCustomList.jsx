@@ -19,7 +19,7 @@ function TransferListCustomList({ title, items }) {
   const numberOfChecked = (items) => intersection(checked, items).length;
   const { state, handleToggle, handleToggleAll } = useTransferList();
 
-  const { left, right, checked } = state || {};
+  const { checked } = state || {};
   return (
     <Card>
       <CardHeader

@@ -63,6 +63,7 @@ function AddInfomationsTransferList({ type = "屬性" }) {
       <Grid className="transferList__item" item>
         <TransferListCustomList title={`請選${type}編號`} items={left} />
       </Grid>
+
       <Grid className="transferList__button" item>
         <Grid container direction="column" alignItems="center">
           <Button
@@ -87,12 +88,9 @@ function AddInfomationsTransferList({ type = "屬性" }) {
           </Button>
         </Grid>
       </Grid>
+
       <Grid className="transferList__item" item>
-        <TransferListCustomList
-          title={`已選${type}編號`}
-          items={right}
-          checked={checked}
-        />
+        <TransferListCustomList title={`已選${type}編號`} items={right} />
       </Grid>
     </Grid>
   );

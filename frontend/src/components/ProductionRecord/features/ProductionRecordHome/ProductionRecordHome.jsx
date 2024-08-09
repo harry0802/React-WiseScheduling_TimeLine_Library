@@ -36,7 +36,7 @@ function ProductionRecordHome() {
 
   useEffect(() => {
     setPageStatus("產品履歷與BOM");
-  }, [setPageStatus]);
+  }, []);
 
   useEffect(() => {
     (async function () {

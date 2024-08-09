@@ -566,6 +566,15 @@ $border-radius: 4px;
   &__button--remove {
     margin-right: 12px;
     @include button-style(35px, 35px, $highlight-color);
+    transition: all 0.3s;
+    &:hover {
+      color: #6fc1ae;
+      stroke: #6fc1ae;
+    }
+    &:active {
+      color: #8bc1e3;
+      stroke: #8bc1e3;
+    }
   }
 
   // Add button container with sticky positioning

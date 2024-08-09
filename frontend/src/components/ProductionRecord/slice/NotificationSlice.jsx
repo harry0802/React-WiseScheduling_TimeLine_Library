@@ -38,6 +38,8 @@ const useNotificationStore = create((set, get) => ({
         className: "notificationStyle", // Optional class name for custom styling
         style: notificationStyle || { width: 600 }, // Apply custom or default styles
         placement: "bottomRight",
+        duration: 1,
+        pauseOnHover: false,
         icon: iconOptions || (
           <CheckIcon
             className="notificationStyle__icon"

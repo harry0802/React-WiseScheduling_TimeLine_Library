@@ -73,8 +73,8 @@ function TransferListProvider({ children }) {
   );
 }
 
-const not = (a, b) => a.filter((value) => b.indexOf(value) === -1);
-const intersection = (a, b) => a.filter((value) => b.indexOf(value) !== -1);
+const not = (a, b) => a.filter((value) => !~b.indexOf(value));
+const intersection = (a, b) => a.filter((value) => ~b.indexOf(value));
 const union = (a, b) => [...a, ...not(b, a)];
 
 const useTransferList = () => {

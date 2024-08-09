@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Form } from "antd";
 
 import ProductContextCard from "../../../utility/ProductContextCard.jsx";
@@ -12,8 +12,8 @@ import { TransferListProvider } from "../../../context/TransferListProvider.jsx"
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import ProductGroupForm from "../../../utility/ProductGroupForm.jsx";
+import useNotification from "../../../hook/useNotification.js";
 // import { RedoRounded } from "@mui/icons-material";
-
 const items = [
   {
     item_code: "dnh75n",
@@ -22,8 +22,7 @@ const items = [
     item_code: "456def",
   },
 ];
-
-// 滑動組件 製成材料選取功能
+// Dialo - > 製成材料選取功能
 function SectionsDialogTransferList() {
   return (
     <TransferListProvider>
@@ -32,37 +31,52 @@ function SectionsDialogTransferList() {
   );
 }
 
-// 可控組建 裡面的資料是要靈活的
+// Process -> Dialog
+// *可控組建 裡面的資料是要靈活的
 function ProcessSectionsDialog() {
-  const { processDrawer, setProcessDrawer } = useRecordAddInfo();
-
-  const [form] = Form.useForm();
-
   const [initialValues, setInitialValues] = useState({
     processName: "XX-000-XXX",
     moldName: "XX-000-XXX",
   });
   const [tempValues, setTempValues] = useState({ ...initialValues });
+  const [moldItems, setMoldItems] = useState([]);
+
+  const { processDrawer, setProcessDrawer } = useRecordAddInfo();
+  const [form] = Form.useForm();
+  const { notifySuccess } = useNotification();
 
   const handleFormSubmit = async () => {
     try {
-      const values = await form.validateFields();
+      const { items } = await form.validateFields();
+      setMoldItems(
+        items.filter(
+          ({ item_code }) =>
+            !!item_code && typeof item_code !== undefined && item_code !== " "
+        )
+      );
       setInitialValues({ ...tempValues });
-      setProcessDrawer(false);
-      console.log(values);
+      notifySuccess();
     } catch (error) {
+      console.log(error);
       alert("Validation Failed:", error);
+    } finally {
+      setProcessDrawer(false);
     }
   };
 
   const handleDrawerClose = () => {
-    // Reset temp values to initial values when drawer is closed
     setTempValues({ ...initialValues });
+    form.setFieldsValue({ items: moldItems });
     setProcessDrawer(false);
   };
 
+  useEffect(() => {
+    setMoldItems(items);
+    form.setFieldsValue({ items: moldItems });
+  }, [setMoldItems, moldItems, form]);
+
   return (
-    <Form form={form} initialValues={{ ...items }} layout="vertical">
+    <Form form={form} layout="vertical">
       <ProductDrawer
         title="製程 1"
         visible={processDrawer}
@@ -98,14 +112,14 @@ function ProcessSectionsDialog() {
             />
           </div>
         </div>
-        <ProductGroupForm items={items} form={form} />
+        <ProductGroupForm />
         <SectionsDialogTransferList />
       </ProductDrawer>
     </Form>
   );
 }
 
-// 手風琴折疊的內容
+// 手風琴 -> 手風琴折疊的內容
 function ProcessSectionsListDetail(params) {
   return (
     <div>
