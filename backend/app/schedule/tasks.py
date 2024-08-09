@@ -20,10 +20,24 @@ def update_calendar():
 LY_ERP_ON = os.getenv("LY_ERP_ON", "False")
 if LY_ERP_ON.lower() == "true":
     @scheduler.task(
-        "cron",
-        id="sync_ly_0000AB",
-        hour='*',
-        max_instances=1,
+    "cron",
+    id="sync_ly_00000R",
+    hour='*',
+    max_instances=1,
+    )
+    def sync_ly_00000R():
+        with scheduler.app.app_context():
+            try:
+                LyService.sync_ly_00000R()
+            except Exception as error:
+                current_app.logger.error(error)
+
+    
+    @scheduler.task(
+    "cron",
+    id="sync_ly_0000AB",
+    hour='*',
+    max_instances=1,
     )
     def sync_ly_0000AB():
         with scheduler.app.app_context():
@@ -31,3 +45,4 @@ if LY_ERP_ON.lower() == "true":
                 LyService.sync_ly_0000AB()
             except Exception as error:
                 current_app.logger.error(error)
+

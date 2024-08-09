@@ -218,4 +218,25 @@ class productionScheduleController(Resource):
     @controller_entrance_log(description="Get machineSNs")
     def get(self):
         return productionScheduleService.get_machineSNs()
+
+
+@api.route("/checkStartEligibility")
+class productionScheduleController(Resource):
+    eligibility_resp = productionScheduleDto.eligibility_resp
+
+    @api.doc(
+        """製令單需按照製程順序產生母批，例如: 「廠內-成型-1I」的製令單必須進入「On-going」狀態後，「廠內-成型-2I」的製令單才能產生母批。
+        後端確認可以產生母批，會回傳True，不能產生則回傳False""",
+        responses={
+            200: ("data successfully sent", eligibility_resp),
+            404: "not found",
+        },
+    )
+    @api.param("workOrderSN", "workOrderSN", required=True)
+    @api.param("processId", "id of the process", required=True)
+    @controller_entrance_log(description="Check the eligibility of starting the workOrder")
+    def get(self):
+        workOrderSN = request.args.get('workOrderSN', default=None, type=str)
+        processId = request.args.get('processId', default=None, type=int)
+        return productionScheduleService.check_start_eligibility(workOrderSN, processId)
     
