@@ -1,4 +1,5 @@
 import { Button } from "antd";
+import { memo } from "react";
 
 function ProductionRecordButton({
   children,
@@ -21,4 +22,4 @@ function ProductionRecordButton({
   );
 }
 
-export default ProductionRecordButton;
+export default memo(ProductionRecordButton);

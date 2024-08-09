@@ -57,6 +57,7 @@ function InventoryManagementTable() {
     handleEditClick,
     handleSave,
   } = useInventoryStore();
+
   // Handle row click
   const onRowClick = (record) => {
     const isSelected = selectedRowKeys.includes(record.id);
@@ -66,7 +67,7 @@ function InventoryManagementTable() {
     setSelectedKeys(newSelectedRowKeys); // Trigger the onSelectChange function with updated selection
   };
 
-  const handleSaveAndNotify = async () => {
+  const handleSaveAndNotify = () => {
     handleSave();
     setTimeout(() => notifySuccess(), 200);
   };
@@ -74,7 +75,9 @@ function InventoryManagementTable() {
   // Initialize data when the component mounts
   useEffect(() => {
     handlePageStatust("原物料分類");
-    setData(initialData);
+    (function () {
+      setData(initialData);
+    })();
   }, []);
 
   return (
@@ -94,7 +97,6 @@ function InventoryManagementTable() {
         >
           編輯
         </ProductionRecordButton>
-        <button onClick={notifySuccess}>13</button>
       </ControlledTable>
 
       <ProductDrawer
@@ -108,7 +110,6 @@ function InventoryManagementTable() {
           value={selectedProductNumber}
           onChange={(e) => setSelectedProductNumber(e.target.value)}
         />
-        {/* <button onClick={handleSave}>保存</button> */}
       </ProductDrawer>
     </>
   );

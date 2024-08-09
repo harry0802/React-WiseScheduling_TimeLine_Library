@@ -1,5 +1,5 @@
 import NotificationSlice from "../slice/NotificationSlice.jsx"; // Assuming NotificationSlice is imported from Zustand
-import { memo } from "react";
+
 function useNotification() {
   const triggerNotification = NotificationSlice(
     (state) => state.triggerNotification

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, lazy } from "react";
 import { Route, Routes } from "react-router-dom";
 import Topbar from "./components/Global/Topbar";
 // import Sidebar from "./components/Global/Sidebar";
@@ -11,9 +11,11 @@ import ProductionDetailPage from "./pages/ProductionDetailPage";
 import OperatorSignPage from "./pages/OperatorSignPage";
 import ProductionInspectionPage from "./pages/ProductionInspectionPage";
 import LoginPage from "./pages/LoginPage";
-import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
 
 //  ProductionRecordPage - > PATH
+
+import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
+
 import ProductionRecordHome from "./components/ProductionRecord/features/ProductionRecordHome/ProductionRecordHome.jsx";
 import ProductionRecordAddInfo from "./components/ProductionRecord/features/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
 import ProductionRecordProcMaterials from "./components/ProductionRecord/features/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
@@ -75,7 +77,7 @@ const App = () => {
               >
                 <Route index element={<ProductionRecordHome />} />
                 <Route
-                  path="addProductInfo"
+                  path="addProductInfo/:productId"
                   element={
                     <RecordAddInfoProvider>
                       <ProductionRecordAddInfo />

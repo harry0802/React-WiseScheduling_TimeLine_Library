@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRecord } from "../../context/ProductionRecordProvider.jsx";
-import "../../index.scss";
 
 import ProductionRecordButton from "../../utility/ProductionRecordButton.jsx";
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
@@ -11,6 +9,7 @@ import ProductDropdownSearch from "../../utility/ProductDropdownSearch.jsx";
 // UI Icon
 import ScienceIcon from "@mui/icons-material/Science";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import { homeSlice } from "../../slice/HomeSlice.jsx";
 
 const options = [
   { label: "產品名稱", value: "productName" },
@@ -22,29 +21,14 @@ const options = [
 function ProductionRecordActions() {
   const [userSearch, setUserSearch] = useState("");
   const [userSelect, setUserSelect] = useState(options[0].value);
-  const { state, dispatch } = useRecord();
   const navigate = useNavigate();
 
-  function handleSearchChange(e) {
-    setUserSearch((pS) => (pS = e.currentTarget.value));
-  }
-  function handleSelectChange(value) {
-    setUserSelect((pS) => (pS = value));
-  }
+  const { searchData, data } = homeSlice();
 
   function handleSearch() {
-    const { data, itemsPerPage } = state || {};
     if (!data || !userSelect) return;
 
-    // 三元判斷  空值回到原值
-    const filteredData = userSearch
-      ? data.filter((item) => item[userSelect]?.includes(userSearch))
-      : data;
-
-    dispatch({
-      type: "SET_FILTERED_DATA",
-      payload: { filteredData, itemsPerPage },
-    });
+    searchData(userSearch, userSelect);
   }
 
   const throttledHandleSearch = debounce(handleSearch, 500);
@@ -61,8 +45,8 @@ function ProductionRecordActions() {
       <ProductDropdownSearch
         options={options}
         userSelect={userSelect}
-        handleSelectChange={handleSelectChange}
-        handleSearchChange={handleSearchChange}
+        handleSelectChange={(value) => setUserSelect(value)}
+        handleSearchChange={(e) => setUserSearch(e.currentTarget.value)}
       />
 
       <div className="record-actions__button">

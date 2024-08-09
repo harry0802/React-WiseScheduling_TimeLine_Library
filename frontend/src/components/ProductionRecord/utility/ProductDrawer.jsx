@@ -9,6 +9,7 @@ function ProductDrawer({
   onSubmit,
   children,
   headericon = null,
+  disabled,
 }) {
   return (
     <Drawer
@@ -35,7 +36,11 @@ function ProductDrawer({
         <button onClick={onClose} className="c-btn-primars--cancel">
           取消
         </button>
-        <button onClick={onSubmit} className="c-btn-primars">
+        <button
+          disabled={disabled}
+          onClick={onSubmit}
+          className="c-btn-primars"
+        >
           確定
         </button>
       </div>

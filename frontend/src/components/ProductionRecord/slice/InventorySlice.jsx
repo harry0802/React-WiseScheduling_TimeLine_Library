@@ -47,6 +47,7 @@ const InventorySlice = create((set) => {
           dataSource: updateDataSource,
           selectedProductNumber: "",
           drawerVisible: false,
+          selectedRowKeys: [],
         };
       }),
   };

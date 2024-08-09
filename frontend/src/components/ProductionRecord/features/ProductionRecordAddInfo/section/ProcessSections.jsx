@@ -24,10 +24,10 @@ const items = [
 ];
 
 // 滑動組件 製成材料選取功能
-function SectionsDialogTransferList({ type = "" }) {
+function SectionsDialogTransferList() {
   return (
     <TransferListProvider>
-      <AddInfomationsTransferList type={type} />
+      <AddInfomationsTransferList type={"物料"} />
     </TransferListProvider>
   );
 }
@@ -35,26 +35,38 @@ function SectionsDialogTransferList({ type = "" }) {
 // 可控組建 裡面的資料是要靈活的
 function ProcessSectionsDialog() {
   const { processDrawer, setProcessDrawer } = useRecordAddInfo();
-  const [processName, setProcessName] = useState("XX-000-XXX");
-  const [moldName, setMoldName] = useState("XX-000-XXX");
+
   const [form] = Form.useForm();
+
+  const [initialValues, setInitialValues] = useState({
+    processName: "XX-000-XXX",
+    moldName: "XX-000-XXX",
+  });
+  const [tempValues, setTempValues] = useState({ ...initialValues });
 
   const handleFormSubmit = async () => {
     try {
       const values = await form.validateFields();
-      alert("Submitted Values:", values);
-      // closeDrawer(); // Close the drawer after successful submission
+      setInitialValues({ ...tempValues });
+      setProcessDrawer(false);
+      console.log(values);
     } catch (error) {
       alert("Validation Failed:", error);
     }
   };
 
+  const handleDrawerClose = () => {
+    // Reset temp values to initial values when drawer is closed
+    setTempValues({ ...initialValues });
+    setProcessDrawer(false);
+  };
+
   return (
-    <Form form={form} initialValues={{ items }} layout="vertical">
+    <Form form={form} initialValues={{ ...items }} layout="vertical">
       <ProductDrawer
         title="製程 1"
         visible={processDrawer}
-        onClose={() => setProcessDrawer(false)}
+        onClose={handleDrawerClose}
         onSubmit={handleFormSubmit}
         headericon={
           <Button
@@ -68,26 +80,31 @@ function ProcessSectionsDialog() {
         <div className="product-drawer__info">
           <div className="info__item">
             <TextField
-              label="舊產品編號"
-              value={processName}
-              onChange={(e) => setProcessName(e.target.value)}
+              label="製程名稱"
+              value={tempValues.processName}
+              onChange={(e) =>
+                setTempValues({ ...tempValues, processName: e.target.value })
+              }
             />
           </div>
 
           <div className="info__item">
             <TextField
               label="製具編號"
-              value={moldName}
-              onChange={(e) => setMoldName(e.target.value)}
+              value={tempValues.moldName}
+              onChange={(e) =>
+                setTempValues({ ...tempValues, moldName: e.target.value })
+              }
             />
           </div>
         </div>
         <ProductGroupForm items={items} form={form} />
-        <SectionsDialogTransferList type="物料" />
+        <SectionsDialogTransferList />
       </ProductDrawer>
     </Form>
   );
 }
+
 // 手風琴折疊的內容
 function ProcessSectionsListDetail(params) {
   return (
