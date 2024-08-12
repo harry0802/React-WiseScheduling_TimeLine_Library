@@ -20,7 +20,6 @@ def upgrade():
     with op.batch_alter_table('productionSchedule', schema=None) as batch_op:
         batch_op.add_column(sa.Column('productId', sa.Integer(), nullable=True))
         batch_op.add_column(sa.Column('processId', sa.Integer(), nullable=True))
-        batch_op.add_column(sa.Column('ltmoldmapId', sa.Integer(), nullable=True))
         batch_op.alter_column('productSN',
                existing_type=mysql.VARCHAR(length=255),
                nullable=True)
@@ -28,7 +27,6 @@ def upgrade():
                existing_type=mysql.VARCHAR(length=255),
                nullable=True)
         batch_op.create_foreign_key('productionSchedule_ibfk_processId', 'process', ['processId'], ['id'])
-        batch_op.create_foreign_key('productionSchedule_ibfk_ltmoldmapId', 'ltmoldmap', ['ltmoldmapId'], ['no'])
         batch_op.create_foreign_key('productionSchedule_ibfk_productId', 'product', ['productId'], ['id'])
         batch_op.drop_column('moldNo')
     # ### end Alembic commands ###
@@ -39,7 +37,6 @@ def downgrade():
     with op.batch_alter_table('productionSchedule', schema=None) as batch_op:
         batch_op.add_column(sa.Column('moldNo', mysql.VARCHAR(length=255), nullable=False))
         batch_op.drop_constraint('productionSchedule_ibfk_processId', type_='foreignkey')
-        batch_op.drop_constraint('productionSchedule_ibfk_ltmoldmapId', type_='foreignkey')
         batch_op.drop_constraint('productionSchedule_ibfk_productId', type_='foreignkey')
         batch_op.alter_column('productName',
                existing_type=mysql.VARCHAR(length=255),
@@ -47,7 +44,6 @@ def downgrade():
         batch_op.alter_column('productSN',
                existing_type=mysql.VARCHAR(length=255),
                nullable=False)
-        batch_op.drop_column('ltmoldmapId')
         batch_op.drop_column('processId')
         batch_op.drop_column('productId')
     # ### end Alembic commands ###

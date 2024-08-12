@@ -13,7 +13,6 @@ class productionScheduleDto:
             "id": NullableInteger(required=False, description="serialNumber", example=1),
             "productId": NullableInteger(required=False, description="Product ID", example=1),
             "processId": NullableInteger(required=False, description="Process ID", example=1),
-            "ltmoldmapId": NullableInteger(required=False, description="Ltmoldmap ID (Mold)", example=1),
             "productionArea": NullableString(required=False, description="productionArea", example="A"),
             "machineSN": NullableString(required=False, description="machineSN", example="A1",
                                         validate=Length(min=1, max=1)),

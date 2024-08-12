@@ -2,6 +2,7 @@ from datetime import datetime, date, timedelta
 import math
 import sys
 from flask import current_app
+from sqlalchemy import func
 from app import db
 from app.utils import message, err_resp, internal_err_resp
 from app.models.productionSchedule import ProductionSchedule
@@ -10,6 +11,7 @@ from app.models.ltmoldmap import LtMoldMap
 from app.models.product import Product
 from app.models.process import Process
 from app.models.processOption import ProcessOption
+from app.models.processMold import ProcessMold
 from .schemas import productionScheduleSchema
 from app.api.calendar.service import CalendarService
 productionSchedule_schema = productionScheduleSchema()
@@ -81,8 +83,6 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("productId") is not None else db_obj.productId
     db_obj.processId = int(payload["processId"]) \
         if payload.get("processId") is not None else db_obj.processId
-    db_obj.ltmoldmapId = int(payload["ltmoldmapId"]) \
-        if payload.get("ltmoldmapId") is not None else db_obj.ltmoldmapId
     db_obj.productionArea = payload["productionArea"] \
         if payload.get("productionArea") is not None else db_obj.productionArea
     db_obj.machineSN = payload["machineSN"] \
@@ -193,7 +193,7 @@ class productionScheduleService:
 
             # Get the current productionSchedule
             query = ProductionSchedule.query
-            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.productId, ProductionSchedule.processId, ProductionSchedule.ltmoldmapId,
+            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.productId, ProductionSchedule.processId,
                                         ProductionSchedule.productionArea, ProductionSchedule.machineSN, ProductionSchedule.serialNumber,
                                         ProductionSchedule.workOrderSN, ProductionSchedule.workOrderQuantity, ProductionSchedule.workOrderDate, 
                                         ProductionSchedule.moldingSecond, ProductionSchedule.planOnMachineDate, ProductionSchedule.actualOnMachineDate, 
@@ -201,11 +201,13 @@ class productionScheduleService:
                                         ProductionSchedule.actualFinishDate, ProductionSchedule.comment, ProductionSchedule.dailyWorkingHours, 
                                         ProductionSchedule.moldCavity, ProductionSchedule.week, ProductionSchedule.singleOrDoubleColor, 
                                         ProductionSchedule.conversionRate, ProductionSchedule.status, Product.productSN, Product.productName, 
-                                        ProcessOption.processName, LtMoldMap.moldno)
+                                        ProcessOption.processName,
+                                        func.group_concat(LtMoldMap.moldno).label('moldNos'))
             query = query.join(Product, ProductionSchedule.productId == Product.id)
             query = query.join(Process, ProductionSchedule.processId == Process.id)
             query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id)
-            query = query.join(LtMoldMap, ProductionSchedule.ltmoldmapId == LtMoldMap.no)
+            query = query.join(ProcessMold, Process.id == ProcessMold.processId)
+            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no)
 
             query = query.filter(ProductionSchedule.status != "取消生產")
             query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
@@ -263,7 +265,7 @@ class productionScheduleService:
         try:
             # Get the current productionSchedule
             query = ProductionSchedule.query
-            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.productId, ProductionSchedule.processId, ProductionSchedule.ltmoldmapId,
+            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.productId, ProductionSchedule.processId,
                                         ProductionSchedule.productionArea, ProductionSchedule.machineSN, ProductionSchedule.serialNumber,
                                         ProductionSchedule.workOrderSN, ProductionSchedule.workOrderQuantity, ProductionSchedule.workOrderDate, 
                                         ProductionSchedule.moldingSecond, ProductionSchedule.planOnMachineDate, ProductionSchedule.actualOnMachineDate, 
@@ -271,11 +273,13 @@ class productionScheduleService:
                                         ProductionSchedule.actualFinishDate, ProductionSchedule.comment, ProductionSchedule.dailyWorkingHours, 
                                         ProductionSchedule.moldCavity, ProductionSchedule.week, ProductionSchedule.singleOrDoubleColor, 
                                         ProductionSchedule.conversionRate, ProductionSchedule.status, Product.productSN, Product.productName, 
-                                        ProcessOption.processName, LtMoldMap.moldno)
+                                        ProcessOption.processName,
+                                        func.group_concat(LtMoldMap.moldno).label('moldNos'))
             query = query.join(Product, ProductionSchedule.productId == Product.id)
             query = query.join(Process, ProductionSchedule.processId == Process.id)
             query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id)
-            query = query.join(LtMoldMap, ProductionSchedule.ltmoldmapId == LtMoldMap.no)
+            query = query.join(ProcessMold, Process.id == ProcessMold.processId)
+            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no)
             query = query.filter(ProductionSchedule.id == id)
             productionSchedule_db = query.first()
 
@@ -410,6 +414,7 @@ class productionScheduleService:
         except Exception as error:
             raise error
 
+
     @staticmethod
     def update_productionSchedule(id, payload):
         try:
@@ -434,6 +439,7 @@ class productionScheduleService:
         except Exception as error:
             raise error
     
+
     @staticmethod
     def update_productionSchedules(ids, payload):
         try:
@@ -479,6 +485,7 @@ class productionScheduleService:
         # exception without handling should raise to the caller
         except Exception as error:
             raise error
+
 
     @staticmethod
     def delete_productionSchedules(ids):

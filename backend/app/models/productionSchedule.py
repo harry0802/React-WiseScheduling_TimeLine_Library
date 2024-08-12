@@ -43,7 +43,6 @@ class ProductionSchedule(Model):
     id = Column(db.Integer , primary_key = True)
     productId = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=True)
     processId = db.Column(db.Integer, db.ForeignKey('process.id'), nullable=True)
-    ltmoldmapId = db.Column(db.Integer, db.ForeignKey('ltmoldmap.no'), nullable=True)
     productionArea = Column(db.String(255))
     machineSN = Column(db.String(255))
     serialNumber = synonym("id")
@@ -72,9 +71,6 @@ class ProductionSchedule(Model):
     status = Column(db.String(255))
     productionReport = db.relationship('ProductionReport', backref='productionSchedule', lazy=True)
     
-
-
-
 
     def __init__(self, **kwargs):
         super(ProductionSchedule, self).__init__(**kwargs)
