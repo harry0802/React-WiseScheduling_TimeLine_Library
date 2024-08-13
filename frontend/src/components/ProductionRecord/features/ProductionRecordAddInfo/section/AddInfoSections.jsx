@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRecordAddInfo } from "../../../context/RecordAddInfoProvider.jsx";
 import ProductContextCard from "../../../utility/ProductContextCard.jsx";
 import ProductDrawer from "../../../utility/ProductDrawer.jsx";
@@ -14,37 +14,30 @@ function InfoSectionsDialog() {
   } = useRecordAddInfo();
 
   const { notifySuccess } = useNotification();
-  const [oldPdNb, setOldPdNb] = useState(
-    product.oldProductNumber || "Hello World"
-  );
-  const [tempOldPdNb, setTempOldPdNb] = useState(oldPdNb);
+  const [oldPdNb, setOldPdNb] = useState("");
 
   function handleChange(e) {
-    setTempOldPdNb(e.target.value);
+    setOldPdNb(e.target.value);
   }
   function handleConfirm() {
-    setOldPdNb(tempOldPdNb);
     setInfoDrawer(false);
-    notifySuccess();
+    setTimeout(() => {
+      notifySuccess();
+    }, 100);
   }
 
-  useEffect(() => {
-    if (!infoDrawer && oldPdNb !== tempOldPdNb) {
-      setTempOldPdNb(oldPdNb);
-    }
-  }, [infoDrawer, oldPdNb, tempOldPdNb]);
   return (
     <ProductDrawer
       title="產品基本資料"
       visible={infoDrawer}
       onClose={() => setInfoDrawer(false)}
       onSubmit={() => handleConfirm()}
-      disabled={oldPdNb === tempOldPdNb}
+      disabled={oldPdNb === ""}
     >
       <div className="product-drawer__info">
         <div className="info__item">
           <span>產品編號</span>
-          <p>{product.productNumber}</p>
+          <p>{product.productSN}</p>
         </div>
 
         <div className="info__item">
@@ -62,7 +55,7 @@ function InfoSectionsDialog() {
         <div className="info__item">
           <TextField
             label="舊產品編號"
-            value={tempOldPdNb}
+            defaultValue={product.oldProductSN}
             onChange={(e) => handleChange(e)}
           />
         </div>
@@ -85,9 +78,9 @@ function InfoSections() {
       {product && (
         <>
           <div className="product-info__text">
-            <p>產品編號 : {product.productNumber}</p>
-            <p>舊產品編號 :{product.oldProductNumber}</p>
-            <p>產品名稱 : {product.productName} 　</p>
+            <p>產品編號 : {product.productSN}</p>
+            <p>舊產品編號 :{product.oldProductSN}</p>
+            <p>產品名稱 : {product.productName} </p>
           </div>
           <InfoSectionsDialog />
         </>

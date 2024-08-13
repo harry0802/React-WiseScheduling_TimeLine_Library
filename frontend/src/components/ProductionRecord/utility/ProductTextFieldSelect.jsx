@@ -1,6 +1,5 @@
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import { styled } from "@mui/system";
 
 function ProductTextFieldSelect({
   label = "設定中...",
@@ -8,8 +7,6 @@ function ProductTextFieldSelect({
   value = "設定中...",
   option = [],
 }) {
-  console.log(option.length > 0);
-
   return (
     <TextField
       select

@@ -1,11 +1,7 @@
-import React from "react";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import TransferListCustomList from "./TransferListCustomList.jsx";
-import {
-  useTransferList,
-  intersection,
-} from "../../../context/TransferListProvider.jsx";
+import { useTransferListSlice } from "../../../slice/TransferListSlice.jsx";
 
 /*
 SelectAllTransferList
@@ -47,10 +43,8 @@ SelectAllTransferList
 */
 
 function AddInfomationsTransferList({ type = "屬性" }) {
-  const { state, handleCheckedRight, handleCheckedLeft } =
-    useTransferList() || {};
-
-  const { left, right, checked } = state || {};
+  const { left, right, checked, moveRight, moveLeft, intersection } =
+    useTransferListSlice();
 
   return (
     <Grid
@@ -70,7 +64,7 @@ function AddInfomationsTransferList({ type = "屬性" }) {
             sx={{ my: 0.5 }}
             variant="outlined"
             size="small"
-            onClick={handleCheckedRight}
+            onClick={moveRight}
             disabled={intersection(checked, left).length === 0}
             aria-label="move selected right"
           >
@@ -80,7 +74,7 @@ function AddInfomationsTransferList({ type = "屬性" }) {
             sx={{ my: 0.5 }}
             variant="outlined"
             size="small"
-            onClick={handleCheckedLeft}
+            onClick={moveLeft}
             disabled={intersection(checked, right).length === 0}
             aria-label="move selected left"
           >

@@ -3,7 +3,7 @@ import { create } from "zustand";
 /**
  * Zustand store for managing transfer list state.
  */
-export const useTransferListStore = create((set, get) => ({
+export const useTransferListSlice = create((set, get) => ({
   left: [],
   right: [],
   checked: [],
@@ -28,12 +28,10 @@ export const useTransferListStore = create((set, get) => ({
    */
   toggleAll: (items) =>
     set((state) => {
-      const { not, union } = state;
-      if (state.checked.length === items.length) {
-        return { checked: not(state.checked, items) };
-      } else {
-        return { checked: union(state.checked, items) };
-      }
+      const { not, union, checked } = state;
+      return checked.length === items.length
+        ? { checked: not(state.checked, items) }
+        : { checked: union(state.checked, items) };
     }),
 
   /**
@@ -41,11 +39,11 @@ export const useTransferListStore = create((set, get) => ({
    */
   moveRight: () =>
     set((state) => {
-      const { not } = state;
+      const { not, checked, left, right } = state;
       return {
-        left: not(state.left, state.checked),
-        right: state.right.concat(state.checked),
-        checked: not(state.checked, state.checked),
+        left: not(left, checked),
+        right: right.concat(checked),
+        checked: not(checked, checked),
       };
     }),
 
@@ -103,6 +101,7 @@ export const useTransferListStore = create((set, get) => ({
    * @returns {number[]} - The filtered array.
    */
   not: (a, b) => a.filter((value) => !~b.indexOf(value)),
+  intersection: (a, b) => a.filter((value) => ~b.indexOf(value)),
   /**
    * Creates a union of two arrays, excluding duplicates.
    * @param {number[]} a - The first array.
@@ -113,6 +112,4 @@ export const useTransferListStore = create((set, get) => ({
     const { not } = get();
     return [...a, ...not(b, a)];
   },
-
-  intersection: (a, b) => a.filter((value) => ~b.indexOf(value)),
 }));

@@ -8,12 +8,13 @@ import AddIcon from "@mui/icons-material/Add";
 import TextField from "@mui/material/TextField";
 import AddInfomationsTransferList from "../transferList/AddInfomationsTransferList.jsx";
 import { useRecordAddInfo } from "../../../context/RecordAddInfoProvider.jsx";
-import { TransferListProvider } from "../../../context/TransferListProvider.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 import ProductGroupForm from "../../../utility/ProductGroupForm.jsx";
 import useNotification from "../../../hook/useNotification.js";
-// import { RedoRounded } from "@mui/icons-material";
+import { useTransferListSlice } from "../../../slice/TransferListSlice.jsx";
+import { useGetSingleProcessAndMaterialsQuery } from "../../../service/endpoints/processApi.js";
+import { useParams } from "react-router-dom";
 const items = [
   {
     item_code: "dnh75n",
@@ -22,28 +23,26 @@ const items = [
     item_code: "456def",
   },
 ];
-// Dialo - > 製成材料選取功能
-function SectionsDialogTransferList() {
-  return (
-    <TransferListProvider>
-      <AddInfomationsTransferList type={"物料"} />
-    </TransferListProvider>
-  );
-}
 
 // Process -> Dialog
 // *可控組建 裡面的資料是要靈活的
 function ProcessSectionsDialog() {
   const [initialValues, setInitialValues] = useState({
-    processName: "XX-000-XXX",
-    moldName: "XX-000-XXX",
+    processName: "",
+    moldName: "",
   });
   const [tempValues, setTempValues] = useState({ ...initialValues });
   const [moldItems, setMoldItems] = useState([]);
-
   const { processDrawer, setProcessDrawer } = useRecordAddInfo();
   const [form] = Form.useForm();
   const { notifySuccess } = useNotification();
+  const { right: modeData } = useTransferListSlice();
+
+  const handleDrawerClose = () => {
+    setTempValues({ ...initialValues });
+    form.setFieldsValue({ items: moldItems });
+    setProcessDrawer(false);
+  };
 
   const handleFormSubmit = async () => {
     try {
@@ -55,19 +54,13 @@ function ProcessSectionsDialog() {
         )
       );
       setInitialValues({ ...tempValues });
-      notifySuccess();
+      setTimeout(() => notifySuccess(), 100);
     } catch (error) {
       console.log(error);
       alert("Validation Failed:", error);
     } finally {
       setProcessDrawer(false);
     }
-  };
-
-  const handleDrawerClose = () => {
-    setTempValues({ ...initialValues });
-    form.setFieldsValue({ items: moldItems });
-    setProcessDrawer(false);
   };
 
   useEffect(() => {
@@ -95,7 +88,7 @@ function ProcessSectionsDialog() {
           <div className="info__item">
             <TextField
               label="製程名稱"
-              value={tempValues.processName}
+              defaultValue="XX-000-XXX"
               onChange={(e) =>
                 setTempValues({ ...tempValues, processName: e.target.value })
               }
@@ -105,7 +98,7 @@ function ProcessSectionsDialog() {
           <div className="info__item">
             <TextField
               label="製具編號"
-              value={tempValues.moldName}
+              defaultValue="XX-000-XXX"
               onChange={(e) =>
                 setTempValues({ ...tempValues, moldName: e.target.value })
               }
@@ -113,7 +106,7 @@ function ProcessSectionsDialog() {
           </div>
         </div>
         <ProductGroupForm />
-        <SectionsDialogTransferList />
+        <AddInfomationsTransferList type={"物料"} />
       </ProductDrawer>
     </Form>
   );
@@ -130,16 +123,19 @@ function ProcessSectionsListDetail(params) {
   );
 }
 
-// 手風琴
+// 手風琴 按下編輯按鈕要設定以紀錄資料
 function ProcessSectionsList() {
   const { setProcessDrawer } = useRecordAddInfo();
+  const { initializeForEdit } = useTransferListSlice();
   return (
     <>
       <ProcessAccordion
         title="製程1 廠內-成型-1I"
-        OnClick={() => setProcessDrawer(true)}
+        OnClick={() => {
+          setProcessDrawer(true);
+          initializeForEdit([1, 3, 5, 7, 9], [2, 4, 6, 8, 10]);
+        }}
       />
-      <ProcessSectionsDialog />
     </>
   );
 }
@@ -147,17 +143,27 @@ function ProcessSectionsList() {
 // main component
 function ProcessSections() {
   const { setProcessDrawer } = useRecordAddInfo();
+  const { initialize } = useTransferListSlice();
+  const handleDrawer = (transferInit = [7, 0, 8, 9, 20]) => {
+    setProcessDrawer(true);
+    initialize(transferInit);
+  };
+  const { productId } = useParams();
+
+  const { data } = useGetSingleProcessAndMaterialsQuery(productId);
+  console.log(data);
 
   // 放置製程內容
   return (
     <>
       <ProductContextCard
-        OnClick={() => setProcessDrawer(true)}
+        OnClick={() => handleDrawer()}
         icon={<AddIcon />}
         title="製程順序與物料需求對應"
       >
         <ProcessSectionsList />
       </ProductContextCard>
+      <ProcessSectionsDialog />
     </>
   );
 }

@@ -76,13 +76,15 @@ body {
     }
   }
 }
-
 .reusableTable {
   max-height: 32.5rem;
   overflow: auto;
-  //   overflow-y: auto;
+  cursor: pointer;
 
-  & :global(.ant-table-tbody) > tr:hover > td {
-    background: none !important; /* Remove background on hover */
+  & :global(.ant-table-tbody) {
+    tr:hover > td {
+      background: inherit !important;
+      color: #000 !important; // White text on hover
+    }
   }
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Typography, Button } from "antd";
+import { Card, Typography } from "antd";
 const { Title, Text, Paragraph } = Typography;
 
 function ProductionRecordCard({ title, subtitle, content, onButtonClick }) {

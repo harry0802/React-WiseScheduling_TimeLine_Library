@@ -1,4 +1,4 @@
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 import { memo } from "react";
 
 function ProductionRecordButton({
@@ -8,17 +8,20 @@ function ProductionRecordButton({
   className = "",
   icon,
   disabled,
+  tooltip = "",
 }) {
   return (
-    <Button
-      onClick={OnClick}
-      className={`c-btn-primars ${className}`}
-      shape={shape}
-      icon={icon}
-      disabled={!!disabled ? disabled : null}
-    >
-      {children}
-    </Button>
+    <Tooltip title={tooltip}>
+      <Button
+        onClick={OnClick}
+        className={`c-btn-primars ${className}`}
+        shape={shape}
+        icon={icon}
+        disabled={!!disabled ? disabled : null}
+      >
+        {children}
+      </Button>
+    </Tooltip>
   );
 }
 

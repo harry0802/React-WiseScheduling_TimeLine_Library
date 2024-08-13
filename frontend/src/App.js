@@ -86,11 +86,7 @@ const App = () => {
                 />
                 <Route
                   path="procMaterials"
-                  element={
-                    <ProcMaterialsProvider>
-                      <ProductionRecordProcMaterials />
-                    </ProcMaterialsProvider>
-                  }
+                  element={<ProductionRecordProcMaterials />}
                 />
                 <Route
                   path="inventoryManagement"

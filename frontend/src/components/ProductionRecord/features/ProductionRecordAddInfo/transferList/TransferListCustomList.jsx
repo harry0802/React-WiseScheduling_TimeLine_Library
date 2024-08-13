@@ -10,16 +10,18 @@ import {
   ListItemText,
 } from "@mui/material";
 
-import {
-  intersection,
-  useTransferList,
-} from "../../../context/TransferListProvider.jsx";
+import { useTransferListSlice } from "../../../slice/TransferListSlice.jsx";
 
 function TransferListCustomList({ title, items }) {
-  const numberOfChecked = (items) => intersection(checked, items).length;
-  const { state, handleToggle, handleToggleAll } = useTransferList();
+  const {
+    checked,
+    toggle: handleToggle,
+    toggleAll: handleToggleAll,
+    intersection,
+  } = useTransferListSlice();
 
-  const { checked } = state || {};
+  const numberOfChecked = (items) => intersection(checked, items).length;
+
   return (
     <Card>
       <CardHeader

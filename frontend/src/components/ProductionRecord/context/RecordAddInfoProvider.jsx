@@ -18,7 +18,7 @@ function RecordAddInfoProvider({ children }) {
 
   useEffect(() => {
     (function () {
-      const product = data?.filter((item) => item.id === productId);
+      const product = data?.filter((item) => +item.id === +productId);
       setProductData(product);
     })();
   }, [productId, data]);

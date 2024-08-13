@@ -4,7 +4,7 @@ import { Pagination } from "antd";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { homeSlice } from "../../slice/HomeSlice";
-import fakedata from "../../data.json";
+import { useGetProductsWithPaginationQuery } from "../../service/endpoints/productApi";
 
 // 分頁器
 function ProductionRecordPaginations() {
@@ -34,25 +34,27 @@ function ProductionRecordHome() {
   const navigate = useNavigate();
   const { displayedData, setPageStatus, setData } = homeSlice();
 
+  const { data: productData } = useGetProductsWithPaginationQuery();
+
   useEffect(() => {
     setPageStatus("產品履歷與BOM");
   }, []);
 
   useEffect(() => {
     (async function () {
-      const order = await setData(fakedata);
-      return order;
+      if (productData) {
+        setData(productData.data);
+      }
     })();
-  }, []);
+  }, [productData, setData]);
   return (
     <div className="record-home">
       <div className="record-home__content">
         {displayedData?.map((data) => (
           <ProductionRecordCard
             key={data.id}
-            title={data.productNumber}
-            subtitle={data.customerName}
-            content={data.description}
+            title={data.productSN}
+            subtitle={data.productName}
             onButtonClick={() => navigate(`addProductInfo/${data.id}`)}
           />
         ))}

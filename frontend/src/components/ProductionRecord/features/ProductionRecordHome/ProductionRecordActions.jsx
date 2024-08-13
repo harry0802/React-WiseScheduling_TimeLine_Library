@@ -13,21 +13,18 @@ import { homeSlice } from "../../slice/HomeSlice.jsx";
 
 const options = [
   { label: "產品名稱", value: "productName" },
-  { label: "產品編號", value: "productNumber" },
-  { label: "舊產品編號", value: "oldProductNumber" },
-  { label: "客戶名稱", value: "customerName" },
+  { label: "產品編號", value: "productSN" },
+  { label: "舊產品編號", value: "oldProductSN" },
+  // { label: "客戶名稱", value: "customerName" },
 ];
 
 function ProductionRecordActions() {
   const [userSearch, setUserSearch] = useState("");
   const [userSelect, setUserSelect] = useState(options[0].value);
   const navigate = useNavigate();
-
   const { searchData, data } = homeSlice();
-
   function handleSearch() {
     if (!data || !userSelect) return;
-
     searchData(userSearch, userSelect);
   }
 
@@ -38,7 +35,7 @@ function ProductionRecordActions() {
     return () => {
       throttledHandleSearch.cancel();
     };
-  }, [userSearch, userSelect]);
+  }, [userSearch, userSelect, throttledHandleSearch]);
 
   return (
     <div className="record-actions">
@@ -50,11 +47,17 @@ function ProductionRecordActions() {
       />
 
       <div className="record-actions__button">
-        <ProductionRecordButton OnClick={() => navigate("inventoryManagement")}>
+        <ProductionRecordButton
+          tooltip="歸類物料"
+          OnClick={() => navigate("inventoryManagement")}
+        >
           <ScienceIcon />
         </ProductionRecordButton>
 
-        <ProductionRecordButton OnClick={() => navigate("procMaterials")}>
+        <ProductionRecordButton
+          tooltip="物料編碼與製程編碼"
+          OnClick={() => navigate("procMaterials")}
+        >
           <MenuBookOutlinedIcon />
         </ProductionRecordButton>
       </div>
