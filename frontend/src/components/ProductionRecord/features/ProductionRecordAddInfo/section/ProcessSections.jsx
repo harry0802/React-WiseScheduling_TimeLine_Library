@@ -13,7 +13,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ProductGroupForm from "../../../utility/ProductGroupForm.jsx";
 import useNotification from "../../../hook/useNotification.js";
 import { useTransferListSlice } from "../../../slice/TransferListSlice.jsx";
-import { useGetSingleProcessAndMaterialsQuery } from "../../../service/endpoints/processApi.js";
+import {
+  useGetProcessesAndMaterialsQuery,
+  useGetSingleProcessAndMaterialsQuery,
+} from "../../../service/endpoints/processApi.js";
 import { useParams } from "react-router-dom";
 const items = [
   {
@@ -149,9 +152,8 @@ function ProcessSections() {
     initialize(transferInit);
   };
   const { productId } = useParams();
-
-  const { data } = useGetSingleProcessAndMaterialsQuery(productId);
-  console.log(data);
+  const { data: processData } = useGetProcessesAndMaterialsQuery(productId);
+  console.log(processData);
 
   // 放置製程內容
   return (
@@ -161,7 +163,7 @@ function ProcessSections() {
         icon={<AddIcon />}
         title="製程順序與物料需求對應"
       >
-        <ProcessSectionsList />
+        {processData > 0 && <ProcessSectionsList />}
       </ProductContextCard>
       <ProcessSectionsDialog />
     </>

@@ -9,19 +9,27 @@ import ProductTextFieldInput from "../../utility/ProductTextFieldInput";
 import ProductTextFieldSelect from "../../utility/ProductTextFieldSelect";
 import Productcontent from "../../utility/ProductContent";
 import useNotification from "../../hook/useNotification";
+import {
+  useGetProcessOptionsQuery,
+  useProcessOptionActions,
+} from "../../service/endpoints/processOptionApi";
+import {
+  useGetMaterialOptionsQuery,
+  useMaterialOptionActions,
+} from "../../service/endpoints/materialOptionApi";
 
 // Column Definitions
 const productColumns = [
   { title: "編號", dataIndex: "id", width: 50, key: "id" },
-  { title: "製程代碼", dataIndex: "code", key: "code" },
-  { title: "製程名稱", dataIndex: "name", key: "name" },
-  { title: "製成類別", dataIndex: "description", key: "description" },
+  { title: "製程代碼", dataIndex: "processSN", key: "processSN" },
+  { title: "製程名稱", dataIndex: "processName", key: "processName" },
+  { title: "製成類別", dataIndex: "processCategory", key: "processCategory" },
 ];
 
 const materialColumns = [
   { title: "編號", dataIndex: "id", width: 50, key: "id" },
-  { title: "物料代碼", dataIndex: "code", key: "code" },
-  { title: "物料名稱", dataIndex: "name", key: "name" },
+  { title: "物料代碼", dataIndex: "materialCode", key: "materialCode" },
+  { title: "物料名稱", dataIndex: "materialType", key: "materialType" },
 ];
 
 // Options for Process Categories
@@ -32,20 +40,6 @@ const options = [
   { value: "Out-BE-委外後製程", label: "Out-BE-委外後製程" },
   { value: "In-TS廠內出貨檢驗", label: "In-TS廠內出貨檢驗" },
 ];
-
-// Generate Data Function
-const generateData = (count, type) => {
-  return Array.from({ length: count }, (_, i) => ({
-    key: (i + 1).toString(),
-    id: (i + 1).toString().padStart(2, "0"),
-    code: type === "product" ? "In-UJ01" : `Rm-${i + 1}`,
-    name: type === "product" ? "商內-成品-UJ01" : `原料${i + 1}`,
-    description:
-      type === "product"
-        ? options[Math.floor(Math.random() * options.length)].value
-        : undefined,
-  }));
-};
 
 // Reusable Table Component
 function ReusableTable({ columns, data, onRowClick }) {
@@ -78,44 +72,95 @@ function ProcMaterialsTable({ title, columns, data, onRowClick, onAddClick }) {
 // Main Component
 function ProductionRecordProcMaterials() {
   const [selectedData, setSelectedData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false); // Explicit mode state
   const [userSelect, setUserSelect] = useState(options[0].value);
   const [productData, setProductData] = useState([]);
   const [materialDataList, setMaterialDataList] = useState([]);
   const { notifySuccess } = useNotification();
 
   const [drawerVisible, setDrawerVisible] = useState(false);
-  // "product" or "material"
   const [drawerType, setDrawerType] = useState("product");
 
   const { handlePageStatust } = useRecord();
+
+  const { data: processOptionsData } = useGetProcessOptionsQuery();
+  const { data: materialOptionsData } = useGetMaterialOptionsQuery();
+
+  const {
+    handleCreate: handleCreateMaterial,
+    handleUpdate: handleUpdateMaterial,
+    handleDelete: handleDeleteMaterial,
+  } = useMaterialOptionActions();
+
+  const {
+    handleCreate: handleCreateProcess,
+    handleUpdate: handleUpdateProcess,
+    handleDelete: handleDeleteProcess,
+  } = useProcessOptionActions();
+
+  // Ensure each item has a unique key
+  useEffect(() => {
+    if (processOptionsData?.data) {
+      const productsWithKeys = processOptionsData.data.map((item, index) => ({
+        ...item,
+        key: item.id || `product-${index}`,
+      }));
+      setProductData(productsWithKeys);
+    }
+
+    if (materialOptionsData?.data) {
+      const materialsWithKeys = materialOptionsData.data.map((item, index) => ({
+        ...item,
+        key: item.id || `material-${index}`,
+      }));
+      setMaterialDataList(materialsWithKeys);
+    }
+  }, [materialOptionsData, processOptionsData]);
 
   const openDrawer = (data, type) => {
     setSelectedData(data);
     setDrawerType(type);
     setDrawerVisible(true);
+    setIsEditing(!!data); // If data exists, set to edit mode
     if (data && data.description) {
       setUserSelect(data.description);
     }
   };
-
   const handleSubmit = () => {
+    // Function to update data, efficiently filtering out the 'key' property
     const updateData = (dataList, updatedData) => {
-      return dataList.map((item) =>
-        item.id === updatedData.id ? updatedData : item
-      );
+      return dataList.map((item) => {
+        if (item.id === updatedData.id) {
+          // Create a shallow copy and delete the 'key' property directly
+          const updatedItem = { ...updatedData };
+          delete updatedItem.key;
+          return updatedItem;
+        }
+        return item;
+      });
     };
 
+    // !我專注在這
     if (drawerType === "product") {
-      setProductData((prevData) => updateData(prevData, selectedData));
+      setProductData((prevData) => {
+        const updatedProductData = updateData(prevData, selectedData);
+        handleUpdateProcess(updatedProductData);
+        return updatedProductData;
+      });
     } else {
-      setMaterialDataList((prevData) => updateData(prevData, selectedData));
+      setMaterialDataList((prevData) => {
+        const updatedMaterialData = updateData(prevData, selectedData);
+        handleUpdateMaterial(updatedMaterialData);
+        return updatedMaterialData;
+      });
     }
+
     setDrawerVisible(false);
     setSelectedData(null);
     setUserSelect(options[0].value);
+    setIsEditing(false);
     setTimeout(() => notifySuccess(), 200);
   };
-
   const handleInputChange = (field, value) => {
     setSelectedData((prevData) => ({
       ...prevData,
@@ -123,47 +168,68 @@ function ProductionRecordProcMaterials() {
     }));
   };
 
-  const renderDrawer = () => (
-    <ProductDrawer
-      title={drawerType === "product" ? "編輯製程編碼" : "編輯物料種類編碼"}
-      visible={drawerVisible}
-      onClose={() => {
-        setDrawerVisible(false);
-        setUserSelect(options[0].value);
-      }}
-      onSubmit={handleSubmit}
-    >
-      <ProductTextFieldInput
-        label={drawerType === "product" ? "製程名稱" : "物料名稱"}
-        value={selectedData?.name || ""}
-        OnChange={(e) => handleInputChange("name", e.target.value)}
-      />
-      <ProductTextFieldInput
-        label={drawerType === "product" ? "製程代碼" : "物料代碼"}
-        value={selectedData?.code || ""}
-        OnChange={(e) => handleInputChange("code", e.target.value)}
-      />
-      {drawerType === "product" && (
-        <ProductTextFieldSelect
-          label="製程類別"
-          value={userSelect}
-          option={options}
-          OnChange={(e) => {
-            setUserSelect(e.target.value);
-            handleInputChange("description", e.target.value);
-          }}
+  const renderDrawer = () => {
+    const isProduct = drawerType === "product";
+
+    const fields = {
+      name: isProduct ? "processSN" : "materialCode",
+      code: isProduct ? "processName" : "materialType",
+      title: isEditing
+        ? isProduct
+          ? "編輯製程編碼"
+          : "編輯物料種類編碼"
+        : isProduct
+        ? "添加製程編碼"
+        : "添加物料種類編碼",
+      nameLabel: isProduct ? "製程名稱" : "物料名稱",
+      codeLabel: isProduct ? "製程代碼" : "物料代碼",
+    };
+
+    const handleOnClose = () => {
+      setDrawerVisible(false);
+      setUserSelect(options[0].value);
+      setSelectedData(null);
+      setIsEditing(false); // Reset editing mode on close
+    };
+
+    const handleFieldChange = (field) => (e) =>
+      handleInputChange(field, e.target.value);
+
+    return (
+      <ProductDrawer
+        title={fields.title}
+        visible={drawerVisible}
+        onClose={handleOnClose}
+        onSubmit={handleSubmit}
+      >
+        <ProductTextFieldInput
+          label={fields.nameLabel}
+          value={selectedData?.[fields.name] || ""}
+          OnChange={handleFieldChange(fields.name)}
         />
-      )}
-    </ProductDrawer>
-  );
+        <ProductTextFieldInput
+          label={fields.codeLabel}
+          value={selectedData?.[fields.code] || ""}
+          OnChange={handleFieldChange(fields.code)}
+        />
+        {isProduct && (
+          <ProductTextFieldSelect
+            label="製程類別"
+            value={userSelect}
+            option={options}
+            OnChange={(e) => {
+              const selectedValue = e.target.value;
+              setUserSelect(selectedValue);
+              handleInputChange("processCategory", selectedValue);
+            }}
+          />
+        )}
+      </ProductDrawer>
+    );
+  };
 
   useEffect(() => {
     handlePageStatust("製程與物料編碼維護");
-  }, []);
-
-  useEffect(() => {
-    setProductData(generateData(50, "product"));
-    setMaterialDataList(generateData(50, "material"));
   }, []);
 
   return (
