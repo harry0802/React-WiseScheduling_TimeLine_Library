@@ -52,7 +52,7 @@ button.c-btn-primars,
     }
   }
   &--delete {
-    background-color: #eb0004; // Normal background color
+    background-color: #eb0004 !important; // Normal background color
     color: #fff !important;
     &:hover {
       color: #fff !important;

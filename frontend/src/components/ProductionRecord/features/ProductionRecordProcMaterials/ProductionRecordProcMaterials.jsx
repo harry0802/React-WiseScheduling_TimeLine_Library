@@ -17,17 +17,19 @@ import {
   useGetMaterialOptionsQuery,
   useMaterialOptionActions,
 } from "../../service/endpoints/materialOptionApi";
+import ProductionRecordButton from "../../utility/ProductionRecordButton";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 // Column Definitions
 const productColumns = [
-  { title: "編號", dataIndex: "id", width: 50, key: "id" },
+  { title: "編號", dataIndex: "key", width: 50, key: "key" },
   { title: "製程代碼", dataIndex: "processSN", key: "processSN" },
   { title: "製程名稱", dataIndex: "processName", key: "processName" },
   { title: "製成類別", dataIndex: "processCategory", key: "processCategory" },
 ];
 
 const materialColumns = [
-  { title: "編號", dataIndex: "id", width: 50, key: "id" },
+  { title: "編號", dataIndex: "key", width: 50, key: "key" },
   { title: "物料代碼", dataIndex: "materialCode", key: "materialCode" },
   { title: "物料名稱", dataIndex: "materialType", key: "materialType" },
 ];
@@ -98,25 +100,6 @@ function ProductionRecordProcMaterials() {
     handleDelete: handleDeleteProcess,
   } = useProcessOptionActions();
 
-  // Ensure each item has a unique key
-  useEffect(() => {
-    if (processOptionsData?.data) {
-      const productsWithKeys = processOptionsData.data.map((item, index) => ({
-        ...item,
-        key: item.id || `product-${index}`,
-      }));
-      setProductData(productsWithKeys);
-    }
-
-    if (materialOptionsData?.data) {
-      const materialsWithKeys = materialOptionsData.data.map((item, index) => ({
-        ...item,
-        key: item.id || `material-${index}`,
-      }));
-      setMaterialDataList(materialsWithKeys);
-    }
-  }, [materialOptionsData, processOptionsData]);
-
   const openDrawer = (data, type) => {
     setSelectedData(data);
     setDrawerType(type);
@@ -126,41 +109,60 @@ function ProductionRecordProcMaterials() {
       setUserSelect(data.description);
     }
   };
+
+  const handleOnClose = () => {
+    setDrawerVisible(false);
+    setUserSelect(options[0].value);
+    setSelectedData(null);
+    setIsEditing(false); // Reset editing mode on close
+  };
+
   const handleSubmit = () => {
-    // Function to update data, efficiently filtering out the 'key' property
-    const updateData = (dataList, updatedData) => {
-      return dataList.map((item) => {
-        if (item.id === updatedData.id) {
-          // Create a shallow copy and delete the 'key' property directly
-          const updatedItem = { ...updatedData };
-          delete updatedItem.key;
-          return updatedItem;
-        }
-        return item;
-      });
+    const processSubmission = (dataList, newData, updateFn, createFn) => {
+      if (isEditing) {
+        const updatedData = dataList.map((item) =>
+          item.id === newData.id ? newData : item
+        );
+        updateFn(updatedData);
+        return updatedData;
+      } else {
+        const createdData = [...dataList, newData];
+
+        createFn([newData]);
+        return createdData;
+      }
     };
 
-    // !我專注在這
-    if (drawerType === "product") {
-      setProductData((prevData) => {
-        const updatedProductData = updateData(prevData, selectedData);
-        handleUpdateProcess(updatedProductData);
-        return updatedProductData;
-      });
-    } else {
-      setMaterialDataList((prevData) => {
-        const updatedMaterialData = updateData(prevData, selectedData);
-        handleUpdateMaterial(updatedMaterialData);
-        return updatedMaterialData;
-      });
-    }
+    const actions = {
+      product: {
+        setState: setProductData,
+        updateFn: handleUpdateProcess,
+        createFn: handleCreateProcess,
+      },
+      material: {
+        setState: setMaterialDataList,
+        updateFn: handleUpdateMaterial,
+        createFn: handleCreateMaterial,
+      },
+    };
 
+    const { setState, updateFn, createFn } = actions[drawerType];
+
+    setState((prevData) =>
+      processSubmission(prevData, selectedData, updateFn, createFn)
+    );
+
+    resetFormState();
+  };
+
+  const resetFormState = () => {
     setDrawerVisible(false);
     setSelectedData(null);
     setUserSelect(options[0].value);
     setIsEditing(false);
     setTimeout(() => notifySuccess(), 200);
   };
+
   const handleInputChange = (field, value) => {
     setSelectedData((prevData) => ({
       ...prevData,
@@ -168,7 +170,18 @@ function ProductionRecordProcMaterials() {
     }));
   };
 
-  const renderDrawer = () => {
+  //! handleDelete
+  const handleDelete = () => {
+    if (!selectedData) return;
+    const isProduct = drawerType === "product";
+    const { id } = selectedData || {};
+    isProduct ? handleDeleteProcess(id) : handleDeleteMaterial(id);
+    setTimeout(() => notifySuccess(), 200);
+    handleOnClose();
+  };
+
+  // * RenderDrawer component
+  function renderDrawer() {
     const isProduct = drawerType === "product";
 
     const fields = {
@@ -185,11 +198,16 @@ function ProductionRecordProcMaterials() {
       codeLabel: isProduct ? "製程代碼" : "物料代碼",
     };
 
-    const handleOnClose = () => {
-      setDrawerVisible(false);
-      setUserSelect(options[0].value);
-      setSelectedData(null);
-      setIsEditing(false); // Reset editing mode on close
+    const isDisabled = () => {
+      if (isProduct) {
+        return (
+          !selectedData?.processSN ||
+          !selectedData?.processName ||
+          !selectedData?.processCategory
+        );
+      } else {
+        return !selectedData?.materialCode || !selectedData?.materialType;
+      }
     };
 
     const handleFieldChange = (field) => (e) =>
@@ -201,6 +219,17 @@ function ProductionRecordProcMaterials() {
         visible={drawerVisible}
         onClose={handleOnClose}
         onSubmit={handleSubmit}
+        headericon={
+          isEditing && (
+            <ProductionRecordButton
+              OnClick={handleDelete}
+              className="c-btn-primars--delete"
+            >
+              <DeleteIcon />
+            </ProductionRecordButton>
+          )
+        }
+        disabled={isDisabled()}
       >
         <ProductTextFieldInput
           label={fields.nameLabel}
@@ -212,10 +241,12 @@ function ProductionRecordProcMaterials() {
           value={selectedData?.[fields.code] || ""}
           OnChange={handleFieldChange(fields.code)}
         />
+
         {isProduct && (
           <ProductTextFieldSelect
+            // ! 處理下拉選單
             label="製程類別"
-            value={userSelect}
+            value={selectedData?.processCategory || userSelect}
             option={options}
             OnChange={(e) => {
               const selectedValue = e.target.value;
@@ -226,11 +257,49 @@ function ProductionRecordProcMaterials() {
         )}
       </ProductDrawer>
     );
-  };
+  }
 
   useEffect(() => {
     handlePageStatust("製程與物料編碼維護");
   }, []);
+
+  // Ensure each item has a unique key
+  useEffect(() => {
+    if (processOptionsData?.data) {
+      const productsWithKeys = processOptionsData.data.map((item, index) => ({
+        ...item,
+        key: index + 1 || `product-${index + 1}`,
+      }));
+      setProductData(productsWithKeys);
+    }
+
+    if (materialOptionsData?.data) {
+      const materialsWithKeys = materialOptionsData.data.map((item, index) => ({
+        ...item,
+        key: index + 1 || `material-${index + 1}`,
+      }));
+      setMaterialDataList(materialsWithKeys);
+    }
+  }, [materialOptionsData, processOptionsData]);
+
+  // Ensure each item has a unique key
+  useEffect(() => {
+    if (processOptionsData?.data) {
+      const productsWithKeys = processOptionsData.data.map((item, index) => ({
+        ...item,
+        key: index + 1 || `product-${index + 1}`,
+      }));
+      setProductData(productsWithKeys);
+    }
+
+    if (materialOptionsData?.data) {
+      const materialsWithKeys = materialOptionsData.data.map((item, index) => ({
+        ...item,
+        key: index + 1 || `material-${index + 1}`,
+      }));
+      setMaterialDataList(materialsWithKeys);
+    }
+  }, [materialOptionsData, processOptionsData]);
 
   return (
     <div>
