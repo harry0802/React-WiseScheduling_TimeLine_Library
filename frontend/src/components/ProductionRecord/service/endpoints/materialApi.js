@@ -54,3 +54,29 @@ export const {
   useGetCategorizedMaterialsQuery,
   useUpdateMaterialsMutation,
 } = materialApi;
+
+export function useMaterialAtions() {
+  const [updateMaterials, { isLoading: isUpdating, error: updateError }] =
+    useUpdateMaterialsMutation();
+
+  const handleUpdate = async (materials) => {
+    try {
+      //todo 如何更新我的   materialCode , materialType
+      console.log(materials);
+
+      const response = await updateMaterials(materials).unwrap();
+
+      return response;
+    } catch (err) {
+      console.error("Failed to update Materials:", err);
+      throw err;
+    }
+  };
+
+  return {
+    handleUpdate,
+    updateMaterials,
+    isUpdating,
+    updateError,
+  };
+}

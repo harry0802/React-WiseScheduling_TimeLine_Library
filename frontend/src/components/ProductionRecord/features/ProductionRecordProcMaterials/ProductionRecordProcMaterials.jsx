@@ -31,7 +31,7 @@ const productColumns = [
 const materialColumns = [
   { title: "編號", dataIndex: "key", width: 50, key: "key" },
   { title: "物料代碼", dataIndex: "materialCode", key: "materialCode" },
-  { title: "物料名稱", dataIndex: "materialType", key: "materialType" },
+  { title: "物料種類", dataIndex: "materialType", key: "materialType" },
 ];
 
 // Options for Process Categories
@@ -99,7 +99,11 @@ function ProductionRecordProcMaterials() {
     handleUpdate: handleUpdateProcess,
     handleDelete: handleDeleteProcess,
   } = useProcessOptionActions();
-
+  /**
+   * Opens the drawer (form) to add or edit a record.
+   * @param {Object|null} data - The selected data record, or null for adding a new record.
+   * @param {"product"|"material"} type - The type of data being handled, either product or material.
+   */
   const openDrawer = (data, type) => {
     setSelectedData(data);
     setDrawerType(type);
@@ -110,6 +114,9 @@ function ProductionRecordProcMaterials() {
     }
   };
 
+  /**
+   * Closes the drawer and resets the form state.
+   */
   const handleOnClose = () => {
     setDrawerVisible(false);
     setUserSelect(options[0].value);
@@ -208,7 +215,9 @@ function ProductionRecordProcMaterials() {
 
     resetFormState();
   };
-
+  /**
+   * Resets the form state after submission or cancellation.
+   */
   const resetFormState = () => {
     setDrawerVisible(false);
     setSelectedData(null);
@@ -217,13 +226,20 @@ function ProductionRecordProcMaterials() {
     setTimeout(() => notifySuccess(), 200);
   };
 
+  /**
+   * Handles input changes in the form fields.
+   * @param {string} field - The field name being updated.
+   * @param {string} value - The new value for the field.
+   */
   const handleInputChange = (field, value) => {
     setSelectedData((prevData) => ({
       ...prevData,
       [field]: value,
     }));
   };
-
+  /**
+   * Handles the deletion of the selected data record.
+   */
   const handleDelete = () => {
     if (!selectedData) return;
     const isProduct = drawerType === "product";
@@ -232,7 +248,10 @@ function ProductionRecordProcMaterials() {
     setTimeout(() => notifySuccess(), 200);
     handleOnClose();
   };
-
+  /**
+   * Renders the drawer component, which contains the form for adding/editing data.
+   * @returns {JSX.Element} - Returns the drawer component with the form.
+   */
   function renderDrawer() {
     const isProduct = drawerType === "product";
 
@@ -241,13 +260,13 @@ function ProductionRecordProcMaterials() {
       code: isProduct ? "processName" : "materialType",
       title: isEditing
         ? isProduct
-          ? "編輯製程編碼"
-          : "編輯物料種類編碼"
+          ? "編輯製程編碼" // "Edit Process Code"
+          : "編輯物料種類編碼" // "Edit Material Type Code"
         : isProduct
-        ? "添加製程編碼"
-        : "添加物料種類編碼",
-      nameLabel: isProduct ? "製程名稱" : "物料名稱",
-      codeLabel: isProduct ? "製程代碼" : "物料代碼",
+        ? "添加製程編碼" // "Add Process Code"
+        : "添加物料種類編碼", // "Add Material Type Code"
+      nameLabel: isProduct ? "製程名稱" : "物料代碼", // "Process Name" or "Material Name"
+      codeLabel: isProduct ? "製程代碼" : "物料種類", // "Process Code" or "Material Code"
     };
 
     const isDisabled = () => {
