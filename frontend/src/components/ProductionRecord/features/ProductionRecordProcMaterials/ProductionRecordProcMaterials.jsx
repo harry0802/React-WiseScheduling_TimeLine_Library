@@ -117,40 +117,94 @@ function ProductionRecordProcMaterials() {
     setIsEditing(false); // Reset editing mode on close
   };
 
+  // const handleSubmit = () => {
+  //   const processSubmission = (dataList, newData, updateFn, createFn) => {
+  //     if (isEditing) {
+  //       const updatedData = dataList.map((item) =>
+  //         item.id === newData.id ? newData : item
+  //       );
+  //       updateFn(updatedData);
+  //       return updatedData;
+  //     } else {
+  //       // ! 處理下拉選單
+
+  //       const isProduct = drawerType === "product";
+  //       const createdData = [
+  //         ...dataList,
+  //         isProduct
+  //           ? {
+  //               ...newData,
+  //               processCategory: !!newData.processCategory
+  //                 ? newData.processCategory
+  //                 : userSelect,
+  //             }
+  //           : newData,
+  //       ];
+
+  //       createFn([
+  //         {
+  //           ...newData,
+  //           processCategory: !!newData.processCategory
+  //             ? newData.processCategory
+  //             : userSelect,
+  //         },
+  //       ]);
+  //       return createdData;
+  //     }
+  //   };
+
+  //   const actions = {
+  //     product: {
+  //       setState: setProductData,
+  //       updateFn: handleUpdateProcess,
+  //       createFn: handleCreateProcess,
+  //     },
+  //     material: {
+  //       setState: setMaterialDataList,
+  //       updateFn: handleUpdateMaterial,
+  //       createFn: handleCreateMaterial,
+  //     },
+  //   };
+
+  //   const { setState, updateFn, createFn } = actions[drawerType];
+
+  //   setState((prevData) =>
+  //     processSubmission(prevData, selectedData, updateFn, createFn)
+  //   );
+
+  //   resetFormState();
+  // };
   const handleSubmit = () => {
-    const processSubmission = (dataList, newData, updateFn, createFn) => {
-      if (isEditing) {
-        const updatedData = dataList.map((item) =>
-          item.id === newData.id ? newData : item
-        );
-        updateFn(updatedData);
-        return updatedData;
-      } else {
-        const createdData = [...dataList, newData];
-
-        createFn([newData]);
-        return createdData;
-      }
+    const processedData = {
+      ...selectedData,
+      processCategory: selectedData?.processCategory || userSelect,
     };
 
-    const actions = {
-      product: {
-        setState: setProductData,
-        updateFn: handleUpdateProcess,
-        createFn: handleCreateProcess,
-      },
-      material: {
-        setState: setMaterialDataList,
-        updateFn: handleUpdateMaterial,
-        createFn: handleCreateMaterial,
-      },
-    };
-
-    const { setState, updateFn, createFn } = actions[drawerType];
+    const { setState, updateFn, createFn } =
+      drawerType === "product"
+        ? {
+            setState: setProductData,
+            updateFn: handleUpdateProcess,
+            createFn: handleCreateProcess,
+          }
+        : {
+            setState: setMaterialDataList,
+            updateFn: handleUpdateMaterial,
+            createFn: handleCreateMaterial,
+          };
 
     setState((prevData) =>
-      processSubmission(prevData, selectedData, updateFn, createFn)
+      isEditing
+        ? prevData.map((item) =>
+            item.id === processedData.id ? processedData : item
+          )
+        : [...prevData, processedData]
     );
+
+    const dataToSubmit = Array.isArray(processedData)
+      ? processedData
+      : [processedData];
+    (isEditing ? updateFn : createFn)(dataToSubmit);
 
     resetFormState();
   };
@@ -170,7 +224,6 @@ function ProductionRecordProcMaterials() {
     }));
   };
 
-  //! handleDelete
   const handleDelete = () => {
     if (!selectedData) return;
     const isProduct = drawerType === "product";
@@ -180,7 +233,6 @@ function ProductionRecordProcMaterials() {
     handleOnClose();
   };
 
-  // * RenderDrawer component
   function renderDrawer() {
     const isProduct = drawerType === "product";
 
@@ -200,11 +252,7 @@ function ProductionRecordProcMaterials() {
 
     const isDisabled = () => {
       if (isProduct) {
-        return (
-          !selectedData?.processSN ||
-          !selectedData?.processName ||
-          !selectedData?.processCategory
-        );
+        return !selectedData?.processSN || !selectedData?.processName;
       } else {
         return !selectedData?.materialCode || !selectedData?.materialType;
       }
@@ -244,7 +292,6 @@ function ProductionRecordProcMaterials() {
 
         {isProduct && (
           <ProductTextFieldSelect
-            // ! 處理下拉選單
             label="製程類別"
             value={selectedData?.processCategory || userSelect}
             option={options}
@@ -266,40 +313,22 @@ function ProductionRecordProcMaterials() {
   // Ensure each item has a unique key
   useEffect(() => {
     if (processOptionsData?.data) {
-      const productsWithKeys = processOptionsData.data.map((item, index) => ({
-        ...item,
-        key: index + 1 || `product-${index + 1}`,
-      }));
-      setProductData(productsWithKeys);
+      setProductData(
+        processOptionsData.data.map((item, index) => ({
+          ...item,
+          key: index + 1,
+        }))
+      );
     }
-
     if (materialOptionsData?.data) {
-      const materialsWithKeys = materialOptionsData.data.map((item, index) => ({
-        ...item,
-        key: index + 1 || `material-${index + 1}`,
-      }));
-      setMaterialDataList(materialsWithKeys);
+      setMaterialDataList(
+        materialOptionsData.data.map((item, index) => ({
+          ...item,
+          key: index + 1,
+        }))
+      );
     }
-  }, [materialOptionsData, processOptionsData]);
-
-  // Ensure each item has a unique key
-  useEffect(() => {
-    if (processOptionsData?.data) {
-      const productsWithKeys = processOptionsData.data.map((item, index) => ({
-        ...item,
-        key: index + 1 || `product-${index + 1}`,
-      }));
-      setProductData(productsWithKeys);
-    }
-
-    if (materialOptionsData?.data) {
-      const materialsWithKeys = materialOptionsData.data.map((item, index) => ({
-        ...item,
-        key: index + 1 || `material-${index + 1}`,
-      }));
-      setMaterialDataList(materialsWithKeys);
-    }
-  }, [materialOptionsData, processOptionsData]);
+  }, [processOptionsData, materialOptionsData]);
 
   return (
     <div>
