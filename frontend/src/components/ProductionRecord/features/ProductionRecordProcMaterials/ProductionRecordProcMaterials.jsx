@@ -14,12 +14,12 @@ import {
   useProcessOptionActions,
 } from "../../service/endpoints/processOptionApi";
 import {
+  useGetMaterialCheckIsDeletableByIdQuery as materialCheckIsDeletableByIdQuery,
   useGetMaterialOptionsQuery,
   useMaterialOptionActions,
 } from "../../service/endpoints/materialOptionApi";
 import ProductionRecordButton from "../../utility/ProductionRecordButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-
 // Column Definitions
 const productColumns = [
   { title: "編號", dataIndex: "key", width: 50, key: "key" },
@@ -99,6 +99,7 @@ function ProductionRecordProcMaterials() {
     handleUpdate: handleUpdateProcess,
     handleDelete: handleDeleteProcess,
   } = useProcessOptionActions();
+
   /**
    * Opens the drawer (form) to add or edit a record.
    * @param {Object|null} data - The selected data record, or null for adding a new record.
@@ -113,7 +114,7 @@ function ProductionRecordProcMaterials() {
       setUserSelect(data.description);
     }
   };
-
+  //    useGetProcessByProductSNsQuery()
   /**
    * Closes the drawer and resets the form state.
    */
@@ -255,6 +256,24 @@ function ProductionRecordProcMaterials() {
   function renderDrawer() {
     const isProduct = drawerType === "product";
 
+    /*
+     ! 問題渲染時會自動觸發
+     todo 避免選染觸發 
+     ? 拆分組件由不同 props 觸發 
+
+     todo 處理不同類別的 api 請求
+     ? 點擊時觸發相關函數
+     ? 辨別不同 drawerType 應該處理 API 需求
+
+     todo 如果已被引用不可刪除
+     ? disable 與 添加提示文字
+    */
+    // if (selectedData?.id) {
+    //   const { data: theDeletable } = materialCheckIsDeletableByIdQuery(
+    //     selectedData?.id
+    //   );
+    // }
+
     const fields = {
       name: isProduct ? "processSN" : "materialCode",
       code: isProduct ? "processName" : "materialType",
@@ -268,6 +287,7 @@ function ProductionRecordProcMaterials() {
       nameLabel: isProduct ? "製程名稱" : "物料代碼", // "Process Name" or "Material Name"
       codeLabel: isProduct ? "製程代碼" : "物料種類", // "Process Code" or "Material Code"
     };
+    // ! selectedData
 
     const isDisabled = () => {
       if (isProduct) {

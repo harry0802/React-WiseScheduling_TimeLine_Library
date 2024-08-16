@@ -11,6 +11,14 @@ export const materialOptionApi = apiSlice.injectEndpoints({
       providesTags: ["MaterialOption"], // Caching tag to optimize performance
     }),
 
+    // Endpoint for fetching material CheckIsDeletable by material ID
+    getMaterialCheckIsDeletableById: builder.query({
+      query: (id) => ({
+        url: `materialOption/checkIsDeletable/${id}`,
+      }),
+      providesTags: ["MaterialOption"], // Caching tag to optimize performance
+    }),
+
     // Endpoint for creating a new material option
     createMaterialOption: builder.mutation({
       query: (materialOption) => ({
@@ -44,6 +52,7 @@ export const materialOptionApi = apiSlice.injectEndpoints({
 
 export const {
   useGetMaterialOptionsQuery,
+  useGetMaterialCheckIsDeletableByIdQuery,
   useCreateMaterialOptionMutation,
   useUpdateMaterialOptionMutation,
   useDeleteMaterialOptionMutation,
