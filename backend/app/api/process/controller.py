@@ -59,6 +59,9 @@ class processController(Resource):
     
 
     # PUT
+    @api.doc(description="""1.製程還未被引用在計畫排程表中，允許修改
+                            2.製程若被排入計畫排程表中，且狀態是尚未上機或On-going，製程順序與內容不能被修改"""
+            )
     @api.doc(
         "Update processs",
         responses={
@@ -93,7 +96,23 @@ class processController(Resource):
         return processService.get_process_by_id(id)
     
 
-@api.route("/GetProcessByProductSNs/")
+@api.route("/checkIsEditableIsDeletable/<int:id>")
+@api.param("id", "process ID")
+class processController(Resource):
+    # GET
+    @api.doc(
+        "Get single process and its all materials and molds",
+        responses={
+            200: ("process data successfully sent"),
+            404: "process not found",
+        },
+    )
+    @controller_entrance_log(description="Get single process and its all materials and molds")
+    def get(self, id):
+        return processService.check_isEditable_isDeletable(id)
+
+
+@api.route("/getProcessByProductSNs/")
 class processController(Resource):
     process_resp = processDto.process_resp
     # GET
@@ -118,6 +137,10 @@ class processController(Resource):
 class processController(Resource):
     process_resp = processDto.process_resp
     # DELETE
+    @api.doc(description="""1.製程還未被引用在計畫排程表中，允許刪除
+                            2.製程若被排入計畫排程表中，且狀態是尚未上機或On-going，製程順序與內容不能被刪除
+                            3.一個製程被刪除，其底下的模具也要跟著被刪除"""
+            )
     @api.doc(
         "Delete single process and its all molds",
         responses={

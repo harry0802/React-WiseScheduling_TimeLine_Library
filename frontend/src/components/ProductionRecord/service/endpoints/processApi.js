@@ -24,7 +24,7 @@ export const processApi = producRecordApiSlice.injectEndpoints({
     // Endpoint for fetching processes by ProductSNs
     getProcessByProductSNs: builder.query({
       query: ({ productSNs }) => ({
-        url: `process/GetProcessByProductSNs/`,
+        url: `process/getProcessByProductSNs/`,
         params: { productSNs }, // Query parameters
       }),
       providesTags: ["Process"], // Caching tag to optimize performance

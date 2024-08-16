@@ -9,6 +9,20 @@ from .schemas import materialOptionSchema
 materialOption_schema = materialOptionSchema()
 
 
+def isDeletable(id):
+    try:
+        # Check if the materialOption has been used in Material
+        material_db = Material.query.filter(
+            Material.materialOptionId == id
+        ).first()
+        if material_db:
+            return False
+
+        return True
+    except Exception as error:
+        raise error
+
+
 def complete_materialOption(db_obj, payload):
     db_obj.materialCode = payload["materialCode"] \
         if payload.get("materialCode") is not None else db_obj.materialCode
@@ -31,6 +45,19 @@ class materialOptionService:
             materialOption_dto = materialOption_schema.dump(materialOption_db, many=True)
             resp = message(True, "materialOption data sent")
             resp["data"] = materialOption_dto
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+        
+
+    @staticmethod
+    def check_isDeletable(id):
+        try:
+            retult = isDeletable(id)
+            msg = "MaterialOption is deletable" if retult else "MaterialOption can't be deleted"
+            resp = message(True, msg)
+            resp["data"] = retult
             return resp, 200
         # exception without handling should raise to the caller
         except Exception as error:
@@ -90,15 +117,8 @@ class materialOptionService:
     def delete_materialOption(id):
         try:
             # Check if the materialOption has been used in Material
-            material_db = Material.query.filter(
-                Material.materialOptionId == id
-            ).first()
-            if material_db:
-                processMaterial_db = ProcessMaterial.query.filter(
-                    ProcessMaterial.materialId == material_db.id
-                ).first()
-                if processMaterial_db:
-                    return err_resp("MaterialOption is in use", "MaterialOption_409", 409)
+            if isDeletable(id) is False:
+                return err_resp("MaterialOption is in use", "MaterialOption_409", 409)
 
             materialOption_db = MaterialOption.query.filter(
                 MaterialOption.id == id

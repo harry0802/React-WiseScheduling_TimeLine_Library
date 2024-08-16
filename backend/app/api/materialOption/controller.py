@@ -59,11 +59,28 @@ class materialOptionController(Resource):
         return materialOptionService.update_materialOptions(payload)
     
 
+@api.route("/checkIsDeletable/<int:id>")
+class materialOptionController(Resource):
+    # GET
+    @api.doc(description='檢查物料選項是否可以被刪除。已使用在分類物料(Material)中的物料代碼、物料種類(MaterialOption)不能被刪除。')
+    @api.doc(
+        "Check materialOption is deletable",
+        responses={
+            200: ("materialOption data can be deleted"),
+            404: "materialOption not found",
+        },
+    )
+    @controller_entrance_log(description="Check materialOption is deletable")
+    def get(self, id):
+        return materialOptionService.check_isDeletable(id)
+
+
 @api.route("/<int:id>")
 class materialOptionController(Resource):
     materialOption_resp = materialOptionDto.materialOption_resp
 
     # DELETE
+    @api.doc(description='刪除物料選項。已使用在分類物料(Material)中的物料代碼、物料種類(MaterialOption)不能被刪除。')
     @api.doc(
         "Delete materialOptions",
         responses={

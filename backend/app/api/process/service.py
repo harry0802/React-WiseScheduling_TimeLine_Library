@@ -20,7 +20,7 @@ molds_schema = moldsSchema()
 materials_schema = materialsSchema()
 
 
-def check_isEditable_isDeletable(id):
+def isEditable_isDeletable(id):
     """1.製程順序還未被引用在產線排程中，允許修改和刪除
        2.產品若被排入排程，製程順序與內容不能被刪除與修改，除非完成或暫停此產品所有單據
 
@@ -134,6 +134,19 @@ class processService:
         
 
     @staticmethod
+    def check_isEditable_isDeletable(id):
+        try:
+            retult = isEditable_isDeletable(id)
+            msg = "Process is deletable" if retult else "Process can't be deleted"
+            resp = message(True, msg)
+            resp["data"] = retult
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+        
+
+    @staticmethod
     def get_process_by_productSNs(productSNs):
         try:
             print("productSNs: ", type(productSNs), productSNs, file=sys.stderr)
@@ -221,7 +234,7 @@ class processService:
         try:
             process_db_list = []
             for data in payloads:
-                if check_isEditable_isDeletable(data["id"]) == False:
+                if isEditable_isDeletable(data["id"]) == False:
                     return err_resp("process cannot be edited", "process_409", 409)
 
                 process_db = Process.query.filter(
@@ -303,7 +316,7 @@ class processService:
     @staticmethod
     def delete_process(id):
         try:
-            if check_isEditable_isDeletable(id) == False:
+            if isEditable_isDeletable(id) == False:
                     return err_resp("process cannot be deleted", "process_409", 409)
             
             # Get the process by id

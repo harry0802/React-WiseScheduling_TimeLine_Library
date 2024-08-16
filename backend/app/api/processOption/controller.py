@@ -59,11 +59,28 @@ class processOptionController(Resource):
         return processOptionService.update_processOptions(payload)
     
 
+@api.route("/checkIsDeletable/<int:id>")
+class processOptionController(Resource):
+    # GET
+    @api.doc(description='檢查製程選項是否可以被刪除。已使用在製程(Process)中的製程代碼、製程名稱(ProcessOption)不能被刪除。')
+    @api.doc(
+        "Check processOption is deletable",
+        responses={
+            200: ("processOption data can be deleted"),
+            404: "processOption not found",
+        },
+    )
+    @controller_entrance_log(description="Check processOption is deletable")
+    def get(self, id):
+        return processOptionService.check_isDeletable(id)
+    
+
 @api.route("/<int:id>")
 class processOptionController(Resource):
     processOption_resp = processOptionDto.processOption_resp
 
     # DELETE
+    @api.doc(description='刪除製程選項。已使用在製程(Process)中的製程代碼、製程名稱(ProcessOption)不能被刪除。')
     @api.doc(
         "Delete processOptions",
         responses={
