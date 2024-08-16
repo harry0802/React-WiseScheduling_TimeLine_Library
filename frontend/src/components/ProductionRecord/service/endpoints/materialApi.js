@@ -61,11 +61,7 @@ export function useMaterialAtions() {
 
   const handleUpdate = async (materials) => {
     try {
-      //todo 如何更新我的   materialCode , materialType
-      console.log(materials);
-
       const response = await updateMaterials(materials).unwrap();
-
       return response;
     } catch (err) {
       console.error("Failed to update Materials:", err);
@@ -75,7 +71,7 @@ export function useMaterialAtions() {
 
   return {
     handleUpdate,
-    updateMaterials,
+
     isUpdating,
     updateError,
   };

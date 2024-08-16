@@ -1,53 +1,77 @@
 // Import the centralized API slice
 import producRecordApiSlice from "../producRecordApiSlice";
 
-// Extend the API slice with process-specific endpoints
+/**
+ * Extends the API slice with process-specific endpoints.
+ */
 export const processApi = producRecordApiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // Endpoint for fetching processes and their materials by product ID and process category
+    /**
+     * Fetches processes and their materials by product ID and process category.
+     * @param {Object} params - The parameters for the query.
+     * @param {string} params.processCategory - The process category.
+     * @param {string} params.productId - The product ID.
+     * @returns {Object} - The query result.
+     */
     getProcessesAndMaterials: builder.query({
       query: ({ processCategory, productId }) => ({
-        url: "process/", // API endpoint path
-        params: { processCategory, productId }, // Query parameters
+        url: "process/",
+        params: { processCategory, productId },
       }),
-      providesTags: ["Process"], // Caching tag to optimize performance
+      providesTags: ["Process"],
     }),
 
-    // Endpoint for fetching a single process and its materials by process ID
+    /**
+     * Fetches a single process and its materials by process ID.
+     * @param {string} id - The process ID.
+     * @returns {Object} - The query result.
+     */
     getSingleProcessAndMaterials: builder.query({
       query: (id) => ({
-        url: `process/singleProcess/${id}`, // API endpoint path with process ID
+        url: `process/singleProcess/${id}`,
       }),
-      providesTags: ["Process"], // Caching tag to optimize performance
+      providesTags: ["Process"],
     }),
 
-    // Endpoint for creating a new process and its materials
+    /**
+     * Creates a new process and its materials.
+     * @param {Object} processData - The process data to create.
+     * @returns {Object} - The mutation result.
+     */
     createSingleProcessAndMaterials: builder.mutation({
       query: (processData) => ({
-        url: "process/", // API endpoint path
-        method: "POST", // HTTP method for creating
-        body: processData, // Request body containing process data
+        url: "process/",
+        method: "POST",
+        body: processData,
       }),
-      invalidatesTags: ["Process"], // Invalidate the 'Process' cache after mutation
+      invalidatesTags: ["Process"],
     }),
 
-    // Endpoint for updating an existing process and its materials
+    /**
+     * Updates an existing process and its materials.
+     * @param {Object} processData - The process data to update.
+     * @returns {Object} - The mutation result.
+     */
     updateSingleProcessAndMaterials: builder.mutation({
       query: (processData) => ({
-        url: "process/", // API endpoint path
-        method: "PUT", // HTTP method for updating
-        body: processData, // Request body containing updated process data
+        url: "process/",
+        method: "PUT",
+        body: processData,
       }),
-      invalidatesTags: ["Process"], // Invalidate the 'Process' cache after mutation
+      invalidatesTags: ["Process"],
     }),
 
-    // Endpoint for deleting a process by its ID
+    /**
+     * Deletes a process by its ID.
+     * @param {string} id - The ID of the process to delete.
+     * @returns {Object} - The mutation result.
+     */
     deleteProcess: builder.mutation({
       query: (id) => ({
-        url: `process/${id}`, // API endpoint path with process ID
-        method: "DELETE", // HTTP method for deletion
+        url: `process/${id}`,
+        method: "DELETE",
       }),
-      invalidatesTags: ["Process"], // Invalidate the 'Process' cache after mutation
+      invalidatesTags: ["Process"],
     }),
   }),
 });
@@ -60,3 +84,96 @@ export const {
   useUpdateSingleProcessAndMaterialsMutation,
   useDeleteProcessMutation,
 } = processApi;
+
+/**
+ * Custom hook to encapsulate all process actions.
+ * @returns {Object} - An object containing all process actions and states.
+ */
+export function useProcessActions() {
+  const {
+    data: processes,
+    isLoading: isLoadingProcesses,
+    error: processError,
+  } = useGetProcessesAndMaterialsQuery();
+
+  const {
+    data: singleProcess,
+    isLoading: isLoadingSingleProcess,
+    error: singleProcessError,
+  } = useGetSingleProcessAndMaterialsQuery();
+
+  const [createProcess, { isLoading: isCreating, error: createError }] =
+    useCreateSingleProcessAndMaterialsMutation();
+
+  const [updateProcess, { isLoading: isUpdating, error: updateError }] =
+    useUpdateSingleProcessAndMaterialsMutation();
+
+  const [deleteProcess, { isLoading: isDeleting, error: deleteError }] =
+    useDeleteProcessMutation();
+
+  /**
+   * Handles the creation of a new process.
+   * @param {Object} processData - The data for the new process.
+   * @returns {Promise<Object>} - The response from the API.
+   * @throws Will throw an error if the creation fails.
+   */
+  const handleCreateProcess = async (processData) => {
+    try {
+      const response = await createProcess(processData).unwrap();
+      return response;
+    } catch (err) {
+      console.error("Failed to create process:", err);
+      throw err;
+    }
+  };
+
+  /**
+   * Handles the update of an existing process.
+   * @param {Object} processData - The data for the updated process.
+   * @returns {Promise<Object>} - The response from the API.
+   * @throws Will throw an error if the update fails.
+   */
+  const handleUpdateProcess = async (processData) => {
+    try {
+      const response = await updateProcess(processData).unwrap();
+      return response;
+    } catch (err) {
+      console.error("Failed to update process:", err);
+      throw err;
+    }
+  };
+
+  /**
+   * Handles the deletion of a process.
+   * @param {string} id - The ID of the process to delete.
+   * @returns {Promise<Object>} - The response from the API.
+   * @throws Will throw an error if the deletion fails.
+   */
+  const handleDeleteProcess = async (id) => {
+    try {
+      const response = await deleteProcess(id).unwrap();
+      return response;
+    } catch (err) {
+      console.error("Failed to delete process:", err);
+      throw err;
+    }
+  };
+
+  return {
+    processes,
+    isLoadingProcesses,
+    processError,
+    singleProcess,
+    isLoadingSingleProcess,
+    singleProcessError,
+    handleCreateProcess,
+    isCreating,
+    createError,
+    handleUpdateProcess,
+    isUpdating,
+    updateError,
+    handleDeleteProcess,
+    isDeleting,
+    deleteError,
+  };
+}

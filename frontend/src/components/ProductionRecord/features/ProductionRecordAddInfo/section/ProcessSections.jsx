@@ -15,7 +15,7 @@ import useNotification from "../../../hook/useNotification.js";
 import { useTransferListSlice } from "../../../slice/TransferListSlice.jsx";
 import {
   useGetProcessesAndMaterialsQuery,
-  useGetSingleProcessAndMaterialsQuery,
+  useProcessActions,
 } from "../../../service/endpoints/processApi.js";
 import { useParams } from "react-router-dom";
 const items = [
@@ -153,7 +153,9 @@ function ProcessSections() {
   };
   const { productId } = useParams();
   const { data: processData } = useGetProcessesAndMaterialsQuery(productId);
-  console.log(processData);
+  /* 
+todo : 1. 先拿到所有的製程  
+*/
 
   // 放置製程內容
   return (

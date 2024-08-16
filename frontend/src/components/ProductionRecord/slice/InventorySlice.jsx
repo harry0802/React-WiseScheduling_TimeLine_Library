@@ -26,10 +26,8 @@ const InventorySlice = create((set, get) => {
       set({ selectedProductNumber }),
 
     // *新增的 filterData 方法
-
     filterData: (searchTerm, searchKey) => {
       const trimmedSearchTerm = searchTerm.trim();
-
       set((state) => ({
         tableView: trimmedSearchTerm
           ? state.dataSource.filter((item) => {
@@ -60,13 +58,11 @@ const InventorySlice = create((set, get) => {
 
     handleSave: async () => {
       const state = get();
-
       const { selectedRowKeys, dataSource, selectedProductNumber } = state;
-
       const updateDataSource = dataSource.map((item) => ({
         ...item,
-        materialType: selectedRowKeys.some((pd) => pd === item.id)
-          ? selectedProductNumber
+        materialOptionId: selectedRowKeys.some((pd) => pd === item.id)
+          ? +selectedProductNumber
           : item.productNumber,
       }));
 
@@ -76,6 +72,8 @@ const InventorySlice = create((set, get) => {
         drawerVisible: false,
         selectedRowKeys: [],
       });
+
+      console.log(updateDataSource);
 
       return updateDataSource;
     },

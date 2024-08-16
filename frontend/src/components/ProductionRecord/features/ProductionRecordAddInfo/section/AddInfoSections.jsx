@@ -5,6 +5,8 @@ import ProductDrawer from "../../../utility/ProductDrawer.jsx";
 import EditIcon from "@mui/icons-material/Edit";
 import TextField from "@mui/material/TextField";
 import useNotification from "../../../hook/useNotification.js";
+import { homeSlice } from "../../../slice/HomeSlice.jsx";
+import { useProductActions } from "../../../service/endpoints/productApi.js";
 
 function InfoSectionsDialog() {
   const {
@@ -15,11 +17,13 @@ function InfoSectionsDialog() {
 
   const { notifySuccess } = useNotification();
   const [oldPdNb, setOldPdNb] = useState("");
+  const { data: productDatas } = homeSlice();
 
-  function handleChange(e) {
-    setOldPdNb(e.target.value);
-  }
-  function handleConfirm() {
+  const { handleUpdate } = useProductActions();
+  async function handleConfirm() {
+    if (!productDatas || !product) return;
+    const updateData = { ...product, oldProductSN: oldPdNb };
+    await handleUpdate([updateData]);
     setInfoDrawer(false);
     setTimeout(() => {
       notifySuccess();
@@ -56,7 +60,7 @@ function InfoSectionsDialog() {
           <TextField
             label="舊產品編號"
             defaultValue={product.oldProductSN}
-            onChange={(e) => handleChange(e)}
+            onChange={(e) => setOldPdNb(e.target.value)}
           />
         </div>
       </div>
@@ -69,6 +73,7 @@ function InfoSections() {
     setInfoDrawer,
     productData: [product],
   } = useRecordAddInfo();
+
   return (
     <ProductContextCard
       OnClick={() => setInfoDrawer(true)}

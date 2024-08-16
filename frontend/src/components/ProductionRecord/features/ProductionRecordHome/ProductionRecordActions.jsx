@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import ProductionRecordButton from "../../utility/ProductionRecordButton.jsx";
-import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
 
 import ProductDropdownSearch from "../../utility/ProductDropdownSearch.jsx";
 
@@ -10,6 +9,7 @@ import ProductDropdownSearch from "../../utility/ProductDropdownSearch.jsx";
 import ScienceIcon from "@mui/icons-material/Science";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import { homeSlice } from "../../slice/HomeSlice.jsx";
+import { useDebounce } from "react-use";
 
 const options = [
   { label: "產品名稱", value: "productName" },
@@ -27,15 +27,7 @@ function ProductionRecordActions() {
     if (!data || !userSelect) return;
     searchData(userSearch, userSelect);
   }
-
-  const throttledHandleSearch = debounce(handleSearch, 500);
-
-  useEffect(() => {
-    throttledHandleSearch();
-    return () => {
-      throttledHandleSearch.cancel();
-    };
-  }, [userSearch, userSelect, throttledHandleSearch]);
+  useDebounce(handleSearch, 500, [userSearch, userSelect]);
 
   return (
     <div className="record-actions">

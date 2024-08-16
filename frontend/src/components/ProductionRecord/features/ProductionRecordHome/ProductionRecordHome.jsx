@@ -1,10 +1,9 @@
 import ProductionRecordCard from "./ProductionRecordCard";
 import "../../index.scss";
 import { Pagination } from "antd";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { homeSlice } from "../../slice/HomeSlice";
-import { useGetProductsWithPaginationQuery } from "../../service/endpoints/productApi";
+import { useEffectOnce } from "react-use";
 
 // 分頁器
 function ProductionRecordPaginations() {
@@ -32,21 +31,10 @@ function ProductionRecordPaginations() {
 // 首頁
 function ProductionRecordHome() {
   const navigate = useNavigate();
-  const { displayedData, setPageStatus, setData } = homeSlice();
+  const { displayedData, setPageStatus } = homeSlice();
 
-  const { data: productData } = useGetProductsWithPaginationQuery();
+  useEffectOnce(() => setPageStatus("產品履歷與BOM"));
 
-  useEffect(() => {
-    setPageStatus("產品履歷與BOM");
-  }, []);
-
-  useEffect(() => {
-    (async function () {
-      if (productData) {
-        setData(productData.data);
-      }
-    })();
-  }, [productData, setData]);
   return (
     <div className="record-home">
       <div className="record-home__content">

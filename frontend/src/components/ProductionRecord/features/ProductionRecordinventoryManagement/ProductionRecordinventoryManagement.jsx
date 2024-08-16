@@ -21,15 +21,14 @@ import { useGetMaterialOptionsQuery } from "../../service/endpoints/materialOpti
     * 為何回傳 api 參數自動忽略  
     * 如何跟新 materials ::  materialCode , materialType ?
     * 已知 materialType 由原物料分配 
-    * materialCode 由誰分配  / 邏輯 ? 行為 ?
+    *  materialCode 搭配 materialType 為一組　:回傳 api 時由後端辨認 id
     
 ? 原物料分類 ::   materialCode , materialType 
  todo 原物料分類  // API　name 取得物料選項(Done)
    * 來源是否是 materialOptions 的  materialType 與 materialCode
    
- todo 物料種類代碼管理 ===  原物料分類
+ todo 物料種類代碼管理 ===  原物料分類　
   *  兩者是否是連動關係
-
 */
 
 // Fake data for demonstration purposes
@@ -63,7 +62,7 @@ function InventoryManagementTable() {
   const { notifySuccess } = useNotification();
   // Access Zustand store
   const {
-    dataSource,
+    tableView,
     selectedRowKeys,
     drawerVisible,
     selectedProductNumber,
@@ -99,7 +98,6 @@ function InventoryManagementTable() {
   const { data: materialOptions } = useGetMaterialOptionsQuery();
 
   // Initialize data when the component mounts
-  console.log(selectedRowKeys);
 
   useEffect(() => {
     handlePageStatust("原物料分類");
@@ -118,7 +116,10 @@ function InventoryManagementTable() {
     if (!materialOptions) return;
     (async function () {
       await setRadioData(
-        materialOptions?.data.map((item) => item.materialType)
+        materialOptions?.data.map((item) => ({
+          id: item.id,
+          materialType: item.materialType,
+        }))
       );
     })();
   }, [setRadioData, materialOptions]);
@@ -127,7 +128,7 @@ function InventoryManagementTable() {
     <>
       <ControlledTable
         columns={columns}
-        dataSource={dataSource}
+        dataSource={tableView}
         selectedRowKeys={selectedRowKeys}
         onSelectChange={setSelectedKeys}
         onRowClick={onRowClick}

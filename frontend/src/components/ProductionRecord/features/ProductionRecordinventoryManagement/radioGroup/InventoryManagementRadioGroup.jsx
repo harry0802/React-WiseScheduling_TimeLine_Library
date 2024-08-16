@@ -30,7 +30,9 @@ InventoryManagementRadioGroup
 function RadioItem({ item }) {
   return (
     <FormControlLabel
-      value={item}
+      key={item.id}
+      value={item.id}
+      label={item.materialType}
       control={
         <Radio
           sx={{
@@ -41,7 +43,6 @@ function RadioItem({ item }) {
           }}
         />
       }
-      label={item}
     />
   );
 }
@@ -56,11 +57,12 @@ function InventoryManagementRadioGroup({ data, value, onChange }) {
       onChange={onChange}
     >
       <Grid container spacing={2}>
-        {data.map((item, index) => (
-          <Grid xs={12} sm={6} md={4} lg={3} key={index}>
-            <RadioItem item={item} />
-          </Grid>
-        ))}
+        {data &&
+          data.map((item, index) => (
+            <Grid xs={12} sm={6} md={4} lg={3} key={index}>
+              <RadioItem item={item} />
+            </Grid>
+          ))}
       </Grid>
     </RadioGroup>
   );
