@@ -32,6 +32,7 @@ import {
 import "./index.scss";
 import { saveAs } from "file-saver";
 import Exceljs from "exceljs";
+import ExcelExample from "../../assets/ExcelExample.xlsx";
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
 import { TZ } from "../../config/config";
 import dayjs from "dayjs";
@@ -67,11 +68,10 @@ const ResizableTitle = (props) => {
   );
 };
 
-
 /*--------------------------------------------------  global / Context   start ------------------------------------------------------*/
 /* EditableContext :: EditablerProvider
-*  EditableRow -> HTML::tr th td
-*/
+ *  EditableRow -> HTML::tr th td
+ */
 // 表單編輯設置
 const EditableContext = React.createContext(null);
 
@@ -87,9 +87,6 @@ const EditableRow = ({ id, ...props }) => {
 };
 
 /*--------------------------------------------------  global / Context  end ------------------------------------------------------*/
-
-
-
 
 /*--------------------------------------------------  global / useContext  start ------------------------------------------------------*/
 const EditableCell = ({
@@ -108,7 +105,6 @@ const EditableCell = ({
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
-  
 
   useEffect(() => {
     if (editing) {
@@ -202,14 +198,12 @@ const EditableCell = ({
 
 /*--------------------------------------------------  global / useContext  end ------------------------------------------------------*/
 
-
 const ProductionSchedule = (props) => {
   const navigate = useNavigate();
   const { Option } = Select;
 
-
   /*--------------------------------------------------  ant ui -> table -> Column   start ------------------------------------------------------*/
-/*
+  /*
 * ant ui ->  table ->  same API Column  
 
 *  defaultColumns :: [] 
@@ -624,27 +618,21 @@ const ProductionSchedule = (props) => {
 
   /*--------------------------------------------------  ant ui -> table -> Column   end ------------------------------------------------------*/
 
-/*--------------------------------------------------  分頁 secontions   start ------------------------------------------------------*/
+  /*--------------------------------------------------  分頁 secontions   start ------------------------------------------------------*/
 
   // 設定初始當前頁面以及分頁一頁有幾個資料
   const [pagination, setPagination] = useState({
     page: 1 /*當前分頁位址*/,
     pageSize: 20, // 默认值为 10
   });
- /*--------------------------------------------------  分頁 secontions end ------------------------------------------------------*/
+  /*--------------------------------------------------  分頁 secontions end ------------------------------------------------------*/
 
-
-
-
-
- /*--------------------------------------------------  資料處理 start ------------------------------------------------------*/
+  /*--------------------------------------------------  資料處理 start ------------------------------------------------------*/
 
   const [totalCurrent, setTotalCurrent] = useState(1); /*總數據量*/
   const [dataSource, setDataSource] = useState([]); /*回傳資料*/
 
- /*--------------------------------------------------  資料處理 end ------------------------------------------------------*/
-
-
+  /*--------------------------------------------------  資料處理 end ------------------------------------------------------*/
 
   /*-------------------------------------------------- 搜尋條件篩選  start ------------------------------------------------------*/
 
@@ -704,7 +692,7 @@ const ProductionSchedule = (props) => {
   };
   /*-------------------------------------------------- 搜尋條件篩選  end ------------------------------------------------------*/
 
-/*--------------------------------------------------獲取外部 api 工作列表 start ------------------------------------------------------*/
+  /*--------------------------------------------------獲取外部 api 工作列表 start ------------------------------------------------------*/
 
   // get distinct workOrderSNs from LY(凌越) ERP
   const {
@@ -713,7 +701,6 @@ const ProductionSchedule = (props) => {
     isSuccess: workOrderSNIsSuccess,
     refetch: workOrderSNRefetch,
   } = useGetWorkOrderSNsQuery();
-
 
   const [workOrderSNsFromLYState, setWorkOrderSNsFromLYState] = useState([]);
   useEffect(() => {
@@ -725,13 +712,11 @@ const ProductionSchedule = (props) => {
     }
   }, [workOrderSNIsSuccess, workOrderSNData]);
 
-/*--------------------------------------------------獲取外部 api 工作列表 end ------------------------------------------------------*/
-
+  /*--------------------------------------------------獲取外部 api 工作列表 end ------------------------------------------------------*/
 
   const onChange = (filters, sorter) => {};
 
-
-/*-------------------------------------------------- 表單 I/O start ------------------------------------------------------*/
+  /*-------------------------------------------------- 表單 I/O start ------------------------------------------------------*/
 
   // 新增 exportData 狀態
   const [needExportData, setNeedExportData] = useState([]);
@@ -997,10 +982,9 @@ const ProductionSchedule = (props) => {
     });
   };
 
-/*-------------------------------------------------- 表單 I/O end ------------------------------------------------------*/
+  /*-------------------------------------------------- 表單 I/O end ------------------------------------------------------*/
 
-
-/*-------------------------------------------------- 新增項目 與 新增製令單 start  ------------------------------------------------------*/
+  /*-------------------------------------------------- 新增項目 與 新增製令單 start  ------------------------------------------------------*/
 
   // 新增項目
   const [addProductionSchedule] = useAddProductionScheduleMutation();
@@ -1051,11 +1035,10 @@ const ProductionSchedule = (props) => {
       console.error("處理新增製令單時發生錯誤:", error);
     }
   };
-/*-------------------------------------------------- 新增項目 與 新增製令單 end  ------------------------------------------------------*/
+  /*-------------------------------------------------- 新增項目 與 新增製令單 end  ------------------------------------------------------*/
 
-
-/*--------------------------------------------------  勾選表單 start ------------------------------------------------------*/
-// ant ui:: Table ->  rowSelection API
+  /*--------------------------------------------------  勾選表單 start ------------------------------------------------------*/
+  // ant ui:: Table ->  rowSelection API
 
   /* 表單 SELECTIONS SECTION
     
@@ -1065,7 +1048,6 @@ const ProductionSchedule = (props) => {
   const [selectionType, setSelectionType] = useState("checkbox");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 追蹤選中的行的 id
   const [cancelStaus] = useCancelStausMutation();
-
 
   //勾選刪除
   const deleteChecked = async () => {
@@ -1091,8 +1073,7 @@ const ProductionSchedule = (props) => {
 
     const stringIds = JSON.stringify(selectedRowKeys);
 
-
-//  popup dialog  
+    //  popup dialog
     Modal.confirm({
       title: "確認刪除",
       content: "確定要刪除生產選中的項目嗎？",
@@ -1120,10 +1101,9 @@ const ProductionSchedule = (props) => {
       name: record.name,
     }),
   };
-/*-------------------------------------------------- 勾選表單 end  ------------------------------------------------------*/
+  /*-------------------------------------------------- 勾選表單 end  ------------------------------------------------------*/
 
-
-/*-------------------------------------------------- 外部 API 串接 START  ------------------------------------------------------*/
+  /*-------------------------------------------------- 外部 API 串接 START  ------------------------------------------------------*/
 
   // 編輯
   // get production schedule through LY
@@ -1154,14 +1134,11 @@ const ProductionSchedule = (props) => {
       message.warning("凌越ERP查無此製令單號，請重新輸入。");
     }
   };
-/*-------------------------------------------------- 外部 API 串接 end  ------------------------------------------------------*/
-
-
+  /*-------------------------------------------------- 外部 API 串接 end  ------------------------------------------------------*/
 
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
 
-
- // 儲存, 更新  觸發
+  // 儲存, 更新  觸發
   const handleSave = async (row) => {
     try {
       // Check if there are changes in the data
@@ -1174,9 +1151,6 @@ const ProductionSchedule = (props) => {
         "actualOnMachineDate",
         "actualFinishDate",
       ];
-
-    
-      
 
       const isDataChanged = Object.keys(row).some((key) => {
         // Check if the key is a date key and compare dates
@@ -1297,10 +1271,10 @@ const ProductionSchedule = (props) => {
     }
   };
 
-//  --------------------------------------------------  ui 套件 Table 設定 start  --------------------------------------------------
-/*
-* Ant ui :: Table-> API -> components 
-*/
+  //  --------------------------------------------------  ui 套件 Table 設定 start  --------------------------------------------------
+  /*
+   * Ant ui :: Table-> API -> components
+   */
   const components = {
     header: {
       cell: ResizableTitle,
@@ -1311,7 +1285,7 @@ const ProductionSchedule = (props) => {
     },
   };
 
-//  --------------------------------------------------  ui 套件 Form 設定  end  --------------------------------------------------
+  //  --------------------------------------------------  ui 套件 Form 設定  end  --------------------------------------------------
 
   const handleResize =
     (index) =>
@@ -1324,11 +1298,10 @@ const ProductionSchedule = (props) => {
       setDefaultColumns(newColumns);
     };
 
-
   /*
-  * 處理 ant ui ->  columns  ,  loop defaultColumns  
-  * onCell : 自定義 props 傳給子層組件
-  */  
+   * 處理 ant ui ->  columns  ,  loop defaultColumns
+   * onCell : 自定義 props 傳給子層組件
+   */
 
   const columns = defaultColumns.map((col, index) => {
     const onCell = (record) => ({
@@ -1470,6 +1443,20 @@ const ProductionSchedule = (props) => {
         >
           匯入
         </Button>
+        <a
+          href={ExcelExample}
+          download="生產排程計畫表-匯入範例"
+          target="_blank"
+        >
+          <Button
+            type="ghost"
+            className={
+              dataSource.length === 0 ? "downloadBtn-initial" : "downloadBtn"
+            }
+          >
+            下載匯入Excel範例
+          </Button>
+        </a>
       </div>
     </div>
   );

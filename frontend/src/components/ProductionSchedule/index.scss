@@ -438,4 +438,15 @@
     @extend %btn-shared;
     left: 6%;
   }
+
+  .downloadBtn-initial {
+    @extend %btn-shared;
+    left: 11%;
+    bottom: -38px;
+  }
+
+  .downloadBtn {
+    @extend %btn-shared;
+    left: 11%;
+  }
 }

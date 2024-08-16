@@ -8,6 +8,19 @@ from .schemas import processOptionSchema
 processOption_schema = processOptionSchema()
 
 
+def isDeletable(id):
+    try:
+        # Check if the processOption has been used in Process
+        process_db = Process.query.filter(
+            Process.processOptionId == id
+        ).first()
+        if process_db:
+            return False
+
+        return True
+    except Exception as error:
+        raise error
+
 def complete_processOption(db_obj, payload):
     db_obj.processCategory = payload["processCategory"] \
         if payload.get("processCategory") is not None else db_obj.processCategory
@@ -32,6 +45,19 @@ class processOptionService:
             processOption_dto = processOption_schema.dump(processOption_db, many=True)
             resp = message(True, "processOption data sent")
             resp["data"] = processOption_dto
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+        
+
+    @staticmethod
+    def check_isDeletable(id):
+        try:
+            retult = isDeletable(id)
+            msg = "ProcessOption is deletable" if retult else "ProcessOption can't be deleted"
+            resp = message(True, msg)
+            resp["data"] = retult
             return resp, 200
         # exception without handling should raise to the caller
         except Exception as error:
@@ -91,10 +117,7 @@ class processOptionService:
     def delete_processOption(id):
         try:
             # Check if the processOption has been used in Process
-            process_db = Process.query.filter(
-                Process.processOptionId == id
-            ).first()
-            if process_db:
+            if not isDeletable(id):
                 return err_resp("ProcessOption is in use", "ProcessOption_409", 409)
 
             processOption_db = ProcessOption.query.filter(
