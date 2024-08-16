@@ -60,7 +60,9 @@ const InventorySlice = create((set, get) => {
 
     handleSave: async () => {
       const state = get();
+
       const { selectedRowKeys, dataSource, selectedProductNumber } = state;
+
       const updateDataSource = dataSource.map((item) => ({
         ...item,
         materialType: selectedRowKeys.some((pd) => pd === item.id)

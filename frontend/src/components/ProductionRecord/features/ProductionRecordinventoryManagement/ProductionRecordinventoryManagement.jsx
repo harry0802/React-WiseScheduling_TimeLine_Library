@@ -99,8 +99,7 @@ function InventoryManagementTable() {
   const { data: materialOptions } = useGetMaterialOptionsQuery();
 
   // Initialize data when the component mounts
-
-  console.log(materials);
+  console.log(selectedRowKeys);
 
   useEffect(() => {
     handlePageStatust("原物料分類");
@@ -137,7 +136,7 @@ function InventoryManagementTable() {
         <ProductionRecordButton
           shape="round"
           OnClick={handleEditClick}
-          disabled={selectedRowKeys.length === 0}
+          disabled={selectedRowKeys.length < 1}
         >
           編輯
         </ProductionRecordButton>
@@ -148,6 +147,7 @@ function InventoryManagementTable() {
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
         onSubmit={handleSaveAndNotify}
+        disabled={!selectedProductNumber}
       >
         <InventoryManagementRadioGroup
           data={radioData}

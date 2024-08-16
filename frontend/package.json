@@ -43,6 +43,7 @@
     "react-spreadsheet-import": "^4.6.1",
     "react-styled-toggle": "^1.0.18",
     "react-switcher-rc": "^1.1.13",
+    "react-use": "^17.5.1",
     "redux": "^4.2.1",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5",
