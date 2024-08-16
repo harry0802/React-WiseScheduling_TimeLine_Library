@@ -67,7 +67,7 @@ class ProductionSchedule(Model):
     week = Column(db.Integer)
     singleOrDoubleColor = Column(db.String(255))
     conversionRate = Column(db.Float)
-    #status: on-going, finish, delay, delay-finish
+    #status: 尚未上機, On-going, Done, 暫停生產, 取消生產
     status = Column(db.String(255))
     productionReport = db.relationship('ProductionReport', backref='productionSchedule', lazy=True)
     

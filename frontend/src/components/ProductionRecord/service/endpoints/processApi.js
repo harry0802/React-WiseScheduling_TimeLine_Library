@@ -21,6 +21,15 @@ export const processApi = producRecordApiSlice.injectEndpoints({
       providesTags: ["Process"], // Caching tag to optimize performance
     }),
 
+    // Endpoint for fetching processes by ProductSNs
+    getProcessByProductSNs: builder.query({
+      query: ({ productSNs }) => ({
+        url: `process/GetProcessByProductSNs/`,
+        params: { productSNs }, // Query parameters
+      }),
+      providesTags: ["Process"], // Caching tag to optimize performance
+    }),
+
     // Endpoint for creating a new process and its materials
     createSingleProcessAndMaterials: builder.mutation({
       query: (processData) => ({
@@ -56,6 +65,7 @@ export const processApi = producRecordApiSlice.injectEndpoints({
 export const {
   useGetProcessesAndMaterialsQuery,
   useGetSingleProcessAndMaterialsQuery,
+  useGetProcessByProductSNsQuery,
   useCreateSingleProcessAndMaterialsMutation,
   useUpdateSingleProcessAndMaterialsMutation,
   useDeleteProcessMutation,

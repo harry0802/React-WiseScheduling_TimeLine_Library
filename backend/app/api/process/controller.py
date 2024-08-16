@@ -1,10 +1,12 @@
 from flask import request,current_app
 from flask_restx import Resource
+from flask_restx import reqparse
 from app.utils import controller_entrance_log
 from .service import processService
 from .dto import processDto
 from .schemas import processSchema
-
+parser = reqparse.RequestParser()
+parser.add_argument('productSNs', action='split')
 api = processDto.api
 control_schema = processSchema()
 
@@ -90,6 +92,26 @@ class processController(Resource):
     def get(self, id):
         return processService.get_process_by_id(id)
     
+
+@api.route("/GetProcessByProductSNs/")
+class processController(Resource):
+    process_resp = processDto.process_resp
+    # GET
+    @api.doc(
+        "Get Process Names by a list Product Numbers",
+        responses={
+            200: ("process data successfully sent", process_resp),
+            404: "process not found",
+        },
+    )
+    
+    @api.param("productSNs", "a list of productSNs", required=True)
+    @controller_entrance_log(description="Get Process Names by a list Product Numbers")
+    def get(self):
+        args = parser.parse_args()
+        productSNs = args["productSNs"]
+        return processService.get_process_by_productSNs(productSNs)
+
 
 @api.route("/<int:id>")
 @api.param("id", "process ID")

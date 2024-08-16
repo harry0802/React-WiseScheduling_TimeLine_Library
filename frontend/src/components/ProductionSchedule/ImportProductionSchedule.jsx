@@ -3,6 +3,8 @@ import { ReactSpreadsheetImport } from "react-spreadsheet-import";
 import { useNavigate } from "react-router-dom";
 import { notification } from "antd";
 import { useAddProductionSchedulesMutation } from "../../store/api/productionScheduleApi";
+import { useGetProductsWithPaginationQuery } from "../ProductionRecord/service/endpoints/productApi";
+import { useGetProcessByProductSNsQuery } from "../ProductionRecord/service/endpoints/processApi";
 import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -14,14 +16,18 @@ export default function ImportProductionSchedule() {
   const navigate = useNavigate();
   const [addProductionSchedules] = useAddProductionSchedulesMutation();
   const [isOpen, setIsOpen] = useState(true);
+  const [productSNsState, setproductSNsState] = useState("");
+  const { data: productData } = useGetProductsWithPaginationQuery({});
+  const { data: processData } = useGetProcessByProductSNsQuery({
+    productSNs: productSNsState,
+  });
+
   const onClose = () => {
     setIsOpen(false);
     navigate("/ProductionSchedulePage");
   };
 
   const onSubmit = async (data, file) => {
-    console.log(data);
-
     data.validData.forEach((element) => {
       // remove serialNumber, system generated
       delete element.serialNumber;
@@ -67,19 +73,109 @@ export default function ImportProductionSchedule() {
       });
   };
 
-  const rowHook = (data, addError) => {
-    const status_list = [
-      "尚未上機",
-      "On-going",
-      "Done",
-      "暫停生產",
-      "取消生產",
-    ];
-    if (status_list.includes(data.status) === false) {
-      return { ...data, status: "" };
-    }
-    return data;
+  const selectHeaderStepHook = (headerValues, data) => {
+    const productSNList = data.map((row) => row[4]);
+    const productSNSet = new Set(productSNList);
+    const productSNArray = Array.from(productSNSet);
+    const productSNs = productSNArray.join(",");
+    setproductSNsState(productSNs);
+    return { headerValues, data };
   };
+
+  const rowHook = (data, addError) => {
+    const { status, productSN, productName, processName } = data;
+
+    // check the format of the date if match yyyy-mm-dd
+    const dateRegex = /^\d{4}[\/-]\d{2}[\/-]\d{2}$/;
+    if (!dateRegex.test(data.workOrderDate)) {
+      addError("workOrderDate", {
+        message: "日期格式錯誤，請使用yyyy-mm-dd",
+        level: "error",
+      });
+      return data;
+    }
+    if (!dateRegex.test(data.planOnMachineDate)) {
+      addError("planOnMachineDate", {
+        message: "日期格式錯誤，請使用yyyy-mm-dd",
+        level: "error",
+      });
+      return data;
+    }
+    if (!dateRegex.test(data.planFinishDate)) {
+      addError("planFinishDate", {
+        message: "日期格式錯誤，請使用yyyy-mm-dd",
+        level: "error",
+      });
+      return data;
+    }
+
+    // Check if status is "尚未上機"
+    if (status !== "尚未上機") {
+      addError("status", { message: "狀態只允許尚未上機", level: "error" });
+      return data;
+    }
+
+    // Find the product by productSN and productName
+    const product = productData.data.find(
+      (product) =>
+        product.productSN === productSN && product.productName === productName
+    );
+
+    if (!product) {
+      // If product not found, add errors and exit
+      addError("productSN", {
+        message: "產品編號或產品名稱不存在",
+        level: "error",
+      });
+      addError("productName", {
+        message: "產品編號或產品名稱不存在",
+        level: "error",
+      });
+      addError("processName", {
+        message: "需有正確的產品編號和產品名稱，才能確認製程名稱",
+        level: "error",
+      });
+      return data;
+    }
+
+    // Find processes related to the product
+    const processes = processData.data.filter(
+      (process) => process.productId === product.id
+    );
+
+    if (processes.length === 0) {
+      addError("productSN", {
+        message: "此產品尚未建立製程，請先建立製程",
+        level: "error",
+      });
+      addError("productName", {
+        message: "此產品尚未建立製程，請先建立製程",
+        level: "error",
+      });
+      return data;
+    }
+
+    // Find the specific process by processName
+    const process = processes.find(
+      (process) => process.processName === processName
+    );
+
+    if (!process) {
+      addError("processName", {
+        message: "找不到對應的製程",
+        level: "error",
+      });
+      return data;
+    }
+
+    // Add productId and processId to data
+    return {
+      ...data,
+      productId: product.id,
+      processId: process.id,
+    };
+  };
+
   const fields = [
     {
       label: "生產區域",
@@ -173,6 +269,22 @@ export default function ImportProductionSchedule() {
         {
           rule: "required",
           errorMessage: "產品名稱為必填",
+          level: "error",
+        },
+      ],
+    },
+    {
+      label: "製程名稱",
+      key: "processName",
+      alternateMatches: ["製程名稱"],
+      fieldType: {
+        type: "input",
+      },
+      example: "廠內-成型-IJ01",
+      validations: [
+        {
+          rule: "required",
+          errorMessage: "製程名稱為必填",
           level: "error",
         },
       ],
@@ -505,6 +617,7 @@ export default function ImportProductionSchedule() {
         onClose={onClose}
         onSubmit={onSubmit}
         fields={fields}
+        selectHeaderStepHook={selectHeaderStepHook}
         rowHook={rowHook}
         translations={translations}
       />

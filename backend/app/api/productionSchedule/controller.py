@@ -197,7 +197,6 @@ class productionScheduleController(Resource):
     )
     @controller_entrance_log(description="Get single productionSchedule through LY")
     def get(self):
-        print("in getProductionScheduleThroughLY", file=sys.stderr)
         id = request.args.get('id', default=None, type=int)
         workOrderSN = request.args.get('workOrderSN', default=None, type=str)
         return productionScheduleService.get_productionSchedule_through_LY(id, workOrderSN)

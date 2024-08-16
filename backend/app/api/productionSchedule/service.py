@@ -225,7 +225,7 @@ class productionScheduleService:
                 query = query.filter(ProductionSchedule.status != "Done",
                                      ProductionSchedule.planFinishDate < datetime.now())
             query = query.filter(ProductionSchedule.machineSN.in_(machineSNs)) if machineSNs else query
-
+            query = query.group_by(ProductionSchedule.id)
             if hasattr(ProductionSchedule, sort):
                 query = query.order_by(getattr(ProductionSchedule, sort).desc())
             else:
@@ -317,7 +317,6 @@ class productionScheduleService:
 
     @staticmethod
     def get_productionSchedule_through_LY(id, workOrderSN):
-        print("workOrderSN:", workOrderSN, file=sys.stderr, flush=True)
         current_app.logger.info(f"get_productionSchedule_through_LY: {workOrderSN}")
         try:
             ly0000AB_db = LY0000AB.query.filter(

@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from app import db
 from app.utils import message, err_resp, internal_err_resp
+from app.models.product import Product
 from app.models.process import Process
 from app.models.material import Material
 from app.models.processOption import ProcessOption
@@ -31,6 +32,7 @@ def check_isEditable_isDeletable(id):
     productionSchedule_db = db.session.execute(
         db.select(ProductionSchedule)
         .filter(ProductionSchedule.processId == id)
+        .filter(ProductionSchedule.status.in_(["尚未上機", "On-going"]))
     ).scalars().all()
     if productionSchedule_db:
         result = False
@@ -123,6 +125,32 @@ class processService:
             process_db.materials = material_dto
 
             process_dto = process_schema.dump(process_db)
+            resp = message(True, "process data sent")
+            resp["data"] = process_dto
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+        
+
+    @staticmethod
+    def get_process_by_productSNs(productSNs):
+        try:
+            print("productSNs: ", type(productSNs), productSNs, file=sys.stderr)
+            # Get the process by product id
+            query = Process.query
+            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id)
+            query = query.join(Product, Product.id == Process.productId)
+            query = query.filter(Product.productSN.in_(productSNs))
+            process_db_list = query.all()
+
+            for process_db in process_db_list:
+                # get ProcessOption 
+                process_db.processCategory = process_db.processOptions.processCategory
+                process_db.processSN = process_db.processOptions.processSN
+                process_db.processName = process_db.processOptions.processName
+
+            process_dto = process_schema.dump(process_db_list, many=True)
             resp = message(True, "process data sent")
             resp["data"] = process_dto
             return resp, 200
