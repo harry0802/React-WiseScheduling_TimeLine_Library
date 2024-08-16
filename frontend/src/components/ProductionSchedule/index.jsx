@@ -32,6 +32,7 @@ import {
 import "./index.scss";
 import { saveAs } from "file-saver";
 import Exceljs from "exceljs";
+import ExcelExample from "../../assets/ExcelExample.xlsx";
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
 import { TZ } from "../../config/config";
 import dayjs from "dayjs";
@@ -1442,6 +1443,20 @@ const ProductionSchedule = (props) => {
         >
           匯入
         </Button>
+        <a
+          href={ExcelExample}
+          download="生產排程計畫表-匯入範例"
+          target="_blank"
+        >
+          <Button
+            type="ghost"
+            className={
+              dataSource.length === 0 ? "downloadBtn-initial" : "downloadBtn"
+            }
+          >
+            下載匯入Excel範例
+          </Button>
+        </a>
       </div>
     </div>
   );
