@@ -56,11 +56,10 @@ function TransferListCustomList({ title, items }) {
         role="list"
       >
         {items.map((value) => {
-          const labelId = `transfer-list-item-${value}-label`;
-
+          const labelId = value.materialSN;
           return (
             <ListItemButton
-              key={value}
+              key={value.id}
               role="listitem"
               onClick={() => handleToggle(value)}
             >
@@ -72,7 +71,7 @@ function TransferListCustomList({ title, items }) {
                   inputProps={{ "aria-labelledby": labelId }}
                 />
               </ListItemIcon>
-              <ListItemText id={labelId} primary={`項目 ${value + 1}`} />
+              <ListItemText id={labelId} primary={labelId} />
             </ListItemButton>
           );
         })}

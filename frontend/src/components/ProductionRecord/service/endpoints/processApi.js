@@ -14,9 +14,8 @@ export const processApi = producRecordApiSlice.injectEndpoints({
      * @returns {Object} - The query result.
      */
     getProcessesAndMaterials: builder.query({
-      query: ({ processCategory, productId }) => ({
-        url: "process/",
-        params: { processCategory, productId },
+      query: ({ productId, processCategory }) => ({
+        url: `process/?productId=${productId}&processCategory=${processCategory}`,
       }),
       providesTags: ["Process"],
     }),

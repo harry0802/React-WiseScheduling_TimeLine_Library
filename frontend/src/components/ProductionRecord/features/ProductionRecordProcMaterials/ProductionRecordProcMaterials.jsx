@@ -10,16 +10,18 @@ import ProductTextFieldSelect from "../../utility/ProductTextFieldSelect";
 import Productcontent from "../../utility/ProductContent";
 import useNotification from "../../hook/useNotification";
 import {
+  useGetCheckIsDeletableOptionQuery,
   useGetProcessOptionsQuery,
   useProcessOptionActions,
 } from "../../service/endpoints/processOptionApi";
 import {
-  useGetMaterialCheckIsDeletableByIdQuery as materialCheckIsDeletableByIdQuery,
+  useGetMaterialCheckIsDeletableByIdQuery,
   useGetMaterialOptionsQuery,
   useMaterialOptionActions,
 } from "../../service/endpoints/materialOptionApi";
 import ProductionRecordButton from "../../utility/ProductionRecordButton";
 import DeleteIcon from "@mui/icons-material/Delete";
+
 // Column Definitions
 const productColumns = [
   { title: "編號", dataIndex: "key", width: 50, key: "key" },
@@ -78,15 +80,24 @@ function ProductionRecordProcMaterials() {
   const [userSelect, setUserSelect] = useState(options[0].value);
   const [productData, setProductData] = useState([]);
   const [materialDataList, setMaterialDataList] = useState([]);
-  const { notifySuccess } = useNotification();
-
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [isAppoint, setIsAppoint] = useState(false);
+
+  const { notifySuccess } = useNotification();
   const [drawerType, setDrawerType] = useState("product");
-
   const { handlePageStatust } = useRecord();
-
   const { data: processOptionsData } = useGetProcessOptionsQuery();
   const { data: materialOptionsData } = useGetMaterialOptionsQuery();
+  const { data: isMaterialDeletable } = useGetMaterialCheckIsDeletableByIdQuery(
+    selectedData?.id || 0,
+    { skip: drawerType !== "product" || !selectedData?.id }
+  );
+  const { data: isProcessDeletable } = useGetCheckIsDeletableOptionQuery(
+    selectedData?.id || 0,
+    {
+      skip: drawerType === "product" || !selectedData?.id,
+    }
+  );
 
   const {
     handleCreate: handleCreateMaterial,
@@ -123,6 +134,7 @@ function ProductionRecordProcMaterials() {
     setUserSelect(options[0].value);
     setSelectedData(null);
     setIsEditing(false); // Reset editing mode on close
+    setDrawerVisible(false);
   };
 
   // const handleSubmit = () => {
@@ -249,15 +261,14 @@ function ProductionRecordProcMaterials() {
     setTimeout(() => notifySuccess(), 200);
     handleOnClose();
   };
+
   /**
    * Renders the drawer component, which contains the form for adding/editing data.
    * @returns {JSX.Element} - Returns the drawer component with the form.
    */
   function renderDrawer() {
-    const isProduct = drawerType === "product";
-
     /*
-     ! 問題渲染時會自動觸發
+     ! 問題渲染時會自動觸發 [解決] 
      todo 避免選染觸發 
      ? 拆分組件由不同 props 觸發 
 
@@ -268,12 +279,8 @@ function ProductionRecordProcMaterials() {
      todo 如果已被引用不可刪除
      ? disable 與 添加提示文字
     */
-    // if (selectedData?.id) {
-    //   const { data: theDeletable } = materialCheckIsDeletableByIdQuery(
-    //     selectedData?.id
-    //   );
-    // }
-
+    if (!drawerVisible) return;
+    const isProduct = drawerType === "product";
     const fields = {
       name: isProduct ? "processSN" : "materialCode",
       code: isProduct ? "processName" : "materialType",
@@ -287,7 +294,6 @@ function ProductionRecordProcMaterials() {
       nameLabel: isProduct ? "製程名稱" : "物料代碼", // "Process Name" or "Material Name"
       codeLabel: isProduct ? "製程代碼" : "物料種類", // "Process Code" or "Material Code"
     };
-    // ! selectedData
 
     const isDisabled = () => {
       if (isProduct) {
@@ -307,7 +313,8 @@ function ProductionRecordProcMaterials() {
         onClose={handleOnClose}
         onSubmit={handleSubmit}
         headericon={
-          isEditing && (
+          isEditing &&
+          isAppoint && (
             <ProductionRecordButton
               OnClick={handleDelete}
               className="c-btn-primars--delete"
@@ -328,7 +335,6 @@ function ProductionRecordProcMaterials() {
           value={selectedData?.[fields.code] || ""}
           OnChange={handleFieldChange(fields.code)}
         />
-
         {isProduct && (
           <ProductTextFieldSelect
             label="製程類別"
@@ -341,9 +347,39 @@ function ProductionRecordProcMaterials() {
             }}
           />
         )}
+
+        <span>
+          {!isAppoint
+            ? `該項目已被引用,無法被刪除 `
+            : `此次修改，已引用之產品亦會連動，請確認後再發送`}
+        </span>
       </ProductDrawer>
     );
   }
+
+  const getAppointStatus = (
+    drawerType,
+    isMaterialDeletable,
+    isProcessDeletable
+  ) => {
+    if (drawerType === "product") {
+      return isMaterialDeletable?.data;
+    } else if (drawerType === "material") {
+      return isProcessDeletable?.data;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    if (drawerVisible) {
+      const appointStatus = getAppointStatus(
+        drawerType,
+        isMaterialDeletable,
+        isProcessDeletable
+      );
+      setIsAppoint(appointStatus || false);
+    }
+  }, [isMaterialDeletable, isProcessDeletable, drawerVisible, drawerType]);
 
   useEffect(() => {
     handlePageStatust("製程與物料編碼維護");
@@ -377,7 +413,9 @@ function ProductionRecordProcMaterials() {
             title="製程編碼管理"
             columns={productColumns}
             data={productData}
-            onRowClick={(record) => openDrawer(record, "product")}
+            onRowClick={async (record) => {
+              openDrawer(record, "product");
+            }}
             onAddClick={() => openDrawer(null, "product")}
           />
 

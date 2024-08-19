@@ -12,6 +12,14 @@ export const processOptionApi = apiSlice.injectEndpoints({
       providesTags: ["ProcessOption"], // Caching tag to optimize performance
     }),
 
+    // Endpoint for fetching process option CheckIsDeletable by process option ID
+    getCheckIsDeletableOption: builder.query({
+      query: (id) => ({
+        url: `processOption/checkIsDeletable/${id}`,
+      }),
+      providesTags: ["ProcessOption"], // Caching tag to optimize performance
+    }),
+
     // Endpoint for creating a new process option
     createProcessOption: builder.mutation({
       query: (processOption) => ({
@@ -46,6 +54,7 @@ export const processOptionApi = apiSlice.injectEndpoints({
 // Export hooks for interacting with the endpoints
 export const {
   useGetProcessOptionsQuery,
+  useGetCheckIsDeletableOptionQuery,
   useCreateProcessOptionMutation,
   useUpdateProcessOptionMutation,
   useDeleteProcessOptionMutation,

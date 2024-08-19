@@ -31,6 +31,7 @@ function RecordAddInfoProvider({ children }) {
         processDrawer,
         setProcessDrawer,
         productData,
+        productId,
       }}
     >
       {children}
