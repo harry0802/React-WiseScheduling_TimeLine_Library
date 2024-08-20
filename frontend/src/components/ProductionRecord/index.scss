@@ -298,7 +298,7 @@ button.c-btn-primars,
   align-items: self-start;
   padding: 1.875rem 1.4375rem 5.125rem 1.4375rem;
 
-  gap: 38px;
+  // gap: 1.625rem;
   color: $palette-text-primary;
   font-family: Roboto;
   font-size: 16px;
@@ -315,6 +315,7 @@ button.c-btn-primars,
     width: 100%;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 1.25rem;
   }
 
   &__text {

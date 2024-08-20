@@ -71,7 +71,6 @@ export function useMaterialAtions() {
 
   return {
     handleUpdate,
-
     isUpdating,
     updateError,
   };

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Button, Form } from "antd";
 
 import ProductContextCard from "../../../utility/ProductContextCard.jsx";
@@ -14,11 +13,9 @@ import ProductGroupForm from "../../../utility/ProductGroupForm.jsx";
 import useNotification from "../../../hook/useNotification.js";
 import { useTransferListSlice } from "../../../slice/TransferListSlice.jsx";
 import { useGetProcessesAndMaterialsQuery } from "../../../service/endpoints/processApi.js";
-import { useParams } from "react-router-dom";
 import { useGetCategorizedMaterialsQuery } from "../../../service/endpoints/materialApi.js";
 import { Autocomplete } from "@mui/material";
-import { useGetMaterialOptionsQuery } from "../../../service/endpoints/materialOptionApi.js";
-import { useGetProcessOptionsQuery } from "../../../service/endpoints/processOptionApi.js";
+import { useProcessDialog } from "../../../hook/useProcessDialog.js";
 
 /*
  ! dialog 製成添加實現
@@ -36,104 +33,103 @@ todo 用戶操作:
 
 // Process -> Dialog
 // *可控組建 裡面的資料是要靈活的
-function ProcessSectionsDialog({ processData }) {
-  const { processSN, molds } = processData || {};
 
-  const [initialValues, setInitialValues] = useState({
-    processName: "",
-    moldName: "",
-  });
-
-  const [selectedProcess, setSelectedProcess] = useState(null); // Store the selected process object
-  const [moldItems, setMoldItems] = useState(molds ? molds : []);
-  const { processDrawer, setProcessDrawer } = useRecordAddInfo();
+function ProcessSectionsDialog({ processData, isEditMode, onDelete }) {
   const [form] = Form.useForm();
   const { notifySuccess } = useNotification();
-  const { right: modeData } = useTransferListSlice();
+  const { setProcessDrawer, processDrawer, productId } = useRecordAddInfo();
+  const {
+    formValues,
+    setFormValues,
+    selectedProcess,
+    moldItems,
+    setMoldItems,
+    options,
+    inputValue,
+    checkMastirialData,
+    setInputValue,
+    handleCreateProcess,
+    handleUpdateProcess,
+    handleDeleteProcess,
+    convertToApiFormat,
+  } = useProcessDialog(processData);
 
-  const { data: processesOptions } = useGetProcessOptionsQuery();
-
-  const [options, setOptions] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-
-  useEffect(() => {
-    if (processesOptions?.data) {
-      setOptions(processesOptions?.data);
-    }
-  }, [processesOptions]);
-
-  useEffect(() => {
-    const selected = options.find(
-      (option) => option.processName === initialValues.processName
-    );
-    setSelectedProcess(selected || null);
-  }, [initialValues.processName, options]);
-
-  useEffect(() => {
-    form.setFieldsValue({ moldItems });
-  }, [moldItems, form]);
-
-  function handleDrawerClose() {
+  const handleDrawerClose = () => {
     form.setFieldsValue({ items: moldItems });
     setProcessDrawer(false);
-  }
+  };
 
-  async function handleFormSubmit() {
+  const handleFormSubmit = async () => {
     if (!selectedProcess) {
       console.error("Invalid process selected");
       return;
     }
 
-    const { id, processName } = selectedProcess;
-    console.log("Selected Process ID:", id);
-    console.log("Selected Process Name:", processName);
-
     try {
       const { items } = await form.validateFields();
-      const filteredItems = items.filter(
-        ({ item_code }) =>
-          !!item_code && typeof item_code !== undefined && item_code !== " "
+      const filteredItems = items?.filter(
+        ({ item_code }) => !!item_code && item_code.trim().length > 0
       );
+
       setMoldItems(filteredItems);
+
+      const data = convertToApiFormat({
+        productId,
+        processOptionId: selectedProcess.id,
+        jigSN: inputValue,
+        molds: filteredItems,
+        materials: checkMastirialData,
+      });
+
+      isEditMode
+        ? await handleUpdateProcess(data)
+        : await handleCreateProcess(data);
       setTimeout(() => notifySuccess(), 100);
-    } catch (error) {
-      console.log("Validation Failed:", error.message);
     } finally {
-      setProcessDrawer(false);
+      handleDrawerClose();
     }
-  }
+  };
 
   return (
     <Form form={form} layout="vertical">
       <ProductDrawer
-        disabled={!selectedProcess || !initialValues.moldName}
-        title={`製程 ${processData?.length + 1}`}
+        disabled={
+          !selectedProcess ||
+          selectedProcess.processName !== inputValue ||
+          !formValues.moldName
+        }
+        title={`製程 ${
+          isEditMode ? `${processData?.length}` : `${processData?.length + 1}`
+        }`}
         visible={processDrawer}
         onClose={handleDrawerClose}
         onSubmit={handleFormSubmit}
         headericon={
-          <Button
-            style={{ borderRadius: "50%" }}
-            className="ant-btn-default c-btn-primars--delete"
-          >
-            <DeleteIcon />
-          </Button>
+          isEditMode && (
+            <Button
+              style={{ borderRadius: "50%" }}
+              className="ant-btn-default c-btn-primars--delete"
+              onClick={onDelete}
+            >
+              <DeleteIcon />
+            </Button>
+          )
         }
       >
         <div className="product-drawer__info">
           <div className="info__item">
             <Autocomplete
               freeSolo
-              options={options.map((option) => option.processName)} // Display processName for Autocomplete
+              options={options.map((option) => option.processName)}
               onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
-              onChange={(_, value) => {
-                setInitialValues({ ...initialValues, processName: value });
-              }}
+              onChange={(_, value) =>
+                setFormValues({ ...formValues, processName: value })
+              }
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="製程名稱"
-                  value={initialValues.processName}
+                  default={formValues.processName}
                 />
               )}
             />
@@ -142,9 +138,9 @@ function ProcessSectionsDialog({ processData }) {
           <div className="info__item">
             <TextField
               label="製具編號"
-              defaultValue={processSN ? processSN : ""}
+              default={formValues.moldName}
               onChange={(e) =>
-                setInitialValues({ ...initialValues, moldName: e.target.value })
+                setFormValues({ ...formValues, moldName: e.target.value })
               }
             />
           </div>
@@ -155,30 +151,61 @@ function ProcessSectionsDialog({ processData }) {
     </Form>
   );
 }
+
 // *手風琴 -> 手風琴折疊的內容
-function ProcessSectionsListDetail(params) {
+function ProcessSectionsListDetail({ materialItems, processIndex = 0 }) {
+  const { productSN, materialSN, materialName, quantity, unit } =
+    materialItems || {};
+
   return (
     <div>
-      <p></p>
-      <p></p>
-      <p></p>
+      <p>物料:{processIndex + 1}</p>
+      <p>{materialSN || "materialSN "}</p>
+      <p>{materialName || "materialName"}</p>
+      <p>{productSN || "productSN"}</p>
+      <p>
+        {quantity || "quantity"} {unit || "unit"}
+      </p>
     </div>
   );
 }
 
 // *手風琴 按下編輯按鈕要設定以紀錄資料
-function ProcessSectionsList() {
+function ProcessSectionsList({ data, processNb = 0, initMaterialCategorized }) {
   const { setProcessDrawer } = useRecordAddInfo();
   const { initializeForEdit } = useTransferListSlice();
+  const { materials, jigSN, molds, processCategory } = data || {};
+  function uniqByKeepLast(data, key) {
+    return [...new Map(data.map((x) => [key(x), x])).values()];
+  }
+
   return (
     <>
       <ProcessAccordion
-        title="製程1 廠內-成型-1I"
+        title={`製程${processNb + 1} ${
+          processCategory ? processCategory : "廠內-成型-1I"
+        }`}
         OnClick={() => {
           setProcessDrawer(true);
           initializeForEdit([1, 3, 5, 7, 9], [2, 4, 6, 8, 10]);
         }}
-      />
+      >
+        <p>治具編號 : {jigSN}</p>
+        <p>
+          模具編號 :{" "}
+          {molds
+            ?.map((item) => item.moldno)
+            .filter(Boolean)
+            .join(",") || ""}
+        </p>
+        {materials?.map((material, i) => (
+          <ProcessSectionsListDetail
+            materialItems={material}
+            processIndex={i}
+            key={i}
+          />
+        ))}
+      </ProcessAccordion>
     </>
   );
 }
@@ -190,7 +217,10 @@ function ProcessSections() {
 
   const { data: initMaterialCategorized } =
     useGetCategorizedMaterialsQuery(false);
-  const { data: processData } = useGetProcessesAndMaterialsQuery(productId);
+
+  const { data: processData } = useGetProcessesAndMaterialsQuery(productId, {
+    skip: !productId || typeof productId === undefined,
+  });
 
   // !AddNewprocess
   const handleAddNewProcess = () => {
@@ -210,8 +240,15 @@ todo : 1. 先拿到所有的製程
         icon={<AddIcon />}
         title="製程順序與物料需求對應"
       >
-        {processData?.length > 0 ? (
-          <ProcessSectionsList />
+        {processData?.data.length > 0 ? (
+          processData.data.map((items, i) => (
+            <ProcessSectionsList
+              key={i}
+              data={items}
+              processNb={i}
+              initMaterialCategorized={initMaterialCategorized.data}
+            />
+          ))
         ) : (
           <span>請添加製成</span>
         )}

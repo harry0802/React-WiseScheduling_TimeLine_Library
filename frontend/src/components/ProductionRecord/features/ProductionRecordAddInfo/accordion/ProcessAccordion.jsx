@@ -26,9 +26,11 @@ function ProcessAccordion({ children, title, OnClick = null }) {
         </ProductionRecordButton>
       </AccordionSummary>
 
-      <AccordionDetails className="accordion__content">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-        malesuada lacus ex, sit amet blandit leo lobortis eget.
+      <AccordionDetails
+        style={{ display: "flex", flexDirection: "column", rowGap: "1.25rem" }}
+        className="accordion__content"
+      >
+        {children}
       </AccordionDetails>
     </Accordion>
   );

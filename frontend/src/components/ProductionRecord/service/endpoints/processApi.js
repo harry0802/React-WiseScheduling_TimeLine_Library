@@ -14,9 +14,19 @@ export const processApi = producRecordApiSlice.injectEndpoints({
      * @returns {Object} - The query result.
      */
     getProcessesAndMaterials: builder.query({
-      query: ({ productId, processCategory }) => ({
-        url: `process/?productId=${productId}&processCategory=${processCategory}`,
-      }),
+      query: (productId, processCategory) => {
+        // Ensure productId is always included
+        let queryString = `process/?productId=${productId}`;
+
+        // Conditionally add processCategory if it exists
+        if (processCategory) {
+          queryString += `&processCategory=${processCategory}`;
+        }
+
+        return {
+          url: queryString,
+        };
+      },
       providesTags: ["Process"],
     }),
 
@@ -99,18 +109,6 @@ export const {
  * @returns {Object} - An object containing all process actions and states.
  */
 export function useProcessActions() {
-  const {
-    data: processes,
-    isLoading: isLoadingProcesses,
-    error: processError,
-  } = useGetProcessesAndMaterialsQuery();
-
-  const {
-    data: singleProcess,
-    isLoading: isLoadingSingleProcess,
-    error: singleProcessError,
-  } = useGetSingleProcessAndMaterialsQuery();
-
   const [createProcess, { isLoading: isCreating, error: createError }] =
     useCreateSingleProcessAndMaterialsMutation();
 
@@ -129,10 +127,11 @@ export function useProcessActions() {
   const handleCreateProcess = async (processData) => {
     try {
       const response = await createProcess(processData).unwrap();
+      console.log(response);
+
       return response;
     } catch (err) {
       console.error("Failed to create process:", err);
-      throw err;
     }
   };
 
@@ -169,12 +168,6 @@ export function useProcessActions() {
   };
 
   return {
-    processes,
-    isLoadingProcesses,
-    processError,
-    singleProcess,
-    isLoadingSingleProcess,
-    singleProcessError,
     handleCreateProcess,
     isCreating,
     createError,
@@ -185,4 +178,59 @@ export function useProcessActions() {
     isDeleting,
     deleteError,
   };
+}
+
+/**
+ * Converts the raw input data to the format required by the API.
+ *
+ * @param {Object} data - The raw data to be converted.
+ * @param {number} data.productId - The ID of the product.
+ * @param {number} data.processOptionId - The ID of the process option.
+ * @param {string} data.jigSN - The jig serial number.
+ * @param {Array<Object>} data.molds - The array of molds data.
+ * @param {Array<Object>} data.materials - The array of materials data.
+ *
+ * @returns {Array<Object>} - An array of formatted process objects ready to be sent to the API.
+ */
+export function convertToApiFormat({
+  productId,
+  processOptionId,
+  jigSN,
+  molds,
+  materials,
+}) {
+  // 檢查並過濾模具數組中的無效值
+  const formattedMolds = Array.isArray(molds)
+    ? molds
+        .filter(
+          (mold) =>
+            mold.item_code &&
+            typeof mold.item_code === "string" &&
+            mold.item_code.trim() !== ""
+        )
+        .map((mold, index) => ({
+          id: mold.id || index + 1, // 如果 id 不存在，使用索引作為 id
+          moldno: mold.item_code,
+        }))
+    : [];
+
+  // 檢查並過濾物料數組中的無效值
+  const formattedMaterials = Array.isArray(materials)
+    ? materials
+        .filter((material) => material.id)
+        .map((material) => ({
+          id: material.id,
+        }))
+    : [];
+
+  // 返回一個格式化的對象數組
+  return [
+    {
+      productId: +productId, // 這裡假設 `id` 與 `productId` 相同
+      processOptionId,
+      jigSN: jigSN.trim(),
+      molds: formattedMolds,
+      materials: formattedMaterials,
+    },
+  ];
 }
