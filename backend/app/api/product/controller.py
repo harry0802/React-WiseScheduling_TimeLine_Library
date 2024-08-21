@@ -1,6 +1,6 @@
 from flask import request,current_app
 from flask_restx import Resource
-from backend.app.utils_log import controller_entrance_log
+from app.utils_log import controller_entrance_log
 from .service import productService
 from .dto import productDto
 from .schemas import productSchema

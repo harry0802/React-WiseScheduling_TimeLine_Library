@@ -5,7 +5,7 @@ from flask import request
 from flask_restx import Resource
 from flask_restx import inputs
 
-from backend.app.utils_log import controller_entrance_log
+from app.utils_log import controller_entrance_log
 
 from .service import productionReportService
 from .dto import productionReportDto

@@ -7,7 +7,7 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from app import db
 from app.adapters.modbus_client_manager import ModbusClientManager
-from backend.app.utils_log import message, err_resp, internal_err_resp
+from app.utils_log import message, err_resp, internal_err_resp
 from app.models.device import Devices, ControlHistory, ControlState , PublishState
 from app.models.register_setting import DeviceSetting
 from .schemas import DevicesSchema

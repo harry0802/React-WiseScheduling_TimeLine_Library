@@ -3,7 +3,7 @@ from flask import current_app
 from flask_jwt_extended import create_access_token
 
 from app import db
-from backend.app.utils_log import message, err_resp, internal_err_resp
+from app.utils_log import message, err_resp, internal_err_resp
 from app.models.user import User
 from app.models.schemas import UserSchema
 

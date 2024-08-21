@@ -2,7 +2,7 @@ from app.service.customField import *
 from flask_restx import Namespace, fields
 from .schemas import optionSchema
 from marshmallow.validate import Length, Range
-from backend.app.utils_log import validation_error
+from app.utils_log import validation_error
 import logging
 import copy
 
