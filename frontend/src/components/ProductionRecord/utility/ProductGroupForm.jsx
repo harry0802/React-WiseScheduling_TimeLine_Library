@@ -8,14 +8,14 @@ function ProductGroupForm() {
   return (
     <div className="groupForm">
       <div className="groupForm-item">
-        <Form.List name="items">
+        <Form.List name={"items"}>
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }) => (
                 <Space key={key} className="groupForm__content">
                   <Form.Item
                     {...restField}
-                    name={[name, "item_code"]}
+                    name={[name, "moldno"]}
                     label={`模具編號${name + 1}`} // Custom label for each item
                     className="groupForm__input"
                   >

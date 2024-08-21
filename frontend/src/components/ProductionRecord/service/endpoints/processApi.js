@@ -91,6 +91,18 @@ export const processApi = producRecordApiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Process"],
     }),
+
+    /**
+     * Checks if a process is editable and deletable by its ID.
+     * @param {string} id - The ID of the process to check.
+     * @returns {Object} - The query result.
+     */
+    checkIsEditableIsDeletable: builder.query({
+      query: (id) => ({
+        url: `process/checkIsEditableIsDeletable/${id}`,
+      }),
+      providesTags: ["Process"],
+    }),
   }),
 });
 
@@ -102,6 +114,7 @@ export const {
   useCreateSingleProcessAndMaterialsMutation,
   useUpdateSingleProcessAndMaterialsMutation,
   useDeleteProcessMutation,
+  useCheckIsEditableIsDeletableQuery,
 } = processApi;
 
 /**
@@ -198,19 +211,20 @@ export function convertToApiFormat({
   jigSN,
   molds,
   materials,
+  dataId,
 }) {
   // 檢查並過濾模具數組中的無效值
   const formattedMolds = Array.isArray(molds)
     ? molds
         .filter(
           (mold) =>
-            mold.item_code &&
-            typeof mold.item_code === "string" &&
-            mold.item_code.trim() !== ""
+            mold.moldno &&
+            typeof mold.moldno === "string" &&
+            mold.moldno.trim() !== ""
         )
         .map((mold, index) => ({
           id: mold.id || index + 1, // 如果 id 不存在，使用索引作為 id
-          moldno: mold.item_code,
+          moldno: mold.moldno,
         }))
     : [];
 
@@ -231,6 +245,7 @@ export function convertToApiFormat({
       jigSN: jigSN.trim(),
       molds: formattedMolds,
       materials: formattedMaterials,
+      id: dataId, // 這��假設 `id` 與 `process
     },
   ];
 }

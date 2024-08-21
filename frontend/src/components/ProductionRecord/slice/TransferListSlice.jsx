@@ -80,6 +80,7 @@ export const useTransferListSlice = create((set, get) => ({
    * @param {"setup"|"edit"} mode - The mode of initialization, either "setup" or "edit".
    * @returns {Promise<void>} - A promise that resolves when the data has been loaded and the state initialized.
    */
+
   loadDataFromApi: async (apiEndpoint, mode = "setup") => {
     try {
       const response = await fetch(apiEndpoint);
