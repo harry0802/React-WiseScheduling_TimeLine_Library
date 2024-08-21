@@ -9,7 +9,7 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from app import db
 from app.adapters.modbus_client_manager import ModbusClientManager
-from app.utils import message, err_resp, internal_err_resp, acceptable_condition_check
+from app.utils_log import message, err_resp, internal_err_resp, acceptable_condition_check
 from app.models.device import Devices, ControlHistory, ControlState , PublishState
 from app.models.register_setting import GatewaySetting, DeviceSetting, RegisterSetting
 from .schemas import HousesSchema, DevicesSchema

@@ -4,7 +4,7 @@ import sys
 from flask import current_app
 from sqlalchemy import func
 from app import db
-from app.utils import message, err_resp, internal_err_resp
+from app.utils_log import message, err_resp, internal_err_resp
 from app.models.productionSchedule import ProductionSchedule
 from app.models.ly0000AB import LY0000AB
 from app.models.ltmoldmap import LtMoldMap

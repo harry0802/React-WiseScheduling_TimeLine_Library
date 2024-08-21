@@ -4,7 +4,7 @@ import requests
 from app.api.product.service import productService
 from app.api.material.service import materialService
 from flask import current_app
-from app.utils import message, err_resp, internal_err_resp
+from app.utils_log import message, err_resp, internal_err_resp
 from app.models.product import Product
 from app.models.material import Material
 from app.models.ly00000RTitle import LY00000RTitle
@@ -14,7 +14,6 @@ from app.api.lysErp.xmlEnum import DataKind, Ixmlda00000R_Title, Ixmlda00000R_De
 from app.api.lysErp.xmlRequest import LyDataOutRequestParameter, LyGetPassKeyRequest, LyDataOutRequest
 from app.api.lysErp.xmlParser import parse_LyGetPassKey, parse_LyDataOut
 import xml.etree.ElementTree as ET
-from app.utils import err_resp, internal_err_resp
 import os
 from dotenv import load_dotenv
 load_dotenv()

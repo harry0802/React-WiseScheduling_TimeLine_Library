@@ -4,7 +4,7 @@ import requests
 from flask import current_app
 
 from app import db
-from app.utils import message, err_resp, internal_err_resp
+from app.utils_log import message, err_resp, internal_err_resp
 from app.models.calendar import Calendar
 from .schemas import CalendarSchema
 

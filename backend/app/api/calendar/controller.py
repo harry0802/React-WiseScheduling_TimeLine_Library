@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import request
 from flask_restx import Resource
 
-from app.utils import validation_error
+from app.utils_log import validation_error
 
 from .service import CalendarService
 from .dto import CalendarDto

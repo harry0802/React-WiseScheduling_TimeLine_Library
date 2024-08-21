@@ -4,7 +4,7 @@ import sys
 import importlib
 from flask import current_app
 from app import db
-from app.utils import message, err_resp, internal_err_resp
+from app.utils_log import message, err_resp, internal_err_resp
 from app.models.option import Option
 from .schemas import optionSchema
 option_schema = optionSchema()
