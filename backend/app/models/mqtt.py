@@ -10,7 +10,7 @@ from datetime import datetime
 # from app.adapters.modbus_client_manager import ModbusClientManager
 # from app.models.device_setting import DeviceSetting, PLCSetting
 # from app.models.device import Devices, DeviceHistory
-from app.utils import message
+from backend.app.utils_log import message
 #from app.adapters.mqtt_client import MQTTDeviceService
 
 main_logger = logging.getLogger('main')

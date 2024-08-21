@@ -1,6 +1,6 @@
 import sys
 from flask_restx import Resource
-from app.utils import controller_entrance_log
+from backend.app.utils_log import controller_entrance_log
 from .service import LyService
 from .dto import lyServiceDto
 

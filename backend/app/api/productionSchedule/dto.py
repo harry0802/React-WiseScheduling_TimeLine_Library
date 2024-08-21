@@ -1,7 +1,7 @@
 from flask_restx import Namespace, fields
 from .schemas import productionScheduleSchema
 from marshmallow.validate import Length, Range
-from app.utils import validation_error
+from backend.app.utils_log import validation_error
 import logging
 import copy
 from app.service.customField import *

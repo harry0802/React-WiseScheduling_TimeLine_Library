@@ -1,7 +1,7 @@
 import sys
 from flask import current_app
 from app import db
-from app.utils import message, err_resp, internal_err_resp
+from backend.app.utils_log import message, err_resp, internal_err_resp
 from app.models.processOption import ProcessOption
 from app.models.process import Process
 from .schemas import processOptionSchema

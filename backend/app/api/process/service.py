@@ -5,7 +5,7 @@ from sqlalchemy.orm import contains_eager
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from app import db
-from app.utils import message, err_resp, internal_err_resp
+from backend.app.utils_log import message, err_resp, internal_err_resp
 from app.models.product import Product
 from app.models.process import Process
 from app.models.material import Material

@@ -2,7 +2,7 @@ import os
 from flask import current_app
 
 from app import db
-from app.utils import err_resp, message, internal_err_resp
+from backend.app.utils_log import err_resp, message, internal_err_resp
 from app.models.user import User
 
 

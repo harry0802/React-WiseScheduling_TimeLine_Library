@@ -1,6 +1,9 @@
+import os
 import traceback
 from flask import current_app, request
+from app import scheduler
 from datetime import datetime
+
 
 def message(status, message):
     response_object = {"status": status, "message": message}
@@ -23,6 +26,7 @@ def internal_err_resp():
     err = message(False, "Something went wrong during the process!")
     err["error_reason"] = "server_error"
     return err, 500
+
 
 def acceptable_condition_check(condition, test_val):
     # check test_val is in (interval) condition or not
@@ -48,12 +52,15 @@ def acceptable_condition_check(condition, test_val):
     # logging.info(f'{left_open}, {right_open}, {a}, {b}, {test_val}')
     return result
 
+
 def get_user_info_by_token(request):
     # get user info from jwt token
     # from flask_jwt_extended import get_jwt_identity
     # user_name = get_jwt_identity()
     user_name = "byAnonymous"
     return user_name
+
+
 def get_client_info(request):
     user_name = get_user_info_by_token(request)
     return {
@@ -63,24 +70,6 @@ def get_client_info(request):
         "user_name": user_name,
     }
 
-def log_decorator(func):
-    def wrapper(*args, **kwargs):
-        try:
-            client_info = get_client_info(request)
-            current_app.logger.info (f"Called {func.__name__} with args: {args}")
-            current_app.logger.debug(f" with kwargs: {kwargs}") 
-            result = func(*args, **kwargs)
-            current_app.logger.info(f"Returned {func.__name__}")
-            # current_app.logger.debug("I'm a DEBUG message")
-            # current_app.logger.info("I'm an INFO message")
-            # current_app.logger.warning("I'm a WARNING message")
-            # current_app.logger.error("I'm a ERROR message")
-            # current_app.logger.critical("I'm a CRITICAL message")
-            return result
-        except Exception as e:
-            current_app.logger.error(f"Error in {func.__name__}: {e}")
-            raise e
-    return wrapper
 
 """ log format
 {
@@ -170,7 +159,7 @@ def controller_entrance_log(description=""):
                 #after calling the function
                 log_format["level"] = "INFO"
                 log_format["data"]["result"] = result
-                if result[1] == 200:
+                if len(result) == 2 and result[1] == 200:
                     log_format["message"] = f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']} successfully"
                 else:
                     log_format["message"] = f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']} failed"
@@ -188,6 +177,156 @@ def controller_entrance_log(description=""):
                     log_format["data"]['process_info']['call_stack'].append(f"{idx}: {line}")
                     
                 current_app.logger.critical(log_format)
+                # err = message(False, "Something went wrong during the process!")
+                # err["error_reason"] = "server_error"
+                return {
+                        "status": False,
+                        "message": "Something went wrong during the process!",
+                        "error_reason": "server_error"
+                    }, 500
+        return wrapper
+    return decorator
+
+
+def scheduler_entrance_log(description=""):
+    def decorator(func):
+        from functools import wraps
+        log_format = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "level": "ERROR",
+            "message": "entry log",
+            "data": {}
+        }
+        message_info = {
+            "who": "byAnonymous",
+            "what": "GET /controller/entrance",
+            "where": "at xxx.xxx.xxx.xxx",
+            "why": "action logging"
+        }
+        def wrapper(*args, **kwargs):
+            try:
+                #before calling the function
+                message_info["who"] = "ScheduledTask"
+                message_info["what"] = func.__name__
+                message_info["where"] = f"at {os.path.basename(__file__)}"
+                message_info["why"] = f"[{description}]"
+                log_format["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                log_format["level"] = "INFO"
+                log_format["message"] = f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']}"
+                log_format["data"] = {
+                    "args": f"{args}",
+                    "kwargs": f"{kwargs}",
+                }
+                with scheduler.app.app_context():
+                    current_app.logger.info(log_format)
+                #call the function
+                result = func(*args, **kwargs)
+                
+                #after calling the function
+                log_format["level"] = "INFO"
+                log_format["message"] = f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']} Done"
+                    
+                with scheduler.app.app_context():
+                    current_app.logger.info(log_format)
+                return result
+            except Exception as e:
+                log_format["level"] = "CRITICAL"
+                log_format["message"] = f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']} exception"
+                log_format["data"]["exception"] = e.__class__.__name__
+                log_format["data"]["message"] = e.__str__()
+                log_format["data"]['process_info'] = {}
+                log_format["data"]['process_info']['call_stack']=[]
+                call_stack = traceback.format_exc()
+                for idx, line in enumerate(call_stack.split("\n")):
+                    log_format["data"]['process_info']['call_stack'].append(f"{idx}: {line}")
+                
+                with scheduler.app.app_context():
+                    current_app.logger.critical(log_format)
+                return internal_err_resp()
+        wrapper = wraps(func)(wrapper)
+        return wrapper
+    return decorator
+
+
+def function_entrance_log(description=""):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            log_format = {
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "level": "ERROR",
+                "message": "entry log",
+                "data": {}
+            }
+            message_info = {
+                "who": "byAnonymous",
+                "what": "GET /controller/entrance",
+                "where": "at xxx.xxx.xxx.xxx",
+                "why": "action logging"
+            }
+            try:
+                #before calling the function
+                message_info["who"] = "process"
+                message_info["what"] = func.__name__
+                message_info["where"] = f"at {os.path.basename(__file__)}"
+                message_info["why"] = f"[{description}]"
+                log_format = {
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "level": "INFO",
+                    "message": f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']}",
+                    "data": {
+                        "args": f"{args}",
+                        "kwargs": f"{kwargs}",
+                    }
+                }
+                current_app.logger.info(log_format)
+
+                #call the function
+                result = func(*args, **kwargs)
+                
+                #after calling the function
+                log_format["level"] = "INFO"
+                log_format["message"] = f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']} End"
+                current_app.logger.info(log_format)
+                return result
+            except Exception as e:
+                log_format["level"] = "CRITICAL"
+                log_format["message"] = f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']} exception"
+                log_format["data"]["exception"] = e.__class__.__name__
+                log_format["data"]["message"] = e.__str__()
+                log_format["data"]['process_info'] = {}
+                log_format["data"]['process_info']['call_stack']=[]
+                call_stack = traceback.format_exc()
+                for idx, line in enumerate(call_stack.split("\n")):
+                    log_format["data"]['process_info']['call_stack'].append(f"{idx}: {line}")
+                    
+                current_app.logger.critical(log_format)
                 return internal_err_resp()
         return wrapper
     return decorator
+
+
+def function_log(data, level="INFO"):
+    import inspect
+    message_info = {
+        "who": "dev",
+        "what": "log",
+        "where": f"at {inspect.stack()[1].function}",
+        "why": "[code log]"
+    }
+    log_format = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "level": level.upper(),
+        "message":  f"{message_info['who']} {message_info['what']} {message_info['where']} {message_info['why']}",
+        "data": data
+    }
+    if level.upper() == "CRITICAL":
+        current_app.logger.critical(log_format)
+    elif level.upper() == "ERROR":
+        current_app.logger.error(log_format)
+    elif level.upper() == "WARNING":
+        current_app.logger.warning(log_format)
+    elif level.upper() == "INFO":
+        current_app.logger.info(log_format)
+    elif level.upper() == "DEBUG":
+        current_app.logger.debug(log_format)
+
