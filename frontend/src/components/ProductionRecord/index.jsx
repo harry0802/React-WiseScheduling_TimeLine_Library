@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 import InventoryManagementActions from "./features/ProductionRecordinventoryManagement/InventoryManagementActions.jsx";
 import ProductNotification from "./utility/ProductNotification";
 
-import { useRecord } from "./context/ProductionRecordProvider";
+import { homeSlice } from "./slice/HomeSlice";
 
 // wrapper
 function ProductionRecordWarpper({ children }) {
@@ -18,11 +18,11 @@ function ProductionRecordWarpper({ children }) {
 
 // wrapper -> header
 function ProductionRecordHeader({ children }) {
-  const { state } = useRecord();
+  const { pageStatus } = homeSlice();
   return (
     <div className="record-header">
       <div className="record-header__title">
-        <h3 className="record-header__title">{state.pageStatus} </h3>
+        <h3 className="record-header__title">{pageStatus} </h3>
       </div>
       {children}
     </div>

@@ -54,7 +54,6 @@ function ProcessSectionsDialog() {
     onDelete,
     processIndex,
     processName,
-    processSN,
     checkMastirialData,
     setInputValue,
     handleCreateProcess,
@@ -62,20 +61,15 @@ function ProcessSectionsDialog() {
     handleDeleteProcess,
     convertToApiFormat,
     mold,
-    // processIndex,
+    jigSN,
   } = useProcessDialog();
 
   const handleDrawerClose = () => {
     form.setFieldsValue({ items: mold });
     setProcessDrawer(false);
   };
-  console.log(inputValue);
-  console.log(processId);
   const handleFormSubmit = async () => {
-    if (!selectedProcess) {
-      console.error("Invalid process selected");
-      return;
-    }
+    if (!selectedProcess) return;
 
     try {
       const { items } = await form.validateFields();
@@ -86,12 +80,11 @@ function ProcessSectionsDialog() {
       const data = convertToApiFormat({
         productId,
         processOptionId: selectedProcess.id,
-        jigSN: inputValue,
+        jigSN: formValues.moldName,
         molds: filteredItems,
         materials: checkMastirialData,
         dataId: processId,
       });
-      console.log(data);
 
       isEditMode
         ? await handleUpdateProcess(data)
@@ -102,6 +95,8 @@ function ProcessSectionsDialog() {
     }
   };
 
+  // console.log(selectedProcess, inputValue, formValues.moldName);
+
   useEffect(() => {
     form.setFieldsValue({ items: mold });
   }, [mold, form]);
@@ -109,11 +104,11 @@ function ProcessSectionsDialog() {
   return (
     <Form form={form} layout="vertical" initialValues={{ item: [] }}>
       <ProductDrawer
-        // disabled={
-        //   !selectedProcess ||
-        //   selectedProcess.processName !== inputValue ||
-        //   !formValues.moldName
-        // }
+        disabled={
+          !selectedProcess ||
+          selectedProcess.processName !== inputValue ||
+          !formValues.moldName
+        }
         title={`製程 ${processIndex}`}
         visible={processDrawer}
         onClose={handleDrawerClose}
@@ -154,7 +149,7 @@ function ProcessSectionsDialog() {
           <div className="info__item">
             <TextField
               label="製具編號"
-              defaultValue={processSN}
+              defaultValue={jigSN}
               onChange={(e) =>
                 setFormValues({ ...formValues, moldName: e.target.value })
               }

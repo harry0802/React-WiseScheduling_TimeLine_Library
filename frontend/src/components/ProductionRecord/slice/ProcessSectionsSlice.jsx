@@ -11,6 +11,7 @@ const initialState = {
   isEditMode: false,
   onDelete: true,
   processIndex: 0,
+  jigSN: "",
   //   selectedProcessOpt: {},
 };
 
@@ -26,6 +27,7 @@ const actions = (set) => ({
       isEditMode: data?.isEditMode ?? state.isEditMode,
       onDelete: data?.onDelete ?? state.onDelete,
       processIndex: data?.processIndex + 1 ?? state.processIndex,
+      jigSN: data?.jigSN ?? "",
     }));
   },
 
@@ -36,6 +38,7 @@ const actions = (set) => ({
   setProcessName: (data) => set(() => ({ processName: data })),
   setMoldName: (data) => set(() => ({ moldName: data })),
   setProcessIndex: (index) => set(() => ({ processIndex: index })),
+  setJigSN: (data) => set(() => ({ jigSN: data })),
   reset: () => set({ ...initialState }),
 });
 

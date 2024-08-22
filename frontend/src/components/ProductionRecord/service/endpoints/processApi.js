@@ -222,10 +222,14 @@ export function convertToApiFormat({
             typeof mold.moldno === "string" &&
             mold.moldno.trim() !== ""
         )
-        .map((mold, index) => ({
-          id: mold.id || index + 1, // 如果 id 不存在，使用索引作為 id
-          moldno: mold.moldno,
-        }))
+        .map((mold) =>
+          mold.id
+            ? {
+                id: mold.id,
+                moldno: mold.moldno,
+              }
+            : { moldno: mold.moldno }
+        )
     : [];
 
   // 檢查並過濾物料數組中的無效值
@@ -245,7 +249,7 @@ export function convertToApiFormat({
       jigSN: jigSN.trim(),
       molds: formattedMolds,
       materials: formattedMaterials,
-      id: dataId, // 這��假設 `id` 與 `process
+      id: dataId,
     },
   ];
 }

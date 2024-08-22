@@ -3,7 +3,6 @@ import ControlledTable from "./table/ControlledTable.jsx";
 import ProductDrawer from "../../utility/ProductDrawer.jsx";
 import { useEffect } from "react";
 import InventoryManagementRadioGroup from "./radioGroup/InventoryManagementRadioGroup.jsx";
-import { useRecord } from "../../context/ProductionRecordProvider.jsx";
 import ProductionRecordButton from "../../utility/ProductionRecordButton.jsx";
 import useInventoryStore from "../../slice/InventorySlice.jsx";
 import useNotification from "../../hook/useNotification.js";
@@ -12,6 +11,8 @@ import {
   useMaterialAtions,
 } from "../../service/endpoints/materialApi.js";
 import { useGetMaterialOptionsQuery } from "../../service/endpoints/materialOptionApi.js";
+import { homeSlice } from "../../slice/HomeSlice.jsx";
+import { useEffectOnce } from "react-use";
 
 /*
 ! 問題  
@@ -58,8 +59,9 @@ const columns = [
 ];
 
 function InventoryManagementTable() {
-  const { handlePageStatust } = useRecord();
   const { notifySuccess } = useNotification();
+
+  const { setPageStatus } = homeSlice();
   // Access Zustand store
   const {
     tableView,
@@ -98,11 +100,7 @@ function InventoryManagementTable() {
   const { data: materialOptions } = useGetMaterialOptionsQuery();
 
   // Initialize data when the component mounts
-
-  useEffect(() => {
-    handlePageStatust("原物料分類");
-  }, []);
-
+  useEffectOnce(() => setPageStatus("原物料分類"));
   useEffect(() => {
     if (!materials) return;
     (async function () {

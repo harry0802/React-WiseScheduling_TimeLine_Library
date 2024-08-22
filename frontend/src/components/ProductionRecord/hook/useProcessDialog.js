@@ -16,6 +16,7 @@ export function useProcessDialog() {
     processName,
     processSN,
     processId,
+    jigSN,
   } = useProcessSectionSlice();
 
   //
@@ -24,7 +25,6 @@ export function useProcessDialog() {
     processName: "",
     moldName: "",
   });
-  //
 
   const [selectedProcess, setSelectedProcess] = useState(null);
   const [inputValue, setInputValue] = useState(processName || "");
@@ -43,12 +43,18 @@ export function useProcessDialog() {
   }, [processesOptions]);
 
   useEffect(() => {
-    const selected = options.find(
-      (option) => option.processName === processName ?? formValues.processName
+    const selected = options.find((option) =>
+      isEditMode
+        ? option.processName === (inputValue || processName)
+        : option.processName === formValues.processName
     );
 
     setSelectedProcess(selected || null);
-  }, [formValues.processName, options, processName]);
+  }, [inputValue, formValues.processName, options, processName, isEditMode]);
+
+  useEffect(() => {
+    setFormValues((pFv) => ({ ...pFv, moldName: jigSN }));
+  }, [jigSN]);
 
   return {
     formValues,
@@ -70,5 +76,6 @@ export function useProcessDialog() {
     processSN,
     processId,
     mold,
+    jigSN,
   };
 }

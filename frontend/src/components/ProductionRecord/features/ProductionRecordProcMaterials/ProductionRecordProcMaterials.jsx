@@ -21,6 +21,7 @@ import {
 } from "../../service/endpoints/materialOptionApi";
 import ProductionRecordButton from "../../utility/ProductionRecordButton";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { homeSlice } from "../../slice/HomeSlice";
 
 // Column Definitions
 const productColumns = [
@@ -83,19 +84,20 @@ function ProductionRecordProcMaterials() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [isAppoint, setIsAppoint] = useState(false);
 
+  const { setPageStatus } = homeSlice();
+
   const { notifySuccess } = useNotification();
   const [drawerType, setDrawerType] = useState("product");
-  const { handlePageStatust } = useRecord();
   const { data: processOptionsData } = useGetProcessOptionsQuery();
   const { data: materialOptionsData } = useGetMaterialOptionsQuery();
   const { data: isMaterialDeletable } = useGetMaterialCheckIsDeletableByIdQuery(
-    selectedData?.id || 0,
-    { skip: drawerType !== "product" || !selectedData?.id }
+    selectedData?.id,
+    { skip: drawerType !== "material" || !selectedData?.id }
   );
   const { data: isProcessDeletable } = useGetCheckIsDeletableOptionQuery(
-    selectedData?.id || 0,
+    selectedData?.id,
     {
-      skip: drawerType === "product" || !selectedData?.id,
+      skip: drawerType !== "product" || !selectedData?.id,
     }
   );
 
@@ -137,63 +139,6 @@ function ProductionRecordProcMaterials() {
     setDrawerVisible(false);
   };
 
-  // const handleSubmit = () => {
-  //   const processSubmission = (dataList, newData, updateFn, createFn) => {
-  //     if (isEditing) {
-  //       const updatedData = dataList.map((item) =>
-  //         item.id === newData.id ? newData : item
-  //       );
-  //       updateFn(updatedData);
-  //       return updatedData;
-  //     } else {
-  //       // ! 處理下拉選單
-
-  //       const isProduct = drawerType === "product";
-  //       const createdData = [
-  //         ...dataList,
-  //         isProduct
-  //           ? {
-  //               ...newData,
-  //               processCategory: !!newData.processCategory
-  //                 ? newData.processCategory
-  //                 : userSelect,
-  //             }
-  //           : newData,
-  //       ];
-
-  //       createFn([
-  //         {
-  //           ...newData,
-  //           processCategory: !!newData.processCategory
-  //             ? newData.processCategory
-  //             : userSelect,
-  //         },
-  //       ]);
-  //       return createdData;
-  //     }
-  //   };
-
-  //   const actions = {
-  //     product: {
-  //       setState: setProductData,
-  //       updateFn: handleUpdateProcess,
-  //       createFn: handleCreateProcess,
-  //     },
-  //     material: {
-  //       setState: setMaterialDataList,
-  //       updateFn: handleUpdateMaterial,
-  //       createFn: handleCreateMaterial,
-  //     },
-  //   };
-
-  //   const { setState, updateFn, createFn } = actions[drawerType];
-
-  //   setState((prevData) =>
-  //     processSubmission(prevData, selectedData, updateFn, createFn)
-  //   );
-
-  //   resetFormState();
-  // };
   const handleSubmit = () => {
     const processedData = {
       ...selectedData,
@@ -269,7 +214,7 @@ function ProductionRecordProcMaterials() {
   function renderDrawer() {
     /*
      ! 問題渲染時會自動觸發 [解決] 
-     todo 避免選染觸發 
+     Todo 避免選染觸發 
      ? 拆分組件由不同 props 觸發 
 
      todo 處理不同類別的 api 請求
@@ -349,7 +294,9 @@ function ProductionRecordProcMaterials() {
         )}
 
         <span>
-          {!isAppoint
+          {!isEditing
+            ? ""
+            : !isAppoint
             ? `該項目已被引用,無法被刪除 `
             : `此次修改，已引用之產品亦會連動，請確認後再發送`}
         </span>
@@ -363,9 +310,11 @@ function ProductionRecordProcMaterials() {
     isProcessDeletable
   ) => {
     if (drawerType === "product") {
-      return isMaterialDeletable?.data;
-    } else if (drawerType === "material") {
       return isProcessDeletable?.data;
+    } else if (drawerType === "material") {
+      console.log(isProcessDeletable?.data);
+
+      return isMaterialDeletable?.data;
     }
     return false;
   };
@@ -382,7 +331,7 @@ function ProductionRecordProcMaterials() {
   }, [isMaterialDeletable, isProcessDeletable, drawerVisible, drawerType]);
 
   useEffect(() => {
-    handlePageStatust("製程與物料編碼維護");
+    setPageStatus("製程與物料編碼維護");
   }, []);
 
   // Ensure each item has a unique key
