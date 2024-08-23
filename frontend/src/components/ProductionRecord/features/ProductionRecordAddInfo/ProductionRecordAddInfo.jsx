@@ -1,7 +1,6 @@
 import ProductContent from "../../utility/ProductContent.jsx";
 import AddInfoSections from "./section/AddInfoSections.jsx";
 import ProcessSections from "./section/ProcessSections.jsx";
-import { useRecord } from "../../context/ProductionRecordProvider.jsx";
 import { useEffectOnce } from "react-use";
 import { homeSlice } from "../../slice/HomeSlice.jsx";
 

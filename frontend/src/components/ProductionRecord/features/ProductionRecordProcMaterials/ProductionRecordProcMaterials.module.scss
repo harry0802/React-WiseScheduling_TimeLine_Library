@@ -88,3 +88,15 @@ body {
     }
   }
 }
+
+.edit-warning__message {
+  font-size: 16px;
+  line-height: 1.8; /* 調整字體間隔 */
+  margin-bottom: 10px; /* 增加段落間距 */
+}
+
+.edit-warning__link {
+  color: #007bff; /* 使用容易識別的藍色鏈接 */
+  text-decoration: underline;
+  cursor: pointer;
+}

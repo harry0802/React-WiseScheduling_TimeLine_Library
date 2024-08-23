@@ -140,8 +140,6 @@ export function useProcessActions() {
   const handleCreateProcess = async (processData) => {
     try {
       const response = await createProcess(processData).unwrap();
-      console.log(response);
-
       return response;
     } catch (err) {
       console.error("Failed to create process:", err);
