@@ -203,11 +203,11 @@ class productionScheduleService:
                                         ProductionSchedule.conversionRate, ProductionSchedule.status, Product.productSN, Product.productName, 
                                         ProcessOption.processName,
                                         func.group_concat(LtMoldMap.moldno).label('moldNos'))
-            query = query.join(Product, ProductionSchedule.productId == Product.id)
-            query = query.join(Process, ProductionSchedule.processId == Process.id)
-            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id)
-            query = query.join(ProcessMold, Process.id == ProcessMold.processId)
-            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no)
+            query = query.join(Product, ProductionSchedule.productId == Product.id, isouter = True) # left outer join
+            query = query.join(Process, ProductionSchedule.processId == Process.id, isouter = True) # left outer join
+            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id, isouter = True) # left outer join
+            query = query.join(ProcessMold, Process.id == ProcessMold.processId, isouter = True) # left outer join
+            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no, isouter = True) # left outer join
 
             query = query.filter(ProductionSchedule.status != "取消生產")
             query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \

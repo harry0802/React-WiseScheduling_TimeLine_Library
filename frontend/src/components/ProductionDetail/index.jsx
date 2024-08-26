@@ -240,6 +240,10 @@ const ProductionDetail = (props) => {
       });
       return;
     }
+
+    navigate("/LeaderSignPage", {
+      state: { action: "complete", completedWorkOrders: workOrders },
+    });
   };
 
   if (isLoading) {
