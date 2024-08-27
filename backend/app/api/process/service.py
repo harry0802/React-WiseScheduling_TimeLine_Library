@@ -14,6 +14,7 @@ from app.models.processMold import ProcessMold
 from app.models.processMaterial import ProcessMaterial
 from app.models.ltmoldmap import LtMoldMap
 from app.models.productionSchedule import ProductionSchedule
+from app.api.option.service import optionService
 from .schemas import processSchema, moldsSchema, materialsSchema
 process_schema = processSchema()
 molds_schema = moldsSchema()
@@ -53,6 +54,12 @@ class processService:
     @staticmethod
     def get_processes(productId, processCategory=None):
         try:
+            # Check if the processCategory is valid
+            if processCategory is not None:
+                processCategoryEnum, statusCode = optionService.get_options("processCategory")
+                if not any(item['category'] == processCategory for item in processCategoryEnum.get('data', [])):
+                    return err_resp("Invalid processCategory value", "processCategory_404", 404)
+            
             # Get the process by product id
             query = Process.query
             query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id)

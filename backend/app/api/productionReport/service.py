@@ -2,11 +2,17 @@ from datetime import datetime, timedelta, timezone
 import math
 import sys
 from flask import current_app
+from sqlalchemy import func
 from app import db
 from app.utils_log import message, err_resp, internal_err_resp
 from app.models.productionReport import ProductionReport
 from app.models.injector import Injector
 from app.models.injectorOee15m import InjectorOee15m
+from app.models.ltmoldmap import LtMoldMap
+from app.models.product import Product
+from app.models.process import Process
+from app.models.processOption import ProcessOption
+from app.models.processMold import ProcessMold
 from .schemas import productionReportSchema, productionScheduleReportSchema
 from sqlalchemy import or_
 from app.models.productionSchedule import ProductionSchedule
@@ -342,7 +348,7 @@ class productionReportService:
     def get_workOrders(start_planOnMachineDate, end_planOnMachineDate, machineSN=None, status="all", workOrderSN=None, 
                               productName=None, expiry="無期限", motherOnly=False, productionSchedule_ids=None):
         try:
-            # transform the ISO format datetime to UNIX timestamp
+            # transform the ISO format datetime to datetime object
             start_planOnMachineDate = datetime.fromisoformat(start_planOnMachineDate) \
                 if start_planOnMachineDate else None
             end_planOnMachineDate = datetime.fromisoformat(end_planOnMachineDate) \
@@ -350,27 +356,34 @@ class productionReportService:
             productionSchedule_ids = [int(id) for id in productionSchedule_ids.replace("[", "").replace("]", "").split(",")] if productionSchedule_ids else None
 
             query = ProductionSchedule.query
-            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.machineSN, ProductionSchedule.moldNo,
-                                        ProductionSchedule.workOrderSN, ProductionSchedule.productSN, ProductionSchedule.productName,
+            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.machineSN, ProductionSchedule.workOrderSN,
                                         ProductionSchedule.workOrderQuantity, ProductionSchedule.planOnMachineDate, ProductionSchedule.planFinishDate,
-                                        ProductionSchedule.actualOnMachineDate, ProductionSchedule.status, 
-                                        ProductionReport.productionReport_id, ProductionReport.serialNumber, ProductionReport.lotName,
-                                        ProductionReport.productionQuantity, ProductionReport.defectiveQuantity,  
-                                        ProductionReport.productionDefectiveRate, ProductionReport.unfinishedQuantity, ProductionReport.colorDifference,
-                                        ProductionReport.deformation, ProductionReport.shrinkage, ProductionReport.shortage,
-                                        ProductionReport.hole, ProductionReport.bubble, ProductionReport.impurity, ProductionReport.pressure,
-                                        ProductionReport.overflow, ProductionReport.flowMark, ProductionReport.oilStain, ProductionReport.burr,
-                                        ProductionReport.blackSpot, ProductionReport.scratch, ProductionReport.encapsulation, ProductionReport.other,
-                                        ProductionReport.leader, ProductionReport.operator1, ProductionReport.operator2, ProductionReport.startTime,
-                                        ProductionReport.endTime)
+                                        ProductionSchedule.actualOnMachineDate, ProductionSchedule.status, ProductionReport.productionReport_id, 
+                                        ProductionReport.serialNumber, ProductionReport.lotName, ProductionReport.productionQuantity, 
+                                        ProductionReport.defectiveQuantity, ProductionReport.productionDefectiveRate, 
+                                        ProductionReport.unfinishedQuantity, ProductionReport.colorDifference, ProductionReport.deformation, 
+                                        ProductionReport.shrinkage, ProductionReport.shortage, ProductionReport.hole, ProductionReport.bubble, 
+                                        ProductionReport.impurity, ProductionReport.pressure, ProductionReport.overflow, 
+                                        ProductionReport.flowMark, ProductionReport.oilStain, ProductionReport.burr, ProductionReport.blackSpot, 
+                                        ProductionReport.scratch, ProductionReport.encapsulation, ProductionReport.other, ProductionReport.leader, 
+                                        ProductionReport.operator1, ProductionReport.operator2, ProductionReport.startTime, ProductionReport.endTime,
+                                        Product.productSN, Product.productName, 
+                                        ProcessOption.processName,
+                                        func.group_concat(LtMoldMap.moldno).label('moldNos'))
             query = query.join(ProductionReport, ProductionSchedule.id == ProductionReport.pschedule_id, isouter = True) # left outer join
+            query = query.join(Product, ProductionSchedule.productId == Product.id, isouter = True) # left outer join
+            query = query.join(Process, ProductionSchedule.processId == Process.id, isouter = True) # left outer join
+            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id, isouter = True) # left outer join
+            query = query.join(ProcessMold, Process.id == ProcessMold.processId, isouter = True) # left outer join
+            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no, isouter = True) # left outer join
+
             query = query.filter(ProductionSchedule.status != "取消生產")
             query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
                     if start_planOnMachineDate and end_planOnMachineDate else query
             query = query.filter(ProductionSchedule.machineSN == machineSN) if machineSN else query
             query = query.filter(ProductionSchedule.status == status) if status != "all" else query
             query = query.filter(ProductionSchedule.workOrderSN.like(f"%{workOrderSN}%")) if workOrderSN else query
-            query = query.filter(ProductionSchedule.productName.like(f"%{productName}%")) if productName else query
+            query = query.filter(Product.productName.like(f"%{productName}%")) if productName else query
             if (expiry == "即將到期"):
                 # 預計完成日前七天，該單尚未完成，為即將到期
                 query = query.filter(ProductionSchedule.status != "Done", 
@@ -381,7 +394,7 @@ class productionReportService:
                                      ProductionSchedule.planFinishDate < datetime.now())
             query = query.filter(or_(ProductionReport.serialNumber == 0, ProductionReport.serialNumber == None)) if motherOnly else query
             query = query.filter(ProductionSchedule.id.in_(productionSchedule_ids)) if productionSchedule_ids else query
-            
+            query = query.group_by(ProductionSchedule.id)
             query = query.order_by(ProductionSchedule.id.desc(), ProductionReport.id.asc())
             productionReport_db = query.all()
             if not (productionReport_db):

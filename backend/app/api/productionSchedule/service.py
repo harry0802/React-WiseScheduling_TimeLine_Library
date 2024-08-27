@@ -184,7 +184,7 @@ class productionScheduleService:
     def get_productionSchedules(page, size, sort, start_planOnMachineDate, end_planOnMachineDate, machineSN=None, status="all", workOrderSN=None, 
                               productName=None, expiry="無期限", machineSNs=[]):
         try:
-            # transform the ISO format datetime to UNIX timestamp
+            # transform the ISO format datetime to datetime type
             start_planOnMachineDate = datetime.fromisoformat(start_planOnMachineDate) \
                 if start_planOnMachineDate else None
             end_planOnMachineDate = datetime.fromisoformat(end_planOnMachineDate) \
@@ -275,11 +275,12 @@ class productionScheduleService:
                                         ProductionSchedule.conversionRate, ProductionSchedule.status, Product.productSN, Product.productName, 
                                         ProcessOption.processName,
                                         func.group_concat(LtMoldMap.moldno).label('moldNos'))
-            query = query.join(Product, ProductionSchedule.productId == Product.id)
-            query = query.join(Process, ProductionSchedule.processId == Process.id)
-            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id)
-            query = query.join(ProcessMold, Process.id == ProcessMold.processId)
-            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no)
+            query = query.join(Product, ProductionSchedule.productId == Product.id, isouter = True) # left outer join
+            query = query.join(Process, ProductionSchedule.processId == Process.id, isouter = True) # left outer join
+            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id, isouter = True) # left outer join
+            query = query.join(ProcessMold, Process.id == ProcessMold.processId, isouter = True) # left outer join
+            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no, isouter = True) # left outer join
+            query = query.filter(ProductionSchedule.status != "取消生產")
             query = query.filter(ProductionSchedule.id == id)
             productionSchedule_db = query.first()
 
