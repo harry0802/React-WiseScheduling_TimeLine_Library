@@ -19,10 +19,10 @@ function ProductTextFieldSelect({
         option.map((opt) => (
           <MenuItem
             className="textField-select__menuItem"
-            key={opt.value}
-            value={opt.value}
+            key={opt.id}
+            value={opt.category}
           >
-            {opt.label}
+            {opt.category}
           </MenuItem>
         ))}
     </TextField>

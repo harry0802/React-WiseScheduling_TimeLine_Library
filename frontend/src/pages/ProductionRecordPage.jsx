@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { ProductionRecordProvider } from "../components/ProductionRecord/context/ProductionRecordProvider.jsx";
+
 import ProductionRecord from "../components/ProductionRecord/index.jsx";
 import { useGetProductsWithPaginationQuery } from "../components/ProductionRecord/service/endpoints/productApi.js";
 import { homeSlice } from "../components/ProductionRecord/slice/HomeSlice.jsx";
@@ -15,9 +15,7 @@ function ProductionRecordPage() {
   }, [productData, setData]);
   return (
     <div>
-      <ProductionRecordProvider>
-        <ProductionRecord />
-      </ProductionRecordProvider>
+      <ProductionRecord />
     </div>
   );
 }

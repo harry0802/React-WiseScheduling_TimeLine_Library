@@ -246,9 +246,12 @@ function ProcessSections() {
   const { data: initMaterialCategorized } =
     useGetCategorizedMaterialsQuery(false);
 
-  const { data: processData } = useGetProcessesAndMaterialsQuery(productId, {
-    skip: !productId,
-  });
+  const { data: processData } = useGetProcessesAndMaterialsQuery(
+    { productId },
+    {
+      skip: !productId,
+    }
+  );
 
   const handleAddNewProcess = () => {
     setProcessDrawer(true);

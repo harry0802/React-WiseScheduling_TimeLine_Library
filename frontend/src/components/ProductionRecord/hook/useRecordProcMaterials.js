@@ -12,6 +12,7 @@ import {
 } from "../service/endpoints/materialOptionApi";
 import { useEffectOnce } from "react-use";
 import useNotification from "../hook/useNotification";
+import { useGetOptionQuery } from "../service/endpoints/optionApi";
 
 // Column Definitions
 export const productColumns = [
@@ -27,15 +28,6 @@ export const materialColumns = [
   { title: "物料種類", dataIndex: "materialType", key: "materialType" },
 ];
 
-// Options for Process Categories
-const options = [
-  { value: "In-ij廠內成型", label: "In-ij廠內成型" },
-  { value: "Out-委外成型", label: "Out-委外成型" },
-  { value: "In-BE-廠內後製程", label: "In-BE-廠內後製程" },
-  { value: "Out-BE-委外後製程", label: "Out-BE-委外後製程" },
-  { value: "In-TS廠內出貨檢驗", label: "In-TS廠內出貨檢驗" },
-];
-
 function isDuplicate(item, processedData, fields) {
   return fields.some((field) => item[field] === processedData[field]);
 }
@@ -49,19 +41,27 @@ function checkForDuplicates(dataList, processedData, idField, fields) {
 }
 
 export function useRecordProcMaterials() {
+  // initialize
+  const { data: processOption } = useGetOptionQuery("processCategory");
+
+  // slice
+  const { setPageStatus } = homeSlice();
+
+  // local state
   const [selectedData, setSelectedData] = useState(null);
   const [isEditing, setIsEditing] = useState(false); // Explicit mode state
-  const [userSelect, setUserSelect] = useState(options[0].value);
+  const [userSelect, setUserSelect] = useState([]);
   const [productData, setProductData] = useState([]);
+
+  // ui state
   const [materialDataList, setMaterialDataList] = useState([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [isAppoint, setIsAppoint] = useState(false);
-  const { setPageStatus } = homeSlice();
   const [drawerType, setDrawerType] = useState("product");
-  const { notifySuccess } = useNotification();
   const [isDuplicate, setIsDuplicate] = useState(false);
 
   // API
+  const { notifySuccess } = useNotification();
   const { data: processOptionsData } = useGetProcessOptionsQuery();
   const { data: materialOptionsData } = useGetMaterialOptionsQuery();
   const { data: isMaterialDeletable } = useGetMaterialCheckIsDeletableByIdQuery(
@@ -88,7 +88,6 @@ export function useRecordProcMaterials() {
   } = useProcessOptionActions();
 
   //  Actions
-
   /**
    * Opens the drawer (form) to add or edit a record.
    * @param {Object|null} data - The selected data record, or null for adding a new record.
@@ -109,7 +108,7 @@ export function useRecordProcMaterials() {
    */
   const handleOnClose = () => {
     setDrawerVisible(false);
-    setUserSelect(options[0].value);
+    setUserSelect(processOption?.data[0]?.category);
     setSelectedData(null);
     setIsEditing(false); // Reset editing mode on close
     setDrawerVisible(false);
@@ -175,7 +174,7 @@ export function useRecordProcMaterials() {
   const resetFormState = () => {
     setDrawerVisible(false);
     setSelectedData(null);
-    setUserSelect(options[0].value);
+    setUserSelect(processOption?.data[0]?.category);
     setIsEditing(false);
     setIsDuplicate(false);
     setTimeout(() => notifySuccess(), 200);
@@ -251,6 +250,10 @@ export function useRecordProcMaterials() {
     }
   }, [processOptionsData, materialOptionsData]);
 
+  useEffect(() => {
+    setUserSelect(processOption?.data[0]?.category);
+  }, [processOption, setUserSelect]);
+
   return {
     openDrawer,
     handleSubmit,
@@ -268,6 +271,7 @@ export function useRecordProcMaterials() {
     setPageStatus,
     drawerType,
     isDuplicate,
+    processOption: processOption?.data,
     notifySuccess,
   };
 }

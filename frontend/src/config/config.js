@@ -53,3 +53,21 @@ export const MACHINE_LIST = [
   { productionArea: "D", machineSN: "D8", singleOrDoubleColor: "單" },
   { productionArea: "D", machineSN: "D9", singleOrDoubleColor: "單" },
 ];
+
+export const PROCESS_CATEGORY_OPTION = [
+  {
+    category: "In-IJ(廠內成型)",
+  },
+  {
+    category: "Out-IJ(委外成型)",
+  },
+  {
+    category: "In-BE(廠內後製程)",
+  },
+  {
+    category: "Out-BE(委外後製程)",
+  },
+  {
+    category: "In-TS(廠內出貨檢驗)",
+  },
+];

@@ -25,7 +25,8 @@ function ProductionRecordProcMaterials() {
     userSelect,
     drawerVisible,
     drawerType,
-    isDuplicate
+    isDuplicate,
+    processOption,
   } = useRecordProcMaterials();
 
   // const [selectedData, setSelectedData] = useState(null);
@@ -340,7 +341,7 @@ function ProductionRecordProcMaterials() {
 
         {drawerVisible && (
           <ProcMaterialsDrawer
-          isDuplicate={isDuplicate}
+            isDuplicate={isDuplicate}
             isEditing={isEditing}
             drawerType={drawerType}
             isAppoint={isAppoint}
@@ -352,6 +353,7 @@ function ProductionRecordProcMaterials() {
             handleDelete={handleDelete}
             setUserSelect={setUserSelect}
             handleInputChange={handleInputChange}
+            processOption={processOption}
           />
         )}
       </Productcontent>

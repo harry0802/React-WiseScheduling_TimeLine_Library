@@ -19,7 +19,7 @@ const WarningMessage = ({ to, children }) => (
 const EditWarning = ({ isEditing, isAppoint, drawerType, isDuplicate }) => {
   return (
     <>
-      {!isAppoint ? (
+      {!isAppoint && isEditing ? (
         drawerType !== "material" ? (
           <WarningMessage to="/ProductionRecordPage">產品資訊</WarningMessage>
         ) : (
@@ -29,10 +29,10 @@ const EditWarning = ({ isEditing, isAppoint, drawerType, isDuplicate }) => {
             </WarningMessage>
           </>
         )
+      ) : isEditing ? (
+        <p>可進行刪除與編輯操作</p>
       ) : (
-        <>
-          <p>可進行刪除與編輯操作</p>
-        </>
+        ""
       )}
       {isDuplicate && (
         <p className={styles["edit-warning__message"]}>

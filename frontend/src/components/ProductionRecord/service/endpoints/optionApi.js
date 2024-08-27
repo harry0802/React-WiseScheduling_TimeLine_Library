@@ -6,7 +6,7 @@ export const optionApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Endpoint for fetching options by name and optional ID
     getOption: builder.query({
-      query: ({ name, id }) => ({
+      query: (name, id) => ({
         url: `option/${name}`, // API endpoint path with option name
         params: { id }, // Optional query parameter for option ID
       }),

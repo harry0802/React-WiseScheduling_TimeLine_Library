@@ -20,6 +20,7 @@ import {
   PRODUCTION_AREA,
   MACHINE_LIST,
   REACT_APP_LY_ERP_ON,
+  PROCESS_CATEGORY_OPTION,
 } from "../../config/config";
 import {
   useGetProductionScheduleQuery,
@@ -38,8 +39,70 @@ import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { useGetProcessesAndMaterialsQuery } from "../ProductionRecord/service/endpoints/processApi";
+import { clear } from "@testing-library/user-event/dist/clear";
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+/*
+ProductionSchedule (Main Component)
+│
+├── **Imports**
+│   ├── React
+│   ├── React Router (`useNavigate`)
+│   ├── Ant Design Components (`Table`, `Select`, `Form`, `Input`, `Button`, `Modal`, `Tooltip`, `AutoComplete`)
+│   ├── FontAwesome Icons (`faPlus`, `faTrashCan`)
+│   ├── Utilities (`Resizable`, `debounce`, `saveAs`, `Exceljs`, `dayjs`)
+│   ├── API Hooks (`useGetProductionScheduleQuery`, `useGetWorkOrderSNsQuery`, `useUpdateProductionScheduleMutation`, etc.)
+│   └── Config and Constants (`WORKORDER_STATUS`, `PRODUCTION_AREA`, `MACHINE_LIST`, `TZ`)
+│
+├── **Components**
+│   ├── **Reusable Components**
+│   │   ├── ResizableTitle (Handles resizable table columns)
+│   │   ├── EditableContext (React Context for editable cells)
+│   │   ├── EditableRow (Table row wrapped with Form and Context Provider)
+│   │   └── EditableCell (Editable table cell, handles input and save logic)
+│   │
+│   └── **External Components**
+│       └── FilterBar (Used for search and filtering controls)
+│
+├── **State Management** (Local state using React hooks)
+│   ├── Pagination (`pagination`, `setPagination`)
+│   ├── Data (`dataSource`, `setDataSource`)
+│   ├── Filters and Search (`startDate`, `endDate`, `statusState`, `expiryState`, `keywordTypeState`, `keywordState`)
+│   ├── Loading States (`loading`)
+│   └── Miscellaneous (`workOrderSNsFromLYState`, `totalCurrent`, `needExportData`)
+│
+├── **API Data Fetching and Mutations** (RTK Query hooks)
+│   ├── useGetProductionScheduleQuery (Fetches production schedule data)
+│   ├── useGetWorkOrderSNsQuery (Fetches work order serial numbers)
+│   ├── useGetProductionScheduleThroughLYQuery (Fetches production schedule data through LY)
+│   ├── useCancelStausMutation (Mutation for cancelling status)
+│   ├── useAddProductionScheduleMutation (Mutation for adding production schedules)
+│   └── useUpdateProductionScheduleMutation (Mutation for updating production schedules)
+│
+├── **Helper Functions**
+│   ├── handleSave (Handles saving of edited table rows)
+│   ├── handleAdd (Handles addition of new work orders)
+│   ├── deleteChecked (Handles deletion of selected table rows)
+│   ├── handleProductionAreaChange (Updates production area and related fields)
+│   ├── handleMachineSNChange (Updates machine serial number and related fields)
+│   ├── handleSingleOrDoubleColorChange (Updates single or double color selection)
+│   ├── exportToExcel (Handles export of table data to Excel format)
+│   └── queryFromLY (Handles fetching data from external LY ERP system)
+│
+└── **Render Logic**
+    ├── Table (Main data table with editable cells, sorting, filtering, and pagination)
+    ├── FilterBar (Search and filter controls)
+    ├── Action Buttons
+    │   ├── Add Button (Adds a new work order)
+    │   ├── Delete Button (Deletes selected rows)
+    │   ├── Export Button (Exports data to Excel)
+    │   └── Import Button (Navigates to import page)
+    └── Conditional Rendering (Displays loading state, table, and buttons based on data and state)
+
+
+*/
 
 // 表格可調整欄位寬度
 const ResizableTitle = (props) => {
@@ -197,10 +260,45 @@ const EditableCell = ({
 };
 
 /*--------------------------------------------------  global / useContext  end ------------------------------------------------------*/
+//  TODO: Add more form controls and logic for editing production schedule
+function ScheduleProcessNameOptions({ source }) {
+  const { productId } = source || {};
+  const { Option } = Select;
+  const [userSelect, setUserSelect] = useState();
+
+  const { data: processCategory } = useGetProcessesAndMaterialsQuery(
+    {
+      productId: productId,
+      processCategory: PROCESS_CATEGORY_OPTION[0].category,
+    },
+
+    { skip: !productId }
+  );
+
+  console.log(processCategory);
+
+  return (
+    <Select
+      defaultValue={userSelect || ""}
+      value={userSelect}
+      style={{ width: 200, background: "none", borderColor: "#1677ff" }}
+      // onChange={(value) => handleProductionAreaChange(value, record)}
+    >
+      {processCategory?.data?.map((item, index) => (
+        <Option key={index} value={item.value} label={item.processName}>
+          {item.processName}
+        </Option>
+      ))}
+      ,
+    </Select>
+  );
+}
 
 const ProductionSchedule = (props) => {
   const navigate = useNavigate();
   const { Option } = Select;
+
+  //! New Add :  Fetch processCategory data using RTK Query hook
 
   /*--------------------------------------------------  ant ui -> table -> Column   start ------------------------------------------------------*/
   /*
@@ -329,6 +427,27 @@ const ProductionSchedule = (props) => {
       //   message: `is required.`,
       // }
     },
+    // ! new add column
+    {
+      title: "製程名稱",
+      dataIndex: "processName",
+      ellipsis: true,
+      width: 120,
+      type: "string",
+      render: function (text, record) {
+        if (!record.productId) return null;
+        return <ScheduleProcessNameOptions source={record} />;
+      },
+    },
+    {
+      title: "模具編號",
+      dataIndex: "moldno",
+      ellipsis: true,
+      width: 60,
+      type: "string",
+      render: function () {},
+    },
+
     {
       title: "成型秒數",
       dataIndex: "moldingSecond",
@@ -631,7 +750,6 @@ const ProductionSchedule = (props) => {
 
   const [totalCurrent, setTotalCurrent] = useState(1); /*總數據量*/
   const [dataSource, setDataSource] = useState([]); /*回傳資料*/
-
   /*--------------------------------------------------  資料處理 end ------------------------------------------------------*/
 
   /*-------------------------------------------------- 搜尋條件篩選  start ------------------------------------------------------*/
@@ -1107,7 +1225,9 @@ const ProductionSchedule = (props) => {
 
   // 編輯
   // get production schedule through LY
+  //  ? 處理製令單獲取資料的 fn ?
   const [lyQuery, setLyQuery] = useState({ id: null, workOrderSN: null });
+
   const { data: lyData, isSuccess: lyIsSuccess } =
     useGetProductionScheduleThroughLYQuery(
       {
@@ -1121,7 +1241,13 @@ const ProductionSchedule = (props) => {
       handleSave({ ...lyData });
     }
   }, [lyIsSuccess, lyData]);
-
+  // TODO
+  /*
+ ? 查無製令單號 
+ * 目前製令單號為 db 所以目前 erp 沒有同步嗎?
+ * 所以剛剛行為沒有觸發該錯誤是為上述原因?
+*
+*/
   const queryFromLY = (row) => {
     if (
       workOrderSNsFromLYState.some((item) => item.value === row.workOrderSN)
@@ -1137,7 +1263,11 @@ const ProductionSchedule = (props) => {
   /*-------------------------------------------------- 外部 API 串接 end  ------------------------------------------------------*/
 
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
-
+  /*
+   TODO  
+   * matchedData 獲取對應的製令單 
+   * dataSource 所有的 table data 
+*/
   // 儲存, 更新  觸發
   const handleSave = async (row) => {
     try {

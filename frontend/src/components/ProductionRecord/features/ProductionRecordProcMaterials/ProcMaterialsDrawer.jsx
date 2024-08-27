@@ -6,13 +6,6 @@ import ProductTextFieldSelect from "../../utility/ProductTextFieldSelect";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditWarning from "./EditWarning";
 
-const options = [
-  { value: "In-ij廠內成型", label: "In-ij廠內成型" },
-  { value: "Out-委外成型", label: "Out-委外成型" },
-  { value: "In-BE-廠內後製程", label: "In-BE-廠內後製程" },
-  { value: "Out-BE-委外後製程", label: "Out-BE-委外後製程" },
-  { value: "In-TS廠內出貨檢驗", label: "In-TS廠內出貨檢驗" },
-];
 export default function ProcMaterialsDrawer({
   isEditing,
   drawerType,
@@ -26,6 +19,7 @@ export default function ProcMaterialsDrawer({
   handleInputChange,
   userSelect,
   isDuplicate,
+  processOption,
 }) {
   const isProduct = drawerType === "product";
   const fields = {
@@ -81,11 +75,11 @@ export default function ProcMaterialsDrawer({
         value={selectedData?.[fields.code] || ""}
         OnChange={handleFieldChange(fields.code)}
       />
-      {isProduct && (
+      {isProduct && processOption && (
         <ProductTextFieldSelect
           label="製程類別"
           value={selectedData?.processCategory || userSelect}
-          option={options}
+          option={processOption}
           OnChange={(e) => {
             const selectedValue = e.target.value;
             setUserSelect(selectedValue);
