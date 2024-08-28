@@ -1,100 +1,101 @@
 {
-    "common": {
-        "submitBtn": "Đổi ca",
-        "okBtn": "OK",
-        "cancelBtn": "Hủy bỏ",
-        "updatingError": "暫時無法更新，請稍後再試"
+  "common": {
+    "submitBtn": "Đổi ca",
+    "okBtn": "OK",
+    "cancelBtn": "Hủy bỏ",
+    "updatingError": "暫時無法更新，請稍後再試"
+  },
+  "productionReport": {
+    "machineSelect": {
+      "title": "H.thống đ.phối d.chuyền sx-chọn máy",
+      "onGoing": "Đang hoạt động",
+      "none": "Hiện chưa có tài liệu sản xuất."
     },
-    "productionReport": {
-        "machineSelect": {
-            "title": "H.thống đ.phối d.chuyền sx-chọn máy",
-            "onGoing": "Đang hoạt động",
-            "none": "Hiện chưa có tài liệu sản xuất."
-        },
-        "report": {
-            "title": "H.thống đ.phối d.chuyền sx",
-            "moldUnmatchedMsg": "Sản phẩm bạn chọn không cùng khuôn, vui lòng xác nhận!!"
-        },
-        "statusInfoIcon": {
-            "description1": "1. Trước 7d dkiến chưa hthành đơn, trthái vàng nhắc nhở",
-            "description2": "2. Quá tg dkiến, trthái đỏ cảnh báo",
-            "description3": "3. Tdừng đơn, màu k đậm, nhưng đơn cũ vẫn cthể hợp vào đơn mới sx"
-        },
-        "table": {
-            "status": "Trạng thái",
-            "workOrderSN": "Mã đơn",
-            "moldNo": "Mã khuôn",
-            "productName": "Tên sản phẩm",
-            "workOrderQuantity": "SL của đơn",
-            "productionQuantity": "Sp đạt",
-            "formatedDefectiveQty": "Số không đạt",
-            "planOnMachineDate": "Ngày d.kiến lên",
-            "actualOnMachineDate": "Ngày lên th.tế",
-            "unfinishedQuantity": "Chưa hthành",
-            "operators": "NV phụ trách",
-            "period": "Khoảng t.gian sx"
-        },
-        "filterBar": {
-            "week": "Tuần",
-            "allStatus": "Trạng thái",
-            "notYet": "Chưa lên",
-            "onGoing": "Đang SX",
-            "done": "Đã đủ",
-            "pause": "tdừng SX",
-            "unlimited": "Vô thời hạn",
-            "expiring": "Đã đến hạn",
-            "expired": "Đã hết hạn",
-            "workOrderSN": "Mã đơn",
-            "productName": "Tên sản phẩm",
-            "keyword": "Nhập từ khóa tìm ..."
-        },
-        "leaderSign": {
-            "title": "Vui lòng nhập tài khoản quản lý dây chuyền sản xuất",
-            "completeTitle": "Nhập tk q.lý dây chuyền sx để h.thành g.đoạn công việc này.",
-            "pauseTitle": "Nhập tk q.lý d.chuyền sx để tạm dừng g.đoạn sx.",
-            "username": "Tk",
-            "usernameError": "Vui lòng nhập tài khoản quản lý dây chuyền sản xuất",
-            "password": "輸入密碼",
-            "completeMsg": "G.đoạn c.việc này đã h.thành",
-            "pauseMsg": "C.việc ở g.đoạn này   đã bị tạm   dừng"
-        },
-        "detail": {
-            "title": "H.thống đ.phối d.chuyền sx",
-            "completePopMsg": "Còn SL chưa h.thành. Sau khi đóng đơn, đơn hàng k thể tiếp tục và cần được mở lại. Chắc chắn muốn h.thành g.đoạn sx này ?",
-            "forbidden": "K qlại được, tdừng hoặc hthành gđoạn sx"
-        },
-        "operatorSign": {
-            "operator1Title": "Nhập tk n.viên d.chuyền sx 1 (bắt buộc)",
-            "operator1Username": "Nvsx(1)*",
-            "operator1UsernameError": "Tk nvsx 1",
-            "operator1UsernameUnmatched": "人員1帳號與開始的人員1不符合",
-            "operator2Title": "Nhập tk n.viên d.chuyền sx 2",
-            "operator2Username": "Nvsx(2)",
-            "operator2UsernameUnmatched": "人員2帳號與開始的人員2不符合"
-        },
-        "inspection": {
-            "colorDifference": "SMàu",
-            "bubble": "Bọt khí",
-            "oilStain": "NDầu",
-            "deformation": "BDạng",
-            "impurity": "TChất",
-            "burr": "MB en",
-            "shrinkage": "Lõm",
-            "pressure": "DKhê",
-            "blackSpot": "Đđen",
-            "shortage": "ThiếuN",
-            "overflow": "ThừaN",
-            "scratch": "Xước",
-            "hole": "TLỗ",
-            "flowMark": "Vạch",
-            "encapsulation": "Baofung",
-            "other": "khác",
-            "operator1": "nhân sự số 1",
-            "operator2": "nhân sự số 2",
-            "startTime": "Thời gian bắt đầu",
-            "count": "số*",
-            "shiftChange": "Đổi ca",
-            "forbidden": "Không thể quay lại. H.thành công đoạn sx và bàn giao \"đổi ca\"."
-        }
+    "report": {
+      "title": "H.thống đ.phối d.chuyền sx",
+      "moldUnmatchedMsg": "Sản phẩm bạn chọn không cùng khuôn, vui lòng xác nhận!!"
+    },
+    "statusInfoIcon": {
+      "description1": "1. Trước 7d dkiến chưa hthành đơn, trthái vàng nhắc nhở",
+      "description2": "2. Quá tg dkiến, trthái đỏ cảnh báo",
+      "description3": "3. Tdừng đơn, màu k đậm, nhưng đơn cũ vẫn cthể hợp vào đơn mới sx"
+    },
+    "table": {
+      "status": "Trạng thái",
+      "workOrderSN": "Mã đơn",
+      "moldNo": "Mã khuôn",
+      "productName": "Tên sản phẩm",
+      "processName": "Tên quy trình",
+      "workOrderQuantity": "SL của đơn",
+      "productionQuantity": "Sp đạt",
+      "formatedDefectiveQty": "Số không đạt",
+      "planOnMachineDate": "Ngày d.kiến lên",
+      "actualOnMachineDate": "Ngày lên th.tế",
+      "unfinishedQuantity": "Chưa hthành",
+      "operators": "NV phụ trách",
+      "period": "Khoảng t.gian sx"
+    },
+    "filterBar": {
+      "week": "Tuần",
+      "allStatus": "Trạng thái",
+      "notYet": "Chưa lên",
+      "onGoing": "Đang SX",
+      "done": "Đã đủ",
+      "pause": "tdừng SX",
+      "unlimited": "Vô thời hạn",
+      "expiring": "Đã đến hạn",
+      "expired": "Đã hết hạn",
+      "workOrderSN": "Mã đơn",
+      "productName": "Tên sản phẩm",
+      "keyword": "Nhập từ khóa tìm ..."
+    },
+    "leaderSign": {
+      "title": "Vui lòng nhập tài khoản quản lý dây chuyền sản xuất",
+      "completeTitle": "Nhập tk q.lý dây chuyền sx để h.thành g.đoạn công việc này.",
+      "pauseTitle": "Nhập tk q.lý d.chuyền sx để tạm dừng g.đoạn sx.",
+      "username": "Tk",
+      "usernameError": "Vui lòng nhập tài khoản quản lý dây chuyền sản xuất",
+      "password": "輸入密碼",
+      "completeMsg": "G.đoạn c.việc này đã h.thành",
+      "pauseMsg": "C.việc ở g.đoạn này   đã bị tạm   dừng"
+    },
+    "detail": {
+      "title": "H.thống đ.phối d.chuyền sx",
+      "completePopMsg": "Còn SL chưa h.thành. Sau khi đóng đơn, đơn hàng k thể tiếp tục và cần được mở lại. Chắc chắn muốn h.thành g.đoạn sx này ?",
+      "forbidden": "K qlại được, tdừng hoặc hthành gđoạn sx"
+    },
+    "operatorSign": {
+      "operator1Title": "Nhập tk n.viên d.chuyền sx 1 (bắt buộc)",
+      "operator1Username": "Nvsx(1)*",
+      "operator1UsernameError": "Tk nvsx 1",
+      "operator1UsernameUnmatched": "人員1帳號與開始的人員1不符合",
+      "operator2Title": "Nhập tk n.viên d.chuyền sx 2",
+      "operator2Username": "Nvsx(2)",
+      "operator2UsernameUnmatched": "人員2帳號與開始的人員2不符合"
+    },
+    "inspection": {
+      "colorDifference": "SMàu",
+      "bubble": "Bọt khí",
+      "oilStain": "NDầu",
+      "deformation": "BDạng",
+      "impurity": "TChất",
+      "burr": "MB en",
+      "shrinkage": "Lõm",
+      "pressure": "DKhê",
+      "blackSpot": "Đđen",
+      "shortage": "ThiếuN",
+      "overflow": "ThừaN",
+      "scratch": "Xước",
+      "hole": "TLỗ",
+      "flowMark": "Vạch",
+      "encapsulation": "Baofung",
+      "other": "khác",
+      "operator1": "nhân sự số 1",
+      "operator2": "nhân sự số 2",
+      "startTime": "Thời gian bắt đầu",
+      "count": "số*",
+      "shiftChange": "Đổi ca",
+      "forbidden": "Không thể quay lại. H.thành công đoạn sx và bàn giao \"đổi ca\"."
     }
+  }
 }

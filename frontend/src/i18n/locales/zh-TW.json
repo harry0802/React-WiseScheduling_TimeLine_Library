@@ -29,6 +29,7 @@
       "workOrderSN": "製令單號",
       "moldNo": "模具編號",
       "productName": "產品名稱",
+      "processName": "製程名稱",
       "workOrderQuantity": "製令數量",
       "productionQuantity": "良品數量",
       "formatedDefectiveQty": "不良數",

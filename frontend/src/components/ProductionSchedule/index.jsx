@@ -40,7 +40,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { useGetProcessesAndMaterialsQuery } from "../ProductionRecord/service/endpoints/processApi";
-import { clear } from "@testing-library/user-event/dist/clear";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -260,32 +260,49 @@ const EditableCell = ({
 };
 
 /*--------------------------------------------------  global / useContext  end ------------------------------------------------------*/
-//  TODO: Add more form controls and logic for editing production schedule
+//  TODO: Add more form controls and logic for editing production  schedule
 function ScheduleProcessNameOptions({ source }) {
-  const { productId } = source || {};
+  // parameter deconstruct
   const { Option } = Select;
-  const [userSelect, setUserSelect] = useState();
+  const { productId, id, processName } = source || {};
+
+  // * Api
+  const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
 
   const { data: processCategory } = useGetProcessesAndMaterialsQuery(
     {
       productId: productId,
       processCategory: PROCESS_CATEGORY_OPTION[0].category,
     },
-
     { skip: !productId }
   );
 
-  console.log(processCategory);
+  // * Handle Select Change
+  const handleSelectChange = async (value) => {
+    if (!id) return;
+    try {
+      // Send a request to the server to update the data
+      const response = await UpdateProductionSchedule({
+        id,
+        data: { processId: value },
+      });
+      !response.error
+        ? message.success("修改數據成功")
+        : message.error("修改數據失敗");
+    } catch (error) {
+      message.error("更新過程中出現錯誤");
+    }
+  };
 
   return (
     <Select
-      defaultValue={userSelect || ""}
-      value={userSelect}
+      defaultValue={processName || ""}
+      value={processName || ""}
       style={{ width: 200, background: "none", borderColor: "#1677ff" }}
-      // onChange={(value) => handleProductionAreaChange(value, record)}
+      onChange={(value, label) => handleSelectChange(value, label)}
     >
       {processCategory?.data?.map((item, index) => (
-        <Option key={index} value={item.value} label={item.processName}>
+        <Option key={index} value={item.id} label={item.processName}>
           {item.processName}
         </Option>
       ))}
@@ -445,7 +462,10 @@ const ProductionSchedule = (props) => {
       ellipsis: true,
       width: 60,
       type: "string",
-      render: function () {},
+      render: function (_, record) {
+        if (!record.moldNos) return null;
+        return record.moldNos;
+      },
     },
 
     {
@@ -1041,6 +1061,12 @@ const ProductionSchedule = (props) => {
         case "workOrderDate":
           items["width"] = 25;
           break;
+        case "processName":
+          items["width"] = 25;
+          break;
+        case "moldno":
+          items["width"] = 25;
+          break;
         case "moldingSecond":
           items["width"] = 15;
           break;
@@ -1260,7 +1286,7 @@ const ProductionSchedule = (props) => {
       message.warning("凌越ERP查無此製令單號，請重新輸入。");
     }
   };
-  /*-------------------------------------------------- 外部 API 串接 end  ------------------------------------------------------*/
+  /*  -------------------------------------------------- 外部 API 串接 end  ------------------------------------------------------*/
 
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
   /*
@@ -1273,6 +1299,9 @@ const ProductionSchedule = (props) => {
     try {
       // Check if there are changes in the data
       const matchedData = dataSource.find((item) => item.id === row.id);
+
+      console.log(matchedData);
+
       // Define date keys
       const dateKeys = [
         "workOrderDate",

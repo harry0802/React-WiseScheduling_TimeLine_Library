@@ -32,8 +32,8 @@ export default function ProcMaterialsDrawer({
       : isProduct
       ? "添加製程編碼"
       : "添加物料種類編碼",
-    nameLabel: isProduct ? "製程名稱" : "物料代碼",
-    codeLabel: isProduct ? "製程代碼" : "物料種類",
+    nameLabel: isProduct ? "製程代碼" : "物料代碼",
+    codeLabel: isProduct ? "製程名稱" : "物料種類",
   };
   const handleFieldChange = (field) => (e) =>
     handleInputChange(field, e.target.value);

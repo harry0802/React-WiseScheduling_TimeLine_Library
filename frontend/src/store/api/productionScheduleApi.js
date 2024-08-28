@@ -7,7 +7,7 @@ import timezone from "dayjs/plugin/timezone";
 import { TZ } from "../../config/config";
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
+// /productionSchedule/checkStartEligibility
 const productionScheduleApi = createApi({
   reducerPath: "productionScheduleApi",
   baseQuery: fetchBaseQuery({
@@ -97,6 +97,9 @@ const productionScheduleApi = createApi({
         },
         providesTags: [{ type: "productionSchedule" }],
       }),
+
+      getcheckStartEligibility: build.query({}),
+
       addProductionSchedule: build.mutation({
         query(data) {
           return {

@@ -15,8 +15,6 @@ export const processApi = producRecordApiSlice.injectEndpoints({
      */
     getProcessesAndMaterials: builder.query({
       query: ({ productId, processCategory }) => {
-        console.log(productId);
-
         // Ensure productId is always included
         let queryString = `process/?productId=${productId}`;
 
