@@ -62,6 +62,7 @@ class productionScheduleReportSchema(Schema):
     moldNo = fields.String(required=False)
     productSN = fields.String(required=True)
     productName = fields.String(required=True)
+    processId = fields.Integer(dump_only=True)
     processName = fields.String(dump_only=True)
     moldNos = fields.String(dump_only=True)
     workOrderQuantity = fields.Integer(required=True)

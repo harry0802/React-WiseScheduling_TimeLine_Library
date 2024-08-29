@@ -203,7 +203,7 @@ def insert_0000AB(ly0000AB_db_list):
         raise error
     
 
-def delete_0000AB_within_three_months():
+def delete_0000AB_within_six_months():
     try:
         delete_0000AB_list = db.session.execute(db.select(LY0000AB).filter(LY0000AB.MP_DATE < db.func.date_sub(db.func.current_date(), db.text("INTERVAL 6 MONTH")))).scalars()
         for delete_0000AB in delete_0000AB_list:
@@ -266,8 +266,8 @@ class LyService:
             # insert the data into the database
             insert_0000AB(ly0000AB_db_list)
 
-            # remove the data that older than 3 months
-            delete_0000AB_within_three_months()
+            # remove the data that older than 6 months
+            delete_0000AB_within_six_months()
         except Exception as error:
             raise error
         

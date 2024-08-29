@@ -368,7 +368,7 @@ class productionReportService:
                                         ProductionReport.scratch, ProductionReport.encapsulation, ProductionReport.other, ProductionReport.leader, 
                                         ProductionReport.operator1, ProductionReport.operator2, ProductionReport.startTime, ProductionReport.endTime,
                                         Product.productSN, Product.productName, 
-                                        ProcessOption.processName,
+                                        ProcessOption.processName, ProcessMold.processId,
                                         func.group_concat(LtMoldMap.moldno).label('moldNos'))
             query = query.join(ProductionReport, ProductionSchedule.id == ProductionReport.pschedule_id, isouter = True) # left outer join
             query = query.join(Product, ProductionSchedule.productId == Product.id, isouter = True) # left outer join
