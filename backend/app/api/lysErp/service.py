@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import sys
 from app import db
 import requests
@@ -254,11 +255,15 @@ class LyService:
     def sync_ly_0000AB():
         """Sync 0000AB Data from LY ERP"""
         try:
-            # get the last MP_NO from the database
             irwhere = ""
+            # get the date of 6 months ago
+            six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%d-%m")
+            irwhere += f"MP_DATE>'{six_months_ago}'"
+            
+            # get the last MP_NO from the database
             last_mp_no = get_last_mp_no_from_0000AB()
             if last_mp_no != "":
-                irwhere = f"MP_NO>'{last_mp_no}'"
+                irwhere += f"AND MP_NO>'{last_mp_no}'"
             
             # call api and get the data from LY ERP  
             lyDataOutRequestParameter = LyDataOutRequestParameter(idakd=DataKind.FactoryProductionOrder.value, irwhere=irwhere)
