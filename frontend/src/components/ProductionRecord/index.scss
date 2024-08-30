@@ -2,6 +2,10 @@
 * {
   box-sizing: border-box;
 }
+.color-danger {
+  font-weight: 800;
+  color: $danger-text-color;
+}
 
 //c = Component
 button.ant-btn-default,

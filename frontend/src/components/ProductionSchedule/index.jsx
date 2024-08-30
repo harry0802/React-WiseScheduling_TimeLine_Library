@@ -41,6 +41,8 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { useGetProcessesAndMaterialsQuery } from "../ProductionRecord/service/endpoints/processApi";
 
+import { useRendersCount } from "react-use";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -314,6 +316,8 @@ function ScheduleProcessNameOptions({ source }) {
 const ProductionSchedule = (props) => {
   const navigate = useNavigate();
   const { Option } = Select;
+
+  const rendersCount = useRendersCount();
 
   //! New Add :  Fetch processCategory data using RTK Query hook
 
@@ -1129,6 +1133,9 @@ const ProductionSchedule = (props) => {
   /*-------------------------------------------------- 表單 I/O end ------------------------------------------------------*/
 
   /*-------------------------------------------------- 新增項目 與 新增製令單 start  ------------------------------------------------------*/
+  // TODO: 修復 bug
+  //  ! 請先取消勾選增製令單才能新增項目  // 已刪除項目還是跳出
+  //  !
 
   // 新增項目
   const [addProductionSchedule] = useAddProductionScheduleMutation();
@@ -1616,6 +1623,7 @@ const ProductionSchedule = (props) => {
             下載匯入Excel範例
           </Button>
         </a>
+        <span>Renders count: {rendersCount}</span>
       </div>
     </div>
   );

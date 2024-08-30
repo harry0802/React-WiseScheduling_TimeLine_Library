@@ -20,6 +20,7 @@ function InfoSectionsDialog() {
   const { data: productDatas } = homeSlice();
 
   const { handleUpdate } = useProductActions();
+
   async function handleConfirm() {
     if (!productDatas || !product) return;
     const updateData = { ...product, oldProductSN: oldPdNb };

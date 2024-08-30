@@ -97,8 +97,21 @@ const productionScheduleApi = createApi({
         },
         providesTags: [{ type: "productionSchedule" }],
       }),
+      // /productionSchedule/checkStartEligibility
+      getCheckStartEligiBility: build.query({
+        query(arg) {
+          const { processId, workOrderSN } = arg;
+          return {
+            url: "productionSchedule/checkStartEligibility",
+            params: {
+              processId,
+              workOrderSN,
+            },
+          };
+        },
 
-      getcheckStartEligibility: build.query({}),
+        providesTags: [{ type: "productionSchedule" }],
+      }),
 
       addProductionSchedule: build.mutation({
         query(data) {
@@ -212,6 +225,7 @@ export const {
   useGetMachinesQuery,
   useGetWorkOrderSNsQuery,
   useGetProductionScheduleThroughLYQuery,
+  useGetCheckStartEligiBilityQuery,
   useAddProductionScheduleMutation,
   useAddProductionSchedulesMutation,
   useDelProductionScheduleMutation,

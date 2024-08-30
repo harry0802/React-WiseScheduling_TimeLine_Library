@@ -15,6 +15,7 @@ import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { useProductionReport, showModal } from "./hook/useProductionReport";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -200,47 +201,7 @@ const ProductionReport = (props) => {
     }
   }, [isSuccess, workOrderList]);
 
-  // TODO logic for sending
-  /*
-   * 1. 當兩筆模具編號 ( Row Data ) 一樣時候 不可進行生產
-
-   * 2. 母胚生產檢查
-   */
-
-  // * Function to display modal information
-  const showModal = (message) =>
-    Modal.info({
-      content: <p>{message}</p>,
-      okText: "確定",
-      onOk() {},
-    });
-
-  // * Function to check if all selected rows have identical mold numbers
-  const allMoldNosIdentical = (selectedRowsData) => {
-    const moldNoSet = new Set();
-    console.log(selectedRowsData);
-
-    for (const { moldNos } of selectedRowsData) {
-      if (!moldNos) {
-        showModal("所選製令單必須有模具編號");
-        return false;
-      }
-
-      const moldNosArray = moldNos.split(",").map((item) => item.trim());
-
-      // Initialize set with the first row's mold numbers
-      if (moldNoSet.size === 0)
-        moldNosArray.forEach((moldNo) => moldNoSet.add(moldNo));
-
-      // Check if all subsequent mold numbers match the initialized set
-      if (moldNosArray.some((moldNo) => !moldNoSet.has(moldNo))) {
-        showModal(t("productionReport.report.moldUnmatchedMsg"));
-        return false;
-      }
-    }
-
-    return true;
-  };
+  const { allMoldNosIdentical, checkEligibilityBatch } = useProductionReport();
 
   // 產生母批
   /* TODO 修改模具邏輯
@@ -248,7 +209,7 @@ const ProductionReport = (props) => {
    * 需要判斷多筆 moldNos 是否一樣 , 使用既有的 set 來尋找值 / has
    * 只允許一樣的 moldNos 生產
    */
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (selectedRowKeys.length === 0) {
       showModal("請先勾選製令單");
       return;
@@ -258,7 +219,18 @@ const ProductionReport = (props) => {
       selectedRowKeys.includes(row.id)
     );
 
-    if (allMoldNosIdentical(selectedRowsData)) {
+    // Step 1: Check for duplicate mold numbers
+    if (!(await allMoldNosIdentical(selectedRowsData))) return;
+
+    // Step 2: Prepare parameters for eligibility checks
+    const paramsArray = selectedRowsData.map(({ processId, workOrderSN }) => ({
+      processId,
+      workOrderSN,
+    }));
+
+    // Step 3: Batch process eligibility checks using Promise.all with rejection handling
+    const isEligible = await checkEligibilityBatch(paramsArray);
+    if (isEligible) {
       navigate("/LeaderSignPage", {
         state: { action: "new", newWorkOrders: selectedRowsData },
       });
@@ -282,7 +254,7 @@ const ProductionReport = (props) => {
   //   );
 
   //   // * 處理模具部分
-  //   /* TODO 修改模具邏輯
+  //   /*
   //    * 原有的  moldNo  改為 moldNos
   //    * 需要判斷多筆 moldNos 是否一樣 , 使用既有的 set 來尋找值 / has
   //    * 只允許一樣的 moldNos 生產

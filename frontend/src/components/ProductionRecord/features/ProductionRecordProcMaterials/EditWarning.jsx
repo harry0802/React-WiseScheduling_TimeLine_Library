@@ -3,15 +3,15 @@ import styles from "./ProductionRecordProcMaterials.module.scss";
 
 const WarningMessage = ({ to, children }) => (
   <div>
-    <p className={styles["edit-warning__message"]}>
-      該項目已被引用，無法被刪除。如要刪除請至
+    <p className={`${styles["edit-warning__message"]} color-danger`}>
+      * 該項目已被引用，無法被刪除。如要刪除請至
       <Link to={to} className={styles["edit-warning__link"]}>
         {children}
       </Link>
       編輯
     </p>
-    <p className={styles["edit-warning__message"]}>
-      此次修改，該引用項目亦會 "連動"，請確認後再發送
+    <p className={`${styles["edit-warning__message"]} color-danger`}>
+      * 此次修改，該引用項目亦會 "連動"，請確認後再發送
     </p>
   </div>
 );
@@ -35,8 +35,8 @@ const EditWarning = ({ isEditing, isAppoint, drawerType, isDuplicate }) => {
         ""
       )}
       {isDuplicate && (
-        <p className={styles["edit-warning__message"]}>
-          相同的製程與物料不可重複 , 請確認後再發送
+        <p className={`${styles["edit-warning__message"]} color-danger`}>
+          * 相同的製程與物料不可重複 , 請確認後再發送
         </p>
       )}
     </>

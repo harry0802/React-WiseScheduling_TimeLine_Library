@@ -28,8 +28,8 @@ export const materialApi = apiSlice.injectEndpoints({
 
     // Endpoint for fetching categorized materials
     getCategorizedMaterials: builder.query({
-      query: (categorized = true) => ({
-        url: `material/?categorized=${categorized}`, // API endpoint path with categorized parameter
+      query: ({ categorized, productSN }) => ({
+        url: `material/?categorized=${categorized}&productSN=${productSN}`, // API endpoint path with categorized parameter
       }),
       providesTags: ["Material"], // Caching tag to optimize performance
     }),

@@ -107,27 +107,33 @@ function ProcessSectionsDialog() {
         disabled={
           !selectedProcess ||
           selectedProcess.processName !== inputValue ||
-          !formValues.moldName
+          !formValues.moldName ||
+          !onDelete
         }
         title={`製程 ${processIndex}`}
         visible={processDrawer}
         onClose={handleDrawerClose}
         onSubmit={handleFormSubmit}
         headericon={
-          isEditMode &&
-          onDelete && (
-            <Button
-              style={{ borderRadius: "50%" }}
-              className="ant-btn-default c-btn-primars--delete"
-              onClick={() => {
-                handleDeleteProcess(processId);
-                setTimeout(() => notifySuccess(), 100);
-                handleDrawerClose();
-              }}
-            >
-              <DeleteIcon />
-            </Button>
-          )
+          <>
+            {isEditMode && onDelete && (
+              <Button
+                style={{ borderRadius: "50%" }}
+                className="ant-btn-default c-btn-primars--delete"
+                onClick={() => {
+                  handleDeleteProcess(processId);
+                  setTimeout(() => notifySuccess(), 100);
+                  handleDrawerClose();
+                }}
+              >
+                <DeleteIcon />
+              </Button>
+            )}
+
+            {!onDelete && isEditMode && (
+              <div className="color-danger">產線排程中，無法變動</div>
+            )}
+          </>
         }
       >
         <div className="product-drawer__info">
@@ -192,8 +198,7 @@ function ProcessSectionsList({ data, processNb = 0, initMaterialCategorized }) {
 
   //  ! concentrate
   const { setProcessAll } = useProcessSectionSlice();
-  const { materials, jigSN, molds, processCategory } = data || {};
-
+  const { materials, jigSN, molds, processCategory, processName } = data || {};
   const theRestMaterialed = removeMatchingItemsById(
     initMaterialCategorized,
     materials
@@ -218,6 +223,7 @@ function ProcessSectionsList({ data, processNb = 0, initMaterialCategorized }) {
           initializeForEdit(theRestMaterialed, materials);
         }}
       >
+        <p>製程名稱 : {processName}</p>
         <p>治具編號 : {jigSN}</p>
         <p>
           模具編號 :{"  "}
@@ -240,11 +246,17 @@ function ProcessSectionsList({ data, processNb = 0, initMaterialCategorized }) {
 
 //* Main Component
 function ProcessSections() {
-  const { setProcessDrawer, productId } = useRecordAddInfo();
+  const { setProcessDrawer, productId, productData } = useRecordAddInfo();
   const { initialize } = useTransferListSlice();
   const { setProcessAll: initProcess } = useProcessSectionSlice();
-  const { data: initMaterialCategorized } =
-    useGetCategorizedMaterialsQuery(false);
+  const { data: initMaterialCategorized } = useGetCategorizedMaterialsQuery(
+    {
+      categorized: true,
+      productSN: productData[0]?.productSN,
+    },
+    { skip: !productData[0] }
+  );
+  console.log(productData);
 
   const { data: processData } = useGetProcessesAndMaterialsQuery(
     { productId },
