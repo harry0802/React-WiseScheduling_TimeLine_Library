@@ -14,7 +14,6 @@ import { MACHINE_LIST } from "../../config/config";
 import {
   useGetProductionScheduleQuery,
   useGetWorkOrderSNsQuery,
-  useGetProductionScheduleThroughLYQuery,
   useAddProductionScheduleMutation,
   useUpdateProductionScheduleMutation,
 } from "../../store/api/productionScheduleApi";
@@ -37,12 +36,20 @@ import { useLYQuery } from "./hook/useLYQuery";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+/**
+ * 生產計劃排程表組件
+ * Production Schedule Component
+ *
+ * @returns {JSX.Element} 生產計劃排程表組件
+ * @returns {JSX.Element} Production Schedule Component
+ */
 function ProductionSchedule() {
   const navigate = useNavigate();
   const rendersCount = useRendersCount();
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
 
   // 搜尋條件篩選
+  // Search filters
   const {
     startDate,
     setStartDate,
@@ -62,6 +69,7 @@ function ProductionSchedule() {
   } = useSearchFilters();
 
   // 分頁設定
+  // Pagination settings
   const { pagination, setPagination, handleTableChange } = usePagination();
   const { data, isLoading, isSuccess, refetch } = useGetProductionScheduleQuery(
     {
@@ -76,22 +84,21 @@ function ProductionSchedule() {
   );
 
   // 資料處理
+  // Data processing
   const [totalCurrent, setTotalCurrent] = useState(1);
   const [dataSource, setDataSource] = useState([]);
 
   // 獲取外部 api 工作列表
-  const {
-    data: workOrderSNData,
-    isLoading: workOrderSNIsLoading,
-    isSuccess: workOrderSNIsSuccess,
-    refetch: workOrderSNRefetch,
-  } = useGetWorkOrderSNsQuery();
+  // Fetch external API work order list
+  const { data: workOrderSNData, isSuccess: workOrderSNIsSuccess } =
+    useGetWorkOrderSNsQuery();
 
   const [workOrderSNsFromLYState, setWorkOrderSNsFromLYState] = useState([]);
 
   const onChange = (filters, sorter) => {};
 
   // 表單 I/O
+  // Form I/O
   const { needExportData } = useExportData(
     startDate,
     endDate,
@@ -103,30 +110,38 @@ function ProductionSchedule() {
   );
 
   // 新增項目 與 新增製令單
+  // Add item and add work order
   const [addProductionSchedule] = useAddProductionScheduleMutation();
   const [nowDate, setNowDate] = useState(
     dayjs.tz(dayjs().format("YYYY-MM-DD"), TZ).format()
   );
 
   // 勾選表單
+  // Form selection
   const { selectionType, selectedRowKeys, deleteChecked, rowSelection } =
     useSelectionAndDeletion(dataSource, refetch);
 
   const handleAdd = async () => {
     if (selectedRowKeys.length > 0) {
       message.warning("請先取消勾選增製令單才能新增項目");
+      // Please uncheck the added work order before adding a new item
       return;
     }
 
     try {
       Modal.confirm({
         title: "確認新增",
+        // Confirm Addition
         content: "確定要新增製令單嗎？",
+        // Are you sure you want to add a new work order?
         okText: "確定",
+        // Confirm
         cancelText: "取消",
+        // Cancel
         onOk: async () => {
           try {
             message.success("新增製令單成功");
+            // Successfully added work order
 
             const newData = {
               workOrderSN: "",
@@ -142,21 +157,25 @@ function ProductionSchedule() {
             setPagination({ ...pagination, page: 1 });
           } catch (error) {
             console.error("新增製令單時發生錯誤:", error);
+            // Error occurred while adding work order
           }
         },
       });
     } catch (error) {
       console.error("處理新增製令單時發生錯誤:", error);
+      // Error occurred while processing the addition of work order
     }
   };
 
   const handleSave = useCallback(
     async (row) => {
       const originalDataSource = [...dataSource]; // 保存当前的数据源状态
+      // Save the current state of the data source
       try {
         const matchedData = dataSource.find((item) => item.id === row.id);
         if (!matchedData) {
           throw new Error("未找到匹配的数据");
+          // Matching data not found
         }
 
         const dateKeys = [
@@ -212,12 +231,16 @@ function ProductionSchedule() {
 
         if (!response.error) {
           message.success("修改數據成功");
+          // Data modified successfully
         } else {
           throw new Error("修改數據失敗");
+          // Failed to modify data
         }
       } catch (error) {
         message.error("修改數據失敗!!!!");
+        // Failed to modify data!!!!
         // 恢复原始数据
+        // Restore original data
         setDataSource(originalDataSource);
       }
     },
@@ -234,6 +257,7 @@ function ProductionSchedule() {
         queryFromLY(row);
       } else {
         message.warning("凌越ERP查無此製令單號，請重新輸入。");
+        // This work order number is not found in LY ERP, please re-enter.
       }
     },
     [workOrderSNsFromLYState, queryFromLY]
@@ -257,6 +281,7 @@ function ProductionSchedule() {
         },
       });
       message.success("修改數據成功");
+      // Data modified successfully
     } catch (error) {
       console.error("Error updating production area:", error);
     }
@@ -276,6 +301,7 @@ function ProductionSchedule() {
         },
       });
       message.success("修改數據成功");
+      // Data modified successfully
     } catch (error) {
       console.error("Error updating production area:", error);
     }
@@ -288,6 +314,7 @@ function ProductionSchedule() {
         data: { singleOrDoubleColor: value },
       });
       message.success("修改數據成功");
+      // Data modified successfully
     } catch (error) {
       console.error("Error updating production area:", error);
     }
@@ -384,6 +411,7 @@ function ProductionSchedule() {
       <div className="box">
         <div className="title-box">
           <div className="title">生產計劃排程表</div>
+          {/* Production Schedule Table */}
           <div className="btn-box">
             <FilterBar
               startDate={startDate}

@@ -211,7 +211,6 @@ function ProcessSectionsList({ data, processNb = 0, initMaterialCategorized }) {
           processCategory ? processCategory : "廠內-成型-1I"
         }`}
         OnClick={() => {
-          //  ! concentrate event
           setProcessDrawer(true);
           setProcessAll({
             ...data,
@@ -256,7 +255,6 @@ function ProcessSections() {
     },
     { skip: !productData[0] }
   );
-  console.log(productData);
 
   const { data: processData } = useGetProcessesAndMaterialsQuery(
     { productId },
