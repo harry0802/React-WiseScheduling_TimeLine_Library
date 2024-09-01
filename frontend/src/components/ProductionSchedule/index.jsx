@@ -170,7 +170,6 @@ const EditableCell = ({
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
-
   useEffect(() => {
     if (editing) {
       inputRef.current.focus();

@@ -1,6 +1,6 @@
 import React from "react";
 import ProductionSchedule from "../components/ProductionSchedule";
-import ProductionSchedule_v1 from "../components/ProductionSchedule/indexV1";
+import ProductionScheduleV1 from "../components/ProductionSchedule/indexV1";
 // import SimpleDemo from "../components/ProductionSchedule/SimpleDemo";
 // import EditTableDemo from "../components/ProductionSchedule/EditTableDemo";
 
@@ -9,7 +9,7 @@ const ProductionSchedulePage = () => {
     <div>
       {/* <EditTableDemo /> */}
       {/* <ProductionSchedule /> */}
-      <ProductionSchedule_v1 />
+      <ProductionScheduleV1 />
       {/* <SimpleDemo /> */}
     </div>
   );
