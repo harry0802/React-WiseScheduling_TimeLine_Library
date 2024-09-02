@@ -210,7 +210,7 @@
   .ant-table-wrapper
     .ant-table-thead
     > tr
-    > th:nth-child(n + 19):nth-child(-n + 24) {
+    > th:nth-child(n + 19):nth-child(-n + 26) {
     background: #186c98;
     color: #e1e7f5;
     font-size: 14px;
@@ -220,7 +220,7 @@
     border: 1px solid #8f8f8f;
   }
 
-  .ant-table-wrapper .ant-table-thead > tr > th:nth-child(25) {
+  .ant-table-wrapper .ant-table-thead > tr > th:nth-child(27) {
     background: #402085;
     color: #e1e7f5;
     font-size: 14px;

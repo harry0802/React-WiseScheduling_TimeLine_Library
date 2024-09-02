@@ -45,7 +45,7 @@ dayjs.extend(timezone);
  */
 function ProductionSchedule() {
   const navigate = useNavigate();
-  const rendersCount = useRendersCount();
+  // const rendersCount = useRendersCount();
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
 
   // 搜尋條件篩選
@@ -526,7 +526,7 @@ function ProductionSchedule() {
             下載匯入Excel範例
           </Button>
         </a>
-        <span>Renders count: {rendersCount}</span>
+        {/* <span>Renders count: {rendersCount}</span> */}
       </div>
     </div>
   );
