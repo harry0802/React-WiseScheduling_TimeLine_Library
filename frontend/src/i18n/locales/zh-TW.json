@@ -99,7 +99,8 @@
       "startTime": "開始時間",
       "count": "數量*",
       "shiftChange": "換班",
-      "forbidden": "您無法回到上一頁，請完成此生產階段，並\"換班\"交接"
+      "forbidden": "您無法回到上一頁，請完成此生產階段，並\"換班\"交接",
+      "currentProduction": "當前製程"
     }
   }
 }

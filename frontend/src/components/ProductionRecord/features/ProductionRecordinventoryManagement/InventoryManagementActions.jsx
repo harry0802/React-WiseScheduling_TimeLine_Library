@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductDropdownSearch from "../../utility/ProductDropdownSearch.jsx";
 import { useDebounce } from "react-use";
-import InventorySlice from "../../slice/InventorySlice.jsx";
+import useInventoryStore from "../../slice/InventorySlice.jsx"; // 更新的引入
+
 const options = [
   { label: "物料編號", value: "materialSN" },
   { label: "物料名稱", value: "materialName" },
@@ -10,13 +11,19 @@ const options = [
 function InventoryManagementActions() {
   const [userSearch, setUserSearch] = useState("");
   const [userSelect, setUserSelect] = useState(options[0].value);
-  const { filterData, dataSource } = InventorySlice();
+  const { filterData, dataSource, setSearchState } = useInventoryStore(); // 更新以使用 Zustand store
+
   const handleSearch = () => {
     if (!dataSource || dataSource?.length < 0) return;
     filterData(userSearch, userSelect);
+    setSearchState({ userSearch, userSelect }); // 存儲搜尋狀態
   };
 
   useDebounce(handleSearch, 500, [userSearch, userSelect]);
+
+  useEffect(() => {
+    setSearchState({ userSearch, userSelect }); // 在組件掛載時初始化搜尋狀態
+  }, []);
 
   return (
     <ProductDropdownSearch

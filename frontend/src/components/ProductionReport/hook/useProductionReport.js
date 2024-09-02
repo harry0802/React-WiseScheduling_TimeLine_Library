@@ -72,23 +72,30 @@ function useProductionReport() {
     return true;
   };
   /**
-   * Asynchronously checks the eligibility of all provided parameters using Promise.all.
+   * Asynchronously checks the eligibility of all provided parameters.
    *
-   * Sends multiple asynchronous requests to check the eligibility of each process and work order
-   * combination. If any request fails or if any response contains data: false, the function returns false.
+   * This function iterates through an array of parameters, each representing a production order.
+   * It checks the eligibility of each order to start production. If any order fails the eligibility check,
+   * the function immediately returns false and displays an error message. If all orders pass the check,
+   * the function returns true.
    *
    * @async
-   * @param {Array<Object>} paramsArray - An array of objects containing processId and workOrderSN for each check.
-   * @returns {Promise<boolean>} A promise that resolves to true if all eligibility checks pass; otherwise, false.
+   * @param {Array<Object>} paramsArray - An array of objects, each containing information about a production order.
+   * @param {string} paramsArray[].processId - The ID of the process for the production order.
+   * @param {string} paramsArray[].workOrderSN - The serial number of the work order.
+   * @param {string} paramsArray[].no - The NO number of the production order in the table.
+   * @returns {Promise<boolean>} A promise that resolves to true if all orders are eligible, false otherwise.
+   * @throws {Error} If there's an error during the batch processing.
    */
   const checkEligibilityBatch = async (paramsArray) => {
     try {
-      for (const { processId, workOrderSN } of paramsArray) {
+      for (const { processId, workOrderSN, no } of paramsArray) {
         const result = await checkStartEligibility(processId, workOrderSN);
-        console.log(result);
 
         if (!result || !result.data) {
-          showModal(`生產失敗，訂單號碼: ${workOrderSN} 無法開始生產`);
+          showModal(
+            `生產失敗，訂單號碼: ${workOrderSN}  (NO: ${no}) 無法開始生產`
+          );
           return false; // Exit immediately if any eligibility check fails
         }
       }

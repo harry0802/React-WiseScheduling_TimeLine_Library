@@ -216,6 +216,7 @@ export function convertToApiFormat({
     ? molds
         .filter(
           (mold) =>
+            mold &&
             mold.moldno &&
             typeof mold.moldno === "string" &&
             mold.moldno.trim() !== ""
@@ -224,16 +225,16 @@ export function convertToApiFormat({
           mold.id
             ? {
                 id: mold.id,
-                moldno: mold.moldno,
+                moldno: mold.moldno.trim(),
               }
-            : { moldno: mold.moldno }
+            : { moldno: mold.moldno.trim() }
         )
     : [];
 
   // 檢查並過濾物料數組中的無效值
   const formattedMaterials = Array.isArray(materials)
     ? materials
-        .filter((material) => material.id)
+        .filter((material) => material && material.id)
         .map((material) => ({
           id: material.id,
         }))
@@ -242,12 +243,12 @@ export function convertToApiFormat({
   // 返回一個格式化的對象數組
   return [
     {
-      productId: +productId, // 這裡假設 `id` 與 `productId` 相同
-      processOptionId,
-      jigSN: jigSN.trim(),
+      productId: productId ? +productId : null, // 確保 productId 是數字或 null
+      processOptionId: processOptionId || null,
+      jigSN: jigSN && typeof jigSN === "string" ? jigSN.trim() : "",
       molds: formattedMolds,
       materials: formattedMaterials,
-      id: dataId,
+      id: dataId || null,
     },
   ];
 }

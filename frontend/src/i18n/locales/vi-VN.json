@@ -95,7 +95,8 @@
       "startTime": "Thời gian bắt đầu",
       "count": "số*",
       "shiftChange": "Đổi ca",
-      "forbidden": "Không thể quay lại. H.thành công đoạn sx và bàn giao \"đổi ca\"."
+      "forbidden": "Không thể quay lại. H.thành công đoạn sx và bàn giao \"đổi ca\".",
+      "currentProduction": "Sản xuất hiện tại"
     }
   }
 }

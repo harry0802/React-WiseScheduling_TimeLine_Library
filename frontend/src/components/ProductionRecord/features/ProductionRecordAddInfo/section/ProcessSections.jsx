@@ -50,12 +50,12 @@ function ProcessSectionsDialog() {
     processId,
     options,
     inputValue,
+    setInputValue,
     isEditMode,
     onDelete,
     processIndex,
     processName,
     checkMastirialData,
-    setInputValue,
     handleCreateProcess,
     handleUpdateProcess,
     handleDeleteProcess,
@@ -64,18 +64,30 @@ function ProcessSectionsDialog() {
     jigSN,
   } = useProcessDialog();
 
+  const isProcessNameChanged = () => {
+    if (!selectedProcess || !inputValue) return false;
+    return (
+      selectedProcess.processName.trim().toLowerCase() !==
+      inputValue.trim().toLowerCase()
+    );
+  };
+
   const handleDrawerClose = () => {
     form.setFieldsValue({ items: mold });
     setProcessDrawer(false);
+    // 重置輸入值
+    setInputValue("");
+    setFormValues({});
   };
+
   const handleFormSubmit = async () => {
     if (!selectedProcess) return;
 
     try {
       const { items } = await form.validateFields();
-      const filteredItems = items?.filter(
-        ({ moldno }) => !!moldno && moldno.trim().length > 0
-      );
+      const filteredItems =
+        items?.filter(({ moldno }) => !!moldno && moldno.trim().length > 0) ||
+        [];
 
       const data = convertToApiFormat({
         productId,
@@ -90,6 +102,8 @@ function ProcessSectionsDialog() {
         ? await handleUpdateProcess(data)
         : await handleCreateProcess(data);
       setTimeout(() => notifySuccess(), 100);
+    } catch (error) {
+      console.error("Form submission error:", error);
     } finally {
       handleDrawerClose();
     }
@@ -98,8 +112,16 @@ function ProcessSectionsDialog() {
   // console.log(selectedProcess, inputValue, formValues.moldName);
 
   useEffect(() => {
-    form.setFieldsValue({ items: mold });
-  }, [mold, form]);
+    if (processDrawer) {
+      // 當對話框打開時，設置初始值
+      setInputValue(isEditMode ? processName : "");
+      form.setFieldsValue({
+        items: mold,
+        processName: isEditMode ? processName : "",
+        moldName: isEditMode ? jigSN : "",
+      });
+    }
+  }, [processDrawer, isEditMode, processName, mold, jigSN, form]);
 
   return (
     <Form form={form} layout="vertical" initialValues={{ item: [] }}>
@@ -107,8 +129,8 @@ function ProcessSectionsDialog() {
         disabled={
           !selectedProcess ||
           selectedProcess.processName !== inputValue ||
-          !formValues.moldName ||
-          !onDelete
+          !onDelete ||
+          isProcessNameChanged()
         }
         title={`製程 ${processIndex}`}
         visible={processDrawer}

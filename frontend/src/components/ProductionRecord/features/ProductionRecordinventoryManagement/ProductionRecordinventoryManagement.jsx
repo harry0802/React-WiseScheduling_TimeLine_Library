@@ -60,9 +60,7 @@ const columns = [
 
 function InventoryManagementTable() {
   const { notifySuccess } = useNotification();
-
   const { setPageStatus } = homeSlice();
-  // Access Zustand store
   const {
     tableView,
     selectedRowKeys,
@@ -76,6 +74,8 @@ function InventoryManagementTable() {
     handleSave,
     radioData,
     setRadioData,
+    filterData,
+    searchState,
   } = useInventoryStore();
 
   const { handleUpdate } = useMaterialAtions();
@@ -93,6 +93,9 @@ function InventoryManagementTable() {
   const handleSaveAndNotify = async () => {
     const updateDataSource = await handleSave();
     await handleUpdate(updateDataSource);
+    if (searchState?.userSearch) {
+      filterData(searchState.userSearch, searchState.userSelect); // Reapply filter
+    }
     setTimeout(() => notifySuccess(), 200);
   };
 
@@ -101,14 +104,20 @@ function InventoryManagementTable() {
 
   // Initialize data when the component mounts
   useEffectOnce(() => setPageStatus("原物料分類"));
+
+  // 監測到資料變動初始化 如果正在搜尋時 進行搜尋過濾
   useEffect(() => {
     if (!materials) return;
     (async function () {
       await setData(
-        materials?.data.map((item, i) => ({ ...item, key: i + 1 }))
+        materials?.data.map((item, i) => ({ ...item, key: i + 1 })),
+        true // Reset tableView on initialization
       );
+      if (searchState?.userSearch) {
+        filterData(searchState.userSearch, searchState.userSelect); // Reapply filter after setting data
+      }
     })();
-  }, [materials, setData]);
+  }, [materials, setData, filterData, searchState]);
 
   useEffect(() => {
     if (!materialOptions) return;

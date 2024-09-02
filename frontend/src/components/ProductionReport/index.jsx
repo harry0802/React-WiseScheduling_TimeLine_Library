@@ -215,17 +215,21 @@ const ProductionReport = (props) => {
       return;
     }
 
-    const selectedRowsData = dataSource.filter((row) =>
-      selectedRowKeys.includes(row.id)
-    );
+    const selectedRowsData = dataSource
+      .map((row, index) => ({
+        ...row,
+        no: (index + 1).toString().padStart(2, "0"),
+      })) // Add NO to each row
+      .filter((row) => selectedRowKeys.includes(row.id));
 
     // Step 1: Check for duplicate mold numbers
     if (!(await allMoldNosIdentical(selectedRowsData))) return;
 
     // Step 2: Prepare parameters for eligibility checks
-    const paramsArray = selectedRowsData.map(({ processId, workOrderSN }) => ({
-      processId,
-      workOrderSN,
+    const paramsArray = selectedRowsData.map((row) => ({
+      processId: row.processId,
+      workOrderSN: row.workOrderSN,
+      no: row.no, // Adding NO column
     }));
 
     // Step 3: Batch process eligibility checks using Promise.all with rejection handling
