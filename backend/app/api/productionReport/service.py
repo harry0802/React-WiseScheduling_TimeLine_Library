@@ -213,6 +213,8 @@ def complete_productionReport(mode, db_obj, payload):
 
     # 工時(formula) = (結束時間 - 開始時間).hours
     if (db_obj.startTime and db_obj.endTime):
+        # convert startTime to user's local timezone according to the endTime
+        db_obj.startTime = db_obj.startTime.astimezone(timezone(db_obj.endTime.tzinfo.utcoffset(db_obj.startTime)))
         db_obj.workingHours = (db_obj.endTime - db_obj.startTime).total_seconds() / 3600
         current_app.logger.debug(f"workingHours: {db_obj.workingHours}")
 
