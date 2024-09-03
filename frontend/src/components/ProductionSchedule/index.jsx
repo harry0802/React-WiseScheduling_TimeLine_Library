@@ -11,13 +11,21 @@ import {
   message,
   Modal,
   Tooltip,
+  AutoComplete,
 } from "antd";
 import { Resizable } from "react-resizable";
 import FilterBar from "../ProductionReport/FilterBar";
 import { WORKORDER_STATUS } from "../../config/enum";
-import { PRODUCTION_AREA, MACHINE_LIST } from "../../config/config";
+import {
+  PRODUCTION_AREA,
+  MACHINE_LIST,
+  REACT_APP_LY_ERP_ON,
+  PROCESS_CATEGORY_OPTION,
+} from "../../config/config";
 import {
   useGetProductionScheduleQuery,
+  useGetWorkOrderSNsQuery,
+  useGetProductionScheduleThroughLYQuery,
   useCancelStausMutation,
   useAddProductionScheduleMutation,
   useUpdateProductionScheduleMutation,
@@ -25,18 +33,82 @@ import {
 import "./index.scss";
 import { saveAs } from "file-saver";
 import Exceljs from "exceljs";
+import ExcelExample from "../../assets/ExcelExample.xlsx";
 import { debounce } from "lodash"; // 引入 lodash 的 debounce 函數
 import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { useGetProcessesAndMaterialsQuery } from "../ProductionRecord/service/endpoints/processApi";
+
+import { useRendersCount } from "react-use";
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+/*
+ProductionSchedule (Main Component)
+│
+├── **Imports**
+│   ├── React
+│   ├── React Router (`useNavigate`)
+│   ├── Ant Design Components (`Table`, `Select`, `Form`, `Input`, `Button`, `Modal`, `Tooltip`, `AutoComplete`)
+│   ├── FontAwesome Icons (`faPlus`, `faTrashCan`)
+│   ├── Utilities (`Resizable`, `debounce`, `saveAs`, `Exceljs`, `dayjs`)
+│   ├── API Hooks (`useGetProductionScheduleQuery`, `useGetWorkOrderSNsQuery`, `useUpdateProductionScheduleMutation`, etc.)
+│   └── Config and Constants (`WORKORDER_STATUS`, `PRODUCTION_AREA`, `MACHINE_LIST`, `TZ`)
+│
+├── **Components**
+│   ├── **Reusable Components**
+│   │   ├── ResizableTitle (Handles resizable table columns)
+│   │   ├── EditableContext (React Context for editable cells)
+│   │   ├── EditableRow (Table row wrapped with Form and Context Provider)
+│   │   └── EditableCell (Editable table cell, handles input and save logic)
+│   │
+│   └── **External Components**
+│       └── FilterBar (Used for search and filtering controls)
+│
+├── **State Management** (Local state using React hooks)
+│   ├── Pagination (`pagination`, `setPagination`)
+│   ├── Data (`dataSource`, `setDataSource`)
+│   ├── Filters and Search (`startDate`, `endDate`, `statusState`, `expiryState`, `keywordTypeState`, `keywordState`)
+│   ├── Loading States (`loading`)
+│   └── Miscellaneous (`workOrderSNsFromLYState`, `totalCurrent`, `needExportData`)
+│
+├── **API Data Fetching and Mutations** (RTK Query hooks)
+│   ├── useGetProductionScheduleQuery (Fetches production schedule data)
+│   ├── useGetWorkOrderSNsQuery (Fetches work order serial numbers)
+│   ├── useGetProductionScheduleThroughLYQuery (Fetches production schedule data through LY)
+│   ├── useCancelStausMutation (Mutation for cancelling status)
+│   ├── useAddProductionScheduleMutation (Mutation for adding production schedules)
+│   └── useUpdateProductionScheduleMutation (Mutation for updating production schedules)
+│
+├── **Helper Functions**
+│   ├── handleSave (Handles saving of edited table rows)
+│   ├── handleAdd (Handles addition of new work orders)
+│   ├── deleteChecked (Handles deletion of selected table rows)
+│   ├── handleProductionAreaChange (Updates production area and related fields)
+│   ├── handleMachineSNChange (Updates machine serial number and related fields)
+│   ├── handleSingleOrDoubleColorChange (Updates single or double color selection)
+│   ├── exportToExcel (Handles export of table data to Excel format)
+│   └── queryFromLY (Handles fetching data from external LY ERP system)
+│
+└── **Render Logic**
+    ├── Table (Main data table with editable cells, sorting, filtering, and pagination)
+    ├── FilterBar (Search and filter controls)
+    ├── Action Buttons
+    │   ├── Add Button (Adds a new work order)
+    │   ├── Delete Button (Deletes selected rows)
+    │   ├── Export Button (Exports data to Excel)
+    │   └── Import Button (Navigates to import page)
+    └── Conditional Rendering (Displays loading state, table, and buttons based on data and state)
+
+
+*/
 
 // 表格可調整欄位寬度
 const ResizableTitle = (props) => {
   const { onResize, width, ...restProps } = props;
-
   if (!width) {
     return <th {...restProps} />;
   }
@@ -61,6 +133,10 @@ const ResizableTitle = (props) => {
   );
 };
 
+/*--------------------------------------------------  global / Context   start ------------------------------------------------------*/
+/* EditableContext :: EditablerProvider
+ *  EditableRow -> HTML::tr th td
+ */
 // 表單編輯設置
 const EditableContext = React.createContext(null);
 
@@ -75,6 +151,9 @@ const EditableRow = ({ id, ...props }) => {
   );
 };
 
+/*--------------------------------------------------  global / Context  end ------------------------------------------------------*/
+
+/*--------------------------------------------------  global / useContext  start ------------------------------------------------------*/
 const EditableCell = ({
   title,
   editable,
@@ -84,12 +163,13 @@ const EditableCell = ({
   type,
   record,
   handleSave,
+  queryFromLY,
+  workOrderSNsFromLYState,
   ...restProps
 }) => {
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
   const form = useContext(EditableContext);
-
   useEffect(() => {
     if (editing) {
       inputRef.current.focus();
@@ -101,6 +181,19 @@ const EditableCell = ({
     form.setFieldsValue({
       [dataIndex]: record[dataIndex],
     });
+  };
+
+  const queryFromLYandSave = async () => {
+    try {
+      const values = await form.validateFields();
+      toggleEdit();
+      queryFromLY({
+        ...record,
+        ...values,
+      });
+    } catch (errInfo) {
+      console.log("queryFromLYandSave failed:", errInfo);
+    }
   };
 
   const save = async () => {
@@ -120,15 +213,37 @@ const EditableCell = ({
 
   if (editable) {
     childNode = editing ? (
-      <Form.Item
-        style={{
-          margin: 0,
-        }}
-        name={dataIndex}
-        rules={[rule]}
-      >
-        <Input ref={inputRef} onPressEnter={save} onBlur={save} type={type} />
-      </Form.Item>
+      dataIndex === "workOrderSN" && REACT_APP_LY_ERP_ON === true ? (
+        <Form.Item
+          style={{
+            margin: 0,
+          }}
+          name={dataIndex}
+          rules={[rule]}
+        >
+          <AutoComplete
+            ref={inputRef}
+            defaultValue={record[dataIndex]}
+            onBlur={queryFromLYandSave}
+            style={{ width: 140 }}
+            options={workOrderSNsFromLYState}
+            placeholder="輸入製令單號"
+            filterOption={(inputValue, option) =>
+              option.value.indexOf(inputValue) !== -1
+            }
+          />
+        </Form.Item>
+      ) : (
+        <Form.Item
+          style={{
+            margin: 0,
+          }}
+          name={dataIndex}
+          rules={[rule]}
+        >
+          <Input ref={inputRef} onPressEnter={save} onBlur={save} type={type} />
+        </Form.Item>
+      )
     ) : (
       <div
         className="editable-cell-value-wrap"
@@ -145,9 +260,83 @@ const EditableCell = ({
   return <td {...restProps}>{childNode}</td>;
 };
 
+/*--------------------------------------------------  global / useContext  end ------------------------------------------------------*/
+//  TODO: Add more form controls and logic for editing production  schedule
+function ScheduleProcessNameOptions({ source }) {
+  // parameter deconstruct
+  const { Option } = Select;
+  const { productId, id, processName } = source || {};
+
+  // * Api
+  const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
+
+  const { data: processCategory } = useGetProcessesAndMaterialsQuery(
+    {
+      productId: productId,
+      processCategory: PROCESS_CATEGORY_OPTION[0].category,
+    },
+    { skip: !productId }
+  );
+
+  // * Handle Select Change
+  const handleSelectChange = async (value) => {
+    if (!id) return;
+    try {
+      // Send a request to the server to update the data
+      const response = await UpdateProductionSchedule({
+        id,
+        data: { processId: value },
+      });
+      !response.error
+        ? message.success("修改數據成功")
+        : message.error("修改數據失敗");
+    } catch (error) {
+      message.error("更新過程中出現錯誤");
+    }
+  };
+
+  return (
+    <Select
+      defaultValue={processName || ""}
+      value={processName || ""}
+      style={{ width: 200, background: "none", borderColor: "#1677ff" }}
+      onChange={(value, label) => handleSelectChange(value, label)}
+    >
+      {processCategory?.data?.map((item, index) => (
+        <Option key={index} value={item.id} label={item.processName}>
+          {item.processName}
+        </Option>
+      ))}
+      ,
+    </Select>
+  );
+}
+
 const ProductionSchedule = (props) => {
   const navigate = useNavigate();
   const { Option } = Select;
+
+  const rendersCount = useRendersCount();
+
+  //! New Add :  Fetch processCategory data using RTK Query hook
+
+  /*--------------------------------------------------  ant ui -> table -> Column   start ------------------------------------------------------*/
+  /*
+* ant ui ->  table ->  same API Column  
+
+*  defaultColumns :: [] 
+
+* defaultColumns ::[category] -> category:: {}
+
+{} :
+* render :: function (插入自訂義元素) 
+  - Tooltip :  當寬度不足時文字將會縮行... , 使用 Tooltip ， hover 顯示全文 
+  - Select : 下拉選單
+
+* Rule : ant ui ->  form -> Rule 
+
+*/
+
   const [defaultColumns, setDefaultColumns] = useState([
     {
       title: "編號 ",
@@ -180,7 +369,6 @@ const ProductionSchedule = (props) => {
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>
-          {/* <span style={{background:'#fff'}} >{text}</span> */}
           <span>{text}</span>
         </Tooltip>
       ),
@@ -190,7 +378,7 @@ const ProductionSchedule = (props) => {
       dataIndex: "productName",
       width: 125,
       fixed: true,
-      editable: true,
+      editable: REACT_APP_LY_ERP_ON === false,
       ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
@@ -209,7 +397,7 @@ const ProductionSchedule = (props) => {
       title: "產品編號",
       dataIndex: "productSN",
       width: 80,
-      editable: true,
+      editable: REACT_APP_LY_ERP_ON === false,
       ellipsis: true,
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
@@ -226,7 +414,7 @@ const ProductionSchedule = (props) => {
     {
       title: "製令數量",
       dataIndex: "workOrderQuantity",
-      editable: true,
+      editable: REACT_APP_LY_ERP_ON === false,
       ellipsis: true,
       width: 50,
       type: "number",
@@ -241,7 +429,7 @@ const ProductionSchedule = (props) => {
       title: "訂單交期",
       dataIndex: "workOrderDate",
       width: 60,
-      editable: true,
+      editable: REACT_APP_LY_ERP_ON === false,
       ellipsis: true,
       type: "date",
       sorter: (a, b) => {
@@ -259,6 +447,30 @@ const ProductionSchedule = (props) => {
       //   message: `is required.`,
       // }
     },
+    // ! new add column
+    {
+      title: "製程名稱",
+      dataIndex: "processName",
+      ellipsis: true,
+      width: 120,
+      type: "string",
+      render: function (text, record) {
+        if (!record.productId) return null;
+        return <ScheduleProcessNameOptions source={record} />;
+      },
+    },
+    {
+      title: "模具編號",
+      dataIndex: "moldno",
+      ellipsis: true,
+      width: 60,
+      type: "string",
+      render: function (_, record) {
+        if (!record.moldNos) return null;
+        return record.moldNos;
+      },
+    },
+
     {
       title: "成型秒數",
       dataIndex: "moldingSecond",
@@ -545,13 +757,26 @@ const ProductionSchedule = (props) => {
       ),
     },
   ]);
+
+  /*--------------------------------------------------  ant ui -> table -> Column   end ------------------------------------------------------*/
+
+  /*--------------------------------------------------  分頁 secontions   start ------------------------------------------------------*/
+
   // 設定初始當前頁面以及分頁一頁有幾個資料
   const [pagination, setPagination] = useState({
     page: 1 /*當前分頁位址*/,
     pageSize: 20, // 默认值为 10
   });
+  /*--------------------------------------------------  分頁 secontions end ------------------------------------------------------*/
+
+  /*--------------------------------------------------  資料處理 start ------------------------------------------------------*/
+
   const [totalCurrent, setTotalCurrent] = useState(1); /*總數據量*/
   const [dataSource, setDataSource] = useState([]); /*回傳資料*/
+  /*--------------------------------------------------  資料處理 end ------------------------------------------------------*/
+
+  /*-------------------------------------------------- 搜尋條件篩選  start ------------------------------------------------------*/
+
   // 搜尋條件篩選
   const [startDate, setStartDate] = useState(
     new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -606,8 +831,33 @@ const ProductionSchedule = (props) => {
     }
     setPagination(newPagination);
   };
+  /*-------------------------------------------------- 搜尋條件篩選  end ------------------------------------------------------*/
+
+  /*--------------------------------------------------獲取外部 api 工作列表 start ------------------------------------------------------*/
+
+  // get distinct workOrderSNs from LY(凌越) ERP
+  const {
+    data: workOrderSNData,
+    isLoading: workOrderSNIsLoading,
+    isSuccess: workOrderSNIsSuccess,
+    refetch: workOrderSNRefetch,
+  } = useGetWorkOrderSNsQuery();
+
+  const [workOrderSNsFromLYState, setWorkOrderSNsFromLYState] = useState([]);
+  useEffect(() => {
+    if (workOrderSNIsSuccess) {
+      const workOrderSNOption = workOrderSNData.map((item) => {
+        return { value: item };
+      });
+      setWorkOrderSNsFromLYState(workOrderSNOption);
+    }
+  }, [workOrderSNIsSuccess, workOrderSNData]);
+
+  /*--------------------------------------------------獲取外部 api 工作列表 end ------------------------------------------------------*/
 
   const onChange = (filters, sorter) => {};
+
+  /*-------------------------------------------------- 表單 I/O start ------------------------------------------------------*/
 
   // 新增 exportData 狀態
   const [needExportData, setNeedExportData] = useState([]);
@@ -814,6 +1064,12 @@ const ProductionSchedule = (props) => {
         case "workOrderDate":
           items["width"] = 25;
           break;
+        case "processName":
+          items["width"] = 25;
+          break;
+        case "moldno":
+          items["width"] = 25;
+          break;
         case "moldingSecond":
           items["width"] = 15;
           break;
@@ -873,6 +1129,13 @@ const ProductionSchedule = (props) => {
     });
   };
 
+  /*-------------------------------------------------- 表單 I/O end ------------------------------------------------------*/
+
+  /*-------------------------------------------------- 新增項目 與 新增製令單 start  ------------------------------------------------------*/
+  // TODO: 修復 bug
+  //  ! 請先取消勾選增製令單才能新增項目  // 已刪除項目還是跳出
+  //  !
+
   // 新增項目
   const [addProductionSchedule] = useAddProductionScheduleMutation();
   const [nowDate, setNowDate] = useState(
@@ -922,10 +1185,20 @@ const ProductionSchedule = (props) => {
       console.error("處理新增製令單時發生錯誤:", error);
     }
   };
+  /*-------------------------------------------------- 新增項目 與 新增製令單 end  ------------------------------------------------------*/
 
+  /*--------------------------------------------------  勾選表單 start ------------------------------------------------------*/
+  // ant ui:: Table ->  rowSelection API
+
+  /* 表單 SELECTIONS SECTION
+    
+  *  selectionType :: rowSelection ->  type::'checkbox' 
+  * cancelStaus 
+  */
   const [selectionType, setSelectionType] = useState("checkbox");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]); // 追蹤選中的行的 id
   const [cancelStaus] = useCancelStausMutation();
+
   //勾選刪除
   const deleteChecked = async () => {
     // Get the selected rows' ids
@@ -950,6 +1223,7 @@ const ProductionSchedule = (props) => {
 
     const stringIds = JSON.stringify(selectedRowKeys);
 
+    //  popup dialog
     Modal.confirm({
       title: "確認刪除",
       content: "確定要刪除生產選中的項目嗎？",
@@ -977,17 +1251,86 @@ const ProductionSchedule = (props) => {
       name: record.name,
     }),
   };
+  /*-------------------------------------------------- 勾選表單 end  ------------------------------------------------------*/
+
+  /*-------------------------------------------------- 外部 API 串接 START  ------------------------------------------------------*/
 
   // 編輯
-  const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
+  // get production schedule through LY
+  //  ? 處理製令單獲取資料的 fn ?
+  const [lyQuery, setLyQuery] = useState({ id: null, workOrderSN: null });
 
+  const { data: lyData, isSuccess: lyIsSuccess } =
+    useGetProductionScheduleThroughLYQuery(
+      {
+        id: lyQuery.id,
+        workOrderSN: lyQuery.workOrderSN,
+      },
+      { skip: REACT_APP_LY_ERP_ON === false }
+    );
+  useEffect(() => {
+    if (lyIsSuccess) {
+      handleSave({ ...lyData });
+    }
+  }, [lyIsSuccess, lyData]);
+  // TODO
+  /*
+ ? 查無製令單號 
+ * 目前製令單號為 db 所以目前 erp 沒有同步嗎?
+ * 所以剛剛行為沒有觸發該錯誤是為上述原因?
+*
+*/
+  const queryFromLY = (row) => {
+    if (
+      workOrderSNsFromLYState.some((item) => item.value === row.workOrderSN)
+    ) {
+      setLyQuery({
+        id: row.id,
+        workOrderSN: row.workOrderSN,
+      });
+    } else {
+      message.warning("凌越ERP查無此製令單號，請重新輸入。");
+    }
+  };
+  /*  -------------------------------------------------- 外部 API 串接 end  ------------------------------------------------------*/
+
+  const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
+  /*
+   TODO  
+   * matchedData 獲取對應的製令單 
+   * dataSource 所有的 table data 
+*/
+  // 儲存, 更新  觸發
   const handleSave = async (row) => {
     try {
       // Check if there are changes in the data
-      const isDataChanged = Object.keys(row).some(
-        (key) => row[key] !== dataSource.find((item) => item.id === row.id)[key]
-      );
-      // 当从服务器获取到 hourlyCapacity 时，检查 conversionRate 是否有值
+      const matchedData = dataSource.find((item) => item.id === row.id);
+
+      console.log(matchedData);
+
+      // Define date keys
+      const dateKeys = [
+        "workOrderDate",
+        "planOnMachineDate",
+        "planFinishDate",
+        "actualOnMachineDate",
+        "actualFinishDate",
+      ];
+
+      const isDataChanged = Object.keys(row).some((key) => {
+        // Check if the key is a date key and compare dates
+        if (dateKeys.includes(key)) {
+          const dataDate = matchedData[key]
+            ? dayjs(matchedData[key]).tz(TZ).format("YYYY-MM-DD")
+            : null;
+          const rowDate = row[key]
+            ? dayjs(row[key]).tz(TZ).format("YYYY-MM-DD")
+            : null;
+          return dataDate !== rowDate;
+        }
+        // For non-date keys, directly compare the values
+        return matchedData[key] !== row[key];
+      });
 
       if (!isDataChanged) {
         // If there are no changes, you can choose to return or show a message
@@ -1093,6 +1436,10 @@ const ProductionSchedule = (props) => {
     }
   };
 
+  //  --------------------------------------------------  ui 套件 Table 設定 start  --------------------------------------------------
+  /*
+   * Ant ui :: Table-> API -> components
+   */
   const components = {
     header: {
       cell: ResizableTitle,
@@ -1102,6 +1449,8 @@ const ProductionSchedule = (props) => {
       cell: EditableCell,
     },
   };
+
+  //  --------------------------------------------------  ui 套件 Form 設定  end  --------------------------------------------------
 
   const handleResize =
     (index) =>
@@ -1114,6 +1463,11 @@ const ProductionSchedule = (props) => {
       setDefaultColumns(newColumns);
     };
 
+  /*
+   * 處理 ant ui ->  columns  ,  loop defaultColumns
+   * onCell : 自定義 props 傳給子層組件
+   */
+
   const columns = defaultColumns.map((col, index) => {
     const onCell = (record) => ({
       record,
@@ -1123,6 +1477,8 @@ const ProductionSchedule = (props) => {
       type: col.type,
       title: col.title,
       handleSave,
+      queryFromLY,
+      workOrderSNsFromLYState: workOrderSNsFromLYState,
     });
 
     return {
@@ -1170,6 +1526,7 @@ const ProductionSchedule = (props) => {
                 <FontAwesomeIcon icon={faTrashCan} style={{ color: "#fff" }} />
               </button>
             </Tooltip>
+
             <Tooltip title="新增製令單">
               <button className="add" onClick={debouncedHandleAdd}>
                 <FontAwesomeIcon icon={faPlus} style={{ color: "#fff" }} />
@@ -1251,6 +1608,21 @@ const ProductionSchedule = (props) => {
         >
           匯入
         </Button>
+        <a
+          href={ExcelExample}
+          download="生產排程計畫表-匯入範例"
+          target="_blank"
+        >
+          <Button
+            type="ghost"
+            className={
+              dataSource.length === 0 ? "downloadBtn-initial" : "downloadBtn"
+            }
+          >
+            下載匯入Excel範例
+          </Button>
+        </a>
+        <span>Renders count: {rendersCount}</span>
       </div>
     </div>
   );

@@ -1,20 +1,19 @@
 from datetime import datetime, date, timedelta
-import json
 import math
-from operator import and_
 import sys
-
-import requests
-from app.models.products import products
 from flask import current_app
-
+from sqlalchemy import func
 from app import db
-from app.utils import message, err_resp, internal_err_resp
+from app.utils_log import message, err_resp, internal_err_resp
 from app.models.productionSchedule import ProductionSchedule
+from app.models.ly0000AB import LY0000AB
+from app.models.ltmoldmap import LtMoldMap
+from app.models.product import Product
+from app.models.process import Process
+from app.models.processOption import ProcessOption
+from app.models.processMold import ProcessMold
 from .schemas import productionScheduleSchema
-from flask import url_for
 from app.api.calendar.service import CalendarService
-from sqlalchemy import extract
 productionSchedule_schema = productionScheduleSchema()
 
 
@@ -78,19 +77,12 @@ def shift_by_holiday(start_date, end_date=datetime(1,1,1), workdays=1):
     current_app.logger.debug(f"final_end: {final_end_date}, deltaDays: {deltaDays}, holiday_count: {holiday_list_2nd_count}")
     return final_end_date
 
-def update_moldNo_by_productName(productSN):
-    try:
-        query = products.query.filter(products.prod_no == productSN)
-        mold_db = query.first()
-        if mold_db is None:
-            return ""
-        return mold_db.mold_no
-    except Exception as error:
-            raise error
-    
 
 def complete_productionSchedule(db_obj, payload):
-    isProductSNChanged = False
+    db_obj.productId = int(payload["productId"]) \
+        if payload.get("productId") is not None else db_obj.productId
+    db_obj.processId = int(payload["processId"]) \
+        if payload.get("processId") is not None else db_obj.processId
     db_obj.productionArea = payload["productionArea"] \
         if payload.get("productionArea") is not None else db_obj.productionArea
     db_obj.machineSN = payload["machineSN"] \
@@ -99,14 +91,6 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("serialNumber") is not None else db_obj.serialNumber
     db_obj.workOrderSN = payload["workOrderSN"] \
         if payload.get("workOrderSN") is not None else db_obj.workOrderSN
-    db_obj.moldNo = payload["moldNo"] \
-        if payload.get("moldNo") is not None else db_obj.moldNo
-    if payload.get("productSN") is not None and db_obj.productSN != payload["productSN"]:
-        isProductSNChanged = True
-    db_obj.productSN = payload["productSN"] \
-        if payload.get("productSN") is not None else db_obj.productSN
-    db_obj.productName = payload["productName"] \
-        if payload.get("productName") is not None else db_obj.productName
     db_obj.workOrderQuantity = int(payload["workOrderQuantity"]) \
         if payload.get("workOrderQuantity") is not None else db_obj.workOrderQuantity
     db_obj.workOrderDate = datetime.fromisoformat(payload["workOrderDate"]) \
@@ -174,9 +158,6 @@ def complete_productionSchedule(db_obj, payload):
         #預計完成日(shift by holiday)
         db_obj.planFinishDate = shift_by_holiday(start_date=db_obj.planOnMachineDate, workdays=db_obj.workDays+db_obj.moldWorkDays)
     
-    #從模具雲的products資料表拿到moldNo
-    if db_obj.moldNo is None or db_obj.moldNo == "" or isProductSNChanged:
-        db_obj.moldNo = update_moldNo_by_productName(db_obj.productSN)
     #周數
     if payload.get("week") is not None and False: #waiting for frontend has its own week calculation
         db_obj.week = payload["week"]
@@ -203,7 +184,7 @@ class productionScheduleService:
     def get_productionSchedules(page, size, sort, start_planOnMachineDate, end_planOnMachineDate, machineSN=None, status="all", workOrderSN=None, 
                               productName=None, expiry="無期限", machineSNs=[]):
         try:
-            # transform the ISO format datetime to UNIX timestamp
+            # transform the ISO format datetime to datetime type
             start_planOnMachineDate = datetime.fromisoformat(start_planOnMachineDate) \
                 if start_planOnMachineDate else None
             end_planOnMachineDate = datetime.fromisoformat(end_planOnMachineDate) \
@@ -212,13 +193,29 @@ class productionScheduleService:
 
             # Get the current productionSchedule
             query = ProductionSchedule.query
+            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.productId, ProductionSchedule.processId,
+                                        ProductionSchedule.productionArea, ProductionSchedule.machineSN, ProductionSchedule.serialNumber,
+                                        ProductionSchedule.workOrderSN, ProductionSchedule.workOrderQuantity, ProductionSchedule.workOrderDate, 
+                                        ProductionSchedule.moldingSecond, ProductionSchedule.planOnMachineDate, ProductionSchedule.actualOnMachineDate, 
+                                        ProductionSchedule.moldWorkDays, ProductionSchedule.workDays, ProductionSchedule.planFinishDate, 
+                                        ProductionSchedule.actualFinishDate, ProductionSchedule.comment, ProductionSchedule.dailyWorkingHours, 
+                                        ProductionSchedule.moldCavity, ProductionSchedule.week, ProductionSchedule.singleOrDoubleColor, 
+                                        ProductionSchedule.conversionRate, ProductionSchedule.status, Product.productSN, Product.productName, 
+                                        ProcessOption.processName,
+                                        func.group_concat(LtMoldMap.moldno).label('moldNos'))
+            query = query.join(Product, ProductionSchedule.productId == Product.id, isouter = True) # left outer join
+            query = query.join(Process, ProductionSchedule.processId == Process.id, isouter = True) # left outer join
+            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id, isouter = True) # left outer join
+            query = query.join(ProcessMold, Process.id == ProcessMold.processId, isouter = True) # left outer join
+            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no, isouter = True) # left outer join
+
             query = query.filter(ProductionSchedule.status != "取消生產")
             query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
                     if start_planOnMachineDate and end_planOnMachineDate else query
             query = query.filter(ProductionSchedule.machineSN == machineSN) if machineSN else query
             query = query.filter(ProductionSchedule.status == status) if status != "all" else query
             query = query.filter(ProductionSchedule.workOrderSN.like(f"%{workOrderSN}%")) if workOrderSN else query
-            query = query.filter(ProductionSchedule.productName.like(f"%{productName}%")) if productName else query
+            query = query.filter(Product.productName.like(f"%{productName}%")) if productName else query
             if (expiry == "即將到期"):
                 # 預計完成日前七天，該單尚未完成，為即將到期
                 query = query.filter(ProductionSchedule.status != "Done", 
@@ -228,7 +225,7 @@ class productionScheduleService:
                 query = query.filter(ProductionSchedule.status != "Done",
                                      ProductionSchedule.planFinishDate < datetime.now())
             query = query.filter(ProductionSchedule.machineSN.in_(machineSNs)) if machineSNs else query
-
+            query = query.group_by(ProductionSchedule.id)
             if hasattr(ProductionSchedule, sort):
                 query = query.order_by(getattr(ProductionSchedule, sort).desc())
             else:
@@ -262,17 +259,33 @@ class productionScheduleService:
         except Exception as error:
             raise error
         
+
     @staticmethod
     def get_productionSchedule(id):
         try:
             # Get the current productionSchedule
-            productionSchedule_db = ProductionSchedule.query.filter(
-                    ProductionSchedule.id == id
-                ).first()
+            query = ProductionSchedule.query
+            query = query.with_entities(ProductionSchedule.id, ProductionSchedule.productId, ProductionSchedule.processId,
+                                        ProductionSchedule.productionArea, ProductionSchedule.machineSN, ProductionSchedule.serialNumber,
+                                        ProductionSchedule.workOrderSN, ProductionSchedule.workOrderQuantity, ProductionSchedule.workOrderDate, 
+                                        ProductionSchedule.moldingSecond, ProductionSchedule.planOnMachineDate, ProductionSchedule.actualOnMachineDate, 
+                                        ProductionSchedule.moldWorkDays, ProductionSchedule.workDays, ProductionSchedule.planFinishDate, 
+                                        ProductionSchedule.actualFinishDate, ProductionSchedule.comment, ProductionSchedule.dailyWorkingHours, 
+                                        ProductionSchedule.moldCavity, ProductionSchedule.week, ProductionSchedule.singleOrDoubleColor, 
+                                        ProductionSchedule.conversionRate, ProductionSchedule.status, Product.productSN, Product.productName, 
+                                        ProcessOption.processName,
+                                        func.group_concat(LtMoldMap.moldno).label('moldNos'))
+            query = query.join(Product, ProductionSchedule.productId == Product.id, isouter = True) # left outer join
+            query = query.join(Process, ProductionSchedule.processId == Process.id, isouter = True) # left outer join
+            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id, isouter = True) # left outer join
+            query = query.join(ProcessMold, Process.id == ProcessMold.processId, isouter = True) # left outer join
+            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no, isouter = True) # left outer join
+            query = query.filter(ProductionSchedule.status != "取消生產")
+            query = query.filter(ProductionSchedule.id == id)
+            productionSchedule_db = query.first()
 
             if productionSchedule_db is None:
                 return err_resp("productionSchedule not found", "productionSchedule_404", 404)
-                productionSchedule_db = []
             
             productionSchedule_dto = productionSchedule_schema.dump(productionSchedule_db)
 
@@ -297,6 +310,63 @@ class productionScheduleService:
 
             resp = message(True, "machineSN data sent")
             resp["data"] = productionSchedule_dto
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+    
+
+    @staticmethod
+    def get_productionSchedule_through_LY(id, workOrderSN):
+        current_app.logger.info(f"get_productionSchedule_through_LY: {workOrderSN}")
+        try:
+            ly0000AB_db = LY0000AB.query.filter(
+                    LY0000AB.MP_NO == workOrderSN
+                ).first()
+            if ly0000AB_db is None:
+                return err_resp("查無此製令單編號", "0000AB_404", 404)
+            else:
+                productionSchedule_db = ProductionSchedule.query.filter(
+                    ProductionSchedule.id == id
+                ).first()
+
+                # get Product ID by productSN from Product table
+                product_db = Product.query.filter(
+                    Product.productSN == ly0000AB_db.MP_SKNO
+                ).first()
+                if product_db is None:
+                    return err_resp("無此產品編號", "product_404", 404)
+                
+                productionSchedule_db.productId = product_db.id
+                productionSchedule_db.workOrderSN = ly0000AB_db.MP_NO
+                productionSchedule_db.productName = ly0000AB_db.MP_SKNM
+                productionSchedule_db.productSN = ly0000AB_db.MP_SKNO
+                productionSchedule_db.workOrderQuantity = ly0000AB_db.MP_AQTY
+                productionSchedule_db.workOrderDate = ly0000AB_db.MP_EDTE
+
+            productionSchedule_dto = productionSchedule_schema.dump(productionSchedule_db)
+            resp = message(True, "productionSchedule data sent")
+            resp["data"] = productionSchedule_dto
+            return resp, 200
+        except Exception as error:
+            raise error
+            
+
+    @staticmethod
+    def check_start_eligibility(workOrderSN, processId):
+        try:
+            result = False
+            query = ProductionSchedule.query
+            query = query.with_entities(ProductionSchedule.machineSN, ProductionSchedule.productionArea)
+            query = query.join(Process, Process.id == ProductionSchedule.processId)
+            query = query.filter(ProductionSchedule.status == "尚未上機")
+            query = query.filter(ProductionSchedule.workOrderSN == workOrderSN)
+            query = query.filter(Process.id < processId)
+            if len(query.all()) == 0:
+                result = True
+
+            resp = message(True, "machineSN data sent")
+            resp["data"] = result
             return resp, 200
         # exception without handling should raise to the caller
         except Exception as error:
@@ -344,6 +414,7 @@ class productionScheduleService:
         except Exception as error:
             raise error
 
+
     @staticmethod
     def update_productionSchedule(id, payload):
         try:
@@ -368,6 +439,7 @@ class productionScheduleService:
         except Exception as error:
             raise error
     
+
     @staticmethod
     def update_productionSchedules(ids, payload):
         try:
@@ -395,7 +467,8 @@ class productionScheduleService:
         # exception without handling should raise to the caller
         except Exception as error:
             raise error
-
+        
+    
     @staticmethod
     def delete_productionSchedule(id):
         try:
@@ -412,6 +485,7 @@ class productionScheduleService:
         # exception without handling should raise to the caller
         except Exception as error:
             raise error
+
 
     @staticmethod
     def delete_productionSchedules(ids):

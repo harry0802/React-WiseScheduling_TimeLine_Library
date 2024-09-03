@@ -1,0 +1,102 @@
+@import "../../../../styles/variables";
+
+// 變量定義
+$font-color: #8f8f8f;
+$font-family: Roboto, sans-serif;
+$font-size: 0.875rem;
+$line-height: 1.25rem; // 142.857%
+$border-color: #8f8f8f;
+$background-color-thead: #cdcdcd;
+$background-color-even-row: #dfdfdf;
+
+// 基礎樣式
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: $font-family;
+  color: $font-color;
+  font-size: $font-size;
+  line-height: $line-height;
+}
+
+// 組件樣式
+.procMaterials-context {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18.75rem, 1fr));
+  gap: 1.25rem;
+
+  // 表格樣式
+  :global(.ant-table-wrapper) {
+    width: 100%;
+    border: 1px solid $border-color;
+
+    & :where(*) {
+      color: $font-color;
+      font-family: $font-family;
+      font-size: $font-size;
+      font-style: normal;
+      font-weight: 400;
+      line-height: $line-height;
+      border-radius: 0;
+      border: none;
+      border-radius: 0 !important;
+      border-start-end-radius: 0px;
+    }
+
+    :global(.ant-table-thead .ant-table-cell) {
+      &::before {
+        display: none;
+      }
+      color: $font-color;
+      padding: 10px;
+      border-radius: 0;
+      border-bottom: 1px solid $border-color;
+      background: $background-color-thead;
+    }
+
+    & :global(.ant-table-tbody) {
+      :not(:last-child) {
+        border-right: 1px solid $border-color;
+      }
+      & :global(.ant-table-row) {
+        &:not(:last-child) > td {
+          border-bottom: 1px solid $border-color;
+        }
+
+        &:nth-of-type(odd) {
+          background: $background-color-even-row;
+        }
+      }
+    }
+  }
+}
+.reusableTable {
+  max-height: 32.5rem;
+  overflow: auto;
+  cursor: pointer;
+
+  & :global(.ant-table-tbody) {
+    tr:hover > td {
+      background: inherit !important;
+      color: #000 !important; // White text on hover
+    }
+  }
+}
+
+.edit-warning__message {
+  font-size: 16px;
+  line-height: 1.8; /* 調整字體間隔 */
+  margin-bottom: 10px; /* 增加段落間距 */
+}
+
+.edit-warning__link {
+  color: #007bff; /* 使用容易識別的藍色鏈接 */
+  text-decoration: underline;
+  cursor: pointer;
+}

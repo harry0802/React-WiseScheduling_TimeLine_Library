@@ -3,7 +3,7 @@ import sys
 from flask import request
 from flask_restx import Resource
 
-from app.utils import controller_entrance_log
+from app.utils_log import controller_entrance_log
 
 from .service import productionScheduleService
 from .dto import productionScheduleDto
@@ -102,7 +102,6 @@ class productionScheduleController(Resource):
         return productionScheduleService.create_productionSchedules(payload)
 
 
-
 @api.route("/<int:id>")
 @api.param("id", "id of the productionSchedule")
 class productionScheduleController(Resource):
@@ -148,6 +147,7 @@ class productionScheduleController(Resource):
     def delete(self, id):
         return productionScheduleService.delete_productionSchedule(id)
 
+
 @api.route("/<int_list:ids>")
 @api.param("ids", "ids of the productionSchedule", required=True, default="[1,2,3]", type="int_list")
 class productionScheduleController(Resource):
@@ -170,7 +170,6 @@ class productionScheduleController(Resource):
             payload.pop(prop, None)
         return productionScheduleService.update_productionSchedules(ids, payload)
 
-
     @api.doc(
         "delete the current productionSchedules",
         responses={
@@ -181,6 +180,27 @@ class productionScheduleController(Resource):
     @controller_entrance_log(description="delete the current productionSchedules")
     def delete(self, ids):
         return productionScheduleService.delete_productionSchedules(ids)
+
+
+@api.route("/getProductionScheduleThroughLY/")
+@api.param("id", "id of the productionSchedule", required=True)
+@api.param("workOrderSN", "workOrderSN", required=True)
+class productionScheduleController(Resource):
+    productionSchedule_resp = productionScheduleDto.productionSchedule_resp
+
+    @api.doc(
+        "Get single productionSchedule through LY",
+        responses={
+            200: ("productionSchedule data found", productionSchedule_resp),
+            404: "productionSchedule not found",
+        },
+    )
+    @controller_entrance_log(description="Get single productionSchedule through LY")
+    def get(self):
+        id = request.args.get('id', default=None, type=int)
+        workOrderSN = request.args.get('workOrderSN', default=None, type=str)
+        return productionScheduleService.get_productionSchedule_through_LY(id, workOrderSN)
+
 
 @api.route("/machineSN")
 class productionScheduleController(Resource):
@@ -197,4 +217,25 @@ class productionScheduleController(Resource):
     @controller_entrance_log(description="Get machineSNs")
     def get(self):
         return productionScheduleService.get_machineSNs()
+
+
+@api.route("/checkStartEligibility")
+class productionScheduleController(Resource):
+    eligibility_resp = productionScheduleDto.eligibility_resp
+
+    @api.doc(
+        """製令單需按照製程順序產生母批，例如: 「廠內-成型-1I」的製令單必須進入「On-going」狀態後，「廠內-成型-2I」的製令單才能產生母批。
+        後端確認可以產生母批，會回傳True，不能產生則回傳False""",
+        responses={
+            200: ("data successfully sent", eligibility_resp),
+            404: "not found",
+        },
+    )
+    @api.param("workOrderSN", "workOrderSN", required=True)
+    @api.param("processId", "id of the process", required=True)
+    @controller_entrance_log(description="Check the eligibility of starting the workOrder")
+    def get(self):
+        workOrderSN = request.args.get('workOrderSN', default=None, type=str)
+        processId = request.args.get('processId', default=None, type=int)
+        return productionScheduleService.check_start_eligibility(workOrderSN, processId)
     

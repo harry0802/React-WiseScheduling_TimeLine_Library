@@ -150,6 +150,14 @@ const TabPanel = (props) => {
                 <span>{t("productionReport.table.formatedDefectiveQty")}</span>
                 <span>{defectiveQuantity}</span>
               </div>
+
+              <div>
+                <span>
+                  {t("productionReport.inspection.currentProduction")}
+                </span>
+                <span>{123}</span>
+              </div>
+
               <div className={styles.qty}>
                 <span>{t("productionReport.table.productionQuantity")}</span>
                 <TextField

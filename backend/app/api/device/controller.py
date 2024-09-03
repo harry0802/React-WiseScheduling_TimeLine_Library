@@ -1,7 +1,7 @@
 from flask import request
 from flask_restx import Resource
 
-from app.utils import validation_error
+from app.utils_log import validation_error
 
 from .service import DeviceService
 from .dto import DeviceDto

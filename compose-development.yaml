@@ -68,6 +68,14 @@ services:
       - MQTT_PASSWORD=${MQTT_PASSWORD}
       - MQTT_TOPIC_DATA=${MQTT_TOPIC_DATA}
       - MQTT_TOPIC_COTROL=${MQTT_TOPIC_COTROL}
+      # 凌越ERP
+      - LY_ERP_ON=${LY_ERP_ON}
+      - LY_ERP_URL=${LY_ERP_URL}
+      - LY_ERP_PUSID=${LY_ERP_PUSID}
+      - LY_ERP_PVERIFYKEY=${LY_ERP_PVERIFYKEY}
+      - LY_ERP_ICPNO=${LY_ERP_ICPNO}
+      - LY_XML_SOAP_NAMESPACE=${LY_XML_SOAP_NAMESPACE}
+      - LY_XML_TEMPURI_NAMESPACE=${LY_XML_TEMPURI_NAMESPACE}
     depends_on:
       db:
         condition: service_healthy
@@ -85,6 +93,8 @@ services:
     environment:
       - REACT_APP_API_HOST=${REACT_APP_API_HOST}
       - REACT_APP_API_PORT=${REACT_APP_API_PORT}
+      # 凌越ERP
+      - REACT_APP_LY_ERP_ON=${LY_ERP_ON}
     restart: always
     # command: npm install || npm start
     command: sh init.sh
@@ -92,6 +102,8 @@ services:
       - ./frontend/.:/app/
     ports:
       - "${REACT_APP_PORT}:3000"
+      #websocket for live server
+      - 5500:5500
     networks:
       - frontnet
     depends_on:

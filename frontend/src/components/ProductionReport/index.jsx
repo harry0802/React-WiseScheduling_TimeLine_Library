@@ -15,6 +15,7 @@ import { TZ } from "../../config/config";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { useProductionReport, showModal } from "./hook/useProductionReport";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -57,19 +58,7 @@ const ProductionReport = (props) => {
         </Tooltip>
       ),
     },
-    {
-      title: `${t("productionReport.table.moldNo")}`,
-      dataIndex: "moldNo",
-      width: "8%",
-      fixed: true,
-      ellipsis: true,
-      render: (text) => (
-        // 使用 Tooltip 包裹超出部分的内容
-        <Tooltip title={text}>
-          <span>{text}</span>
-        </Tooltip>
-      ),
-    },
+
     {
       title: `${t("productionReport.table.productName")}`,
       dataIndex: "productName",
@@ -87,6 +76,34 @@ const ProductionReport = (props) => {
       title: `${t("productionReport.table.workOrderQuantity")}`,
       dataIndex: "workOrderQuantity",
       width: "9%",
+    },
+    {
+      title: `${t("productionReport.table.moldNo")}`,
+      dataIndex: "moldNo",
+      width: "8%",
+      fixed: true,
+      ellipsis: true,
+      render: (text, record) => (
+        // 使用 Tooltip 包裹超出部分的内容
+        <Tooltip title={text}>
+          <span>{record.moldNos}</span>
+        </Tooltip>
+      ),
+    },
+    // TODO: added new columns here...
+    // added  zh-Tw.json  processName
+    {
+      title: `${t("productionReport.table.processName")}`,
+      dataIndex: "processName",
+      width: "8%",
+      fixed: true,
+      ellipsis: true,
+      render: (text, record) => (
+        // 使用 Tooltip 包裹超出部分的内容
+        <Tooltip title={text}>
+          <span>{record.processName}</span>
+        </Tooltip>
+      ),
     },
     {
       title: `${t("productionReport.table.productionQuantity")}`,
@@ -114,6 +131,7 @@ const ProductionReport = (props) => {
   const machineSN_Store = useMachineSNStore((state) => state.machineSN_Store);
   const [dataSource, setDataSource] = useState([]); // 製令單資料，用於 Table 的 dataSource
   const navigate = useNavigate();
+
   // 搜尋條件篩選
   const [startDate, setStartDate] = useState(
     new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -183,51 +201,114 @@ const ProductionReport = (props) => {
     }
   }, [isSuccess, workOrderList]);
 
+  const { allMoldNosIdentical, checkEligibilityBatch } = useProductionReport();
+
   // 產生母批
-  const handleAdd = () => {
-    // Get the selected rows' ids
+  /* TODO 修改模具邏輯
+   * 原有的  moldNo  改為 moldNos
+   * 需要判斷多筆 moldNos 是否一樣 , 使用既有的 set 來尋找值 / has
+   * 只允許一樣的 moldNos 生產
+   */
+  const handleAdd = async () => {
     if (selectedRowKeys.length === 0) {
-      Modal.info({
-        content: <p>請先勾選製令單</p>,
-        okText: "確定",
-        onOk() {},
-      });
+      showModal("請先勾選製令單");
       return;
     }
 
-    const selectedRowsData = dataSource.filter(
-      (row) => selectedRowKeys.includes(row.id) // productionSchedule.id
-    );
-    // 選取的製令單必須屬於同一個模具
-    let isMoldNoEmpty = false;
-    const moldNoSet = new Set();
-    selectedRowsData.forEach((row) => {
-      if (row.moldNo === "") {
-        isMoldNoEmpty = true;
-        return;
-      }
-      moldNoSet.add(row.moldNo);
-    });
-    if (isMoldNoEmpty) {
-      Modal.info({
-        content: <p>所選製令單必須有模具編號</p>,
-        okText: "確定",
-        onOk() {},
+    const selectedRowsData = dataSource
+      .map((row, index) => ({
+        ...row,
+        no: (index + 1).toString().padStart(2, "0"),
+      })) // Add NO to each row
+      .filter((row) => selectedRowKeys.includes(row.id));
+
+    // Step 1: Check for duplicate mold numbers
+    if (!(await allMoldNosIdentical(selectedRowsData))) return;
+
+    // Step 2: Prepare parameters for eligibility checks
+    const paramsArray = selectedRowsData.map((row) => ({
+      processId: row.processId,
+      workOrderSN: row.workOrderSN,
+      no: row.no, // Adding NO column
+    }));
+
+    // Step 3: Batch process eligibility checks using Promise.all with rejection handling
+    const isEligible = await checkEligibilityBatch(paramsArray);
+    if (isEligible) {
+      navigate("/LeaderSignPage", {
+        state: { action: "new", newWorkOrders: selectedRowsData },
       });
-      return;
     }
-    if (moldNoSet.size > 1) {
-      Modal.info({
-        content: <p>{t("productionReport.report.moldUnmatchedMsg")}</p>,
-        okText: "確定",
-        onOk() {},
-      });
-      return;
-    }
-    navigate("/LeaderSignPage", {
-      state: { action: "new", newWorkOrders: selectedRowsData },
-    });
   };
+
+  // 產生母批
+  // const handleAdd = () => {
+  //   // Get the selected rows' ids
+  //   if (selectedRowKeys.length === 0) {
+  //     Modal.info({
+  //       content: <p>請先勾選製令單</p>,
+  //       okText: "確定",
+  //       onOk() {},
+  //     });
+  //     return;
+  //   }
+  //   // * 過濾出選擇的資料
+  //   const selectedRowsData = dataSource.filter(
+  //     (row) => selectedRowKeys.includes(row.id) // productionSchedule.id
+  //   );
+
+  //   // * 處理模具部分
+  //   /*
+  //    * 原有的  moldNo  改為 moldNos
+  //    * 需要判斷多筆 moldNos 是否一樣 , 使用既有的 set 來尋找值 / has
+  //    * 只允許一樣的 moldNos 生產
+  //    */
+
+  //   // 選取的製令單必須屬於同一個模具
+  //   let isMoldNoEmpty = false;
+  //   const moldNoSet = new Set();
+
+  //   selectedRowsData.forEach((row) => {
+  //     const { moldNos } = row || {};
+  //     if (!moldNos) {
+  //       isMoldNoEmpty = true;
+  //       return;
+  //     }
+
+  //     const moldNosArray = moldNos.split(",").map((item) => item.trim());
+
+  //     moldNosArray.forEach(function (item) {
+  //       if (moldNoSet.has(item)) {
+  //         alert("有重複");
+  //         return;
+  //       }
+
+  //       moldNoSet.add(item);
+  //     });
+
+  //     // moldNoSet.add(row.moldNo);
+  //   });
+
+  //   if (isMoldNoEmpty) {
+  //     showModal("所選製令單必須有模具編號");
+  //     return;
+  //   }
+
+  //   // if (moldNoSet.size > 1) {
+  //   //   // t("productionReport.report.moldUnmatchedMsg")
+  //   //   //
+  //   //   Modal.info({
+  //   //     content: <p>{t("productionReport.report.moldUnmatchedMsg")}</p>,
+  //   //     okText: "確定",
+  //   //     onOk() {},
+  //   //   });
+  //   //   return;
+  //   // }
+
+  //   // navigate("/LeaderSignPage", {
+  //   //   state: { action: "new", newWorkOrders: selectedRowsData },
+  //   // });
+  // };
 
   // 勾選設定
   const rowSelection = {

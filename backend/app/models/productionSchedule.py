@@ -41,14 +41,15 @@ relationship = db.relationship
 class ProductionSchedule(Model):
     __tablename__ = "productionSchedule"
     id = Column(db.Integer , primary_key = True)
+    productId = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=True)
+    processId = db.Column(db.Integer, db.ForeignKey('process.id'), nullable=True)
     productionArea = Column(db.String(255))
     machineSN = Column(db.String(255))
     serialNumber = synonym("id")
     # serialNumber = Column(db.String(255))
     workOrderSN = Column(db.String(255))
-    moldNo = Column(db.String(255))
-    productSN = Column(db.String(255))
-    productName = Column(db.String(255))
+    # productSN = Column(db.String(255))
+    # productName = Column(db.String(255))
     workOrderQuantity = Column(db.Integer)
     workOrderDate = Column(TimestampDatetime)
     moldingSecond = Column(db.Integer)
@@ -66,13 +67,10 @@ class ProductionSchedule(Model):
     week = Column(db.Integer)
     singleOrDoubleColor = Column(db.String(255))
     conversionRate = Column(db.Float)
-    #status: on-going, finish, delay, delay-finish
+    #status: 尚未上機, On-going, Done, 暫停生產, 取消生產
     status = Column(db.String(255))
     productionReport = db.relationship('ProductionReport', backref='productionSchedule', lazy=True)
     
-
-
-
 
     def __init__(self, **kwargs):
         super(ProductionSchedule, self).__init__(**kwargs)

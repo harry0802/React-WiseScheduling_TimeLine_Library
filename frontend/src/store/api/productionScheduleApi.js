@@ -7,7 +7,7 @@ import timezone from "dayjs/plugin/timezone";
 import { TZ } from "../../config/config";
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
+// /productionSchedule/checkStartEligibility
 const productionScheduleApi = createApi({
   reducerPath: "productionScheduleApi",
   baseQuery: fetchBaseQuery({
@@ -73,6 +73,46 @@ const productionScheduleApi = createApi({
         },
         providesTags: [{ type: "productionSchedule" }],
       }),
+      getWorkOrderSNs: build.query({
+        query: () => `/lyService/get_workOrderSNs`,
+
+        transformResponse(baseQueryReturnValue, meta, arg) {
+          return baseQueryReturnValue.data;
+        },
+        providesTags: [{ type: "productionSchedule" }],
+      }),
+      getProductionScheduleThroughLY: build.query({
+        query(arg) {
+          const { id, workOrderSN } = arg;
+          return {
+            url: "productionSchedule/getProductionScheduleThroughLY/",
+            params: {
+              id: id,
+              workOrderSN: workOrderSN,
+            },
+          };
+        },
+        transformResponse(baseQueryReturnValue, meta, arg) {
+          return baseQueryReturnValue.data;
+        },
+        providesTags: [{ type: "productionSchedule" }],
+      }),
+      // /productionSchedule/checkStartEligibility
+      getCheckStartEligiBility: build.query({
+        query(arg) {
+          const { processId, workOrderSN } = arg;
+          return {
+            url: "productionSchedule/checkStartEligibility",
+            params: {
+              processId,
+              workOrderSN,
+            },
+          };
+        },
+
+        providesTags: [{ type: "productionSchedule" }],
+      }),
+
       addProductionSchedule: build.mutation({
         query(data) {
           return {
@@ -183,6 +223,9 @@ export const {
   useGetProductionScheduleQuery,
   useGetProductionScheduleByMachinesQuery,
   useGetMachinesQuery,
+  useGetWorkOrderSNsQuery,
+  useGetProductionScheduleThroughLYQuery,
+  useGetCheckStartEligiBilityQuery,
   useAddProductionScheduleMutation,
   useAddProductionSchedulesMutation,
   useDelProductionScheduleMutation,
