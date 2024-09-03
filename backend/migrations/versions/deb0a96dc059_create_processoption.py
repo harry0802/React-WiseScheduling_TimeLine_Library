@@ -24,9 +24,6 @@ def upgrade():
        sa.Column('processSN', sa.String(length=255), nullable=True),
        sa.Column('processName', sa.String(length=255), nullable=True),
        sa.PrimaryKeyConstraint('id'),
-
-
-       
     )
     # ### end Alembic commands ###
 

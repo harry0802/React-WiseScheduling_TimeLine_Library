@@ -18,7 +18,7 @@ class TimestampDatetime(TypeDecorator):
     def process_bind_param(self, value, dialect):
         # when inserting to database, convert ISO format datetime to UTC timezone
         if value is not None:
-            return value.astimezone(pytz.timezone('UTC')).replace(tzinfo=None)
+            return value.astimezone(pytz.timezone('UTC'))
         else:
             return None
         
