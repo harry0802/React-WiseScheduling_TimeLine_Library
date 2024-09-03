@@ -102,6 +102,7 @@ const TabPanel = (props) => {
     defectiveQuantity,
     productionQuantity,
     unfinishedQuantity,
+    processName,
     ...other
   } = props;
 
@@ -155,7 +156,7 @@ const TabPanel = (props) => {
                 <span>
                   {t("productionReport.inspection.currentProduction")}
                 </span>
-                <span>{123}</span>
+                <span>{processName}</span>
               </div>
 
               <div className={styles.qty}>
@@ -349,6 +350,7 @@ const ProductionInspection = () => {
               unfinishedQuantity={
                 lot.unfinishedQuantity ? lot.unfinishedQuantity : ""
               }
+              processName={lot.processName}
             ></TabPanel>
           );
         }
