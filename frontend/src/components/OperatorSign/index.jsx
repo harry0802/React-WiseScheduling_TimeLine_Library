@@ -32,8 +32,6 @@ const OperatorSign = (props) => {
   const [errorMsgOperator2, setErrorMsgOperator2] = useState("");
   const lotStore = useLotStore((state) => state.lots);
 
-  console.log(location);
-
   const updateLots = useLotStore((state) => state.updateLots);
   const [addChildLots, addChildLotsMutationResult] = useAddChildLotsMutation(); // 新增子批
   const [updateChildLots, updateChildLotsMutationResult] =

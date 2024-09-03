@@ -145,6 +145,8 @@ const ProductionDetail = (props) => {
   useEffect(() => {
     if (isSuccess) {
       // 將母批和子批分開，並且將子批放入母批的children中
+
+      console.log("workOrders", workOrders);
       const motherLots = workOrders.filter((item) => item.serialNumber === 0);
       const childLots = workOrders.filter((item) => item.serialNumber !== 0);
       const nestedLots = motherLots.map((motherLot) => {
