@@ -1,0 +1,37 @@
+/*
+src/
+└── styles/
+    ├── abstracts/
+    │   ├── _variables.scss
+    │   ├── _functions.scss
+    │   ├── _mixins.scss
+    │   └── _placeholders.scss
+    ├── base/
+    │   ├── _reset.scss
+    │   ├── _typography.scss
+    │   └── _utilities.scss
+    ├── components/
+    │   ├── _buttons.scss
+    │   ├── _carousel.scss
+    │   ├── _forms.scss
+    │   └── _modal.scss
+    ├── layout/
+    │   ├── _header.scss
+    │   ├── _footer.scss
+    │   ├── _navigation.scss
+    │   └── _grid.scss
+    ├── pages/
+    │   ├── _home.scss
+    │   ├── _about.scss
+    │   └── _contact.scss
+    ├── themes/
+    │   ├── _default.scss
+    │   └── _admin.scss
+    ├── vendors/
+    │   └── _normalize.scss
+    └── main.scss
+*/
+
+@import "base/reset";
+@import "abstracts/variables";
+@import "layout/layout";

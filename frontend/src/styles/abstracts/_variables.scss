@@ -1,0 +1,27 @@
+// Colors
+$color-primary: #186c98;
+$color-primary-light: #739bb0;
+$color-primary-text: #e1e7f5;
+$color-text: #8f8f8f;
+$color-background-light: #eceaea;
+$color-background-dark: #515357;
+$color-danger: #ef4444;
+
+// Breakpoints
+$breakpoint-xs: 576px; // Portrait phones
+$breakpoint-sm: 768px; // Tablets
+$breakpoint-md: 992px; // Laptops
+$breakpoint-lg: 1200px; // Large devices
+
+// You can also add some utility functions for breakpoints
+@mixin respond-above($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin respond-below($breakpoint) {
+  @media (max-width: ($breakpoint - 1)) {
+    @content;
+  }
+}
