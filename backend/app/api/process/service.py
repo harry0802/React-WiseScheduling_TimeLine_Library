@@ -14,7 +14,7 @@ from app.models.processMold import ProcessMold
 from app.models.processMaterial import ProcessMaterial
 from app.models.ltmoldmap import LtMoldMap
 from app.models.productionSchedule import ProductionSchedule
-from app.api.option.service import optionService
+from app.api.option.optionEnum import WorkOrderStatusEnum
 from .schemas import processSchema, moldsSchema, materialsSchema
 process_schema = processSchema()
 molds_schema = moldsSchema()
@@ -33,7 +33,7 @@ def isEditable_isDeletable(id):
     productionSchedule_db = db.session.execute(
         db.select(ProductionSchedule)
         .filter(ProductionSchedule.processId == id)
-        .filter(ProductionSchedule.status.in_(["尚未上機", "On-going"]))
+        .filter(ProductionSchedule.status.in_([WorkOrderStatusEnum.NOT_YET.value, WorkOrderStatusEnum.ON_GOING.value]))
     ).scalars().all()
     if productionSchedule_db:
         result = False
@@ -54,12 +54,6 @@ class processService:
     @staticmethod
     def get_processes(productId, processCategory=None):
         try:
-            # Check if the processCategory is valid
-            if processCategory is not None:
-                processCategoryEnum, statusCode = optionService.get_options("processCategory")
-                if not any(item['category'] == processCategory for item in processCategoryEnum.get('data', [])):
-                    return err_resp("Invalid processCategory value", "processCategory_404", 404)
-            
             # Get the process by product id
             query = Process.query
             query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id)
@@ -156,7 +150,6 @@ class processService:
     @staticmethod
     def get_process_by_productSNs(productSNs):
         try:
-            print("productSNs: ", type(productSNs), productSNs, file=sys.stderr)
             # Get the process by product id
             query = Process.query
             query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id)

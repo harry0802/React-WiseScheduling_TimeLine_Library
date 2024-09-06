@@ -12,6 +12,7 @@ from app.models.product import Product
 from app.models.process import Process
 from app.models.processOption import ProcessOption
 from app.models.processMold import ProcessMold
+from app.api.option.optionEnum import WorkOrderStatusEnum
 from .schemas import productionScheduleSchema
 from app.api.calendar.service import CalendarService
 productionSchedule_schema = productionScheduleSchema()
@@ -170,13 +171,13 @@ def complete_productionSchedule(db_obj, payload):
     today = datetime.date(datetime.now())
     status = payload.get("status", None)
     if db_obj.actualOnMachineDate is None:
-        db_obj.status = "尚未上機"
+        db_obj.status = WorkOrderStatusEnum.NOT_YET.value
     if db_obj.actualOnMachineDate is not None:
-        db_obj.status = "On-going"
-    if status in ["暫停生產", "取消生產"]:
+        db_obj.status = WorkOrderStatusEnum.ON_GOING.value
+    if status in [WorkOrderStatusEnum.PAUSE.value, WorkOrderStatusEnum.CANCEL.value]:
         db_obj.status = status
     if db_obj.actualFinishDate is not None:
-        db_obj.status = "Done"
+        db_obj.status = WorkOrderStatusEnum.DONE.value
     return db_obj
 
 class productionScheduleService:

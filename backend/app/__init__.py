@@ -5,15 +5,14 @@ This module:
 - Contains create_app()
 - Registers extensions
 """
-
 from flask import Flask
-
 # Import extensions
 from .extensions import bcrypt, cors, db, jwt, ma, scheduler
-
 # Import config
 from config import config_by_name
 import os
+from app.api.option.optionEnum import OptionDataSource
+
 
 from werkzeug.routing import BaseConverter
 class IntListConverter(BaseConverter):
@@ -35,6 +34,10 @@ def create_app(config_name):
 
     register_extensions(app)
 
+    # Set enum values
+    with app.app_context():
+        OptionDataSource().set_enum()
+    
     #ONLY disable 
     if os.getenv('BACKEND_MODE',"MIX") == "SEPARATION" and os.getenv('BACKEND_SYS',"API") == "API":
         pass

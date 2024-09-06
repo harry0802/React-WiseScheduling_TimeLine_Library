@@ -25,6 +25,20 @@ def str_to_class(module_name, class_name):
 
 class optionService:
     @staticmethod
+    def get_all_options(name):
+        try:
+            # get the option list from the database
+            option_db = Option.query.filter(Option.name == name.lower()).first()
+            if option_db:
+                option_list = json.loads(option_db.content)
+
+            return option_list
+        # exception without handling should raise to the caller
+        except Exception as error:
+            return []
+        
+
+    @staticmethod
     def get_options(name, id = None):
         try:
             # get the option list from the database

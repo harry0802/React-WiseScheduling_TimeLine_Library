@@ -2,6 +2,7 @@ from flask import request,current_app
 from flask_restx import Resource
 from flask_restx import reqparse
 from app.utils_log import controller_entrance_log
+from app.api.option.optionEnum import ProcessCategoryEnum
 from .service import processService
 from .dto import processDto
 from .schemas import processSchema
@@ -33,7 +34,7 @@ class processController(Resource):
     @api.param("productId", "Product ID", required=True)
     @api.param("processCategory", "The category of process. 用於新增製令單時，列出屬於「廠內-成型」類別的製程",
             type="string",
-            enum = ["In-IJ(廠內成型)", "Out-IJ(委外成型)", "In-BE(廠內後製程)", "Out-BE(委外後製程)", "In-TS(廠內出貨檢驗)"]
+            enum=[e.value for e in ProcessCategoryEnum]
             )
 
     @controller_entrance_log(description="Get processs")
