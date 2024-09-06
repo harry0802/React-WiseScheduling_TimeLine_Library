@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@iconify/react": "^4.1.1"
   }
 }

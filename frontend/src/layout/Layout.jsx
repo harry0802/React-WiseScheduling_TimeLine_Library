@@ -1,7 +1,8 @@
-import React, { useState, createContext, useContext } from "react";
-import { Layout as AntLayout } from "antd";
+import { useState, createContext, useContext } from "react";
+import { Layout as AntLayout, Menu } from "antd";
 const { Content, Header, Footer, Sider } = AntLayout;
 import { Link, Outlet } from "react-router-dom";
+import { HomeOutlined, BarChartOutlined } from "@ant-design/icons";
 
 const LayoutContext = createContext();
 
@@ -18,6 +19,19 @@ const Layout = ({ children }) => {
 const LayoutSider = () => {
   const { collapsed, setCollapsed } = useContext(LayoutContext);
 
+  const menuItems = [
+    {
+      key: "1",
+      icon: <HomeOutlined />,
+      label: <Link to="/">Home</Link>,
+    },
+    {
+      key: "2",
+      icon: <BarChartOutlined />,
+      label: <Link to="/pig-house-inventory">Pig House Inventory</Link>,
+    },
+  ];
+
   return (
     <Sider
       className="app-layout__sider"
@@ -26,7 +40,12 @@ const LayoutSider = () => {
       onCollapse={setCollapsed}
       breakpoint="lg"
     >
-      {/* Sider content */}
+      <Menu
+        theme="dark"
+        mode="inline"
+        defaultSelectedKeys={["1"]}
+        items={menuItems}
+      />
     </Sider>
   );
 };
