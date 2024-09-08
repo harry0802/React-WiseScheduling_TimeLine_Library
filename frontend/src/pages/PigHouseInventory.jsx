@@ -1,4 +1,4 @@
-import PigHouseInventoryTable from "../features/PigHouseInventory";
+import PigHouseInventoryTable from "../features/pighouseinventory";
 
 function PigHouseInventory() {
   return <PigHouseInventoryTable />;

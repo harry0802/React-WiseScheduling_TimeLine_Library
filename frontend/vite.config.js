@@ -26,7 +26,4 @@ export default defineConfig({
       exclude: ["node_modules/**", "dist/**"],
     }),
   ],
-  server: {
-    port: 3000,
-  },
 });

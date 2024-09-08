@@ -1,4 +1,3 @@
-import React from "react";
 import ProductionRecordButton from "../../utility/ProductionRecordButton";
 import ProductDrawer from "../../utility/ProductDrawer";
 import ProductTextFieldInput from "../../utility/ProductTextFieldInput";
