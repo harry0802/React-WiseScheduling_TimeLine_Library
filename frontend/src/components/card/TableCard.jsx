@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { Icon } from "@iconify/react";
-import BaseButton from "../button/baseButton";
+import BaseButton from "../button/BaseButton";
 import GlobalStyles from "../../styles/GlobalStyle"; // 导入 GlobalStyles
 
 // Styled components
@@ -64,7 +64,7 @@ const StyledBaseButton = styled(BaseButton)`
 function TableCard({ title, onAddClick, children }) {
   return (
     <TableCardWrapper>
-      <GlobalStyles /> {/* 使用 GlobalStyles */}
+      <GlobalStyles />
       <TableCardHeader>
         <HeaderTitle>{title}</HeaderTitle>
         <StyledBaseButton onClick={onAddClick}>

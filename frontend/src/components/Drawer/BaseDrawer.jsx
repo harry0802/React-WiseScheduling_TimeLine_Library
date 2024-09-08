@@ -1,7 +1,6 @@
 import { createContext, useContext, memo } from "react";
 import { Drawer } from "antd";
 import styled, { css } from "styled-components";
-import GlobalStyles from "../../styles/GlobalStyle"; // 导入 GlobalStyles
 
 const DrawerContext = createContext();
 
