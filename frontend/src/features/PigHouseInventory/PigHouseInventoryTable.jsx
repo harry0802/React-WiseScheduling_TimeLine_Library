@@ -1,21 +1,20 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
-
-import DynamicForm from "../../components/form/DynamicForm";
-import { getPigHouseInventoryFormConfig } from "./formConfig";
+import { getColumnDefinitions } from "./getColumnDefinitions";
 import BaseButton from "../../components/button/BaseButton";
 import BaseTable from "../../components/table/BaseTable";
 import BaseDrawer from "../../components/Drawer/BaseDrawer";
-import { getColumnDefinitions } from "./getColumnDefinitions";
+import PigHouseInventoryForm from "./PigHouseInventoryForm";
+import { usePigHouseInventory } from "./context/PostContext";
 
-const pigBreeds = ["大白豬", "杜洛克", "藍瑞斯", "漢普夏", "巴克夏", "約克夏"];
-const healthStatuses = ["良好", "一般", "需要關注", "生病"];
-const managers = ["張三", "李四", "王五", "趙六", "孫七"];
-
-function PigHouseInventoryTable({ data, onAddInventory }) {
+function PigHouseInventoryTable() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [id, setId] = useState(null);
+
   const { columnConfig, totalWidth } = getColumnDefinitions();
 
+  const { inventories: data, handleAddInventory: onAddInventory } =
+    usePigHouseInventory();
   function handleDrawerOpen() {
     setIsDrawerOpen(true);
   }
@@ -26,14 +25,15 @@ function PigHouseInventoryTable({ data, onAddInventory }) {
   }
 
   function handleClickRow(row) {
-    console.log(row);
+    handleDrawerOpen();
+    setId(row.id);
   }
 
-  const formConfig = getPigHouseInventoryFormConfig(
-    pigBreeds,
-    managers,
-    healthStatuses
-  );
+  useEffect(() => {
+    if (!isDrawerOpen) {
+      setId(null);
+    }
+  }, [setId, isDrawerOpen]);
 
   return (
     <>
@@ -46,33 +46,34 @@ function PigHouseInventoryTable({ data, onAddInventory }) {
         bordered
         size="small"
         pagination={false}
-        addButton={
-          <BaseButton onClick={() => setIsDrawerOpen(true)}>
-            添加豬舍庫存
-          </BaseButton>
-        }
+        title="豬舍庫存管理"
+        maxHeight={"100%"}
       />
-
       <BaseDrawer
         visible={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         width={700}
       >
         <BaseDrawer.Header>
-          添加豬舍庫存
-          <BaseButton type="delete">
-            <Icon
-              icon="material-symbols:delete"
-              onClick={() => setIsDrawerOpen(false)}
-            />
-          </BaseButton>
+          {id ? "編輯豬舍庫存" : "添加豬舍庫存"}
+          {id && (
+            <BaseButton type="delete">
+              <Icon
+                icon="material-symbols:delete"
+                onClick={() => {
+                  setIsDrawerOpen(false);
+                  setId(null);
+                }}
+              />
+            </BaseButton>
+          )}
         </BaseDrawer.Header>
 
         <BaseDrawer.Body>
-          <DynamicForm config={formConfig} onFinish={handleSubmit} />
+          <PigHouseInventoryForm id={id} />
         </BaseDrawer.Body>
 
-        <BaseDrawer.Footer />
+        {/* <BaseDrawer.Footer onSubmit={handleSubmit} /> */}
       </BaseDrawer>
     </>
   );

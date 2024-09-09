@@ -29,6 +29,7 @@ const StyledTable = styled(Table)`
         padding: 10px;
         border-bottom: 1px solid var(--color-text);
         background: var(--color-background-thead);
+        border-right: 1px solid var(--color-text);
       }
 
       td {
@@ -67,7 +68,7 @@ const StyledTable = styled(Table)`
   }
 
   &.reusableTable {
-    max-height: 32.5rem;
+    max-height: ${({ maxHeight }) => maxHeight || "32.5rem"};
     overflow: auto;
     cursor: pointer;
     .ant-table-tbody {
@@ -84,6 +85,7 @@ function ReusableTable({
   data,
   onRowClick,
   scroll = { x: 1200, y: 500 },
+  maxHeight,
 }) {
   return (
     <StyledTable
@@ -95,6 +97,7 @@ function ReusableTable({
       onRow={(record) => ({
         onClick: () => onRowClick(record),
       })}
+      maxHeight={maxHeight}
     />
   );
 }
@@ -106,6 +109,7 @@ const BaseTable = ({
   onRowClick,
   onAddClick,
   scroll,
+  maxHeight,
 }) => {
   return (
     <div className="procMaterials-context">
@@ -119,6 +123,7 @@ const BaseTable = ({
           data={data}
           onRowClick={onRowClick}
           scroll={scroll}
+          maxHeight={maxHeight}
         />
       </TableCard>
     </div>

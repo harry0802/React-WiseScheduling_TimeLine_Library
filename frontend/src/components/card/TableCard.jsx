@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { Icon } from "@iconify/react";
-import BaseButton from "../button/BaseButton";
 import GlobalStyles from "../../styles/GlobalStyle"; // 导入 GlobalStyles
+import BaseButton from "../button/BaseButton";
 
 // Styled components
 const TableCardWrapper = styled.div`

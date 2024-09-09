@@ -37,21 +37,21 @@ export const getColumnDefinitions = () => {
       children: [
         {
           title: "原總數",
-          dataIndex: "breedingPigOriginal",
-          key: "breedingPigOriginal",
+          dataIndex: "breedingOriginal",
+          key: "breedingOriginal",
         },
-        { title: "移入", dataIndex: "breedingPigIn", key: "breedingPigIn" },
-        { title: "移出", dataIndex: "breedingPigOut", key: "breedingPigOut" },
+        { title: "移入", dataIndex: "breedingIn", key: "breedingIn" },
+        { title: "移出", dataIndex: "breedingOut", key: "breedingOut" },
         {
           title: "死亡頭數",
-          dataIndex: "breedingPigDeath",
-          key: "breedingPigDeath",
+          dataIndex: "breedingDeath",
+          key: "breedingDeath",
         },
-        { title: "出售", dataIndex: "breedingPigSold", key: "breedingPigSold" },
+        { title: "出售", dataIndex: "breedingSold", key: "breedingSold" },
         {
           title: "剩餘總數",
-          dataIndex: "breedingPigRemaining",
-          key: "breedingPigRemaining",
+          dataIndex: "breedingRemaining",
+          key: "breedingRemaining",
         },
       ],
     },
@@ -60,21 +60,21 @@ export const getColumnDefinitions = () => {
       children: [
         {
           title: "原總數",
-          dataIndex: "testingPigOriginal",
-          key: "testingPigOriginal",
+          dataIndex: "testingOriginal",
+          key: "testingOriginal",
         },
-        { title: "移入", dataIndex: "testingPigIn", key: "testingPigIn" },
-        { title: "移出", dataIndex: "testingPigOut", key: "testingPigOut" },
+        { title: "移入", dataIndex: "testingIn", key: "testingIn" },
+        { title: "移出", dataIndex: "testingOut", key: "testingOut" },
         {
           title: "死亡頭數",
-          dataIndex: "testingPigDeath",
-          key: "testingPigDeath",
+          dataIndex: "testingDeath",
+          key: "testingDeath",
         },
-        { title: "出售", dataIndex: "testingPigSold", key: "testingPigSold" },
+        { title: "出售", dataIndex: "testingSold", key: "testingSold" },
         {
           title: "剩餘總數",
-          dataIndex: "testingPigRemaining",
-          key: "testingPigRemaining",
+          dataIndex: "testingRemaining",
+          key: "testingRemaining",
         },
       ],
     },
@@ -83,17 +83,17 @@ export const getColumnDefinitions = () => {
       children: [
         {
           title: "原總數",
-          dataIndex: "meatPigOriginal",
-          key: "meatPigOriginal",
+          dataIndex: "meatOriginal",
+          key: "meatOriginal",
         },
-        { title: "移入", dataIndex: "meatPigIn", key: "meatPigIn" },
-        { title: "移出", dataIndex: "meatPigOut", key: "meatPigOut" },
-        { title: "死亡頭數", dataIndex: "meatPigDeath", key: "meatPigDeath" },
-        { title: "出售", dataIndex: "meatPigSold", key: "meatPigSold" },
+        { title: "移入", dataIndex: "meatIn", key: "meatIn" },
+        { title: "移出", dataIndex: "meatOut", key: "meatOut" },
+        { title: "死亡頭數", dataIndex: "meatDeath", key: "meatDeath" },
+        { title: "出售", dataIndex: "meatSold", key: "meatSold" },
         {
           title: "剩餘總數",
-          dataIndex: "meatPigRemaining",
-          key: "meatPigRemaining",
+          dataIndex: "meatRemaining",
+          key: "meatRemaining",
         },
       ],
     },
@@ -117,8 +117,8 @@ export const getColumnDefinitions = () => {
         },
         {
           title: "出生弱仔",
-          dataIndex: "farrowing3WeakBorn",
-          key: "farrowing3WeakBorn",
+          dataIndex: "farrowing3PigletWeakBorn",
+          key: "farrowing3PigletWeakBorn",
         },
         {
           title: "仔豬死亡",
@@ -127,8 +127,8 @@ export const getColumnDefinitions = () => {
         },
         {
           title: "弱仔死亡",
-          dataIndex: "farrowing3WeakDeath",
-          key: "farrowing3WeakDeath",
+          dataIndex: "farrowing3PigletWeakDeath",
+          key: "farrowing3PigletWeakDeath",
         },
         {
           title: "母豬死亡",
@@ -187,8 +187,8 @@ export const getColumnDefinitions = () => {
         },
         {
           title: "保育豬原總數",
-          dataIndex: "farrowing8NurseryOriginal",
-          key: "farrowing8NurseryOriginal",
+          dataIndex: "farrowing8NurseryPigOriginal",
+          key: "farrowing8NurseryPigOriginal",
         },
         {
           title: "仔豬原總數",
@@ -202,8 +202,8 @@ export const getColumnDefinitions = () => {
         },
         {
           title: "出生弱仔",
-          dataIndex: "farrowing8WeakBorn",
-          key: "farrowing8WeakBorn",
+          dataIndex: "farrowing8PigletWeakBorn",
+          key: "farrowing8PigletWeakBorn",
         },
         {
           title: "仔豬死亡",
@@ -212,8 +212,8 @@ export const getColumnDefinitions = () => {
         },
         {
           title: "弱仔死亡",
-          dataIndex: "farrowing8WeakDeath",
-          key: "farrowing8WeakDeath",
+          dataIndex: "farrowing8PigletWeakDeath",
+          key: "farrowing8PigletWeakDeath",
         },
         {
           title: "母豬移入",
@@ -243,18 +243,18 @@ export const getColumnDefinitions = () => {
         { title: "出售", dataIndex: "farrowing8Sold", key: "farrowing8Sold" },
         {
           title: "保育豬移入",
-          dataIndex: "farrowing8NurseryIn",
-          key: "farrowing8NurseryIn",
+          dataIndex: "farrowing8NurseryPigIn",
+          key: "farrowing8NurseryPigIn",
         },
         {
           title: "保育豬移出",
-          dataIndex: "farrowing8NurseryOut",
-          key: "farrowing8NurseryOut",
+          dataIndex: "farrowing8NurseryPigOut",
+          key: "farrowing8NurseryPigOut",
         },
         {
           title: "保育豬死亡",
-          dataIndex: "farrowing8NurseryDeath",
-          key: "farrowing8NurseryDeath",
+          dataIndex: "farrowing8NurseryPigDeath",
+          key: "farrowing8NurseryPigDeath",
         },
         {
           title: "剩餘仔豬總數",
@@ -263,8 +263,8 @@ export const getColumnDefinitions = () => {
         },
         {
           title: "剩餘保育豬總數",
-          dataIndex: "farrowing8NurseryRemaining",
-          key: "farrowing8NurseryRemaining",
+          dataIndex: "farrowing8NurseryPigRemaining",
+          key: "farrowing8NurseryPigRemaining",
         },
         {
           title: "剩餘母豬",
@@ -278,21 +278,21 @@ export const getColumnDefinitions = () => {
       children: [
         {
           title: "原總數",
-          dataIndex: "nurseryPigOriginal",
-          key: "nurseryPigOriginal",
+          dataIndex: "nurseryOriginal",
+          key: "nurseryOriginal",
         },
-        { title: "移入", dataIndex: "nurseryPigIn", key: "nurseryPigIn" },
-        { title: "移出", dataIndex: "nurseryPigOut", key: "nurseryPigOut" },
+        { title: "移入", dataIndex: "nurseryIn", key: "nurseryIn" },
+        { title: "移出", dataIndex: "nurseryOut", key: "nurseryOut" },
         {
           title: "死亡頭數",
-          dataIndex: "nurseryPigDeath",
-          key: "nurseryPigDeath",
+          dataIndex: "nurseryDeath",
+          key: "nurseryDeath",
         },
-        { title: "出售", dataIndex: "nurseryPigSold", key: "nurseryPigSold" },
+        { title: "出售", dataIndex: "nurserySold", key: "nurserySold" },
         {
           title: "剩餘總數",
-          dataIndex: "nurseryPigRemaining",
-          key: "nurseryPigRemaining",
+          dataIndex: "nurseryRemaining",
+          key: "nurseryRemaining",
         },
       ],
     },
