@@ -13,9 +13,7 @@ import ProductionInspectionPage from "./pages/ProductionInspectionPage";
 import LoginPage from "./pages/LoginPage";
 
 //  ProductionRecordPage - > PATH
-
 import ProductionRecordPage from "./pages/ProductionRecordPage.jsx";
-
 import ProductionRecordHome from "./components/ProductionRecord/features/ProductionRecordHome/ProductionRecordHome.jsx";
 import ProductionRecordAddInfo from "./components/ProductionRecord/features/ProductionRecordAddInfo/ProductionRecordAddInfo.jsx";
 import ProductionRecordProcMaterials from "./components/ProductionRecord/features/ProductionRecordProcMaterials/ProductionRecordProcMaterials.jsx";
@@ -23,7 +21,9 @@ import ProductionRecordinventoryManagement from "./components/ProductionRecord/f
 
 // context
 import { RecordAddInfoProvider } from "./components/ProductionRecord/context/RecordAddInfoProvider.jsx";
-import { ProcMaterialsProvider } from "./components/ProductionRecord/context/ProcMaterialsProvider.jsx";
+
+// QualityAssuranceSystemPage - > PATH
+import QualityAssuranceSystemPage from "./pages/QualityAssuranceSystemPage.jsx";
 
 import "./App.scss";
 import { Layout } from "antd";
