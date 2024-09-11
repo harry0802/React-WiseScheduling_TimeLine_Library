@@ -13,6 +13,15 @@ import {
 
 const { TextArea } = Input;
 
+/**
+ * 運作邏輯：
+ * 1. 根據 config 中的 fields 生成表單欄位
+ * 2. 每個欄位根據其 type 生成不同的表單元件（如 Input、Select、DatePicker 等）
+ * 3. 如果欄位有 dependencies，則在表單值更新時重新渲染該欄位
+ * 4. 如果欄位有 shouldRender 函數，則根據該函數的返回值決定是否渲染該欄位
+ * 5. 表單提交時，調用 onFinish 函數
+ */
+
 const FormItemMap = {
   input: Input,
   number: InputNumber,

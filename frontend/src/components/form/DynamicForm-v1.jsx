@@ -24,16 +24,14 @@ const FormItemMap = {
   radio: Radio.Group,
   textarea: TextArea,
 };
-
 function DynamicForm({ children, onFinish, initialValues, ...props }) {
   const [form] = Form.useForm();
 
-  // Convert date strings in initial values to dayjs objects
+  // 將初始值中的日期字符串轉換為 dayjs 對象
   const formattedInitialValues = React.useMemo(() => {
     if (!initialValues) return initialValues;
     const formatted = { ...initialValues };
     Object.keys(formatted).forEach((key) => {
-      // Check if the field is a date field and convert its value to a dayjs object
       if (
         formatted[key] &&
         props.fields.find((f) => f.name === key && f.type === "date")
@@ -45,15 +43,13 @@ function DynamicForm({ children, onFinish, initialValues, ...props }) {
   }, [initialValues, props.fields]);
 
   const handleFinish = (values) => {
-    // Convert dayjs objects back to strings before submitting
+    // 將 dayjs 對象轉換回字符串
     const formattedValues = { ...values };
     Object.keys(formattedValues).forEach((key) => {
-      // Check if the value is a dayjs object and convert it back to a string
       if (formattedValues[key] && dayjs.isDayjs(formattedValues[key])) {
         formattedValues[key] = formattedValues[key].format("YYYY-MM-DD");
       }
     });
-    // Call the onFinish function with the formatted values
     onFinish(formattedValues);
   };
 
@@ -66,11 +62,11 @@ function DynamicForm({ children, onFinish, initialValues, ...props }) {
       {...props}
     >
       <Row gutter={16}>{children({ form, FormItem: Form.Item })}</Row>
-      <Form.Item>
+      {/* <Form.Item>
         <Button type="primary" htmlType="submit">
           {props.submitText || "提交"}
         </Button>
-      </Form.Item>
+      </Form.Item> */}
     </Form>
   );
 }

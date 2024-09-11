@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { getColumnDefinitions } from "./getColumnDefinitions";
 import BaseButton from "../../components/button/BaseButton";
@@ -10,11 +10,11 @@ import { usePigHouseInventory } from "./context/PostContext";
 function PigHouseInventoryTable() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [id, setId] = useState(null);
-
+  const formRef = useRef(null);
   const { columnConfig, totalWidth } = getColumnDefinitions();
-
   const { inventories: data, handleAddInventory: onAddInventory } =
     usePigHouseInventory();
+
   function handleDrawerOpen() {
     setIsDrawerOpen(true);
   }
@@ -22,6 +22,10 @@ function PigHouseInventoryTable() {
   function handleSubmit(values) {
     onAddInventory(values);
     setIsDrawerOpen(false);
+    if (formRef.current) {
+      const test = formRef.current.submit();
+      console.log(test);
+    }
   }
 
   function handleClickRow(row) {
@@ -49,6 +53,7 @@ function PigHouseInventoryTable() {
         title="豬舍庫存管理"
         maxHeight={"100%"}
       />
+
       <BaseDrawer
         visible={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
@@ -70,10 +75,10 @@ function PigHouseInventoryTable() {
         </BaseDrawer.Header>
 
         <BaseDrawer.Body>
-          <PigHouseInventoryForm id={id} />
+          <PigHouseInventoryForm id={id} ref={formRef} />
         </BaseDrawer.Body>
 
-        {/* <BaseDrawer.Footer onSubmit={handleSubmit} /> */}
+        <BaseDrawer.Footer onSubmit={handleSubmit} />
       </BaseDrawer>
     </>
   );
