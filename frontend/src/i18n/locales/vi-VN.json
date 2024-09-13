@@ -98,5 +98,8 @@
       "forbidden": "Không thể quay lại. H.thành công đoạn sx và bàn giao \"đổi ca\".",
       "currentProduction": "Sản xuất hiện tại"
     }
+  },
+  "QmsMachineSelect": {
+    "title": "Hệ thống điều phối dây chuyền sx-chọn máy"
   }
 }

@@ -102,5 +102,8 @@
       "forbidden": "您無法回到上一頁，請完成此生產階段，並\"換班\"交接",
       "currentProduction": "當前製程"
     }
+  },
+  "QmsMachineSelect": {
+    "title": "品管檢驗系統-機台選擇"
   }
 }

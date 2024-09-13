@@ -52,12 +52,17 @@ const Login = (props) => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center", // Add this line
-        height: "100vh", // Modify this if needed
         textAlign: "center",
+
+        // overflow: "hidden",
       }}
     >
       <img
-        style={{ width: "482px", height: "308px" }}
+        style={{
+          maxWidth: "30.125rem",
+          objectFit: "cover",
+          aspectRatio: "16/1",
+        }}
         src={myImage}
         alt="一張圖片"
       />

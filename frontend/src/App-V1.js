@@ -1,4 +1,3 @@
-import React from "react";
 import { useRoutes } from "react-router-dom";
 import routeConfig from "./router/routeConfig";
 import "./App.scss";

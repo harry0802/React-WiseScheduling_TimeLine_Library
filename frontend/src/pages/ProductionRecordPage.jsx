@@ -13,11 +13,7 @@ function ProductionRecordPage() {
       }
     })();
   }, [productData, setData]);
-  return (
-    <div>
-      <ProductionRecord />
-    </div>
-  );
+  return <ProductionRecord />;
 }
 
 export default ProductionRecordPage;

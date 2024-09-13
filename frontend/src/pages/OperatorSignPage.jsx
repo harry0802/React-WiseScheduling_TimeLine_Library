@@ -4,10 +4,10 @@ import { MachineStoreValidator } from "../components/Global/MachineStoreValidato
 
 const OperatorSignPage = () => {
   return (
-    <div>
+    <>
       <MachineStoreValidator />
       <OperatorSign />
-    </div>
+    </>
   );
 };
 

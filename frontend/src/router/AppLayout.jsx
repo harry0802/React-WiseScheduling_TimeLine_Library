@@ -3,11 +3,17 @@ import { Layout, Spin } from "antd";
 import { Outlet } from "react-router-dom";
 import Topbar from "../components/Global/Topbar";
 import styled from "styled-components";
+
 const { Content } = Layout;
 
-const MainContainer = styled(Content)`
-  width: auto;
-  height: 100%;
+const MainContent = styled.div`
+  && {
+    display: flex;
+    padding: 0 1.25rem;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+  }
 `;
 
 const AppLayout = () => {
@@ -15,14 +21,14 @@ const AppLayout = () => {
 
   return (
     <Layout>
-      <Layout>
-        <Topbar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <MainContainer>
-          <React.Suspense fallback={<Spin size="large" />}>
+      <Topbar collapsed={collapsed} setCollapsed={setCollapsed} />
+      <Content style={{ display: "flex", flexDirection: "column" }}>
+        <React.Suspense fallback={<Spin size="large" />}>
+          <MainContent>
             <Outlet />
-          </React.Suspense>
-        </MainContainer>
-      </Layout>
+          </MainContent>
+        </React.Suspense>
+      </Content>
     </Layout>
   );
 };

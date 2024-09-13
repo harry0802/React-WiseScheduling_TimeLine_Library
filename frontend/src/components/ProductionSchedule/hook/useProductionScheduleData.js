@@ -1,22 +1,24 @@
 import { useState, useEffect } from "react";
-import { message } from "antd";
-import dayjs from "dayjs";
-import { TZ } from "../../config/config";
 import { useGetProductionScheduleQuery } from "../../../store/api/productionScheduleApi";
+import { convertDatesToCustomFormat } from "../utils/excelUtils";
 
 export function useProductionScheduleData(queryParams) {
   const [dataSource, setDataSource] = useState([]);
   const [totalCurrent, setTotalCurrent] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const { data, isLoading, isSuccess, refetch } =
-    useGetProductionScheduleQuery(queryParams);
+  const { data, isLoading, isSuccess, refetch } = useGetProductionScheduleQuery(
+    queryParams,
+    { skip: !queryParams }
+  );
 
   useEffect(() => {
     if (isSuccess) {
       setLoading(true);
 
       const { data: fetchedData, meta } = data;
+      console.log(fetchedData);
+
       setTotalCurrent(meta.total_count);
 
       const processedData = fetchedData.map((item) => {
@@ -38,21 +40,10 @@ export function useProductionScheduleData(queryParams) {
           );
         }
 
-        // 转换日期格式
-        const dateKeys = [
-          "workOrderDate",
-          "planOnMachineDate",
-          "planFinishDate",
-          "actualOnMachineDate",
-          "actualFinishDate",
-        ];
-
-        dateKeys.forEach((key) => {
-          newItem[key] = item[key]
-            ? dayjs(item[key]).tz(TZ).format("YYYY-MM-DD")
-            : "";
-        });
-
+        // 使用 convertDatesToISO 转换日期格式
+        console.log(newItem);
+        newItem = convertDatesToCustomFormat(newItem, "YYYY-MM-DD");
+        console.log(newItem);
         return newItem;
       });
 

@@ -1,15 +1,81 @@
 import React from "react";
 import { Box, Typography, Button, Container, Paper } from "@mui/material";
-import LockIcon from "@mui/icons-material/Lock";
 import TimerIcon from "@mui/icons-material/Timer";
 import BeachAccess from "@mui/icons-material/BeachAccess";
 import styled from "styled-components";
 
 const StyledContainer = styled(Container)`
-  width: auto;
-  border: none;
-  box-shadow: none;
-  padding-top: 6.13rem;
+  && {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+`;
+
+const StyledPaper = styled(Paper)`
+  && {
+    align-items: center;
+    border: none;
+    box-shadow: none;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    font-family: Roboto;
+    font-size: 0.75rem;
+    font-style: normal;
+    font-weight: 400;
+    justify-content: center;
+    line-height: 1.25rem;
+    text-align: center;
+  }
+`;
+
+const StyledBox = styled(Box)`
+  && {
+    align-items: center;
+    background-color: currentColor;
+    border-radius: 50%;
+    color: transparent;
+    display: flex;
+    height: 2.5625rem;
+    justify-content: center;
+    line-height: 1.25rem;
+    margin: auto auto 1.25rem;
+    width: 2.5625rem;
+  }
+`;
+
+const StyledTypography = styled(Typography)`
+  color: white;
+`;
+
+const StyledButton = styled(Button)`
+  && {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #8f8f8f;
+    border-radius: 0.25rem;
+    color: white;
+    flex-shrink: 0;
+    height: 2.5rem;
+    justify-content: center;
+    padding: 0.625rem 1.9375rem;
+    transition: background 0.3s ease;
+    width: 11.875rem;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    &:active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  &:nth-of-type(1) {
+    margin-bottom: 1.25rem;
+  }
 `;
 
 // 自定義鎖圖標組件
@@ -43,57 +109,6 @@ const CustomLockIcon = () => (
   </svg>
 );
 
-// 更新 StyledBox 組件以適應新的圖標尺寸
-const StyledBox = styled(Box)`
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  width: 2.5625rem;
-  height: 2.5625rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  line-height: 1.25rem; /* 166.667% */
-  margin-bottom: 1.25rem;
-  background-color: currentColor;
-  color: white;
-`;
-
-const StyledPaper = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: none;
-  box-shadow: none;
-  color: #fff;
-  text-align: center;
-  font-family: Roboto;
-  font-size: 0.75rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 1.25rem; /* 166.667% */
-`;
-
-const StyledTypography = styled(Typography)`
-  color: white;
-`;
-
-const StyledButton = styled(Button)`
-  width: 11.875rem;
-  height: 2.5rem;
-  padding: 0.625rem 1.9375rem;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-  border-radius: 0.25rem;
-  border: 1px solid #8f8f8f;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-
-  &:nth-of-type(1) {
-    margin-bottom: 1.25rem;
-  }
-`;
-
 function QmsUserAccessSelect() {
   return (
     <StyledContainer>
@@ -107,11 +122,16 @@ function QmsUserAccessSelect() {
         <StyledBox>
           <CustomLockIcon />
         </StyledBox>
-        <StyledTypography variant="h4" gutterBottom>
+        <StyledTypography
+          sx={{
+            marginBottom: "1.4788rem",
+          }}
+          variant="h4"
+        >
           A01
         </StyledTypography>
 
-        <StyledTypography variant="subtitle1" gutterBottom sx={{ mb: 2 }}>
+        <StyledTypography variant="subtitle1" gutterBottom>
           請選擇使用與操作權限
         </StyledTypography>
         <StyledButton variant="contained" startIcon={<TimerIcon />}>
@@ -120,7 +140,20 @@ function QmsUserAccessSelect() {
         <StyledButton variant="contained" startIcon={<BeachAccess />}>
           品管人員
         </StyledButton>
-        <Button variant="text" sx={{ mt: "5.58rem", color: "white" }}>
+        <Button
+          variant="text"
+          sx={{
+            backgroundColor: "transparent",
+            color: "#8F8F8F",
+            mt: "5.58rem",
+            textDecoration: "underline",
+            textUnderlineOffset: ".1875rem",
+            "&:hover": {
+              backgroundColor: "transparent",
+              color: "white",
+            },
+          }}
+        >
           取消
         </Button>
       </StyledPaper>

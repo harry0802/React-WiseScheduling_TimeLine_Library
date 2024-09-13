@@ -6,12 +6,12 @@ import ProductionScheduleV1 from "../components/ProductionSchedule/indexV1";
 
 const ProductionSchedulePage = () => {
   return (
-    <div>
+    <>
       {/* <EditTableDemo /> */}
       {/* <ProductionSchedule /> */}
       <ProductionScheduleV1 />
       {/* <SimpleDemo /> */}
-    </div>
+    </>
   );
 };
 

@@ -4,10 +4,10 @@ import { MachineStoreValidator } from "../components/Global/MachineStoreValidato
 
 const ProductionDetailPage = () => {
   return (
-    <div>
+    <>
       <MachineStoreValidator />
       <ProductionDetail />
-    </div>
+    </>
   );
 };
 

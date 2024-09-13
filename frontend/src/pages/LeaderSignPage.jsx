@@ -4,10 +4,10 @@ import { MachineStoreValidator } from "../components/Global/MachineStoreValidato
 
 const LeaderSignPage = () => {
   return (
-    <div>
+    <>
       <MachineStoreValidator />
       <LeaderSign />
-    </div>
+    </>
   );
 };
 
