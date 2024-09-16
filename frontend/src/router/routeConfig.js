@@ -50,6 +50,14 @@ const routeConfig = [
             path: "QmsUserAccessSelect",
             element: <LazyComponents.QmsUserAccessSelect />,
           },
+          {
+            path: "QmsAuthenticate/:userType",
+            element: <LazyComponents.QmsAuthenticate />,
+          },
+          {
+            path: "QmsProductionInspection",
+            element: <LazyComponents.QmsProductionInspection />,
+          },
         ],
       },
       {

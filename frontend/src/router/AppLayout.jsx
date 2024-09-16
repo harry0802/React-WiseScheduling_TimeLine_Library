@@ -6,11 +6,27 @@ import styled from "styled-components";
 
 const { Content } = Layout;
 
-const MainContent = styled.div`
+const StyledLayout = styled(Layout)`
   && {
     display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+`;
+
+const StyledContent = styled(Content)`
+  && {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+`;
+
+const MainContent = styled.div`
+  && {
+    flex: 1;
+    display: flex;
     padding: 0 1.25rem;
-    height: 100%;
     width: 100%;
     justify-content: center;
   }
@@ -20,16 +36,16 @@ const AppLayout = () => {
   const [collapsed, setCollapsed] = React.useState(false);
 
   return (
-    <Layout>
+    <StyledLayout>
       <Topbar collapsed={collapsed} setCollapsed={setCollapsed} />
-      <Content style={{ display: "flex", flexDirection: "column" }}>
+      <StyledContent>
         <React.Suspense fallback={<Spin size="large" />}>
           <MainContent>
             <Outlet />
           </MainContent>
         </React.Suspense>
-      </Content>
-    </Layout>
+      </StyledContent>
+    </StyledLayout>
   );
 };
 

@@ -143,7 +143,6 @@ const convertItem = (item, format) => {
     "actualOnMachineDate",
     "actualFinishDate",
   ];
-  console.log(newItem["planOnMachineDate"]);
 
   dateFields.forEach((field) => {
     newItem[field] = formatDate(item[field], format);

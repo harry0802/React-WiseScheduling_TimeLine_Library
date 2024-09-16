@@ -3,13 +3,13 @@ import { Box, Typography, Button, Container, Paper } from "@mui/material";
 import TimerIcon from "@mui/icons-material/Timer";
 import BeachAccess from "@mui/icons-material/BeachAccess";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 const StyledContainer = styled(Container)`
   && {
     margin: 0;
     padding: 0;
-    height: 100%;
-    align-items: center;
+    align-self: center;
     justify-content: center;
   }
 `;
@@ -39,31 +39,34 @@ const StyledBox = styled(Box)`
     border-radius: 50%;
     color: transparent;
     display: flex;
-    height: 2.5625rem;
+    height: 3.75rem;
     justify-content: center;
     line-height: 1.25rem;
     margin: auto auto 1.25rem;
-    width: 2.5625rem;
+    width: 3.75rem;
   }
 `;
 
 const StyledTypography = styled(Typography)`
+  font-size: 1.125rem;
   color: white;
 `;
 
 const StyledButton = styled(Button)`
   && {
+    height: 56px;
     align-items: center;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid #8f8f8f;
     border-radius: 0.25rem;
     color: white;
     flex-shrink: 0;
-    height: 2.5rem;
+    height: 56px;
     justify-content: center;
     padding: 0.625rem 1.9375rem;
     transition: background 0.3s ease;
-    width: 11.875rem;
+    width: 18.75rem;
+    font-size: 18px;
 
     &:hover {
       background: rgba(255, 255, 255, 0.2);
@@ -82,8 +85,8 @@ const StyledButton = styled(Button)`
 const CustomLockIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="41"
-    height="41"
+    width="60"
+    height="60"
     viewBox="0 0 41 41"
     fill="none"
   >
@@ -110,6 +113,7 @@ const CustomLockIcon = () => (
 );
 
 function QmsUserAccessSelect() {
+  const navigate = useNavigate();
   return (
     <StyledContainer>
       <StyledPaper
@@ -131,17 +135,36 @@ function QmsUserAccessSelect() {
           A01
         </StyledTypography>
 
-        <StyledTypography variant="subtitle1" gutterBottom>
+        <StyledTypography
+          sx={{
+            marginBottom: "1.25rem",
+          }}
+          variant="subtitle"
+          gutterBottom
+        >
           請選擇使用與操作權限
         </StyledTypography>
-        <StyledButton variant="contained" startIcon={<TimerIcon />}>
+        <StyledButton
+          variant="contained"
+          startIcon={<TimerIcon />}
+          onClick={() =>
+            navigate("/QualityManagementSystem/QmsAuthenticate/productionLine")
+          }
+        >
           產線小班長
         </StyledButton>
-        <StyledButton variant="contained" startIcon={<BeachAccess />}>
+        <StyledButton
+          onClick={() =>
+            navigate("/QualityManagementSystem/QmsAuthenticate/qualityControl")
+          }
+          variant="contained"
+          startIcon={<BeachAccess />}
+        >
           品管人員
         </StyledButton>
         <Button
           variant="text"
+          onClick={() => navigate("/QualityManagementSystem")}
           sx={{
             backgroundColor: "transparent",
             color: "#8F8F8F",

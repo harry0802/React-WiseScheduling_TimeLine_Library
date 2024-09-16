@@ -186,7 +186,6 @@ function ProductionSchedule() {
           [row],
           "YYYY-MM-DDTHH:mm:ss"
         )[0];
-        console.log(convertedRow);
 
         const response = await UpdateProductionSchedule({
           id: row.id,

@@ -67,3 +67,11 @@ export const QualityAssuranceSystemMachine = lazyImport(() =>
 export const QmsUserAccessSelect = lazyImport(() =>
   import("../components/QualityManagementSystem/feature/QmsUserAccessSelect")
 );
+export const QmsAuthenticate = lazyImport(() =>
+  import("../components/QualityManagementSystem/feature/QmsAuthenticate")
+);
+export const QmsProductionInspection = lazyImport(() =>
+  import(
+    "../components/QualityManagementSystem/feature/QmsProductionInspection"
+  )
+);

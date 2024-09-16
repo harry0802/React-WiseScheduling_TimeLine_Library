@@ -5,7 +5,7 @@ import { MachineStoreValidator } from "../components/Global/MachineStoreValidato
 const LeaderSignPage = () => {
   return (
     <>
-      <MachineStoreValidator />
+      {/* <MachineStoreValidator /> */}
       <LeaderSign />
     </>
   );
