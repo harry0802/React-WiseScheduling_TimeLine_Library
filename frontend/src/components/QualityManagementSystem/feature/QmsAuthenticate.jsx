@@ -9,8 +9,9 @@ import {
   IconButton,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useEffectOnce } from "react-use";
+import { useQmsStore } from "../slice/QmsAccount";
 
 const LeaderSignContainer = styled(Box)`
   display: flex;
@@ -28,44 +29,50 @@ const StyledTypography = styled(Typography)`
 `;
 
 const StyledTextField = styled(TextField)`
-  width: 100%;
-  max-width: 18.75rem;
-  margin-bottom: 1.25rem;
-
   && {
+    width: 100%;
+    max-width: 18.75rem;
+    margin-bottom: 1.875rem;
     .MuiInputBase-input {
       font-size: 1rem;
       color: #fff;
     }
-    label {
-      color: #8f8f8f;
-    }
-    fieldset {
-      border-color: #8f8f8f;
-    }
-    &:hover fieldset {
-      border-color: #8f8f8f;
-    }
-    .Mui-focused fieldset {
-      border-color: #8f8f8f;
-    }
+
+    label,
+    fieldset,
+    &:hover fieldset,
+    .Mui-focused fieldset,
     input:focus + fieldset {
-      border-color: #8f8f8f;
+      color: ${({ error }) => (error ? "#d32f2f" : "#8f8f8f")};
+      border-color: ${({ error }) => (error ? "#d32f2f" : "#8f8f8f")};
     }
   }
 
   .MuiInputLabel-root {
-    color: #8f8f8f;
+    color: ${({ error }) => (error ? "#d32f2f" : "#8f8f8f")};
     margin-bottom: 0.9375rem;
     &.Mui-focused {
-      color: #8f8f8f;
+      color: ${({ error }) => (error ? "#d32f2f" : "#8f8f8f")};
     }
   }
+
+  .MuiFormHelperText-root {
+    color: #d32f2f;
+  }
+
+  ${({ error }) =>
+    error &&
+    `
+    && .MuiInputBase-input {
+      color: #d32f2f;
+    }
+  `}
 `;
 
 const SubmitButton = styled(Button)`
   && {
     display: flex;
+    margin-bottom: 1.875rem;
     width: 300px;
     height: 56px;
     justify-content: center;
@@ -80,7 +87,6 @@ const SubmitButton = styled(Button)`
 const CancelButton = styled(Button)`
   && {
     color: #8f8f8f;
-    margin-top: 0.9375rem;
     font-size: 0.875rem;
     text-transform: none;
     &:hover {
@@ -92,14 +98,39 @@ const CancelButton = styled(Button)`
 
 function QmsAuthenticate() {
   const navigate = useNavigate();
-  const { userType } = useParams();
+  const { userType, machineSN } = useParams();
+  const {
+    login,
+    account: storedAccount,
+    password: storedPassword,
+  } = useQmsStore();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [account, setAccount] = useState(storedAccount || "");
+  const [password, setPassword] = useState(storedPassword || "");
+  const [accountError, setAccountError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
+  const validateForm = () => {
+    const newAccountError = account ? "" : "請輸入帳號";
+    const newPasswordError = password ? "" : "請輸入密碼";
+    setAccountError(newAccountError);
+    setPasswordError(newPasswordError);
+    return !newAccountError && !newPasswordError;
   };
+
+  const handleSubmit = () => {
+    if (validateForm()) {
+      login(account, password, userType);
+      navigate(`/QualityManagementSystem/${machineSN}/${userType}/dashboard`);
+    }
+  };
+
+  useEffectOnce(() => {
+    if (!machineSN || !userType) {
+      navigate("/QualityManagementSystem");
+    }
+  });
 
   return (
     <LeaderSignContainer>
@@ -107,24 +138,35 @@ function QmsAuthenticate() {
         請輸入{userType === "productionLine" ? "產線小班長" : "品管人員"}帳號
       </StyledTypography>
       <StyledTextField
-        sx={{ mb: "1.25rem" }}
         label="請輸入帳號"
         variant="outlined"
         fullWidth
+        value={account}
+        onChange={(e) => setAccount(e.target.value)}
+        error={!!accountError}
+        helperText={accountError}
+        required
+        onFocus={() => setAccountError("")}
+        onBlur={() => !account && setAccountError("請輸入帳號")}
       />
       <StyledTextField
-        sx={{ mb: "2.125rem" }}
         label="請輸入密碼"
         variant="outlined"
         type={showPassword ? "text" : "password"}
         fullWidth
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={!!passwordError}
+        helperText={passwordError}
+        required
+        onFocus={() => setPasswordError("")}
+        onBlur={() => !password && setPasswordError("請輸入密碼")}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
               <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
+                onClick={() => setShowPassword(!showPassword)}
+                onMouseDown={(e) => e.preventDefault()}
                 edge="end"
                 sx={{ color: "#8f8f8f" }}
               >
@@ -134,11 +176,11 @@ function QmsAuthenticate() {
           ),
         }}
       />
-      <SubmitButton variant="contained" fullWidth>
+      <SubmitButton variant="contained" fullWidth onClick={handleSubmit}>
         確認
       </SubmitButton>
       <CancelButton
-        onClick={() => navigate("/QualityManagementSystem/QmsUserAccessSelect")}
+        onClick={() => navigate(`/QualityManagementSystem/${machineSN}`)}
         variant="text"
       >
         取消

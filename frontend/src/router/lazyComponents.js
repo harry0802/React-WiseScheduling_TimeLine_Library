@@ -72,6 +72,6 @@ export const QmsAuthenticate = lazyImport(() =>
 );
 export const QmsProductionInspection = lazyImport(() =>
   import(
-    "../components/QualityManagementSystem/feature/QmsProductionInspection"
+    "../components/QualityManagementSystem/feature/QmsProductionInspection/Index"
   )
 );

@@ -153,7 +153,7 @@ function MachineSelect() {
 
   const handleMachineClick = (machine) => {
     if (machine.status === "active") {
-      navigate("QmsUserAccessSelect");
+      navigate(`${machine.machineSN}`);
     } else {
       messageApi.warning(machine.machineSN + " 目前無生產任何單據");
     }

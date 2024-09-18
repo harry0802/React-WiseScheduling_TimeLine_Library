@@ -47,15 +47,15 @@ const routeConfig = [
             element: <LazyComponents.QualityAssuranceSystemMachine />,
           },
           {
-            path: "QmsUserAccessSelect",
+            path: ":machineSN",
             element: <LazyComponents.QmsUserAccessSelect />,
           },
           {
-            path: "QmsAuthenticate/:userType",
+            path: ":machineSN/:userType",
             element: <LazyComponents.QmsAuthenticate />,
           },
           {
-            path: "QmsProductionInspection",
+            path: ":machineSN/:userType/dashboard",
             element: <LazyComponents.QmsProductionInspection />,
           },
         ],

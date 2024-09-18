@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Typography, Button, Container, Paper } from "@mui/material";
 import TimerIcon from "@mui/icons-material/Timer";
 import BeachAccess from "@mui/icons-material/BeachAccess";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffectOnce } from "react-use";
 
 const StyledContainer = styled(Container)`
   && {
@@ -114,6 +115,14 @@ const CustomLockIcon = () => (
 
 function QmsUserAccessSelect() {
   const navigate = useNavigate();
+  const { machineSN } = useParams();
+
+  useEffectOnce(() => {
+    if (!machineSN) {
+      navigate("/QualityManagementSystem");
+    }
+  });
+
   return (
     <StyledContainer>
       <StyledPaper
@@ -126,13 +135,14 @@ function QmsUserAccessSelect() {
         <StyledBox>
           <CustomLockIcon />
         </StyledBox>
+
         <StyledTypography
           sx={{
             marginBottom: "1.4788rem",
           }}
           variant="h4"
         >
-          A01
+          {machineSN}
         </StyledTypography>
 
         <StyledTypography
@@ -147,16 +157,12 @@ function QmsUserAccessSelect() {
         <StyledButton
           variant="contained"
           startIcon={<TimerIcon />}
-          onClick={() =>
-            navigate("/QualityManagementSystem/QmsAuthenticate/productionLine")
-          }
+          onClick={() => navigate(`productionLine`)}
         >
           產線小班長
         </StyledButton>
         <StyledButton
-          onClick={() =>
-            navigate("/QualityManagementSystem/QmsAuthenticate/qualityControl")
-          }
+          onClick={() => navigate(`qualityControl`)}
           variant="contained"
           startIcon={<BeachAccess />}
         >
