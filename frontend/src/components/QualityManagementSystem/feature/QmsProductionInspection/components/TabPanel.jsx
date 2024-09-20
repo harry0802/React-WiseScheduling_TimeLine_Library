@@ -2,8 +2,6 @@ import React from "react";
 import { Grid } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
-import { TZ } from "../../../../../config/config";
-import QuantityInput from "../../../../ProductionInspection/QuantityInput";
 import {
   StyledInspection,
   StyledHead,
@@ -12,20 +10,25 @@ import {
   StyledQty,
   StyledRecords,
   StyledTextField,
+  StyledButton,
 } from "../utils/styles";
+
+import QuantityInput from "../../../../ProductionInspection/QuantityInput";
 import { INSPECTION_LIST, TRANSLATION_KEYS } from "../utils/constants";
+import { TZ } from "../../../../../config/config";
 
 const TabPanel = ({
   value,
   index,
   lot,
-  updateLotsByProductionQuantity,
+  updateLotsByInspectionQuantity,
+  updateLotsByGoodQuantity,
   render,
+  handleSubmit,
   ...other
 }) => {
   const { t } = useTranslation();
   const lastItem = lot.getLastChild();
-
   const defaultRender = () => (
     <StyledInspection>
       <StyledHead>
@@ -64,26 +67,48 @@ const TabPanel = ({
             <span>{lot.processName}</span>
           </div>
           <StyledQty>
-            <span>{t(TRANSLATION_KEYS.PRODUCTION_QUANTITY)}</span>
+            <span>{t(TRANSLATION_KEYS.INSPECTION_QUANTITY)}</span>
             <StyledTextField
               sx={{ width: "200px" }}
-              id={`productionQuantity${index}`}
+              id={`inspectionQuantity${index}`}
               label={t(TRANSLATION_KEYS.COUNT)}
               type="number"
-              name={`productionQuantity${index}`}
-              autoComplete={`productionQuantity${index}`}
-              defaultValue={lastItem.productionQuantity || ""}
+              name={`inspectionQuantity${index}`}
+              autoComplete={`inspectionQuantity${index}`}
+              defaultValue={lastItem.inspectionQuantity || ""}
               variant="outlined"
               margin="normal"
               onChange={(event) => {
-                updateLotsByProductionQuantity(
+                updateLotsByInspectionQuantity(
                   lastItem.lotName,
                   event.target.value
                 );
               }}
             />
           </StyledQty>
+          <StyledQty>
+            <span>{t(TRANSLATION_KEYS.GOOD_QUANTITY)}</span>
+            <StyledTextField
+              sx={{ width: "200px" }}
+              id={`goodQuantity${index}`}
+              label={t(TRANSLATION_KEYS.COUNT)}
+              type="number"
+              name={`goodQuantity${index}`}
+              autoComplete={`goodQuantity${index}`}
+              defaultValue={lastItem.goodQuantity || ""}
+              variant="outlined"
+              margin="normal"
+              onChange={(event) => {
+                updateLotsByGoodQuantity(lastItem.lotName, event.target.value);
+              }}
+            />
+          </StyledQty>
+
+          <StyledButton className="btn-primary" onClick={handleSubmit}>
+            {t(TRANSLATION_KEYS.SUBMIT)}
+          </StyledButton>
         </StyledInfo>
+
         <StyledRecords>
           <Grid
             container
@@ -96,6 +121,7 @@ const TabPanel = ({
                   label={t(item.label)}
                   lotName={lastItem.lotName}
                   schema={item.schema}
+                  isQualityControl
                 />
               </Grid>
             ))}
@@ -115,7 +141,7 @@ const TabPanel = ({
     >
       {value === index &&
         (render
-          ? render({ lot, lastItem, updateLotsByProductionQuantity, t })
+          ? render({ lot, lastItem, updateLotsByInspectionQuantity, t })
           : defaultRender())}
     </div>
   );

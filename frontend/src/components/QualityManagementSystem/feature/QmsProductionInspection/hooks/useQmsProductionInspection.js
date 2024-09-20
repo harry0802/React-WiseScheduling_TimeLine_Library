@@ -6,12 +6,14 @@ import { useTranslation } from "react-i18next";
 import { TRANSLATION_KEYS } from "../utils/constants";
 import { createQmsProductionInspectionService } from "../domain/qmsProductionInspectionService";
 import { useUpdateChildLotsMutation } from "../../../../../store/api/productionReportApi";
+import { useLotStore } from "../../../../../store/zustand/store";
 
 export const useQmsProductionInspection = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [updateChildLots] = useUpdateChildLotsMutation();
+  const { lots: lotsFromStore } = useLotStore();
 
   const qmsService = createQmsProductionInspectionService(updateChildLots);
   const [lots, setLots] = useState(qmsService.initialLots);
@@ -65,8 +67,12 @@ export const useQmsProductionInspection = () => {
     }
   };
 
-  const updateLotsByProductionQuantity = (lotName, quantity) => {
-    setLots(qmsService.updateLotProductionQuantity(lots, lotName, quantity));
+  const updateLotsByInspectionQuantity = (lotName, quantity) => {
+    setLots(qmsService.updateLotInspectionQuantity(lots, lotName, quantity));
+  };
+
+  const updateLotsByGoodQuantity = (lotName, quantity) => {
+    setLots(qmsService.updateLotGoodQuantity(lots, lotName, quantity));
   };
 
   return {
@@ -74,6 +80,7 @@ export const useQmsProductionInspection = () => {
     lots,
     handleChange,
     handleSubmit,
-    updateLotsByProductionQuantity,
+    updateLotsByInspectionQuantity,
+    updateLotsByGoodQuantity,
   };
 };

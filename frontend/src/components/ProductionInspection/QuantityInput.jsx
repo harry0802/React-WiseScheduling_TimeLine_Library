@@ -7,6 +7,10 @@ import AddIcon from "@mui/icons-material/Add";
 import { useLotStore } from "../../store/zustand/store";
 
 const NumberInput = React.forwardRef(function CustomNumberInput(props, ref) {
+  if (props.isQualityControl) {
+    return <StyledText ref={ref}>{props.defaultValue || 0}</StyledText>;
+  }
+
   return (
     <BaseNumberInput
       slots={{
@@ -36,10 +40,14 @@ export default function QuantityInput(props) {
   const updateLotsByInspection = useLotStore(
     (state) => state.updateLotsByInspection
   );
-  const { label, lotName, schema } = props;
+  const { label, lotName, schema, isQualityControl = false } = props;
+
+  console.log(lots);
 
   // get the value according to the lotName and schema from the lots
   const getInputValue = (lotName, schema) => {
+    if (lots.length === 0) return 0;
+
     let split_lotName = lotName.split("-");
     split_lotName.pop();
     let lot = lots.filter((lot) => lot.lotName === split_lotName.join("-"));
@@ -62,7 +70,8 @@ export default function QuantityInput(props) {
         min={0}
         max={999}
         defaultValue={getInputValue(lotName, schema)}
-        onChange={(event, newValue) => {
+        isQualityControl={isQualityControl}
+        onChange={(_, newValue) => {
           if (newValue < 0 || newValue === "" || newValue === undefined) {
             newValue = 0;
           }
@@ -175,5 +184,19 @@ const StyledButton = styled("button")(
   &.increment {
     order: 1;
   }
+`
+);
+
+// 新增一個純文字的樣式組件
+const StyledText = styled("span")(
+  () => `
+  font-size: 1.75rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #8F8F8F;
+  padding: 6px 6px;
+  min-width: 2.5rem;
+  text-align: center;
+  display: inline-block;
 `
 );

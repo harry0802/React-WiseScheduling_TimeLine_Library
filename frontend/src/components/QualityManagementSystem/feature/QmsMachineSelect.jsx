@@ -1,54 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ConfigProvider, Row, Col, Tooltip } from "antd";
+import { ConfigProvider, Row, Col, Tooltip, Select } from "antd";
 import { CheckOutlined, PauseOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import RefreshButton from "../../Global/RefreshButton";
 import { message } from "antd";
+import {
+  useGetMachinesQuery,
+  useGetProductionScheduleByMachinesQuery,
+} from "../../../store/api/productionScheduleApi";
+import { PRODUCTION_AREA } from "../../../config/config";
 
-const machineData = [
-  {
-    machineSN: "M001",
-    status: "active",
-    name: "Cutting Machine A",
-  },
-  {
-    machineSN: "M002",
-    status: "inactive",
-    name: "Drilling Machine B",
-  },
-  {
-    machineSN: "M003",
-    status: "active",
-    name: "Welding Machine C",
-  },
-  {
-    machineSN: "M004",
-    status: "inactive",
-    name: "Assembly Line D",
-  },
-  {
-    machineSN: "M005",
-    status: "active",
-    name: "Packaging Machine E",
-  },
-  {
-    machineSN: "M006",
-    status: "inactive",
-    name: "Quality Control Station F",
-  },
-  {
-    machineSN: "M007",
-    status: "active",
-    name: "Painting Booth G",
-  },
-  {
-    machineSN: "M008",
-    status: "inactive",
-    name: "CNC Machine H",
-  },
-];
 const Container = styled.div`
   width: 100%;
 `;
@@ -146,18 +109,86 @@ const MachineBox = styled.div`
   }
 `;
 
+const FilterSection = styled.div`
+  display: flex;
+  gap: 1.875rem;
+`;
+
+const StyledSelect = styled(Select)`
+  .ant-select-selection-placeholder,
+  .ant-select-dropdown .ant-select-item,
+  .ant-select-selection-item {
+    color: #8f8f8f;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    border-radius: 0.25rem;
+  }
+
+  &.ant-select-single .ant-select-selector {
+    border-radius: 0.25rem;
+  }
+`;
+
 function MachineSelect() {
   const { t } = useTranslation();
+  const { Option } = Select;
   const navigate = useNavigate();
   const [messageApi, contextHolder] = message.useMessage();
+  const [areaFilter, setAreaFilter] = useState("A");
+  const [filteredMachines, setFilteredMachines] = useState([]);
+
+  const { data: machines, isLoading } = useGetMachinesQuery();
+  console.log(machines);
+
+  const { data: productionSchedules, isLoading: isProductionSchedulesLoading } =
+    useGetProductionScheduleByMachinesQuery({ status: "On-going" });
+
+  const activeMachines = React.useMemo(() => {
+    if (!productionSchedules || !productionSchedules) return {};
+    console.log(productionSchedules);
+
+    return productionSchedules.reduce((acc, schedule) => {
+      acc[schedule.machineSN] = true;
+      return acc;
+    }, {});
+  }, [productionSchedules]);
 
   const handleMachineClick = (machine) => {
-    if (machine.status === "active") {
+    if (activeMachines[machine.machineSN]) {
       navigate(`${machine.machineSN}`);
     } else {
       messageApi.warning(machine.machineSN + " 目前無生產任何單據");
     }
   };
+
+  console.log(productionSchedules);
+  const allAreaOptions = [
+    PRODUCTION_AREA.map((item, index) => (
+      <Option key={index} value={item.value} label={item.label}>
+        {item.label}
+      </Option>
+    )),
+  ];
+
+  useEffect(() => {
+    if (machines) {
+      const filtered = machines.filter(
+        (machine) => machine.productionArea === areaFilter
+      );
+      setFilteredMachines(filtered);
+    }
+  }, [machines, areaFilter]);
+
+  const handleAreaChange = (value) => {
+    setAreaFilter(value);
+  };
+
+  useEffect(() => {
+    if (productionSchedules) {
+      console.log(productionSchedules);
+    }
+  }, [productionSchedules]);
 
   return (
     <ConfigProvider
@@ -165,6 +196,9 @@ function MachineSelect() {
         components: {
           Button: {
             primaryColor: "#4CAF50",
+          },
+          Select: {
+            optionFontSize: 24,
           },
         },
       }}
@@ -178,17 +212,27 @@ function MachineSelect() {
               {t("QmsMachineSelect.title")}
               <RefreshButton />
             </Title>
+            <FilterSection>
+              <StyledSelect
+                className="area-filter"
+                defaultValue="A"
+                style={{ width: "11.25rem", height: "3.75rem" }}
+                onChange={handleAreaChange}
+              >
+                {allAreaOptions}
+              </StyledSelect>
+            </FilterSection>
           </TitleBox>
           <Row gutter={[16, 24]}>
-            {machineData.map((machine) => (
+            {filteredMachines.map((machine) => (
               <Col span={6} key={machine.machineSN}>
                 <MachineBox
-                  active={machine.status === "active"}
+                  active={activeMachines[machine.machineSN]}
                   onClick={() => handleMachineClick(machine)}
                 >
                   <h1>{machine.machineSN}</h1>
                   <p>
-                    {machine.status === "active"
+                    {activeMachines[machine.machineSN]
                       ? t("productionReport.machineSelect.onGoing")
                       : t("productionReport.machineSelect.none")}
                   </p>

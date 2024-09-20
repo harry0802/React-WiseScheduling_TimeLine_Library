@@ -11,6 +11,9 @@ export const TRANSLATION_KEYS = {
   CURRENT_PRODUCTION: "productionReport.inspection.currentProduction",
   PRODUCTION_QUANTITY: "productionReport.table.productionQuantity",
   COUNT: "productionReport.inspection.count",
+  INSPECTION_QUANTITY: "productionReport.table.inspectionQuantity",
+  GOOD_QUANTITY: "productionReport.table.goodQuantity",
+  SUBMIT: "productionReport.inspection.submit",
 };
 
 export const INSPECTION_LIST = [

@@ -118,6 +118,8 @@ const ProductionDetail = (props) => {
     },
   ];
   const navigate = useNavigate();
+
+  // * 從zustand store 取得製令單id
   const productionScheduleIdsStore = useProductionScheduleIdsStore(
     (state) => state.productionScheduleIdsStore
   ); // 要準備生產的製令單id
@@ -132,6 +134,8 @@ const ProductionDetail = (props) => {
     navigate("/MachineSelectPage");
   }
 
+  //
+  //  TODO:  我品保系統的資料需要從api取得
   // 取得製令單/母批資料
   const {
     data: workOrders,
@@ -145,7 +149,7 @@ const ProductionDetail = (props) => {
   useEffect(() => {
     if (isSuccess) {
       // 將母批和子批分開，並且將子批放入母批的children中
-
+      // * 我品保系統的資料需要從api取得
       console.log("workOrders", workOrders);
       const motherLots = workOrders.filter((item) => item.serialNumber === 0);
       const childLots = workOrders.filter((item) => item.serialNumber !== 0);

@@ -1,29 +1,66 @@
 import React from "react";
 import { Tab } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import {
-  StyledBox,
-  StyledTabContainer,
-  StyledTabs,
-  StyledButton,
-} from "./utils/styles";
+import { StyledBox, StyledTabContainer, StyledTabs } from "./utils/styles";
 import TabPanel from "./components/TabPanel";
-import { TRANSLATION_KEYS } from "./utils/constants";
 import { a11yProps } from "./utils/utils";
 import { useQmsProductionInspection } from "./hooks/useQmsProductionInspection";
+
+/* WORKFLOW
+QmsProductionInspection (Index.jsx)
+│
+├── useQmsProductionInspection (hook)
+│   │
+│   ├── createQmsProductionInspectionService
+│   │   │
+│   │   ├── createLotService
+│   │   │   │
+│   │   │   ├── createLot
+│   │   │   │   └── createLotChild
+│   │   │   │
+│   │   │   ├── updateLotProductionQuantity
+│   │   │   ├── getLotsWithEmptyProductionQuantity
+│   │   │   └── prepareChildLotsForUpdate
+│   │   │
+│   │   ├── initialLots
+│   │   ├── updateLotProductionQuantity
+│   │   └── submitLots
+│   │
+│   ├── handleChange (tab change)
+│   └── handleSubmit
+│
+├── Render Tabs
+│   └── Tab (for each lot)
+│
+└── Render TabPanels
+    └── TabPanel (for each lot)
+        │
+        ├── Display Lot Information
+        │   ├── Operator 1 & 2
+        │   ├── Start Time
+        │   ├── Work Order Quantity
+        │   ├── Unfinished Quantity
+        │   ├── Defective Quantity
+        │   └── Current Production
+        │
+        ├── Production Quantity Input
+        │   └── updateLotsByProductionQuantity
+        │
+        └── Inspection List
+            └── QuantityInput (for each inspection item)
+*/
 
 const QmsProductionInspection = ({
   renderTabPanel,
   renderTabs,
   renderTabPanels,
 }) => {
-  const { t } = useTranslation();
   const {
     tabValue,
     lots,
     handleChange,
     handleSubmit,
-    updateLotsByProductionQuantity,
+    updateLotsByInspectionQuantity,
+    updateLotsByGoodQuantity,
   } = useQmsProductionInspection();
 
   const defaultRenderTabs = () =>
@@ -46,8 +83,10 @@ const QmsProductionInspection = ({
         value={tabValue}
         index={index}
         lot={lot}
-        updateLotsByProductionQuantity={updateLotsByProductionQuantity}
+        updateLotsByInspectionQuantity={updateLotsByInspectionQuantity}
+        updateLotsByGoodQuantity={updateLotsByGoodQuantity}
         render={renderTabPanel}
+        handleSubmit={handleSubmit}
       />
     ));
 
@@ -69,13 +108,11 @@ const QmsProductionInspection = ({
         ? renderTabPanels({
             lots,
             tabValue,
-            updateLotsByProductionQuantity,
+            updateLotsByInspectionQuantity,
+            updateLotsByGoodQuantity,
             renderTabPanel,
           })
         : defaultRenderTabPanels()}
-      <StyledButton onClick={handleSubmit}>
-        {t(TRANSLATION_KEYS.SHIFT_CHANGE)}
-      </StyledButton>
     </StyledBox>
   );
 };
