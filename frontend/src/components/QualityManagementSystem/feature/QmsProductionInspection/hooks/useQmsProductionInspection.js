@@ -5,37 +5,44 @@ import { useTranslation } from "react-i18next";
 
 import { TRANSLATION_KEYS } from "../utils/constants";
 import { createQmsProductionInspectionService } from "../domain/qmsProductionInspectionService";
-import { useUpdateChildLotsMutation } from "../../../../../store/api/productionReportApi";
-import { useLotStore } from "../../../../../store/zustand/store";
+import {
+  useGetProductionReportQuery,
+  useUpdateChildLotsMutation,
+} from "../../../../../store/api/productionReportApi";
 
 export const useQmsProductionInspection = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [updateChildLots] = useUpdateChildLotsMutation();
-  const { lots: lotsFromStore } = useLotStore();
 
   const qmsService = createQmsProductionInspectionService(updateChildLots);
   const [lots, setLots] = useState(qmsService.initialLots);
 
+  const {
+    data: workOrders,
+    isLoading,
+    isSuccess,
+    refetch,
+  } = useGetProductionReportQuery({
+    machineSN: "A1",
+  });
+  console.log(workOrders);
+
   useEffect(() => {
-    window.history.pushState(null, "", document.URL);
-    window.onpopstate = function () {
+    const handlePopState = () => {
       window.history.pushState(null, "", document.URL);
       Modal.info({
         content: <p>{t(TRANSLATION_KEYS.FORBIDDEN)}</p>,
         okText: t("common.okBtn"),
-        onOk() {},
       });
     };
-    return () => {
-      window.onpopstate = null;
-    };
-  }, [t]);
 
-  const handleChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
+    window.history.pushState(null, "", document.URL);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   const handleSubmit = async () => {
     try {
@@ -67,20 +74,20 @@ export const useQmsProductionInspection = () => {
     }
   };
 
-  const updateLotsByInspectionQuantity = (lotName, quantity) => {
-    setLots(qmsService.updateLotInspectionQuantity(lots, lotName, quantity));
-  };
-
-  const updateLotsByGoodQuantity = (lotName, quantity) => {
-    setLots(qmsService.updateLotGoodQuantity(lots, lotName, quantity));
+  const updateLotQuantity = (updateFn) => (lotName, quantity) => {
+    setLots(updateFn(lots, lotName, quantity));
   };
 
   return {
     tabValue,
     lots,
-    handleChange,
+    handleChange: (_, newValue) => setTabValue(newValue),
     handleSubmit,
-    updateLotsByInspectionQuantity,
-    updateLotsByGoodQuantity,
+    updateLotsByInspectionQuantity: updateLotQuantity(
+      qmsService.updateLotInspectionQuantity
+    ),
+    updateLotsByGoodQuantity: updateLotQuantity(
+      qmsService.updateLotGoodQuantity
+    ),
   };
 };

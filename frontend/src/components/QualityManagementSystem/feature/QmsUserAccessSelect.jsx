@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Box, Typography, Button, Container, Paper } from "@mui/material";
 import TimerIcon from "@mui/icons-material/Timer";
 import BeachAccess from "@mui/icons-material/BeachAccess";
 import styled from "styled-components";
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffectOnce } from "react-use";
+import { useQmsData, useQmsStore } from "../slice/QmsAccount";
 
 const StyledContainer = styled(Container)`
   && {
@@ -117,11 +117,27 @@ function QmsUserAccessSelect() {
   const navigate = useNavigate();
   const { machineSN } = useParams();
 
-  useEffectOnce(() => {
-    if (!machineSN) {
-      navigate("/QualityManagementSystem");
+  const { productionSchedules, isLoadingProductionSchedules, inspectionTypes } =
+    useQmsData();
+  const { setUserType } = useQmsStore();
+
+  const handleClick = (userNB) => {
+    const type = inspectionTypes[userNB].schema;
+    setUserType(type);
+    navigate(`${type}`);
+  };
+
+  useEffect(() => {
+    if (!isLoadingProductionSchedules && productionSchedules) {
+      const isActiveSchedule = productionSchedules.some(
+        (schedule) => schedule.machineSN === machineSN
+      );
+
+      if (!isActiveSchedule) {
+        navigate("/QualityManagementSystem");
+      }
     }
-  });
+  }, [machineSN, isLoadingProductionSchedules, productionSchedules, navigate]);
 
   return (
     <StyledContainer>
@@ -157,12 +173,12 @@ function QmsUserAccessSelect() {
         <StyledButton
           variant="contained"
           startIcon={<TimerIcon />}
-          onClick={() => navigate(`productionLine`)}
+          onClick={() => handleClick(0)}
         >
           產線小班長
         </StyledButton>
         <StyledButton
-          onClick={() => navigate(`qualityControl`)}
+          onClick={() => handleClick(1)}
           variant="contained"
           startIcon={<BeachAccess />}
         >

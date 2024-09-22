@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ConfigProvider, Row, Col, Tooltip, Select } from "antd";
-import { CheckOutlined, PauseOutlined } from "@ant-design/icons";
+import { ConfigProvider, Row, Col, Select } from "antd";
 import styled from "styled-components";
 import RefreshButton from "../../Global/RefreshButton";
 import { message } from "antd";
-import {
-  useGetMachinesQuery,
-  useGetProductionScheduleByMachinesQuery,
-} from "../../../store/api/productionScheduleApi";
+import { useGetMachinesQuery } from "../../../store/api/productionScheduleApi";
 import { PRODUCTION_AREA } from "../../../config/config";
+import { useQmsData } from "../slice/QmsAccount";
 
 const Container = styled.div`
   width: 100%;
@@ -139,15 +136,20 @@ function MachineSelect() {
   const [filteredMachines, setFilteredMachines] = useState([]);
 
   const { data: machines, isLoading } = useGetMachinesQuery();
-  console.log(machines);
 
-  const { data: productionSchedules, isLoading: isProductionSchedulesLoading } =
-    useGetProductionScheduleByMachinesQuery({ status: "On-going" });
+  // TODO  收集活躍機台
+  // todo  現在當我點下時候我要把 productionSchedules 中活越的機台 workOrderSN 收集起來
+  //  ? 點擊機台  -> 過濾一樣的機台 machineSN ->  收集所有的 workOrderSN
+  // * 過濾當下點擊的機台 = 使用 machineSN 過濾
+  // * 收集所有的 workOrderSN
+  // ! 這些是為了要給後續 品管人員檢驗要用的
+
+  const { productionSchedules } = useQmsData();
+
+  console.log(productionSchedules);
 
   const activeMachines = React.useMemo(() => {
     if (!productionSchedules || !productionSchedules) return {};
-    console.log(productionSchedules);
-
     return productionSchedules.reduce((acc, schedule) => {
       acc[schedule.machineSN] = true;
       return acc;
@@ -162,7 +164,6 @@ function MachineSelect() {
     }
   };
 
-  console.log(productionSchedules);
   const allAreaOptions = [
     PRODUCTION_AREA.map((item, index) => (
       <Option key={index} value={item.value} label={item.label}>
@@ -183,12 +184,6 @@ function MachineSelect() {
   const handleAreaChange = (value) => {
     setAreaFilter(value);
   };
-
-  useEffect(() => {
-    if (productionSchedules) {
-      console.log(productionSchedules);
-    }
-  }, [productionSchedules]);
 
   return (
     <ConfigProvider
