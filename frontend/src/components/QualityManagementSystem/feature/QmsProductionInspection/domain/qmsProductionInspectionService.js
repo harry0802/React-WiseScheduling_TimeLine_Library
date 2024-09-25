@@ -1,4 +1,4 @@
-import { mockLots } from "../../../data/ProductionInspectionData";
+import { formatInspectionDataForApi } from "../utils/format";
 import { createLotService } from "./lotService";
 
 // Create QMS Production Inspection Service
@@ -6,35 +6,40 @@ export function createQmsProductionInspectionService(updateChildLotsMutation) {
   const lotService = createLotService();
 
   return {
-    // Initialize lots using mock data
-    initialLots: lotService.createLots(mockLots),
-
-    // * prepare lots from api
-    // async getInitialLots() {
-    //   const apiLots = await fetchInitialLotsApi();
-    //   return lotService.createLots(apiLots);
-    // },
+    // Initialize lots using external data
+    initialLots: (lotsData) => lotService.createLots(lotsData),
 
     // Update production quantity for a specific lot
-    updateLotInspectionQuantity(lots, lotName, quantity) {
-      return lotService.updateLotInspectionQuantity(lots, lotName, quantity);
+    updateLotInspectionQuantity(lots, lotId, quantity) {
+      return lotService.updateLotInspectionQuantity(lots, lotId, quantity);
     },
-    updateLotGoodQuantity(lots, lotName, quantity) {
-      return lotService.updateLotGoodQuantity(lots, lotName, quantity);
+    updateLotGoodQuantity(lots, lotId, quantity) {
+      return lotService.updateLotGoodQuantity(lots, lotId, quantity);
     },
 
     // Submit lots for processing
-    async submitLots(lots) {
+    async submitLots(lots, inspectionType, inspect) {
       // Check for lots with empty production quantity
       const emptyLots = lotService.getLotsWithEmptyProductionQuantity(lots);
-
       if (emptyLots.length > 0) {
         throw new Error("EMPTY_PRODUCTION_QUANTITY");
       }
 
       // Prepare child lots data and update
       const childLots = lotService.prepareChildLotsForUpdate(lots);
-      await updateChildLotsMutation(childLots);
+
+      console.log("childLots", childLots);
+
+      const apiData = formatInspectionDataForApi(
+        childLots,
+        inspectionType,
+        inspect
+      );
+      console.log(updateChildLotsMutation);
+
+      console.log("apiData", apiData);
+      const result = await updateChildLotsMutation(apiData);
+      console.log("result", result);
     },
   };
 }

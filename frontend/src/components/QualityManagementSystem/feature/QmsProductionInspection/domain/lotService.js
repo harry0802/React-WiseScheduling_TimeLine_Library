@@ -8,21 +8,23 @@ export function createLotService() {
     },
 
     // Updates the inspection quantity of a specific lot
-    updateLotInspectionQuantity(lots, lotName, quantity) {
-      const lot = lots.find((l) => l.getLastChild().lotName === lotName);
+    updateLotInspectionQuantity(lots, lotId, quantity) {
+      const lot = lots.find((l) => l.id === lotId);
       if (lot) {
         lot.updateLastChildInspectionQuantity(quantity);
       } else {
-        console.error("Lot not found");
+        console.error(`Lot with id ${lotId} not found`);
       }
       return lots;
     },
-    updateLotGoodQuantity(lots, lotName, quantity) {
-      const lot = lots.find((l) => l.getLastChild().lotName === lotName);
+
+    // Updates the good quantity of a specific lot
+    updateLotGoodQuantity(lots, lotId, quantity) {
+      const lot = lots.find((l) => l.id === lotId);
       if (lot) {
         lot.updateLastChildGoodQuantity(quantity);
       } else {
-        console.error("Lot not found");
+        console.error(`Lot with id ${lotId} not found`);
       }
       return lots;
     },

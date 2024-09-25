@@ -17,6 +17,7 @@ export function createLot(props) {
     // ? but seen like only one child
     updateLastChildInspectionQuantity(quantity) {
       const lastChild = this.children.at(-1);
+
       lastChild.updateInspectionQuantity(quantity);
     },
     updateLastChildGoodQuantity(quantity) {

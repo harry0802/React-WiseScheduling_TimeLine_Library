@@ -48,6 +48,10 @@ const OperatorSign = (props) => {
 
   // 開始子批生產
   const startChildLot = async (data) => {
+    const operator1 = data.get("operator1");
+    const operator2 = data.get("operator2");
+    console.log("Initial operator data:", operator1, operator2);
+
     let childLots = [];
     let newLots = lotStore.map((lot) => {
       const childLot = {
@@ -55,18 +59,27 @@ const OperatorSign = (props) => {
         machineSN: lot.machineSN,
         workOrderSN: lot.workOrderSN,
         workOrderQuantity: lot.workOrderQuantity,
-        operator1: data.get("operator1"),
-        operator2: data.get("operator2"),
+        operator1: operator1,
+        operator2: operator2,
         pschedule_id: lot.id, // set productionSchedule.id to productionReport's foreign key
       };
+      console.log("Created childLot:", childLot);
       childLots.push(childLot);
       if (lot.children === null) {
         lot.children = [childLot];
       } else {
+        console.log("lot.children", lot.children);
+        console.log("childLot", childLot);
         lot.children.push(childLot);
       }
       return lot;
     });
+
+    console.log("childLots after mapping:", childLots);
+    console.log("newLots after mapping:", newLots);
+
+    // TODO: API 回傳時候沒問題 但與 productionReport 不同步
+
     await addChildLots(childLots)
       .unwrap()
       .then((payload) => {
@@ -89,6 +102,7 @@ const OperatorSign = (props) => {
         });
         return;
       });
+
     // 更新製令單狀態為On-going
     const updatedProductionSchedules = new Set();
     lotStore.forEach((workOrder) => {

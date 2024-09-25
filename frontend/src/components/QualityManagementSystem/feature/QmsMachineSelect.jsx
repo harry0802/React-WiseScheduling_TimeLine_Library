@@ -7,7 +7,7 @@ import RefreshButton from "../../Global/RefreshButton";
 import { message } from "antd";
 import { useGetMachinesQuery } from "../../../store/api/productionScheduleApi";
 import { PRODUCTION_AREA } from "../../../config/config";
-import { useQmsData } from "../slice/QmsAccount";
+import { useProductionSchedules, useQmsData } from "../slice/QmsAccount";
 
 const Container = styled.div`
   width: 100%;
@@ -135,21 +135,27 @@ function MachineSelect() {
   const [areaFilter, setAreaFilter] = useState("A");
   const [filteredMachines, setFilteredMachines] = useState([]);
 
-  const { data: machines, isLoading } = useGetMachinesQuery();
+  const { data: machines } = useGetMachinesQuery();
+
+  // 使用 useQmsData hook
+  const { productionSchedules, handleMachineSelect } = useProductionSchedules();
 
   // TODO  收集活躍機台
   // todo  現在當我點下時候我要把 productionSchedules 中活越的機台 workOrderSN 收集起來
-  //  ? 點擊機台  -> 過濾一樣的機台 machineSN ->  收集所有的 workOrderSN
+  //  ? 點擊機台  -> 過濾一樣的機台 machineSN ->  紀錄 workOrderSN
   // * 過濾當下點擊的機台 = 使用 machineSN 過濾
-  // * 收集所有的 workOrderSN
-  // ! 這些是為了要給後續 品管人員檢驗要用的
+  // * 收集 workOrderSN 與 productionSchedule 的 id
 
-  const { productionSchedules } = useQmsData();
+  // ! 一台機台只會有一個 workOrderSN 但會有多個 productionSchedule
+  // * 目前我需要在 Zustand 中紀錄 workOrderSN  並且收集所有的 productionSchedule 的 id
 
-  console.log(productionSchedules);
+  // TODO  這些是為了要給後續 品管人員檢驗要用的
+  // * productionReport api 中我要給他過濾直  1 .machineSN 2 .workOrderSN 3 .status
+  // * 他將會拿到所有的 productionSchedule 裡面的 ProductionInspection 但她需要透過 上面記錄的 id 將他組合成我要的資料格式
 
-  const activeMachines = React.useMemo(() => {
-    if (!productionSchedules || !productionSchedules) return {};
+  // 計算活躍機台
+  const activeMachineMap = React.useMemo(() => {
+    if (!productionSchedules) return {};
     return productionSchedules.reduce((acc, schedule) => {
       acc[schedule.machineSN] = true;
       return acc;
@@ -157,7 +163,8 @@ function MachineSelect() {
   }, [productionSchedules]);
 
   const handleMachineClick = (machine) => {
-    if (activeMachines[machine.machineSN]) {
+    if (activeMachineMap[machine.machineSN]) {
+      handleMachineSelect(machine.machineSN);
       navigate(`${machine.machineSN}`);
     } else {
       messageApi.warning(machine.machineSN + " 目前無生產任何單據");
@@ -222,12 +229,12 @@ function MachineSelect() {
             {filteredMachines.map((machine) => (
               <Col span={6} key={machine.machineSN}>
                 <MachineBox
-                  active={activeMachines[machine.machineSN]}
+                  active={activeMachineMap[machine.machineSN]}
                   onClick={() => handleMachineClick(machine)}
                 >
                   <h1>{machine.machineSN}</h1>
                   <p>
-                    {activeMachines[machine.machineSN]
+                    {activeMachineMap[machine.machineSN]
                       ? t("productionReport.machineSelect.onGoing")
                       : t("productionReport.machineSelect.none")}
                   </p>

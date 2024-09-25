@@ -7,18 +7,18 @@ export const inspectionApi = apiSlice.injectEndpoints({
       providesTags: ["InspectionType"],
     }),
     addQualityInspection: builder.mutation({
-      query: (body) => ({
-        url: "qualityInspection",
+      query: (inspections) => ({
+        url: "qualityInspection/",
         method: "POST",
-        body,
+        body: inspections,
       }),
       invalidatesTags: ["QualityInspection"],
     }),
     updateQualityInspection: builder.mutation({
-      query: (body) => ({
-        url: "qualityInspection",
+      query: (inspections) => ({
+        url: "qualityInspection/",
         method: "PUT",
-        body,
+        body: inspections,
       }),
       invalidatesTags: ["QualityInspection"],
     }),
@@ -30,6 +30,11 @@ export const inspectionApi = apiSlice.injectEndpoints({
       query: () => "qualityInspection/in_process_inspections",
       providesTags: ["QualityInspection"],
     }),
+
+    getInspections: builder.query({
+      query: (type) => `qualityInspection/${type.toLowerCase()}_inspections`,
+      providesTags: ["QualityInspection"],
+    }),
   }),
 });
 
@@ -39,4 +44,5 @@ export const {
   useUpdateQualityInspectionMutation,
   useGetFirstInspectionsQuery,
   useGetInProcessInspectionsQuery,
+  useGetInspectionsQuery,
 } = inspectionApi;

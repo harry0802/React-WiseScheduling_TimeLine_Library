@@ -1,10 +1,17 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { useGetInspectionTypesQuery } from "../service/endpoints/inspectionApi";
-
-import React from "react";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { useEffect } from "react";
+import { useGetProductionReportQuery } from "../../../store/api/productionReportApi";
 import { useGetProductionScheduleByMachinesQuery } from "../../../store/api/productionScheduleApi";
+import {
+  useAddQualityInspectionMutation,
+  useGetInspectionsQuery,
+  useGetInspectionTypesQuery,
+} from "../service/endpoints/inspectionApi";
+import { createQmsProductionInspectionService } from "../feature/QmsProductionInspection/domain/qmsProductionInspectionService";
 
+// 1. Initial State
 const initialState = {
   account: "",
   password: "",
@@ -12,62 +19,139 @@ const initialState = {
   userType: null,
   inspectionTypes: [],
   productionSchedules: [],
+  activeMachines: {},
+  productionReports: {},
 };
 
-const actions = (set) => ({
+// 2. Store Actions
+const createActions = (set) => ({
+  // User related actions
   setAccount: (account) => set({ account }),
   setPassword: (password) => set({ password }),
   setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
   setUserType: (userType) => set({ userType }),
+  login: (account, password, userType) =>
+    set({ account, password, isAuthenticated: true, userType }),
+  logout: () => set(initialState),
+
+  // Inspection and Production Schedule actions
   setInspectionTypes: (types) => set({ inspectionTypes: types }),
   setProductionSchedules: (schedules) =>
     set({ productionSchedules: schedules }),
-  login: (account, password, userType) =>
-    set({
-      account,
-      password,
-      isAuthenticated: true,
-      userType,
-    }),
-  logout: () => set(initialState),
+
+  // Active Machine actions
+  setActiveMachine: (machineSN, workOrderSN, scheduleIds) =>
+    set((state) => ({
+      activeMachines: {
+        ...state.activeMachines,
+        [machineSN]: { workOrderSN, scheduleIds },
+      },
+    })),
+  clearActiveMachines: () => set({ activeMachines: {} }),
+
+  // Production Report actions
+  setProductionReport: (machineSN, report) =>
+    set((state) => ({
+      productionReports: {
+        ...state.productionReports,
+        [machineSN]: report,
+      },
+    })),
+  clearProductionReports: () => set({ productionReports: {} }),
 });
 
+// 3. Zustand Store Creation
 const useQmsStore = create(
-  persist(
-    (set) => ({
-      ...initialState,
-      ...actions(set),
-    }),
-    {
-      name: "qms-storage",
-      storage: sessionStorage,
-    }
-  )
+  persist((set) => ({ ...initialState, ...createActions(set) }), {
+    name: "qms-storage",
+    storage: createJSONStorage(() => sessionStorage),
+  })
 );
 
-export const useQmsData = () => {
+// 4. Data Processing Module
+const dataProcessing = {
+  processProductionReport: (reportData, inspectionData) =>
+    reportData.map((report) => {
+      const matchingInspection = inspectionData.find(
+        (inspection) => inspection?.productionScheduleId === report?.id
+      );
+
+      return {
+        id: report.id,
+        productName: report.productName,
+        workOrderQuantity: report.workOrderQuantity,
+        unfinishedQuantity: report.unfinishedQuantity,
+        processName: report.processName,
+        children: [dataProcessing.createLotData(report, matchingInspection)],
+      };
+    }),
+
+  createLotData: (report, inspection) => ({
+    id: report.id,
+    lotName: report.lotName,
+    workOrderSN: report.workOrderSN,
+    operator1: report.operator1,
+    operator2: report.operator2,
+    startTime: report.startTime,
+    endTime: report.endTime,
+    defectiveQuantity: report.defectiveQuantity,
+    productionQuantity: report.productionQuantity,
+    colorDifference: report.colorDifference,
+    deformation: report.deformation,
+    shrinkage: report.shrinkage,
+    shortage: report.shortage,
+    hole: report.hole,
+    bubble: report.bubble,
+    impurity: report.impurity,
+    pressure: report.pressure,
+    overflow: report.overflow,
+    flowMark: report.flowMark,
+    oilStain: report.oilStain,
+    burr: report.burr,
+    blackSpot: report.blackSpot,
+    scratch: report.scratch,
+    encapsulation: report.encapsulation,
+    other: report.other,
+    // Add inspection data if available
+    inspectionQuantity: inspection?.inspectionQuantity || 0,
+    goodQuantity: inspection?.goodQuantity || 0,
+    inspector: inspection?.inspector || null,
+    inspectionDate: inspection?.inspectionDate || null,
+    inspectionType: inspection?.inspectionType || null,
+    inspectionResult: inspection?.result || null,
+  }),
+};
+
+// 5. Main Hooks
+export const useInspectionTypes = () => {
+  const { inspectionTypes, setInspectionTypes } = useQmsStore();
   const { data: apiInspectionTypes, isLoading: isLoadingInspectionTypes } =
     useGetInspectionTypesQuery();
+
+  useEffect(() => {
+    if (apiInspectionTypes && !isLoadingInspectionTypes) {
+      setInspectionTypes(apiInspectionTypes.data);
+    }
+  }, [apiInspectionTypes, isLoadingInspectionTypes, setInspectionTypes]);
+
+  return { inspectionTypes, isLoadingInspectionTypes };
+};
+
+export const useProductionSchedules = () => {
+  const {
+    productionSchedules,
+    setProductionSchedules,
+    activeMachines,
+    setActiveMachine,
+    clearActiveMachines,
+  } = useQmsStore();
 
   const {
     data: apiProductionSchedules,
     isLoading: isLoadingProductionSchedules,
   } = useGetProductionScheduleByMachinesQuery({ status: "On-going" });
 
-  const {
-    inspectionTypes,
-    setInspectionTypes,
-    productionSchedules,
-    setProductionSchedules,
-  } = useQmsStore();
-
-  React.useEffect(() => {
-    if (apiInspectionTypes && !isLoadingInspectionTypes) {
-      setInspectionTypes(apiInspectionTypes.data);
-    }
-  }, [apiInspectionTypes, isLoadingInspectionTypes, setInspectionTypes]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (apiProductionSchedules && !isLoadingProductionSchedules) {
       setProductionSchedules(apiProductionSchedules);
     }
@@ -77,11 +161,104 @@ export const useQmsData = () => {
     setProductionSchedules,
   ]);
 
+  const handleMachineSelect = (machineSN) => {
+    const machineSchedules = productionSchedules.filter(
+      (schedule) => schedule.machineSN === machineSN
+    );
+    const [{ workOrderSN }] = machineSchedules;
+    const scheduleIds = machineSchedules.map(({ id }) => id);
+    setActiveMachine(machineSN, workOrderSN, scheduleIds);
+  };
+
   return {
-    inspectionTypes,
-    isLoadingInspectionTypes,
     productionSchedules,
     isLoadingProductionSchedules,
+    activeMachines,
+    handleMachineSelect,
+    clearActiveMachines,
+  };
+};
+
+export const useProductionReports = () => {
+  const {
+    activeMachines,
+
+    setProductionReport,
+    clearProductionReports,
+    userType,
+  } = useQmsStore();
+
+  const { data: productionReportData, isLoading: isLoadingProductionReport } =
+    useGetProductionReportQuery(
+      { status: "On-going" },
+      { skip: !activeMachines || Object.keys(activeMachines).length === 0 }
+    );
+
+  const [addQualityInspection] = useAddQualityInspectionMutation();
+
+  const { data: inspections } = useGetInspectionsQuery(userType, {
+    refetchOnMountOrArgChange: true,
+    skip: !userType,
+  });
+
+  const qmsService = createQmsProductionInspectionService(addQualityInspection);
+
+  useEffect(() => {
+    if (productionReportData && !isLoadingProductionReport) {
+      Object.entries(activeMachines).forEach(([machineSN, { workOrderSN }]) => {
+        if (productionReportData && Array.isArray(productionReportData)) {
+          const { data: inspectionsSource } = inspections || {};
+          console.log(inspectionsSource?.at(-1));
+
+          const machineReportData = productionReportData.filter(
+            (report) =>
+              report.machineSN === machineSN &&
+              report.workOrderSN === workOrderSN
+          );
+
+          const inspectionData = inspectionsSource
+            ?.filter((inspection) => inspection.workOrderSN === workOrderSN)
+            .at(-1);
+
+          const processedData = dataProcessing.processProductionReport(
+            machineReportData,
+            [inspectionData] || []
+          );
+
+          console.log(processedData);
+
+          setProductionReport(machineSN, processedData);
+        } else {
+          setProductionReport(machineSN, []);
+        }
+      });
+    }
+  }, [
+    productionReportData,
+    isLoadingProductionReport,
+    activeMachines,
+    setProductionReport,
+    inspections,
+  ]);
+
+  return {
+    qmsService,
+
+    clearProductionReports,
+    isLoadingProductionReport,
+  };
+};
+
+// 原來的 useQmsData 可以保留，但現在它只是組合其他 hooks 的結果
+export const useQmsData = () => {
+  const inspectionData = useInspectionTypes();
+  const schedulesData = useProductionSchedules();
+  const reportsData = useProductionReports();
+
+  return {
+    ...inspectionData,
+    ...schedulesData,
+    ...reportsData,
   };
 };
 

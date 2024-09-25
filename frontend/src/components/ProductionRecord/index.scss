@@ -136,18 +136,38 @@ button.ant-btn-default,
     margin-top: 1.187rem;
   }
 
+  // 基本變量定義，作為後備
+  --gradient-start: #8ac0e2;
+  --gradient-end: rgba(115, 213, 191, 0.2);
+
+  // @property 定義，用於支持的瀏覽器
+  @supports (background: paint(something)) {
+    @property --gradient-start {
+      syntax: "<color>";
+      initial-value: #8ac0e2;
+      inherits: false;
+    }
+
+    @property --gradient-end {
+      syntax: "<color>";
+      initial-value: rgba(115, 213, 191, 0.2);
+      inherits: false;
+    }
+  }
+
   &-card {
     height: 300px;
     border: 1px solid #8f8f8f;
     border-radius: 10px;
     background: linear-gradient(
       121deg,
-      #8ac0e2 19.1%,
-      rgba(115, 213, 191, 0.2) 100%
+      var(--gradient-start) 19.1%,
+      var(--gradient-end) 100%
     );
     cursor: pointer;
-    transition: all 0.2s ease-in-out, background 0s, transform 0.4s ease-in-out,
-      box-shadow 0.4s ease-in-out;
+    transition: border-color 0.3s ease, background 0.8s ease-in,
+      --gradient-start 0.8s ease-in, --gradient-end 0.8s ease-in,
+      color 0.8s ease-in-out !important;
     grid-column: span 6;
 
     & .ant-card-body {
@@ -223,12 +243,31 @@ button.ant-btn-default,
     }
 
     &:hover {
+      --gradient-start: #6ec0ad;
+      --gradient-end: #20479c;
       border-color: #fff;
-      background: linear-gradient(122deg, #6ec0ad 18.5%, #20479c 97.71%);
     }
 
     &:active {
-      background: #8bc1e3;
+      --gradient-start: #8bc1e3;
+      --gradient-end: #8bc1e3;
+    }
+
+    // 為不支持 CSS 變量的瀏覽器提供後備樣式
+    @supports not (background: var(--gradient-start)) {
+      background: linear-gradient(
+        121deg,
+        #8ac0e2 19.1%,
+        rgba(115, 213, 191, 0.2) 100%
+      );
+
+      &:hover {
+        background: linear-gradient(121deg, #6ec0ad 19.1%, #20479c 100%);
+      }
+
+      &:active {
+        background: #8bc1e3;
+      }
     }
 
     .ant-typography.record-card__title,

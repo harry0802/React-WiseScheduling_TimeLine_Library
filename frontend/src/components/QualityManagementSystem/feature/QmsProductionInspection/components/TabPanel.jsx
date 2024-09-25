@@ -28,7 +28,8 @@ const TabPanel = ({
   ...other
 }) => {
   const { t } = useTranslation();
-  const lastItem = lot.getLastChild();
+
+  const lastItem = lot?.getLastChild();
   const defaultRender = () => (
     <StyledInspection>
       <StyledHead>
@@ -80,6 +81,7 @@ const TabPanel = ({
               margin="normal"
               onChange={(event) => {
                 updateLotsByInspectionQuantity(
+                  lot.id,
                   lastItem.lotName,
                   event.target.value
                 );
@@ -99,7 +101,11 @@ const TabPanel = ({
               variant="outlined"
               margin="normal"
               onChange={(event) => {
-                updateLotsByGoodQuantity(lastItem.lotName, event.target.value);
+                updateLotsByGoodQuantity(
+                  lot.id,
+                  lastItem.lotName,
+                  event.target.value
+                );
               }}
             />
           </StyledQty>
@@ -118,6 +124,7 @@ const TabPanel = ({
             {INSPECTION_LIST.map((item, index) => (
               <Grid item xs={2} sm={4} md={4} key={index}>
                 <QuantityInput
+                  qualityInputValue={lot.children[0][item.schema]}
                   label={t(item.label)}
                   lotName={lastItem.lotName}
                   schema={item.schema}

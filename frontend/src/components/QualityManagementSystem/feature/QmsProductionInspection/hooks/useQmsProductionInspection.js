@@ -1,54 +1,61 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Modal, notification } from "antd";
 import { useTranslation } from "react-i18next";
 
 import { TRANSLATION_KEYS } from "../utils/constants";
 import { createQmsProductionInspectionService } from "../domain/qmsProductionInspectionService";
+import { useProductionReports, useQmsStore } from "../../../slice/QmsAccount";
 import {
-  useGetProductionReportQuery,
-  useUpdateChildLotsMutation,
-} from "../../../../../store/api/productionReportApi";
+  useAddQualityInspectionMutation,
+  useGetInspectionsQuery,
+} from "../../../service/endpoints/inspectionApi";
 
 export const useQmsProductionInspection = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { machineSN, userType } = useParams();
+  const { productionReports, inspectionTypes, account } = useQmsStore();
+  const [addQualityInspection] = useAddQualityInspectionMutation();
   const [tabValue, setTabValue] = useState(0);
-  const [updateChildLots] = useUpdateChildLotsMutation();
 
-  const qmsService = createQmsProductionInspectionService(updateChildLots);
-  const [lots, setLots] = useState(qmsService.initialLots);
+  const { qmsService, clearProductionReports, isLoadingProductionReport } =
+    useProductionReports();
 
-  const {
-    data: workOrders,
-    isLoading,
-    isSuccess,
-    refetch,
-  } = useGetProductionReportQuery({
-    machineSN: "A1",
-  });
-  console.log(workOrders);
+  const initialLots = useCallback(
+    () =>
+      productionReports[machineSN]
+        ? qmsService.initialLots(productionReports[machineSN])
+        : [],
+    [machineSN, productionReports, qmsService]
+  );
 
-  useEffect(() => {
-    const handlePopState = () => {
-      window.history.pushState(null, "", document.URL);
-      Modal.info({
-        content: <p>{t(TRANSLATION_KEYS.FORBIDDEN)}</p>,
+  const [lots, setLots] = useState(initialLots);
+
+  const handleSubmit = useCallback(async () => {
+    if (lots.length === 0) {
+      showErrorModal(t(TRANSLATION_KEYS.EMPTY_FIELD_ERROR));
+      return;
+    }
+    try {
+      const { name } = inspectionTypes.find((type) => type.schema === userType);
+      await qmsService.submitLots(lots, name, account);
+    } catch (error) {
+      handleSubmitError(error);
+    }
+  }, [lots, qmsService, t]);
+
+  const showErrorModal = useCallback(
+    (content) => {
+      Modal.error({
+        content: <p>{content}</p>,
         okText: t("common.okBtn"),
       });
-    };
+    },
+    [t]
+  );
 
-    window.history.pushState(null, "", document.URL);
-    window.addEventListener("popstate", handlePopState);
-
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  const handleSubmit = async () => {
-    try {
-      await qmsService.submitLots(lots);
-      // navigate("/OperatorSignPage", { state: { action: "endChildLot" } });
-    } catch (error) {
+  const handleSubmitError = useCallback(
+    (error) => {
       if (error.message === "EMPTY_PRODUCTION_QUANTITY") {
         Modal.error({
           content: (
@@ -71,17 +78,40 @@ export const useQmsProductionInspection = () => {
           duration: 5,
         });
       }
-    }
-  };
+    },
+    [lots, t]
+  );
 
-  const updateLotQuantity = (updateFn) => (lotName, quantity) => {
-    setLots(updateFn(lots, lotName, quantity));
-  };
+  const updateLotQuantity = useCallback(
+    (updateFn) => (lotId, lotName, quantity) => {
+      if (typeof updateFn !== "function") {
+        console.error("updateFn is not a function");
+        return;
+      }
+      setLots((prevLots) => updateFn(prevLots, lotId, quantity));
+    },
+    []
+  );
+
+  useEffect(() => {
+    const handlePopState = () => {
+      window.history.pushState(null, "", document.URL);
+      Modal.info({
+        content: <p>{t(TRANSLATION_KEYS.FORBIDDEN)}</p>,
+        okText: t("common.okBtn"),
+      });
+    };
+
+    window.history.pushState(null, "", document.URL);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [t]);
 
   return {
     tabValue,
     lots,
-    handleChange: (_, newValue) => setTabValue(newValue),
+    handleChange: useCallback((_, newValue) => setTabValue(newValue), []),
     handleSubmit,
     updateLotsByInspectionQuantity: updateLotQuantity(
       qmsService.updateLotInspectionQuantity

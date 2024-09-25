@@ -11,6 +11,9 @@ const NumberInput = React.forwardRef(function CustomNumberInput(props, ref) {
     return <StyledText ref={ref}>{props.defaultValue || 0}</StyledText>;
   }
 
+  console.log(props);
+  console.log(ref);
+
   return (
     <BaseNumberInput
       slots={{
@@ -40,15 +43,22 @@ export default function QuantityInput(props) {
   const updateLotsByInspection = useLotStore(
     (state) => state.updateLotsByInspection
   );
-  const { label, lotName, schema, isQualityControl = false } = props;
 
-  console.log(lots);
+  const {
+    label,
+    lotName,
+    schema,
+    isQualityControl = false,
+    qualityInputValue,
+  } = props;
 
-  // get the value according to the lotName and schema from the lots
+  // Move getInputValue function definition before useState
   const getInputValue = (lotName, schema) => {
-    if (lots.length === 0) return 0;
+    if (lots?.length === 0 && !isQualityControl) return 0;
+    if (isQualityControl) return qualityInputValue;
 
     let split_lotName = lotName.split("-");
+
     split_lotName.pop();
     let lot = lots.filter((lot) => lot.lotName === split_lotName.join("-"));
     if (lot.length > 0) {
@@ -62,6 +72,11 @@ export default function QuantityInput(props) {
     return 0;
   };
 
+  // Use React.useState to manage the input value
+  const [inputValue, setInputValue] = React.useState(() =>
+    getInputValue(lotName, schema)
+  );
+
   return (
     <div className={styles.quantityInput}>
       <label>{label}</label>
@@ -69,12 +84,13 @@ export default function QuantityInput(props) {
         aria-label="Quantity Input"
         min={0}
         max={999}
-        defaultValue={getInputValue(lotName, schema)}
+        value={inputValue}
         isQualityControl={isQualityControl}
         onChange={(_, newValue) => {
           if (newValue < 0 || newValue === "" || newValue === undefined) {
             newValue = 0;
           }
+          setInputValue(newValue);
           updateLotsByInspection(lotName, schema, newValue);
         }}
       />

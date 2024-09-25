@@ -15,23 +15,20 @@ export function useProductionScheduleData(queryParams) {
   useEffect(() => {
     if (isSuccess) {
       setLoading(true);
-
       const { data: fetchedData, meta } = data;
-      console.log(fetchedData);
-
       setTotalCurrent(meta.total_count);
 
       const processedData = fetchedData.map((item) => {
         let newItem = { ...item };
 
-        // 计算 hourlyCapacity
+        // calc hourlyCapacity
         if (item.moldingSecond && item.moldCavity) {
           newItem.hourlyCapacity = Math.floor(
             (3600 / item.moldingSecond) * item.moldCavity
           );
         }
 
-        // 计算 dailyCapacity
+        // calc dailyCapacity
         if (newItem.hourlyCapacity !== null && item.conversionRate !== null) {
           newItem.dailyCapacity = Math.floor(
             newItem.hourlyCapacity *
@@ -40,10 +37,8 @@ export function useProductionScheduleData(queryParams) {
           );
         }
 
-        // 使用 convertDatesToISO 转换日期格式
-        console.log(newItem);
+        // convert date format
         newItem = convertDatesToCustomFormat(newItem, "YYYY-MM-DD");
-        console.log(newItem);
         return newItem;
       });
 

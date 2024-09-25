@@ -2,7 +2,7 @@ import React from "react";
 import AppLayout from "./AppLayout";
 import { RecordAddInfoProvider } from "../components/ProductionRecord/context/RecordAddInfoProvider";
 import * as LazyComponents from "./lazyComponents";
-
+// ProductionReportPage
 const routeConfig = [
   {
     path: "/",
@@ -69,7 +69,7 @@ const routeConfig = [
             path: "addProductInfo/:productId",
             element: (
               <RecordAddInfoProvider>
-                <React.Suspense fallback={<div>Loading...</div>}>
+                <React.Suspense fallback={<div> Loading... </div>}>
                   <LazyComponents.ProductionRecordAddInfo />
                 </React.Suspense>
               </RecordAddInfoProvider>

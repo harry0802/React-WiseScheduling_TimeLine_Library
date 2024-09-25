@@ -4,7 +4,12 @@ import { Box, Typography, Button, Container, Paper } from "@mui/material";
 import TimerIcon from "@mui/icons-material/Timer";
 import BeachAccess from "@mui/icons-material/BeachAccess";
 import styled from "styled-components";
-import { useQmsData, useQmsStore } from "../slice/QmsAccount";
+import {
+  useInspectionTypes,
+  useProductionSchedules,
+  useQmsData,
+  useQmsStore,
+} from "../slice/QmsAccount";
 
 const StyledContainer = styled(Container)`
   && {
@@ -117,9 +122,11 @@ function QmsUserAccessSelect() {
   const navigate = useNavigate();
   const { machineSN } = useParams();
 
-  const { productionSchedules, isLoadingProductionSchedules, inspectionTypes } =
-    useQmsData();
   const { setUserType } = useQmsStore();
+
+  const { productionSchedules, isLoadingProductionSchedules } =
+    useProductionSchedules();
+  const { inspectionTypes } = useInspectionTypes();
 
   const handleClick = (userNB) => {
     const type = inspectionTypes[userNB].schema;
