@@ -257,7 +257,7 @@ class LyService:
         try:
             irwhere = ""
             # get the date of 6 months ago
-            six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%d-%m")
+            six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
             irwhere += f"MP_DATE>'{six_months_ago}'"
             
             # get the last MP_NO from the database
