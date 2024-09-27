@@ -33,7 +33,9 @@
       "actualOnMachineDate": "Ngày lên th.tế",
       "unfinishedQuantity": "Chưa hthành",
       "operators": "NV phụ trách",
-      "period": "Khoảng t.gian sx"
+      "period": "Khoảng t.gian sx",
+      "inspectionQuantity": "SL đã kiểm",
+      "goodQuantity": "SL đạt"
     },
     "filterBar": {
       "week": "Tuần",
@@ -96,7 +98,13 @@
       "count": "số*",
       "shiftChange": "Đổi ca",
       "forbidden": "Không thể quay lại. H.thành công đoạn sx và bàn giao \"đổi ca\".",
-      "currentProduction": "Sản xuất hiện tại"
+      "currentProduction": "Sản xuất hiện tại",
+      "submit": "Gửi"
     }
+  },
+  "QmsMachineSelect": {
+    "title": "Hệ thống điều phối dây chuyền sx-chọn máy",
+    "emptyFieldError": "Vui lòng nhập số lượng để điều phối dây chuyền sx",
+    "forbidden": "Không thể quay lại. H.thành công đoạn sx và bàn giao \"đổi ca\"."
   }
 }

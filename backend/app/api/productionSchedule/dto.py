@@ -4,6 +4,7 @@ from marshmallow.validate import Length, Range
 from app.utils_log import validation_error
 import logging
 import copy
+from app.api.option.optionEnum import WorkOrderStatusEnum
 from app.service.customField import *
 
 class productionScheduleDto:
@@ -36,7 +37,7 @@ class productionScheduleDto:
             "week": NullableInteger(required=False, description="week",min=0, max=53),
             "singleOrDoubleColor": NullableString(required=False, description="singleOrDoubleColor", example="single"),
             "conversionRate": NullableFloat(required=False, description="conversionRate", example=0.95),
-            "status": NullableString(required=False, description="status", example="尚未上機", enum=["尚未上機", "On-going", "Done", "暫停生產", "取消生產"]),
+            "status": NullableString(required=False, description="status", example="尚未上機", enum=[e.value for e in WorkOrderStatusEnum]),
         }
     #GET model
     get_obj = copy.deepcopy(base_obj)

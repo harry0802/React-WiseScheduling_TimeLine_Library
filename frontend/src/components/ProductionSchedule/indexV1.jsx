@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faTrashCan } from "@fortawesome/free-solid-svg-icons";
-import { Table, Button, message, Modal, Tooltip } from "antd";
+import { Table, Button, message, Modal, Tooltip, Spin } from "antd";
 import { debounce } from "lodash";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -20,7 +20,6 @@ import {
 import "./index.scss";
 import ExcelExample from "../../assets/ExcelExample.xlsx";
 import { TZ } from "../../config/config";
-import { useRendersCount } from "react-use";
 import EditableRow from "./component/EditableRow";
 import EditableCell from "./component/EditableCell";
 import ResizableTitle from "./component/ResizableTitle";
@@ -30,26 +29,18 @@ import { getDefaultColumns } from "./hook/columnsConfig";
 import { getColumns } from "./utils/tableUtils";
 import { useSelectionAndDeletion } from "./hook/useSelectionAndDeletion";
 import useExportData from "./hook/useExportData";
-import { convertDatesToISO, exportToExcel } from "./utils/excelUtils";
+import { convertDatesToCustomFormat, exportToExcel } from "./utils/excelUtils";
 import { useLYQuery } from "./hook/useLYQuery";
+import { LoadingOutlined } from "@ant-design/icons";
+import { useProductionScheduleData } from "./hook/useProductionScheduleData";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-/**
- * 生產計劃排程表組件
- * Production Schedule Component
- *
- * @returns {JSX.Element} 生產計劃排程表組件
- * @returns {JSX.Element} Production Schedule Component
- */
 function ProductionSchedule() {
   const navigate = useNavigate();
-  // const rendersCount = useRendersCount();
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
 
-  // 搜尋條件篩選
-  // Search filters
   const {
     startDate,
     setStartDate,
@@ -63,33 +54,30 @@ function ProductionSchedule() {
     setKeywordTypeState,
     keywordState,
     setKeywordState,
-    loading,
-    setLoading,
     formatDateTime,
   } = useSearchFilters();
 
-  // 分頁設定
-  // Pagination settings
   const { pagination, setPagination, handleTableChange } = usePagination();
-  const { data, isLoading, isSuccess, refetch } = useGetProductionScheduleQuery(
-    {
-      size: pagination?.pageSize,
-      page: pagination?.page,
-      start_planOnMachineDate: formatDateTime(startDate, "start"),
-      end_planOnMachineDate: formatDateTime(endDate, "end"),
-      status: statusState,
-      expiry: expiryState,
-      [keywordTypeState]: keywordState,
-    }
-  );
 
-  // 資料處理
-  // Data processing
-  const [totalCurrent, setTotalCurrent] = useState(1);
-  const [dataSource, setDataSource] = useState([]);
+  const queryParams = {
+    size: pagination?.pageSize,
+    page: pagination?.page,
+    start_planOnMachineDate: formatDateTime(startDate, "start"),
+    end_planOnMachineDate: formatDateTime(endDate, "end"),
+    status: statusState,
+    expiry: expiryState,
+    [keywordTypeState]: keywordState,
+  };
 
-  // 獲取外部 api 工作列表
-  // Fetch external API work order list
+  const {
+    dataSource,
+    setDataSource,
+    totalCurrent,
+    loading,
+    isLoading,
+    refetch,
+  } = useProductionScheduleData(queryParams);
+
   const { data: workOrderSNData, isSuccess: workOrderSNIsSuccess } =
     useGetWorkOrderSNsQuery();
 
@@ -97,8 +85,6 @@ function ProductionSchedule() {
 
   const onChange = (filters, sorter) => {};
 
-  // 表單 I/O
-  // Form I/O
   const { needExportData } = useExportData(
     startDate,
     endDate,
@@ -109,39 +95,29 @@ function ProductionSchedule() {
     formatDateTime
   );
 
-  // 新增項目 與 新增製令單
-  // Add item and add work order
   const [addProductionSchedule] = useAddProductionScheduleMutation();
   const [nowDate, setNowDate] = useState(
     dayjs.tz(dayjs().format("YYYY-MM-DD"), TZ).format()
   );
 
-  // 勾選表單
-  // Form selection
   const { selectionType, selectedRowKeys, deleteChecked, rowSelection } =
     useSelectionAndDeletion(dataSource, refetch);
 
   const handleAdd = async () => {
     if (selectedRowKeys.length > 0) {
       message.warning("請先取消勾選增製令單才能新增項目");
-      // Please uncheck the added work order before adding a new item
       return;
     }
 
     try {
       Modal.confirm({
         title: "確認新增",
-        // Confirm Addition
         content: "確定要新增製令單嗎？",
-        // Are you sure you want to add a new work order?
         okText: "確定",
-        // Confirm
         cancelText: "取消",
-        // Cancel
         onOk: async () => {
           try {
             message.success("新增製令單成功");
-            // Successfully added work order
 
             const newData = {
               workOrderSN: "",
@@ -157,25 +133,20 @@ function ProductionSchedule() {
             setPagination({ ...pagination, page: 1 });
           } catch (error) {
             console.error("新增製令單時發生錯誤:", error);
-            // Error occurred while adding work order
           }
         },
       });
     } catch (error) {
       console.error("處理新增製令單時發生錯誤:", error);
-      // Error occurred while processing the addition of work order
     }
   };
-
   const handleSave = useCallback(
     async (row) => {
-      const originalDataSource = [...dataSource]; // 保存当前的数据源状态
-      // Save the current state of the data source
+      const originalDataSource = [...dataSource];
       try {
         const matchedData = dataSource.find((item) => item.id === row.id);
         if (!matchedData) {
           throw new Error("未找到匹配的数据");
-          // Matching data not found
         }
 
         const dateKeys = [
@@ -206,41 +177,28 @@ function ProductionSchedule() {
         const updatedData = dataSource.map((item) =>
           item.id === row.id ? { ...item, ...row } : item
         );
+
         setDataSource(updatedData);
 
-        row.workOrderDate = row.workOrderDate
-          ? dayjs.tz(row.workOrderDate, TZ).format()
-          : null;
-        row.planOnMachineDate = row.planOnMachineDate
-          ? dayjs.tz(row.planOnMachineDate, TZ).format()
-          : null;
-        row.planFinishDate = row.planFinishDate
-          ? dayjs.tz(row.planFinishDate, TZ).format()
-          : null;
-        row.actualOnMachineDate = row.actualOnMachineDate
-          ? dayjs.tz(row.actualOnMachineDate, TZ).format()
-          : null;
-        row.actualFinishDate = row.actualFinishDate
-          ? dayjs.tz(row.actualFinishDate, TZ).format()
-          : null;
+        // 使用 @excelUtils.js 轉換日期
+        // 2024-09-12T16:00:00
+        const convertedRow = convertDatesToCustomFormat(
+          [row],
+          "YYYY-MM-DDTHH:mm:ss"
+        )[0];
 
         const response = await UpdateProductionSchedule({
           id: row.id,
-          data: row,
+          data: convertedRow,
         });
 
         if (!response.error) {
           message.success("修改數據成功");
-          // Data modified successfully
         } else {
           throw new Error("修改數據失敗");
-          // Failed to modify data
         }
       } catch (error) {
         message.error("修改數據失敗!!!!");
-        // Failed to modify data!!!!
-        // 恢复原始数据
-        // Restore original data
         setDataSource(originalDataSource);
       }
     },
@@ -257,7 +215,6 @@ function ProductionSchedule() {
         queryFromLY(row);
       } else {
         message.warning("凌越ERP查無此製令單號，請重新輸入。");
-        // This work order number is not found in LY ERP, please re-enter.
       }
     },
     [workOrderSNsFromLYState, queryFromLY]
@@ -281,7 +238,6 @@ function ProductionSchedule() {
         },
       });
       message.success("修改數據成功");
-      // Data modified successfully
     } catch (error) {
       console.error("Error updating production area:", error);
     }
@@ -301,7 +257,6 @@ function ProductionSchedule() {
         },
       });
       message.success("修改數據成功");
-      // Data modified successfully
     } catch (error) {
       console.error("Error updating production area:", error);
     }
@@ -314,7 +269,6 @@ function ProductionSchedule() {
         data: { singleOrDoubleColor: value },
       });
       message.success("修改數據成功");
-      // Data modified successfully
     } catch (error) {
       console.error("Error updating production area:", error);
     }
@@ -349,6 +303,7 @@ function ProductionSchedule() {
       cell: EditableCell,
     },
   };
+
   useEffect(() => {
     if (workOrderSNIsSuccess) {
       const workOrderSNOption = workOrderSNData.map((item) => {
@@ -358,46 +313,8 @@ function ProductionSchedule() {
     }
   }, [workOrderSNIsSuccess, workOrderSNData]);
 
-  useEffect(() => {
-    if (isSuccess) {
-      const { data: rawDataSource, meta } = data;
-
-      const processedDataSource = rawDataSource.map((item) => {
-        let newItem = { ...item };
-
-        if (item.moldingSecond && item.moldCavity) {
-          newItem.hourlyCapacity = Math.floor(
-            (3600 / item.moldingSecond) * item.moldCavity
-          );
-        }
-
-        if (newItem.hourlyCapacity !== null && item.conversionRate !== null) {
-          newItem.dailyCapacity = Math.floor(
-            newItem.hourlyCapacity *
-              item.dailyWorkingHours *
-              item.conversionRate
-          );
-        }
-
-        return newItem;
-      });
-
-      const newDataWithISODate = convertDatesToISO(processedDataSource);
-      setDataSource((prevDataSource) => {
-        if (
-          JSON.stringify(prevDataSource) !== JSON.stringify(newDataWithISODate)
-        ) {
-          return newDataWithISODate;
-        }
-        return prevDataSource;
-      });
-      setLoading(false);
-      setTotalCurrent(meta.total_count);
-    }
-  }, [isSuccess, data]);
-
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Spin indicator={<LoadingOutlined spin />} size="large" />;
   }
 
   const debouncedHandleDelete = debounce(deleteChecked, 500);
@@ -411,7 +328,6 @@ function ProductionSchedule() {
       <div className="box">
         <div className="title-box">
           <div className="title">生產計劃排程表</div>
-          {/* Production Schedule Table */}
           <div className="btn-box">
             <FilterBar
               startDate={startDate}
@@ -440,57 +356,57 @@ function ProductionSchedule() {
             </Tooltip>
           </div>
         </div>
-        {isSuccess && (
-          <Table
-            components={components}
-            rowClassName={(record, index) => {
-              var className = "";
-              if (record.status === WORKORDER_STATUS.PAUSE) {
-                className += " status-pause ";
-              }
-              if (
-                record.planFinishDate &&
-                record.status !== WORKORDER_STATUS.DONE &&
-                dayjs().isAfter(dayjs(record.planFinishDate).add(-7, "days"))
-              ) {
-                className += " expiry-warning ";
-              }
-              if (
-                record.planFinishDate &&
-                record.status !== WORKORDER_STATUS.DONE &&
-                dayjs().isAfter(dayjs(record.planFinishDate))
-              ) {
-                className += " expiry-danger ";
-              }
 
-              return className;
-            }}
-            bordered
-            striped={true}
-            rowKey="id"
-            dataSource={dataSource}
-            columns={columns}
-            pagination={{
-              total: totalCurrent,
-              current: pagination?.page,
-              defaultPageSize: pagination?.pageSize,
-              pageSize: pagination?.pageSize,
-              showSizeChanger: true,
-              showLessItems: true,
-              showQuickJumper: false,
-              position: ["bottomCenter"],
-              onChange: handleTableChange,
-            }}
-            loading={loading}
-            scroll={{ x: 3000 }}
-            rowSelection={{
-              type: selectionType,
-              ...rowSelection,
-              columnWidth: "32px",
-            }}
-            onChange={onChange}
-          />
-        )}
+        <Table
+          components={components}
+          rowClassName={(record, index) => {
+            var className = "";
+            if (record.status === WORKORDER_STATUS.PAUSE) {
+              className += " status-pause ";
+            }
+            if (
+              record.planFinishDate &&
+              record.status !== WORKORDER_STATUS.DONE &&
+              dayjs().isAfter(dayjs(record.planFinishDate).add(-7, "days"))
+            ) {
+              className += " expiry-warning ";
+            }
+            if (
+              record.planFinishDate &&
+              record.status !== WORKORDER_STATUS.DONE &&
+              dayjs().isAfter(dayjs(record.planFinishDate))
+            ) {
+              className += " expiry-danger ";
+            }
+
+            return className;
+          }}
+          bordered
+          striped={true}
+          rowKey="id"
+          dataSource={dataSource}
+          columns={columns}
+          pagination={{
+            total: totalCurrent,
+            current: pagination?.page,
+            defaultPageSize: pagination?.pageSize,
+            pageSize: pagination?.pageSize,
+            showSizeChanger: true,
+            showLessItems: true,
+            showQuickJumper: false,
+            position: ["bottomCenter"],
+            onChange: handleTableChange,
+          }}
+          loading={loading}
+          scroll={{ x: 3000 }}
+          rowSelection={{
+            type: selectionType,
+            ...rowSelection,
+            columnWidth: "32px",
+          }}
+          onChange={onChange}
+        />
+
         {dataSource.length > 0 && (
           <Button
             key="downloadExcel"
@@ -526,7 +442,6 @@ function ProductionSchedule() {
             下載匯入Excel範例
           </Button>
         </a>
-        {/* <span>Renders count: {rendersCount}</span> */}
       </div>
     </div>
   );

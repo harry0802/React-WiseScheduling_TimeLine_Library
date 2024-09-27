@@ -38,11 +38,14 @@ function ProductionRecord() {
   const location = useLocation();
 
   const isHomePage =
-    location.pathname === "/ProductionRecordPage" &&
-    location.pathname === "/ProductionRecordPage";
+    location.pathname.startsWith("/ProductionRecordPage") &&
+    (location.pathname === "/ProductionRecordPage" ||
+      location.pathname === "/ProductionRecordPage/");
 
   const isInventoryPage =
-    location.pathname === "/ProductionRecordPage/inventoryManagement";
+    location.pathname.startsWith("/ProductionRecordPage/inventoryManagement") &&
+    (location.pathname === "/ProductionRecordPage/inventoryManagement" ||
+      location.pathname === "/ProductionRecordPage/inventoryManagement/");
 
   return (
     <ProductionRecordWarpper>
@@ -53,7 +56,6 @@ function ProductionRecord() {
 
       <ProductionRecordSections>
         <Outlet />
-        <ProductNotification />
       </ProductionRecordSections>
     </ProductionRecordWarpper>
   );

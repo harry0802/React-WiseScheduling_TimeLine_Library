@@ -119,31 +119,48 @@ export const exportToExcel = (columns, data) => {
 
 /**
  * 日期格式轉換
- * @param {Array} data - 數據數組
- * @returns {Array} 轉換後的數據數組
+ * @param {Array|Object} data - 數據數組或對象
+ * @param {string} format - 日期格式字符串
+ * @returns {Array|Object} 轉換後的數據數組或對象
  */
-export const convertDatesToISO = (data) => {
-  if (!Array.isArray(data)) {
-    console.error("data 不是一個數組");
-    return [];
+export const convertDatesToCustomFormat = (data, format) => {
+  if (Array.isArray(data)) {
+    return data.map((item) => convertItem(item, format));
+  } else if (typeof data === "object" && data !== null) {
+    return convertItem(data, format);
+  } else {
+    console.error("data is neither an array nor an object");
+    return data;
   }
+};
 
-  return data.map((item) => {
-    const newItem = { ...item };
-    newItem.workOrderDate = formatDate(item.workOrderDate);
-    newItem.planOnMachineDate = formatDate(item.planOnMachineDate);
-    newItem.planFinishDate = formatDate(item.planFinishDate);
-    newItem.actualOnMachineDate = formatDate(item.actualOnMachineDate);
-    newItem.actualFinishDate = formatDate(item.actualFinishDate);
-    return newItem;
+const convertItem = (item, format) => {
+  const newItem = { ...item };
+  const dateFields = [
+    "workOrderDate",
+    "planOnMachineDate",
+    "planFinishDate",
+    "actualOnMachineDate",
+    "actualFinishDate",
+  ];
+
+  dateFields.forEach((field) => {
+    newItem[field] = formatDate(item[field], format);
   });
+
+  return newItem;
 };
 
 /**
  * 格式化日期
  * @param {string} date - 日期字符串
+ * @param {string} format - 日期格式字符串
  * @returns {string} 格式化後的日期字符串
  */
-const formatDate = (date) => {
-  return date ? dayjs(date).tz(TZ).format("YYYY-MM-DD") : "";
+const formatDate = (date, format) => {
+  if (date) {
+    return dayjs(date).tz(TZ).format(format);
+  } else {
+    return null;
+  }
 };

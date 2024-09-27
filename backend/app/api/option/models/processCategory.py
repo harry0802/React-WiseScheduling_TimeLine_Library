@@ -7,3 +7,4 @@ class ProcessCategory():
     def __init__(self): 
         self.id = None
         self.category = None
+        self.schema = None

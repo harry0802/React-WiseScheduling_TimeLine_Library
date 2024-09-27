@@ -6,7 +6,7 @@ from flask_restx import Resource
 from flask_restx import inputs
 
 from app.utils_log import controller_entrance_log
-
+from app.api.option.optionEnum import WorkOrderStatusEnum
 from .service import productionReportService
 from .dto import productionReportDto
 from .schemas import productionReportSchema
@@ -46,7 +46,9 @@ class productionReportController(Resource):
     @api.param("machineSN", "machineSN")
     @api.param("start_planOnMachineDate", "Search range from planOnMachineDate")
     @api.param("end_planOnMachineDate", "Search range to planOnMachineDate")
-    @api.param("status", "尚未上機, On-going, Done, 暫停生產, all")
+    @api.param("status", type="string",
+            enum=[WorkOrderStatusEnum.NOT_YET.value, WorkOrderStatusEnum.ON_GOING.value, WorkOrderStatusEnum.DONE.value, 
+                  WorkOrderStatusEnum.PAUSE.value, "all"])
     @api.param("expiry", "無限期, 即將到期, 已經過期")
     @api.param("workOrderSN", "workOrderSN")
     @api.param("productName", "productName")

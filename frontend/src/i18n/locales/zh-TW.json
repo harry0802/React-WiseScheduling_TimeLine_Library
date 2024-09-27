@@ -37,7 +37,9 @@
       "actualOnMachineDate": "實際上機日",
       "unfinishedQuantity": "未完成數量",
       "operators": "負責人員",
-      "period": "生產區間"
+      "period": "生產區間",
+      "inspectionQuantity": "檢驗數量",
+      "goodQuantity": "良品數量"
     },
     "filterBar": {
       "week": "週",
@@ -100,7 +102,13 @@
       "count": "數量*",
       "shiftChange": "換班",
       "forbidden": "您無法回到上一頁，請完成此生產階段，並\"換班\"交接",
-      "currentProduction": "當前製程"
+      "currentProduction": "當前製程",
+      "submit": "送出檢驗"
     }
+  },
+  "QmsMachineSelect": {
+    "title": "品管檢驗系統-機台選擇",
+    "emptyFieldError": "請輸入檢驗數量",
+    "forbidden": "您無法回到上一頁，請完成檢驗 "
   }
 }

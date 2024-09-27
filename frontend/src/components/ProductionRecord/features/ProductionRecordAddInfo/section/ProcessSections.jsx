@@ -109,8 +109,6 @@ function ProcessSectionsDialog() {
     }
   };
 
-  // console.log(selectedProcess, inputValue, formValues.moldName);
-
   useEffect(() => {
     if (processDrawer) {
       // 當對話框打開時，設置初始值
@@ -193,15 +191,14 @@ function ProcessSectionsDialog() {
 
 // *手風琴 -> 手風琴折疊的內容
 function ProcessSectionsListDetail({ materialItems, processIndex = 0 }) {
-  const { productSN, materialSN, materialName, quantity, unit } =
-    materialItems || {};
+  const { materialSN, materialName, quantity, unit } = materialItems || {};
 
   return (
     <div>
       <p>物料:{processIndex + 1}</p>
       <p>{materialSN || "materialSN..."}</p>
       <p>{materialName || "materialName..."}</p>
-      <p>{productSN || "productSN..."}</p>
+
       <p>
         {quantity || "quantity..."} {unit || "unit..."}
       </p>

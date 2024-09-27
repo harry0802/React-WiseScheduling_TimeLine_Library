@@ -5,8 +5,13 @@ import { styled } from "@mui/system";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import { useLotStore } from "../../store/zustand/store";
+import { useHandleLotChanges } from "./useHandleLotChanges";
 
 const NumberInput = React.forwardRef(function CustomNumberInput(props, ref) {
+  if (props.isQualityControl) {
+    return <StyledText ref={ref}>{props.value || 0}</StyledText>;
+  }
+
   return (
     <BaseNumberInput
       slots={{
@@ -36,13 +41,35 @@ export default function QuantityInput(props) {
   const updateLotsByInspection = useLotStore(
     (state) => state.updateLotsByInspection
   );
-  const { label, lotName, schema } = props;
 
-  // get the value according to the lotName and schema from the lots
+  const {
+    label,
+    lotName,
+    schema,
+    isQualityControl = false,
+    qualityInputValue,
+    putawayId,
+    pscheduleId,
+  } = props;
+
+  const { handleLotChange } = useHandleLotChanges();
+
+  // Move getInputValue function definition before useState
   const getInputValue = (lotName, schema) => {
+    if (lots?.length === 0 && !isQualityControl) return 0;
+    if (isQualityControl) {
+      if (qualityInputValue !== undefined && qualityInputValue !== null) {
+        return qualityInputValue;
+      } else {
+        return 0;
+      }
+    }
+
     let split_lotName = lotName.split("-");
+
     split_lotName.pop();
     let lot = lots.filter((lot) => lot.lotName === split_lotName.join("-"));
+
     if (lot.length > 0) {
       const childrenLots = lot[0].children.filter(
         (child) => child.lotName === lotName
@@ -54,6 +81,11 @@ export default function QuantityInput(props) {
     return 0;
   };
 
+  // Use React.useState to manage the input value
+  const [inputValue, setInputValue] = React.useState(() =>
+    getInputValue(lotName, schema)
+  );
+
   return (
     <div className={styles.quantityInput}>
       <label>{label}</label>
@@ -61,12 +93,15 @@ export default function QuantityInput(props) {
         aria-label="Quantity Input"
         min={0}
         max={999}
-        defaultValue={getInputValue(lotName, schema)}
-        onChange={(event, newValue) => {
+        value={inputValue}
+        isQualityControl={isQualityControl}
+        onChange={(_, newValue) => {
           if (newValue < 0 || newValue === "" || newValue === undefined) {
             newValue = 0;
           }
+          setInputValue(newValue);
           updateLotsByInspection(lotName, schema, newValue);
+          handleLotChange(pscheduleId, putawayId);
         }}
       />
     </div>
@@ -175,5 +210,19 @@ const StyledButton = styled("button")(
   &.increment {
     order: 1;
   }
+`
+);
+
+// 新增一個純文字的樣式組件
+const StyledText = styled("span")(
+  () => `
+  font-size: 1.75rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #8F8F8F;
+  padding: 6px 6px;
+  min-width: 2.5rem;
+  text-align: center;
+  display: inline-block;
 `
 );

@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import { TZ } from "../../config/config";
+import { useHandleLotChanges } from "./useHandleLotChanges";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -103,6 +104,8 @@ const TabPanel = (props) => {
     productionQuantity,
     unfinishedQuantity,
     processName,
+    pscheduleId,
+    putawayId,
     ...other
   } = props;
 
@@ -195,6 +198,8 @@ const TabPanel = (props) => {
                       label={item.lable}
                       lotName={lotName}
                       schema={item.schema}
+                      putawayId={putawayId}
+                      pscheduleId={pscheduleId}
                     />
                   </Grid>
                 ))}
@@ -241,6 +246,8 @@ const ProductionInspection = () => {
     setTabValue(newValue);
   };
 
+  const { handleAllLotsSubmit } = useHandleLotChanges();
+
   const handleSubmit = async () => {
     // check if TextField if empty
     const emptyTextField = lots.filter((lot) => {
@@ -273,6 +280,7 @@ const ProductionInspection = () => {
         id: lastChild.id || lastChild.productionReport_id,
       };
     });
+
     await updateChildLots(childLots)
       .unwrap()
       .then((payload) => {
@@ -328,6 +336,7 @@ const ProductionInspection = () => {
       {lots.map((lot, index) => {
         if (lot.children != null && lot.children.length > 0) {
           const lastItem = lot.children[lot.children.length - 1];
+
           return (
             <TabPanel
               key={index}
@@ -340,6 +349,8 @@ const ProductionInspection = () => {
                 .tz(TZ)
                 .format("YYYY-MM-DD HH:mm:ss")}
               quatity={lot.workOrderQuantity}
+              pscheduleId={lastItem.pschedule_id}
+              putawayId={lastItem.id}
               lotName={lastItem.lotName}
               defectiveQuantity={
                 lastItem.defectiveQuantity ? lastItem.defectiveQuantity : ""
@@ -363,7 +374,10 @@ const ProductionInspection = () => {
           color: "#FFFFFF",
           fontSize: "16px",
         }}
-        onClick={() => handleSubmit()}
+        onClick={() => {
+          handleSubmit();
+          handleAllLotsSubmit();
+        }}
       >
         {t("productionReport.inspection.shiftChange")}
       </Button>

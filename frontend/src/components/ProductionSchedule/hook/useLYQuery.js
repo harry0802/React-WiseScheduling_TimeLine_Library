@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useGetProductionScheduleThroughLYQuery } from "../../../store/api/productionScheduleApi";
+import { message } from "antd";
 
 /**
  * 自定義 Hook，用於處理凌越 ERP 查詢邏輯
@@ -14,8 +15,11 @@ export function useLYQuery(handleSave) {
   /**
    * 使用 RTK Query 獲取生產計劃數據
    */
-  const { data: lyData, isSuccess: lyIsSuccess } =
-    useGetProductionScheduleThroughLYQuery(lyQuery, { skip: !isQuerying });
+  const {
+    data: lyData,
+    isSuccess: lyIsSuccess,
+    error,
+  } = useGetProductionScheduleThroughLYQuery(lyQuery, { skip: !isQuerying });
 
   /**
    * 觸發凌越 ERP 查詢
@@ -35,6 +39,10 @@ export function useLYQuery(handleSave) {
     handleSave({ ...lyData });
     setIsQuerying(false);
     setLyQuery({ id: null, workOrderSN: null });
+  }
+
+  if (error) {
+    message.warning(error.data.message);
   }
 
   return { queryFromLY };

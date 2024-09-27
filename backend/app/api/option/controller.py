@@ -1,3 +1,10 @@
+"""
+此Option模組的目的為確保前端以及後端的資料都來自資料庫，確保一致性和正確性。
+例如: 機台狀態、製程選項的分類、檢驗類別等等。
+在後端，將這些狀態、類別等等宣告為Enum，並在Flask一開始create_app()中，從資料庫拿最新資料更新Enum，以確保前後端使用的資料一致。
+"""
+
+import sys
 from flask import request,current_app
 from flask_restx import Resource
 from app.utils_log import controller_entrance_log
@@ -5,12 +12,17 @@ from .service import optionService
 from .dto import optionDto
 from .schemas import optionSchema
 from .models.processCategory import ProcessCategory
+from .models.inspectionType import InspectionType
+from .models.workOrderStatus import WorkOrderStatus
 
 api = optionDto.api
 control_schema = optionSchema()
 name_param = f"""The name of the option: 
-           (製程選項的分類){ProcessCategory().__name__}: {ProcessCategory().__dict__}
+           (製令單狀態) {WorkOrderStatus().__name__}: {WorkOrderStatus().__dict__}
+           (製程選項的分類) {ProcessCategory().__name__}: {ProcessCategory().__dict__}
+           (檢驗類別) {InspectionType().__name__}: {InspectionType().__dict__}
            """
+
 
 @api.route("/<name>")
 @api.param("name", name_param)

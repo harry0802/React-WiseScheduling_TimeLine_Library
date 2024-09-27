@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { convertDatesToISO } from "../utils/excelUtils"; // 引入新的函數
+import { convertDatesToCustomFormat } from "../utils/excelUtils"; // 引入新的函數
 import { useGetProductionScheduleQuery } from "../../../store/api/productionScheduleApi";
 
 /**
@@ -40,7 +40,7 @@ function useExportData(
 
   useEffect(() => {
     if (exportIsSuccess) {
-      const newDataWithISODate = convertDatesToISO(exportData.data); // 使用新的函數
+      const newDataWithISODate = convertDatesToCustomFormat(exportData.data); // 使用新的函數
       setNeedExportData(newDataWithISODate);
     }
   }, [exportIsSuccess, exportData]);

@@ -8,7 +8,7 @@ function ProductionRecordAddInfo() {
   const { setPageStatus } = homeSlice();
   useEffectOnce(() => setPageStatus("新增產品資訊"));
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <ProductContent title="新增產品資訊">
         <AddInfoSections />
         <ProcessSections />

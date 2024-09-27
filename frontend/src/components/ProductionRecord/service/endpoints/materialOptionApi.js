@@ -73,7 +73,7 @@ export const useMaterialOptionActions = () => {
       const response = await createMaterialOption(newMaterialOption).unwrap();
       return response;
     } catch (err) {
-      console.error("Failed to create material option:", err);
+      console.error("💣 Failed to create material option:", err);
       throw err;
     }
   };
@@ -84,11 +84,11 @@ export const useMaterialOptionActions = () => {
         updatedMaterialOption
       ).unwrap();
 
-      console.log(updatedMaterialOption);
+      console.log("🔥🔥🔥", updatedMaterialOption);
 
       return response;
     } catch (err) {
-      console.error("Failed to update material option:", err);
+      console.error("💣 Failed to update material option:", err);
       throw err;
     }
   };
@@ -98,7 +98,7 @@ export const useMaterialOptionActions = () => {
       const response = await deleteMaterialOption(id).unwrap();
       return response;
     } catch (err) {
-      console.error("Failed to delete material option:", err);
+      console.error("💣 Failed to delete material option:", err);
       throw err;
     }
   };

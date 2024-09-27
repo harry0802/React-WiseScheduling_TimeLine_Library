@@ -3,9 +3,9 @@ import ImportProductionSchedule from "../components/ProductionSchedule/ImportPro
 
 const ImportProductionSchedulePage = () => {
   return (
-    <div>
+    <>
       <ImportProductionSchedule />
-    </div>
+    </>
   );
 };
 

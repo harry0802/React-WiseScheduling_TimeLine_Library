@@ -1,0 +1,42 @@
+export const TRANSLATION_KEYS = {
+  SHIFT_CHANGE: "productionReport.inspection.shiftChange",
+  EMPTY_FIELD_ERROR: "QmsMachineSelect.emptyFieldError",
+  FORBIDDEN: "QmsMachineSelect.forbidden",
+  OPERATOR1: "productionReport.inspection.operator1",
+  OPERATOR2: "productionReport.inspection.operator2",
+  START_TIME: "productionReport.inspection.startTime",
+  WORK_ORDER_QUANTITY: "productionReport.table.workOrderQuantity",
+  UNFINISHED_QUANTITY: "productionReport.table.unfinishedQuantity",
+  DEFECTIVE_QUANTITY: "productionReport.table.formatedDefectiveQty",
+  CURRENT_PRODUCTION: "productionReport.inspection.currentProduction",
+  PRODUCTION_QUANTITY: "productionReport.table.productionQuantity",
+  COUNT: "productionReport.inspection.count",
+  INSPECTION_QUANTITY: "productionReport.table.inspectionQuantity",
+  GOOD_QUANTITY: "productionReport.table.goodQuantity",
+  SUBMIT: "productionReport.inspection.submit",
+};
+
+export const INSPECTION_LIST = [
+  {
+    label: "productionReport.inspection.colorDifference",
+    schema: "colorDifference",
+  },
+  { label: "productionReport.inspection.bubble", schema: "bubble" },
+  { label: "productionReport.inspection.oilStain", schema: "oilStain" },
+  { label: "productionReport.inspection.deformation", schema: "deformation" },
+  { label: "productionReport.inspection.impurity", schema: "impurity" },
+  { label: "productionReport.inspection.burr", schema: "burr" },
+  { label: "productionReport.inspection.shrinkage", schema: "shrinkage" },
+  { label: "productionReport.inspection.pressure", schema: "pressure" },
+  { label: "productionReport.inspection.blackSpot", schema: "blackSpot" },
+  { label: "productionReport.inspection.shortage", schema: "shortage" },
+  { label: "productionReport.inspection.overflow", schema: "overflow" },
+  { label: "productionReport.inspection.scratch", schema: "scratch" },
+  { label: "productionReport.inspection.hole", schema: "hole" },
+  { label: "productionReport.inspection.flowMark", schema: "flowMark" },
+  {
+    label: "productionReport.inspection.encapsulation",
+    schema: "encapsulation",
+  },
+  { label: "productionReport.inspection.other", schema: "other" },
+];

@@ -1,4 +1,5 @@
 .production-schedule {
+  width: 100%;
   .filter-section {
     display: flex;
     gap: 15px;
@@ -37,7 +38,7 @@
   .box {
     position: relative;
     margin-bottom: 10px;
-    padding: 20px;
+    padding: 20px 0;
   }
 
   .editable-row,
@@ -407,7 +408,7 @@
   .importBtn-initial {
     @extend %btn-shared;
     left: 6%;
-    bottom: -38px;
+    // bottom: -38px;
   }
 
   .importBtn {
@@ -418,7 +419,7 @@
   .downloadBtn-initial {
     @extend %btn-shared;
     left: 11%;
-    bottom: -38px;
+    // bottom: -38px;
   }
 
   .downloadBtn {
