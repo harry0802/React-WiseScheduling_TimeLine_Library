@@ -76,7 +76,7 @@ const TabPanel = ({
               type="number"
               name={`inspectionQuantity${index}`}
               autoComplete={`inspectionQuantity${index}`}
-              defaultValue={lastItem.inspectionQuantity || ""}
+              defaultValue=""
               variant="outlined"
               margin="normal"
               onChange={(event) => {
@@ -97,7 +97,7 @@ const TabPanel = ({
               type="number"
               name={`goodQuantity${index}`}
               autoComplete={`goodQuantity${index}`}
-              defaultValue={lastItem.goodQuantity || ""}
+              defaultValue=""
               variant="outlined"
               margin="normal"
               onChange={(event) => {

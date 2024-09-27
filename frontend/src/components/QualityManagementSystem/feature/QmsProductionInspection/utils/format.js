@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { TZ } from "../../../../../config/config";
 
 // 設置 dayjs 插件
 dayjs.extend(utc);
@@ -34,14 +35,7 @@ export const formatInspectionDataForApi = (
  * @returns {string} - 格式化後的日期字符串
  */
 const formatDate = (date) => {
-  console.log(date);
-
-  if (!date) {
-    // 如果沒有提供日期，使用當前時間
-    return dayjs().tz("Asia/Taipei").format("YYYY-MM-DD HH:mm:ssZ");
-  }
-
-  return dayjs(date).tz("Asia/Taipei").format("YYYY-MM-DD HH:mm:ssZ");
+  return dayjs().tz(TZ).format("YYYY-MM-DD HH:mm:ssZ");
 };
 
 // 使用示例：
