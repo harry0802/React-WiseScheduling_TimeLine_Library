@@ -3,7 +3,6 @@ import ProductionRecordActions from "./features/ProductionRecordHome/ProductionR
 import { Outlet } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import InventoryManagementActions from "./features/ProductionRecordinventoryManagement/InventoryManagementActions.jsx";
-import ProductNotification from "./utility/ProductNotification";
 
 import { homeSlice } from "./slice/HomeSlice";
 

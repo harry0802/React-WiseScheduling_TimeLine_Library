@@ -178,12 +178,12 @@ const ProductionDetail = (props) => {
         // combine leader and start time in operators and period
         if (item.leader != null) {
           operators = JSON.parse(item.leader).map((leader) => {
-            return `${leader.leader}\n`;
+            return `\n${leader.leader}\n`;
           });
           period = JSON.parse(item.leader).map((leader) => {
             return `${dayjs(leader.log_time)
               .tz(TZ)
-              .format("YYYY-MM-DD HH:mm")} ${leader.action}\n`;
+              .format("YYYY-MM-DD HH:mm")} \n${leader.action}\n`;
           });
         }
         // set groupWhite class to the first item and its children, set groupGray to the second item and its children, set groupWhite to the third item and its children, and so on
