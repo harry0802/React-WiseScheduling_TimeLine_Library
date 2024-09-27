@@ -1,5 +1,5 @@
-import React from "react";
-import { Tab } from "@mui/material";
+import React, { useEffect, useState, useMemo } from "react";
+import { Tab, Tooltip } from "@mui/material";
 import { StyledBox, StyledTabContainer, StyledTabs } from "./utils/styles";
 import TabPanel from "./components/TabPanel";
 import { a11yProps } from "./utils/utils";
@@ -49,11 +49,7 @@ QmsProductionInspection (Index.jsx)
             └── QuantityInput (for each inspection item)
 */
 
-const QmsProductionInspection = ({
-  renderTabPanel,
-  renderTabs,
-  renderTabPanels,
-}) => {
+const QmsProductionInspection = () => {
   const {
     tabValue,
     lots,
@@ -63,32 +59,57 @@ const QmsProductionInspection = ({
     updateLotsByGoodQuantity,
   } = useQmsProductionInspection();
 
-  const defaultRenderTabs = () =>
-    lots.map((lot, index) => (
-      <Tab
-        key={index}
-        label={
-          lot.productName.length > 5
-            ? `${lot.productName.substring(0, 5)}...`
-            : lot.productName
-        }
-        {...a11yProps(index)}
-      />
-    ));
+  const [updateKey, setUpdateKey] = useState(0);
 
-  const defaultRenderTabPanels = () =>
-    lots.map((lot, index) => (
-      <TabPanel
-        key={index}
-        value={tabValue}
-        index={index}
-        lot={lot}
-        updateLotsByInspectionQuantity={updateLotsByInspectionQuantity}
-        updateLotsByGoodQuantity={updateLotsByGoodQuantity}
-        render={renderTabPanel}
-        handleSubmit={handleSubmit}
-      />
-    ));
+  useEffect(() => {
+    // console.log("🚀 Lots updated:", lots);
+    setUpdateKey((prev) => prev + 1);
+  }, [lots]);
+
+  const memoizedTabs = useMemo(
+    () =>
+      lots.map((lot, index) => (
+        <Tooltip
+          key={`tooltip-${lot.id}-${index}`}
+          title={lot.productName}
+          placement="top"
+        >
+          <Tab
+            key={`${lot.id}-${index}-${updateKey}`}
+            label={
+              lot.productName.length > 5
+                ? `${lot.productName.slice(0, 5)}...`
+                : lot.productName
+            }
+            {...a11yProps(index)}
+          />
+        </Tooltip>
+      )),
+    [lots, updateKey]
+  );
+
+  const memoizedTabPanels = useMemo(
+    () =>
+      lots.map((lot, index) => (
+        <TabPanel
+          key={`${lot.id}-${index}-${updateKey}`}
+          value={tabValue}
+          index={index}
+          lot={lot}
+          updateLotsByInspectionQuantity={updateLotsByInspectionQuantity}
+          updateLotsByGoodQuantity={updateLotsByGoodQuantity}
+          handleSubmit={handleSubmit}
+        />
+      )),
+    [
+      lots,
+      updateKey,
+      tabValue,
+      updateLotsByInspectionQuantity,
+      updateLotsByGoodQuantity,
+      handleSubmit,
+    ]
+  );
 
   return (
     <StyledBox>
@@ -101,18 +122,10 @@ const QmsProductionInspection = ({
           aria-label="visible arrows tabs example"
           TabIndicatorProps={{ style: { backgroundColor: "#8AC0E2" } }}
         >
-          {renderTabs ? renderTabs({ lots, a11yProps }) : defaultRenderTabs()}
+          {memoizedTabs}
         </StyledTabs>
       </StyledTabContainer>
-      {renderTabPanels
-        ? renderTabPanels({
-            lots,
-            tabValue,
-            updateLotsByInspectionQuantity,
-            updateLotsByGoodQuantity,
-            renderTabPanel,
-          })
-        : defaultRenderTabPanels()}
+      {memoizedTabPanels}
     </StyledBox>
   );
 };

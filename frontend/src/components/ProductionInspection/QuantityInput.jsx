@@ -5,14 +5,12 @@ import { styled } from "@mui/system";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import { useLotStore } from "../../store/zustand/store";
+import { useHandleLotChanges } from "./useHandleLotChanges";
 
 const NumberInput = React.forwardRef(function CustomNumberInput(props, ref) {
   if (props.isQualityControl) {
-    return <StyledText ref={ref}>{props.defaultValue || 0}</StyledText>;
+    return <StyledText ref={ref}>{props.value || 0}</StyledText>;
   }
-
-  console.log(props);
-  console.log(ref);
 
   return (
     <BaseNumberInput
@@ -50,17 +48,28 @@ export default function QuantityInput(props) {
     schema,
     isQualityControl = false,
     qualityInputValue,
+    putawayId,
+    pscheduleId,
   } = props;
+
+  const { handleLotChange } = useHandleLotChanges();
 
   // Move getInputValue function definition before useState
   const getInputValue = (lotName, schema) => {
     if (lots?.length === 0 && !isQualityControl) return 0;
-    if (isQualityControl) return qualityInputValue;
+    if (isQualityControl) {
+      if (qualityInputValue !== undefined && qualityInputValue !== null) {
+        return qualityInputValue;
+      } else {
+        return 0;
+      }
+    }
 
     let split_lotName = lotName.split("-");
 
     split_lotName.pop();
     let lot = lots.filter((lot) => lot.lotName === split_lotName.join("-"));
+
     if (lot.length > 0) {
       const childrenLots = lot[0].children.filter(
         (child) => child.lotName === lotName
@@ -92,6 +101,7 @@ export default function QuantityInput(props) {
           }
           setInputValue(newValue);
           updateLotsByInspection(lotName, schema, newValue);
+          handleLotChange(pscheduleId, putawayId);
         }}
       />
     </div>

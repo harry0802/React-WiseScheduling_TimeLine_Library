@@ -3,6 +3,7 @@ import { Layout, Spin } from "antd";
 import { Outlet } from "react-router-dom";
 import Topbar from "../components/Global/Topbar";
 import styled from "styled-components";
+import ProductNotification from "../components/ProductionRecord/utility/ProductNotification";
 
 const { Content } = Layout;
 
@@ -36,16 +37,19 @@ const AppLayout = () => {
   const [collapsed, setCollapsed] = React.useState(false);
 
   return (
-    <StyledLayout>
-      <Topbar collapsed={collapsed} setCollapsed={setCollapsed} />
-      <StyledContent>
-        <React.Suspense fallback={<Spin size="large" />}>
-          <MainContent>
-            <Outlet />
-          </MainContent>
-        </React.Suspense>
-      </StyledContent>
-    </StyledLayout>
+    <>
+      <StyledLayout>
+        <Topbar collapsed={collapsed} setCollapsed={setCollapsed} />
+        <StyledContent>
+          <React.Suspense fallback={<Spin size="large" />}>
+            <MainContent>
+              <Outlet />
+            </MainContent>
+          </React.Suspense>
+        </StyledContent>
+      </StyledLayout>
+      <ProductNotification />
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
 export const TRANSLATION_KEYS = {
   SHIFT_CHANGE: "productionReport.inspection.shiftChange",
-  EMPTY_FIELD_ERROR: "productionReport.inspection.emptyFieldError",
-  FORBIDDEN: "productionReport.inspection.forbidden",
+  EMPTY_FIELD_ERROR: "QmsMachineSelect.emptyFieldError",
+  FORBIDDEN: "QmsMachineSelect.forbidden",
   OPERATOR1: "productionReport.inspection.operator1",
   OPERATOR2: "productionReport.inspection.operator2",
   START_TIME: "productionReport.inspection.startTime",

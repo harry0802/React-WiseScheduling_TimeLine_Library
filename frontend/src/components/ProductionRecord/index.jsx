@@ -56,7 +56,6 @@ function ProductionRecord() {
 
       <ProductionRecordSections>
         <Outlet />
-        <ProductNotification />
       </ProductionRecordSections>
     </ProductionRecordWarpper>
   );

@@ -103,6 +103,8 @@
     }
   },
   "QmsMachineSelect": {
-    "title": "Hệ thống điều phối dây chuyền sx-chọn máy"
+    "title": "Hệ thống điều phối dây chuyền sx-chọn máy",
+    "emptyFieldError": "Vui lòng nhập số lượng để điều phối dây chuyền sx",
+    "forbidden": "Không thể quay lại. H.thành công đoạn sx và bàn giao \"đổi ca\"."
   }
 }

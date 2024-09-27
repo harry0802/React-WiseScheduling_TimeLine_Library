@@ -107,6 +107,8 @@
     }
   },
   "QmsMachineSelect": {
-    "title": "品管檢驗系統-機台選擇"
+    "title": "品管檢驗系統-機台選擇",
+    "emptyFieldError": "請輸入檢驗數量",
+    "forbidden": "您無法回到上一頁，請完成檢驗 "
   }
 }

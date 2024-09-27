@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useGetProductionReportQuery } from "../../../store/api/productionReportApi";
 import { useGetProductionScheduleByMachinesQuery } from "../../../store/api/productionScheduleApi";
 import {
@@ -10,6 +10,7 @@ import {
   useGetInspectionTypesQuery,
 } from "../service/endpoints/inspectionApi";
 import { createQmsProductionInspectionService } from "../feature/QmsProductionInspection/domain/qmsProductionInspectionService";
+import { useParams } from "react-router-dom";
 
 // 1. Initial State
 const initialState = {
@@ -182,71 +183,79 @@ export const useProductionSchedules = () => {
 export const useProductionReports = () => {
   const {
     activeMachines,
-
     setProductionReport,
     clearProductionReports,
     userType,
   } = useQmsStore();
+  const { machineSN } = useParams();
 
+  // Queries
   const { data: productionReportData, isLoading: isLoadingProductionReport } =
     useGetProductionReportQuery(
-      { status: "On-going" },
-      { skip: !activeMachines || Object.keys(activeMachines).length === 0 }
+      { status: "On-going", machineSN },
+      {
+        refetchOnMountOrArgChange: true,
+        skip:
+          !machineSN ||
+          !activeMachines ||
+          Object.keys(activeMachines).length === 0,
+      }
     );
-
-  const [addQualityInspection] = useAddQualityInspectionMutation();
 
   const { data: inspections } = useGetInspectionsQuery(userType, {
     refetchOnMountOrArgChange: true,
     skip: !userType,
   });
 
+  // Mutations
+  const [addQualityInspection] = useAddQualityInspectionMutation();
+
+  // Memoized values
+  const lastProductionReport = useMemo(
+    () =>
+      productionReportData?.length
+        ? [productionReportData[productionReportData.length - 1]]
+        : [],
+    [productionReportData]
+  );
+
+  const latestInspections = useMemo(() => {
+    const inspectionsSource = inspections?.data;
+    return inspectionsSource
+      ?.filter((inspection) => inspection.machineSN === machineSN)
+      .sort((a, b) => b.inspectionDate - a.inspectionDate);
+  }, [machineSN, inspections]);
+
+  // Services
   const qmsService = createQmsProductionInspectionService(addQualityInspection);
 
+  // Effects
   useEffect(() => {
-    if (productionReportData && !isLoadingProductionReport) {
+    if (lastProductionReport.length && !isLoadingProductionReport) {
       Object.entries(activeMachines).forEach(([machineSN, { workOrderSN }]) => {
-        if (productionReportData && Array.isArray(productionReportData)) {
-          const { data: inspectionsSource } = inspections || {};
-          console.log(inspectionsSource?.at(-1));
+        const machineReportData = lastProductionReport.filter(
+          (report) =>
+            report.machineSN === machineSN && report.workOrderSN === workOrderSN
+        );
 
-          const machineReportData = productionReportData.filter(
-            (report) =>
-              report.machineSN === machineSN &&
-              report.workOrderSN === workOrderSN
-          );
+        const inspectionData = latestInspections?.at(-1);
+        const processedData = dataProcessing.processProductionReport(
+          machineReportData,
+          [inspectionData].filter(Boolean)
+        );
 
-          const inspectionData = inspectionsSource
-            ?.filter((inspection) => inspection.workOrderSN === workOrderSN)
-            .at(-1);
-
-          const processedData = dataProcessing.processProductionReport(
-            machineReportData,
-            [inspectionData] || []
-          );
-
-          console.log(processedData);
-
-          setProductionReport(machineSN, processedData);
-        } else {
-          setProductionReport(machineSN, []);
-        }
+        setProductionReport(machineSN, processedData);
       });
     }
   }, [
-    productionReportData,
+    lastProductionReport,
     isLoadingProductionReport,
     activeMachines,
     setProductionReport,
-    inspections,
+    latestInspections,
   ]);
 
-  return {
-    qmsService,
-
-    clearProductionReports,
-    isLoadingProductionReport,
-  };
+  return { qmsService, clearProductionReports, isLoadingProductionReport };
 };
 
 // 原來的 useQmsData 可以保留，但現在它只是組合其他 hooks 的結果
@@ -254,6 +263,12 @@ export const useQmsData = () => {
   const inspectionData = useInspectionTypes();
   const schedulesData = useProductionSchedules();
   const reportsData = useProductionReports();
+
+  // Add error handling
+  if (!inspectionData || !schedulesData || !reportsData) {
+    console.error("Error: One or more QMS data hooks failed to load");
+    return null;
+  }
 
   return {
     ...inspectionData,

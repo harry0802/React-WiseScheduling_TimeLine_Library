@@ -19,27 +19,26 @@ export function createQmsProductionInspectionService(updateChildLotsMutation) {
 
     // Submit lots for processing
     async submitLots(lots, inspectionType, inspect) {
-      // Check for lots with empty production quantity
-      const emptyLots = lotService.getLotsWithEmptyProductionQuantity(lots);
-      if (emptyLots.length > 0) {
-        throw new Error("EMPTY_PRODUCTION_QUANTITY");
+      try {
+        // Check for lots with empty production quantity
+        const emptyLots = lotService.getLotsWithEmptyProductionQuantity(lots);
+        if (emptyLots.length > 0) {
+          throw new Error("EMPTY_PRODUCTION_QUANTITY");
+        }
+
+        // Prepare child lots data and update
+        const childLots = lotService.prepareChildLotsForUpdate(lots);
+        const apiData = formatInspectionDataForApi(
+          childLots,
+          inspectionType,
+          inspect
+        );
+        const result = await updateChildLotsMutation(apiData);
+        return result;
+      } catch (error) {
+        console.error("💣 Error submitting lots:", error);
+        throw error;
       }
-
-      // Prepare child lots data and update
-      const childLots = lotService.prepareChildLotsForUpdate(lots);
-
-      console.log("childLots", childLots);
-
-      const apiData = formatInspectionDataForApi(
-        childLots,
-        inspectionType,
-        inspect
-      );
-      console.log(updateChildLotsMutation);
-
-      console.log("apiData", apiData);
-      const result = await updateChildLotsMutation(apiData);
-      console.log("result", result);
     },
   };
 }

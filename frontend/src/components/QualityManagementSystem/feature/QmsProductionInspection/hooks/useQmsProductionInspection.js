@@ -4,22 +4,17 @@ import { Modal, notification } from "antd";
 import { useTranslation } from "react-i18next";
 
 import { TRANSLATION_KEYS } from "../utils/constants";
-import { createQmsProductionInspectionService } from "../domain/qmsProductionInspectionService";
 import { useProductionReports, useQmsStore } from "../../../slice/QmsAccount";
-import {
-  useAddQualityInspectionMutation,
-  useGetInspectionsQuery,
-} from "../../../service/endpoints/inspectionApi";
+import useNotification from "../../../../ProductionRecord/hook/useNotification";
 
 export const useQmsProductionInspection = () => {
   const { t } = useTranslation();
   const { machineSN, userType } = useParams();
   const { productionReports, inspectionTypes, account } = useQmsStore();
-  const [addQualityInspection] = useAddQualityInspectionMutation();
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
-
-  const { qmsService, clearProductionReports, isLoadingProductionReport } =
-    useProductionReports();
+  const { notifySuccess } = useNotification();
+  const { qmsService } = useProductionReports();
 
   const initialLots = useCallback(
     () =>
@@ -29,7 +24,14 @@ export const useQmsProductionInspection = () => {
     [machineSN, productionReports, qmsService]
   );
 
-  const [lots, setLots] = useState(initialLots);
+  const [lots, setLots] = useState([]);
+
+  useEffect(() => {
+    const updatedLots = initialLots();
+    if (JSON.stringify(updatedLots) !== JSON.stringify(lots)) {
+      setLots(updatedLots);
+    }
+  }, [initialLots, productionReports, machineSN]);
 
   const handleSubmit = useCallback(async () => {
     if (lots.length === 0) {
@@ -39,6 +41,8 @@ export const useQmsProductionInspection = () => {
     try {
       const { name } = inspectionTypes.find((type) => type.schema === userType);
       await qmsService.submitLots(lots, name, account);
+      navigate(`/QualityManagementSystem`);
+      notifySuccess();
     } catch (error) {
       handleSubmitError(error);
     }
@@ -71,7 +75,7 @@ export const useQmsProductionInspection = () => {
           okText: t("common.okBtn"),
         });
       } else {
-        console.error("rejected", error);
+        console.error("💣 rejected", error);
         notification.error({
           description: t("common.updatingError"),
           placement: "bottomRight",
