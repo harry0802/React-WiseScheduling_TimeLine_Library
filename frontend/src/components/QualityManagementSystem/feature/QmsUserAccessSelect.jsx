@@ -180,12 +180,12 @@ function QmsUserAccessSelect() {
         <StyledButton
           variant="contained"
           startIcon={<TimerIcon />}
-          onClick={() => handleClick(0)}
+          onClick={() => handleClick(1)} // 改為 1
         >
           產線小班長
         </StyledButton>
         <StyledButton
-          onClick={() => handleClick(1)}
+          onClick={() => handleClick(0)} // 改為 0
           variant="contained"
           startIcon={<BeachAccess />}
         >
