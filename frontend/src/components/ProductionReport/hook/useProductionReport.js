@@ -13,7 +13,7 @@ import { API_BASE } from "../../../store/api/apiConfig";
 const checkStartEligibility = async (processId, workOrderSN) => {
   try {
     const response = await fetch(
-      `${API_BASE}/productionSchedule/checkStartEligibility?processId=${processId}&workOrderSN=${workOrderSN}`
+      `${API_BASE}productionSchedule/checkStartEligibility?processId=${processId}&workOrderSN=${workOrderSN}`
     );
     if (!response.ok) throw new Error("Network response was not ok");
     const data = await response.json();
