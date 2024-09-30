@@ -1,11 +1,12 @@
 import { useMemo, useCallback } from "react";
 import { notification } from "antd"; // Importing notification from antd for displaying notifications
+// Importing function for creating a notification repository
+import { Icon } from "@iconify/react"; // Importing Icon from @iconify/react for custom icons
+import { createNotificationRepository } from "./notificationRepository";
 import {
   createNotificationEntity,
   validateNotification,
-} from "../components/notification/notificationEntity"; // Importing functions for creating and validating notification entities
-import { createNotificationRepository } from "../components/notification/notificationRepository"; // Importing function for creating a notification repository
-import { Icon } from "@iconify/react"; // Importing Icon from @iconify/react for custom icons
+} from "./notificationEntity";
 
 // Defining constants for notification types
 const NOTIFICATION_TYPES = {
@@ -15,19 +16,28 @@ const NOTIFICATION_TYPES = {
   INFO: "info",
 };
 
-// Configuration for each notification type, including icon and color
-const NOTIFICATION_CONFIG = {
-  [NOTIFICATION_TYPES.SUCCESS]: { icon: "mdi:check-bold", color: "#07CB3E" },
-  [NOTIFICATION_TYPES.ERROR]: { icon: "mdi:alert", color: "#FF4D4F" },
-  [NOTIFICATION_TYPES.WARNING]: { icon: "mdi:alert-outline", color: "#FAAD14" },
-  [NOTIFICATION_TYPES.INFO]: {
-    icon: "mdi:information-outline",
-    color: "#1890FF",
-  },
-};
-
 // Custom hook for managing notifications
 const useNotification = () => {
+  // Configuration for each notification type, including icon and color
+  const NOTIFICATION_CONFIG = useMemo(
+    () => ({
+      [NOTIFICATION_TYPES.SUCCESS]: {
+        icon: "mdi:check-bold",
+        color: "#07CB3E",
+      },
+      [NOTIFICATION_TYPES.ERROR]: { icon: "mdi:alert", color: "#FF4D4F" },
+      [NOTIFICATION_TYPES.WARNING]: {
+        icon: "mdi:alert-outline",
+        color: "#FAAD14",
+      },
+      [NOTIFICATION_TYPES.INFO]: {
+        icon: "mdi:information-outline",
+        color: "#1890FF",
+      },
+    }),
+    []
+  );
+
   // Creating a notification repository using useMemo to memoize the creation
   const notificationRepository = useMemo(
     () => createNotificationRepository(notification),

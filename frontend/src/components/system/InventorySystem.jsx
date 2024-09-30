@@ -8,6 +8,9 @@ import React, {
 import BaseTable from "../table/BaseTable";
 import BaseDrawer from "../Drawer/BaseDrawer";
 import DynamicForm from "../form/DynamicForm-v1";
+import { Form } from "antd";
+import { formatSubmitValues } from "../../utility/formUtils";
+import useNotification from "../notification/useNotification";
 
 const InventoryContext = createContext();
 
@@ -16,6 +19,7 @@ export function InventorySystem({ children, config }) {
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const { notifySuccess } = useNotification();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,7 +52,10 @@ export function InventorySystem({ children, config }) {
       setLoading(true);
       try {
         const newItem = await config.addItem(item);
+        console.log(newItem);
+
         setData((prev) => [...prev, newItem]);
+
         return newItem;
       } finally {
         setLoading(false);
@@ -65,6 +72,7 @@ export function InventorySystem({ children, config }) {
         setData((prev) =>
           prev.map((item) => (item.id === id ? updatedItem : item))
         );
+        notifySuccess();
         return updatedItem;
       } finally {
         setLoading(false);
@@ -88,6 +96,8 @@ export function InventorySystem({ children, config }) {
 
   const handleFinish = useCallback(
     async (values) => {
+      console.log(values);
+
       if (editingItem) {
         await updateItem(editingItem.id, values);
       } else {
@@ -147,34 +157,46 @@ InventorySystem.Table = function InventoryTable() {
 InventorySystem.Drawer = function InventoryDrawer() {
   const { visible, closeDrawer, editingItem, config, handleFinish } =
     useInventoryContext();
+  const [form] = Form.useForm();
+
+  const onSubmit = useCallback(() => {
+    form
+      .validateFields()
+      .then((values) => {
+        const formattedValues = formatSubmitValues(values);
+        handleFinish(formattedValues);
+      })
+      .catch((error) => {
+        console.error("Validation failed:", error);
+      });
+  }, [form, handleFinish]);
 
   return (
     <BaseDrawer visible={visible} onClose={closeDrawer} width={700}>
       <BaseDrawer.Header>
-        {editingItem ? `Edit ${config.title}` : `Add ${config.title}`}
+        {editingItem ? `編輯${config.title}` : `新增${config.title}`}
       </BaseDrawer.Header>
       <BaseDrawer.Body>
-        <InventorySystem.Form />
+        <InventorySystem.Form form={form} />
       </BaseDrawer.Body>
-      <BaseDrawer.Footer onSubmit={handleFinish} />
+      <BaseDrawer.Footer onSubmit={onSubmit} />
     </BaseDrawer>
   );
 };
 
-InventorySystem.Form = function InventoryForm() {
-  const { config, editingItem, handleFinish } = useInventoryContext();
-
+InventorySystem.Form = function InventoryForm({ form }) {
+  const { config, editingItem } = useInventoryContext();
   return (
     <DynamicForm
+      form={form}
       fields={config.formFields}
-      onFinish={handleFinish}
       initialValues={editingItem}
-      submitText="Save"
+      submitButton={false}
     >
-      {({ FormItem }) => (
+      {() => (
         <>
-          {config.formFields.map((field) => (
-            <DynamicForm.Field key={field.name} field={field} />
+          {config.formFields.map((field, index) => (
+            <DynamicForm.Field key={index} field={field} />
           ))}
         </>
       )}

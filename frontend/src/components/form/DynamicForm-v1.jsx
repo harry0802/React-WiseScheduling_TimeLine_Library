@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback, useEffect } from "react";
 import {
   Form,
   Input,
@@ -11,7 +11,10 @@ import {
   Row,
   Col,
 } from "antd";
-import dayjs from "dayjs"; // 引入 dayjs
+import {
+  formatInitialValues,
+  formatSubmitValues,
+} from "../../utility/formUtils";
 
 const { TextArea } = Input;
 
@@ -24,34 +27,40 @@ const FormItemMap = {
   radio: Radio.Group,
   textarea: TextArea,
 };
-function DynamicForm({ children, onFinish, initialValues, ...props }) {
-  const [form] = Form.useForm();
 
-  // 將初始值中的日期字符串轉換為 dayjs 對象
-  const formattedInitialValues = React.useMemo(() => {
-    if (!initialValues) return initialValues;
-    const formatted = { ...initialValues };
-    Object.keys(formatted).forEach((key) => {
-      if (
-        formatted[key] &&
-        props.fields.find((f) => f.name === key && f.type === "date")
-      ) {
-        formatted[key] = dayjs(formatted[key]);
-      }
-    });
-    return formatted;
-  }, [initialValues, props.fields]);
+function DynamicForm({
+  children,
+  onFinish,
+  initialValues,
+  submitText = "提交",
+  fields = [],
+  form: propForm,
+  submitButton = false,
+  ...props
+}) {
+  const [defaultForm] = Form.useForm();
+  const form = propForm || defaultForm;
 
-  const handleFinish = (values) => {
-    // 將 dayjs 對象轉換回字符串
-    const formattedValues = { ...values };
-    Object.keys(formattedValues).forEach((key) => {
-      if (formattedValues[key] && dayjs.isDayjs(formattedValues[key])) {
-        formattedValues[key] = formattedValues[key].format("YYYY-MM-DD");
-      }
-    });
-    onFinish(formattedValues);
-  };
+  const formattedInitialValues = useMemo(() => {
+    return formatInitialValues(initialValues, fields);
+  }, [initialValues, fields]);
+
+  const handleFinish = useCallback(
+    (values) => {
+      const formattedValues = formatSubmitValues(values);
+      onFinish(formattedValues);
+    },
+    [onFinish]
+  );
+
+  // * 沒有初始值 就是新的表單
+  useEffect(() => {
+    if (initialValues) {
+      form.setFieldsValue(formattedInitialValues);
+    } else {
+      form.resetFields();
+    }
+  }, [form, formattedInitialValues, initialValues]);
 
   return (
     <Form
@@ -62,17 +71,20 @@ function DynamicForm({ children, onFinish, initialValues, ...props }) {
       {...props}
     >
       <Row gutter={16}>{children({ form, FormItem: Form.Item })}</Row>
-      {/* <Form.Item>
-        <Button type="primary" htmlType="submit">
-          {props.submitText || "提交"}
-        </Button>
-      </Form.Item> */}
+      {submitButton && (
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            {submitText}
+          </Button>
+        </Form.Item>
+      )}
     </Form>
   );
 }
 
-DynamicForm.Field = ({ field, children }) => {
+DynamicForm.Field = React.memo(({ field, children }) => {
   const Component = FormItemMap[field.type];
+
   if (!Component) return null;
 
   const renderFormItem = () => {
@@ -130,7 +142,7 @@ DynamicForm.Field = ({ field, children }) => {
       }}
     </Form.Item>
   );
-};
+});
 
 DynamicForm.Field.displayName = "DynamicForm.Field";
 

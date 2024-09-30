@@ -1,16 +1,14 @@
+import {
+  flattenObject,
+  generateRandomDate,
+  generateRandomNumber,
+} from "../../utility/dataGeneratorUtils";
+
 const pigBreeds = ["大白豬", "杜洛克", "藍瑞斯", "漢普夏", "巴克夏", "約克夏"];
 const healthStatuses = ["良好", "一般", "需要關注", "生病"];
 const managers = ["張三", "李四", "王五", "趙六", "孫七"];
 
-const generateRandomNumber = (min, max) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
-
-const generateRandomDate = () => {
-  const date = new Date();
-  date.setDate(date.getDate() - generateRandomNumber(0, 365));
-  return date.toISOString().split("T")[0];
-};
-
+// * Table Cloumn 設定最小寬度與最大寬度
 const pigCategories = {
   breeding: { min: 50, max: 150 },
   testing: { min: 50, max: 150 },
@@ -20,6 +18,7 @@ const pigCategories = {
   farrowing8: { min: 20, max: 70, includeNursery: true },
 };
 
+// * 生成豬隻數據
 const generatePigData = ({ min, max }) => ({
   original: generateRandomNumber(min, max),
   in: generateRandomNumber(0, 20),
@@ -29,6 +28,7 @@ const generatePigData = ({ min, max }) => ({
   remaining: generateRandomNumber(min - 20, max - 20),
 });
 
+// * 生成隨機數據
 const generateFarrowingData = ({ min, max, includeNursery }) => {
   const data = {
     sow: generatePigData({ min, max }),
@@ -39,7 +39,7 @@ const generateFarrowingData = ({ min, max, includeNursery }) => {
       weakDeath: generateRandomNumber(0, 10),
     },
   };
-
+  // ! 特殊屬性
   if (includeNursery) {
     data.nurseryPig = generatePigData({ min: min * 2, max: max * 2 });
     data.sold = generateRandomNumber(0, 100);
@@ -48,24 +48,8 @@ const generateFarrowingData = ({ min, max, includeNursery }) => {
   return data;
 };
 
-const flattenObject = (obj, prefix = "") =>
-  Object.keys(obj).reduce((acc, k) => {
-    const pre = prefix.length
-      ? `${prefix}${k.charAt(0).toUpperCase() + k.slice(1)}`
-      : k;
-    if (
-      typeof obj[k] === "object" &&
-      obj[k] !== null &&
-      !Array.isArray(obj[k])
-    ) {
-      Object.assign(acc, flattenObject(obj[k], pre));
-    } else {
-      acc[pre] = obj[k];
-    }
-    return acc;
-  }, {});
-
-export const generateMockInventory = (index) => {
+export function generateMockInventory(index) {
+  // !生成豬隻數據
   const pigData = Object.entries(pigCategories).reduce((acc, [key, value]) => {
     acc[key] = key.includes("farrowing")
       ? generateFarrowingData(value)
@@ -73,35 +57,38 @@ export const generateMockInventory = (index) => {
     return acc;
   }, {});
 
+  // ! 扁平化數據
   const flattenedPigData = flattenObject(pigData);
 
-  const totalPigs = Object.values(pigData).reduce(
-    (sum, category) =>
-      sum +
-      (category.remaining ||
-        category.sow?.remaining +
-          category.piglet?.remaining +
-          (category.nurseryPig?.remaining || 0)),
-    0
-  );
+  //* 總隻數
+  const totalPigs = Object.values(pigData).reduce((sum, category) => {
+    const categoryTotal =
+      category.remaining ||
+      (category.sow?.remaining || 0) +
+        (category.piglet?.remaining || 0) +
+        (category.nurseryPig?.remaining || 0);
+    return sum + (isNaN(categoryTotal) ? 0 : categoryTotal);
+  }, 0);
 
-  const totalDeaths = Object.values(pigData).reduce(
-    (sum, category) =>
-      sum +
-      (category.death ||
-        category.sow?.death +
-          category.piglet?.death +
-          (category.nurseryPig?.death || 0)),
-    0
-  );
+  // * 總死亡數
+  const totalDeaths = Object.values(pigData).reduce((sum, category) => {
+    const categoryDeaths =
+      category.death ||
+      (category.sow?.death || 0) +
+        (category.piglet?.death || 0) +
+        (category.nurseryPig?.death || 0);
+    return sum + (isNaN(categoryDeaths) ? 0 : categoryDeaths);
+  }, 0);
 
-  const totalSold = Object.values(pigData).reduce(
-    (sum, category) =>
-      sum +
-      (category.sold ||
-        category.sow?.sold + category.piglet?.sold + (category.sold || 0)),
-    0
-  );
+  // * 總出售數
+  const totalSold = Object.values(pigData).reduce((sum, category) => {
+    const categorySold =
+      category.sold ||
+      (category.sow?.sold || 0) +
+        (category.piglet?.sold || 0) +
+        (category.sold || 0);
+    return sum + (isNaN(categorySold) ? 0 : categorySold);
+  }, 0);
 
   return {
     id: `PH${String(index + 1).padStart(3, "0")}`,
@@ -116,7 +103,10 @@ export const generateMockInventory = (index) => {
     totalSold,
     ...flattenedPigData,
   };
-};
+}
 
-export const generateMockInventories = (count) =>
-  Array.from({ length: count }, (_, index) => generateMockInventory(index));
+export function generateMockInventories(count) {
+  return Array.from({ length: count }, (_, index) =>
+    generateMockInventory(index)
+  );
+}

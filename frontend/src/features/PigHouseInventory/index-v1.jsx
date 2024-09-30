@@ -1,4 +1,3 @@
-import React from "react";
 import { pigHouseInventoryConfig } from "./config/pigHouseInventoryConfig";
 import InventorySystem from "../../components/system/InventorySystem";
 

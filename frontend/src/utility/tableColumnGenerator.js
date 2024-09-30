@@ -28,6 +28,7 @@ export const generateColumns = (config, options = {}) => {
       title: columnConfig.title, // 設置標題
       dataIndex: columnConfig.dataIndex, // 設置數據索引
       key: columnConfig.key || columnConfig.dataIndex, // 設置鍵，默認為數據索引
+      sorter: columnConfig.sorter,
       ...(columnConfig.fixed ? { fixed: columnConfig.fixed } : {}), // 如果配置了固定位置，則添加固定位置屬性
       // 設置寬度
       width:

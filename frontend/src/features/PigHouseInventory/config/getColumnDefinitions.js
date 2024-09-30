@@ -1,9 +1,13 @@
-import { generateColumns } from "../../utility/tableColumnGenerator";
+import dayjs from "dayjs";
+import { generateColumns } from "../../../utility/tableColumnGenerator";
+import { sortDate, sortNumber } from "../../../utility/sortUtils";
 
 export const getColumnDefinitions = () => {
   const columnConfig = [
     {
       title: "統計",
+      dataIndex: "statistics",
+      key: "statistics",
       children: [
         {
           title: "日期",
@@ -11,29 +15,35 @@ export const getColumnDefinitions = () => {
           fixed: "left",
           width: 120,
           key: "date",
+          sorter: (a, b) => sortDate(a.date, b.date),
         },
         {
           title: "總隻數",
           dataIndex: "totalPigs",
           fixed: "left",
           key: "totalPigs",
+          sorter: (a, b) => sortNumber(a.totalPigs, b.totalPigs),
         },
         {
           title: "死亡頭數",
           dataIndex: "totalDeaths",
           fixed: "left",
           key: "totalDeaths",
+          sorter: (a, b) => sortNumber(a.totalDeaths, b.totalDeaths),
         },
         {
           title: "總出售",
           dataIndex: "totalSold",
           fixed: "left",
           key: "totalSold",
+          sorter: (a, b) => sortNumber(a.totalSold, b.totalSold),
         },
       ],
     },
     {
       title: "種豬",
+      dataIndex: "breedingPigs",
+      key: "breedingPigs",
       children: [
         {
           title: "原總數",
@@ -57,6 +67,8 @@ export const getColumnDefinitions = () => {
     },
     {
       title: "檢定",
+      dataIndex: "testing",
+      key: "testing",
       children: [
         {
           title: "原總數",
@@ -80,6 +92,8 @@ export const getColumnDefinitions = () => {
     },
     {
       title: "肉豬",
+      dataIndex: "meatPigs",
+      key: "meatPigs",
       children: [
         {
           title: "原總數",
@@ -99,6 +113,8 @@ export const getColumnDefinitions = () => {
     },
     {
       title: "分娩(3)",
+      dataIndex: "farrowing3",
+      key: "farrowing3",
       children: [
         {
           title: "母豬原總數",
@@ -179,6 +195,8 @@ export const getColumnDefinitions = () => {
     },
     {
       title: "分娩(8)",
+      dataIndex: "farrowing8",
+      key: "farrowing8",
       children: [
         {
           title: "母豬原總數",
@@ -275,6 +293,8 @@ export const getColumnDefinitions = () => {
     },
     {
       title: "保育",
+      dataIndex: "nursery",
+      key: "nursery",
       children: [
         {
           title: "原總數",
@@ -309,6 +329,8 @@ export const getColumnDefinitions = () => {
       return total + 100; // 默認寬度
     }, 0);
   };
+
+  // 計算寬度
   const generateColumnss = generateColumns(columnConfig, {
     setWidthForChars: 3,
     defaultWidth: 120,

@@ -1,4 +1,4 @@
-import { getColumnDefinitions } from "../getColumnDefinitions";
+import { getColumnDefinitions } from "./getColumnDefinitions";
 import {
   generateMockInventories,
   generateMockInventory,
@@ -94,8 +94,10 @@ export const pigHouseInventoryConfig = {
 
   addItem: async (item) => {
     const newItem = generateMockInventory(Date.now());
+    console.log(newItem);
+
     console.log("Adding item:", { ...item, ...newItem });
-    return { ...item, ...newItem };
+    return { ...newItem, ...item };
   },
 
   updateItem: async (id, updates) => {
