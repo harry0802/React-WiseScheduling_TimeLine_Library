@@ -56,7 +56,7 @@ const ProductionDetail = (props) => {
     {
       title: `${t("productionReport.table.workOrderSN")}`,
       dataIndex: "lotName",
-      width: "10%",
+      width: "12%",
       render: (text) => (
         // 使用 Tooltip 包裹超出部分的内容
         <Tooltip title={text}>

@@ -114,8 +114,8 @@ const dataProcessing = {
     encapsulation: report.encapsulation,
     other: report.other,
     // Add inspection data if available
-    inspectionQuantity: inspection?.inspectionQuantity || 0,
-    goodQuantity: inspection?.goodQuantity || 0,
+    // inspectionQuantity: inspection?.inspectionQuantity || 0,
+    // goodQuantity: inspection?.goodQuantity || 0,
     inspector: inspection?.inspector || null,
     inspectionDate: inspection?.inspectionDate || null,
     inspectionType: inspection?.inspectionType || null,
