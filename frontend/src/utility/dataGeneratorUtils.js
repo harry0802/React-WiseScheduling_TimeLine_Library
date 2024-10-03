@@ -3,9 +3,13 @@ export const generateRandomNumber = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
 // * 生成隨機日期
-export const generateRandomDate = () => {
+export const generateRandomDate = (min = null, max = null) => {
   const date = new Date();
-  date.setDate(date.getDate() - generateRandomNumber(0, 365));
+  if (!min) {
+    date.setDate(date.getDate() - generateRandomNumber(0, 365));
+  }
+  date.setDate(min - max);
+
   return date.toISOString().split("T")[0];
 };
 

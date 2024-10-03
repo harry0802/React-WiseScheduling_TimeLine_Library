@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { generateColumns } from "../../../utility/tableColumnGenerator";
 import { sortDate, sortNumber } from "../../../utility/sortUtils";
+import { calculateTotalWidth } from "../../../utility/calculateTotalWidth";
 
 export const getColumnDefinitions = () => {
   const columnConfig = [
@@ -317,18 +318,6 @@ export const getColumnDefinitions = () => {
       ],
     },
   ];
-
-  const calculateTotalWidth = (cols) => {
-    return cols.reduce((total, col) => {
-      if (typeof col.width === "number") {
-        return total + col.width;
-      }
-      if (col.children) {
-        return total + calculateTotalWidth(col.children);
-      }
-      return total + 100; // 默認寬度
-    }, 0);
-  };
 
   // 計算寬度
   const generateColumnss = generateColumns(columnConfig, {

@@ -20,6 +20,7 @@ export function InventorySystem({ children, config }) {
   const [visible, setVisible] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const { notifySuccess } = useNotification();
+  console.log(config);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -140,6 +141,7 @@ export function useInventoryContext() {
 InventorySystem.Table = function InventoryTable() {
   const { config, data, loading, openDrawer } = useInventoryContext();
   const { columnConfig, totalWidth } = config.getColumns();
+  console.log(columnConfig);
 
   return (
     <BaseTable

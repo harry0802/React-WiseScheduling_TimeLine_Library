@@ -30,6 +30,21 @@ const LayoutSider = () => {
       icon: <BarChartOutlined />,
       label: <Link to="/pig-house-inventory">Pig House Inventory</Link>,
     },
+    {
+      key: "3",
+      icon: <BarChartOutlined />,
+      label: <Link to="/sow-breeding-records">Sow Breeding Records</Link>,
+    },
+    {
+      key: "4",
+      icon: <BarChartOutlined />,
+      label: <Link to="/boar-genotype">Boar Genotype</Link>,
+    },
+    {
+      key: "5",
+      icon: <BarChartOutlined />,
+      label: <Link to="/culling-boar">Culling Boar</Link>,
+    },
   ];
 
   return (

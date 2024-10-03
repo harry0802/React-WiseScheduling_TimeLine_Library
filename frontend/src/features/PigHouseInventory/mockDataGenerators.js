@@ -48,6 +48,7 @@ const generateFarrowingData = ({ min, max, includeNursery }) => {
   return data;
 };
 
+// TODO : 所有的表單邏輯都會走向這裡
 export function generateMockInventory(index) {
   // !生成豬隻數據
   const pigData = Object.entries(pigCategories).reduce((acc, [key, value]) => {

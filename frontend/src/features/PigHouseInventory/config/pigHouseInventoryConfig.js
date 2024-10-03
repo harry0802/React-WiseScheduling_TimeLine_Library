@@ -66,6 +66,7 @@ const specialFields = {
 };
 
 const generateFields = (category) => {
+  // 優先搜尋 specialFields key 若不存在使用 commonFields
   const fields = specialFields[category.key] || commonFields;
   return fields.map((field) => ({
     name: `${category.key}${field.key}`,
