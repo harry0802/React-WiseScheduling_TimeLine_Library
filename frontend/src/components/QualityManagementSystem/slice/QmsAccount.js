@@ -195,12 +195,15 @@ export const useProductionReports = () => {
       { status: "On-going", machineSN },
       {
         refetchOnMountOrArgChange: true,
+        pollingInterval: 30000, // Poll every 30 seconds
         skip:
           !machineSN ||
           !activeMachines ||
           Object.keys(activeMachines).length === 0,
       }
     );
+
+  console.log("🚀 productionReportData:", productionReportData);
 
   const { data: inspections } = useGetInspectionsQuery(userType, {
     refetchOnMountOrArgChange: true,
