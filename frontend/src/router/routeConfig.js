@@ -85,6 +85,26 @@ const routeConfig = [
           },
         ],
       },
+
+      {
+        path: "QuotationManagementSystem",
+        element: <LazyComponents.QuotationManagementSystem />,
+        children: [
+          {
+            index: true,
+            replace: true,
+            element: <LazyComponents.QmsHome />,
+          },
+          {
+            path: "addProductInfo/:productId",
+            element: (
+              <React.Suspense fallback={<div> Loading... </div>}>
+                <LazyComponents.QmsAddtions />
+              </React.Suspense>
+            ),
+          },
+        ],
+      },
     ],
   },
 ];

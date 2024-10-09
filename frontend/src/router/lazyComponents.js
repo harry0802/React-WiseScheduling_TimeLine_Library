@@ -75,3 +75,14 @@ export const QmsProductionInspection = lazyImport(() =>
     "../components/QualityManagementSystem/feature/QmsProductionInspection/Index"
   )
 );
+
+// QuotationManagementSystem
+export const QuotationManagementSystem = lazyImport(() =>
+  import("../pages/QuotationManagementSystemPage")
+);
+export const QmsHome = lazyImport(() =>
+  import("../components/QuotationManagementSystem/features/QmsHome")
+);
+export const QmsAddtions = lazyImport(() =>
+  import("../components/QuotationManagementSystem/features/QmsAddtionInfos")
+);

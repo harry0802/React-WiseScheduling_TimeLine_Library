@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 import Topbar from "../components/Global/Topbar";
 import styled from "styled-components";
 import ProductNotification from "../components/ProductionRecord/utility/ProductNotification";
+import GlobalStyles from "../styles/GlobalStyle";
 
 const { Content } = Layout;
 
@@ -39,6 +40,7 @@ const AppLayout = () => {
   return (
     <>
       <StyledLayout>
+        <GlobalStyles />
         <Topbar collapsed={collapsed} setCollapsed={setCollapsed} />
         <StyledContent>
           <React.Suspense fallback={<Spin size="large" />}>
