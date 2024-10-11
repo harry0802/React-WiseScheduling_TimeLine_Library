@@ -31,8 +31,6 @@ function QmsHome() {
     ));
   }
 
-  //   PmPagination
-
   return (
     <PmHomeContent>
       <PmHomeContent.Content>

@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useEffect } from "react";
 import {
   useForm,
   FormProvider,
-  Controller,
+  useController,
   useFormContext,
 } from "react-hook-form";
 import {
@@ -54,7 +54,7 @@ const StyledForm = styled("form")(({ theme }) => ({
   "& .MuiButton-containedPrimary": {
     backgroundColor: "#83bf45",
     color: "white",
-    transition: "background-color 0.3s, transform 0.1s",
+    transition: "background-color 0.3s, transform 0.1s ",
     boxShadow: "3px 3px 6px rgba(0, 0, 0, 0.25)",
     "&:hover": {
       backgroundColor: "#6fc1ae",
@@ -72,17 +72,21 @@ function DynamicForm({
   submitText = "提交",
   fields = [],
   submitButton = false,
+  externalMethods, // 新增這個prop來接收外部的useForm方法
   ...props
 }) {
-  const methods = useForm();
+  const internalMethods = useForm();
+  const methods = externalMethods || internalMethods; // 使用外部方法或內部方法
 
   const formattedInitialValues = useMemo(() => {
     return formatInitialValues(initialValues, fields);
   }, [initialValues, fields]);
 
+  // 這是給預設內部的按鈕觸發的 如果今天沒有預設按鈕 則會是在外面觸發 與此無關
   const handleFinish = useCallback(
     (values) => {
       const formattedValues = formatSubmitValues(values);
+      console.log(formattedValues);
       onFinish(formattedValues);
     },
     [onFinish]
@@ -112,11 +116,20 @@ function DynamicForm({
   );
 }
 
-DynamicForm.Field = React.memo(({ field, children }) => {
+DynamicForm.Field = React.memo(({ field }) => {
   const { control } = useFormContext();
-  const Component = FormItemMap[field.type];
 
-  console.log(field);
+  const {
+    field: controllerField,
+    fieldState: { error },
+  } = useController({
+    name: field.name,
+    control,
+    rules: field.rules,
+    defaultValue: field.defaultValue ?? "",
+  });
+
+  const Component = FormItemMap[field.type];
 
   if (!Component) return null;
 
@@ -124,7 +137,7 @@ DynamicForm.Field = React.memo(({ field, children }) => {
     switch (field.type) {
       case "select":
         return (
-          <Select {...field.props}>
+          <Select {...field.props} {...controllerField}>
             {field.options?.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
@@ -134,7 +147,7 @@ DynamicForm.Field = React.memo(({ field, children }) => {
         );
       case "radio":
         return (
-          <RadioGroup {...field.props}>
+          <RadioGroup {...field.props} {...controllerField}>
             {field.options?.map((option) => (
               <FormControlLabel
                 key={option.value}
@@ -147,39 +160,56 @@ DynamicForm.Field = React.memo(({ field, children }) => {
         );
       case "autocomplete":
         return (
-          <Controller
-            name={field.name}
-            control={control}
-            rules={field.rules}
-            render={({ field: controllerField }) => (
-              <Autocomplete
-                {...field.props}
-                options={field.options || []}
-                value={controllerField.value}
-                onChange={(event, newValue) => {
-                  controllerField.onChange(newValue);
-                }}
-                renderInput={(params) => (
-                  <TextField {...params} label={field.label} />
-                )}
+          <Autocomplete
+            {...field.props}
+            {...field}
+            options={field.options || []}
+            value={controllerField.value || null} // Ensure null when no match
+            onChange={(event, newValue) => controllerField.onChange(newValue)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={field.label}
+                error={!!error}
+                helperText={error?.message}
               />
             )}
+            isOptionEqualToValue={(option, value) => {
+              // 如果 value 是字符串，則與 option.value 比較
+              return typeof value === "string"
+                ? option.value === value
+                : option.value === value?.value;
+            }}
           />
         );
       case "checkbox":
         return (
           <FormControlLabel
-            control={<Checkbox {...field.props} />}
+            control={
+              <Checkbox
+                {...field.props}
+                checked={controllerField.value}
+                onChange={(e) => controllerField.onChange(e.target.checked)}
+              />
+            }
             label={field.label}
           />
         );
       case "date":
-        return <TextField {...field.props} type="date" />;
       case "textarea":
-        return <TextField {...field.props} multiline />;
-
+      case "input":
       default:
-        return <TextField {...field.props} variant="outlined" />;
+        return (
+          <TextField
+            {...field.props}
+            {...field}
+            {...controllerField}
+            type={field.type === "date" ? "date" : "text"}
+            multiline={field.type === "textarea"}
+            error={!!error}
+            helperText={error?.message}
+          />
+        );
     }
   };
 

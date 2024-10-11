@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import styled from "styled-components";
 import ProductContextCard from "../../ProductionRecord/utility/ProductContextCard.jsx";
 import useNotification from "../../ProductionRecord/hook/useNotification.js";
 import BaseDrawer from "../Drawer/BaseDrawer.jsx";
 import DynamicForm from "../form/DynamicForm.jsx";
+import { useForm } from "react-hook-form";
 // 樣式組件
 const ProductInfo = styled.div`
   display: flex;
@@ -44,11 +45,12 @@ function BaseProductInfoSection({
 }) {
   const [infoDrawer, setInfoDrawerState] = useState(false);
   const { notifySuccess } = useNotification();
-
+  const methods = useForm();
   const openDrawer = () => setInfoDrawerState(true);
   const closeDrawer = () => setInfoDrawerState(false);
 
-  const handleConfirm = async (formData) => {
+  const handleConfirm = useCallback(async () => {
+    const formData = methods.getValues();
     console.log(formData);
 
     if (customValidation ? customValidation(formData) : true) {
@@ -56,7 +58,7 @@ function BaseProductInfoSection({
       closeDrawer();
       setTimeout(() => notifySuccess(), 100);
     }
-  };
+  }, [methods, customValidation, onUpdate, closeDrawer, notifySuccess]);
 
   const contextValue = {
     product,
@@ -66,6 +68,7 @@ function BaseProductInfoSection({
     infoDrawer,
     config,
     editingItem,
+    methods,
   };
 
   return (
@@ -89,26 +92,34 @@ function Info({ render }) {
 }
 
 // Drawer 子組件
-function Drawer({ render, children }) {
-  const { infoDrawer, closeDrawer, handleConfirm, product } =
+function Drawer({ children }) {
+  const { infoDrawer, closeDrawer, handleConfirm, methods } =
     useContext(ProductInfoContext);
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    methods.handleSubmit(handleConfirm)();
+  };
 
   return (
     <BaseDrawer visible={infoDrawer} onClose={closeDrawer}>
       <BaseDrawer.Header>產品詳情</BaseDrawer.Header>
       <BaseDrawer.Body>{children}</BaseDrawer.Body>
-      <BaseDrawer.Footer onSubmit={() => handleConfirm(product)} />
+      <BaseDrawer.Footer onSubmit={onSubmit} />
     </BaseDrawer>
   );
 }
 
 // Form 子組件
-function Form({ form, formFields }) {
+function Form({ form, formFields, initialValues }) {
+  const { methods } = useContext(ProductInfoContext);
+
   return (
     <DynamicForm
+      externalMethods={methods}
       form={form}
       fields={formFields}
-      //   initialValues={editingItem}
+      initialValues={initialValues}
       submitButton={false}
     >
       {() => (

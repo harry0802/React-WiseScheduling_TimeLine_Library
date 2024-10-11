@@ -9,15 +9,15 @@ const fields = [
     type: "input",
     name: "productNumber",
     label: "產品序號",
-    rules: { required: "請輸入產品序號" },
+    rules: { required: "Name is required" },
     props: { placeholder: "請輸入產品序號" },
   },
   {
     type: "input",
-    name: "username",
-    label: "用戶名",
-    rules: { required: "請輸入用戶名" },
-    props: { placeholder: "請輸入用戶名" },
+    name: "productName",
+    label: "產品名稱",
+    rules: { required: "Name is required" },
+    props: { placeholder: "請輸入產品名稱" },
   },
   {
     type: "autocomplete",
@@ -29,6 +29,7 @@ const fields = [
       { value: "clientC", label: "客戶C" },
       { value: "clientD", label: "客戶D" },
     ],
+    rules: { required: "Please select at least one customer" },
   },
 ];
 
@@ -38,9 +39,19 @@ function QmsPdInfo() {
   const navigate = useNavigate();
 
   const [form] = Form.useForm();
-
-  if (data === null || !productId) navigate("/ProductionRecordPage");
   const [productData, setProductData] = useState([]);
+  const handleUpdate = async (formData) => {
+    setProductData([
+      {
+        ...formData,
+        customerName: formData.customerName.label
+          ? formData.customerName.label
+          : formData.customerName,
+      },
+    ]);
+  };
+
+  if (data === null || !productId) navigate("/QuotationManagementSystem");
 
   useEffect(() => {
     (function () {
@@ -51,9 +62,9 @@ function QmsPdInfo() {
   return (
     <BaseProductInfoSection
       product={productData}
-      //   onUpdate={handleUpdate}
+      onUpdate={handleUpdate}
       title="產品詳情"
-      customValidation={(formData) => formData.oldProductSN.length > 0}
+      // customValidation={(formData) => formData.oldProductSN.length > 0}
     >
       <BaseProductInfoSection.Info
         render={(product) => (
@@ -75,7 +86,15 @@ function QmsPdInfo() {
         )}
       />
       <BaseProductInfoSection.Drawer>
-        <BaseProductInfoSection.Form form={form} formFields={fields} />
+        <BaseProductInfoSection.Form
+          initialValues={{
+            productName: productData[0]?.productName,
+            productNumber: productData[0]?.productNumber,
+            customerName: productData[0]?.customerName,
+          }}
+          form={form}
+          formFields={fields}
+        />
       </BaseProductInfoSection.Drawer>
     </BaseProductInfoSection>
   );
