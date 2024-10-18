@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
+    "@iconify/react": "^5.0.2",
     "@mswjs/data": "^0.12.0",
     "cz-conventional-changelog": "^3.3.0",
     "mock-socket": "^9.2.1",

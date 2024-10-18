@@ -1,9 +1,10 @@
-import React, { useMemo, useCallback, useEffect } from "react";
+import React, { useMemo, useCallback, useEffect, useState } from "react";
 import {
   useForm,
   FormProvider,
   useController,
   useFormContext,
+  useWatch,
 } from "react-hook-form";
 import {
   Button,
@@ -16,6 +17,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Autocomplete,
+  CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {
@@ -23,17 +25,19 @@ import {
   formatSubmitValues,
 } from "../../../utility/formUtils";
 
+// 支持的表單元素映射
 const FormItemMap = {
   input: TextField,
   number: TextField,
   select: Select,
-  // date: DatePicker,
   checkbox: Checkbox,
   radio: RadioGroup,
   textarea: TextField,
   autocomplete: Autocomplete,
+  date: TextField, // Date 可以擴展為更複雜的 DatePicker
 };
 
+// 表單樣式
 const StyledForm = styled("form")(({ theme }) => ({
   "& .MuiFormControl-root": {
     marginBottom: theme.spacing(3),
@@ -65,6 +69,7 @@ const StyledForm = styled("form")(({ theme }) => ({
   },
 }));
 
+// 動態表單組件
 function DynamicForm({
   children,
   onFinish,
@@ -72,21 +77,22 @@ function DynamicForm({
   submitText = "提交",
   fields = [],
   submitButton = false,
-  externalMethods, // 新增這個prop來接收外部的useForm方法
+  externalMethods,
+  loading = false, // 是否顯示提交加載狀態
   ...props
 }) {
   const internalMethods = useForm();
-  const methods = externalMethods || internalMethods; // 使用外部方法或內部方法
+  const methods = externalMethods || internalMethods;
 
+  // 格式化初始值
   const formattedInitialValues = useMemo(() => {
     return formatInitialValues(initialValues, fields);
   }, [initialValues, fields]);
 
-  // 這是給預設內部的按鈕觸發的 如果今天沒有預設按鈕 則會是在外面觸發 與此無關
+  // 提交處理
   const handleFinish = useCallback(
     (values) => {
       const formattedValues = formatSubmitValues(values);
-      console.log(formattedValues);
       onFinish(formattedValues);
     },
     [onFinish]
@@ -107,8 +113,13 @@ function DynamicForm({
           {children({ FormItem: ({ children }) => children })}
         </Grid>
         {submitButton && (
-          <Button type="submit" variant="contained" color="primary">
-            {submitText}
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : submitText}
           </Button>
         )}
       </StyledForm>
@@ -116,9 +127,9 @@ function DynamicForm({
   );
 }
 
-DynamicForm.Field = React.memo(({ field }) => {
-  const { control } = useFormContext();
-
+// 動態表單欄位
+DynamicForm.Field = React.memo(({ field, customProps }) => {
+  const { control, watch } = useFormContext();
   const {
     field: controllerField,
     fieldState: { error },
@@ -129,16 +140,35 @@ DynamicForm.Field = React.memo(({ field }) => {
     defaultValue: field.defaultValue ?? "",
   });
 
+  // 從 props 中提取出自定義屬性
+  const { getDependentOptions, dependsOn, ...restProps } = field.props || {};
+
+  // 監聽依賴字段的值
+  const dependentValue = dependsOn ? watch(dependsOn) : null;
+
+  // 根據依賴值獲取選項
+  const options = useMemo(() => {
+    if (getDependentOptions && dependentValue) {
+      return getDependentOptions(dependentValue);
+    }
+    return field.options || [];
+  }, [field, dependentValue, getDependentOptions]);
+
   const Component = FormItemMap[field.type];
 
   if (!Component) return null;
 
-  const renderFormItem = () => {
+  const renderFormItem = (fieldProps) => {
     switch (field.type) {
       case "select":
         return (
-          <Select {...field.props} {...controllerField}>
-            {field.options?.map((option) => (
+          <Select
+            {...fieldProps}
+            helperText={error?.message}
+            error={!!error}
+            fullWidth
+          >
+            {options.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
@@ -147,8 +177,8 @@ DynamicForm.Field = React.memo(({ field }) => {
         );
       case "radio":
         return (
-          <RadioGroup {...field.props} {...controllerField}>
-            {field.options?.map((option) => (
+          <RadioGroup {...fieldProps}>
+            {options.map((option) => (
               <FormControlLabel
                 key={option.value}
                 value={option.value}
@@ -161,10 +191,9 @@ DynamicForm.Field = React.memo(({ field }) => {
       case "autocomplete":
         return (
           <Autocomplete
-            {...field.props}
-            {...field}
-            options={field.options || []}
-            value={controllerField.value || null} // Ensure null when no match
+            {...fieldProps}
+            options={options || []}
+            value={controllerField.value || null}
             onChange={(event, newValue) => controllerField.onChange(newValue)}
             renderInput={(params) => (
               <TextField
@@ -174,12 +203,6 @@ DynamicForm.Field = React.memo(({ field }) => {
                 helperText={error?.message}
               />
             )}
-            isOptionEqualToValue={(option, value) => {
-              // 如果 value 是字符串，則與 option.value 比較
-              return typeof value === "string"
-                ? option.value === value
-                : option.value === value?.value;
-            }}
           />
         );
       case "checkbox":
@@ -187,7 +210,7 @@ DynamicForm.Field = React.memo(({ field }) => {
           <FormControlLabel
             control={
               <Checkbox
-                {...field.props}
+                {...fieldProps}
                 checked={controllerField.value}
                 onChange={(e) => controllerField.onChange(e.target.checked)}
               />
@@ -201,9 +224,7 @@ DynamicForm.Field = React.memo(({ field }) => {
       default:
         return (
           <TextField
-            {...field.props}
-            {...field}
-            {...controllerField}
+            {...fieldProps}
             type={field.type === "date" ? "date" : "text"}
             multiline={field.type === "textarea"}
             error={!!error}
@@ -213,13 +234,34 @@ DynamicForm.Field = React.memo(({ field }) => {
     }
   };
 
+  const fieldProps = {
+    ...field,
+    ...field.props,
+    ...restProps,
+    ...controllerField,
+    ...customProps,
+  };
+
   return (
     <Grid item xs={field.span || 12}>
-      {renderFormItem()}
+      {renderFormItem(fieldProps)}
     </Grid>
   );
 });
 
+// 處理依賴關係的子組件
+function DependentField({ field }) {
+  const { watch } = useFormContext();
+  const dependentValue = watch(field.dependsOn);
+
+  if (dependentValue !== field.dependsOnValue) {
+    return null;
+  }
+
+  return <DynamicForm.Field field={field} />;
+}
+
 DynamicForm.Field.displayName = "DynamicForm.Field";
+DynamicForm.DependentField = DependentField;
 
 export default DynamicForm;

@@ -1,5 +1,8 @@
 import ProductAddtionLayout from "../../Global/layout/ProductAddtionLayout";
+import ProcessCostAnalysis from "../components/ProcessCostAnalysis/ProcessCostAnalysis";
+import QmsDashbord from "../components/QmsDashbord";
 import QmsPdInfo from "../components/QmsPdInfo";
+import QmsProfitDashboard from "../components/QmsProfitDashboard";
 
 function QmsAddtions() {
   const breadcrumbs = [
@@ -9,7 +12,10 @@ function QmsAddtions() {
 
   return (
     <ProductAddtionLayout breadcrumbs={breadcrumbs}>
+      <QmsDashbord />
       <QmsPdInfo />
+      <QmsProfitDashboard />
+      <ProcessCostAnalysis />
     </ProductAddtionLayout>
   );
 }

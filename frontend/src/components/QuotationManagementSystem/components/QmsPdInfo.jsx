@@ -2,7 +2,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
 import { qmsHomeSlice } from "../slice/qmsHome";
 import { useEffect, useState } from "react";
-import { Form } from "antd";
 
 const fields = [
   {
@@ -38,24 +37,24 @@ function QmsPdInfo() {
   const { productId } = useParams();
   const navigate = useNavigate();
 
-  const [form] = Form.useForm();
   const [productData, setProductData] = useState([]);
+
   const handleUpdate = async (formData) => {
-    setProductData([
-      {
-        ...formData,
-        customerName: formData.customerName.label
-          ? formData.customerName.label
-          : formData.customerName,
-      },
-    ]);
+    console.log(formData);
+
+    setProductData((prev) => ({
+      ...prev,
+      customerName: formData.customerName.label
+        ? formData.customerName.label
+        : formData.customerName,
+    }));
   };
 
   if (data === null || !productId) navigate("/QuotationManagementSystem");
 
   useEffect(() => {
     (function () {
-      const product = data?.filter((item) => item.id === productId);
+      const [product] = data?.filter((item) => item.id === productId);
       setProductData(product);
     })();
   }, [productId, data]);
@@ -85,14 +84,13 @@ function QmsPdInfo() {
           </>
         )}
       />
-      <BaseProductInfoSection.Drawer>
+      <BaseProductInfoSection.Drawer title="產品詳情">
         <BaseProductInfoSection.Form
           initialValues={{
-            productName: productData[0]?.productName,
-            productNumber: productData[0]?.productNumber,
-            customerName: productData[0]?.customerName,
+            productName: productData.productName,
+            productNumber: productData.productNumber,
+            customerName: productData.customerName,
           }}
-          form={form}
           formFields={fields}
         />
       </BaseProductInfoSection.Drawer>

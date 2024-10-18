@@ -354,11 +354,12 @@ button.ant-btn-default,
   flex-direction: column;
   align-items: self-start;
   padding: 1.875rem 1.4375rem 5.125rem 1.4375rem;
+  font-family: Roboto;
 
   // gap: 1.625rem;
   color: $palette-text-primary;
   font-family: Roboto;
-  font-size: 16px;
+  font-size: 18px;
   font-style: normal;
   font-weight: 600;
   line-height: 1.25rem; /* 125% */
@@ -373,6 +374,9 @@ button.ant-btn-default,
     align-items: center;
     justify-content: space-between;
     margin-bottom: 1.25rem;
+    :where(h3) {
+      font-size: 1.5rem;
+    }
   }
 
   &__text {
@@ -381,6 +385,7 @@ button.ant-btn-default,
   }
   &__text > p:not(:first-child) {
     margin-top: 1.25rem;
+    font-weight: 400;
   }
 }
 
@@ -394,6 +399,7 @@ button.ant-btn-default,
   font-style: normal;
   font-weight: 400;
   line-height: 1.25rem; /* 125% */
+
   & :is(.MuiAccordionSummary-content) {
     align-items: center;
     gap: 1.25rem;

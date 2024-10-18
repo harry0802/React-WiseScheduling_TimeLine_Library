@@ -1,34 +1,12 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import EditIcon from "@mui/icons-material/Edit";
-import styled from "styled-components";
 import ProductContextCard from "../../ProductionRecord/utility/ProductContextCard.jsx";
 import useNotification from "../../ProductionRecord/hook/useNotification.js";
 import BaseDrawer from "../Drawer/BaseDrawer.jsx";
 import DynamicForm from "../form/DynamicForm.jsx";
 import { useForm } from "react-hook-form";
-// 樣式組件
-const ProductInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: self-start;
-  color: var(--palette-text-primary);
-  font-family: Roboto, sans-serif;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 1.25rem;
-  border-radius: 4px;
-  width: 100%;
-`;
-
-const ProductInfoText = styled.div`
-  height: 100%;
-  font-size: 0.875rem;
-
-  > p:not(:first-child) {
-    margin-top: 1.25rem;
-  }
-`;
+import BaseTable from "../table/BaseTable.jsx";
+import { ProductInfo, ProductInfoText } from "./SectionsStyled.jsx";
 // 創建上下文
 const ProductInfoContext = createContext();
 
@@ -44,15 +22,13 @@ function BaseProductInfoSection({
   editingItem,
 }) {
   const [infoDrawer, setInfoDrawerState] = useState(false);
-  const { notifySuccess } = useNotification();
   const methods = useForm();
   const openDrawer = () => setInfoDrawerState(true);
   const closeDrawer = () => setInfoDrawerState(false);
+  const { notifySuccess } = useNotification();
 
   const handleConfirm = useCallback(async () => {
     const formData = methods.getValues();
-    console.log(formData);
-
     if (customValidation ? customValidation(formData) : true) {
       await onUpdate(formData);
       closeDrawer();
@@ -80,19 +56,30 @@ function BaseProductInfoSection({
   );
 }
 
-// Info 子組件
+// Info 子組件 處理文字類別
 function Info({ render }) {
   const { product } = useContext(ProductInfoContext);
 
   return (
     <ProductInfo>
-      <ProductInfoText>{product && render(product[0])}</ProductInfoText>
+      <ProductInfoText>{product && render(product)}</ProductInfoText>
+    </ProductInfo>
+  );
+}
+
+// Table 子組件 處理表格類別
+function Table({ columns, data }) {
+  const { product, openDrawer } = useContext(ProductInfoContext);
+
+  return (
+    <ProductInfo>
+      <BaseTable columns={columns} data={data} onRowClick={openDrawer} />
     </ProductInfo>
   );
 }
 
 // Drawer 子組件
-function Drawer({ children }) {
+function Drawer({ title, children }) {
   const { infoDrawer, closeDrawer, handleConfirm, methods } =
     useContext(ProductInfoContext);
 
@@ -103,7 +90,7 @@ function Drawer({ children }) {
 
   return (
     <BaseDrawer visible={infoDrawer} onClose={closeDrawer}>
-      <BaseDrawer.Header>產品詳情</BaseDrawer.Header>
+      <BaseDrawer.Header>{title}</BaseDrawer.Header>
       <BaseDrawer.Body>{children}</BaseDrawer.Body>
       <BaseDrawer.Footer onSubmit={onSubmit} />
     </BaseDrawer>
@@ -111,13 +98,12 @@ function Drawer({ children }) {
 }
 
 // Form 子組件
-function Form({ form, formFields, initialValues }) {
+function Form({ formFields, initialValues }) {
   const { methods } = useContext(ProductInfoContext);
 
   return (
     <DynamicForm
       externalMethods={methods}
-      form={form}
       fields={formFields}
       initialValues={initialValues}
       submitButton={false}
@@ -135,6 +121,7 @@ function Form({ form, formFields, initialValues }) {
 
 // 將子組件添加到 BaseProductInfoSection
 BaseProductInfoSection.Info = Info;
+BaseProductInfoSection.Table = Table;
 BaseProductInfoSection.Drawer = Drawer;
 BaseProductInfoSection.Form = Form;
 export default BaseProductInfoSection;
