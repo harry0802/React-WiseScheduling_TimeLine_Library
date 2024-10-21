@@ -27,6 +27,8 @@ export function ProcessCostAnalysisProvider({ children }) {
 
   // 經過檢查的 setProcessType 函數，避免不必要的更新
   const setProcessTypeWithCheck = useCallback((type) => {
+    console.log(type);
+
     if (type !== processTypeRef.current) {
       setProcessType(type);
       processTypeRef.current = type;
@@ -66,7 +68,7 @@ export function ProcessCostAnalysisProvider({ children }) {
       }
 
       if (processTypeOption) {
-        setProcessType(processTypeOption.label);
+        setProcessType(processTypeOption.value);
         setTypeTitle(processTypeOption.label);
       }
 

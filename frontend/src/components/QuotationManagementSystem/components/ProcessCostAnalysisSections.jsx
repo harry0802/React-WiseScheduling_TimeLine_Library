@@ -25,28 +25,7 @@ import { mockProcessCostAnalysisData } from "../data/processCostAnalysisData";
 
 // ProcessTypeSelect 組件
 function ProcessTypeSelect() {
-  const { processType, setProcessType, methods, formData, infoDrawer } =
-    useProcessCostAnalysis();
-  const watchProcessType = useWatch({
-    control: methods.control,
-    name: "processType",
-    defaultValue: processType,
-  });
-
-  useEffect(() => {
-    if (watchProcessType && watchProcessType !== processType && infoDrawer) {
-      setProcessType(watchProcessType);
-    }
-  }, [watchProcessType, processType, setProcessType, methods, infoDrawer]);
-
-  const handleFormChange = useCallback(
-    (data) => {
-      if (data.processType !== processType) {
-        setProcessType(data.processType);
-      }
-    },
-    [processType, setProcessType]
-  );
+  const { processType, methods, formData } = useProcessCostAnalysis();
 
   const renderFields = useCallback(
     ({ FormItem }) => (
@@ -73,17 +52,16 @@ function ProcessTypeSelect() {
     () => (
       <DynamicForm
         externalMethods={methods}
-        onFinish={handleFormChange}
         submitButton={false}
         initialValues={{
-          processType: processType || "",
-          processSubtype: formData[processType]?.processSubtype || "",
+          processType: formData.processType || "",
+          processSubtype: formData[formData.processType]?.processSubtype || "",
         }}
       >
         {renderFields}
       </DynamicForm>
     ),
-    [methods, handleFormChange, renderFields, formData, processType]
+    [methods, renderFields, formData, processType]
   );
 
   return memoizedForm;
@@ -91,52 +69,31 @@ function ProcessTypeSelect() {
 
 // ProcessFormSections 組件
 function ProcessFormSections() {
-  const { processType, methods, setFormData } = useProcessCostAnalysis();
+  const { methods } = useProcessCostAnalysis();
+  const watchProcessType = useWatch({
+    control: methods.control,
+    name: "processType",
+  });
   const [activeTab, setActiveTab] = useState(0);
-  const [tabValues, setTabValues] = useState({});
 
-  const sections = useMemo(
-    () => FORM_CONFIGURATIONS[processType] || [],
-    [processType]
-  );
+  console.log(watchProcessType);
 
-  const handleTabChange = useCallback(
-    (_, newValue) => {
-      const currentValues = methods.getValues();
-      setTabValues((prev) => ({
-        ...prev,
-        [activeTab]: currentValues,
-      }));
-      setActiveTab(newValue);
-      if (tabValues[newValue]) {
-        Object.entries(tabValues[newValue]).forEach(([name, value]) => {
-          methods.setValue(name, value);
-        });
-      }
-    },
-    [activeTab, methods, tabValues]
-  );
+  const sections = FORM_CONFIGURATIONS[watchProcessType] || [];
+  console.log(sections);
+  const handleTabChange = useCallback((_, newValue) => {
+    setActiveTab(newValue);
+  }, []);
 
-  const handleFormChange = useCallback(
-    (data) => {
-      setTabValues((prev) => ({
-        ...prev,
-        [activeTab]: data,
-      }));
-    },
-    [activeTab]
-  );
-
-  // 使用 useEffect 來更新 context 中的所有標籤值
-  useEffect(() => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [processType]: {
-        ...prevData[processType],
-        ...tabValues,
-      },
-    }));
-  }, [tabValues, processType, setFormData]);
+  const handleFormChange = useCallback((data) => {
+    console.log(data);
+    // setFormData((prevData) => ({
+    //   ...prevData,
+    //   [processType]: {
+    //     ...prevData[processType],
+    //     ...data,
+    //   },
+    // }));
+  }, []);
 
   const renderFields = useCallback(
     ({ FormItem }) => (
@@ -164,10 +121,18 @@ function ProcessFormSections() {
     [methods, renderFields, handleFormChange]
   );
 
+  // 当 processType 改变时,重置 activeTab
+  // useEffect(() => {
+  //   setActiveTab(0);
+  // }, [processType]);
+  if (!watchProcessType) {
+    return null;
+  }
+
   return (
     <>
       <Tabs value={activeTab} onChange={handleTabChange}>
-        {sections?.map((section, index) => (
+        {FORM_CONFIGURATIONS[watchProcessType]?.map((section, index) => (
           <Tab key={index} label={section.title} />
         ))}
       </Tabs>
@@ -183,6 +148,7 @@ function ProcessTableRenderer({ processType, formData }) {
     return <Typography variant="body1">尚未填寫資料</Typography>;
   }
 
+  console.log(formData);
   // 檢查formData是否為空對象
   if (Object.keys(formData).length === 0) {
     return <Typography variant="body1">尚未填寫資料</Typography>;
@@ -350,32 +316,6 @@ function ProcessCostAnalysisContent({ onUpdate, title, icon }) {
     currentData, // 新增這行來獲取 currentData
   } = useProcessCostAnalysis();
   const { notifySuccess } = useNotification();
-
-  // useEffect(() => {
-  //   setProcesses(mockProcessCostAnalysisData);
-  // }, []);
-
-  // const handleAddProcess = (newProcess) => {
-  //   setProcesses((prevProcesses) => [
-  //     ...prevProcesses,
-  //     { ...newProcess, id: Date.now().toString() },
-  //   ]);
-  // };
-
-  // const handleDeleteProcess = (id) => {
-  //   setProcesses((prevProcesses) =>
-  //     prevProcesses.filter((process) => process.id !== id)
-  //   );
-  // };
-
-  // const handleUpdateProcess = (updatedProcess) => {
-  //   setProcesses((prevProcesses) =>
-  //     prevProcesses.map((process) =>
-  //       process.id === updatedProcess.id ? updatedProcess : process
-  //     )
-  //   );
-  // };
-
   const handleConfirm = async () => {
     const currentFormData = methods.getValues();
     const allData = {
@@ -411,7 +351,10 @@ function ProcessCostAnalysisContent({ onUpdate, title, icon }) {
           }`}
           OnClick={() => openDrawer(process.id)}
         >
-          <ProcessTableRenderer process={process} />
+          <ProcessTableRenderer
+            processType={process.processType}
+            formData={process}
+          />
         </BaseAccordion>
       ))}
       <BaseDrawer visible={infoDrawer} onClose={closeDrawer}>
