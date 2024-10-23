@@ -1,7 +1,7 @@
 // 引入共用的字段和部分定義，以及 createField 函數
 import { commonFields, commonSections, createField } from "./commonConfigs";
 
-// 製程類型定義
+// !製程類型定義 之後這邊的內容是從 API 拿的
 export const PROCESS_TYPES = {
   APPEARANCE_INSPECTION: {
     key: "APPEARANCE_INSPECTION",
@@ -20,8 +20,7 @@ export const PROCESS_TYPES = {
     value: "製程5 廠內出貨檢驗",
   },
 };
-
-// 製程類型選項
+// * 負責轉換成選單的選項
 export const PROCESS_TYPE_OPTIONS = Object.values(PROCESS_TYPES).map(
   ({ key, value }) => ({
     value: key,
@@ -29,7 +28,7 @@ export const PROCESS_TYPE_OPTIONS = Object.values(PROCESS_TYPES).map(
   })
 );
 
-// 修改：製程子類型定義
+// ! 製程子類型定義 之後這邊的內容是從 API 拿的
 export const PROCESS_SUBTYPES = {
   [PROCESS_TYPES.APPEARANCE_INSPECTION.key]: [
     { key: "subtype1", value: "子類型1", label: "子類型1" },
@@ -53,8 +52,9 @@ export const PROCESS_SUBTYPES = {
   ],
 };
 
-// 製程特定配置
+// * 製程特定配置
 const processSpecificConfigs = {
+  // 製程3 廠內外觀整修
   [PROCESS_TYPES.APPEARANCE_INSPECTION.key]: [
     commonSections.rawMaterialCost,
     commonSections.packagingMaterialCost,
@@ -71,6 +71,7 @@ const processSpecificConfigs = {
       ],
     },
   ],
+  // 製程6 運輸費用
   [PROCESS_TYPES.TRANSPORTATION.key]: [
     {
       title: "運輸費用",
@@ -108,21 +109,21 @@ const processSpecificConfigs = {
       title: "貨運與關稅",
       fields: [
         createField(
-          "transportType",
+          "freightType",
           "貨運",
           "input",
           { placeholder: "請輸入貨運方式" },
           { required: "貨運方式為必填" }
         ),
         createField(
-          "distance",
+          "freightCost",
           "運貨費用",
           "number",
           { InputProps: { endAdornment: "元" }, placeholder: "請輸入運貨費用" },
           { required: "運貨費用為必填" }
         ),
         createField(
-          "time",
+          "customsFee",
           "關稅",
           "number",
           { InputProps: { endAdornment: "元" }, placeholder: "請輸入關稅" },
@@ -131,6 +132,7 @@ const processSpecificConfigs = {
       ],
     },
   ],
+  // 廠內-外觀修整
   [PROCESS_TYPES.INTERNAL_APPEARANCE_REPAIR.key]: [
     commonSections.rawMaterialCost,
     commonSections.packagingMaterialCost,
@@ -139,6 +141,7 @@ const processSpecificConfigs = {
       fields: [commonFields.inspectionFee],
     },
   ],
+  // 製程5 廠內出貨檢驗
   [PROCESS_TYPES.INTERNAL_SHIPPING_INSPECTION.key]: [
     {
       title: "廠內出貨檢",
@@ -162,10 +165,11 @@ const processSpecificConfigs = {
   ],
 };
 
-// 最終導出的表單配置
+// * 最終導出的 processSpecificConfigs 表單配置
+// ? 他負責配合 tab 切換表單
 export const FORM_CONFIGURATIONS = processSpecificConfigs;
 
-// 新增：製程選擇表單配置
+// * 這邊是處理下拉選單的配置 製程類別 製程名稱
 export const PROCESS_SELECTION_FORM = [
   {
     title: "製程選擇",

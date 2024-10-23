@@ -1,17 +1,14 @@
 // src/components/Global/sections/ProcessCostAnalysisSections.jsx
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 
 import BaseAccordion from "../../Global/accordion/BaseAccordion.jsx";
-import { Tabs, Tab, Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import ProductContextCard from "../../ProductionRecord/utility/ProductContextCard.jsx";
 import useNotification from "../../ProductionRecord/hook/useNotification.js";
-import DynamicForm from "../../Global/form/DynamicForm.jsx";
 import QmsCasTable from "../../Global/table/QmsCasTable.jsx";
 import {
-  FORM_CONFIGURATIONS,
   PROCESS_TYPE_OPTIONS,
   PROCESS_TYPES,
-  PROCESS_SELECTION_FORM,
   PROCESS_SUBTYPES,
 } from "../../QuotationManagementSystem/config/processTypes.js";
 import {
@@ -20,135 +17,82 @@ import {
 } from "../context/ProcessCostAnalysisContext.jsx";
 import BaseDrawer from "../../Global/Drawer/BaseDrawer.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useWatch } from "react-hook-form";
 import { mockProcessCostAnalysisData } from "../data/processCostAnalysisData";
+import { useProcessForm } from "../hook/useProcessForm.jsx";
+import ProcessForm from "./ProcessForm";
 
-// ProcessTypeSelect 組件
-function ProcessTypeSelect() {
-  const { processType, methods, formData } = useProcessCostAnalysis();
+// * 共用的 slidebar 抽屜
+function ProcessDrawer({ visible, onClose, process, isNew = false, index }) {
+  const { handleSubmit } = useProcessForm(process);
 
-  const renderFields = useCallback(
-    ({ FormItem }) => (
-      <>
-        {PROCESS_SELECTION_FORM[0].fields.map((field, index) => (
-          <FormItem key={index}>
-            <DynamicForm.Field
-              field={field}
-              customProps={{
-                getDependentOptions:
-                  field.name === "processSubtype"
-                    ? (processType) => PROCESS_SUBTYPES[processType] || []
-                    : undefined,
-              }}
-            />
-          </FormItem>
-        ))}
-      </>
-    ),
-    []
+  return (
+    <BaseDrawer visible={visible} onClose={onClose}>
+      <BaseDrawer.Header>
+        {isNew
+          ? "添加新製程"
+          : `製程${index + 1} ${PROCESS_TYPES[process.processType].value}`}
+        {!isNew && <DeleteButton processId={process.id} />}
+      </BaseDrawer.Header>
+      <BaseDrawer.Body>
+        <ProcessForm initialData={process} onSubmit={handleSubmit} />
+      </BaseDrawer.Body>
+      <BaseDrawer.Footer />
+    </BaseDrawer>
   );
-
-  const memoizedForm = useMemo(
-    () => (
-      <DynamicForm
-        externalMethods={methods}
-        submitButton={false}
-        initialValues={{
-          processType: formData.processType || "",
-          processSubtype: formData[formData.processType]?.processSubtype || "",
-        }}
-      >
-        {renderFields}
-      </DynamicForm>
-    ),
-    [methods, renderFields, formData, processType]
-  );
-
-  return memoizedForm;
 }
 
-// ProcessFormSections 組件
-function ProcessFormSections() {
-  const { methods } = useProcessCostAnalysis();
-  const watchProcessType = useWatch({
-    control: methods.control,
-    name: "processType",
-  });
-  const [activeTab, setActiveTab] = useState(0);
+// * 新增製程 slidebar
+function NewProcessDrawer({ isActive, onClose, onUpdate }) {
+  const newProcess = { id: "new", processType: "", processSubtype: "" };
 
-  console.log(watchProcessType);
-
-  const sections = FORM_CONFIGURATIONS[watchProcessType] || [];
-  console.log(sections);
-  const handleTabChange = useCallback((_, newValue) => {
-    setActiveTab(newValue);
-  }, []);
-
-  const handleFormChange = useCallback((data) => {
-    console.log(data);
-    // setFormData((prevData) => ({
-    //   ...prevData,
-    //   [processType]: {
-    //     ...prevData[processType],
-    //     ...data,
-    //   },
-    // }));
-  }, []);
-
-  const renderFields = useCallback(
-    ({ FormItem }) => (
-      <>
-        {sections[activeTab]?.fields.map((field, fieldIndex) => (
-          <FormItem key={fieldIndex}>
-            <DynamicForm.Field field={field} />
-          </FormItem>
-        ))}
-      </>
-    ),
-    [sections, activeTab]
+  return (
+    <ProcessDrawer
+      visible={isActive}
+      onClose={onClose}
+      process={newProcess}
+      isNew
+    />
   );
-
-  const memoizedForm = useMemo(
-    () => (
-      <DynamicForm
-        externalMethods={methods}
-        submitButton={false}
-        onChange={handleFormChange}
-      >
-        {renderFields}
-      </DynamicForm>
-    ),
-    [methods, renderFields, handleFormChange]
-  );
-
-  // 当 processType 改变时,重置 activeTab
-  // useEffect(() => {
-  //   setActiveTab(0);
-  // }, [processType]);
-  if (!watchProcessType) {
-    return null;
-  }
+}
+// * 編輯製程的 accordion 項目 裡面也有 slidebar
+function ProcessItem({ index, process, onUpdate }) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const openDrawer = () => setIsDrawerOpen(true);
+  const closeDrawer = () => setIsDrawerOpen(false);
 
   return (
     <>
-      <Tabs value={activeTab} onChange={handleTabChange}>
-        {FORM_CONFIGURATIONS[watchProcessType]?.map((section, index) => (
-          <Tab key={index} label={section.title} />
-        ))}
-      </Tabs>
-      <Box sx={{ p: 3 }}>{memoizedForm}</Box>
+      <BaseAccordion
+        title={`製程${index + 1} ${
+          PROCESS_TYPES[process.processType].value
+        } - ${
+          PROCESS_SUBTYPES[process.processType].find(
+            (subtype) => subtype.key === process.processSubtype
+          )?.label || ""
+        }`}
+        OnClick={openDrawer}
+      >
+        <ProcessTableRenderer
+          processType={process.processType}
+          formData={process}
+        />
+      </BaseAccordion>
+      <ProcessDrawer
+        index={index}
+        visible={isDrawerOpen}
+        onClose={closeDrawer}
+        process={process}
+      />
     </>
   );
 }
 
-// TODO: 需要組裡表單金額邏輯
-//  ProcessTableRenderer 組件
+// TODO 需要組裡表單金額邏輯
+// * ProcessTableRenderer 組件
 function ProcessTableRenderer({ processType, formData }) {
   if (!formData) {
     return <Typography variant="body1">尚未填寫資料</Typography>;
   }
-
-  console.log(formData);
   // 檢查formData是否為空對象
   if (Object.keys(formData).length === 0) {
     return <Typography variant="body1">尚未填寫資料</Typography>;
@@ -202,7 +146,7 @@ function ProcessTableRenderer({ processType, formData }) {
           isTotal: true,
           cells: [
             { value: "運輸費用與成本小計", colSpan: 5 },
-            { value: "總金額 元", align: "right" }, // 這裡需要根據實際邏輯計算
+            { value: "總金額 元", align: "right" }, // 這裡需要根據實際邏輯算
           ],
         },
       ];
@@ -259,12 +203,12 @@ function ProcessTableRenderer({ processType, formData }) {
       return (
         <>
           <Typography variant="subtitle1">製程3 廠內外觀整修</Typography>
-          <Typography>預檢不良率: {formData.preInspectionRate}%</Typography>
+          <Typography>預不良率: {formData.preInspectionRate}%</Typography>
           <Typography>
             預檢原料報廢百分比: {formData.preInspectionLossRate}%
           </Typography>
-          <Typography>檢驗費用: {formData.inspectionFee}元</Typography>
-          <Typography>加工費用: {formData.processingFee}元</Typography>
+          <Typography>檢費用: {formData.inspectionFee}元</Typography>
+          <Typography>工費用: {formData.processingFee}元</Typography>
           {/* 測染原物料費用成本表格 */}
           <QmsCasTable
             headers={[
@@ -301,99 +245,69 @@ function ProcessTableRenderer({ processType, formData }) {
   }
 }
 
-// 主要的 ProcessCostAnalysisContent 組件
-function ProcessCostAnalysisContent({ onUpdate, title, icon }) {
-  const {
-    processType,
-    setProcessType,
-    methods,
-    handleFormSubmit,
-    infoDrawer,
-    openDrawer,
-    closeDrawer,
-    formData,
-    typeTitle, // 新增這行來獲取 typeTitle
-    currentData, // 新增這行來獲取 currentData
-  } = useProcessCostAnalysis();
-  const { notifySuccess } = useNotification();
-  const handleConfirm = async () => {
-    const currentFormData = methods.getValues();
-    const allData = {
-      ...formData,
-      [processType]: {
-        ...formData[processType],
-        ...currentFormData,
-      },
-    };
+// * 刪除製程的按鈕
+function DeleteButton({ processId }) {
+  const { notifySuccess, notifyError } = useNotification();
 
+  const handleDelete = async (e) => {
+    e.stopPropagation();
     try {
-      await handleFormSubmit(allData);
-      if (typeof onUpdate === "function") {
-        await onUpdate(allData);
-      }
-      closeDrawer();
-      setTimeout(() => notifySuccess("資料已成功保存"), 100);
-      console.log("Saved data:", allData);
+      notifySuccess("製程已成功刪除");
     } catch (error) {
-      console.error("Error saving data:", error);
+      console.error("Error deleting process:", error);
+      notifyError("刪製程時發生錯誤");
     }
   };
 
   return (
-    <ProductContextCard title={title} icon={icon} OnClick={() => openDrawer()}>
-      {mockProcessCostAnalysisData.map((process) => (
-        <BaseAccordion
-          key={process.id}
-          title={`${PROCESS_TYPES[process.processType].value} - ${
-            PROCESS_SUBTYPES[process.processType].find(
-              (subtype) => subtype.key === process.processSubtype
-            )?.label || ""
-          }`}
-          OnClick={() => openDrawer(process.id)}
-        >
-          <ProcessTableRenderer
-            processType={process.processType}
-            formData={process}
+    <IconButton onClick={handleDelete} size="small">
+      <DeleteIcon />
+    </IconButton>
+  );
+}
+
+// 主的 ProcessCostAnalysisContent 組件
+//  TODO 之後 API 完成後，改成從 API 拿資料  替換 mockProcessCostAnalysisData
+function ProcessCostAnalysisContent({ title, icon }) {
+  const [processCostAnalysisData, setProcessCostAnalysisData] = useState(
+    mockProcessCostAnalysisData
+  );
+  const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
+  const openNewProcessDrawer = () => setIsNewDrawerOpen(true);
+  const closeNewProcessDrawer = () => setIsNewDrawerOpen(false);
+
+  // ! 處理 onUpdate 的邏輯 (暫時) 之後有 API 後，改成從 API 設定更新的資料
+  const handleUpdate = (updatedProcess) => {
+    setProcessCostAnalysisData((prev) => [...prev, updatedProcess]);
+  };
+
+  return (
+    <ProductContextCard
+      title={title}
+      icon={icon}
+      OnClick={openNewProcessDrawer}
+    >
+      {processCostAnalysisData &&
+        processCostAnalysisData.map((process, index) => (
+          <ProcessItem
+            key={process.id}
+            index={index}
+            process={process}
+            onUpdate={handleUpdate}
           />
-        </BaseAccordion>
-      ))}
-      <BaseDrawer visible={infoDrawer} onClose={closeDrawer}>
-        <BaseDrawer.Header>
-          {typeTitle || "添加新製程"} {/* 使用 typeTitle */}
-          {currentData.id && ( // 只在編輯現有流程時顯示刪除按鈕
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log("Delete process:", currentData.id);
-                // 實現刪除邏輯
-              }}
-              size="small"
-            >
-              <DeleteIcon />
-            </IconButton>
-          )}
-        </BaseDrawer.Header>
-        <BaseDrawer.Body>
-          {processType ? (
-            <>
-              <ProcessTypeSelect />
-              <ProcessFormSections />
-            </>
-          ) : (
-            <ProcessTypeSelect />
-          )}
-        </BaseDrawer.Body>
-        <BaseDrawer.Footer onSubmit={methods.handleSubmit(handleConfirm)} />
-      </BaseDrawer>
+        ))}
+      {isNewDrawerOpen && (
+        <NewProcessDrawer
+          isActive={isNewDrawerOpen}
+          onClose={closeNewProcessDrawer}
+          onUpdate={handleUpdate}
+        />
+      )}
     </ProductContextCard>
   );
 }
 
 // 包裝了 Provider 的主組件
 export function ProcessCostAnalysisSections(props) {
-  return (
-    <ProcessCostAnalysisProvider>
-      <ProcessCostAnalysisContent {...props} />
-    </ProcessCostAnalysisProvider>
-  );
+  return <ProcessCostAnalysisContent {...props} />;
 }

@@ -4,9 +4,10 @@ import ProductContextCard from "../../ProductionRecord/utility/ProductContextCar
 import useNotification from "../../ProductionRecord/hook/useNotification.js";
 import BaseDrawer from "../Drawer/BaseDrawer.jsx";
 import DynamicForm from "../form/DynamicForm.jsx";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import BaseTable from "../table/BaseTable.jsx";
 import { ProductInfo, ProductInfoText } from "./SectionsStyled.jsx";
+
 // 創建上下文
 const ProductInfoContext = createContext();
 
@@ -21,20 +22,33 @@ function BaseProductInfoSection({
   config,
   editingItem,
 }) {
-  const [infoDrawer, setInfoDrawerState] = useState(false);
-  const methods = useForm();
-  const openDrawer = () => setInfoDrawerState(true);
-  const closeDrawer = () => setInfoDrawerState(false);
-  const { notifySuccess } = useNotification();
+  const [infoDrawer, setInfoDrawer] = useState(false);
+  const methods = useForm({ defaultValues: product });
+  const { notifySuccess, notifyError } = useNotification();
 
-  const handleConfirm = useCallback(async () => {
-    const formData = methods.getValues();
-    if (customValidation ? customValidation(formData) : true) {
-      await onUpdate(formData);
-      closeDrawer();
-      setTimeout(() => notifySuccess(), 100);
-    }
-  }, [methods, customValidation, onUpdate, closeDrawer, notifySuccess]);
+  const openDrawer = useCallback(() => {
+    methods.reset(product); // 打開抽屜時重置表單
+    setInfoDrawer(true);
+  }, [methods, product]);
+
+  const closeDrawer = () => setInfoDrawer(false);
+
+  const handleConfirm = useCallback(
+    async (formData) => {
+      try {
+        if (customValidation && !customValidation(formData)) {
+          throw new Error("自定義驗證失敗");
+        }
+        await onUpdate(formData);
+        closeDrawer();
+        notifySuccess("更新成功");
+      } catch (error) {
+        console.error("提交失敗:", error);
+        notifyError(error.message || "更新失敗");
+      }
+    },
+    [customValidation, onUpdate, closeDrawer, notifySuccess, notifyError]
+  );
 
   const contextValue = {
     product,
@@ -49,9 +63,11 @@ function BaseProductInfoSection({
 
   return (
     <ProductInfoContext.Provider value={contextValue}>
-      <ProductContextCard OnClick={openDrawer} title={title} icon={icon}>
-        {children}
-      </ProductContextCard>
+      <FormProvider {...methods}>
+        <ProductContextCard OnClick={openDrawer} title={title} icon={icon}>
+          {children}
+        </ProductContextCard>
+      </FormProvider>
     </ProductInfoContext.Provider>
   );
 }
@@ -69,8 +85,7 @@ function Info({ render }) {
 
 // Table 子組件 處理表格類別
 function Table({ columns, data }) {
-  const { product, openDrawer } = useContext(ProductInfoContext);
-
+  const { openDrawer } = useContext(ProductInfoContext);
   return (
     <ProductInfo>
       <BaseTable columns={columns} data={data} onRowClick={openDrawer} />
@@ -80,13 +95,13 @@ function Table({ columns, data }) {
 
 // Drawer 子組件
 function Drawer({ title, children }) {
-  const { infoDrawer, closeDrawer, handleConfirm, methods } =
+  const { infoDrawer, closeDrawer, handleConfirm } =
     useContext(ProductInfoContext);
+  const methods = useFormContext();
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+  const onSubmit = useCallback(() => {
     methods.handleSubmit(handleConfirm)();
-  };
+  }, [methods, handleConfirm]);
 
   return (
     <BaseDrawer visible={infoDrawer} onClose={closeDrawer}>
@@ -98,23 +113,14 @@ function Drawer({ title, children }) {
 }
 
 // Form 子組件
-function Form({ formFields, initialValues }) {
-  const { methods } = useContext(ProductInfoContext);
+function Form({ formFields }) {
+  const { methods, product } = useContext(ProductInfoContext);
 
   return (
-    <DynamicForm
-      externalMethods={methods}
-      fields={formFields}
-      initialValues={initialValues}
-      submitButton={false}
-    >
-      {() => (
-        <>
-          {formFields.map((field, index) => (
-            <DynamicForm.Field key={index} field={field} />
-          ))}
-        </>
-      )}
+    <DynamicForm externalMethods={methods}>
+      {formFields.map((field, index) => (
+        <DynamicForm.Field key={index} field={field} initialValues={product} />
+      ))}
     </DynamicForm>
   );
 }

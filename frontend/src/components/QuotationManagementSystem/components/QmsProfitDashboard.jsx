@@ -161,14 +161,12 @@ function QmsProfitDashboard() {
     <BaseProductInfoSection
       onUpdate={handleFormSubmit} // 提交表單時更新計算結果
       title="利潤管理"
+      product={{ quotationAmount }}
     >
       <ProfitManagementGrid data={profitData} />
 
       <BaseProductInfoSection.Drawer title="利潤管理">
         <BaseProductInfoSection.Form
-          initialValues={{
-            quotationAmount: quotationAmount,
-          }}
           formFields={[
             {
               type: "input",
