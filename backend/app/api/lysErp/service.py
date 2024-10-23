@@ -260,10 +260,11 @@ class LyService:
             six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
             irwhere += f"MP_DATE>'{six_months_ago}'"
             
+            # 2024/10/23 註解掉，因為隆廷會開未來的製令單，如果開10天後的製令單，會導致這10天內新增的製令單無法同步
             # get the last MP_NO from the database
-            last_mp_no = get_last_mp_no_from_0000AB()
-            if last_mp_no != "":
-                irwhere += f"AND MP_NO>'{last_mp_no}'"
+            # last_mp_no = get_last_mp_no_from_0000AB()
+            # if last_mp_no != "":
+            #     irwhere += f"AND MP_NO>'{last_mp_no}'"
             print(irwhere)
             # call api and get the data from LY ERP  
             lyDataOutRequestParameter = LyDataOutRequestParameter(idakd=DataKind.FactoryProductionOrder.value, irwhere=irwhere)
