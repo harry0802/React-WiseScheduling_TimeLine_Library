@@ -264,7 +264,7 @@ class LyService:
             last_mp_no = get_last_mp_no_from_0000AB()
             if last_mp_no != "":
                 irwhere += f"AND MP_NO>'{last_mp_no}'"
-            
+            print(irwhere)
             # call api and get the data from LY ERP  
             lyDataOutRequestParameter = LyDataOutRequestParameter(idakd=DataKind.FactoryProductionOrder.value, irwhere=irwhere)
             ly0000AB_db_list = call_LyDataOut_0000AB(lyDataOutRequestParameter)
