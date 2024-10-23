@@ -36,6 +36,7 @@ class materialService:
             query = query.filter(Material.id == id) if id else query
             query = query.filter(Material.productSN == productSN) if productSN else query
             query = query.filter(or_(Material.materialOptionId != None, Material.materialOptionId != "")) if categorized == True else query
+            query = query.order_by(Material.materialOptionId)
             material_db_list = query.all()
 
             material_dto = material_schema.dump(material_db_list, many=True)
