@@ -17,6 +17,9 @@ import {
   FormControlLabel,
   Autocomplete,
   CircularProgress,
+  InputLabel,
+  FormHelperText,
+  FormControl,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {
@@ -81,13 +84,21 @@ const renderFormItem = (field, controllerField, restProps, options, error) => {
   switch (field.type) {
     case "select":
       return (
-        <Select {...mergedProps} error={!!error} fullWidth>
-          {options.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl fullWidth error={!!error}>
+          <InputLabel id={`${field.name}-label`}>{field.label}</InputLabel>
+          <Select
+            {...mergedProps}
+            labelId={`${field.name}-label`}
+            label={field.label}
+          >
+            {options.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+          {error && <FormHelperText>{error.message}</FormHelperText>}
+        </FormControl>
       );
     case "radio":
       return (

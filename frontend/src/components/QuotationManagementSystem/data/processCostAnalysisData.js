@@ -17,12 +17,11 @@ const getRandomSubtype = (processType) => {
     ? subtypes[Math.floor(Math.random() * subtypes.length)].key
     : "";
 };
-
 export const mockProcessCostAnalysisData = [
   {
     id: "1",
-    processType: "APPEARANCE_INSPECTION",
-    processSubtype: "subtype1",
+    processType: PROCESS_TYPES.APPEARANCE_INSPECTION.key, // Ensure alignment with process type key
+    processSubtype: "subtype1", // Matches subtype from PROCESS_SUBTYPES
     preInspectionRate: 5,
     preInspectionLossRate: 2,
     inspectionFee: 1000,
@@ -52,20 +51,20 @@ export const mockProcessCostAnalysisData = [
   },
   {
     id: "2",
-    processType: "TRANSPORTATION",
+    processType: PROCESS_TYPES.TRANSPORTATION.key, // Todo-list form
     processSubtype: "land",
     transportType: "貨車",
     distance: 100,
     time: 2,
     returnDistance: 80,
-    quantity: 1000,
+    quantity: 1000, // Reflects the need for a todo-list structure with multiple entries
     customsQuantity: 1000,
     freightCost: 5000,
     processCategory: "Out-IJ(委外成型)",
   },
   {
     id: "3",
-    processType: "INTERNAL_APPEARANCE_REPAIR",
+    processType: PROCESS_TYPES.INTERNAL_APPEARANCE_REPAIR.key,
     processSubtype: "light",
     preInspectionRate: 3,
     preInspectionLossRate: 1,
@@ -76,7 +75,7 @@ export const mockProcessCostAnalysisData = [
   },
   {
     id: "4",
-    processType: "INTERNAL_SHIPPING_INSPECTION",
+    processType: PROCESS_TYPES.INTERNAL_SHIPPING_INSPECTION.key, // Todo-list form
     processSubtype: "general",
     preInspectionRate: 2,
     preInspectionLossRate: 0.5,
