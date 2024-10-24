@@ -357,6 +357,17 @@ class productionReportService:
                 if end_planOnMachineDate else None
             productionSchedule_ids = [int(id) for id in productionSchedule_ids.replace("[", "").replace("]", "").split(",")] if productionSchedule_ids else None
 
+            # Subquery for moldNos
+            mold_subquery = (
+                db.session.query(Process.id.label('process_id'), 
+                                func.group_concat(LtMoldMap.moldno).label('moldNos'))
+                .join(ProcessMold, Process.id == ProcessMold.processId)
+                .join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no)
+                .group_by(Process.id)
+                .subquery()
+            )
+
+            # main query
             query = ProductionSchedule.query
             query = query.with_entities(ProductionSchedule.id, ProductionSchedule.machineSN, ProductionSchedule.workOrderSN,
                                         ProductionSchedule.workOrderQuantity, ProductionSchedule.planOnMachineDate, ProductionSchedule.planFinishDate,
@@ -371,14 +382,15 @@ class productionReportService:
                                         ProductionReport.operator1, ProductionReport.operator2, ProductionReport.startTime, ProductionReport.endTime,
                                         Product.productSN, Product.productName, 
                                         ProcessOption.processName, ProcessMold.processId,
-                                        func.group_concat(LtMoldMap.moldno).label('moldNos'))
-            query = query.join(ProductionReport, ProductionSchedule.id == ProductionReport.pschedule_id, isouter = True) # left outer join
-            query = query.join(Product, ProductionSchedule.productId == Product.id, isouter = True) # left outer join
-            query = query.join(Process, ProductionSchedule.processId == Process.id, isouter = True) # left outer join
-            query = query.join(ProcessOption, Process.processOptionId == ProcessOption.id, isouter = True) # left outer join
-            query = query.join(ProcessMold, Process.id == ProcessMold.processId, isouter = True) # left outer join
-            query = query.join(LtMoldMap, ProcessMold.ltmoldmapId == LtMoldMap.no, isouter = True) # left outer join
-
+                                        mold_subquery.c.moldNos.label('moldNos'))
+            # Joins
+            query = query.outerjoin(ProductionReport, ProductionSchedule.id == ProductionReport.pschedule_id) # left outer join
+            query = query.outerjoin(Product, ProductionSchedule.productId == Product.id) # left outer join
+            query = query.outerjoin(Process, ProductionSchedule.processId == Process.id) # left outer join
+            query = query.outerjoin(ProcessOption, Process.processOptionId == ProcessOption.id) # left outer join
+            query = query.outerjoin(ProcessMold, Process.id == ProcessMold.processId) # left outer join
+            query = query.outerjoin(mold_subquery, Process.id == mold_subquery.c.process_id)  # left outer join
+            # Filters
             query = query.filter(ProductionSchedule.status != "取消生產")
             query = query.filter(ProductionSchedule.planOnMachineDate.between(start_planOnMachineDate, end_planOnMachineDate)) \
                     if start_planOnMachineDate and end_planOnMachineDate else query
@@ -396,7 +408,7 @@ class productionReportService:
                                      ProductionSchedule.planFinishDate < datetime.now())
             query = query.filter(or_(ProductionReport.serialNumber == 0, ProductionReport.serialNumber == None)) if motherOnly else query
             query = query.filter(ProductionSchedule.id.in_(productionSchedule_ids)) if productionSchedule_ids else query
-            query = query.group_by(ProductionReport.id)
+            query = query.group_by(ProductionSchedule.id)
             query = query.order_by(ProductionSchedule.id.desc(), ProductionReport.id.asc())
             productionReport_db = query.all()
             if not (productionReport_db):
