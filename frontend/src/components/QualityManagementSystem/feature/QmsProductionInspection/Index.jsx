@@ -4,6 +4,7 @@ import { StyledBox, StyledTabContainer, StyledTabs } from "./utils/styles";
 import TabPanel from "./components/TabPanel";
 import { a11yProps } from "./utils/utils";
 import { useQmsProductionInspection } from "./hooks/useQmsProductionInspection";
+import { FormProvider } from "react-hook-form";
 
 /* WORKFLOW
 QmsProductionInspection (Index.jsx)
@@ -57,12 +58,12 @@ const QmsProductionInspection = () => {
     handleSubmit,
     updateLotsByInspectionQuantity,
     updateLotsByGoodQuantity,
+    methods,
   } = useQmsProductionInspection();
 
   const [updateKey, setUpdateKey] = useState(0);
 
   useEffect(() => {
-    // console.log("🚀 Lots updated:", lots);
     setUpdateKey((prev) => prev + 1);
   }, [lots]);
 
@@ -98,7 +99,6 @@ const QmsProductionInspection = () => {
           lot={lot}
           updateLotsByInspectionQuantity={updateLotsByInspectionQuantity}
           updateLotsByGoodQuantity={updateLotsByGoodQuantity}
-          handleSubmit={handleSubmit}
         />
       )),
     [
@@ -107,26 +107,29 @@ const QmsProductionInspection = () => {
       tabValue,
       updateLotsByInspectionQuantity,
       updateLotsByGoodQuantity,
-      handleSubmit,
     ]
   );
 
   return (
-    <StyledBox>
-      <StyledTabContainer>
-        <StyledTabs
-          value={tabValue}
-          onChange={handleChange}
-          variant="scrollable"
-          scrollButtons
-          aria-label="visible arrows tabs example"
-          TabIndicatorProps={{ style: { backgroundColor: "#8AC0E2" } }}
-        >
-          {memoizedTabs}
-        </StyledTabs>
-      </StyledTabContainer>
-      {memoizedTabPanels}
-    </StyledBox>
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(handleSubmit)}>
+        <StyledBox>
+          <StyledTabContainer>
+            <StyledTabs
+              value={tabValue}
+              onChange={handleChange}
+              variant="scrollable"
+              scrollButtons
+              aria-label="visible arrows tabs example"
+              TabIndicatorProps={{ style: { backgroundColor: "#8AC0E2" } }}
+            >
+              {memoizedTabs}
+            </StyledTabs>
+          </StyledTabContainer>
+          {memoizedTabPanels}
+        </StyledBox>
+      </form>
+    </FormProvider>
   );
 };
 

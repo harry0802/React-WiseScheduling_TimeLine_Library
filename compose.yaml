@@ -90,6 +90,7 @@ services:
     #     - REACT_APP_API_HOST=${REACT_APP_API_HOST}
     #     - REACT_APP_API_PORT=${REACT_APP_API_PORT}
     environment:
+      - PORT=${REACT_APP_PORT}
       - REACT_APP_API_HOST=${REACT_APP_API_HOST}
       - REACT_APP_API_PORT=${REACT_APP_API_PORT}
       # 凌越ERP
@@ -107,7 +108,7 @@ services:
       # 綁定本地代碼目錄到容器內，實現代碼同步
       - ./frontend/.:/app/
     ports:
-      - "${REACT_APP_PORT}:3000"
+      - "${REACT_APP_PORT}:${REACT_APP_PORT}"
     networks:
       - frontnet
     depends_on:

@@ -51,11 +51,11 @@ const createActions = (set) => ({
   clearActiveMachines: () => set({ activeMachines: {} }),
 
   // Production Report actions
-  setProductionReport: (machineSN, report) =>
+  setProductionReport: (reports) =>
     set((state) => ({
       productionReports: {
         ...state.productionReports,
-        [machineSN]: report,
+        ...reports,
       },
     })),
   clearProductionReports: () => set({ productionReports: {} }),
@@ -73,9 +73,11 @@ const useQmsStore = create(
 const dataProcessing = {
   processProductionReport: (reportData, inspectionData) =>
     reportData.map((report) => {
-      const matchingInspection = inspectionData.find(
-        (inspection) => inspection?.productionScheduleId === report?.id
-      );
+      const matchingInspection =
+        inspectionData &&
+        inspectionData.find(
+          (inspection) => inspection?.productionScheduleId === report?.id
+        );
 
       return {
         id: report.id,
@@ -202,8 +204,10 @@ export const useProductionReports = () => {
           Object.keys(activeMachines).length === 0,
       }
     );
-
-  console.log("🚀 productionReportData:", productionReportData);
+  console.log(
+    "🚀 ~ useProductionReports ~ productionReportData:",
+    productionReportData
+  );
 
   const { data: inspections } = useGetInspectionsQuery(userType, {
     refetchOnMountOrArgChange: true,
@@ -214,44 +218,100 @@ export const useProductionReports = () => {
   const [addQualityInspection] = useAddQualityInspectionMutation();
 
   // Memoized values
-  const lastProductionReport = useMemo(
-    () =>
-      productionReportData?.length
-        ? [productionReportData[productionReportData.length - 1]]
-        : [],
-    [productionReportData]
-  );
+  const productionReports = useMemo(() => {
+    if (!productionReportData) return {};
+
+    // 按 workOrderSN 分組
+    const groupedReports = productionReportData.reduce((acc, report) => {
+      if (!acc[report.workOrderSN]) {
+        acc[report.workOrderSN] = [];
+      }
+      acc[report.workOrderSN].push(report);
+      return acc;
+    }, {});
+
+    // 從每個分組中選擇最後一條記錄
+    const filteredReports = Object.values(groupedReports).map((group) => {
+      return group[group.length - 1];
+    });
+
+    // 按 machineSN 重新組織數據
+    return filteredReports.reduce((acc, report) => {
+      if (!acc[report.machineSN]) {
+        acc[report.machineSN] = [];
+      }
+      acc[report.machineSN].push(report);
+      return acc;
+    }, {});
+  }, [productionReportData]);
 
   const latestInspections = useMemo(() => {
     const inspectionsSource = inspections?.data;
     return inspectionsSource
-      ?.filter((inspection) => inspection.machineSN === machineSN)
-      .sort((a, b) => b.inspectionDate - a.inspectionDate);
+      ? inspectionsSource
+          .filter((inspection) => inspection.machineSN === machineSN)
+          .sort((a, b) => b.inspectionDate - a.inspectionDate)
+      : [];
   }, [machineSN, inspections]);
 
   // Services
   const qmsService = createQmsProductionInspectionService(addQualityInspection);
 
+  // 處理生產報告數據
+  const processedProductionReports = useMemo(() => {
+    if (!productionReportData) return {};
+
+    // 按 workOrderSN 分組
+    const groupedReports = productionReportData.reduce((acc, report) => {
+      if (!acc[report.workOrderSN]) {
+        acc[report.workOrderSN] = [];
+      }
+      acc[report.workOrderSN].push(report);
+      return acc;
+    }, {});
+
+    // 從每個分組中選擇最後一條記錄
+    const filteredReports = Object.values(groupedReports).map((group) => {
+      return group[group.length - 1];
+    });
+
+    // 按 machineSN 重新組織數據
+    return filteredReports.reduce((acc, report) => {
+      if (!acc[report.machineSN]) {
+        acc[report.machineSN] = [];
+      }
+      acc[report.machineSN].push(report);
+      return acc;
+    }, {});
+  }, [productionReportData]);
+
   // Effects
   useEffect(() => {
-    if (lastProductionReport.length && !isLoadingProductionReport) {
+    if (
+      Object.keys(processedProductionReports).length &&
+      !isLoadingProductionReport
+    ) {
+      const newReports = {};
       Object.entries(activeMachines).forEach(([machineSN, { workOrderSN }]) => {
-        const machineReportData = lastProductionReport.filter(
-          (report) =>
-            report.machineSN === machineSN && report.workOrderSN === workOrderSN
-        );
+        const machineReportData = processedProductionReports[machineSN] || [];
 
-        const inspectionData = latestInspections?.at(-1);
+        // 不再過濾 workOrderSN，保留所有數據
+        const filteredReportData = machineReportData;
+
+        const inspectionData = latestInspections || [];
         const processedData = dataProcessing.processProductionReport(
-          machineReportData,
-          [inspectionData].filter(Boolean)
+          filteredReportData,
+          inspectionData
         );
 
-        setProductionReport(machineSN, processedData);
+        newReports[machineSN] = processedData;
       });
+
+      // 一次性更新所有機器的報告
+      setProductionReport(newReports);
     }
   }, [
-    lastProductionReport,
+    processedProductionReports,
     isLoadingProductionReport,
     activeMachines,
     setProductionReport,
