@@ -7,7 +7,16 @@ export function createQmsProductionInspectionService(updateChildLotsMutation) {
 
   return {
     // Initialize lots using external data
-    initialLots: (lotsData) => lotService.createLots(lotsData),
+    initialLots: (lotsData) => {
+      if (Array.isArray(lotsData)) {
+        return lotService.createLots(lotsData);
+      } else if (typeof lotsData === "object") {
+        return lotService.createLots([lotsData]);
+      } else {
+        console.error("Invalid lotsData format");
+        return [];
+      }
+    },
 
     // Update production quantity for a specific lot
     updateLotInspectionQuantity(lots, lotId, quantity) {
@@ -20,20 +29,31 @@ export function createQmsProductionInspectionService(updateChildLotsMutation) {
     // Submit lots for processing
     async submitLots(lots, inspectionType, inspect) {
       try {
-        // Check for lots with empty production quantity
-        const emptyLots = lotService.getLotsWithEmptyProductionQuantity(lots);
+        // 检查所有批次是否都有生产数量
+        const emptyLots = lots.filter((lot) =>
+          lotService.hasEmptyProductionQuantity(lot)
+        );
         if (emptyLots.length > 0) {
+          console.error("Empty production quantity found:", emptyLots);
           throw new Error("EMPTY_PRODUCTION_QUANTITY");
         }
 
-        // Prepare child lots data and update
-        const childLots = lotService.prepareChildLotsForUpdate(lots);
+        // 准备所有批次的子批次数据
+        const allChildLots = lots.flatMap((lot) =>
+          lotService.prepareChildLotsForUpdate(lot)
+        );
+        console.log("Prepared child lots:", allChildLots);
+
+        // 格式化所有批次的数据
         const apiData = formatInspectionDataForApi(
-          childLots,
+          allChildLots,
           inspectionType,
           inspect
         );
+
+        // 提交所有批次的数据
         const result = await updateChildLotsMutation(apiData);
+
         return result;
       } catch (error) {
         console.error("💣 Error submitting lots:", error);

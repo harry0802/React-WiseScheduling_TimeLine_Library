@@ -13,21 +13,20 @@ dayjs.extend(timezone);
  * @param {string} inspectionType - 檢驗類型
  * @returns {Array} - 轉換後符合 API 格式的數組
  */
-export const formatInspectionDataForApi = (
-  inspectionData,
-  inspectionType,
-  inspect
-) => {
-  return inspectionData.map((item) => ({
-    // id: +item.id,
-    productionScheduleId: +item.id,
-    inspectionQuantity: +item.inspectionQuantity,
-    goodQuantity: +item.goodQuantity,
-    inspector: inspect,
-    inspectionDate: formatDate(item.inspectionDate),
+export function formatInspectionDataForApi(childLots, inspectionType, inspect) {
+  const apiData = childLots.map((childLot) => ({
+    productionScheduleId: childLot.id,
+    inspectionQuantity: childLot.inspectionQuantity,
+    goodQuantity: childLot.goodQuantity,
     inspectionType: inspectionType,
+    inspector: inspect,
+    inspectionDate: formatDate(childLot.inspectionDate),
+    // 添加其他需要的字段
   }));
-};
+
+  console.log("Formatted API data:", apiData);
+  return apiData;
+}
 
 /**
  * 格式化日期為 API 所需的格式

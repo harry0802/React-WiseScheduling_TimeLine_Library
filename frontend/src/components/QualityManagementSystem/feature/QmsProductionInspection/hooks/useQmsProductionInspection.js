@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Modal, notification } from "antd";
 import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
 
 import { TRANSLATION_KEYS } from "../utils/constants";
 import { useProductionReports, useQmsStore } from "../../../slice/QmsAccount";
@@ -15,6 +16,8 @@ export const useQmsProductionInspection = () => {
   const [tabValue, setTabValue] = useState(0);
   const { notifySuccess } = useNotification();
   const { qmsService } = useProductionReports();
+
+  const methods = useForm();
 
   const initialLots = useCallback(
     () =>
@@ -33,20 +36,42 @@ export const useQmsProductionInspection = () => {
     }
   }, [initialLots, productionReports, machineSN]);
 
-  const handleSubmit = useCallback(async () => {
-    if (lots.length === 0) {
-      showErrorModal(t(TRANSLATION_KEYS.EMPTY_FIELD_ERROR));
-      return;
-    }
-    try {
-      const { name } = inspectionTypes.find((type) => type.schema === userType);
-      await qmsService.submitLots(lots, name, account);
-      navigate(`/QualityManagementSystem`);
-      notifySuccess();
-    } catch (error) {
-      handleSubmitError(error);
-    }
-  }, [lots, qmsService, t]);
+  const handleSubmit = useCallback(
+    async (formData) => {
+      if (lots.length === 0) {
+        showErrorModal(t(TRANSLATION_KEYS.EMPTY_FIELD_ERROR));
+        return;
+      }
+      try {
+        const { name } = inspectionTypes.find(
+          (type) => type.schema === userType
+        );
+
+        // 处理表单数据
+        const updatedLots = lots.map((lot, index) => ({
+          ...lot,
+          inspectionQuantity: formData[`inspectionQuantity${index}`],
+          goodQuantity: formData[`goodQuantity${index}`],
+        }));
+
+        await qmsService.submitLots(updatedLots, name, account);
+        navigate(`/QualityManagementSystem`);
+        notifySuccess();
+      } catch (error) {
+        handleSubmitError(error);
+      }
+    },
+    [
+      lots,
+      qmsService,
+      t,
+      inspectionTypes,
+      userType,
+      account,
+      navigate,
+      notifySuccess,
+    ]
+  );
 
   const showErrorModal = useCallback(
     (content) => {
@@ -123,5 +148,6 @@ export const useQmsProductionInspection = () => {
     updateLotsByGoodQuantity: updateLotQuantity(
       qmsService.updateLotGoodQuantity
     ),
+    methods, // 添加这行以暴露表单方法
   };
 };

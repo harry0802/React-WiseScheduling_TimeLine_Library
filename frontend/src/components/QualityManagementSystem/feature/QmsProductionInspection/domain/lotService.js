@@ -44,5 +44,24 @@ export function createLotService() {
         };
       });
     },
+
+    hasEmptyProductionQuantity(lot) {
+      return (
+        !lot.inspectionQuantity ||
+        lot.inspectionQuantity === "" ||
+        !lot.goodQuantity ||
+        lot.goodQuantity === ""
+      );
+    },
+
+    prepareChildLotsForUpdate(lot) {
+      console.log("Preparing child lots for update:", lot);
+      return lot.children.map((child) => ({
+        id: child.id,
+        inspectionQuantity: lot.inspectionQuantity,
+        goodQuantity: lot.goodQuantity,
+        // 添加其他需要的字段
+      }));
+    },
   };
 }
