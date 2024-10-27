@@ -11,10 +11,6 @@ import {
   PROCESS_TYPES,
   PROCESS_SUBTYPES,
 } from "../../QuotationManagementSystem/config/processTypes.js";
-import {
-  ProcessCostAnalysisProvider,
-  useProcessCostAnalysis,
-} from "../context/ProcessCostAnalysisContext.jsx";
 import BaseDrawer from "../../Global/Drawer/BaseDrawer.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { mockProcessCostAnalysisData } from "../data/processCostAnalysisData";
@@ -42,7 +38,7 @@ function ProcessDrawer({ visible, onClose, process, isNew = false, index }) {
 }
 
 // * 新增製程 slidebar
-function NewProcessDrawer({ isActive, onClose, onUpdate }) {
+function NewProcessDrawer({ isActive, onClose }) {
   const newProcess = { id: "new", processType: "", processSubtype: "" };
 
   return (
@@ -55,7 +51,7 @@ function NewProcessDrawer({ isActive, onClose, onUpdate }) {
   );
 }
 // * 編輯製程的 accordion 項目 裡面也有 slidebar
-function ProcessItem({ index, process, onUpdate }) {
+function ProcessItem({ index, process }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const openDrawer = () => setIsDrawerOpen(true);
   const closeDrawer = () => setIsDrawerOpen(false);
