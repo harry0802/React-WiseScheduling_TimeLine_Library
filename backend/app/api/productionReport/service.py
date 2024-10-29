@@ -408,7 +408,7 @@ class productionReportService:
                                      ProductionSchedule.planFinishDate < datetime.now())
             query = query.filter(or_(ProductionReport.serialNumber == 0, ProductionReport.serialNumber == None)) if motherOnly else query
             query = query.filter(ProductionSchedule.id.in_(productionSchedule_ids)) if productionSchedule_ids else query
-            query = query.group_by(ProductionReport.id)
+            query = query.group_by(ProductionReport.id) if not motherOnly else query
             query = query.order_by(ProductionSchedule.id.desc(), ProductionReport.id.asc())
             productionReport_db = query.all()
             if not (productionReport_db):
