@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Tabs, Tab, Typography, Box, Divider } from "@mui/material";
+import { Tabs, Tab, Divider } from "@mui/material";
 import DynamicForm from "../../Global/form/DynamicForm";
 import CustomTodoList from "./CustomTodoList";
 import {
@@ -11,16 +11,69 @@ import {
 } from "../config/processTypes";
 
 function ProcessForm({ initialData, onSubmit }) {
+  // ? 初始化時，當 processType 與 initialData.processType 相同才使用預設值
+  const initialProcessType = initialData?.processType;
   const methods = useForm({
-    defaultValues: initialData || {},
+    defaultValues:
+      initialProcessType === initialData?.processType
+        ? initialData
+        : { processType: initialProcessType }, // 僅保留 processType
   });
 
-  const { watch, setValue } = methods;
+  /* TODO 如果當下的 processType 跟 initialData 的 processType 一樣 才會進行設定預設值
+{
+    id: '2',
+    processType: 'TRANSPORTATION',
+    processSubtype: '海運',
+    transportType: '船運',
+    distance: 500,
+    time: 48,
+    returnDistance: 0,
+    quantity: 1000,
+    customsQuantity: 1000,
+    freightCost: 12000,
+    processCategory: 'Out-IJ(委外成型)',
+    'todoItems_運輸費用': [],
+    activeTab: 2,
+    preInspectionRate: '5%',
+    preInspectionLossRate: '3%',
+    inspectionFee: '1500',
+    processingFee: '800',
+    'todoItems_材料成本': [
+      {
+        materialType: '包材',
+        materialCode: 'MT003',
+        materialName: '塑膠膜',
+        weight: '300',
+        unit: 'kg',
+        unitPrice: '50',
+        amount: '15000'
+      }
+    ],
+    'todoItems_包裝材料成本': [
+      {
+        materialType: '包材',
+        materialCode: 'MT004',
+        materialName: '氣泡墊',
+        weight: '100',
+        unit: 'pcs',
+        unitPrice: '5',
+        amount: '500'
+      }
+    ]
+  }
+
+*/
+
+  const { watch, setValue, reset } = methods;
   const processType = watch("processType");
   const activeTab = watch("activeTab") || 0;
 
+  // * 取得表單配置
   const formConfig = FORM_CONFIGURATIONS[processType] || {};
   const sections = formConfig.items || [];
+
+  // * 切換 Tab
   const handleTabChange = useCallback(
     (_, newValue) => {
       setValue("activeTab", newValue);
@@ -33,6 +86,7 @@ function ProcessForm({ initialData, onSubmit }) {
     [processType]
   );
 
+  // * 選擇欄位
   const selectionFields = useMemo(
     () =>
       PROCESS_SELECTION_FORM[0].fields.map((field) => ({
@@ -49,62 +103,63 @@ function ProcessForm({ initialData, onSubmit }) {
       })),
     [processSubtypeOptions]
   );
-  /*
-GeneralFormItem {
-    type: 'general',
-    title: '廠內出貨檢',
-    fields: [
-      {
-        name: 'workHours',
-        label: '工時(秒)',
-        type: 'number',
-        props: { InputProps: { endAdornment: '秒' }, placeholder: '請輸入工時' },
-        rules: { required: '工時為必填' }
-      },
-      {
-        name: 'price',
-        label: '單價',
-        type: 'number',
-        props: { InputProps: { endAdornment: '元' }, placeholder: '請輸入單價' },
-        rules: { required: '單價為必填' }
-      }
-    ]
-  }
-*/
 
+  // * 選擇 processType 時，清空其他欄位
   const handleProcessTypeChange = useCallback(
     (value) => {
       setValue("processType", value);
       setValue("processSubtype", "");
       setValue("activeTab", 0);
+
+      // 當用戶選擇不同的 processType 時，清空所有其他字段
+      reset({
+        processType: value, // 只保留 processType，清空其他值
+      });
     },
-    [setValue]
+    [setValue, reset]
   );
 
+  // * 當 processType 改變時，切換到第一個 Tab
   useEffect(() => {
     setValue("activeTab", 0);
   }, [processType, setValue]);
 
+  //* 當 processType 改變時觸發重置邏輯
+  useEffect(() => {
+    if (processType && initialData?.processType !== processType) {
+      reset({
+        processType, // 保留當前選擇的 processType，重置其他字段
+      });
+    }
+  }, [processType, initialData, reset]);
+
+  // * 渲染表單項目
   const renderFormItems = useCallback((items) => {
-    console.log("🔥🔥🔥🔥 ~ renderFormItems ~ items:", items);
     if (!Array.isArray(items)) {
       console.warn("items is not an array:", items);
       return null;
     }
 
-    return items.map((item, index) => {
+    return items.map((item, sectionIndex) => {
       switch (item.type) {
         case "general":
           return Array.isArray(item.fields[0])
-            ? item.fields[0].map((field) => (
-                <DynamicForm.Field key={field.name} field={field} />
+            ? item.fields[0].map((field, fieldIndex) => (
+                <DynamicForm.Field
+                  key={`${sectionIndex}-${field.name}-${fieldIndex}`}
+                  field={field}
+                />
               ))
-            : item.fields.map((field) => (
-                <DynamicForm.Field key={field.name} field={field} />
+            : item.fields.map((field, fieldIndex) => (
+                <DynamicForm.Field
+                  key={`${sectionIndex}-${field.name}-${fieldIndex}`}
+                  field={field}
+                />
               ));
         case "todolist":
           return (
             <CustomTodoList
+              key={`${sectionIndex}-${item.title}`}
               name={`todoItems_${item.title}`}
               fields={item.items}
               renderField={(fieldProps) => (
@@ -114,16 +169,10 @@ GeneralFormItem {
           );
         case "nested":
           return (
-            <>
-              <Typography variant="h6">{item.title}</Typography>
+            <React.Fragment key={`${sectionIndex}-${item.title}`}>
               <Divider sx={{ my: 1 }} />
-
-              {console.log(
-                "🔥🔥🔥🔥 ~ renderFormItems ~ item.items:",
-                item.items
-              )}
               {renderFormItems(item.items)}
-            </>
+            </React.Fragment>
           );
 
         default:
@@ -156,7 +205,52 @@ GeneralFormItem {
         <>
           {sections.length > 0 && (
             <Tabs
-              style={{ width: "100%" }}
+              sx={{
+                marginBottom: 3,
+                width: "100%",
+                position: "relative",
+
+                // 底部線
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  width: "99%",
+                  bottom: "1px",
+                  right: 0,
+                  borderBottom: "1px solid #8f8f8f",
+                },
+
+                // Tab 全局樣式
+                "& .MuiTab-root": {
+                  margin: "0 4px",
+                  padding: "12px 16px",
+                  minHeight: "48px",
+                  transition: "all 0.2s ease",
+                  color: "#757575",
+                  fontSize: "18px",
+                  fontWeight: 400,
+                  // hover & active 狀態
+                  "&:hover": {
+                    // color: "#6fc1ae",
+                  },
+                  "&:active": {
+                    // color: "#6fc1ae",
+                  },
+                },
+
+                // active 狀態
+                "& .Mui-selected": {
+                  fontSize: "19px",
+                  color: "#8bc1e3 !important",
+                  fontWeight: 500,
+                },
+                // 底部指示条
+                "& .MuiTabs-indicator": {
+                  height: "3px",
+                  backgroundColor: "#8bc1e3",
+                  transition: "all 0.3s ease",
+                },
+              }}
               value={activeTab}
               onChange={handleTabChange}
             >

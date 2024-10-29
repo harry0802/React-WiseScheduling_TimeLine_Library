@@ -1,87 +1,130 @@
-import { MACHINE_LIST, PROCESS_CATEGORY_OPTION } from "../../../config/config";
-import {
-  FORM_CONFIGURATIONS,
-  PROCESS_TYPE_OPTIONS,
-  PROCESS_TYPES,
-  PROCESS_SELECTION_FORM,
-  PROCESS_SUBTYPES,
-} from "../../QuotationManagementSystem/config/processTypes.js";
-
-const getRandomMachine = () => {
-  return MACHINE_LIST[Math.floor(Math.random() * MACHINE_LIST.length)];
-};
-
-const getRandomSubtype = (processType) => {
-  const subtypes = PROCESS_SUBTYPES[processType];
-  return subtypes && subtypes.length > 0
-    ? subtypes[Math.floor(Math.random() * subtypes.length)].key
-    : "";
-};
 export const mockProcessCostAnalysisData = [
   {
     id: "1",
-    processType: PROCESS_TYPES.APPEARANCE_INSPECTION.key, // Ensure alignment with process type key
-    processSubtype: "subtype1", // Matches subtype from PROCESS_SUBTYPES
-    preInspectionRate: 5,
+    processType: "APPEARANCE_INSPECTION",
+    processSubtype: "子類型1",
+    preInspectionRate: 3,
     preInspectionLossRate: 2,
-    inspectionFee: 1000,
-    processingFee: 2000,
-    processCategory: "In-IJ(廠內成型)",
-    machine: "A1",
-    materials: [
+    unitPrice: 10,
+    inspectionFee: 1200,
+    processingFee: 800,
+    todoItems_材料成本: [
       {
-        type: "主要材料",
-        code: "M001",
-        name: "布料A",
-        weight: 100,
+        materialType: "包材",
+        materialCode: "MT001",
+        materialName: "塑膠膜",
+        weight: "300",
         unit: "kg",
         unitPrice: 50,
-        amount: 5000,
+        amount: 15000,
       },
+    ],
+    todoItems_包裝材料成本: [
       {
-        type: "輔助材料",
-        code: "M002",
-        name: "染料B",
-        weight: 10,
-        unit: "kg",
-        unitPrice: 100,
+        materialType: "包材",
+        materialCode: "MT002",
+        materialName: "氣泡墊",
+        weight: "200",
+        unit: "pcs",
+        unitPrice: 5,
         amount: 1000,
       },
     ],
   },
   {
     id: "2",
-    processType: PROCESS_TYPES.TRANSPORTATION.key, // Todo-list form
-    processSubtype: "land",
-    transportType: "貨車",
-    distance: 100,
-    time: 2,
-    returnDistance: 80,
-    quantity: 1000, // Reflects the need for a todo-list structure with multiple entries
-    customsQuantity: 1000,
-    freightCost: 5000,
-    processCategory: "Out-IJ(委外成型)",
+    processType: "TRANSPORTATION",
+    processSubtype: "海運",
+    transportType: "船運",
+    distance: 500,
+    time: 48,
+    returnDistance: 0,
+    quantity: 1000,
+    freightCost: 12000,
+    customsFee: 1500,
+    todoItems_運輸費用: [],
   },
   {
     id: "3",
-    processType: PROCESS_TYPES.INTERNAL_APPEARANCE_REPAIR.key,
-    processSubtype: "light",
-    preInspectionRate: 3,
-    preInspectionLossRate: 1,
-    inspectionFee: 800,
-    processingFee: 3000,
-    processCategory: "In-BE(廠內後製程)",
-    machine: "B2",
+    processType: "INTERNAL_APPEARANCE_REPAIR",
+    processSubtype: "中度修整",
+    preInspectionRate: 4,
+    preInspectionLossRate: 1.5,
+    inspectionFee: 2000,
+    processingFee: 1000,
+    todoItems_原物料費用包裝材料成本: [
+      {
+        materialType: "包材",
+        materialCode: "MT003",
+        materialName: "塑膠包裝",
+        weight: "100",
+        unit: "kg",
+        unitPrice: 45,
+        amount: 4500,
+      },
+    ],
   },
   {
     id: "4",
-    processType: PROCESS_TYPES.INTERNAL_SHIPPING_INSPECTION.key, // Todo-list form
-    processSubtype: "general",
-    preInspectionRate: 2,
-    preInspectionLossRate: 0.5,
-    inspectionFee: 600,
-    processingFee: 2500,
-    processCategory: "In-TS(廠內出貨檢驗)",
-    machine: "C3",
+    processType: "INTERNAL_SHIPPING_INSPECTION",
+    processSubtype: "一般檢驗",
+    workHours: 3600,
+    unitPrice: 1000,
+    todoItems_包裝材料成本: [
+      {
+        materialType: "鋼鐵",
+        materialCode: "MT004",
+        materialName: "鋼板",
+        weight: "500",
+        unit: "kg",
+        unitPrice: 60,
+        amount: 30000,
+      },
+    ],
+  },
+  {
+    id: "5",
+    processType: "TRANSPORTATION",
+    processSubtype: "陸運",
+    transportType: "卡車運輸",
+    distance: 200,
+    time: 10,
+    returnDistance: 0,
+    quantity: 2000,
+    freightCost: 5000,
+    customsFee: 800,
+    todoItems_運輸費用: [],
+  },
+  {
+    id: "6",
+    processType: "APPEARANCE_INSPECTION",
+    processSubtype: "子類型2",
+    preInspectionRate: 2.5,
+    preInspectionLossRate: 1.2,
+    inspectionFee: 1500,
+    processingFee: 900,
+    unitPrice: 10,
+    todoItems_材料成本: [
+      {
+        materialType: "色母",
+        materialCode: "MT005",
+        materialName: "顏料",
+        weight: "250",
+        unit: "kg",
+        unitPrice: 55,
+        amount: 13750,
+      },
+    ],
+    todoItems_包裝材料成本: [
+      {
+        materialType: "包材",
+        materialCode: "MT006",
+        materialName: "紙箱",
+        weight: "300",
+        unit: "pcs",
+        unitPrice: 8,
+        amount: 2400,
+      },
+    ],
   },
 ];

@@ -27,7 +27,7 @@ import {
   formatSubmitValues,
 } from "../../../utility/formUtils";
 
-// 支持的表單元素映射
+// * 渲染表單項目 支持的表單元素映射
 const FormItemMap = {
   input: TextField,
   number: TextField,
@@ -39,11 +39,14 @@ const FormItemMap = {
   date: TextField,
 };
 
-// 表單樣式
+//* 表單樣式
 const StyledForm = styled("form")(({ theme }) => ({
   "& .MuiFormControl-root": {
+    width: "100%",
+    marginLeft: 0,
     marginBottom: theme.spacing(3),
   },
+
   "& .MuiInputLabel-root": {
     color: "#8f8f8f",
     fontFamily: "Inter, sans-serif",
@@ -71,14 +74,18 @@ const StyledForm = styled("form")(({ theme }) => ({
   },
 }));
 
-// 將 renderFormItem 移到全局
-const mergeProps = (field, controllerField, restProps) => ({
-  ...field,
-  ...controllerField,
-  ...restProps,
-});
+// ! 將renderFormItem 移到全局
+function mergeProps(field, controllerField, restProps) {
+  return {
+    ...field,
+    ...controllerField,
+    ...restProps,
+  };
+}
 
-const renderFormItem = (field, controllerField, restProps, options, error) => {
+// *渲染表單項目
+function renderFormItem(field, controllerField, restProps, options, error) {
+  // 合併 props
   const mergedProps = mergeProps(field, controllerField, restProps);
 
   switch (field.type) {
@@ -153,16 +160,23 @@ const renderFormItem = (field, controllerField, restProps, options, error) => {
       return (
         <TextField
           {...mergedProps}
-          type={field.type === "date" ? "date" : "text"}
+          // 我還要兼容 number 的 type
+          type={
+            field.type === "number"
+              ? "number"
+              : field.type === "date"
+              ? "date"
+              : "text"
+          }
           multiline={field.type === "textarea"}
           error={!!error}
           helperText={error?.message}
         />
       );
   }
-};
+}
 
-// 動態表單組件
+// ! 表單組件主體
 function DynamicForm({
   children,
   onFinish,
@@ -188,9 +202,7 @@ function DynamicForm({
   return (
     <FormProvider {...methods}>
       <StyledForm onSubmit={methods.handleSubmit(handleFinish)} {...props}>
-        <Grid container spacing={2}>
-          {children}
-        </Grid>
+        <Grid container>{children}</Grid>
         {submitButton && (
           <Button
             type="submit"
@@ -206,8 +218,9 @@ function DynamicForm({
   );
 }
 
-// 動態表單欄位
-const FieldComponent = ({ field, initialValues, customProps }) => {
+//  ! 以下為可選組件
+// * 動態表單欄位
+function FieldComponent({ field, initialValues, customProps }) {
   const { control } = useFormContext();
   const {
     field: controllerField,
@@ -216,7 +229,7 @@ const FieldComponent = ({ field, initialValues, customProps }) => {
     name: field.name,
     control,
     rules: field.rules,
-    // 防禦性編程，如果 initialValues 不存在，則使用空字串
+    // ?防禦性 :如果 initialValues 不存在，則使用空字串
     defaultValue: initialValues ? initialValues[field.name] : "",
   });
 
@@ -238,9 +251,9 @@ const FieldComponent = ({ field, initialValues, customProps }) => {
       {renderFormItem(field, controllerField, restProps, options, error)}
     </Grid>
   );
-};
+}
 
-// 這個函數是用來比較兩個 props 是否相等，如果相等，則不重新渲染
+//  動態表單欄位 這個函數是用來比較兩個 props 是否相等，如果相等，則不重新渲染
 const areEqual = (prevProps, nextProps) => {
   return (
     // 比較 name、type、options 和 customProps 是否相等
@@ -254,10 +267,10 @@ const areEqual = (prevProps, nextProps) => {
       JSON.stringify(nextProps.customProps)
   );
 };
-
+//  動態表單欄位 使用 React.memo 進行優化
 DynamicForm.Field = React.memo(FieldComponent, areEqual);
 
-// 處理依賴關係的子組件
+// * 處理依賴關係的子組件
 function DependentField({ field }) {
   const methods = useFormContext();
 
@@ -275,6 +288,7 @@ function DependentField({ field }) {
   return <DynamicForm.Field field={field} />;
 }
 
+//  處理依賴關係的子組件 使用 React.memo 進行優化
 DynamicForm.DependentField = React.memo(DependentField);
 
 export default DynamicForm;

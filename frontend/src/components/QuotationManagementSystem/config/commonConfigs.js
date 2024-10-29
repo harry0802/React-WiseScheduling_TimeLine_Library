@@ -5,7 +5,8 @@ export const createField = (
   type,
   props = {},
   rules = {},
-  options = null
+  options = null,
+  span
 ) => {
   const field = {
     name,
@@ -13,6 +14,7 @@ export const createField = (
     type,
     props,
     rules,
+    span,
   };
 
   if (options) {
@@ -82,28 +84,35 @@ export const commonSections = {
           { value: "鋼鐵", label: "鋼鐵" },
           { value: "包材", label: "包材" },
           { value: "色母", label: "色母" },
-        ]
+        ],
+        3
       ),
       createField(
         "materialCode",
         "物料編號",
         "input",
         { placeholder: "請輸入物料編號" },
-        { required: "物料編號為必填" }
+        { required: "物料編號為必填" },
+        false,
+        3
       ),
       createField(
         "materialName",
         "物料名稱",
         "input",
         { placeholder: "請輸入物料名稱" },
-        { required: "物料名稱為必填" }
+        { required: "物料名稱為必填" },
+        false,
+        3
       ),
       createField(
         "weight",
         "重量",
         "number",
         { InputProps: { endAdornment: "kg" }, placeholder: "請輸入重量" },
-        { required: "重量為必填" }
+        { required: "重量為必填" },
+        false,
+        3
       ),
       createField(
         "unit",
@@ -116,21 +125,26 @@ export const commonSections = {
           { value: "g", label: "g" },
           { value: "pcs", label: "pcs" },
           { value: "set", label: "set" },
-        ]
+        ],
+        3
       ),
       createField(
         "unitPrice",
         "單價",
         "number",
         { InputProps: { endAdornment: "元" }, placeholder: "請輸入單價" },
-        { required: "單價為必填" }
+        { required: "單價為必填" },
+        false,
+        3
       ),
       createField(
         "amount",
         "金額",
         "number",
         { InputProps: { endAdornment: "元" }, placeholder: "請輸入金額" },
-        { required: "金額為必填" }
+        { required: "金額為必填" },
+        false,
+        3
       ),
     ],
   },

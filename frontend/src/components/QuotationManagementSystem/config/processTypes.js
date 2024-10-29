@@ -79,13 +79,6 @@ class TodoListFormItem extends FormItem {
     this.items = items;
   }
 }
-class TodoItem {
-  constructor(title, description) {
-    this.type = "todo";
-    this.title = title;
-    this.description = description;
-  }
-}
 
 // 定義表單部分
 class FormSection {
@@ -118,7 +111,7 @@ export const FORM_CONFIGURATIONS = {
     ),
     new GeneralFormItem("委外檢查費", [
       createField(
-        "inspectionFee",
+        "unitPrice",
         "單價",
         "number",
         { InputProps: { endAdornment: "元" }, placeholder: "請輸入單價" },
@@ -175,9 +168,16 @@ export const FORM_CONFIGURATIONS = {
   [PROCESS_TYPES.INTERNAL_APPEARANCE_REPAIR.key]: new FormSection(
     "廠內外觀修整",
     [
-      new GeneralFormItem("原材料成本", [
-        commonSections.rawMaterialCost.fields,
+      new NestedFormItem("原物料費用", [
+        new GeneralFormItem("原物料費用材料成本", [
+          commonSections.rawMaterialCost.fields,
+        ]),
+        new TodoListFormItem(
+          "原物料費用包裝材料成本",
+          commonSections.packagingMaterialCost.fields
+        ),
       ]),
+
       new TodoListFormItem(
         "包裝材料成本",
         commonSections.packagingMaterialCost.fields
@@ -198,7 +198,7 @@ export const FORM_CONFIGURATIONS = {
           { required: "工時為必填" }
         ),
         createField(
-          "price",
+          "unitPrice",
           "單價",
           "number",
           { InputProps: { endAdornment: "元" }, placeholder: "請輸入單價" },

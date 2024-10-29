@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { IconButton, Button, TextField } from "@mui/material";
+import { IconButton, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -12,59 +12,63 @@ const GroupFormContainer = styled.div`
   background: var(--color-background-card);
   font-size: 18px;
   color: var(--color-text);
-  margin-top: 1.3125rem;
+  /* margin-top: 1.3125rem; */
+  padding: 0.625rem 0;
+  overflow: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 `;
 
 const GroupFormItem = styled.div`
   position: relative;
+  width: 50cqw;
   max-height: 300px;
   overflow-y: auto;
+  flex: 1;
 `;
 
 const GroupFormContent = styled.div`
-  /*除了第一個元素添加 margin-top: 10px 剩下都不要*/
   margin-top: ${(props) => (props.isFirst ? ".625rem" : "0")};
-  width: 100%;
+  width: auto;
   position: relative;
   display: flex;
+  align-items: flex-start; // 确保垂直居中
   border-bottom: 1px solid var(--color-border);
 `;
 
-const GroupFormInput = styled(TextField)`
-  padding: 8px 10px 0.875rem;
-  margin-bottom: 0;
-  width: 100%;
-  .MuiInputBase-input {
-    color: var(--color-text);
-    border: none;
-  }
-  .MuiInputLabel-root {
-    color: var(--color-text-secondary);
-  }
-`;
-
 const RemoveButton = styled(IconButton)`
-  margin-right: 12px;
-  width: 35px !important;
-  height: 35px !important;
-  color: var(--color-button-primary);
-  transition: all 0.3s;
+  && {
+    color: var(--color-button-primary);
+    transition: all 0.3s;
+    padding: 8px; // 调整内边距
+  }
+
+  & > svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5;
+    stroke: currentColor;
+  }
+
   &:hover {
     color: var(--color-hover);
-  }
-  &:active {
-    color: var(--color-active);
   }
 `;
 
 const AdditionContainer = styled.div`
   position: sticky;
-  z-index: 1;
-  text-align: center;
+  left: 0;
+  right: 0;
   bottom: 0;
-  margin-bottom: 0;
+  width: 100%;
+  z-index: 5;
+  text-align: center;
   background: var(--color-background-card);
-  padding-bottom: 5px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+  margin-top: auto;
 `;
 
 const AddButton = styled(Button)`
@@ -74,6 +78,7 @@ const AddButton = styled(Button)`
   font-size: 18px;
   color: var(--color-text);
   font-weight: 400;
+
   &:hover {
     color: var(--color-hover);
   }
@@ -110,20 +115,20 @@ function CustomTodoList({ name, fields, renderField }) {
             )}
           </GroupFormContent>
         ))}
-        <AdditionContainer>
-          <AddButton
-            onClick={() => append({})}
-            startIcon={
-              <AddIcon
-                className="c-btn-primars"
-                style={{ width: "30px", height: "30px", borderRadius: "50%" }}
-              />
-            }
-          >
-            新增任务
-          </AddButton>
-        </AdditionContainer>
       </GroupFormItem>
+      <AdditionContainer>
+        <AddButton
+          onClick={() => append({})}
+          startIcon={
+            <AddIcon
+              className="c-btn-primars"
+              style={{ width: "30px", height: "30px", borderRadius: "50%" }}
+            />
+          }
+        >
+          新增任务
+        </AddButton>
+      </AdditionContainer>
     </GroupFormContainer>
   );
 }
