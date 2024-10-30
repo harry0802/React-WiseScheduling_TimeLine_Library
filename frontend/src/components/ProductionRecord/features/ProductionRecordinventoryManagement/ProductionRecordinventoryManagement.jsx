@@ -84,9 +84,9 @@ function InventoryManagementTable() {
   const onRowClick = (record) => {
     const isSelected = selectedRowKeys.includes(record.id);
     const newSelectedRowKeys = isSelected
-      ? selectedRowKeys.filter((selectedId) => selectedId !== record.id) // Deselect if already selected
-      : [...selectedRowKeys, record.id]; // Select if not already selected
-    setSelectedKeys(newSelectedRowKeys); // Trigger the onSelectChange function with updated selection
+      ? selectedRowKeys.filter((selectedId) => selectedId !== record.id)
+      : [...selectedRowKeys, record.id];
+    setSelectedKeys(newSelectedRowKeys);
   };
 
   // ! 處理發送事件
