@@ -4,6 +4,7 @@ import {
   FormProvider,
   useController,
   useFormContext,
+  Controller,
 } from "react-hook-form";
 import {
   Button,
@@ -84,9 +85,18 @@ function mergeProps(field, controllerField, restProps) {
 }
 
 // *渲染表單項目
+// 提取出自定义 props
 function renderFormItem(field, controllerField, restProps, options, error) {
-  // 合併 props
-  const mergedProps = mergeProps(field, controllerField, restProps);
+  const {
+    getDependentOptions,
+    getDependentValue,
+    dependsOn,
+    rules,
+    ...domProps
+  } = restProps;
+
+  // 合并剩余的合法 DOM props
+  const mergedProps = mergeProps(field, controllerField, domProps);
 
   switch (field.type) {
     case "select":
@@ -155,12 +165,12 @@ function renderFormItem(field, controllerField, restProps, options, error) {
       );
     case "date":
     case "textarea":
+    case "number":
     case "input":
     default:
       return (
         <TextField
           {...mergedProps}
-          // 我還要兼容 number 的 type
           type={
             field.type === "number"
               ? "number"
@@ -218,57 +228,78 @@ function DynamicForm({
   );
 }
 
-//  ! 以下為可選組件
-// * 動態表單欄位
-function FieldComponent({ field, initialValues, customProps }) {
-  const { control } = useFormContext();
+// 過濾掉表單項目的自定義屬性，只保留合法的 DOM 屬性
+const filterCustomProps = (props) => {
   const {
-    field: controllerField,
-    fieldState: { error },
-  } = useController({
-    name: field.name,
-    control,
-    rules: field.rules,
-    // ?防禦性 :如果 initialValues 不存在，則使用空字串
-    defaultValue: initialValues ? initialValues[field.name] : "",
-  });
+    dependsOn, // 依賴的欄位
+    getDependentOptions, // 獲取依賴選項的函數
+    getDependentValue, // 獲取依賴值的函數
+    rules, // 驗證規則
+    customProps, // 其他自定義屬性
+    ...domProps // 剩餘的 DOM 屬性
+  } = props;
+  return domProps;
+};
 
-  const { getDependentOptions, dependsOn, ...restProps } = field.props || {};
+// 表單欄位組件
+const FieldComponent = ({ field, customProps = {} }) => {
+  const methods = useFormContext();
+  const {
+    formState: { errors },
+  } = methods;
 
+  // 監聽依賴欄位的值變化
+  const dependentValue = field.dependsOn
+    ? methods.watch(field.dependsOn)
+    : null;
+
+  // 根據依賴值動態更新選項列表
   const options = useMemo(() => {
-    if (getDependentOptions && field.dependentValue) {
-      return getDependentOptions(field.dependentValue);
+    if (field.getDependentOptions && dependentValue) {
+      return field.getDependentOptions(dependentValue);
     }
     return field.options || [];
-  }, [getDependentOptions, field.dependentValue, field.options]);
+  }, [field, dependentValue]);
 
-  const Component = FormItemMap[field.type];
+  // 當依賴值改變時，自動更新當前欄位的值
+  useEffect(() => {
+    if (field.getDependentValue && dependentValue) {
+      const value = field.getDependentValue(dependentValue);
+      methods.setValue(field.name, value);
+    }
+  }, [dependentValue, field, methods]);
 
-  if (!Component) return null;
+  const domProps = filterCustomProps(customProps);
 
   return (
     <Grid item xs={field.span || 12}>
-      {renderFormItem(field, controllerField, restProps, options, error)}
+      <Controller
+        name={field.name}
+        control={methods.control}
+        rules={field.rules}
+        render={({ field: controllerField }) => (
+          <FormItem
+            field={field}
+            controllerField={controllerField}
+            options={options}
+            error={errors[field.name]}
+            {...domProps}
+          />
+        )}
+      />
     </Grid>
   );
-}
-
-//  動態表單欄位 這個函數是用來比較兩個 props 是否相等，如果相等，則不重新渲染
-const areEqual = (prevProps, nextProps) => {
-  return (
-    // 比較 name、type、options 和 customProps 是否相等
-    prevProps.field.name === nextProps.field.name &&
-    prevProps.field.type === nextProps.field.type &&
-    // 比較 options 是否相等
-    JSON.stringify(prevProps.field.options) ===
-      JSON.stringify(nextProps.field.options) &&
-    // 比較 customProps 是否相等
-    JSON.stringify(prevProps.customProps) ===
-      JSON.stringify(nextProps.customProps)
-  );
 };
-//  動態表單欄位 使用 React.memo 進行優化
-DynamicForm.Field = React.memo(FieldComponent, areEqual);
+
+// 表單項目渲染組件
+const FormItem = ({ field, controllerField, options, error, ...props }) => {
+  const domProps = filterCustomProps(props);
+  return renderFormItem(field, controllerField, domProps, options, error);
+};
+
+// 使用 React.memo 優化渲染效能，避免不必要的重新渲染
+const MemoizedField = React.memo(FieldComponent);
+DynamicForm.Field = MemoizedField;
 
 // * 處理依賴關係的子組件
 function DependentField({ field }) {

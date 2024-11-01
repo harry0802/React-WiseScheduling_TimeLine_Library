@@ -127,7 +127,7 @@ class NestedFormItem {
 
 // 創建表單配置
 export const FORM_CONFIGURATIONS = {
-  // 工廠內成型製程
+  // 工廠內成型製���
   [PROCESS_TYPES.FACTORY_INTERNAL_SHAPING.key]: new FormSection(
     "工廠內成型製程",
     // 1. 原物料嵌套包材  2. 包裝材料  3. 成型加工費
@@ -170,32 +170,27 @@ export const FORM_CONFIGURATIONS = {
           {
             placeholder: "請選擇機台編號",
             dependsOn: "machineArea",
-            getDependentOptions: getMachinesByArea,
+            getDependentOptions: (machineArea) => {
+              console.log("🚀 ~ machineConfig.machines:", machineConfig);
+
+              if (!machineArea || !machineConfig.areas?.length) {
+                return [];
+              }
+
+              const filteredMachines = machineConfig.areas
+                .find((area) => area.value === machineArea)
+                ?.machines?.map((machine) => ({
+                  value: machine.value,
+                  // 金額
+                  label: `${machine.label}_$${machine.rate}`,
+                }));
+
+              return filteredMachines.length ? filteredMachines : [];
+            },
           },
-          false,
-          // { required: "請選擇機台編號" },
+          { required: "請選擇機台編號" },
           [],
           6
-        ),
-
-        // 加工費用
-        createField(
-          "processingFee",
-          "成型加工費",
-          "number",
-          {
-            placeholder: "自動填入加工費",
-            readOnly: true,
-            dependsOn: "machineId",
-            getDependentValue: (machineId) => {
-              const machine = machineConfig.machines.find(
-                (m) => m.value === machineId
-              );
-              return machine?.rate || null;
-            },
-            InputProps: { endAdornment: "元/小時" },
-          },
-          { required: "加工費為必填" }
         ),
 
         // 工時比例
