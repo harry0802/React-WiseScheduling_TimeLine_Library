@@ -12,7 +12,7 @@ export const createField = (
     name,
     label,
     type,
-    props,
+    ...props,
     rules,
     span,
   };
@@ -24,7 +24,7 @@ export const createField = (
   return field;
 };
 
-// 通用字段定義
+// !通用字段定義
 export const commonFields = {
   preInspectionRate: createField(
     "preInspectionRate",
@@ -57,6 +57,14 @@ export const commonFields = {
     { InputProps: { endAdornment: "元" }, placeholder: "請輸入加工費用" },
     { required: "加工費用為必填" }
   ),
+  // 添加一個通用的單價
+  unitPrice: createField(
+    "unitPrice",
+    "單價",
+    "number",
+    { InputProps: { endAdornment: "元" }, placeholder: "請輸入單價" },
+    { required: "單價為必填" }
+  ),
 };
 
 // 通用部分定義
@@ -70,7 +78,7 @@ export const commonSections = {
       commonFields.processingFee,
     ],
   },
-  //   這裡是可以自動添加的
+  // ! 包材與其他單位選項 未來將會串接API
   packagingMaterialCost: {
     title: "包裝材料費",
     fields: [

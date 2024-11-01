@@ -1,26 +1,36 @@
-const {
-  createField,
-  commonFields,
-  commonSections,
-} = require("./commonConfigs");
+import { getMachinesByArea } from "../../../config/config";
+import { createField, commonFields, commonSections } from "./commonConfigs";
+import { machineConfig } from "./machineConfig";
 
 // 定義製程類型
 export const PROCESS_TYPES = {
+  // 添加工廠內製程 - 成型
+  FACTORY_INTERNAL_SHAPING: {
+    key: "FACTORY_INTERNAL_SHAPING",
+    value: "工廠內成型製程",
+  },
+  //  委外成型
+  OUT_SHAPING: {
+    key: "OUT_SHAPING",
+    value: "委外成型",
+  },
+  // 添加工廠內製程 - 後製
+  FACTORY_INTERNAL_FINISHING: {
+    key: "FACTORY_INTERNAL_FINISHING",
+    value: "工廠內後製程",
+  },
+
   APPEARANCE_INSPECTION: {
     key: "APPEARANCE_INSPECTION",
-    value: "製程3 廠內外觀整修",
-  },
-  TRANSPORTATION: {
-    key: "TRANSPORTATION",
-    value: "製程6 運輸費用",
-  },
-  INTERNAL_APPEARANCE_REPAIR: {
-    key: "INTERNAL_APPEARANCE_REPAIR",
-    value: "廠內-外觀修整",
+    value: "廠內外觀整修",
   },
   INTERNAL_SHIPPING_INSPECTION: {
     key: "INTERNAL_SHIPPING_INSPECTION",
-    value: "製程5 廠內出貨檢驗",
+    value: "廠內出貨檢驗",
+  },
+  TRANSPORTATION: {
+    key: "TRANSPORTATION",
+    value: "運輸費用",
   },
 };
 
@@ -34,21 +44,41 @@ export const PROCESS_TYPE_OPTIONS = Object.values(PROCESS_TYPES).map(
 
 // 製程子類型定義
 export const PROCESS_SUBTYPES = {
-  [PROCESS_TYPES.APPEARANCE_INSPECTION.key]: [
-    { key: "subtype1", value: "子類型1", label: "子類型1" },
-    { key: "subtype2", value: "子類型2", label: "子類型2" },
-    { key: "subtype3", value: "子類型3", label: "子類型3" },
+  // 成型製程
+  [PROCESS_TYPES.FACTORY_INTERNAL_SHAPING.key]: [
+    { key: "casting", value: "鑄造成型", label: "鑄造成型" },
+    { key: "molding", value: "模具成型", label: "模具成型" },
+    { key: "extrusion", value: "擠出成型", label: "擠出成型" },
   ],
+  // 委外成型
+  [PROCESS_TYPES.OUT_SHAPING.key]: [
+    { key: "casting", value: "鑄造成型", label: "鑄造成型" },
+    { key: "molding", value: "模具成型", label: "模具成型" },
+    { key: "extrusion", value: "擠出成型", label: "擠出成型" },
+  ],
+
+  // 後製製程
+  [PROCESS_TYPES.FACTORY_INTERNAL_FINISHING.key]: [
+    { key: "polishing", value: "拋光", label: "拋光" },
+    { key: "coating", value: "塗裝", label: "塗裝" },
+    { key: "assembly", value: "組裝", label: "組裝" },
+  ],
+
+  // 外觀檢查
+  [PROCESS_TYPES.APPEARANCE_INSPECTION.key]: [
+    { key: "visual", value: "目視檢查", label: "目視檢查" },
+    { key: "machine", value: "機器檢查", label: "機器檢查" },
+    { key: "detailed", value: "詳細檢查", label: "詳細檢查" },
+  ],
+
+  // 運輸
   [PROCESS_TYPES.TRANSPORTATION.key]: [
     { key: "land", value: "陸運", label: "陸運" },
     { key: "sea", value: "海運", label: "海運" },
     { key: "air", value: "空運", label: "空運" },
   ],
-  [PROCESS_TYPES.INTERNAL_APPEARANCE_REPAIR.key]: [
-    { key: "light", value: "輕度修整", label: "輕度修整" },
-    { key: "medium", value: "中度修整", label: "中度修整" },
-    { key: "heavy", value: "重度修整", label: "重度修整" },
-  ],
+
+  // 廠內出貨檢驗
   [PROCESS_TYPES.INTERNAL_SHIPPING_INSPECTION.key]: [
     { key: "general", value: "一般檢驗", label: "一般檢驗" },
     { key: "strict", value: "嚴格檢驗", label: "嚴格檢驗" },
@@ -97,27 +127,202 @@ class NestedFormItem {
 
 // 創建表單配置
 export const FORM_CONFIGURATIONS = {
+  // 工廠內成型製程
+  [PROCESS_TYPES.FACTORY_INTERNAL_SHAPING.key]: new FormSection(
+    "工廠內成型製程",
+    // 1. 原物料嵌套包材  2. 包裝材料  3. 成型加工費
+    [
+      new NestedFormItem("原物料費用", [
+        new GeneralFormItem("工廠內成型製程材料成本", [
+          commonSections.rawMaterialCost.fields,
+        ]),
+        new TodoListFormItem(
+          "原物料成本",
+          commonSections.packagingMaterialCost.fields
+        ),
+      ]),
+      new TodoListFormItem(
+        "包裝材料費",
+        commonSections.packagingMaterialCost.fields
+      ),
+      new GeneralFormItem("成型加工費", [
+        // 機台區域選擇
+        createField(
+          "machineArea",
+          "機台區域",
+          "select",
+          {
+            placeholder: "請選擇機台區域",
+          },
+          { required: "請選擇機台區域" },
+          machineConfig.areas?.map((area) => ({
+            value: area.value,
+            label: area.label,
+          })),
+          6
+        ),
+
+        // 機台編號選擇
+        createField(
+          "machineId",
+          "機台編號",
+          "select",
+          {
+            placeholder: "請選擇機台編號",
+            dependsOn: "machineArea",
+            getDependentOptions: getMachinesByArea,
+          },
+          false,
+          // { required: "請選擇機台編號" },
+          [],
+          6
+        ),
+
+        // 加工費用
+        createField(
+          "processingFee",
+          "成型加工費",
+          "number",
+          {
+            placeholder: "自動填入加工費",
+            readOnly: true,
+            dependsOn: "machineId",
+            getDependentValue: (machineId) => {
+              const machine = machineConfig.machines.find(
+                (m) => m.value === machineId
+              );
+              return machine?.rate || null;
+            },
+            InputProps: { endAdornment: "元/小時" },
+          },
+          { required: "加工費為必填" }
+        ),
+
+        // 工時比例
+        createField(
+          "workHourRatio",
+          "工時比例",
+          "number",
+          {
+            placeholder: "請輸入工時比例",
+            InputProps: { endAdornment: "%" },
+          },
+          { required: "工時比例為必填" }
+        ),
+
+        // 不良率
+        createField(
+          "defectRate",
+          "不良率",
+          "number",
+          {
+            placeholder: "請輸入不良率",
+            InputProps: { endAdornment: "%" },
+          },
+          { required: "不良率為必填" }
+        ),
+
+        // 淺包工時
+        createField(
+          "shallowPackageTime",
+          "淺包工時",
+          "number",
+          {
+            placeholder: "請輸入淺包工時",
+            dependsOn: "processType",
+            InputProps: { endAdornment: "秒" },
+          },
+          { required: "淺包工時為必填" }
+        ),
+
+        // 成型週期
+        createField(
+          "moldingCycle",
+          "成型週期",
+          "number",
+          {
+            placeholder: "請輸入成型週期",
+            InputProps: { endAdornment: "秒" },
+          },
+          { required: "成型週期為必填" }
+        ),
+
+        // 穴數
+        createField(
+          "holeCount",
+          "穴數",
+          "number",
+          { placeholder: "請輸入穴數" },
+          { required: "穴數為必填" }
+        ),
+      ]),
+    ]
+  ),
+  // 添加廠內後製程
+  [PROCESS_TYPES.FACTORY_INTERNAL_FINISHING.key]: new FormSection(
+    "工廠內後製程",
+    // 1. 原物料嵌套包材   2. 包裝材料  3. 廠內檢查費
+    [
+      new NestedFormItem("原物料費用", [
+        new GeneralFormItem("工廠內後製程材料成本", [
+          commonSections.rawMaterialCost.fields,
+        ]),
+        new TodoListFormItem(
+          "原物料成本",
+          commonSections.packagingMaterialCost.fields
+        ),
+      ]),
+      new TodoListFormItem(
+        "包裝材料費",
+        commonSections.packagingMaterialCost.fields
+      ),
+      // 工時 單價
+      new GeneralFormItem("廠內檢查費", [
+        createField(
+          "workHours",
+          "工時(秒)",
+          "number",
+          { InputProps: { endAdornment: "秒" }, placeholder: "請輸入工時" },
+          { required: "工時為必填" }
+        ),
+        commonFields.unitPrice,
+      ]),
+    ]
+  ),
+
+  // 委外成型
+  [PROCESS_TYPES.OUT_SHAPING.key]: new FormSection("委外成型", [
+    new NestedFormItem("原物料費用", [
+      new GeneralFormItem("委外成型不良率", [
+        commonSections.rawMaterialCost.fields,
+      ]),
+      new TodoListFormItem(
+        "原物料成本",
+        commonSections.packagingMaterialCost.fields
+      ),
+    ]),
+
+    new TodoListFormItem(
+      "包裝材料費",
+      commonSections.packagingMaterialCost.fields
+    ),
+
+    new GeneralFormItem("委外檢查費", [commonFields.unitPrice]),
+  ]),
+
   [PROCESS_TYPES.APPEARANCE_INSPECTION.key]: new FormSection("外觀檢查", [
     new NestedFormItem("材料成本", [
       new GeneralFormItem("材料成本", [commonSections.rawMaterialCost.fields]),
       new TodoListFormItem(
-        "材料成本",
+        "原物料成本",
         commonSections.packagingMaterialCost.fields
       ),
     ]),
     new TodoListFormItem(
-      "包裝材料成本",
+      "包裝材料費",
       commonSections.packagingMaterialCost.fields
     ),
-    new GeneralFormItem("委外檢查費", [
-      createField(
-        "unitPrice",
-        "單價",
-        "number",
-        { InputProps: { endAdornment: "元" }, placeholder: "請輸入單價" },
-        { required: "單價為必填" }
-      ),
-    ]),
+    new GeneralFormItem("委外檢查費", [commonFields.unitPrice]),
   ]),
 
   [PROCESS_TYPES.TRANSPORTATION.key]: new FormSection("運輸", [
@@ -165,27 +370,6 @@ export const FORM_CONFIGURATIONS = {
     ]),
   ]),
 
-  [PROCESS_TYPES.INTERNAL_APPEARANCE_REPAIR.key]: new FormSection(
-    "廠內外觀修整",
-    [
-      new NestedFormItem("原物料費用", [
-        new GeneralFormItem("原物料費用材料成本", [
-          commonSections.rawMaterialCost.fields,
-        ]),
-        new TodoListFormItem(
-          "原物料費用包裝材料成本",
-          commonSections.packagingMaterialCost.fields
-        ),
-      ]),
-
-      new TodoListFormItem(
-        "包裝材料成本",
-        commonSections.packagingMaterialCost.fields
-      ),
-      new GeneralFormItem("廠內檢查費", [commonFields.inspectionFee]),
-    ]
-  ),
-
   [PROCESS_TYPES.INTERNAL_SHIPPING_INSPECTION.key]: new FormSection(
     "廠內出貨檢驗",
     [
@@ -197,13 +381,7 @@ export const FORM_CONFIGURATIONS = {
           { InputProps: { endAdornment: "秒" }, placeholder: "請輸入工時" },
           { required: "工時為必填" }
         ),
-        createField(
-          "unitPrice",
-          "單價",
-          "number",
-          { InputProps: { endAdornment: "元" }, placeholder: "請輸入單價" },
-          { required: "單價為必填" }
-        ),
+        commonFields.unitPrice,
       ]),
     ]
   ),

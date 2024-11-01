@@ -71,3 +71,29 @@ export const PROCESS_CATEGORY_OPTION = [
     category: "In-TS(廠內出貨檢驗)",
   },
 ];
+
+export const MACHINE_CONFIG = {
+  areas: PRODUCTION_AREA,
+  machines: MACHINE_LIST.map((machine) => ({
+    id: machine.machineSN,
+    value: machine.machineSN,
+    label: `${machine.machineSN} (${machine.singleOrDoubleColor})`,
+    area: machine.productionArea,
+    colorType: machine.singleOrDoubleColor,
+  })),
+};
+
+// 輔助函數
+export const getMachinesByArea = (area) => {
+  return MACHINE_CONFIG.machines
+    .filter((machine) => machine.area === area)
+    .map((machine) => ({
+      value: machine.value,
+      label: machine.label,
+    }));
+};
+
+export const getMachineColorType = (machineId) => {
+  const machine = MACHINE_CONFIG.machines.find((m) => m.value === machineId);
+  return machine?.colorType || null;
+};
