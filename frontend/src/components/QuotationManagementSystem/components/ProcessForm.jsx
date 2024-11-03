@@ -10,6 +10,49 @@ import {
   PROCESS_SUBTYPES,
 } from "../config/processTypes";
 
+const tabStyles = {
+  marginBottom: 3,
+  width: "100%",
+  position: "relative",
+
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    width: "99%",
+    bottom: "1px",
+    right: 0,
+    borderBottom: "1px solid #8f8f8f",
+  },
+
+  "& .MuiTab-root": {
+    margin: "0 4px",
+    padding: "12px 16px",
+    minHeight: "48px",
+    transition: "all 0.2s ease",
+    color: "#757575",
+    fontSize: "18px",
+    fontWeight: 400,
+    "&:hover": {
+      // 可選的 hover 狀態樣式
+    },
+    "&:active": {
+      // 可選的 active 狀態樣式
+    },
+  },
+
+  "& .Mui-selected": {
+    fontSize: "19px",
+    color: "#8bc1e3 !important",
+    fontWeight: 500,
+  },
+
+  "& .MuiTabs-indicator": {
+    height: "3px",
+    backgroundColor: "#8bc1e3",
+    transition: "all 0.3s ease",
+  },
+};
+
 function ProcessForm({ initialData, onSubmit }) {
   // ? 初始化時，當 processType 與 initialData.processType 相同才使用預設值
   const initialProcessType = initialData?.processType;
@@ -204,56 +247,7 @@ function ProcessForm({ initialData, onSubmit }) {
       {processType && (
         <>
           {sections.length > 0 && (
-            <Tabs
-              sx={{
-                marginBottom: 3,
-                width: "100%",
-                position: "relative",
-
-                // 底部線
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  width: "99%",
-                  bottom: "1px",
-                  right: 0,
-                  borderBottom: "1px solid #8f8f8f",
-                },
-
-                // Tab 全局樣式
-                "& .MuiTab-root": {
-                  margin: "0 4px",
-                  padding: "12px 16px",
-                  minHeight: "48px",
-                  transition: "all 0.2s ease",
-                  color: "#757575",
-                  fontSize: "18px",
-                  fontWeight: 400,
-                  // hover & active 狀態
-                  "&:hover": {
-                    // color: "#6fc1ae",
-                  },
-                  "&:active": {
-                    // color: "#6fc1ae",
-                  },
-                },
-
-                // active 狀態
-                "& .Mui-selected": {
-                  fontSize: "19px",
-                  color: "#8bc1e3 !important",
-                  fontWeight: 500,
-                },
-                // 底部指示条
-                "& .MuiTabs-indicator": {
-                  height: "3px",
-                  backgroundColor: "#8bc1e3",
-                  transition: "all 0.3s ease",
-                },
-              }}
-              value={activeTab}
-              onChange={handleTabChange}
-            >
+            <Tabs sx={tabStyles} value={activeTab} onChange={handleTabChange}>
               {sections.map((section, index) => (
                 <Tab key={index} label={section.title} />
               ))}

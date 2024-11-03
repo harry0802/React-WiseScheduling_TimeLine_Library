@@ -2,9 +2,8 @@ import React, { useMemo, useCallback, useEffect } from "react";
 import {
   useForm,
   FormProvider,
-  useController,
   useFormContext,
-  Controller,
+  useController,
 } from "react-hook-form";
 import {
   Button,
@@ -23,22 +22,7 @@ import {
   FormControl,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import {
-  formatInitialValues,
-  formatSubmitValues,
-} from "../../../utility/formUtils";
-
-// * 渲染表單項目 支持的表單元素映射
-const FormItemMap = {
-  input: TextField,
-  number: TextField,
-  select: Select,
-  checkbox: Checkbox,
-  radio: RadioGroup,
-  textarea: TextField,
-  autocomplete: Autocomplete,
-  date: TextField,
-};
+import { formatSubmitValues } from "../../../utility/formUtils";
 
 //* 表單樣式
 const StyledForm = styled("form")(({ theme }) => ({
@@ -47,7 +31,6 @@ const StyledForm = styled("form")(({ theme }) => ({
     marginLeft: 0,
     marginBottom: theme.spacing(3),
   },
-
   "& .MuiInputLabel-root": {
     color: "#8f8f8f",
     fontFamily: "Inter, sans-serif",
@@ -75,29 +58,27 @@ const StyledForm = styled("form")(({ theme }) => ({
   },
 }));
 
-// ! 將renderFormItem 移到全局
+// 合併 field, controllerField 和其餘 props
 function mergeProps(field, controllerField, restProps) {
-  return {
-    ...field,
-    ...controllerField,
-    ...restProps,
-  };
+  return { ...field, ...controllerField, ...restProps };
 }
 
-// *渲染表單項目
-// 提取出自定义 props
-function renderFormItem(field, controllerField, restProps, options, error) {
+// 過濾掉表單項目的自定義屬性，只保留合法的 DOM 屬性
+function filterCustomProps(props) {
   const {
+    dependsOn,
     getDependentOptions,
     getDependentValue,
-    dependsOn,
     rules,
+    customProps,
     ...domProps
-  } = restProps;
+  } = props;
+  return domProps;
+}
 
-  // 合并剩余的合法 DOM props
-  const mergedProps = mergeProps(field, controllerField, domProps);
-
+// 渲染表單項目
+function renderFormItem(field, controllerField, restProps, options, error) {
+  const mergedProps = mergeProps(field, controllerField, restProps);
   switch (field.type) {
     case "select":
       return (
@@ -163,10 +144,6 @@ function renderFormItem(field, controllerField, restProps, options, error) {
           label={field.label}
         />
       );
-    case "date":
-    case "textarea":
-    case "number":
-    case "input":
     default:
       return (
         <TextField
@@ -186,7 +163,7 @@ function renderFormItem(field, controllerField, restProps, options, error) {
   }
 }
 
-// ! 表單組件主體
+// 表單主體組件
 function DynamicForm({
   children,
   onFinish,
@@ -201,6 +178,7 @@ function DynamicForm({
   const internalMethods = useForm();
   const methods = externalMethods || internalMethods;
 
+  // 處理表單提交
   const handleFinish = useCallback(
     (values) => {
       const formattedValues = formatSubmitValues(values);
@@ -228,32 +206,25 @@ function DynamicForm({
   );
 }
 
-// 過濾掉表單項目的自定義屬性，只保留合法的 DOM 屬性
-const filterCustomProps = (props) => {
-  const {
-    dependsOn, // 依賴的欄位
-    getDependentOptions, // 獲取依賴選項的函數
-    getDependentValue, // 獲取依賴值的函數
-    rules, // 驗證規則
-    customProps, // 其他自定義屬性
-    ...domProps // 剩餘的 DOM 屬性
-  } = props;
-  return domProps;
-};
-
 // 表單欄位組件
-const FieldComponent = ({ field, customProps = {} }) => {
+function FieldComponent({ field, customProps = {} }) {
   const methods = useFormContext();
-  const {
-    formState: { errors },
-  } = methods;
 
-  // 監聽依賴欄位的值變化
+  // 使用 useController 提取 field 和 error 狀態
+  const {
+    field: controllerField,
+    fieldState: { error },
+  } = useController({
+    name: field.name,
+    control: methods.control,
+    rules: field.rules,
+    defaultValue: field.defaultValue || "", // 防禦性處理
+  });
+
+  // 動態依賴值更新
   const dependentValue = field.dependsOn
     ? methods.watch(field.dependsOn)
     : null;
-
-  // 根據依賴值動態更新選項列表
   const options = useMemo(() => {
     if (field.getDependentOptions && dependentValue) {
       return field.getDependentOptions(dependentValue);
@@ -261,7 +232,7 @@ const FieldComponent = ({ field, customProps = {} }) => {
     return field.options || [];
   }, [field, dependentValue]);
 
-  // 當依賴值改變時，自動更新當前欄位的值
+  // 動態設置欄位值
   useEffect(() => {
     if (field.getDependentValue && dependentValue) {
       const value = field.getDependentValue(dependentValue);
@@ -273,35 +244,28 @@ const FieldComponent = ({ field, customProps = {} }) => {
 
   return (
     <Grid item xs={field.span || 12}>
-      <Controller
-        name={field.name}
-        control={methods.control}
-        rules={field.rules}
-        render={({ field: controllerField }) => (
-          <FormItem
-            field={field}
-            controllerField={controllerField}
-            options={options}
-            error={errors[field.name]}
-            {...domProps}
-          />
-        )}
+      <FormItem
+        field={field}
+        controllerField={controllerField}
+        options={options}
+        error={error}
+        {...domProps}
       />
     </Grid>
   );
-};
+}
 
 // 表單項目渲染組件
-const FormItem = ({ field, controllerField, options, error, ...props }) => {
+function FormItem({ field, controllerField, options, error, ...props }) {
   const domProps = filterCustomProps(props);
   return renderFormItem(field, controllerField, domProps, options, error);
-};
+}
 
 // 使用 React.memo 優化渲染效能，避免不必要的重新渲染
 const MemoizedField = React.memo(FieldComponent);
 DynamicForm.Field = MemoizedField;
 
-// * 處理依賴關係的子組件
+// 處理依賴關係的子組件
 function DependentField({ field }) {
   const methods = useFormContext();
 
@@ -311,7 +275,6 @@ function DependentField({ field }) {
   }
 
   const dependentValue = methods.watch(field.dependsOn);
-
   if (dependentValue !== field.dependsOnValue) {
     return null;
   }
@@ -319,7 +282,64 @@ function DependentField({ field }) {
   return <DynamicForm.Field field={field} />;
 }
 
-//  處理依賴關係的子組件 使用 React.memo 進行優化
+// 使用 React.memo 優化 DependentField 的渲染
 DynamicForm.DependentField = React.memo(DependentField);
 
 export default DynamicForm;
+
+// !example
+// import React from "react";
+// import DynamicForm from "./DynamicForm";
+
+// * 處理表單提交的回調函數
+// * 當表單提交時，這個函數會接收到所有欄位的值
+// function handleSubmit(values) {
+//   console.log("表單提交的值:", values);  // 顯示提交的表單數據
+// }
+
+// ! 定義表單欄位結構
+// const fields = [
+//   {
+//     name: "processSubtype",           // 欄位名稱，用於識別欄位
+//     label: "製程子類型",               // 欄位的顯示標籤
+//     type: "select",                    // 欄位類型：下拉選單
+//     rules: { required: "請選擇製程子類型" }, // 必填規則，提示訊息
+//     options: [                         // 下拉選單選項
+//       { value: "subtype1", label: "子類型 1" },
+//       { value: "subtype2", label: "子類型 2" },
+//     ],
+//   },
+//   {
+//     name: "preInspectionRate",         // 欄位名稱，用於識別此欄位
+//     label: "預檢不良率",               // 顯示標籤
+//     type: "number",                    // 欄位類型：數字輸入框
+//     rules: { required: "預檢不良率為必填" }, // 必填提示訊息
+//   },
+//   {
+//     name: "dependentField",            // 欄位名稱
+//     label: "依賴欄位",                 // 顯示標籤
+//     type: "text",                      // 欄位類型：文字輸入框
+//     dependsOn: "processSubtype",       // 此欄位的顯示依賴於另一欄位
+//     dependsOnValue: "subtype1",        // 當 `processSubtype` 值為 `subtype1` 時顯示
+//     rules: { required: "此欄位為必填" }, // 驗證規則
+//   },
+// ];
+
+// ! 使用範例：渲染表單
+// function ExampleForm() {
+//   return (
+//     <DynamicForm
+//       fields={fields}                  // 設定表單欄位結構
+//       onFinish={handleSubmit}          // 傳入表單提交的處理函數
+//       submitButton                     // 啟用提交按鈕
+//       submitText="提交"                // 設定提交按鈕的顯示文字
+//     >
+//       {/* 使用 `DynamicForm.Field` 來渲染每個欄位 */}
+//       {fields.map((field) => (
+//         <DynamicForm.Field key={field.name} field={field} />
+//       ))}
+//     </DynamicForm>
+//   );
+// }
+
+// export default ExampleForm;

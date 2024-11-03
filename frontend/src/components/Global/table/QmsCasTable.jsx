@@ -60,9 +60,9 @@ const StyledTableCell = styled(TableCell)`
   }
 `;
 
-const BaseTable = ({ headers, data, footers, maxHeight }) => {
+const BaseTable = ({ headers, data, footers }) => {
   return (
-    <StyledTableContainer component={Paper} maxHeight={maxHeight}>
+    <StyledTableContainer component={Paper}>
       <StyledTable stickyHeader>
         <TableHead>
           {headers?.map((headerRow, rowIndex) => (
@@ -73,7 +73,7 @@ const BaseTable = ({ headers, data, footers, maxHeight }) => {
                   colSpan={header.colSpan}
                   align={header.align}
                 >
-                  {header.title}
+                  {header.title ?? header}
                 </StyledTableCell>
               ))}
             </TableRow>

@@ -391,7 +391,7 @@ export const PROCESS_SELECTION_FORM = [
         "processType",
         "製程類型",
         "select",
-        { placeholder: "請選擇製程類型" },
+        { placeholder: "請選擇製程類型1" },
         { required: "請選擇製程類型" },
         PROCESS_TYPE_OPTIONS
       ),
@@ -400,10 +400,7 @@ export const PROCESS_SELECTION_FORM = [
         "製程子類型",
         "select",
         {
-          placeholder: "請選擇製程子類型",
-          dependsOn: "processType",
-          getDependentOptions: (processType) =>
-            PROCESS_SUBTYPES[processType] || [],
+          placeholder: "請選擇製程子類型1",
         },
         { required: "請選擇製程子類型" },
         [] // 初始為空數組
