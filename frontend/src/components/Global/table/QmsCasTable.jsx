@@ -60,58 +60,68 @@ const StyledTableCell = styled(TableCell)`
   }
 `;
 
+const renderTableHead = (headers) => (
+  <TableHead>
+    {headers?.map((headerRow, rowIndex) => (
+      <TableRow key={rowIndex}>
+        {headerRow?.map((header, cellIndex) => (
+          <StyledTableCell
+            key={cellIndex}
+            colSpan={header.colSpan}
+            align={header.align}
+          >
+            {header.title ?? header}
+          </StyledTableCell>
+        ))}
+      </TableRow>
+    ))}
+  </TableHead>
+);
+
+const renderTableBody = (data) => (
+  <TableBody>
+    {data?.map((row, rowIndex) => (
+      <TableRow key={rowIndex} className={row.isTotal ? "total-row" : ""}>
+        {row.cells.map((cell, cellIndex) => (
+          <StyledTableCell
+            key={cellIndex}
+            colSpan={cell.colSpan}
+            align={cell.align}
+          >
+            {cell.value}
+          </StyledTableCell>
+        ))}
+      </TableRow>
+    ))}
+  </TableBody>
+);
+
+const renderTableFooter = (footers) => (
+  <TableFooter>
+    {footers?.map((footerRow, rowIndex) => (
+      <TableRow key={rowIndex}>
+        {footerRow?.map((footer, cellIndex) => (
+          <StyledTableCell
+            key={cellIndex}
+            colSpan={footer.colSpan}
+            align={footer.align}
+          >
+            {footer.value}
+          </StyledTableCell>
+        ))}
+      </TableRow>
+    ))}
+  </TableFooter>
+);
+
 const BaseTable = ({ headers, data, footers }) => {
+  console.log("🔥🔥🔥🔥 ~ BaseTable ~ footers:", footers);
   return (
     <StyledTableContainer component={Paper}>
       <StyledTable stickyHeader>
-        <TableHead>
-          {headers?.map((headerRow, rowIndex) => (
-            <TableRow key={rowIndex}>
-              {headerRow?.map((header, cellIndex) => (
-                <StyledTableCell
-                  key={cellIndex}
-                  colSpan={header.colSpan}
-                  align={header.align}
-                >
-                  {header.title ?? header}
-                </StyledTableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableHead>
-
-        <TableBody>
-          {data?.map((row, rowIndex) => (
-            <TableRow key={rowIndex} className={row.isTotal ? "total-row" : ""}>
-              {row.cells.map((cell, cellIndex) => (
-                <StyledTableCell
-                  key={cellIndex}
-                  colSpan={cell.colSpan}
-                  align={cell.align}
-                >
-                  {cell.value}
-                </StyledTableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-        {footers && (
-          <TableFooter>
-            {footers?.map((footerRow, rowIndex) => (
-              <TableRow key={rowIndex}>
-                {footerRow?.map((footer, cellIndex) => (
-                  <StyledTableCell
-                    key={cellIndex}
-                    colSpan={footer.colSpan}
-                    align={footer.align}
-                  >
-                    {footer.value}
-                  </StyledTableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableFooter>
-        )}
+        {renderTableHead(headers)}
+        {renderTableBody(data)}
+        {footers && renderTableFooter(footers)}
       </StyledTable>
     </StyledTableContainer>
   );

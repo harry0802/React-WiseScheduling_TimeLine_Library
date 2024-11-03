@@ -22,8 +22,7 @@ const renderDefaultProcessType = (formData, processType) => (
 
 // 不同製程的表格渲染配置
 const renderProcessTable = ({ processType, formData }) => {
-  console.log("🔥🔥🔥🔥 ~ renderProcessTable ~  processType:", processType);
-
+  console.log("🔥🔥🔥🔥 ~ renderProcessTable ~ formData :", formData);
   switch (processType) {
     case PROCESS_TYPES.FACTORY_INTERNAL_SHAPING.key: {
       const headers = [
