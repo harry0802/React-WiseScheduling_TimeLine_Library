@@ -23,6 +23,7 @@ function ControlledTable({
     <div className={styles["controlled-table"]}>
       <div className={styles["controlled-table__content"]}>
         <Table
+          rowKey="id"
           columns={columns}
           dataSource={dataSource}
           rowSelection={rowSelectionConfig}
