@@ -15,6 +15,7 @@ import { mockProcessCostAnalysisData } from "../data/processCostAnalysisData";
 import { useProcessForm } from "../hook/useProcessForm.jsx";
 import ProcessForm from "./ProcessForm";
 import RenderProcessTable from "./ProcessTables";
+import { useForm } from "react-hook-form";
 // * 刪除製程的按鈕
 function DeleteButton({ processId }) {
   const { notifySuccess, notifyError } = useNotification();
@@ -38,7 +39,7 @@ function DeleteButton({ processId }) {
 
 // * 共用的 slidebar 抽屜
 function ProcessDrawer({ visible, onClose, process, isNew = false, index }) {
-  const { handleSubmit } = useProcessForm(process);
+  const { methods, handleSubmit } = useProcessForm(process);
 
   return (
     <BaseDrawer visible={visible} onClose={onClose}>
@@ -49,9 +50,13 @@ function ProcessDrawer({ visible, onClose, process, isNew = false, index }) {
         {!isNew && <DeleteButton processId={process.id} />}
       </BaseDrawer.Header>
       <BaseDrawer.Body>
-        <ProcessForm initialData={process} onSubmit={handleSubmit} />
+        <ProcessForm
+          initialData={process}
+          externalMethods={methods}
+          onSubmit={handleSubmit}
+        />
       </BaseDrawer.Body>
-      <BaseDrawer.Footer />
+      <BaseDrawer.Footer onSubmit={handleSubmit} />
     </BaseDrawer>
   );
 }
@@ -74,17 +79,12 @@ function ProcessItem({ index, process }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const openDrawer = () => setIsDrawerOpen(true);
   const closeDrawer = () => setIsDrawerOpen(false);
-
   return (
     <>
       <BaseAccordion
         title={`製程${index + 1} ${
           PROCESS_TYPES[process.processType].value
-        } - ${
-          PROCESS_SUBTYPES[process.processType].find(
-            (subtype) => subtype.key === process.processSubtype
-          )?.label || ""
-        }`}
+        } - ${process.processSubtype ?? ""}`}
         OnClick={openDrawer}
       >
         <RenderProcessTable

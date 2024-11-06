@@ -53,60 +53,17 @@ const tabStyles = {
   },
 };
 
-function ProcessForm({ initialData, onSubmit }) {
-  // ? 初始化時，當 processType 與 initialData.processType 相同才使用預設值
+function ProcessForm({ initialData, onSubmit, externalMethods }) {
   const initialProcessType = initialData?.processType;
-  const methods = useForm({
-    defaultValues:
-      initialProcessType === initialData?.processType
-        ? initialData
-        : { processType: initialProcessType }, // 僅保留 processType
-  });
-
-  /* TODO 如果當下的 processType 跟 initialData 的 processType 一樣 才會進行設定預設值
-{
-    id: '2',
-    processType: 'TRANSPORTATION',
-    processSubtype: '海運',
-    transportType: '船運',
-    distance: 500,
-    time: 48,
-    returnDistance: 0,
-    quantity: 1000,
-    customsQuantity: 1000,
-    freightCost: 12000,
-    processCategory: 'Out-IJ(委外成型)',
-    'todoItems_運輸費用': [],
-    activeTab: 2,
-    preInspectionRate: '5%',
-    preInspectionLossRate: '3%',
-    inspectionFee: '1500',
-    processingFee: '800',
-    'todoItems_材料成本': [
-      {
-        materialType: '包材',
-        materialCode: 'MT003',
-        materialName: '塑膠膜',
-        weight: '300',
-        unit: 'kg',
-        unitPrice: '50',
-        amount: '15000'
-      }
-    ],
-    'todoItems_包裝材料成本': [
-      {
-        materialType: '包材',
-        materialCode: 'MT004',
-        materialName: '氣泡墊',
-        weight: '100',
-        unit: 'pcs',
-        unitPrice: '5',
-        amount: '500'
-      }
-    ]
-  }
-
-*/
+  const methods =
+    externalMethods ||
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useForm({
+      defaultValues:
+        initialProcessType === initialData?.processType
+          ? initialData
+          : { processType: initialProcessType },
+    });
 
   const { watch, setValue, reset } = methods;
   const processType = watch("processType");
@@ -182,7 +139,10 @@ function ProcessForm({ initialData, onSubmit }) {
       console.warn("items is not an array:", items);
       return null;
     }
-
+    // ! 渲染表單項目
+    // * 1. case "general":  一般欄位
+    // * 2. case "todolist": 待辦事項
+    // * 3. case "nested": 巢狀欄位  遞迴渲染 : 如果巢狀欄位中還有巢狀欄位  則會繼續遞迴渲染
     return items.map((item, sectionIndex) => {
       switch (item.type) {
         case "general":
@@ -217,7 +177,7 @@ function ProcessForm({ initialData, onSubmit }) {
               {renderFormItems(item.items)}
             </React.Fragment>
           );
-
+        // * 預設情況 不會進入
         default:
           console.warn(`Unknown item type: ${item.type}`);
           return null;
@@ -226,11 +186,7 @@ function ProcessForm({ initialData, onSubmit }) {
   }, []);
 
   return (
-    <DynamicForm
-      externalMethods={methods}
-      onFinish={onSubmit}
-      submitButton={true}
-    >
+    <DynamicForm externalMethods={methods} onFinish={onSubmit}>
       {selectionFields.map((field) => (
         <DynamicForm.Field
           key={field.name}

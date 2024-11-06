@@ -23,7 +23,7 @@ const GroupFormContainer = styled.div`
 
 const GroupFormItem = styled.div`
   position: relative;
-  width: 50cqw;
+  width: 80cqw;
   max-height: 300px;
   overflow-y: auto;
   flex: 1;
