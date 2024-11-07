@@ -59,7 +59,7 @@ const renderSection = (section, formData) => {
       },
     ];
   }
-
+  // * 計算小計這邊是由 config 裡面定義的 calculation 來計算
   const calculateSubtotal = () => {
     if (!section.calculation || !formData[section.dataKey]) return 0;
 
@@ -70,7 +70,7 @@ const renderSection = (section, formData) => {
       return 0;
     }
   };
-
+  // * 如果 showSubtotal 為 true 就計算小計
   const subtotal = section.showSubtotal && {
     isTotal: true,
     cells: [

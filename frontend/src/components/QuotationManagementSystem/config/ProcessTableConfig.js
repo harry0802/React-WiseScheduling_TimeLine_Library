@@ -1,4 +1,4 @@
-// src/config/ProcessTableConfig.js
+// 所有的計算小計邏輯 calculation 都移除
 
 /*
 ASCII Structure for ProcessTableConfig (with brief explanations)
@@ -58,8 +58,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程物料小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
       },
       {
         // 表格標題
@@ -82,8 +82,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程包材小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
       },
       {
         // 表格標題
@@ -145,8 +145,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程2物料小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
       },
       {
         // 表格標題
@@ -170,8 +170,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程2包材小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
       },
       {
         // 表格標題
@@ -193,8 +193,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程2後製檢修小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
       },
     ],
     // 最終小計標籤
@@ -261,8 +261,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程3包材小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
       },
       {
         // 表格標題
@@ -285,8 +285,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程3後製檢修小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
       },
     ],
     // 最終小計標籤
@@ -328,8 +328,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程4物料小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
       },
       {
         // 表格標題
@@ -353,8 +353,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "包材小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
       },
       {
         // 表格標題
@@ -376,8 +376,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "製程4委外印刷小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
       },
     ],
     // 最終小計標籤
@@ -415,8 +415,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "後製檢修小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
       },
     ],
     // 最終小計標籤
@@ -453,8 +453,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "運輸費用與運輸成本小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
       },
       {
         // 表格標題
@@ -473,8 +473,8 @@ export const PROCESS_TABLE_CONFIG = {
         // 小計標籤
         subtotalLabel: "貨運費用小計",
         // 計算小計邏輯
-        calculation: (data) =>
-          data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        // calculation: (data) =>
+        //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
       },
     ],
     // 最終小計標籤
