@@ -15,7 +15,11 @@ import { mockProcessCostAnalysisData } from "../data/processCostAnalysisData";
 import { useProcessForm } from "../hook/useProcessForm.jsx";
 import ProcessForm from "./ProcessForm";
 import RenderProcessTable from "./ProcessTables";
-import { useForm } from "react-hook-form";
+import {
+  calculateAllCosts,
+  calculateProfit,
+  calculateTotalCost,
+} from "../hook/useProcessComputations.jsx";
 // * 刪除製程的按鈕
 function DeleteButton({ processId }) {
   const { notifySuccess, notifyError } = useNotification();
@@ -79,6 +83,14 @@ function ProcessItem({ index, process }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const openDrawer = () => setIsDrawerOpen(true);
   const closeDrawer = () => setIsDrawerOpen(false);
+
+  const costResult = calculateTotalCost([
+    {
+      processCategory: process.processType,
+      data: process,
+    },
+  ]);
+
   return (
     <>
       <BaseAccordion

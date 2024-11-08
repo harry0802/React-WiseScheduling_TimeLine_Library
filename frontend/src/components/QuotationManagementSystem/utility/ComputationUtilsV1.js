@@ -1,6 +1,13 @@
 // 我要所有的金額 ui也需要展現個別單一金額
 // 全部都是繁體中文
+//  所有數值最大精度到小數點後三位
 
+const COMMON_UNITS = [
+  { value: "kg", label: "kg" },
+  { value: "g", label: "g" },
+  { value: "pcs", label: "pcs" },
+  { value: "set", label: "set" },
+];
 /**
  * 計算原物料費用小計
  * @param {Array} items - 原物料列表，每个项目包含 unitPrice（單價），quantity（數量），unit（單位）
@@ -15,14 +22,26 @@ function calculateMaterialCost(
   defectRate,
   materialWithdrawalFee
 ) {
+  if (!items || items.length === 0) {
+    return {
+      totalCost: 0,
+      amounts: [],
+    };
+  }
+
+  // 把參數轉為百分比 但我要先確保他是沒有被轉換過的數字
+  const fluctuationPercentage_ = parseFloat(fluctuationPercentage) / 100;
+  const materialWithdrawalFee_ = parseFloat(materialWithdrawalFee);
+  const defectRate_ = parseFloat(defectRate) / 100;
+
   // 計算各項金額
   const amounts = items.map((item) => {
+    const { unitPrice, weight, unit } = item;
     let amount = 0;
-    if (item.unit === "公克") {
-      amount =
-        (item.unitPrice / 1000) * item.quantity * (1 + fluctuationPercentage);
-    } else if (item.unit === "件" || item.unit === "個") {
-      amount = item.unitPrice * item.quantity;
+    if (COMMON_UNITS.find((unit) => unit.value === item.unit)) {
+      amount = (unitPrice / 1000) * weight * (1 + fluctuationPercentage_);
+    } else if (unit === "件" || unit === "個") {
+      amount = unitPrice * weight;
     } else {
       throw new Error(`未知的单位类型：${item.unit}`);
     }
@@ -32,17 +51,24 @@ function calculateMaterialCost(
   // 計算金額總和並加上抽料費用
   const subtotal =
     amounts.reduce((total, amount) => total + amount, 0) +
-    materialWithdrawalFee;
+    materialWithdrawalFee_;
 
   // 計算最終小計，考慮預估不良率
-  const totalCost = subtotal * (1 + defectRate);
 
+  const totalCost = Number((subtotal * (1 + defectRate_)).toFixed(3));
+
+  console.log("🚀 ~ totalCost:", totalCost);
   return {
     totalCost,
     amounts,
   };
 }
 
+const MATERIAL_TYPES = [
+  { value: "鋼鐵", label: "鋼鐵" },
+  { value: "包材", label: "包材" },
+  { value: "色母", label: "色母" },
+];
 /**
  * 計算包材費用小計
  * @param {Array} items - 包材列表，每个项目包含 unitPrice（單價），quantity（數量，單位：件）
@@ -55,9 +81,15 @@ function calculateMaterialCost(
 (註:單位為「公斤」「磅」)ex:68/308/2=0.11
 */
 function calculatePackagingCost(items) {
+  if (!items || items.length === 0) {
+    return {
+      totalCost: 0,
+      amounts: [],
+    };
+  }
   const amounts = items.map((item) => {
     let amount = 0;
-    if (item.unit === "件" || item.unit === "個") {
+    if (MATERIAL_TYPES.find((type) => type.value === item.materialType)) {
       amount = item.unitPrice * item.quantity;
     } else if (item.unit === "公斤" || item.unit === "磅") {
       amount = item.unitPrice / item.quantity / item.capacity;
@@ -75,33 +107,38 @@ function calculatePackagingCost(items) {
 
 /**
  * 計算成型加工費用小計
- * @param {number} unitPrice - 單價，“廠內試模費率 8hr”
+ * !單價預設為3000
  * @param {number} defectRate - 不良率（例如：0.02 表示 2%）
  * @param {number} moldingCycle - 成型周期（單位：秒）
  * @param {number} shallowPackageWorkHour - 灌包工時（單位：秒）
  * @param {number} cavityCount - 穴數
  * @param {number} workHourRatio - 工時比例（例如：0.8 表示 80%）
+ * @param {number} unitPrice - 單價，“廠內試模費率 8hr”
  * @returns {number} - 成型加工費用小計
  */
 function calculateMoldingCost(
-  unitPrice,
   defectRate,
   moldingCycle,
   shallowPackageWorkHour,
   cavityCount,
-  workHourRatio
+  workHourRatio,
+  unitPrice = 3000
 ) {
+  //應該是百分比的參數 要轉換成百分比
+  const defectRate_ = parseFloat(defectRate) / 100;
+  const workHourRatio_ = parseFloat(workHourRatio) / 100;
+
   // 計算金額
-  const amount = unitPrice * (1 + defectRate);
+  const amount = unitPrice * (1 + defectRate_);
 
   // 計算總射出次數
   const totalShots =
     ((60 * 60 * 8) / (moldingCycle + shallowPackageWorkHour)) *
     cavityCount *
-    workHourRatio;
+    workHourRatio_;
 
   // 計算小計
-  const subtotal = amount / totalShots;
+  const subtotal = Number((amount / totalShots).toFixed(3));
 
   return subtotal;
 }
@@ -110,15 +147,19 @@ function calculateMoldingCost(
  * 計算成型加工電費小計
  * @param {number} electricityCostPerSecond - 每秒電費
  * @param {number} moldingCycle - 成型周期（單位：秒）
+ * @param {number} cavityCount - 穴數
  * @returns {number} - 成型加工電費小計
- * !尚未不知是否需要除以穴數
+ * !需要除以穴數
  */
 function calculateMoldingElectricityCost(
-  electricityCostPerSecond,
-  moldingCycle
+  moldingCycle,
+  cavityCount,
+  electricityCostPerSecond = 0.0152
 ) {
-  const electricityCost = electricityCostPerSecond * moldingCycle;
-  return electricityCost;
+  const electricityCost =
+    (+electricityCostPerSecond * +moldingCycle) / +cavityCount;
+
+  return Number(electricityCost.toFixed(3));
 }
 
 /**
@@ -128,11 +169,14 @@ function calculateMoldingElectricityCost(
  * @param {number} inspectionCost - 檢驗費用
  * @returns {number} - 后制程與檢驗費用小計
  */
+//  todo 有可能是多筆
 function calculatePostProcessingCost(
   laborCostPerHour,
   laborHours,
   inspectionCost
 ) {
+  console.log("🚀 ~   inspectionCost:", laborCostPerHour);
+
   const laborCost = laborCostPerHour * laborHours;
   const totalCost = laborCost + inspectionCost;
   return {
@@ -147,6 +191,11 @@ function calculatePostProcessingCost(
  * @returns {number} - 附加費用小計
  */
 function calculateAdditionalFees(transportFees, freightAndCustomsFees) {
+  if (!transportFees || !freightAndCustomsFees) {
+    return {
+      totalCost: 0,
+    };
+  }
   // 司机工时固定为 0.3
   const driverWorkHours = 0.3;
 
