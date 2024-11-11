@@ -60,6 +60,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "materialCost",
       },
       {
         // 表格標題
@@ -84,6 +85,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "packagingCost",
       },
       {
         // 表格標題
@@ -104,6 +106,7 @@ export const PROCESS_TABLE_CONFIG = {
         showSubtotal: true,
         // 小計標籤
         subtotalLabel: "製程1加工費用小計",
+        costKey: "moldingCost",
       },
     ],
     // 最終小計標籤
@@ -147,6 +150,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "materialCost",
       },
       {
         // 表格標題
@@ -172,6 +176,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "packagingCost",
       },
       {
         // 表格標題
@@ -179,15 +184,10 @@ export const PROCESS_TABLE_CONFIG = {
         // 表格欄位
         headers: [
           { label: "單價 (元)", key: "unitPrice", unit: "元" },
-          {
-            label: "金額 (元)",
-            key: "totalCost",
-            unit: "元",
-            calculated: true,
-          },
+          { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_委外後製程與檢查費用", // 指向 `processData` 中對應的嵌套資料（假設存在）
+        dataKey: null, // 指向 `processData` 中對應的嵌套資料（假設存在）
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -195,6 +195,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        costKey: "moldingCost",
       },
     ],
     // 最終小計標籤
@@ -238,6 +239,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         calculation: (data) =>
           data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "materialCost",
       },
       {
         // 表格標題
@@ -263,6 +265,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "packagingCost",
       },
       {
         // 表格標題
@@ -273,13 +276,13 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "單價 (元)", key: "unitPrice", unit: "元" },
           {
             label: "金額 (元)",
-            key: "totalCost",
+            key: "amount",
             unit: "元",
             calculated: true,
           },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_廠內後製程與檢查費用", // 指向 `processData` 中對應的嵌套資料（假設存在）
+        dataKey: null, // 指向 `processData` 中對應的嵌套資料（假設存在）
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -287,6 +290,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        costKey: "moldingCost",
       },
     ],
     // 最終小計標籤
@@ -330,6 +334,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "materialCost",
       },
       {
         // 表格標題
@@ -355,6 +360,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "packagingCost",
       },
       {
         // 表格標題
@@ -364,7 +370,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "單價 (元)", key: "unitPrice", unit: "元" },
           {
             label: "金額 (元)",
-            key: "totalCost",
+            key: "amount",
             unit: "元",
             calculated: true,
           },
@@ -378,6 +384,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        costKey: "moldingCost",
       },
     ],
     // 最終小計標籤
@@ -403,7 +410,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "單價 (元)", key: "unitPrice", unit: "元" },
           {
             label: "金額 (元)",
-            key: "totalCost",
+            key: "amount",
             unit: "元",
             calculated: true,
           },
@@ -417,6 +424,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        costKey: "moldingCost",
       },
     ],
     // 最終小計標籤
@@ -455,6 +463,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0),
+        costKey: "transportCost",
       },
       {
         // 表格標題
@@ -464,7 +473,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "費用類型", key: "feeType" },
           { label: "貨運", key: "freightCost", unit: "元" },
           { label: "預估出貨數", key: "estimatedShipment", unit: "pcs" },
-          { label: "金額 (元)", key: "totalCost", unit: "元" },
+          { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
         dataKey: "todoItems_貨運與關稅", // 指向 `processData` 中對應的嵌套資料
@@ -475,6 +484,7 @@ export const PROCESS_TABLE_CONFIG = {
         // 計算小計邏輯
         // calculation: (data) =>
         //   data.reduce((sum, item) => sum + parseFloat(item.totalCost || 0), 0),
+        costKey: "freightCost",
       },
     ],
     // 最終小計標籤

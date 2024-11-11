@@ -1,5 +1,5 @@
 // src/components/Global/sections/ProcessCostAnalysisSections.jsx
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import BaseAccordion from "../../Global/accordion/BaseAccordion.jsx";
 import { IconButton } from "@mui/material";
@@ -15,11 +15,7 @@ import { mockProcessCostAnalysisData } from "../data/processCostAnalysisData";
 import { useProcessForm } from "../hook/useProcessForm.jsx";
 import ProcessForm from "./ProcessForm";
 import RenderProcessTable from "./ProcessTables";
-import {
-  calculateAllCosts,
-  calculateProfit,
-  calculateTotalCost,
-} from "../hook/useProcessComputations.jsx";
+import { calculateTotalCost } from "../hook/useProcessComputations.jsx";
 // * 刪除製程的按鈕
 function DeleteButton({ processId }) {
   const { notifySuccess, notifyError } = useNotification();
@@ -79,17 +75,14 @@ function NewProcessDrawer({ isActive, onClose }) {
   );
 }
 // * 編輯製程的 accordion 項目 裡面也有 slidebar
-function ProcessItem({ index, process }) {
+function ProcessItem({ index, process, costResult }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const openDrawer = () => setIsDrawerOpen(true);
   const closeDrawer = () => setIsDrawerOpen(false);
-
-  const costResult = calculateTotalCost([
-    {
-      processCategory: process.processType,
-      data: process,
-    },
-  ]);
+  // 透過 id 找到 costResult 中的 costDetails
+  const costDetail = costResult.costDetails.find(
+    (detail) => detail.id === process.id
+  );
 
   return (
     <>
@@ -102,6 +95,7 @@ function ProcessItem({ index, process }) {
         <RenderProcessTable
           processType={process.processType}
           formData={process}
+          costDetail={costDetail}
         />
       </BaseAccordion>
       <ProcessDrawer
@@ -130,6 +124,18 @@ function ProcessCostAnalysisContent({ title, icon }) {
     setProcessCostAnalysisData((prev) => [...prev, updatedProcess]);
   };
 
+  // 計算所有製程的成本
+  const costResult = useMemo(() => {
+    return calculateTotalCost(
+      processCostAnalysisData.map((process) => ({
+        processCategory: process.processType,
+        data: process,
+      }))
+    );
+  }, [processCostAnalysisData]);
+
+  console.log("🚀 ~ costResult ~ costResult:", costResult);
+
   return (
     <ProductContextCard
       title={title}
@@ -143,6 +149,7 @@ function ProcessCostAnalysisContent({ title, icon }) {
             index={index}
             process={process}
             onUpdate={handleUpdate}
+            costResult={costResult}
           />
         ))}
       {isNewDrawerOpen && (

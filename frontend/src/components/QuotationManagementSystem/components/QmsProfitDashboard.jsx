@@ -145,35 +145,97 @@ const ProfitManagementGrid = ({ data }) => {
 };
 
 function QmsProfitDashboard() {
-  const [quotationAmount, setQuotationAmount] = useState(100000); // 初始化報價金額
+  const [quotationAmount, setQuotationAmount] = useState(100000);
   const [profitData, setProfitData] = useState(
     calculateProfitAnalysis(quotationAmount)
-  ); // 初始化計算結果
+  );
 
-  // 處理表單提交，更新報價金額及計算結果
   const handleFormSubmit = (values) => {
     const newQuotationAmount = parseFloat(values.quotationAmount);
     setQuotationAmount(newQuotationAmount);
     setProfitData(calculateProfitAnalysis(newQuotationAmount));
   };
 
+  const defaultValues = {
+    quotationAmount: quotationAmount,
+    marketingDiscount: 7,
+    profit: 5,
+    risk: 2,
+    yearFactor: 2,
+    feedback: 2,
+  };
+
   return (
     <BaseProductInfoSection
-      onUpdate={handleFormSubmit} // 提交表單時更新計算結果
+      onUpdate={handleFormSubmit}
       title="利潤管理"
-      product={{ quotationAmount }}
+      product={{ defaultValues }}
     >
       <ProfitManagementGrid data={profitData} />
 
       <BaseProductInfoSection.Drawer title="利潤管理">
         <BaseProductInfoSection.Form
+          defaultValues={defaultValues}
           formFields={[
             {
               type: "input",
               name: "quotationAmount",
-              label: "報價金額",
+              label: "實際報價",
               rules: { required: "報價金額是必填的" },
-              props: { placeholder: "請輸入報價金額" },
+              props: {
+                placeholder: "元",
+                suffix: "元",
+              },
+            },
+            {
+              type: "input",
+              name: "marketingDiscount",
+              label: "管銷研百分比",
+              rules: { required: "管銷研是必填的" },
+              props: {
+                placeholder: "7 %",
+                suffix: "%",
+              },
+            },
+            {
+              type: "input",
+              name: "profit",
+              label: "利潤百分比",
+              rules: { required: "利潤是必填的" },
+              props: {
+                placeholder: "5 %",
+                suffix: "%",
+              },
+            },
+            {
+              type: "input",
+              name: "risk",
+              label: "風險百分比",
+              rules: { required: "風險是必填的" },
+              props: {
+                placeholder: "2 %",
+                suffix: "%",
+              },
+            },
+            {
+              type: "input",
+              name: "yearFactor",
+              label: "年降百分比",
+              rules: { required: "年降是必填的" },
+              props: {
+                placeholder: "2 %",
+                suffix: "%",
+              },
+            },
+            {
+              type: "input",
+              name: "feedback",
+              label: "回饋百分比",
+              rules: { required: "回饋是必填的" },
+              props: {
+                placeholder: "2 %",
+                suffix: "%",
+              },
             },
           ]}
         />

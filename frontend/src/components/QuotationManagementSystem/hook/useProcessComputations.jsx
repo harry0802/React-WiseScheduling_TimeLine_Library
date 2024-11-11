@@ -19,13 +19,26 @@ import {
  * @returns {Object} - Total cost and individual cost breakdown
  */
 function calculateInHouseMoldingCost(data) {
+  // 函數用到的所參數解構
+  const {
+    preInspectionLossRate,
+    preInspectionRate,
+    inspectionFee,
+    defectRate,
+    moldingCycle,
+    shallowPackageTime,
+    holeCount,
+    workHourRatio,
+  } = data;
+
   // Calculate material cost
   const materialCostResult = calculateMaterialCost(
     data["todoItems_原物料成本"],
-    data.preInspectionLossRate,
-    data.preInspectionRate,
-    data.inspectionFee
+    preInspectionLossRate,
+    preInspectionRate,
+    inspectionFee
   );
+
   // Calculate packaging cost
   const packagingCostResult = calculatePackagingCost(
     data["todoItems_包裝材料費"]
@@ -33,17 +46,17 @@ function calculateInHouseMoldingCost(data) {
 
   // Calculate molding cost
   const moldingCostResult = calculateMoldingCost(
-    data.defectRate,
-    data.moldingCycle,
-    data.shallowPackageTime,
-    data.holeCount,
-    data.workHourRatio
+    defectRate,
+    moldingCycle,
+    shallowPackageTime,
+    holeCount,
+    workHourRatio
   );
 
   // Calculate molding electricity cost
   const moldingElectricityCost = calculateMoldingElectricityCost(
-    data.holeCount,
-    data.moldingCycle
+    holeCount,
+    moldingCycle
   );
 
   // Calculate total cost
@@ -74,13 +87,16 @@ function calculateInHouseMoldingCost(data) {
  * @returns {Object} - Total cost and individual cost breakdown
  */
 function calculateOutsourcedMoldingCost(data) {
-  console.log("🚀 ~ calculateOutsourcedMoldingCost ~ data:", data);
+  //  函數用到的所參數解構
+  const { unitPrice, preInspectionLossRate, preInspectionRate, inspectionFee } =
+    data;
+
   // Calculate material cost
   const materialCostResult = calculateMaterialCost(
     data["todoItems_原物料成本"],
-    data.preInspectionLossRate,
-    data.preInspectionRate,
-    data.inspectionFee
+    preInspectionLossRate,
+    preInspectionRate,
+    inspectionFee
   );
 
   // Calculate packaging cost
@@ -88,21 +104,16 @@ function calculateOutsourcedMoldingCost(data) {
     data["todoItems_包裝材料費"]
   );
 
-  // Calculate post-processing cost
-  const postProcessingCostResult = calculatePostProcessingCost(
-    data.laborCostPerHour,
-    data.laborHours,
-    data.inspectionCost
-  );
+  // 委外後製程與檢驗費用  金額 =單價
+  const postProcessingCostResult = +unitPrice;
 
   // Calculate total cost
   const totalCost =
     +materialCostResult.totalCost +
     +packagingCostResult.totalCost +
-    +postProcessingCostResult.totalCost;
-  console.log("🚀 ~ calculateOutsourcedMoldingCost ~ totalCost:", totalCost);
-
+    +postProcessingCostResult;
   // Return individual costs and total cost
+
   return {
     totalCost: totalCost,
     materialCostResult,
@@ -122,12 +133,20 @@ function calculateOutsourcedMoldingCost(data) {
  * @returns {Object} - Total cost and individual cost breakdown
  */
 function calculateInHousePostProcessingCost(data) {
+  // 函數用到的所參數解構
+  const {
+    preInspectionLossRate,
+    preInspectionRate,
+    inspectionFee,
+    workHours,
+    unitPrice,
+  } = data;
   // Calculate material cost
   const materialCostResult = calculateMaterialCost(
     data["todoItems_原物料成本"],
-    data.preInspectionLossRate,
-    data.preInspectionRate,
-    data.inspectionFee
+    preInspectionLossRate,
+    preInspectionRate,
+    inspectionFee
   );
 
   // Calculate packaging cost
@@ -137,16 +156,15 @@ function calculateInHousePostProcessingCost(data) {
 
   // Calculate post-processing cost
   const postProcessingCostResult = calculatePostProcessingCost(
-    data.laborCostPerHour,
-    data.laborHours,
-    data.inspectionCost
+    workHours,
+    unitPrice
   );
 
   // Calculate total cost
   const totalCost =
     materialCostResult.totalCost +
     packagingCostResult.totalCost +
-    postProcessingCostResult.totalCost;
+    postProcessingCostResult;
 
   // Return individual costs and total cost
   return {
@@ -168,7 +186,8 @@ function calculateInHousePostProcessingCost(data) {
  */
 function calculateOutsourcedPostProcessingCost(data) {
   // Similar to In-House Post-Processing
-  return calculateInHousePostProcessingCost(data);
+
+  return calculateOutsourcedMoldingCost(data);
 }
 /**
  * Calculate total cost for In-House Shipping Inspection (In-TS)
@@ -182,86 +201,14 @@ function calculateOutsourcedPostProcessingCost(data) {
  */
 function calculateInHouseShippingInspectionCost(data) {
   // Calculate post-processing cost (inspection cost)
-  const postProcessingCostResult = calculatePostProcessingCost(
-    data.laborCostPerHour,
-    data.laborHours,
-    data.inspectionCost
-  );
+  const { unitPrice } = data;
+  const postProcessingCostResult = +unitPrice;
 
-  // Return total cost and breakdown
   return {
-    totalCost: postProcessingCostResult.totalCost,
+    totalCost: postProcessingCostResult,
     postProcessingCostResult,
   };
 }
-
-// /**
-//  * Calculate total cost based on process category
-//  * @param {string} processCategory - Process category (e.g., 'In-IJ')
-//  * @param {Object} data - Contains all necessary data
-//  * @param {Array} data.rawMaterials - Raw materials data
-//  * @param {number} data.fluctuationPercentage - Fluctuation percentage
-//  * @param {number} data.defectRate - Defect rate
-//  * @param {number} data.materialWithdrawalFee - Material withdrawal fee
-//  * @param {Array} data.packagingItems - Packaging items data
-//  * @returns {Object} - Final quote and cost breakdown
-//  */
-
-// function calculateTotalCost(processCategory, data) {
-//   let costSubtotalResult;
-
-//   // Calculate cost subtotal based on process category
-//   switch (processCategory) {
-//     case "In-IJ":
-//       costSubtotalResult = calculateInHouseMoldingCost(data);
-//       break;
-//     case "Out-IJ":
-//       costSubtotalResult = calculateOutsourcedMoldingCost(data);
-//       break;
-//     case "In-BE":
-//       costSubtotalResult = calculateInHousePostProcessingCost(data);
-//       break;
-//     case "Out-BE":
-//       costSubtotalResult = calculateOutsourcedPostProcessingCost(data);
-//       break;
-//     case "In-TS":
-//       costSubtotalResult = calculateInHouseShippingInspectionCost(data);
-//       break;
-//     case "TRANSPORTATION":
-//       costSubtotalResult = {
-//         totalCost: calculateAdditionalFees(
-//           data.transportFees,
-//           data.freightAndCustomsFees
-//         ),
-//       };
-//       break;
-//     default:
-//       throw new Error("Unknown process category");
-//   }
-
-//   // Get cost subtotal
-//   const costSubtotal = costSubtotalResult.totalCost;
-
-//   // Calculate profit management
-//   const profitManagementResult = calculateProfitManagement(
-//     costSubtotal,
-//     data.sgAndAdminPercentage,
-//     data.profitPercentage,
-//     data.riskPercentage,
-//     data.annualReductionPercentage,
-//     data.rebatePercentage,
-//     data.actualQuotation
-//   );
-
-//   // Return final quote and cost breakdown
-//   return {
-//     profitManagementResult,
-//     costSubtotalResult,
-//     costSubtotal,
-//   };
-// }
-
-// export default calculateTotalCost;
 
 /**
  * 计算所有制程的成本小计
@@ -275,16 +222,11 @@ function calculateTotalCost(processes) {
       costDetails: [],
     };
   }
-  // 初始化总成本小计
-  let totalCostSubtotal = 0;
-  // 初始化每个制程的详细信息
-  const costDetails = [];
-  // 遍历每个制程
-  processes.forEach((process) => {
-    const { processCategory, data } = process;
+
+  const costDetails = processes.map(({ processCategory, data }) => {
     let costSubtotalResult;
 
-    // 根据制程类别计算成本小计
+    // 使用 switch 判斷製程類型並計算
     switch (processCategory) {
       case "FACTORY_INTERNAL_SHAPING":
         costSubtotalResult = calculateInHouseMoldingCost(data);
@@ -302,36 +244,30 @@ function calculateTotalCost(processes) {
         costSubtotalResult = calculateInHouseShippingInspectionCost(data);
         break;
       case "TRANSPORTATION":
-        costSubtotalResult = {
-          totalCost: calculateAdditionalFees(
-            data["todoItems_運費"],
-            data["todoItems_海運費"]
-          ),
-        };
+        costSubtotalResult = calculateAdditionalFees(
+          data["todoItems_運輸費用"],
+          data["todoItems_貨運與關稅"]
+        );
         break;
       default:
         throw new Error("未知的制程类别");
     }
 
-    // 获取该制程的成本小计
-    const costSubtotal = costSubtotalResult.totalCost || 0;
-
-    // 累加到总成本小计
-    totalCostSubtotal += costSubtotal;
-
-    // 存储每个制程的详细信息
-    costDetails.push({
+    return {
+      id: data.id, // 添加 id
       processCategory,
-      costSubtotal,
+      costSubtotal: costSubtotalResult.totalCost || 0,
       costSubtotalResult,
-    });
+    };
   });
 
-  // 返回总成本小计和每个制程的详细信息
+  const totalCostSubtotal = costDetails.reduce(
+    (sum, detail) => sum + detail.costSubtotal,
+    0
+  );
+
   return {
-    // 总成本小计
     totalCostSubtotal,
-    // 每个制程的详细信息
     costDetails,
   };
 }

@@ -1,6 +1,6 @@
 // 我要所有的金額 ui也需要展現個別單一金額
 // 全部都是繁體中文
-//  所有數值最大精度到小數點後三位
+//  所有數值最大精度到小數點後三位 第四位四捨五入
 
 const COMMON_UNITS = [
   { value: "kg", label: "kg" },
@@ -56,8 +56,6 @@ function calculateMaterialCost(
   // 計算最終小計，考慮預估不良率
 
   const totalCost = Number((subtotal * (1 + defectRate_)).toFixed(3));
-
-  console.log("🚀 ~ totalCost:", totalCost);
   return {
     totalCost,
     amounts,
@@ -162,7 +160,7 @@ function calculateMoldingElectricityCost(
   return Number(electricityCost.toFixed(3));
 }
 
-/**
+/** 場內
  * 計算后制程與檢驗費用小計
  * @param {number} laborCostPerHour - 工時成本，單位：每小時費用
  * @param {number} laborHours - 工時數
@@ -170,19 +168,12 @@ function calculateMoldingElectricityCost(
  * @returns {number} - 后制程與檢驗費用小計
  */
 //  todo 有可能是多筆
-function calculatePostProcessingCost(
-  laborCostPerHour,
-  laborHours,
-  inspectionCost
-) {
-  console.log("🚀 ~   inspectionCost:", laborCostPerHour);
-
-  const laborCost = laborCostPerHour * laborHours;
-  const totalCost = laborCost + inspectionCost;
-  return {
-    totalCost,
-    laborCost,
-  };
+function calculatePostProcessingCost(laborCostPerHour, laborHours) {
+  if (!laborHours || !laborCostPerHour) {
+    return 0;
+  }
+  const totalCost = laborCostPerHour * laborHours;
+  return totalCost;
 }
 /**
  * 計算附加費用小計
@@ -194,8 +185,13 @@ function calculateAdditionalFees(transportFees, freightAndCustomsFees) {
   if (!transportFees || !freightAndCustomsFees) {
     return {
       totalCost: 0,
+      transportSubtotal: 0,
+      freightSubtotal: 0,
+      freightAmounts: [],
+      transportAmounts: [],
     };
   }
+
   // 司机工时固定为 0.3
   const driverWorkHours = 0.3;
 
@@ -203,10 +199,9 @@ function calculateAdditionalFees(transportFees, freightAndCustomsFees) {
   // *運輸「金額」=(運距*2*油價/預估出貨數)+司機工時
   const transportAmounts = transportFees.map((item) => {
     const amount =
-      (item.deliveryDistance * 2 * item.fuelPricePerUnit) /
-        item.estimatedShipmentQuantity +
+      (item.distance * 2 * item.oilPrice) / item.shipmentQuantity +
       driverWorkHours;
-    return amount;
+    return Number(amount.toFixed(3));
   });
 
   // 運輸費用小計
@@ -218,18 +213,18 @@ function calculateAdditionalFees(transportFees, freightAndCustomsFees) {
   // *貨運「金額」=運費/預估出貨數
   // 計算貨運與關稅費用
   const freightAmounts = freightAndCustomsFees.map((item) => {
-    const amount = item.freightCost / item.estimatedShipmentQuantity;
-    return amount;
+    const amount = item.freightCost / item.estimatedShipment;
+    return Number(amount.toFixed(3));
   });
-
   // 貨運與關稅費用小計
   const freightSubtotal = freightAmounts.reduce(
     (total, amount) => total + amount,
     0
   );
-
   // 附加費用小計 = 運輸費用小計 + 貨運與關稅費用小計
-  const totalAdditionalFees = transportSubtotal + freightSubtotal;
+  const totalAdditionalFees = Number(
+    (transportSubtotal + freightSubtotal).toFixed(3)
+  );
 
   return {
     // 附加費用總金額

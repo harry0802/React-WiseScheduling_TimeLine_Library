@@ -17,6 +17,15 @@ export const mockProcessCostAnalysisData = [
         unitPrice: "80",
         amount: "40000",
       },
+      {
+        materialType: "鋼鐵",
+        materialCode: "MT003",
+        materialName: "鐵件",
+        weight: "300",
+        unit: "kg",
+        unitPrice: "120",
+        amount: "24000",
+      },
     ],
     todoItems_包裝材料費: [
       {

@@ -17,109 +17,195 @@ const TotalCostContainer = styled(Box)`
   margin-top: 1.3125rem;
 `;
 
-// * 渲染製程表格的 summaryFields
-const renderSummaryFields = (formData, summaryFields) => (
-  <Box>
-    {summaryFields.map((field) => (
-      <Typography key={field.key}>
-        {field.label}: {formData[field.key] || 0}
-        {field.unit}
-      </Typography>
-    ))}
-  </Box>
-);
+// 處理金額顯示的工具函數
+const formatAmount = (amount) => `${(amount || 0).toFixed(3)}`;
 
-// * 渲染製程表格的每一個 section
-const renderSection = (section, formData) => {
-  const headers = [
-    [{ title: section.sectionTitle, colSpan: section.headers.length }],
-    section.headers.map((header) => header.label),
-  ];
-  let data;
-  //  如果有 dataKey 就要去 formData 裡面找 對應到 headers 的 key
-  if (section.dataKey) {
-    data = formData[section.dataKey]?.map((item) => ({
-      cells: section.headers.map((header) => ({
-        value: header.calculated
-          ? calculateValue(item, header)
-          : `${item[header.key] || 0}${header.unit || ""}`,
+// 成本計算結果處理器
+const CostResultHandler = {
+  // 獲取項目金額
+  getItemAmount(costSubtotalResult, dataKey, index) {
+    const amountMap = {
+      todoItems_運輸費用: costSubtotalResult?.transportAmounts?.[index],
+      todoItems_貨運與關稅: costSubtotalResult?.freightAmounts?.[index],
+      todoItems_原物料成本:
+        costSubtotalResult?.materialCostResult?.amounts?.[index],
+      todoItems_包裝材料費:
+        costSubtotalResult?.packagingCostResult?.amounts?.[index],
+    };
+    return amountMap[dataKey] || 0;
+  },
+
+  // 獲取小計值
+  getSubtotalValue(costKey, costSubtotalResult) {
+    if (!costSubtotalResult) return 0;
+
+    const {
+      materialCostResult,
+      packagingCostResult,
+      postProcessingCostResult,
+      transportSubtotal,
+      freightSubtotal,
+      totalCost,
+    } = costSubtotalResult;
+    const subtotalMap = {
+      materialCost: materialCostResult?.totalCost,
+      packagingCost: packagingCostResult?.totalCost,
+      moldingCost: postProcessingCostResult,
+      transportCost: transportSubtotal,
+      freightCost: freightSubtotal,
+      totalCost: totalCost,
+    };
+
+    return subtotalMap[costKey] || 0;
+  },
+};
+
+// 表格數據處理器
+const TableDataHandler = {
+  // 處理單元格值
+  getCellValue(header, item, costSubtotalResult, dataKey, index) {
+    if (header.key === "amount") {
+      const amount = CostResultHandler.getItemAmount(
+        costSubtotalResult,
+        dataKey,
+        index
+      );
+      return {
+        value: `${formatAmount(amount)}${header.unit || ""}`,
         align: "right",
-      })),
-    }));
-  } else {
-    //  如果沒有 dataKey 就要去 formData 裡面找 對應到 headers 的 key
-    data = [
-      {
-        cells: section.headers.map((header) => ({
-          value: header.calculated
-            ? calculateValue(formData, header)
-            : `${formData[header.key] || 0}${header.unit || ""}`,
-          align: "right",
-        })),
-      },
-    ];
-  }
-  // * 計算小計這邊是由 config 裡面定義的 calculation 來計算
-  const calculateSubtotal = () => {
-    if (!section.calculation || !formData[section.dataKey]) return 0;
-
-    try {
-      return section.calculation(formData[section.dataKey]);
-    } catch (error) {
-      console.error("計算小計時出錯:", error);
-      return 0;
+      };
     }
-  };
-  // * 如果 showSubtotal 為 true 就計算小計
-  const subtotal = section.showSubtotal && {
-    isTotal: true,
-    cells: [
-      { value: section.subtotalLabel, colSpan: section.headers.length - 1 },
-      {
-        value: `${calculateSubtotal()} 元`,
-        align: "right",
-      },
-    ],
-  };
 
-  return (
-    <QmsCasTable
-      headers={headers}
-      data={[...(data || []), ...(subtotal ? [subtotal] : [])]}
-    />
-  );
+    return {
+      value: `${item[header.key] || 0}${header.unit || ""}`,
+      align: "right",
+    };
+  },
+
+  // 生成表格數據
+  generateTableData(section, formData, costSubtotalResult) {
+    if (!section.dataKey) {
+      return [
+        {
+          cells: section.headers.map((header) => {
+            // 如果是 amount 欄位，使用 costKey 獲取對應的金額
+            if (header.key === "amount") {
+              const amount = CostResultHandler.getSubtotalValue(
+                section.costKey,
+                costSubtotalResult
+              );
+              return {
+                value: `${formatAmount(amount)}${header.unit || ""}`,
+                align: "right",
+              };
+            }
+            return {
+              value: `${formData[header.key] || 0}${header.unit || ""}`,
+              align: "right",
+            };
+          }),
+        },
+      ];
+    }
+
+    const items = formData[section.dataKey] || [];
+    return items.map((item, index) => ({
+      cells: section.headers.map((header) =>
+        this.getCellValue(
+          header,
+          item,
+          costSubtotalResult,
+          section.dataKey,
+          index
+        )
+      ),
+    }));
+  },
+
+  // 生成小計行
+  generateSubtotalRow(section, costSubtotalResult) {
+    if (!section.showSubtotal) return null;
+    const subtotalValue = CostResultHandler.getSubtotalValue(
+      section.costKey,
+      costSubtotalResult
+    );
+    return {
+      isTotal: true,
+      cells: [
+        {
+          value: section.subtotalLabel,
+          colSpan: section.headers.length - 1,
+        },
+        {
+          value: `${formatAmount(subtotalValue)} 元`,
+          align: "right",
+        },
+      ],
+    };
+  },
 };
 
-// * 計算製程表格的每一個 section 的值
-const calculateValue = (item, header) => {
-  // 根據不同欄位計算邏輯
-  if (header.key === "totalCost") {
-    return `${item.workHours * item.unitPrice}元`;
-  }
-  return `${item[header.key]}${header.unit || ""}`;
-};
-
-// * 渲染製程表格
-const renderProcessTable = ({ processType, formData }) => {
+// 渲染組件
+const ProcessTable = ({ processType, formData, costDetail }) => {
   const config = PROCESS_TABLE_CONFIG[processType];
   if (!config) return null;
 
+  const { costSubtotalResult, costSubtotal } = costDetail || {};
+
+  const renderSummaryFields = () => (
+    <Box>
+      {config.summaryFields.map((field) => (
+        <Typography key={field.key}>
+          {field.label}: {formData[field.key] || 0}
+          {field.unit}
+        </Typography>
+      ))}
+    </Box>
+  );
+
+  const renderSection = (section) => {
+    const headers = [
+      [{ title: section.sectionTitle, colSpan: section.headers.length }],
+      section.headers.map((header) => header.label),
+    ];
+
+    const tableData = TableDataHandler.generateTableData(
+      section,
+      formData,
+      costSubtotalResult
+    );
+
+    const subtotalRow = TableDataHandler.generateSubtotalRow(
+      section,
+      costSubtotalResult
+    );
+
+    return (
+      <QmsCasTable
+        headers={headers}
+        data={[...tableData, ...(subtotalRow ? [subtotalRow] : [])]}
+      />
+    );
+  };
+
   return (
     <Box>
-      {/* 渲染 summaryFields */}
-      {renderSummaryFields(formData, config.summaryFields)}
-      {/* 渲染每一個 section */}
+      {renderSummaryFields()}
+
       {config.sections.map((section, index) => (
         <Box key={index} sx={{ mt: 2 }}>
-          {renderSection(section, formData)}
+          {renderSection(section)}
         </Box>
       ))}
-      {/* 渲染最後的 subtotal */}
+
       {config.showFinalSubtotal && (
-        <TotalCostContainer>{config.finalSubtotalLabel}</TotalCostContainer>
+        <TotalCostContainer>
+          <span>{config.finalSubtotalLabel}</span>
+          <span>{formatAmount(costSubtotal)} 元</span>
+        </TotalCostContainer>
       )}
     </Box>
   );
 };
 
-export default renderProcessTable;
+export default ProcessTable;
