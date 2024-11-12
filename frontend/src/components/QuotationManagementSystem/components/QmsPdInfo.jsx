@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
-import { qmsHomeSlice } from "../slice/qmsHome";
+import { qmsHomeSlice, useSalesHomeSlice } from "../slice/qmsHome";
 
 const fields = [
   {
@@ -39,7 +38,7 @@ const fields = [
 ];
 
 function QmsPdInfo() {
-  const { data } = qmsHomeSlice();
+  const { data } = useSalesHomeSlice();
   const { productId } = useParams();
   const navigate = useNavigate();
 

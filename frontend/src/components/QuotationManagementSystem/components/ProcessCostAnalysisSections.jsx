@@ -1,14 +1,11 @@
 // src/components/Global/sections/ProcessCostAnalysisSections.jsx
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import BaseAccordion from "../../Global/accordion/BaseAccordion.jsx";
 import { IconButton } from "@mui/material";
 import ProductContextCard from "../../ProductionRecord/utility/ProductContextCard.jsx";
 import useNotification from "../../ProductionRecord/hook/useNotification.js";
-import {
-  PROCESS_TYPES,
-  PROCESS_SUBTYPES,
-} from "../../QuotationManagementSystem/config/processTypes.js";
+import { PROCESS_TYPES } from "../../QuotationManagementSystem/config/processTypes.js";
 import BaseDrawer from "../../Global/Drawer/BaseDrawer.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { mockProcessCostAnalysisData } from "../data/processCostAnalysisData";
@@ -16,8 +13,13 @@ import { useProcessForm } from "../hook/useProcessForm.jsx";
 import ProcessForm from "./ProcessForm";
 import RenderProcessTable from "./ProcessTables";
 import { calculateTotalCost } from "../hook/useProcessComputations.jsx";
+import {
+  useFactoryQuotationSlice,
+  useSalesQuotationSlice,
+} from "../slice/useFactorySalesQuotationSlice.jsx";
 // * 刪除製程的按鈕
-function DeleteButton({ processId }) {
+//  !只有業務報價可以刪除製程
+function DeleteButton({ processId, onClose }) {
   const { notifySuccess, notifyError } = useNotification();
 
   const handleDelete = async (e) => {
@@ -27,6 +29,8 @@ function DeleteButton({ processId }) {
     } catch (error) {
       console.error("Error deleting process:", error);
       notifyError("刪製程時發生錯誤");
+    } finally {
+      onClose();
     }
   };
 
@@ -47,7 +51,7 @@ function ProcessDrawer({ visible, onClose, process, isNew = false, index }) {
         {isNew
           ? "添加新製程"
           : `製程${index + 1} ${PROCESS_TYPES[process.processType].value}`}
-        {!isNew && <DeleteButton processId={process.id} />}
+        {!isNew && <DeleteButton processId={process.id} onClose={onClose} />}
       </BaseDrawer.Header>
       <BaseDrawer.Body>
         <ProcessForm
@@ -111,10 +115,22 @@ function ProcessItem({ index, process, costResult }) {
 // 主的 ProcessCostAnalysisContent 組件
 //  TODO 之後 API 完成後，改成從 API 拿資料  替換 mockProcessCostAnalysisData
 
-function ProcessCostAnalysisContent({ title, icon }) {
+function ProcessCostAnalysisContent({ title, icon, type }) {
+  // 如果 route 是 FactoryQuotationManagementSystem，則使用 useFactoryQuotationSlice
+  // 如果 route 是 SalesQuotationManagementSystem，則使用 useSalesQuotationSlice
+  const useQuotationSlice =
+    type === "factory" ? useFactoryQuotationSlice : useSalesQuotationSlice;
+
+  const {
+    data: processData,
+    setData,
+    costAndQuotation,
+    setCostAndQuotation,
+  } = useQuotationSlice();
   const [processCostAnalysisData, setProcessCostAnalysisData] = useState(
     mockProcessCostAnalysisData
   );
+
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
   const openNewProcessDrawer = () => setIsNewDrawerOpen(true);
   const closeNewProcessDrawer = () => setIsNewDrawerOpen(false);
@@ -134,7 +150,18 @@ function ProcessCostAnalysisContent({ title, icon }) {
     );
   }, [processCostAnalysisData]);
 
-  console.log("🚀 ~ costResult ~ costResult:", costResult);
+  // 設定數據
+  useEffect(() => {
+    setData(processCostAnalysisData);
+  }, [processCostAnalysisData, setData]);
+
+  //  設定 不含營銷的成本小計
+  useEffect(() => {
+    if (!costResult) return;
+    setCostAndQuotation({
+      base: costResult.totalCostSubtotal,
+    });
+  }, [costResult, setCostAndQuotation]);
 
   return (
     <ProductContextCard

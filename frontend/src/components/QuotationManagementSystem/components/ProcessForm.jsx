@@ -53,6 +53,8 @@ const tabStyles = {
   },
 };
 
+//  TODO 需要改善當下拉選單改變時  表單數據不會跟著改變的問題
+// ! 目前問題是就算我改變我也無法提供他 初始值 因為我並不知道他原本的表單設定有哪些
 function ProcessForm({ initialData, onSubmit, externalMethods }) {
   const initialProcessType = initialData?.processType;
   const methods =
@@ -104,34 +106,30 @@ function ProcessForm({ initialData, onSubmit, externalMethods }) {
     [processSubtypeOptions]
   );
 
-  // * 選擇 processType 時，清空其他欄位
-  const handleProcessTypeChange = useCallback(
-    (value) => {
-      setValue("processType", value);
-      setValue("processSubtype", "");
-      setValue("activeTab", 0);
-
-      // 當用戶選擇不同的 processType 時，清空所有其他字段
-      reset({
-        processType: value, // 只保留 processType，清空其他值
-      });
-    },
-    [setValue, reset]
-  );
-
-  // * 當 processType 改變時，切換到第一個 Tab
+  // * 當 processType 改變時觸發更新邏輯
   useEffect(() => {
-    setValue("activeTab", 0);
-  }, [processType, setValue]);
+    if (!processType) return;
 
-  //* 當 processType 改變時觸發重置邏輯
-  useEffect(() => {
-    if (processType && initialData?.processType !== processType) {
+    if (processType === initialData?.processType) {
+      // 如果選擇的類型與初始值相同，重置回初始值
+      reset(initialData);
+    } else {
+      // 如果選擇的類型與初始值不同，重置所有欄位
+      console.log("processType", processType);
       reset({
-        processType, // 保留當前選擇的 processType，重置其他字段
+        processType,
+        activeTab: 0,
+        processSubtype: "",
       });
     }
-  }, [processType, initialData, reset]);
+  }, [processType, initialData, reset, setValue]);
+
+  // * 關閉表單時重置所有數據
+  useEffect(() => {
+    return () => {
+      reset(initialData || {}); // 重置回初始數據
+    };
+  }, [reset, initialData]);
 
   // * 渲染表單項目
   const renderFormItems = useCallback((items) => {
@@ -192,10 +190,6 @@ function ProcessForm({ initialData, onSubmit, externalMethods }) {
           key={field.name}
           field={{
             ...field,
-            onChange:
-              field.name === "processType"
-                ? handleProcessTypeChange
-                : undefined,
           }}
         />
       ))}

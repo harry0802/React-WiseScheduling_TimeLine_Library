@@ -259,26 +259,34 @@ function calculateProfitManagement(
   rebatePercentage = 0.02,
   actualQuotation
 ) {
+  // 百分比參數如果不是 7 不是 0.07 就需要轉換 如果是 0.07 就不需要轉換 數值不是固定 但是邏輯是
+  const sgAndAdminPercentage_ = parseFloat(sgAndAdminPercentage) / 100;
+  const profitPercentage_ = parseFloat(profitPercentage) / 100;
+  const riskPercentage_ = parseFloat(riskPercentage) / 100;
+  const annualReductionPercentage_ =
+    parseFloat(annualReductionPercentage) / 100;
+  const rebatePercentage_ = parseFloat(rebatePercentage) / 100;
+
   // 2. 管销研金额
-  const sgAndAdminFee = costSubtotal * sgAndAdminPercentage;
+  const sgAndAdminFee = costSubtotal * sgAndAdminPercentage_;
 
   // 3. 利润金额
-  const profitFee = (costSubtotal + sgAndAdminFee) * profitPercentage;
+  const profitFee = (costSubtotal + sgAndAdminFee) * profitPercentage_;
 
   // 4. 成本小计（含管销研）
   const subtotalWithSGA = costSubtotal + sgAndAdminFee + profitFee;
 
   // 5. 风险金额
-  const riskFee = subtotalWithSGA * riskPercentage;
+  const riskFee = subtotalWithSGA * riskPercentage_;
 
   // 6. 总成本
   const totalCost = subtotalWithSGA + riskFee;
 
   // 7. 年降金额
-  const annualReductionAmount = totalCost * (1 + annualReductionPercentage);
+  const annualReductionAmount = totalCost * (1 + annualReductionPercentage_);
 
   // 8. 回馈金额
-  const rebateAmount = annualReductionAmount * (1 + rebatePercentage);
+  const rebateAmount = annualReductionAmount * (1 + rebatePercentage_);
 
   // 9. 毛利率计算
   const grossProfitMargin = (actualQuotation - costSubtotal) / costSubtotal;

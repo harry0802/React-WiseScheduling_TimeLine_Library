@@ -6,7 +6,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useDebounce } from "react-use";
 import ProductDropdownSearch from "../../ProductionRecord/utility/ProductDropdownSearch.jsx";
 import ProductionRecordButton from "../../ProductionRecord/utility/ProductionRecordButton.jsx";
-import { qmsHomeSlice } from "../slice/qmsHome.jsx";
+import { useSalesHomeSlice } from "../slice/qmsHome.jsx";
 
 const options = [
   { label: "產品名稱", value: "productName" },
@@ -19,7 +19,7 @@ function QmsActions() {
   const [userSearch, setUserSearch] = useState("");
   const [userSelect, setUserSelect] = useState(options[0].value);
   const navigate = useNavigate();
-  const { searchData, data } = qmsHomeSlice();
+  const { searchData, data } = useSalesHomeSlice();
   function handleSearch() {
     if (!data || !userSelect) return;
     searchData(userSearch, userSelect);

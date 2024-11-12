@@ -6,11 +6,11 @@ import QmsPdInfo from "../components/QmsPdInfo";
 import QmsProfitDashboard from "../components/QmsProfitDashboard";
 import AddIcon from "@mui/icons-material/Add";
 
-const type = "sales";
-function QmsAddtions() {
+const type = "factory";
+function FactoryQmsAddtions() {
   const breadcrumbs = [
-    { to: "/SalesQuotationManagementSystem", label: "編輯產品資訊" },
-    { label: "業務報價管理系統" },
+    { to: "/FactoryQuotationManagementSystem", label: "編輯產品資訊" },
+    { label: "工廠報價管理系統" },
   ];
 
   return (
@@ -27,4 +27,4 @@ function QmsAddtions() {
   );
 }
 
-export default QmsAddtions;
+export default FactoryQmsAddtions;

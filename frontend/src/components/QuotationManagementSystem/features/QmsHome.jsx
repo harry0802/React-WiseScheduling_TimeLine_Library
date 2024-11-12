@@ -1,10 +1,20 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import SharedCard from "../../Global/card/ProductCard";
-import { qmsHomeSlice } from "../slice/qmsHome";
+import {
+  qmsHomeSlice,
+  useSalesHomeSlice,
+  useFactoryHomeSlice,
+} from "../slice/qmsHome";
 import PmHomeContent from "../../Global/content/PmHomeContent";
 
 function QmsHome() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const sliceHook = location.pathname.includes("Sales")
+    ? useSalesHomeSlice
+    : useFactoryHomeSlice;
+
   const {
     displayedData,
     currentPage,
@@ -12,7 +22,7 @@ function QmsHome() {
     total,
     setPage,
     setPageSize,
-  } = qmsHomeSlice();
+  } = sliceHook();
 
   function handleCardClick(id) {
     return navigate(`addProductInfo/${id}`);

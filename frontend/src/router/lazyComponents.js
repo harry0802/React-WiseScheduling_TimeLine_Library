@@ -77,12 +77,23 @@ export const QmsProductionInspection = lazyImport(() =>
 );
 
 // QuotationManagementSystem
-export const QuotationManagementSystem = lazyImport(() =>
-  import("../pages/QuotationManagementSystemPage")
+export const SalesQuotationManagementSystem = lazyImport(() =>
+  import("../pages/SalesQuotationManagementSystemPage")
 );
-export const QmsHome = lazyImport(() =>
+export const SalesQmsHome = lazyImport(() =>
   import("../components/QuotationManagementSystem/features/QmsHome")
 );
-export const QmsAddtions = lazyImport(() =>
+
+// FactoryQuotationManagementSystem
+export const FactoryQuotationManagementSystem = lazyImport(() =>
+  import("../pages/FactoryQuotationManagementSystemPage")
+);
+export const FactoryQmsHome = lazyImport(() =>
+  import("../components/QuotationManagementSystem/features/QmsHome")
+);
+export const FactoryQmsAddtions = lazyImport(() =>
+  import("../components/QuotationManagementSystem/features/FactoryQmsAddtions")
+);
+export const QmsAddtions = lazy(() =>
   import("../components/QuotationManagementSystem/features/QmsAddtionInfos")
 );

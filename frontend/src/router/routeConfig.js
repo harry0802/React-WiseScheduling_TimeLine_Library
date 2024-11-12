@@ -87,13 +87,13 @@ const routeConfig = [
       },
 
       {
-        path: "QuotationManagementSystem",
-        element: <LazyComponents.QuotationManagementSystem />,
+        path: "SalesQuotationManagementSystem",
+        element: <LazyComponents.SalesQuotationManagementSystem />,
         children: [
           {
             index: true,
             replace: true,
-            element: <LazyComponents.QmsHome />,
+            element: <LazyComponents.SalesQmsHome />,
           },
           {
             path: "addProductInfo/:productId",
@@ -102,6 +102,20 @@ const routeConfig = [
                 <LazyComponents.QmsAddtions />
               </React.Suspense>
             ),
+          },
+        ],
+      },
+      {
+        path: "FactoryQuotationManagementSystem",
+        element: <LazyComponents.FactoryQuotationManagementSystem />,
+        children: [
+          {
+            index: true,
+            element: <LazyComponents.FactoryQmsHome />,
+          },
+          {
+            path: "addProductInfo/:productId",
+            element: <LazyComponents.FactoryQmsAddtions />,
           },
         ],
       },

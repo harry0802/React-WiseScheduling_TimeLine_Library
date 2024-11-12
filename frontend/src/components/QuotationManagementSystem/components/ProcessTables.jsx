@@ -145,7 +145,7 @@ const TableDataHandler = {
   },
 };
 
-// 渲染組件
+// * 主要組件
 const ProcessTable = ({ processType, formData, costDetail }) => {
   const config = PROCESS_TABLE_CONFIG[processType];
   if (!config) return null;

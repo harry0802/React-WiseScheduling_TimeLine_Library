@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import styled from "styled-components";
 import { Grid, Typography, Paper } from "@mui/material";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
+import { calculateProfit } from "../hook/useProcessComputations";
 
 const StyledPaper = styled(Paper)`
   border-radius: 8px;
@@ -58,77 +59,7 @@ const StyledValue = styled(Typography)`
   }
 `;
 
-// 核心計算函數根據規格書計算
-function calculateProfitAnalysis(quotationAmount) {
-  // 定義每個步驟的百分比 (可以根據規格書調整)
-  const marketingDiscountPercentage = 0.07;
-  const profitPercentage = 0.05;
-  const riskPercentage = 0.02;
-  const yearFactorPercentage = 0.02;
-  const taxCostPercentage = 0.05;
-  const feedbackPercentage = 0.02;
-
-  // 成本小計(不含管)
-  const subtotalWithoutMarketing = quotationAmount;
-
-  // 根據規格書邏輯進行計算
-  const marketingDiscount =
-    subtotalWithoutMarketing * marketingDiscountPercentage;
-  const profit = subtotalWithoutMarketing * profitPercentage;
-  const risk = subtotalWithoutMarketing * riskPercentage;
-  const yearFactor = subtotalWithoutMarketing * yearFactorPercentage;
-  const taxCost = subtotalWithoutMarketing * taxCostPercentage;
-  const feedback = subtotalWithoutMarketing * feedbackPercentage;
-
-  // 總成本：包含管銷研與其他成本
-  const subtotalWithCosts =
-    subtotalWithoutMarketing + profit + risk + yearFactor + taxCost + feedback;
-  // 毛利率
-  const grossProfitMargin =
-    ((subtotalWithoutMarketing - subtotalWithCosts) /
-      subtotalWithoutMarketing) *
-    100;
-
-  // 根據規格書的字段格式化數據
-  return [
-    {
-      key: "quotationAmount",
-      label: "報價金額",
-      value: `${quotationAmount.toFixed(2)} 元`,
-    },
-    {
-      key: "marketingDiscount",
-      label: "管銷研(7%)",
-      value: `${marketingDiscount.toFixed(2)} 元`,
-    },
-    { key: "profit", label: "利潤(5%)", value: `${profit.toFixed(2)} 元` },
-    { key: "risk", label: "風險(2%)", value: `${risk.toFixed(2)} 元` },
-    {
-      key: "yearFactor",
-      label: "年份(2%)",
-      value: `${yearFactor.toFixed(2)} 元`,
-    },
-    {
-      key: "subtotalWithoutMarketing",
-      label: "成本小計(不含管銷研 )",
-      value: `${subtotalWithoutMarketing.toFixed(2)} 元`,
-    },
-    {
-      key: "subtotalWithCosts",
-      label: "總成本",
-      value: `${subtotalWithCosts.toFixed(2)} 元`,
-    },
-    { key: "taxCost", label: "稅成本", value: `${taxCost.toFixed(2)} 元` },
-    { key: "feedback", label: "回饋(2%)", value: `${feedback.toFixed(2)} 元` },
-    {
-      key: "grossProfitMargin",
-      label: "毛利率",
-      value: `${grossProfitMargin.toFixed(2)}%`,
-    },
-  ];
-}
-
-// 利潤分析展示組件
+// 利潤管理展示組件
 const ProfitManagementGrid = ({ data }) => {
   return (
     <StyledPaper>
@@ -146,30 +77,127 @@ const ProfitManagementGrid = ({ data }) => {
 
 function QmsProfitDashboard() {
   const [quotationAmount, setQuotationAmount] = useState(100000);
-  const [profitData, setProfitData] = useState(
-    calculateProfitAnalysis(quotationAmount)
-  );
-
-  const handleFormSubmit = (values) => {
-    const newQuotationAmount = parseFloat(values.quotationAmount);
-    setQuotationAmount(newQuotationAmount);
-    setProfitData(calculateProfitAnalysis(newQuotationAmount));
-  };
-
-  const defaultValues = {
-    quotationAmount: quotationAmount,
+  const [percentages, setPercentages] = useState({
     marketingDiscount: 7,
     profit: 5,
     risk: 2,
     yearFactor: 2,
     feedback: 2,
+  });
+
+  const calculateProfitManagement = useCallback(
+    (amount) => {
+      const subtotalWithoutMarketing = amount;
+
+      const marketingDiscount =
+        subtotalWithoutMarketing * (percentages.marketingDiscount / 100);
+      const profit = subtotalWithoutMarketing * (percentages.profit / 100);
+      const risk = subtotalWithoutMarketing * (percentages.risk / 100);
+      const yearFactor =
+        subtotalWithoutMarketing * (percentages.yearFactor / 100);
+      const taxCost = subtotalWithoutMarketing * 0.05; // 稅率保持 5%
+      const feedback = subtotalWithoutMarketing * (percentages.feedback / 100);
+
+      const subtotalWithCosts =
+        subtotalWithoutMarketing +
+        profit +
+        risk +
+        yearFactor +
+        taxCost +
+        feedback;
+
+      const grossProfitMargin =
+        ((subtotalWithoutMarketing - subtotalWithCosts) /
+          subtotalWithoutMarketing) *
+        100;
+
+      // calculateProfit
+
+      return [
+        {
+          key: "quotationAmount",
+          label: "報價金額",
+          value: `${amount.toFixed(2)} 元`,
+        },
+        {
+          key: "marketingDiscount",
+          label: `管銷研(${percentages.marketingDiscount}%)`,
+          value: `${marketingDiscount.toFixed(2)} 元`,
+        },
+        {
+          key: "profit",
+          label: `利潤(${percentages.profit}%)`,
+          value: `${profit.toFixed(2)} 元`,
+        },
+        {
+          key: "risk",
+          label: `風險(${percentages.risk}%)`,
+          value: `${risk.toFixed(2)} 元`,
+        },
+        {
+          key: "yearFactor",
+          label: `年降(${percentages.yearFactor}%)`,
+          value: `${yearFactor.toFixed(2)} 元`,
+        },
+        {
+          key: "subtotalWithoutMarketing",
+          label: "成本小計(不含管銷研 )",
+          value: `${subtotalWithoutMarketing.toFixed(2)} 元`,
+        },
+        {
+          key: "subtotalWithCosts",
+          label: "總成本",
+          value: `${subtotalWithCosts.toFixed(2)} 元`,
+        },
+        { key: "taxCost", label: "稅成本", value: `${taxCost.toFixed(2)} 元` },
+        {
+          key: "feedback",
+          label: `回饋(${percentages.feedback}%)`,
+          value: `${feedback.toFixed(2)} 元`,
+        },
+        {
+          key: "grossProfitMargin",
+          label: "毛利率",
+          value: `${grossProfitMargin.toFixed(2)}%`,
+        },
+      ];
+    },
+    [percentages]
+  );
+
+  const [profitData, setProfitData] = useState(
+    calculateProfitManagement(quotationAmount)
+  );
+
+  const handleFormSubmit = (values) => {
+    const newQuotationAmount = parseFloat(values.quotationAmount);
+    setQuotationAmount(newQuotationAmount);
+
+    setPercentages({
+      marketingDiscount: parseFloat(values.marketingDiscount),
+      profit: parseFloat(values.profit),
+      risk: parseFloat(values.risk),
+      yearFactor: parseFloat(values.yearFactor),
+      feedback: parseFloat(values.feedback),
+    });
+
+    setProfitData(calculateProfitManagement(newQuotationAmount));
+  };
+
+  useEffect(() => {
+    setProfitData(calculateProfitManagement(quotationAmount));
+  }, [calculateProfitManagement, quotationAmount]);
+
+  const defaultValues = {
+    quotationAmount,
+    ...percentages,
   };
 
   return (
     <BaseProductInfoSection
       onUpdate={handleFormSubmit}
       title="利潤管理"
-      product={{ defaultValues }}
+      product={defaultValues}
     >
       <ProfitManagementGrid data={profitData} />
 
