@@ -6,13 +6,29 @@ const DashboardWrapper = styled.div`
   justify-content: space-between;
 `;
 
-function QmsDashbord() {
+function QmsDashbord({ costAndQuotation }) {
   return (
     <DashboardWrapper>
-      <ScoreCard title="不含營銷的成本小計" value="00,000" unit="元" />
-      <ScoreCard title="含營銷的成本小計" value="00,000" unit="元" />
-      <ScoreCard title="稅成本" value="00,000" unit="元" />
-      <ScoreCard title="實際報價" value="00,000" unit="元" />
+      <ScoreCard
+        title="不含營銷的成本小計"
+        value={costAndQuotation.base ?? 0}
+        unit="元"
+      />
+      <ScoreCard
+        title="含營銷的成本小計"
+        value={costAndQuotation.withMarketing ?? 0}
+        unit="元"
+      />
+      <ScoreCard
+        title="總成本"
+        value={costAndQuotation.totalCost ?? 0}
+        unit="元"
+      />
+      <ScoreCard
+        title="實際報價"
+        value={costAndQuotation.actual ?? 0}
+        unit="元"
+      />
     </DashboardWrapper>
   );
 }

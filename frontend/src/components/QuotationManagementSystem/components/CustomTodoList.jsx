@@ -12,7 +12,6 @@ const GroupFormContainer = styled.div`
   background: var(--color-background-card);
   font-size: 18px;
   color: var(--color-text);
-  /* margin-top: 1.3125rem; */
   padding: 0.625rem 0;
   overflow: auto;
   position: relative;
@@ -34,7 +33,7 @@ const GroupFormContent = styled.div`
   width: auto;
   position: relative;
   display: flex;
-  align-items: flex-start; // 确保垂直居中
+  align-items: flex-start;
   border-bottom: 1px solid var(--color-border);
 `;
 
@@ -42,7 +41,7 @@ const RemoveButton = styled(IconButton)`
   && {
     color: var(--color-button-primary);
     transition: all 0.3s;
-    padding: 8px; // 调整内边距
+    padding: 8px;
   }
 
   & > svg {
@@ -85,7 +84,7 @@ const AddButton = styled(Button)`
 `;
 
 function CustomTodoList({ name, fields, renderField }) {
-  const { control } = useFormContext();
+  const { control, reset } = useFormContext();
   const {
     fields: items,
     append,
@@ -95,12 +94,25 @@ function CustomTodoList({ name, fields, renderField }) {
     name,
   });
 
+  const handleRemove = (index) => {
+    remove(index);
+  };
+
+  const handleAdd = () => {
+    // 確保添加空值對象
+    const emptyItem = fields.reduce((acc, field) => {
+      acc[field.name] = "";
+      return acc;
+    }, {});
+    append(emptyItem);
+  };
+
   return (
     <GroupFormContainer>
       <GroupFormItem>
         {items.map((item, index) => (
           <GroupFormContent key={item.id} isFirst={index === 0}>
-            <RemoveButton onClick={() => remove(index)}>
+            <RemoveButton onClick={() => handleRemove(index)}>
               <CloseIcon />
             </RemoveButton>
             {fields.map((field) =>
@@ -118,7 +130,7 @@ function CustomTodoList({ name, fields, renderField }) {
       </GroupFormItem>
       <AdditionContainer>
         <AddButton
-          onClick={() => append({})}
+          onClick={handleAdd}
           startIcon={
             <AddIcon
               className="c-btn-primars"

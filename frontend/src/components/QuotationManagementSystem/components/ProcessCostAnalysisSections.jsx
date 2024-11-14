@@ -1,4 +1,3 @@
-// src/components/Global/sections/ProcessCostAnalysisSections.jsx
 import React, { useEffect, useMemo, useState } from "react";
 
 import BaseAccordion from "../../Global/accordion/BaseAccordion.jsx";
@@ -13,12 +12,9 @@ import { useProcessForm } from "../hook/useProcessForm.jsx";
 import ProcessForm from "./ProcessForm";
 import RenderProcessTable from "./ProcessTables";
 import { calculateTotalCost } from "../hook/useProcessComputations.jsx";
-import {
-  useFactoryQuotationSlice,
-  useSalesQuotationSlice,
-} from "../slice/useFactorySalesQuotationSlice.jsx";
+
 // * 刪除製程的按鈕
-//  !只有業務報價可以刪除製程
+//  !只有業務報價可以刪除製程fBaseProcessCostAnalysis
 function DeleteButton({ processId, onClose }) {
   const { notifySuccess, notifyError } = useNotification();
 
@@ -112,21 +108,20 @@ function ProcessItem({ index, process, costResult }) {
   );
 }
 
-// 主的 ProcessCostAnalysisContent 組件
+// 基礎的 ProcessCostAnalysis 組件
 //  TODO 之後 API 完成後，改成從 API 拿資料  替換 mockProcessCostAnalysisData
-
-function ProcessCostAnalysisContent({ title, icon, type }) {
-  // 如果 route 是 FactoryQuotationManagementSystem，則使用 useFactoryQuotationSlice
-  // 如果 route 是 SalesQuotationManagementSystem，則使用 useSalesQuotationSlice
-  const useQuotationSlice =
-    type === "factory" ? useFactoryQuotationSlice : useSalesQuotationSlice;
-
+function BaseProcessCostAnalysis({
+  title = "各製程物料與加工成本分析",
+  icon,
+  quotationSlice,
+}) {
   const {
     data: processData,
     setData,
     costAndQuotation,
     setCostAndQuotation,
-  } = useQuotationSlice();
+  } = quotationSlice || {};
+
   const [processCostAnalysisData, setProcessCostAnalysisData] = useState(
     mockProcessCostAnalysisData
   );
@@ -157,7 +152,7 @@ function ProcessCostAnalysisContent({ title, icon, type }) {
 
   //  設定 不含營銷的成本小計
   useEffect(() => {
-    if (!costResult) return;
+    if (!costResult || !setCostAndQuotation) return;
     setCostAndQuotation({
       base: costResult.totalCostSubtotal,
     });
@@ -190,7 +185,4 @@ function ProcessCostAnalysisContent({ title, icon, type }) {
   );
 }
 
-// 包裝了 Provider 的主組件
-export function ProcessCostAnalysisSections(props) {
-  return <ProcessCostAnalysisContent {...props} />;
-}
+export default BaseProcessCostAnalysis;

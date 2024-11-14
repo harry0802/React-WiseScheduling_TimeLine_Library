@@ -92,8 +92,12 @@ export const FactoryQmsHome = lazyImport(() =>
   import("../components/QuotationManagementSystem/features/QmsHome")
 );
 export const FactoryQmsAddtions = lazyImport(() =>
-  import("../components/QuotationManagementSystem/features/FactoryQmsAddtions")
+  import(
+    "../components/QuotationManagementSystem/features/Factory/FactoryQmsAddtions"
+  )
 );
 export const QmsAddtions = lazy(() =>
-  import("../components/QuotationManagementSystem/features/QmsAddtionInfos")
+  import(
+    "../components/QuotationManagementSystem/features/Sales/QmsAddtionInfos"
+  )
 );

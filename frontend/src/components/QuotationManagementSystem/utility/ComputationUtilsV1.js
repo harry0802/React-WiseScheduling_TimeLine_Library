@@ -250,6 +250,18 @@ function calculateAdditionalFees(transportFees, freightAndCustomsFees) {
  * @param {number} actualQuotation - 实际报价
  * @returns {object} - 返回所有计算步骤的结果，包括最终报价金额和毛利率
  */
+// 輔助函數：處理百分比轉換
+function convertToDecimalPercentage(value) {
+  const numValue = parseFloat(value);
+  // 如果數值已經是小數形式（如 0.07），直接返回
+  return numValue >= 1 ? numValue / 100 : numValue;
+}
+
+// 輔助函數：將數字格式化為三位小數
+function formatToThreeDecimals(value) {
+  return Math.round(value * 1000) / 1000;
+}
+
 function calculateProfitManagement(
   costSubtotal,
   sgAndAdminPercentage = 0.07,
@@ -259,51 +271,38 @@ function calculateProfitManagement(
   rebatePercentage = 0.02,
   actualQuotation
 ) {
-  // 百分比參數如果不是 7 不是 0.07 就需要轉換 如果是 0.07 就不需要轉換 數值不是固定 但是邏輯是
-  const sgAndAdminPercentage_ = parseFloat(sgAndAdminPercentage) / 100;
-  const profitPercentage_ = parseFloat(profitPercentage) / 100;
-  const riskPercentage_ = parseFloat(riskPercentage) / 100;
-  const annualReductionPercentage_ =
-    parseFloat(annualReductionPercentage) / 100;
-  const rebatePercentage_ = parseFloat(rebatePercentage) / 100;
+  // 轉換所有百分比為小數形式
+  const sgAndAdminRate = convertToDecimalPercentage(sgAndAdminPercentage);
+  const profitRate = convertToDecimalPercentage(profitPercentage);
+  const riskRate = convertToDecimalPercentage(riskPercentage);
+  const annualReductionRate = convertToDecimalPercentage(
+    annualReductionPercentage
+  );
+  const rebateRate = convertToDecimalPercentage(rebatePercentage);
 
-  // 2. 管销研金额
-  const sgAndAdminFee = costSubtotal * sgAndAdminPercentage_;
-
-  // 3. 利润金额
-  const profitFee = (costSubtotal + sgAndAdminFee) * profitPercentage_;
-
-  // 4. 成本小计（含管销研）
+  // 計算過程
+  const sgAndAdminFee = costSubtotal * sgAndAdminRate;
+  const profitFee = (costSubtotal + sgAndAdminFee) * profitRate;
   const subtotalWithSGA = costSubtotal + sgAndAdminFee + profitFee;
-
-  // 5. 风险金额
-  const riskFee = subtotalWithSGA * riskPercentage_;
-
-  // 6. 总成本
+  const riskFee = subtotalWithSGA * riskRate;
   const totalCost = subtotalWithSGA + riskFee;
-
-  // 7. 年降金额
-  const annualReductionAmount = totalCost * (1 + annualReductionPercentage_);
-
-  // 8. 回馈金额
-  const rebateAmount = annualReductionAmount * (1 + rebatePercentage_);
-
-  // 9. 毛利率计算
+  const annualReductionAmount = totalCost * (1 + annualReductionRate);
+  const rebateAmount = annualReductionAmount * (1 + rebateRate);
   const grossProfitMargin = (actualQuotation - costSubtotal) / costSubtotal;
 
+  // 返回所有結果，並將數值格式化為三位小數
   return {
-    costSubtotal: costSubtotal,
-    sgAndAdminFee: sgAndAdminFee,
-    profitFee: profitFee,
-    subtotalWithSGA: subtotalWithSGA,
-    riskFee: riskFee,
-    totalCost: totalCost,
-    annualReductionAmount: annualReductionAmount,
-    rebateAmount: rebateAmount,
-    grossProfitMargin: grossProfitMargin,
+    costSubtotal: formatToThreeDecimals(costSubtotal),
+    sgAndAdminFee: formatToThreeDecimals(sgAndAdminFee),
+    profitFee: formatToThreeDecimals(profitFee),
+    subtotalWithSGA: formatToThreeDecimals(subtotalWithSGA),
+    riskFee: formatToThreeDecimals(riskFee),
+    totalCost: formatToThreeDecimals(totalCost),
+    annualReductionAmount: formatToThreeDecimals(annualReductionAmount),
+    rebateAmount: formatToThreeDecimals(rebateAmount),
+    grossProfitMargin: formatToThreeDecimals(grossProfitMargin),
   };
 }
-
 export {
   calculateMaterialCost,
   calculatePackagingCost,

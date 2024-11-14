@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
-import { qmsHomeSlice, useSalesHomeSlice } from "../slice/qmsHome";
+import { useFactoryHomeSlice, useSalesHomeSlice } from "../slice/qmsHome";
 
 const fields = [
   {
@@ -37,8 +37,10 @@ const fields = [
   },
 ];
 
-function QmsPdInfo() {
-  const { data } = useSalesHomeSlice();
+function QmsPdInfo({ type }) {
+  const useSlice = type === "sales" ? useSalesHomeSlice : useFactoryHomeSlice;
+  const { data } = useSlice();
+
   const { productId } = useParams();
   const navigate = useNavigate();
 
@@ -80,13 +82,13 @@ function QmsPdInfo() {
             {product && (
               <>
                 <p>
-                  <strong>產品序號:</strong> {product.productNumber}
+                  <strong>產品序號:</strong> {product.productNumber ?? ""}
                 </p>
                 <p>
-                  <strong>產品名稱:</strong> {product.productName}
+                  <strong>產品名稱:</strong> {product.productName ?? ""}
                 </p>
                 <p>
-                  <strong>客戶名稱:</strong> {product.customerName}
+                  <strong>客戶名稱:</strong> {product.customerName ?? ""}
                 </p>
               </>
             )}

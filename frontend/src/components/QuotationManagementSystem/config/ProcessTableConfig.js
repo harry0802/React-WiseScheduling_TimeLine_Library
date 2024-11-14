@@ -23,6 +23,8 @@ PROCESS_TABLE_CONFIG
 │   └── showFinalSubtotal             // Boolean to show or hide the final subtotal
 */
 
+import { PROCESS_DATA_KEYS } from "./ProcessDataKeys";
+
 export const PROCESS_TABLE_CONFIG = {
   // *工廠內成型製程配置
   FACTORY_INTERNAL_SHAPING: {
@@ -52,7 +54,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_原物料成本", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.RAW_MATERIAL,
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -77,7 +79,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_包裝材料費", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.PACKAGING_MATERIAL,
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -142,7 +144,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_原物料成本", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.RAW_MATERIAL, // 指向 `processData` 中對應的嵌套資料
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -168,7 +170,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_包裝材料費", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.PACKAGING_MATERIAL, // 指向 `processData` 中對應的嵌套資料
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -231,7 +233,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_原物料成本", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.RAW_MATERIAL, // 指向 `processData` 中對應的嵌套資料
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -257,7 +259,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_包裝材料費", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.PACKAGING_MATERIAL, // 指向 `processData` 中對應的嵌套資料
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -326,7 +328,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_原物料成本", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.RAW_MATERIAL, // 指向 `processData` 中對應的嵌套資料
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -352,7 +354,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_包裝材料費", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.PACKAGING_MATERIAL, // 指向 `processData` 中對應的嵌套資料
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -455,7 +457,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_運輸費用", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.TRANSPORTATION, // 指向 `processData` 中對應的嵌套資料
         // 顯示小計
         showSubtotal: true,
         // 小計標籤
@@ -476,7 +478,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額 (元)", key: "amount", unit: "元" },
         ],
         // 表格對應的資料鍵
-        dataKey: "todoItems_貨運與關稅", // 指向 `processData` 中對應的嵌套資料
+        dataKey: PROCESS_DATA_KEYS.FREIGHT_AND_DUTY, // 指向 `processData` 中對應的嵌套資料
         // 顯示小計
         showSubtotal: true,
         // 小計標籤

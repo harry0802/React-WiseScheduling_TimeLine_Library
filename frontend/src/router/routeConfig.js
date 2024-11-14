@@ -115,7 +115,11 @@ const routeConfig = [
           },
           {
             path: "addProductInfo/:productId",
-            element: <LazyComponents.FactoryQmsAddtions />,
+            element: (
+              <React.Suspense fallback={<div> Loading... </div>}>
+                <LazyComponents.FactoryQmsAddtions />
+              </React.Suspense>
+            ),
           },
         ],
       },

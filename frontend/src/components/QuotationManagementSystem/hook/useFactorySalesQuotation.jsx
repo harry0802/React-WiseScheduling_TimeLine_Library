@@ -9,17 +9,20 @@
 
 //  4. 需要辨別 業務報價 與 工廠報價
 
-// 我也需要紀錄 1.不含營銷的成本小計 2.含營銷的成本小計 3. 稅成本 4.實際報價
+//  5. 需要紀錄 1.不含營銷的成本小計 2.含營銷的成本小計 3. 稅成本 4.實際報價
+
+//  6. 需要添加一個 個別的運輸管理 資料
 
 export const initialState = {
   // 基礎數據
   data: [],
+  transportationData: [],
 
   // 成本與報價相關
   costAndQuotation: {
     base: 0, // 不含營銷的成本小計
     withMarketing: 0, // 含營銷的成本小計
-    tax: 0, // 稅成本
+    totalCost: 0, // 總成本
     amount: 0, // 其他組件算完的總小計金額(未含管銷研)
     actual: 0, // 實際報價
   },
@@ -52,7 +55,7 @@ export const actions = (set) => ({
       costAndQuotation: {
         base: 0,
         withMarketing: 0,
-        tax: 0,
+        totalCost: 0,
         amount: 0,
         actual: 0,
       },

@@ -161,27 +161,50 @@ export const mockProcessCostAnalysisData = [
     workHours: "3600",
     unitPrice: "1000",
   },
-  {
-    id: "6",
-    processType: "TRANSPORTATION",
-    processSubtype: "海運",
+  // {
+  //   id: "6",
+  //   processType: "TRANSPORTATION",
+  //   processSubtype: "海運",
 
-    todoItems_運輸費用: [
-      {
-        transportType: "船運",
-        distance: "1000",
-        time: "72",
-        oilPrice: "15",
-        shipmentQuantity: "100",
-        amount: "45000",
-      },
-    ],
-    todoItems_貨運與關稅: [
-      {
-        feeType: "貨運",
-        freightCost: "25000",
-        estimatedShipment: "300",
-      },
-    ],
-  },
+  //   todoItems_運輸費用: [
+  //     {
+  //       transportType: "船運",
+  //       distance: "1000",
+  //       time: "72",
+  //       oilPrice: "15",
+  //       shipmentQuantity: "100",
+  //       amount: "45000",
+  //     },
+  //   ],
+  //   todoItems_貨運與關稅: [
+  //     {
+  //       feeType: "貨運",
+  //       freightCost: "25000",
+  //       estimatedShipment: "300",
+  //     },
+  //   ],
+  // },
 ];
+
+export const transportationProcessData = {
+  id: "6",
+  processType: "TRANSPORTATION",
+  processSubtype: "海運",
+  todoItems_運輸費用: [
+    {
+      transportType: "船運",
+      distance: "1000",
+      time: "72",
+      oilPrice: "15",
+      shipmentQuantity: "100",
+      amount: "45000",
+    },
+  ],
+  todoItems_貨運與關稅: [
+    {
+      feeType: "貨運",
+      freightCost: "25000",
+      estimatedShipment: "300",
+    },
+  ],
+};

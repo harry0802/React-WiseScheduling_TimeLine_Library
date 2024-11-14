@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from "react";
 import styled from "styled-components";
 import { Grid, Typography, Paper } from "@mui/material";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
-import { calculateProfit } from "../hook/useProcessComputations";
 
 const StyledPaper = styled(Paper)`
   border-radius: 8px;

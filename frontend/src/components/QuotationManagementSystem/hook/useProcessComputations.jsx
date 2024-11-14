@@ -282,6 +282,7 @@ function calculateProfit(totalCostSubtotal, data) {
   // 调用利润管理的计算函数
   const profitManagementResult = calculateProfitManagement(
     totalCostSubtotal,
+
     data.sgAndAdminPercentage,
     data.profitPercentage,
     data.riskPercentage,
