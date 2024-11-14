@@ -19,6 +19,9 @@ from .material.controller import api as material_ns
 from .option.controller import api as option_ns
 from .lysErp.controller import api as lysErp_ns
 from .qualityInspection.controller import api as qualityInspection_ns
+from .machine.controller import api as machine_ns
+from .customer.controller import api as customer_ns
+from .salesQuotation.controller import api as salesQuotation_ns
 from app.api.calendar.service import CalendarService
 from app.api.lysErp.service import LyService
 from app.api.productionSchedule.service import shift_by_holiday
@@ -55,6 +58,9 @@ api.add_namespace(material_ns)
 api.add_namespace(option_ns)
 api.add_namespace(lysErp_ns)
 api.add_namespace(qualityInspection_ns)
+api.add_namespace(machine_ns)
+api.add_namespace(customer_ns)
+api.add_namespace(salesQuotation_ns)
 
 @api_bp.cli.command('update_calendar')
 def update_calendar():
