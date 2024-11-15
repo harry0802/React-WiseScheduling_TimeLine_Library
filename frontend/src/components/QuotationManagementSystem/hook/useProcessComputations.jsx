@@ -216,6 +216,7 @@ function calculateInHouseShippingInspectionCost(data) {
  * @returns {Object} - 总成本小计和每个制程的详细信息
  */
 function calculateTotalCost(processes) {
+  console.log("🚀 ~ calculateTotalCost ~ processes:", processes);
   if (!processes || processes.length === 0) {
     return {
       totalCostSubtotal: 0,
