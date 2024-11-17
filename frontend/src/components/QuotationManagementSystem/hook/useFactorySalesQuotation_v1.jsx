@@ -3,7 +3,15 @@
  * quotationStore.js
  * Zustand store 專注於本地狀態管理
  */
-import * as calculations from "./useProcessComputations_v1";
+
+import {
+  calculateInHouseMoldingCost,
+  calculateOutsourcedMoldingCost,
+  calculateInHousePostProcessingCost,
+  calculateInHouseShippingInspectionCost,
+  calculateTransportationCost,
+  calculateProfitManagement,
+} from "./useProcessComputations_v1";
 
 export const initialState = {
   // API 狀態
@@ -38,11 +46,24 @@ export const initialState = {
 
   // 成本計算結果
   calculationResults: {
-    subtotal: 0,
-    shippingTotal: 0,
-    totalBeforeOverhead: 0,
-    overheadCost: 0,
+    // 製程成本
+    costSubtotal: 0,
+    // 管理費用
+    sgAndAdminFee: 0,
+    // 利潤
+    profitFee: 0,
+    // 總成本
+    subtotalWithSGA: 0,
+    // 風險費用
+    riskFee: 0,
+    // 總成本
     totalCost: 0,
+    // 年度折扣
+    annualReductionAmount: 0,
+    // 折扣
+    rebateAmount: 0,
+    // 毛利率
+    grossProfitMargin: 0,
   },
 };
 
@@ -84,101 +105,183 @@ export const useQuotationStore = (set, get) => ({
 
   // 利潤管理
   updateProfitManagement: (profitData) =>
-    set((state) => ({
-      overheadRnd: profitData.overheadRnd ?? state.overheadRnd,
-      profit: profitData.profit ?? state.profit,
-      risk: profitData.risk ?? state.risk,
-      annualDiscount: profitData.annualDiscount ?? state.annualDiscount,
-      rebate: profitData.rebate ?? state.rebate,
-      actualQuotation: profitData.actualQuotation ?? state.actualQuotation,
-    })),
+    set((state) => {
+      const currentState = get();
+      const newTotalCost = currentState.calculationResults.costSubtotal;
+      const profitResult = calculateProfitManagement(
+        newTotalCost,
+        profitData.overheadRnd ?? state.overheadRnd,
+        profitData.profit ?? state.profit,
+        profitData.risk ?? state.risk,
+        profitData.annualDiscount ?? state.annualDiscount,
+        profitData.rebate ?? state.rebate,
+        profitData.actualQuotation ?? state.actualQuotation
+      );
+
+      return {
+        overheadRnd: profitData.overheadRnd ?? state.overheadRnd,
+        profit: profitData.profit ?? state.profit,
+        risk: profitData.risk ?? state.risk,
+        annualDiscount: profitData.annualDiscount ?? state.annualDiscount,
+        rebate: profitData.rebate ?? state.rebate,
+        actualQuotation: profitData.actualQuotation ?? state.actualQuotation,
+        calculationResults: {
+          ...profitResult,
+        },
+      };
+    }),
 
   // 重置功能
   resetAll: () => set(initialState),
 
+  // 重置計算結果
   resetCalculations: () =>
     set((state) => ({
       calculationResults: {
-        subtotal: 0,
-        shippingTotal: 0,
-        totalBeforeOverhead: 0,
-        overheadCost: 0,
+        costSubtotal: 0,
+        sgAndAdminFee: 0,
+        profitFee: 0,
+        subtotalWithSGA: 0,
+        riskFee: 0,
         totalCost: 0,
+        annualReductionAmount: 0,
+        rebateAmount: 0,
+        grossProfitMargin: 0,
       },
     })),
 
-  // 新增計算相關方法
-  calculations: {
-    computeProcessCosts: () => {
-      const { processes, shippingCosts } = get();
+  // 1. 基礎成本計算
+  calculateBaseCosts: () => {
+    const { processes } = get();
+    if (!processes?.length) return { totalCostSubtotal: 0, costDetails: [] };
 
-      if (!processes?.length) return { totalCostSubtotal: 0, costDetails: [] };
-
-      const costDetails = processes.map((process) => {
-        const calculators = {
-          "In-IJ(廠內成型)": calculations.calculateInHouseMoldingCost,
-          "Out-IJ(委外成型)": calculations.calculateOutsourcedMoldingCost,
-          "In-BE(廠內後製程)": calculations.calculateInHousePostProcessingCost,
-          "Out-BE(委外後製程)": calculations.calculateOutsourcedMoldingCost,
-          "In-TS(廠內出貨檢驗)":
-            calculations.calculateInHouseShippingInspectionCost,
-        };
-
-        const calculator = calculators[process.processCategory];
-        if (!calculator)
+    // 計算各製程成本
+    const costDetails = processes.map((process) => {
+      let result;
+      switch (process.processCategory) {
+        case "In-IJ(廠內成型)":
+          result = calculateInHouseMoldingCost(process);
+          break;
+        case "Out-IJ(委外成型)":
+        case "Out-BE(委外後製程)":
+          result = calculateOutsourcedMoldingCost(process);
+          break;
+        case "In-BE(廠內後製程)":
+          result = calculateInHousePostProcessingCost(process);
+          break;
+        case "In-TS(廠內出貨檢驗)":
+          result = calculateInHouseShippingInspectionCost(process);
+          break;
+        default:
           throw new Error(`未知的製程類別: ${process.processCategory}`);
-
-        const result = calculator(process);
-
-        return {
-          id: process.id,
-          processCategory: process.processCategory,
-          costSubtotal: result.totalCost || 0,
-          costDetails: result.details,
-        };
-      });
-
-      if (
-        shippingCosts?.SQFreights?.length ||
-        shippingCosts?.SQCustomsDuties?.length
-      ) {
-        const transportResult =
-          calculations.calculateTransportationCost(shippingCosts);
-        costDetails.push({
-          id: "transportation",
-          processCategory: "Transportation",
-          costSubtotal: transportResult.totalCost || 0,
-          costDetails: transportResult.details,
-        });
       }
 
       return {
-        totalCostSubtotal: costDetails.reduce(
-          (sum, detail) => sum + detail.costSubtotal,
-          0
-        ),
-        costDetails,
+        id: process.id,
+        processCategory: process.processCategory,
+        costSubtotal: result.totalCost || 0,
+        costDetails: result.details,
       };
-    },
+    });
 
-    calculateAll: () => {
-      const state = get();
-      const { overheadRnd } = state;
-      const { totalCostSubtotal, costDetails } =
-        state.calculations.computeProcessCosts();
-
-      const results = {
-        subtotal: totalCostSubtotal,
-        shippingTotal:
-          costDetails.find((d) => d.id === "transportation")?.costSubtotal || 0,
-        totalBeforeOverhead: totalCostSubtotal,
-        overheadCost: totalCostSubtotal * overheadRnd,
-        totalCost: totalCostSubtotal * (1 + overheadRnd),
-        costDetails,
-      };
-
-      set({ calculationResults: results });
-      return results;
-    },
+    const processTotal = costDetails.reduce(
+      (sum, detail) => sum + detail.costSubtotal,
+      0
+    );
+    return { processTotal, costDetails };
   },
+
+  // 2. 運輸成本計算
+  calculateTransportation: () => {
+    const { shippingCosts } = get();
+    return calculateTransportationCost(shippingCosts);
+  },
+
+  // 3. 總成本計算（不含利潤）
+  calculateAll: () => {
+    const baseCosts = get().calculateBaseCosts();
+    const transportCosts = get().calculateTransportation();
+    const totalCost = baseCosts.processTotal + transportCosts.totalCost;
+
+    // 更新 store
+    set({
+      calculationResults: {
+        ...get().calculationResults,
+        costSubtotal: totalCost,
+      },
+    });
+
+    return {
+      costSubtotal: totalCost,
+      costDetails: baseCosts.costDetails,
+      transportationCost: transportCosts,
+    };
+  },
+
+  // 4. 利潤計算
+  calculateProfit: () => {
+    const {
+      calculationResults,
+      overheadRnd,
+      profit,
+      risk,
+      annualDiscount,
+      rebate,
+      actualQuotation,
+    } = get();
+
+    // if parameter is 0, don't calculate
+    if (
+      overheadRnd === 0 ||
+      profit === 0 ||
+      risk === 0 ||
+      annualDiscount === 0 ||
+      rebate === 0 ||
+      actualQuotation === 0
+    ) {
+      return;
+    }
+
+    const profitResult = calculateProfitManagement(
+      calculationResults.costSubtotal,
+      overheadRnd,
+      profit,
+      risk,
+      annualDiscount,
+      rebate,
+      actualQuotation
+    );
+
+    set({ calculationResults: profitResult });
+    return profitResult;
+  },
+
+  // ! 更新利潤管理
+  setAllProfileManagement: (profileData) =>
+    set((state) => {
+      const currentState = get();
+      // newTotalCost 計算利潤管理會用到
+      const newTotalCost = currentState.calculationResults.costSubtotal;
+      const profitResult = calculateProfitManagement(
+        newTotalCost,
+        profileData.overheadRnd,
+        profileData.profit,
+        profileData.risk,
+        profileData.annualDiscount,
+        profileData.rebate,
+        profileData.actualQuotation
+      );
+
+      return {
+        overheadRnd: profileData.overheadRnd,
+        profit: profileData.profit,
+        risk: profileData.risk,
+        annualDiscount: profileData.annualDiscount,
+        rebate: profileData.rebate,
+        actualQuotation: profileData.actualQuotation,
+        calculationResults: {
+          ...profitResult,
+        },
+      };
+    }),
 });

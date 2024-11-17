@@ -59,6 +59,7 @@ function QmsPdInfo({ type }) {
     // 這裡可以添加其他更新邏輯，比如發送API請求
   }, []);
 
+  // 監聽產品ID變化，更新產品數據
   useEffect(() => {
     if (data === null || !productId) {
       navigate("/QuotationManagementSystem");

@@ -7,6 +7,11 @@ const COMMON_UNITS = [
   { value: "g", label: "g" },
   { value: "pcs", label: "pcs" },
   { value: "set", label: "set" },
+  { value: "個", label: "個" },
+  { value: "件", label: "件" },
+  { value: "磅", label: "磅" },
+  { value: "公斤", label: "公斤" },
+  { value: "公克", label: "公克" },
 ];
 /**
  * 計算原物料費用小計
@@ -78,6 +83,46 @@ const MATERIAL_TYPES = [
 4.「金額」=「單價」/「每公斤幾個」/容量
 (註:單位為「公斤」「磅」)ex:68/308/2=0.11
 */
+// function calculatePackagingCost(items) {
+//   /*
+//  {
+//       id: 7,
+//       SQProcessId: 4,
+//       packagingType: '包材',
+//       materialSN: 'H-0356-CC05',
+//       materialName: '格板375*555mm(3層)-六格籃用',
+//       unit: '件',
+//       quantity: 1,
+//       capacity: 0.0313,
+//       bagsPerKg: null,
+//       unitPrice: 3.5,
+//       amount: 3.5
+//     },
+// */
+
+//   if (!items || items.length === 0) {
+//     return {
+//       totalCost: 0,
+//       amounts: [],
+//     };
+//   }
+//   const amounts = items.map((item) => {
+//     let amount = 0;
+//     if (MATERIAL_TYPES.find((type) => type.value === item.materialType)) {
+//       amount = item.unitPrice * item.quantity;
+//     } else if (item.unit === "公斤" || item.unit === "磅") {
+//       amount = item.unitPrice / item.quantity / item.capacity;
+//     }
+//     return amount;
+//   });
+//   const totalCost = amounts.reduce((total, amount) => total + amount, 0);
+//   return {
+//     // 包材總金額
+//     totalCost,
+//     // 包材金額
+//     amounts,
+//   };
+// }
 function calculatePackagingCost(items) {
   if (!items || items.length === 0) {
     return {
@@ -85,24 +130,25 @@ function calculatePackagingCost(items) {
       amounts: [],
     };
   }
+
   const amounts = items.map((item) => {
     let amount = 0;
-    if (MATERIAL_TYPES.find((type) => type.value === item.materialType)) {
+
+    // 包材類型判斷
+    if (item.packagingType === "包材") {
       amount = item.unitPrice * item.quantity;
     } else if (item.unit === "公斤" || item.unit === "磅") {
-      amount = item.unitPrice / item.quantity / item.capacity;
+      amount = (item.unitPrice * item.quantity) / (item.capacity || 1);
     }
-    return amount;
+
+    return amount || item.amount || 0;
   });
-  const totalCost = amounts.reduce((total, amount) => total + amount, 0);
+
   return {
-    // 包材總金額
-    totalCost,
-    // 包材金額
+    totalCost: amounts.reduce((sum, amt) => sum + amt, 0),
     amounts,
   };
 }
-
 /**
  * 計算成型加工費用小計
  * !單價預設為3000
@@ -195,46 +241,41 @@ function calculateAdditionalFees(transportFees, freightAndCustomsFees) {
   // 司机工时固定为 0.3
   const driverWorkHours = 0.3;
 
-  //  計算運輸費用
+  // 計算運輸費用
   // *運輸「金額」=(運距*2*油價/預估出貨數)+司機工時
   const transportAmounts = transportFees.map((item) => {
     const amount =
-      (item.distance * 2 * item.oilPrice) / item.shipmentQuantity +
+      (item.deliveryDistance * 2 * item.fuelCostPerKM) /
+        item.estimatedShipment +
       driverWorkHours;
     return Number(amount.toFixed(3));
   });
 
-  // 運輸費用小計
   const transportSubtotal = transportAmounts.reduce(
     (total, amount) => total + amount,
     0
   );
 
   // *貨運「金額」=運費/預估出貨數
-  // 計算貨運與關稅費用
   const freightAmounts = freightAndCustomsFees.map((item) => {
-    const amount = item.freightCost / item.estimatedShipment;
+    const amount = item.freight / item.estimatedShipment;
     return Number(amount.toFixed(3));
   });
-  // 貨運與關稅費用小計
+
   const freightSubtotal = freightAmounts.reduce(
     (total, amount) => total + amount,
     0
   );
-  // 附加費用小計 = 運輸費用小計 + 貨運與關稅費用小計
+
   const totalAdditionalFees = Number(
     (transportSubtotal + freightSubtotal).toFixed(3)
   );
 
   return {
-    // 附加費用總金額
     totalCost: totalAdditionalFees,
-    // 個別小計
     transportSubtotal,
     freightSubtotal,
-    // 貨運與關稅金額
     freightAmounts,
-    // 運輸費用金額
     transportAmounts,
   };
 }

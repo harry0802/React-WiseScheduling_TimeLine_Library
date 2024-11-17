@@ -7,7 +7,7 @@ import { ProcessCostAnalysis } from "../../components/ProcessCostAnalysis";
 import { useEffect, useState } from "react";
 import { useBusinessQuotationStore } from "../../slice/useFactorySalesQuotationSlice_v1";
 import quotationData from "../../data/realdataStructure";
-import { useQuotationComputation } from "../../hook/useProcessComputations_v1";
+import { Spin } from "antd";
 
 const breadcrumbs = [
   { to: "/SalesQuotationManagementSystem", label: "編輯產品資訊 " },
@@ -23,34 +23,66 @@ function QmsAddtions() {
     removeProcess,
     updateProfitManagement,
     resetAll,
+    calculateAll,
+    calculateProfit,
+    updateStore,
+    actualQuotation,
   } = useBusinessQuotationStore();
-  const { calculateAll } = useQuotationComputation();
-  useEffect(() => {
-    // 先重置所有數據
-    resetAll();
 
-    // 然後設置新數據
-    if (quotationData) {
-      console.log("🚀 ~ useEffect ~ quotationData:", quotationData);
-      if (!Array.isArray(quotationData)) {
-        addProcess(quotationData);
-      } else {
-        quotationData.forEach((process) => addProcess(process));
+  const [loading, setLoading] = useState(false);
+
+  // 初始化數據
+  useEffect(() => {
+    setLoading(true);
+    resetAll();
+    const fetchData = async () => {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        if (quotationData) {
+          const { processes, ...restData } = quotationData;
+          updateStore(restData);
+          processes.forEach((process) => addProcess(process));
+          // 初始化時計算所有成本和利潤
+          const costResult = calculateAll();
+          calculateProfit();
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
-      console.log("🚀 ~ QmsAddtions ~ processes:", processes);
-      //  計算所有成本
+    };
+    fetchData();
+  }, []);
+
+  // 監聽製程變化，重新計算成本
+  useEffect(() => {
+    if (processes.length > 0) {
+      const timer = setTimeout(() => {
+        const costResult = calculateAll();
+        calculateProfit();
+      }, 300);
+
+      return () => clearTimeout(timer);
     }
-  }, []); // 只在組件掛載時執行一次
-  return null;
+  }, [processes]);
+
+  if (loading) {
+    return <Spin size="large" />;
+  }
+
   return (
     <ProductAddtionLayout breadcrumbs={breadcrumbs}>
-      <QmsDashbord costAndQuotation={calculationResults} />
+      <QmsDashbord
+        costAndQuotation={{ ...calculationResults, actualQuotation }}
+      />
       <QmsPdInfo type="sales" />
       <QmsProfitDashboard
-        totalCostnoMarketing={calculationResults.totalBeforeOverhead}
+        totalCostnoMarketing={calculationResults.costSubtotal}
         setCostAndQuotation={updateProfitManagement}
       />
-      <ProcessCostAnalysis
+      {/* <ProcessCostAnalysis
         icon={<AddIcon />}
         quotationSlice={{
           processData: processes,
@@ -58,9 +90,8 @@ function QmsAddtions() {
           costAndQuotation: calculationResults,
           setCostAndQuotation: updateProfitManagement,
         }}
-      />
+      /> */}
     </ProductAddtionLayout>
   );
 }
-
 export default QmsAddtions;
