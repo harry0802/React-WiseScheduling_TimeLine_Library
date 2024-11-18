@@ -16,11 +16,8 @@ const breadcrumbs = [
 
 function QmsAddtions() {
   const {
-    processes,
     calculationResults,
-    updateProcess,
     addProcess,
-    removeProcess,
     updateProfitManagement,
     resetAll,
     calculateAll,
@@ -34,18 +31,27 @@ function QmsAddtions() {
   // 初始化數據
   useEffect(() => {
     setLoading(true);
-    resetAll();
     const fetchData = async () => {
       try {
         await new Promise((resolve) => setTimeout(resolve, 1000));
-
         if (quotationData) {
+          resetAll();
           const { processes, ...restData } = quotationData;
           updateStore(restData);
           processes.forEach((process) => addProcess(process));
-          // 初始化時計算所有成本和利潤
-          const costResult = calculateAll();
-          calculateProfit();
+
+          // 合并计算,避免多次触发状态更新
+          const results = calculateAll();
+          const profitResults = calculateProfit();
+
+          // 一次性更新所有状态
+          updateStore({
+            ...restData,
+            calculationResults: {
+              ...results,
+              ...profitResults,
+            },
+          });
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -53,20 +59,9 @@ function QmsAddtions() {
         setLoading(false);
       }
     };
+
     fetchData();
-  }, []);
-
-  // 監聽製程變化，重新計算成本
-  useEffect(() => {
-    if (processes.length > 0) {
-      const timer = setTimeout(() => {
-        const costResult = calculateAll();
-        calculateProfit();
-      }, 300);
-
-      return () => clearTimeout(timer);
-    }
-  }, [processes]);
+  }, []); // 添加依赖
 
   if (loading) {
     return <Spin size="large" />;
@@ -81,16 +76,12 @@ function QmsAddtions() {
       <QmsProfitDashboard
         totalCostnoMarketing={calculationResults.costSubtotal}
         setCostAndQuotation={updateProfitManagement}
+        BusinessQuotationStore={useBusinessQuotationStore}
       />
-      {/* <ProcessCostAnalysis
+      <ProcessCostAnalysis
         icon={<AddIcon />}
-        quotationSlice={{
-          processData: processes,
-          setData: updateProcess,
-          costAndQuotation: calculationResults,
-          setCostAndQuotation: updateProfitManagement,
-        }}
-      /> */}
+        quotationSlice={useBusinessQuotationStore}
+      />
     </ProductAddtionLayout>
   );
 }

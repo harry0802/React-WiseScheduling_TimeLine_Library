@@ -1,6 +1,5 @@
 import React from "react";
 import DynamicForm from "../../../../Global/form/DynamicForm";
-
 const ProcessTypeSelection = React.memo(({ fields, onChange }) => (
   <>
     {fields.map((field) => (

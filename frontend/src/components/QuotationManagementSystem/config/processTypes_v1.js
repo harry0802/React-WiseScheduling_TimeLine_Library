@@ -1,4 +1,4 @@
-import { createField, commonFields, commonSections } from "./commonConfigs";
+import { createField, commonFields, commonSections } from "./commonConfigs_v1";
 
 /**
  * 系統架構說明：
@@ -168,6 +168,11 @@ export const FORM_CONFIGURATIONS = {
       "檢驗費用",
       commonSections.internalProcessingCosts.fields
     ),
+  ]),
+
+  TRANSPORTATION: new FormSection("運輸費用與貨運關稅", [
+    new TodoListFormItem("運輸費用", commonSections.freightCosts.fields),
+    new TodoListFormItem("貨運關稅", commonSections.customsDutyCosts.fields),
   ]),
 };
 

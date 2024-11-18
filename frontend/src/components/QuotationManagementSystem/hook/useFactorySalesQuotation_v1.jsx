@@ -108,23 +108,23 @@ export const useQuotationStore = (set, get) => ({
     set((state) => {
       const currentState = get();
       const newTotalCost = currentState.calculationResults.costSubtotal;
+
       const profitResult = calculateProfitManagement(
         newTotalCost,
-        profitData.overheadRnd ?? state.overheadRnd,
-        profitData.profit ?? state.profit,
-        profitData.risk ?? state.risk,
-        profitData.annualDiscount ?? state.annualDiscount,
-        profitData.rebate ?? state.rebate,
-        profitData.actualQuotation ?? state.actualQuotation
+        profitData.overheadRnd,
+        profitData.profit,
+        profitData.risk,
+        profitData.annualDiscount,
+        profitData.rebate,
+        profitData.actualQuotation
       );
-
       return {
-        overheadRnd: profitData.overheadRnd ?? state.overheadRnd,
-        profit: profitData.profit ?? state.profit,
-        risk: profitData.risk ?? state.risk,
-        annualDiscount: profitData.annualDiscount ?? state.annualDiscount,
-        rebate: profitData.rebate ?? state.rebate,
-        actualQuotation: profitData.actualQuotation ?? state.actualQuotation,
+        overheadRnd: profitData.overheadRnd,
+        profit: profitData.profit,
+        risk: profitData.risk,
+        annualDiscount: profitData.annualDiscount,
+        rebate: profitData.rebate,
+        actualQuotation: profitData.actualQuotation,
         calculationResults: {
           ...profitResult,
         },
@@ -243,14 +243,16 @@ export const useQuotationStore = (set, get) => ({
     }
 
     const profitResult = calculateProfitManagement(
-      calculationResults.costSubtotal,
-      overheadRnd,
-      profit,
-      risk,
-      annualDiscount,
-      rebate,
-      actualQuotation
+      +calculationResults.costSubtotal,
+      +overheadRnd,
+      +profit,
+      +risk,
+      +annualDiscount,
+      +rebate,
+      +actualQuotation
     );
+
+    console.log("🚀 ~ useQuotationStore ~ profitResult:", profitResult);
 
     set({ calculationResults: profitResult });
     return profitResult;
@@ -278,7 +280,7 @@ export const useQuotationStore = (set, get) => ({
         risk: profileData.risk,
         annualDiscount: profileData.annualDiscount,
         rebate: profileData.rebate,
-        actualQuotation: profileData.actualQuotation,
+        actualQuotation: profileData.actualQuotation ?? 0,
         calculationResults: {
           ...profitResult,
         },

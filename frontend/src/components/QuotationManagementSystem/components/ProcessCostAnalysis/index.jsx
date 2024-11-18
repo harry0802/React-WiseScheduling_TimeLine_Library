@@ -1,10 +1,8 @@
+import { useState, useMemo, useEffect } from "react";
 import ProcessList from "./components/ProcessList";
 import ProductContextCard from "../../../ProductionRecord/utility/ProductContextCard";
 import ProcessDrawer from "./components/ProcessDrawer";
 import TransportationProcessItem from "../TransportationProcessItem";
-import { transportationProcessData } from "../../data/processCostAnalysisData";
-import { useState, useMemo, useEffect } from "react";
-import { calculateTotalCost } from "../../hook/useProcessComputations";
 
 export function ProcessCostAnalysis({
   title = "各製程物料與加工成本分析",
@@ -12,53 +10,62 @@ export function ProcessCostAnalysis({
   quotationSlice,
 }) {
   const {
-    processData,
-    setData: updateProcess,
-    costAndQuotation,
-    setCostAndQuotation,
-  } = quotationSlice;
+    processes, // 從 store 取得製程列表
+    updateProcess, // 更新製程方法
+    addProcess, // 新增製程方法
+    removeProcess, // 刪除製程方法
+    calculateBaseCosts, // 計算基礎成本
+    calculateAll, // 計算總成本
+    calculationResults, // 成本計算結果
+    id,
+    shippingCosts,
+  } = quotationSlice();
 
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
 
   // 處理製程更新
   const handleUpdate = (updatedProcess) => {
-    const newProcesses = processData.map((process) =>
-      process.id === updatedProcess.id ? updatedProcess : process
-    );
-    updateProcess(newProcesses);
+    updateProcess(updatedProcess.id, updatedProcess);
+    // 重新計算成本
+    calculateAll();
   };
 
   // 處理製程刪除
   const handleDelete = (processId) => {
-    const newProcesses = processData.filter(
-      (process) => process.id !== processId
-    );
-    updateProcess(newProcesses);
+    removeProcess(processId);
+    // 重新計算成本
+    calculateAll();
   };
 
   // 處理新增製程
   const handleAdd = (newProcess) => {
-    updateProcess([...processData, newProcess]);
+    addProcess({
+      id: processes.length + 1,
+      salesQuotationId: id,
+      processCategory: newProcess.processCategory,
+      processSN: newProcess.processSN,
+      processName: newProcess.processName,
+      SQMaterialCostSetting: {
+        estimatedDefectRate: 0,
+        estimatedMaterialFluctuation: 0,
+        extractionCost: 0,
+        processingCost: 0,
+      },
+      SQMaterialCosts: newProcess.SQMaterialCosts || [],
+      SQPackagingCosts: newProcess.SQPackagingCosts || [],
+      SQInjectionMoldingCosts: newProcess.SQInjectionMoldingCosts || [],
+      SQInPostProcessingCosts: newProcess.SQInPostProcessingCosts || [],
+      SQOutPostProcessingCosts: newProcess.SQOutPostProcessingCosts || [],
+    });
     setIsNewDrawerOpen(false);
+    // 重新計算成本
+    calculateAll();
   };
 
-  // 計算成本結果
-  const costResult = useMemo(() => {
-    return calculateTotalCost(
-      processData.map((process) => ({
-        processCategory: process.processType,
-        data: process,
-      }))
-    );
-  }, [processData]);
-
-  // 更新成本
-  useEffect(() => {
-    if (!costResult || !setCostAndQuotation) return;
-    setCostAndQuotation({
-      base: costResult.totalCostSubtotal,
-    });
-  }, [costResult, setCostAndQuotation]);
+  // 計算各製程成本詳情
+  const processCostDetails = useMemo(() => {
+    return calculateBaseCosts().costDetails;
+  }, [processes, calculateBaseCosts]);
 
   return (
     <ProductContextCard
@@ -66,13 +73,17 @@ export function ProcessCostAnalysis({
       icon={icon}
       OnClick={() => setIsNewDrawerOpen(true)}
     >
-      <ProcessList
-        processes={processData}
-        costResult={costResult}
+      {/* <ProcessList
+        processes={processes}
+        costResult={{
+          costDetails: processCostDetails,
+          totalCostSubtotal: calculationResults.costSubtotal,
+        }}
         onUpdate={handleUpdate}
         onDelete={handleDelete}
-      />
-      <TransportationProcessItem process={transportationProcessData} />
+      /> */}
+      <TransportationProcessItem process={shippingCosts} />
+
       {isNewDrawerOpen && (
         <ProcessDrawer
           isNew={true}

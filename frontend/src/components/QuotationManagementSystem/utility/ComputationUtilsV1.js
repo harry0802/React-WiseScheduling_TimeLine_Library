@@ -312,6 +312,7 @@ function calculateProfitManagement(
   rebatePercentage = 0.02,
   actualQuotation
 ) {
+  console.log("🚀 ~ costSubtotal:", costSubtotal);
   // 轉換所有百分比為小數形式
   const sgAndAdminRate = convertToDecimalPercentage(sgAndAdminPercentage);
   const profitRate = convertToDecimalPercentage(profitPercentage);

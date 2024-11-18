@@ -2,7 +2,7 @@
 import React from "react";
 import { Typography, Box } from "@mui/material";
 import QmsCasTable from "../../Global/table/QmsCasTable";
-import { PROCESS_TABLE_CONFIG } from "../config/ProcessTableConfig";
+import { PROCESS_TABLE_CONFIG } from "../config/ProcessTableConfig_V1";
 import styled from "styled-components";
 
 //  使用 styled-components 來設定 總成本統計
@@ -147,6 +147,7 @@ const TableDataHandler = {
 
 // * 主要組件
 const ProcessTable = ({ processType, formData, costDetail }) => {
+  console.log("🚀 ~ ProcessTable ~ formData:", formData);
   const config = PROCESS_TABLE_CONFIG[processType];
   if (!config) return null;
 

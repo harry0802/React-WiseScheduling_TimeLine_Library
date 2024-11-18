@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { useProcessForm } from "../../../hook/useProcessForm";
 import { DeleteButton } from "./DeleteButton";
-import { PROCESS_TYPES } from "../../../config/processTypes";
+import { PROCESS_TYPES } from "../../../config/processTypes_v1";
 import BaseDrawer from "../../../../Global/Drawer/BaseDrawer";
 import ProcessForm from "../../ProcessForms/index";
 
@@ -17,7 +16,6 @@ function ProcessDrawer({
   const { methods, handleSubmit } = useProcessForm({
     initialData: process,
   });
-
   return (
     <BaseDrawer visible={visible} onClose={onClose}>
       <BaseDrawer.Header>

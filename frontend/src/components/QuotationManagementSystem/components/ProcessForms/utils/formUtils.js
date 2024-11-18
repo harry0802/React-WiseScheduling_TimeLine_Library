@@ -3,7 +3,7 @@ import DynamicForm from "../../../../Global/form/DynamicForm";
 import CustomTodoList from "../../CustomTodoList";
 import { Divider } from "@mui/material";
 import FormItems from "../components/FormItems";
-import { PROCESS_TYPES } from "../../../config/processTypes";
+import { PROCESS_TYPES } from "../../../config/processTypes_v1";
 
 export const renderGeneralFields = (item, sectionIndex) => {
   if (Array.isArray(item.fields[0])) {

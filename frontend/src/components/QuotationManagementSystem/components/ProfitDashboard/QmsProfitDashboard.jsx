@@ -1,16 +1,17 @@
+// QmsProfitDashboard.jsx
 import React from "react";
 import { ProfitGrid } from "./ProfitGrid";
 import { FORM_FIELDS } from "./constants";
 import { useProfitCalculation } from "../../hook/useProfitCalculation";
 import BaseProductInfoSection from "../../../Global/sections/BaseProductInfoSection";
 
-function QmsProfitDashboard({ totalCostnoMarketing, setCostAndQuotation }) {
+function QmsProfitDashboard({ BusinessQuotationStore }) {
   const { profitData, quotationAmount, percentages, handleFormSubmit } =
-    useProfitCalculation(setCostAndQuotation, totalCostnoMarketing);
+    useProfitCalculation(BusinessQuotationStore);
 
   const defaultValues = {
     quotationAmount,
-    ...percentages,
+    ...percentages, // 已經轉換為百分比格式
   };
 
   return (

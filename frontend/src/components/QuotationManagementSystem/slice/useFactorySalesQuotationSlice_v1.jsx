@@ -19,6 +19,7 @@ const internalInitialState = {
   requestPerson: "",
 };
 
+// 業務報價管理系統
 export const useBusinessQuotationStore = create(
   persist(
     (set, get) => ({
@@ -32,6 +33,7 @@ export const useBusinessQuotationStore = create(
   )
 );
 
+// 內部報價管理系統
 export const useInternalQuotationStore = create(
   persist(
     (set, get) => ({

@@ -2,15 +2,16 @@ import { useForm } from "react-hook-form";
 import { Tab, Tabs } from "@mui/material";
 import DynamicForm from "../../../Global/form/DynamicForm";
 import CustomTodoList from "../CustomTodoList";
-import { FORM_CONFIGURATIONS, PROCESS_TYPES } from "../../config/processTypes";
+import { FORM_CONFIGURATIONS } from "../../config/processTypes_v1";
 import { useEffect } from "react";
 
 function TransportationForm({ initialData, onSubmit, setFormMethods }) {
   const methods = useForm({
     defaultValues: {
-      processType: PROCESS_TYPES.TRANSPORTATION.key,
+      processType: "TRANSPORTATION",
       activeTab: 0,
-      ...initialData,
+      SQFreights: initialData?.SQFreights || [],
+      SQCustomsDuties: initialData?.SQCustomsDuties || [],
     },
   });
 
@@ -20,7 +21,8 @@ function TransportationForm({ initialData, onSubmit, setFormMethods }) {
 
   const { watch, setValue } = methods;
   const activeTab = watch("activeTab") || 0;
-  const formConfig = FORM_CONFIGURATIONS[PROCESS_TYPES.TRANSPORTATION.key];
+
+  const formConfig = FORM_CONFIGURATIONS.TRANSPORTATION;
   const sections = formConfig.items || [];
 
   const handleTabChange = (_, newValue) => {
@@ -45,7 +47,9 @@ function TransportationForm({ initialData, onSubmit, setFormMethods }) {
           activeTab === index && (
             <CustomTodoList
               key={section.title}
-              name={`todoItems_${section.title}`}
+              name={
+                section.title === "運輸費用" ? "SQFreights" : "SQCustomsDuties"
+              }
               fields={section.items}
               renderField={(fieldProps) => (
                 <DynamicForm.Field {...fieldProps} />

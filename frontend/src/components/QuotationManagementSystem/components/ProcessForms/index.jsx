@@ -7,26 +7,29 @@ import DynamicForm from "../../../Global/form/DynamicForm";
 
 const ProcessForm = React.memo(({ initialData, onSubmit, methods }) => {
   const {
-    processType,
+    processCategory,
     activeTab,
     formConfig,
     selectionFields,
     handleTabChange,
-    handleProcessTypeChange,
   } = useProcessForm({
     initialData,
     externalMethods: methods,
   });
 
+  const cleanedSelectionFields = React.useMemo(() => {
+    return selectionFields.map((field) => {
+      const { getDependentOptions, dependsOn, ...rest } = field;
+      return rest;
+    });
+  }, [selectionFields]);
+
   const sections = formConfig.items || [];
 
   return (
     <DynamicForm externalMethods={methods} onFinish={onSubmit}>
-      <ProcessTypeSelection
-        fields={selectionFields}
-        onChange={handleProcessTypeChange}
-      />
-      {processType && (
+      <ProcessTypeSelection fields={cleanedSelectionFields} />
+      {processCategory && (
         <ProcessSections
           sections={sections}
           activeTab={activeTab}
