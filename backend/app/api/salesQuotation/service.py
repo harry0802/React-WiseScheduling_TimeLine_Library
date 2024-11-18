@@ -179,7 +179,7 @@ def complete_SQInjectionMoldingCost(db_obj, payload):
 def complete_SQInPostProcessingCost(db_obj, payload):
     db_obj.SQProcessId = int(payload["SQProcessId"]) \
         if payload.get("SQProcessId") is not None else db_obj.SQProcessId
-    db_obj.workSecond = int(payload["workSecond"]) \
+    db_obj.workSecond = float(payload["workSecond"]) \
         if payload.get("workSecond") is not None else db_obj.workSecond
     db_obj.unitPrice = float(payload["unitPrice"]) \
         if payload.get("unitPrice") is not None else db_obj.unitPrice

@@ -174,7 +174,7 @@ def upgrade():
     op.create_table('SQInPostProcessingCost',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('SQProcessId', sa.Integer(), nullable=False, comment='對應的報價製程ID'),
-    sa.Column('workSecond', sa.Integer(), nullable=True, comment='工時(秒)'),
+    sa.Column('workSecond', sa.Float(), nullable=True, comment='工時(秒)'),
     sa.Column('unitPrice', sa.Float(), nullable=True, comment='單價'),
     sa.Column('amount', sa.Float(), nullable=True, comment='金額'),
     sa.ForeignKeyConstraint(['SQProcessId'], ['SQProcess.id'], ),

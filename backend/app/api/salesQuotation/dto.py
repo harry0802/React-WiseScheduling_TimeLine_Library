@@ -61,7 +61,7 @@ class SalesQuotationDto:
     SQInPostProcessingCost_obj = {
         "id": NullableInteger(required=False, description="SQInPostProcessingCost table primary key", example=1),
         "SQProcessId": fields.Integer(required=True, description="對應的報價製程ID", example=1),
-        "workSecond": fields.Integer(required=False, description="工時(秒)", example=1),
+        "workSecond": fields.Float(required=False, description="工時(秒)", example=0.1),
         "unitPrice": fields.Float(required=False, description="單價", example=0.1),
         "amount": fields.Float(required=False, description="金額", example=0.1),
     }

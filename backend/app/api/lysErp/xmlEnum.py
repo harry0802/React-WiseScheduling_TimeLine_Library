@@ -17,6 +17,7 @@ class DataKind(Enum):
         0000AH=廠內組合單 (FactoryCombinationOrder) \n
         0000AI=加工組合單 (ProcessingCombinationOrder) \n
         0000AJ=代工組合單 (SubcontractingCombinationOrder) \n
+        0000AO=進貨單 (PurchaseOrder) \n
         0000B6=入庫單 (WarehouseReceipt) \n
         0000B7=出庫單 (OutboundOrder) \n
         0000BJ=廠內退料單 (FactoryReturnOrder) \n
@@ -38,6 +39,7 @@ class DataKind(Enum):
     FactoryCombinationOrder = '0000AH'
     ProcessingCombinationOrder = '0000AI'
     SubcontractingCombinationOrder = '0000AJ'
+    PurchaseOrder = '0000AO'
     WarehouseReceipt = '0000B6'
     OutboundOrder = '0000B7'
     FactoryReturnOrder = '0000BJ'
@@ -236,3 +238,17 @@ class Ixmlda0000AB_Title(Enum):
     MP_CHECKER2 = 'MP_CHECKER2'
     MP_CHKDTE2 = 'MP_CHKDTE2'
 
+class Ixmlda0000AO_Detail(Enum):
+    """
+        SD_DATE         	datetime	8	貨單日期            
+        SD_NO           	nvarchar	22	貨單編號            
+        SD_SKNO         	nvarchar	30	貨品編號            
+        SD_NAME         	nvarchar	60	品名            
+        SD_PRICE        	float	8	單價   
+    """
+    SD_DATE = 'SD_DATE'
+    SD_NO = 'SD_NO'
+    SD_SKNO = 'SD_SKNO'
+    SD_NAME = 'SD_NAME'
+    SD_PRICE = 'SD_PRICE'
+    
