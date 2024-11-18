@@ -3,11 +3,11 @@ Column = db.Column
 Model = db.Model 
 
 
-class SQPackagingCost(Model):
-    """業務報價中的包材費用資訊"""
-    __tablename__ = "SQPackagingCost"
+class FQPackagingCost(Model):
+    """廠內報價中的包材費用資訊"""
+    __tablename__ = "FQPackagingCost"
     id = Column(db.Integer, primary_key=True)
-    SQProcessId = Column(db.Integer, db.ForeignKey('SQProcess.id'), nullable=False, comment='對應的報價製程ID')
+    FQProcessId = Column(db.Integer, db.ForeignKey('FQProcess.id'), nullable=False, comment='對應的報價製程ID')
     packagingType = Column(db.String(50), comment='包材種類')
     materialSN = Column(db.String(255), comment='物料編碼')
     materialName = Column(db.String(255), comment='物料名稱')
@@ -21,7 +21,7 @@ class SQPackagingCost(Model):
 
 
     def __init__(self, **kwargs):
-        super(SQPackagingCost, self).__init__(**kwargs)
+        super(FQPackagingCost, self).__init__(**kwargs)
 
     def __repr__(self):
         return f"<包材種類:{self.packagingType}>"

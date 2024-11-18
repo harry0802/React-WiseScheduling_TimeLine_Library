@@ -46,3 +46,16 @@ if LY_ERP_ON.lower() == "true":
             except Exception as error:
                 current_app.logger.error(error)
 
+    @scheduler.task(
+    "cron",
+    id="sync_ly_0000AO",
+    hour='*',
+    max_instances=1,
+    )
+    def sync_ly_0000AO():
+        with scheduler.app.app_context():
+            try:
+                LyService.sync_ly_0000AO()
+            except Exception as error:
+                current_app.logger.error(error)
+

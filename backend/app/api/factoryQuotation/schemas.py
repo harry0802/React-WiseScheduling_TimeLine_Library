@@ -2,18 +2,18 @@
 from marshmallow import Schema, fields
 
 
-class SQMaterialCostSettingSchema(Schema):
+class FQMaterialCostSettingSchema(Schema):
     id = fields.Integer(dump_only=True)
-    SQProcessId = fields.Integer(required=True)
+    FQProcessId = fields.Integer(required=True)
     estimatedDefectRate = fields.Float(required=False)
     estimatedMaterialFluctuation = fields.Float(required=False)
     extractionCost = fields.Float(required=False)
     processingCost = fields.Float(required=False)
 
 
-class SQMaterialCostSchema(Schema):
+class FQMaterialCostSchema(Schema):
     id = fields.Integer(dump_only=True)
-    SQProcessId = fields.Integer(required=True)
+    FQProcessId = fields.Integer(required=True)
     materialOptionId = fields.Integer(required=False)
     materialSN = fields.String(required=False)
     materialName = fields.String(required=False)
@@ -23,9 +23,9 @@ class SQMaterialCostSchema(Schema):
     amount = fields.Float(required=False)
 
 
-class SQPackagingCostSchema(Schema):
+class FQPackagingCostSchema(Schema):
     id = fields.Integer(dump_only=True)
-    SQProcessId = fields.Integer(required=True)
+    FQProcessId = fields.Integer(required=True)
     packagingType = fields.String(required=False)
     materialSN = fields.String(required=False)
     materialName = fields.String(required=False)
@@ -37,9 +37,9 @@ class SQPackagingCostSchema(Schema):
     amount = fields.Float(required=False)
 
 
-class SQInjectionMoldingCostSchema(Schema):
+class FQInjectionMoldingCostSchema(Schema):
     id = fields.Integer(dump_only=True)
-    SQProcessId = fields.Integer(required=True)
+    FQProcessId = fields.Integer(required=True)
     machineId = fields.Integer(required=False)
     workHoursRatio = fields.Float(required=False)
     defectiveRate = fields.Float(required=False)
@@ -52,24 +52,24 @@ class SQInjectionMoldingCostSchema(Schema):
     electricityCost = fields.Float(required=False)
 
 
-class SQInPostProcessingCostSchema(Schema):
+class FQInPostProcessingCostSchema(Schema):
     id = fields.Integer(dump_only=True)
-    SQProcessId = fields.Integer(required=True)
+    FQProcessId = fields.Integer(required=True)
     workSecond = fields.Float(required=False)
     unitPrice = fields.Float(required=False)
     amount = fields.Float(required=False)
 
 
-class SQOutPostProcessingCostSchema(Schema):
+class FQOutPostProcessingCostSchema(Schema):
     id = fields.Integer(dump_only=True)
-    SQProcessId = fields.Integer(required=True)
+    FQProcessId = fields.Integer(required=True)
     unitPrice = fields.Float(required=False)
     amount = fields.Float(required=False)
 
 
-class SQFreightSchema(Schema):
+class FQFreightSchema(Schema):
     id = fields.Integer(dump_only=True)
-    salesQuotationId = fields.Integer(required=True)
+    factoryQuotationId = fields.Integer(required=True)
     deliveryDistance = fields.Float(required=False)
     driverWorkHours = fields.Float(required=False)
     fuelCostPerKM = fields.Float(required=False)
@@ -77,38 +77,39 @@ class SQFreightSchema(Schema):
     amount = fields.Float(required=False)
 
 
-class SQCustomsDutySchema(Schema):
+class FQCustomsDutySchema(Schema):
     id = fields.Integer(dump_only=True)
-    salesQuotationId = fields.Integer(required=True)
+    factoryQuotationId = fields.Integer(required=True)
     feeType = fields.String(required=False)
     freight = fields.Float(required=False)
     estimatedShipment = fields.Integer(required=False)
     amount = fields.Float(required=False)
 
 
-class SQProcessSchema(Schema):
+class FQProcessSchema(Schema):
     id = fields.Integer(dump_only=True)
-    salesQuotationId = fields.Integer(required=True)
+    factoryQuotationId = fields.Integer(required=True)
     processOptionId = fields.Integer(required=True)
     processCategory = fields.String(required=False)
     processSN = fields.String(required=False)
     processName = fields.String(required=False)
-    SQMaterialCostSetting = fields.Nested(SQMaterialCostSettingSchema)
-    SQMaterialCosts = fields.List(fields.Nested(SQMaterialCostSchema))
-    SQPackagingCosts = fields.List(fields.Nested(SQPackagingCostSchema))
-    SQInjectionMoldingCosts = fields.List(fields.Nested(SQInjectionMoldingCostSchema))
-    SQInPostProcessingCosts = fields.List(fields.Nested(SQInPostProcessingCostSchema))
-    SQOutPostProcessingCosts = fields.List(fields.Nested(SQOutPostProcessingCostSchema))
+    FQMaterialCostSetting = fields.Nested(FQMaterialCostSettingSchema)
+    FQMaterialCosts = fields.List(fields.Nested(FQMaterialCostSchema))
+    FQPackagingCosts = fields.List(fields.Nested(FQPackagingCostSchema))
+    FQInjectionMoldingCosts = fields.List(fields.Nested(FQInjectionMoldingCostSchema))
+    FQInPostProcessingCosts = fields.List(fields.Nested(FQInPostProcessingCostSchema))
+    FQOutPostProcessingCosts = fields.List(fields.Nested(FQOutPostProcessingCostSchema))
    
 class ShippingCostSchema(Schema):
-    SQFreights = fields.List(fields.Nested(SQFreightSchema))
-    SQCustomsDuties = fields.List(fields.Nested(SQCustomsDutySchema))
+    FQFreights = fields.List(fields.Nested(FQFreightSchema))
+    FQCustomsDuties = fields.List(fields.Nested(FQCustomsDutySchema))
 
-class SalesQuotationSchema(Schema):
+class FactoryQuotationSchema(Schema):
     id = fields.Integer(dump_only=True)
     quotationSN = fields.String(required=False)
     createDate = fields.DateTime(required=False)
     customerName = fields.String(required=False)
+    productSN = fields.String(required=False)
     productName = fields.String(required=False)
     overheadRnd = fields.Float(required=False)
     profit = fields.Float(required=False)
@@ -116,6 +117,6 @@ class SalesQuotationSchema(Schema):
     annualDiscount = fields.Float(required=False)
     rebate = fields.Float(required=False)
     actualQuotation = fields.Float(required=False)
-    processes = fields.List(fields.Nested(SQProcessSchema))
+    processes = fields.List(fields.Nested(FQProcessSchema))
     shippingCosts = fields.Nested(ShippingCostSchema)
 

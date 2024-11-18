@@ -4,6 +4,7 @@ from app import db
 import requests
 from app.api.product.service import productService
 from app.api.material.service import materialService
+
 from flask import current_app
 from app.utils_log import message, err_resp, internal_err_resp
 from app.models.product import Product
@@ -11,7 +12,8 @@ from app.models.material import Material
 from app.models.ly00000RTitle import LY00000RTitle
 from app.models.ly00000RDetail import LY00000RDetail
 from app.models.ly0000AB import LY0000AB
-from app.api.lysErp.xmlEnum import DataKind, Ixmlda00000R_Title, Ixmlda00000R_Detail, Ixmlda0000AB_Title
+from app.models.ly0000AO import LY0000AODetail
+from app.api.lysErp.xmlEnum import DataKind, Ixmlda00000R_Title, Ixmlda00000R_Detail, Ixmlda0000AB_Title, Ixmlda0000AO_Detail
 from app.api.lysErp.xmlRequest import LyDataOutRequestParameter, LyGetPassKeyRequest, LyDataOutRequest
 from app.api.lysErp.xmlParser import parse_LyGetPassKey, parse_LyDataOut
 import xml.etree.ElementTree as ET
@@ -51,7 +53,7 @@ def call_LyDataOut(lyDataOutRequestParameter) -> str:
     """
     try:
         lyDataOutRequestParameter.ikye = call_LyGetPassKey()
-        lyDataOutRequestParameter.icpno = os.getenv("LY_ERP_ICPNO","103") #公司代號
+        lyDataOutRequestParameter.icpno = os.getenv("LY_ERP_ICPNO","00") #公司代號
         ly = LyDataOutRequest(lyDataOutRequestParameter)
         payload = ly.__str__()
         headers = {
@@ -63,6 +65,7 @@ def call_LyDataOut(lyDataOutRequestParameter) -> str:
         return result
     except Exception as error:
         raise error
+
 
 def call_LyDataOut_00000R_Title(lyDataOutRequestParameter) -> list[LY00000RTitle]:
     """利用轉出資料API取得產品結構抬頭檔(產品)
@@ -82,6 +85,7 @@ def call_LyDataOut_00000R_Title(lyDataOutRequestParameter) -> list[LY00000RTitle
                     ly00000R_title_db.__setattr__(key.name, element.text)
             ly00000R_title_db_list.append(ly00000R_title_db)
     return ly00000R_title_db_list
+
 
 def insert_00000R_title_into_product_table(ly00000R_title_db_list):
     try:
@@ -173,8 +177,15 @@ def call_LyDataOut_0000AB(lyDataOutRequestParameter) -> list[LY0000AB]:
     return ly0000AB_db_list
 
 
-# get the last MP_NO from the database
 def get_last_mp_no_from_0000AB() -> str:
+    """get the last MP_NO from the database
+
+    Raises:
+        error: _description_
+
+    Returns:
+        str: _description_
+    """
     try:
         select_result = db.session.execute(
             db.select(LY0000AB)
@@ -202,9 +213,9 @@ def insert_0000AB(ly0000AB_db_list):
         db.session.commit()
     except Exception as error:
         raise error
-    
 
-def delete_0000AB_within_six_months():
+
+def delete_0000AB_older_than_six_months():
     try:
         delete_0000AB_list = db.session.execute(db.select(LY0000AB).filter(LY0000AB.MP_DATE < db.func.date_sub(db.func.current_date(), db.text("INTERVAL 6 MONTH")))).scalars()
         for delete_0000AB in delete_0000AB_list:
@@ -212,7 +223,55 @@ def delete_0000AB_within_six_months():
         db.session.commit()
     except Exception as error:
         raise error
+    
 
+def call_LyDataOut_0000AO_Detail(lyDataOutRequestParameter) -> list[LY0000AODetail]:
+    """利用轉出資料API取得進貨單明細資料
+
+    Returns:
+        LY0000AO: 進貨單明細資料
+    """
+    ixmlda = call_LyDataOut(lyDataOutRequestParameter)
+    ly0000AO_detail_db_list = []
+    if ixmlda:
+        root_ixmlda = ET.fromstring(ixmlda)
+        for lydata_title in root_ixmlda.findall('LYDATADETAIL'):
+            ly0000AO_detail_db = LY0000AODetail()
+            for key in Ixmlda0000AO_Detail:
+                element = lydata_title.find(key.value)
+                if element is not None:
+                    ly0000AO_detail_db.__setattr__(key.name, element.text)
+            ly0000AO_detail_db_list.append(ly0000AO_detail_db)
+    return ly0000AO_detail_db_list
+
+    
+def insert_0000AODetail(ly0000AODetail_db_list):
+    try:
+        # check if there is duplicate data
+        for ly0000AODetail_db in ly0000AODetail_db_list:
+            select_result = db.session.execute(db.select(LY0000AODetail)
+                                               .filter_by(SD_NO=ly0000AODetail_db.SD_NO,
+                                                          SD_SKNO=ly0000AODetail_db.SD_NO,
+                                                          SD_NAME=ly0000AODetail_db.SD_NAME,
+                                                )).scalar_one_or_none()
+            if select_result:
+                db.session.delete(select_result)
+
+        db.session.add_all(ly0000AODetail_db_list)
+        db.session.commit()
+    except Exception as error:
+        raise error
+    
+
+def delete_0000AO_older_than_six_months():
+    try:
+        delete_0000AODetail_list = db.session.execute(db.select(LY0000AODetail).filter(LY0000AODetail.SD_DATE < db.func.date_sub(db.func.current_date(), db.text("INTERVAL 6 MONTH")))).scalars()
+        for delete_0000AODetail in delete_0000AODetail_list:
+            db.session.delete(delete_0000AODetail)
+        db.session.commit()
+    except Exception as error:
+        raise error
+    
 
 class LyService:
     @staticmethod
@@ -257,7 +316,7 @@ class LyService:
         try:
             irwhere = ""
             # get the date of 6 months ago
-            six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%d-%m")
+            six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
             irwhere += f"MP_DATE>'{six_months_ago}'"
             
             # get the last MP_NO from the database
@@ -272,7 +331,31 @@ class LyService:
             insert_0000AB(ly0000AB_db_list)
 
             # remove the data that older than 6 months
-            delete_0000AB_within_six_months()
+            delete_0000AB_older_than_six_months()
+        except Exception as error:
+            raise error
+        
+    
+    @staticmethod
+    def sync_ly_0000AO():
+        """Sync 0000AO 進貨單明細資料 Data from LY ERP
+        目前僅有進貨單明細資料，日後若有需要再增加其他進貨單抬頭資料
+        """
+        try:
+            # get the date of 6 months ago
+            six_months_ago = (datetime.now() - timedelta(days=180)).strftime("%Y-%m-%d")
+            irwhere = f"SD_DATE>'{six_months_ago}'"
+            # only retrieve the part of fields
+            ifld = "SP_DATE" # title
+            idetfields = "SD_DATE,SD_NO,SD_SKNO,SD_NAME,SD_PRICE" # detail
+
+            lyDataOutRequestParameter = LyDataOutRequestParameter(idakd=DataKind.PurchaseOrder.value, irwhere=irwhere, ifld=ifld, idetfields=idetfields)
+            # call api and get the detail data of 0000AO from LY ERP
+            ly0000AO_detail_db_list = call_LyDataOut_0000AO_Detail(lyDataOutRequestParameter)
+            # insert the data into the database
+            insert_0000AODetail(ly0000AO_detail_db_list)
+            # remove the data that older than 6 months
+            delete_0000AO_older_than_six_months()
         except Exception as error:
             raise error
         
