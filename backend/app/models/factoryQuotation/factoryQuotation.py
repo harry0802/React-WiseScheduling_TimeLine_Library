@@ -13,6 +13,7 @@ class FactoryQuotation(Model):
     customerName = Column(db.String(255), nullable=True, comment='客戶名稱')
     productSN = Column(db.String(255), nullable=True, comment='產品編號')
     productName = Column(db.String(255), nullable=True, comment='產品名稱')
+    subtotalCostWithoutOverhead = Column(db.Float, nullable=True, comment='成本小計(不含管銷研)')
     overheadRnd = Column(db.Float, nullable=True, comment='管銷研百分比 (short for Overhead & Research and Development Percentage)')
     profit = Column(db.Float, nullable=True, comment='利潤百分比')
     risk = Column(db.Float, nullable=True, comment='風險百分比')

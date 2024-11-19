@@ -45,6 +45,27 @@ def generate_quotationSN():
         raise error
 
 
+def calculate_subtotalCostWithoutOverhead(salesQuotationId):
+    # Get all processes for the salesQuotation
+    processes = SQProcess.query.filter(SQProcess.factoryQuotationId == salesQuotationId).all()
+    subtotalCostWithoutOverhead = 0
+    # Calculate all costs for each process
+    cost_models = [
+        SQMaterialCost,
+        SQPackagingCost,
+        SQInjectionMoldingCost,
+        SQInPostProcessingCost,
+        SQOutPostProcessingCost
+    ]
+
+    for process in processes:
+        for model in cost_models:
+            costs = model.query.filter(model.SQProcessId == process.id).all()
+            subtotalCostWithoutOverhead += sum(cost.amount or 0 for cost in costs)
+
+    return subtotalCostWithoutOverhead
+
+
 def complete_salesQuotation(db_obj, payload):
     db_obj.customerName = payload["customerName"] \
         if payload.get("customerName") is not None else db_obj.customerName

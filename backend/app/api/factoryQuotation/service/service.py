@@ -289,11 +289,34 @@ def convert_processes_to_payload_format(process_db_list):
         raise error
 
 
+def calculate_subtotalCostWithoutOverhead(factoryQuotationId):
+    # Get all processes for the factoryQuotation
+    processes = FQProcess.query.filter(FQProcess.factoryQuotationId == factoryQuotationId).all()
+    subtotalCostWithoutOverhead = 0
+    # Calculate all costs for each process
+    cost_models = [
+        FQMaterialCost,
+        FQPackagingCost,
+        FQInjectionMoldingCost,
+        FQInPostProcessingCost,
+        FQOutPostProcessingCost
+    ]
+
+    for process in processes:
+        for model in cost_models:
+            costs = model.query.filter(model.FQProcessId == process.id).all()
+            subtotalCostWithoutOverhead += sum(cost.amount or 0 for cost in costs)
+
+    return subtotalCostWithoutOverhead
+
+
 def complete_factoryQuotation(db_obj, payload):
     db_obj.customerName = payload["customerName"] \
         if payload.get("customerName") is not None else db_obj.customerName
     db_obj.productName = payload["productName"] \
         if payload.get("productName") is not None else db_obj.productName
+    db_obj.subtotalCostWithoutOverhead = float(payload["subtotalCostWithoutOverhead"]) \
+        if payload.get("subtotalCostWithoutOverhead") is not None else db_obj.subtotalCostWithoutOverhead
     db_obj.overheadRnd = float(payload["overheadRnd"]) \
         if payload.get("overheadRnd") is not None else db_obj.overheadRnd
     db_obj.profit = float(payload["profit"]) \
@@ -580,6 +603,10 @@ class FactoryQuotationService:
         try:
             if(factoryQuotation_db := FactoryQuotation.query.get(factoryQuotationId)) is None:
                 return err_resp("factoryQuotation not found", "factoryQuotation_404", 404)
+            # 如果 payload裡面有actualQuotation，表示要更新利潤管理，要計算 subtotalCostWithoutOverhead，並更新到payload
+            if payload.get("actualQuotation") is not None:
+                subtotalCostWithoutOverhead = calculate_subtotalCostWithoutOverhead(factoryQuotation_db.id)
+                payload["subtotalCostWithoutOverhead"] = subtotalCostWithoutOverhead
             factoryQuotation_db = complete_factoryQuotation(factoryQuotation_db, payload)
             db.session.add(factoryQuotation_db)
             db.session.commit()
