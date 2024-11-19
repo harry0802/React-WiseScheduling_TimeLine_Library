@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography, Box } from "@mui/material";
 import QmsCasTable from "../../Global/table/QmsCasTable";
-import { PROCESS } from "../config/processTypes";
+import { PROCESS_TYPES, PROCESS_TYPE_OPTIONS } from "../config/processTypes_v1";
 import styled from "styled-components";
 
 /**
@@ -25,7 +25,7 @@ const utils = {
   formatAmount: (amount) => (amount || 0).toFixed(3),
 
   getProcessInfo: (processCategory, processSN) => {
-    const options = PROCESS.OPTIONS[processCategory] || [];
+    const options = PROCESS_TYPE_OPTIONS[processCategory] || [];
     return options.find((opt) => opt.value === processSN) || {};
   },
 };
@@ -164,6 +164,7 @@ const TableHandler = {
  */
 const ProcessTable = ({ formData, costDetail }) => {
   const { costSubtotalResult: costs, costSubtotal } = costDetail || {};
+  console.log("🚀 ~ ProcessTable ~ costDetail:", costDetail);
   const { sections = {} } = formData;
 
   // 渲染基本資訊

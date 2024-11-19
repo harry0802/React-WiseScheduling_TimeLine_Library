@@ -19,13 +19,14 @@ export function ProcessCostAnalysis({
     calculationResults, // 成本計算結果
     id,
     shippingCosts,
+    updateShippingCosts,
   } = quotationSlice();
-
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
 
   // 處理製程更新
   const handleUpdate = (updatedProcess) => {
-    updateProcess(updatedProcess.id, updatedProcess);
+    console.log("🚀 ~ handleUpdate ~ updatedProcess:", updatedProcess);
+    updateProcess(updatedProcess);
     // 重新計算成本
     calculateAll();
   };
@@ -33,6 +34,12 @@ export function ProcessCostAnalysis({
   // 處理製程刪除
   const handleDelete = (processId) => {
     removeProcess(processId);
+    // 重新計算成本
+    calculateAll();
+  };
+  // 更新運輸成本
+  const handleUpdateShippingCosts = (updatedShippingCosts) => {
+    updateShippingCosts(updatedShippingCosts);
     // 重新計算成本
     calculateAll();
   };
@@ -82,7 +89,11 @@ export function ProcessCostAnalysis({
         onUpdate={handleUpdate}
         onDelete={handleDelete}
       /> */}
-      <TransportationProcessItem process={shippingCosts} />
+      <TransportationProcessItem
+        process={shippingCosts}
+        costDetail={calculationResults.transportationCost}
+        onUpdate={handleUpdateShippingCosts}
+      />
 
       {isNewDrawerOpen && (
         <ProcessDrawer

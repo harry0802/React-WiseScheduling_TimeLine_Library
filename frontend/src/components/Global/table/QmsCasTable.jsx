@@ -115,7 +115,6 @@ const renderTableFooter = (footers) => (
 );
 
 const BaseTable = ({ headers, data, footers }) => {
-  console.log("🔥🔥🔥🔥 ~ BaseTable ~ footers:", footers);
   return (
     <StyledTableContainer component={Paper}>
       <StyledTable stickyHeader>

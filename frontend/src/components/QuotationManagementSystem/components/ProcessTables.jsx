@@ -20,13 +20,30 @@ const TotalCostContainer = styled(Box)`
 // 處理金額顯示的工具函數
 const formatAmount = (amount) => `${(amount || 0).toFixed(3)}`;
 
+/**
+ * @file ProcessTables.js
+ * @description 製程表格組件,用於展示各類製程的成本明細
+ */
+
+/**
+ * @namespace CostResultHandler
+ * @description 成本計算結果的處理工具
+ */
+
 // 成本計算結果處理器
 const CostResultHandler = {
-  // 獲取項目金額
+  /**
+   * @function getItemAmount
+   * @description 獲取特定項目的金額
+   * @param {Object} costSubtotalResult - 成本小計結果
+   * @param {string} dataKey - 數據鍵值
+   * @param {number} index - 項目索引
+   * @returns {number} 項目金額
+   */
   getItemAmount(costSubtotalResult, dataKey, index) {
     const amountMap = {
-      todoItems_運輸費用: costSubtotalResult?.transportAmounts?.[index],
-      todoItems_貨運與關稅: costSubtotalResult?.freightAmounts?.[index],
+      SQFreights: costSubtotalResult?.transportAmounts?.[index],
+      SQCustomsDuties: costSubtotalResult?.freightAmounts?.[index],
       todoItems_原物料成本:
         costSubtotalResult?.materialCostResult?.amounts?.[index],
       todoItems_包裝材料費:
@@ -35,10 +52,15 @@ const CostResultHandler = {
     return amountMap[dataKey] || 0;
   },
 
-  // 獲取小計值
+  /**
+   * @function getSubtotalValue
+   * @description 獲取特定成本類型的小計值
+   * @param {string} costKey - 成本鍵值 !對應到 costSubtotalResult 中的 key
+   * @param {Object} costSubtotalResult - 成本小計結果
+   * @returns {number} 小計值
+   */
   getSubtotalValue(costKey, costSubtotalResult) {
     if (!costSubtotalResult) return 0;
-
     const {
       materialCostResult,
       packagingCostResult,
@@ -60,9 +82,21 @@ const CostResultHandler = {
   },
 };
 
-// 表格數據處理器
+/**
+ * @namespace TableDataHandler
+ * @description 表格數據處理工具
+ */
 const TableDataHandler = {
-  // 處理單元格值
+  /**
+   * @function getCellValue
+   * @description 處理表格單元格值
+   * @param {Object} header - 表頭配置
+   * @param {Object} item - 項目數據
+   * @param {Object} costSubtotalResult - 成本小計結果
+   * @param {string} dataKey - 數據鍵值 !對應到 formData 中的 key
+   * @param {number} index - 項目索引
+   * @returns {Object} 單元格配置對象
+   */
   getCellValue(header, item, costSubtotalResult, dataKey, index) {
     if (header.key === "amount") {
       const amount = CostResultHandler.getItemAmount(
@@ -82,7 +116,14 @@ const TableDataHandler = {
     };
   },
 
-  // 生成表格數據
+  /**
+   * @function generateTableData
+   * @description 生成表格數據
+   * @param {Object} section - 區段配置
+   * @param {Object} formData - 表單數據
+   * @param {Object} costSubtotalResult - 成本小計結果
+   * @returns {Array<Object>} 表格數據陣列
+   */
   generateTableData(section, formData, costSubtotalResult) {
     if (!section.dataKey) {
       return [
@@ -145,13 +186,19 @@ const TableDataHandler = {
   },
 };
 
-// * 主要組件
+/**
+ * @component ProcessTable
+ * @description 製程表格主組件
+ * @param {Object} props
+ * @param {string} props.processType - 製程類型
+ * @param {Object} props.formData - 表單數據
+ * @param {Object} props.costDetail - 成本明細
+ */
 const ProcessTable = ({ processType, formData, costDetail }) => {
-  console.log("🚀 ~ ProcessTable ~ formData:", formData);
   const config = PROCESS_TABLE_CONFIG[processType];
   if (!config) return null;
 
-  const { costSubtotalResult, costSubtotal } = costDetail || {};
+  const { costDetails, costSubtotal } = costDetail || {};
 
   const renderSummaryFields = () => (
     <Box>
@@ -173,12 +220,12 @@ const ProcessTable = ({ processType, formData, costDetail }) => {
     const tableData = TableDataHandler.generateTableData(
       section,
       formData,
-      costSubtotalResult
+      costDetails
     );
 
     const subtotalRow = TableDataHandler.generateSubtotalRow(
       section,
-      costSubtotalResult
+      costDetails
     );
 
     return (

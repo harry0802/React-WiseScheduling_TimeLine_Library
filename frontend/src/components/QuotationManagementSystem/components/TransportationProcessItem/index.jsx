@@ -4,20 +4,26 @@ import BaseAccordion from "../../../Global/accordion/BaseAccordion";
 import ProcessTable from "../ProcessTables";
 import TransportationForm from "./TransportationForm";
 
-function TransportationProcessItem({ process, onUpdate }) {
+function TransportationProcessItem({ process, onUpdate, costDetail }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formMethods, setFormMethods] = useState(null);
 
-  const handleSubmit = () => {
-    if (!formMethods) return;
-    const formData = formMethods.getValues();
-    console.log("🚀 ~ handleSubmit ~ formData:", formData);
-
-    onUpdate?.({
-      ...formData,
-      id: process.id,
-    });
-    setIsDrawerOpen(false);
+  const handleSubmit = async (formData) => {
+    try {
+      // 實現提交邏輯
+      console.log("Submitting:", formData);
+      onUpdate?.({
+        SQFreights: formData.SQFreights,
+        SQCustomsDuties: formData.SQCustomsDuties,
+      });
+      // 這裡可以加入 API 調用
+      return formData;
+    } catch (error) {
+      console.error("Submit error:", error);
+      throw error;
+    } finally {
+      setIsDrawerOpen(false);
+    }
   };
 
   return (
@@ -26,7 +32,11 @@ function TransportationProcessItem({ process, onUpdate }) {
         title="運輸費用與貨運關稅"
         OnClick={() => setIsDrawerOpen(true)}
       >
-        <ProcessTable processType="TRANSPORTATION" formData={process} />
+        <ProcessTable
+          costDetail={costDetail}
+          processType="TRANSPORTATION"
+          formData={process}
+        />
       </BaseAccordion>
 
       <BaseDrawer visible={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
@@ -38,7 +48,9 @@ function TransportationProcessItem({ process, onUpdate }) {
             setFormMethods={setFormMethods}
           />
         </BaseDrawer.Body>
-        <BaseDrawer.Footer onSubmit={handleSubmit} />
+        <BaseDrawer.Footer
+          onSubmit={formMethods ? formMethods.handleSubmit(handleSubmit) : null}
+        />
       </BaseDrawer>
     </>
   );

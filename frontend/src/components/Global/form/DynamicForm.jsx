@@ -182,6 +182,7 @@ function DynamicForm({
   const handleFinish = useCallback(
     (values) => {
       const formattedValues = formatSubmitValues(values);
+      console.log("🚀 ~ formattedValues:", formattedValues);
       onFinish(formattedValues);
     },
     [onFinish]
@@ -209,8 +210,6 @@ function DynamicForm({
 // 表單欄位組件
 function FieldComponent({ field, customProps = {} }) {
   const methods = useFormContext();
-
-  // 使用 useController 提取 field 和 error 狀態
   const {
     field: controllerField,
     fieldState: { error },
@@ -218,35 +217,40 @@ function FieldComponent({ field, customProps = {} }) {
     name: field.name,
     control: methods.control,
     rules: field.rules,
-    defaultValue: field.defaultValue || "", // 防禦性處理
+    // 使用 react-hook-form 的內建轉換
+    defaultValue: field.type === "number" ? null : "",
   });
 
-  // 動態依賴值更新
-  const dependentValue = field.dependsOn
-    ? methods.watch(field.dependsOn)
-    : null;
+  const inputProps =
+    field.type === "number"
+      ? {
+          ...controllerField,
+          inputProps: { ...field.inputProps },
+          // 使用 valueAsNumber
+          inputMode: "numeric",
+          onChange: (e) => {
+            const value = e.target.valueAsNumber;
+            controllerField.onChange(isNaN(value) ? null : value);
+          },
+        }
+      : controllerField;
+
   const options = useMemo(() => {
-    if (field.getDependentOptions && dependentValue) {
+    if (field.options) return field.options;
+    if (field.getDependentOptions) {
+      const dependentValue = methods.watch(field.dependsOn);
       return field.getDependentOptions(dependentValue);
     }
-    return field.options || [];
-  }, [field, dependentValue]);
+    return [];
+  }, [field, methods]);
 
-  // 動態設置欄位值
-  useEffect(() => {
-    if (field.getDependentValue && dependentValue) {
-      const value = field.getDependentValue(dependentValue);
-      methods.setValue(field.name, value);
-    }
-  }, [dependentValue, field, methods]);
-
-  const domProps = filterCustomProps(customProps);
+  const domProps = filterCustomProps({ ...field, ...customProps });
 
   return (
     <Grid item xs={field.span || 12}>
       <FormItem
         field={field}
-        controllerField={controllerField}
+        controllerField={inputProps}
         options={options}
         error={error}
         {...domProps}

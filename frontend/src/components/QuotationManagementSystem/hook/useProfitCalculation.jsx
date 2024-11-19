@@ -12,7 +12,6 @@ export function useProfitCalculation(BusinessQuotationStore) {
     calculationResults,
     updateProfitManagement,
   } = BusinessQuotationStore();
-
   // !百分比計算
   //  四捨五入 保留小數點後三位
   const percentages = useMemo(
@@ -32,52 +31,54 @@ export function useProfitCalculation(BusinessQuotationStore) {
       {
         key: "quotationAmount",
         label: "報價金額",
-        value: `${actualQuotation?.toFixed(3)} 元/pcs`,
+        value: `${actualQuotation?.toFixed(3) || 0} 元/pcs`,
       },
       {
         key: "marketingDiscount",
         label: `管銷研(${percentages.marketingDiscount}%)`,
-        value: `${calculationResults.sgAndAdminFee.toFixed(3)} 元/pcs`,
+        value: `${calculationResults?.sgAndAdminFee?.toFixed(3) || 0} 元/pcs`,
       },
       {
         key: "profit",
         label: `利潤(${percentages.profit}%)`,
-        value: `${calculationResults.profitFee.toFixed(3)} 元/pcs`,
+        value: `${calculationResults?.profitFee?.toFixed(3) || 0} 元/pcs`,
       },
       {
         key: "risk",
         label: `風險(${percentages.risk}%)`,
-        value: `${calculationResults.riskFee.toFixed(3)} 元/pcs`,
+        value: `${calculationResults?.riskFee?.toFixed(3) || 0} 元/pcs`,
       },
       {
         key: "yearFactor",
         label: `年降(${percentages.yearFactor}%)`,
-        value: `${calculationResults.annualReductionAmount.toFixed(3)} 元/pcs`,
+        value: `${
+          calculationResults?.annualReductionAmount?.toFixed(3) || 0
+        } 元/pcs`,
       },
       {
         key: "subtotalWithoutMarketing",
         label: "成本小計(不含管銷研)",
-        value: `${calculationResults.costSubtotal.toFixed(3)} 元/pcs`,
+        value: `${calculationResults?.costSubtotal?.toFixed(3) || 0} 元/pcs`,
       },
       {
         key: "subtotalWithSGA",
         label: "成本小計(含管銷研)",
-        value: `${calculationResults.subtotalWithSGA.toFixed(3)} 元/pcs`,
+        value: `${calculationResults?.subtotalWithSGA?.toFixed(3) || 0} 元/pcs`,
       },
       {
         key: "subtotalWithCosts",
         label: "總成本",
-        value: `${calculationResults.totalCost.toFixed(3)} 元/pcs`,
+        value: `${calculationResults?.totalCost?.toFixed(3) || 0} 元/pcs`,
       },
       {
         key: "feedback",
         label: `回饋(${percentages.feedback}%)`,
-        value: `${calculationResults.rebateAmount.toFixed(3)} 元/pcs`,
+        value: `${calculationResults?.rebateAmount?.toFixed(3) || 0} 元/pcs`,
       },
       {
         key: "grossProfitMargin",
         label: "毛利率",
-        value: `${calculationResults.grossProfitMargin?.toFixed(3)}%`,
+        value: `${calculationResults?.grossProfitMargin?.toFixed(3) || 0}%`,
       },
     ],
     [actualQuotation, percentages, calculationResults]

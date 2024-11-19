@@ -101,7 +101,7 @@ function CustomTodoList({ name, fields, renderField }) {
   const handleAdd = () => {
     // 確保添加空值對象
     const emptyItem = fields.reduce((acc, field) => {
-      acc[field.name] = "";
+      acc[field.name] = field.type === "number" ? null : "";
       return acc;
     }, {});
     append(emptyItem);

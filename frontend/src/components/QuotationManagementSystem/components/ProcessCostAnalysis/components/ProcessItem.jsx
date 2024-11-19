@@ -6,8 +6,6 @@ import { PROCESS_TYPES } from "../../../config/processTypes";
 import BaseAccordion from "../../../../Global/accordion/BaseAccordion";
 
 function ProcessItem({ index, process, costDetail, onUpdate, onDelete }) {
-  console.log("🚀 ~ ProcessItem ~ costDetail:", costDetail);
-  console.log("🚀 ~ ProcessItem ~  costDetail:", process);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (

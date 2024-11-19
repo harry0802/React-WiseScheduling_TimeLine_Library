@@ -14,14 +14,12 @@ function TransportationForm({ initialData, onSubmit, setFormMethods }) {
       SQCustomsDuties: initialData?.SQCustomsDuties || [],
     },
   });
-
   useEffect(() => {
     setFormMethods(methods);
   }, [methods, setFormMethods]);
 
   const { watch, setValue } = methods;
   const activeTab = watch("activeTab") || 0;
-
   const formConfig = FORM_CONFIGURATIONS.TRANSPORTATION;
   const sections = formConfig.items || [];
 

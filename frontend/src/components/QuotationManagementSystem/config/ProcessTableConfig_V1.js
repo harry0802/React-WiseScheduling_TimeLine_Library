@@ -1,6 +1,14 @@
 /**
- * 定義製程相關數據的存取鍵值
- * 對應到 quotationData 中的 processes 陣列內的數據結構
+ * @constant {Object} PROCESS_DATA_KEYS
+ * @description 定義製程相關數據的存取鍵值,對應quotationData中processes陣列內的數據結構
+ * @property {string} MATERIAL_SETTING - 材料成本設置
+ * @property {string} MATERIAL_COSTS - 材料成本列表
+ * @property {string} PACKAGING_COSTS - 包裝成本列表
+ * @property {string} INJECTION_MOLDING_COSTS - 成型成本列表
+ * @property {string} IN_POST_PROCESSING_COSTS - 廠內後製成本
+ * @property {string} OUT_POST_PROCESSING_COSTS - 委外後製成本
+ * @property {string} FREIGHTS - 運輸費用列表
+ * @property {string} CUSTOMS_DUTIES - 關稅列表
  */
 export const PROCESS_DATA_KEYS = {
   // 基本成本設置
@@ -15,13 +23,58 @@ export const PROCESS_DATA_KEYS = {
 };
 
 /**
- * 製程表格配置
- * key 需與 quotationData 中的 processCategory 完全對應
+ * @constant {Object} PROCESS_TYPES
+ * @description 定義所有製程類型的常量
+ * @property {string} IN_INJECTION - 廠內成型製程
+ * @property {string} OUT_INJECTION - 委外成型製程
+ * @property {string} IN_BACKEND - 廠內後製製程
+ * @property {string} OUT_BACKEND - 委外後製製程
+ * @property {string} IN_TESTING - 廠內出貨檢驗
+ * @property {string} TRANSPORTATION - 運輸與關稅
+ */
+export const PROCESS_TYPES = {
+  IN_INJECTION: "In-IJ(廠內成型)",
+  OUT_INJECTION: "Out-IJ(委外成型)",
+  IN_BACKEND: "In-BE(廠內後製程)",
+  OUT_BACKEND: "Out-BE(委外後製程)",
+  IN_TESTING: "In-TS(廠內出貨檢驗)",
+  TRANSPORTATION: "TRANSPORTATION",
+};
+
+/**
+ * @constant {Object} PROCESS_TITLES
+ * @description 定義所有製程的顯示標題
+ */
+export const PROCESS_TITLES = {
+  [PROCESS_TYPES.IN_INJECTION]: "廠內成型製程費用",
+  [PROCESS_TYPES.OUT_INJECTION]: "委外成型製程費用",
+  [PROCESS_TYPES.IN_BACKEND]: "廠內後製製程費用",
+  [PROCESS_TYPES.OUT_BACKEND]: "委外後製製程費用",
+  [PROCESS_TYPES.IN_TESTING]: "廠內出貨檢驗費用",
+  [PROCESS_TYPES.TRANSPORTATION]: "運輸費用與關稅成本",
+};
+
+/**
+ * @constant {Object} PROCESS_TABLE_CONFIG
+ * @description 製程表格配置對象,定義了各種製程類型的表格結構
+ * @property {Object} In-IJ - 廠內成型製程配置
+ * @property {Object} Out-IJ - 委外成型製程配置
+ * @property {Object} In-BE - 廠內後製製程配置
+ * @property {Object} Out-BE - 委外後製製程配置
+ * @property {Object} In-TS - 廠內出貨檢驗配置
+ * @property {Object} TRANSPORTATION - 運輸與關稅配置
+ *
+ * @typedef {Object} ProcessSection
+ * @property {string} sectionTitle - 區段標題
+ * @property {Array<Object>} headers - 表頭配置
+ * @property {string} dataKey - 數據鍵值
+ * @property {boolean} showSubtotal - 是否顯示小計
+ * @property {string} subtotalLabel - 小計標籤
+ * @property {string} costKey - 成本鍵值
  */
 export const PROCESS_TABLE_CONFIG = {
-  // 廠內成型製程
-  "In-IJ(廠內成型)": {
-    title: "廠內成型製程費用",
+  [PROCESS_TYPES.IN_INJECTION]: {
+    title: PROCESS_TITLES[PROCESS_TYPES.IN_INJECTION],
     summaryFields: [
       { label: "預估不良率", key: "estimatedDefectRate", unit: "%" },
       { label: "預估材料浮動", key: "estimatedMaterialFluctuation", unit: "%" },
@@ -84,9 +137,8 @@ export const PROCESS_TABLE_CONFIG = {
     showFinalSubtotal: true,
   },
 
-  // 委外成型製程
-  "Out-IJ(委外成型)": {
-    title: "委外成型製程費用",
+  [PROCESS_TYPES.OUT_INJECTION]: {
+    title: PROCESS_TITLES[PROCESS_TYPES.OUT_INJECTION],
     summaryFields: [
       { label: "預估不良率", key: "estimatedDefectRate", unit: "%" },
       { label: "預估材料浮動", key: "estimatedMaterialFluctuation", unit: "%" },
@@ -142,9 +194,8 @@ export const PROCESS_TABLE_CONFIG = {
     showFinalSubtotal: true,
   },
 
-  // 廠內後製製程
-  "In-BE(廠內後製程)": {
-    title: "廠內後製製程費用",
+  [PROCESS_TYPES.IN_BACKEND]: {
+    title: PROCESS_TITLES[PROCESS_TYPES.IN_BACKEND],
     summaryFields: [
       { label: "預估不良率", key: "estimatedDefectRate", unit: "%" },
       { label: "預估材料浮動", key: "estimatedMaterialFluctuation", unit: "%" },
@@ -201,9 +252,8 @@ export const PROCESS_TABLE_CONFIG = {
     showFinalSubtotal: true,
   },
 
-  // 委外後製製程
-  "Out-BE(委外後製程)": {
-    title: "委外後製製程費用",
+  [PROCESS_TYPES.OUT_BACKEND]: {
+    title: PROCESS_TITLES[PROCESS_TYPES.OUT_BACKEND],
     summaryFields: [
       { label: "預估不良率", key: "estimatedDefectRate", unit: "%" },
       { label: "預估材料浮動", key: "estimatedMaterialFluctuation", unit: "%" },
@@ -259,9 +309,8 @@ export const PROCESS_TABLE_CONFIG = {
     showFinalSubtotal: true,
   },
 
-  // 廠內出貨檢驗
-  "In-TS(廠內出貨檢驗)": {
-    title: "廠內出貨檢驗費用",
+  [PROCESS_TYPES.IN_TESTING]: {
+    title: PROCESS_TITLES[PROCESS_TYPES.IN_TESTING],
     summaryFields: [],
     sections: [
       {
@@ -281,9 +330,8 @@ export const PROCESS_TABLE_CONFIG = {
     showFinalSubtotal: true,
   },
 
-  // 運輸費用與關稅
-  TRANSPORTATION: {
-    title: "運輸費用與關稅成本",
+  [PROCESS_TYPES.TRANSPORTATION]: {
+    title: PROCESS_TITLES[PROCESS_TYPES.TRANSPORTATION],
     summaryFields: [],
     sections: [
       {
@@ -298,7 +346,7 @@ export const PROCESS_TABLE_CONFIG = {
         dataKey: PROCESS_DATA_KEYS.FREIGHTS,
         showSubtotal: true,
         subtotalLabel: "運輸費用小計",
-        costKey: "transportationCost",
+        costKey: "transportCost",
       },
       {
         sectionTitle: "關稅費用",
@@ -311,7 +359,7 @@ export const PROCESS_TABLE_CONFIG = {
         dataKey: PROCESS_DATA_KEYS.CUSTOMS_DUTIES,
         showSubtotal: true,
         subtotalLabel: "關稅費用小計",
-        costKey: "customsDutyCost",
+        costKey: "freightCost",
       },
     ],
     finalSubtotalLabel: "運輸與關稅總成本",

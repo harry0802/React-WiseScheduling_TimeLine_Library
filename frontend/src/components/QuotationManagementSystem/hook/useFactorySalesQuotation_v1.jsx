@@ -194,14 +194,20 @@ export const useQuotationStore = (set, get) => ({
   // 2. 運輸成本計算
   calculateTransportation: () => {
     const { shippingCosts } = get();
-    return calculateTransportationCost(shippingCosts);
+    console.log("🚀 ~ useQuotationStore ~ shippingCosts:", shippingCosts);
+    const result = calculateTransportationCost(shippingCosts);
+
+    return {
+      costSubtotal: result.totalCost || 0,
+      costDetails: result.details,
+    };
   },
 
   // 3. 總成本計算（不含利潤）
   calculateAll: () => {
     const baseCosts = get().calculateBaseCosts();
     const transportCosts = get().calculateTransportation();
-    const totalCost = baseCosts.processTotal + transportCosts.totalCost;
+    const totalCost = baseCosts.processTotal + transportCosts.costSubtotal;
 
     // 更新 store
     set({
@@ -251,8 +257,6 @@ export const useQuotationStore = (set, get) => ({
       +rebate,
       +actualQuotation
     );
-
-    console.log("🚀 ~ useQuotationStore ~ profitResult:", profitResult);
 
     set({ calculationResults: profitResult });
     return profitResult;

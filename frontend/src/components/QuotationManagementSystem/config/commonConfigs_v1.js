@@ -34,7 +34,7 @@ const createInputProps = (unit, label) => ({
 const createRequiredRule = (label) => ({ required: `${label}為必填` });
 
 /**
- * 通用字段創建函數
+ * @function createField - 優化版本
  */
 export const createField = (
   name,
@@ -49,7 +49,16 @@ export const createField = (
   label,
   type,
   ...props,
-  rules,
+  rules: {
+    ...rules,
+    // 只為 number 類型添加轉換
+    ...(type === "number" && {
+      setValueAs: (value) => {
+        if (value === "" || value === null) return null;
+        return Number(value);
+      },
+    }),
+  },
   ...(span && { span }),
   ...(options && { options }),
 });
