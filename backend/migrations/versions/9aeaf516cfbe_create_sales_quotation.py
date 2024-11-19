@@ -78,6 +78,7 @@ def upgrade():
     sa.Column('createDate', sa.TIMESTAMP(), nullable=True, comment='報價單建立日期'),
     sa.Column('customerName', sa.String(length=255), nullable=True, comment='客戶名稱'),
     sa.Column('productName', sa.String(length=255), nullable=True, comment='產品名稱'),
+    sa.Column('subtotalCostWithoutOverhead', sa.Float(), nullable=True, comment='成本小計(不含管銷研)'),
     sa.Column('overheadRnd', sa.Float(), nullable=True, comment='管銷研百分比 (short for Overhead & Research and Development Percentage)'),
     sa.Column('profit', sa.Float(), nullable=True, comment='利潤百分比'),
     sa.Column('risk', sa.Float(), nullable=True, comment='風險百分比'),

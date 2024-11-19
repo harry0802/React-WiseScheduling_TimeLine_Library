@@ -1,7 +1,7 @@
 from flask import request,current_app
 from flask_restx import Resource
 from app.utils_log import controller_entrance_log
-from .service import SalesQuotationService
+from .service.service import SalesQuotationService
 from .dto import SalesQuotationDto
 from .schemas import SalesQuotationSchema
 api = SalesQuotationDto.api
