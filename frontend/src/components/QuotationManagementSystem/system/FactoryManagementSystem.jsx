@@ -9,6 +9,7 @@ function QuotationManagementSystemFactory() {
   const routes = [
     { path: "/FactoryQuotationManagementSystem", Action: <QmsActions /> },
   ];
+  console.log("🚀 ~ QuotationManagementSystemFactory ~ routes:", routes);
 
   useEffect(() => {
     (async function () {
@@ -18,7 +19,7 @@ function QuotationManagementSystemFactory() {
     })();
   }, [setData]);
 
-  return <SharedManagementSystem title={pageStatus} routes={routes} />;
+  return <SharedManagementSystem title={pageStatus} currentRouter={routes} />;
 }
 
 export default QuotationManagementSystemFactory;

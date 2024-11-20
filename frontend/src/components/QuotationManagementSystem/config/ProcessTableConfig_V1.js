@@ -78,7 +78,7 @@ export const PROCESS_TABLE_CONFIG = {
     summaryFields: [
       { label: "預估不良率", key: "estimatedDefectRate", unit: "%" },
       { label: "預估材料浮動", key: "estimatedMaterialFluctuation", unit: "%" },
-      { label: "取出費用", key: "extractionCost", unit: "元" },
+      { label: "抽料費用", key: "extractionCost", unit: "元" },
       { label: "加工費用", key: "processingCost", unit: "元" },
     ],
     sections: [
@@ -125,6 +125,8 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "單價", key: "unitPrice", unit: "元" },
           { label: "金額", key: "amount", unit: "元" },
           { label: "小計", key: "subtotal", unit: "元" },
+          // 每秒電費
+          { label: "每秒電費", key: "electricityCostPerSecond", unit: "元" },
           { label: "電費", key: "electricityCost", unit: "元" },
         ],
         dataKey: PROCESS_DATA_KEYS.INJECTION_MOLDING_COSTS,

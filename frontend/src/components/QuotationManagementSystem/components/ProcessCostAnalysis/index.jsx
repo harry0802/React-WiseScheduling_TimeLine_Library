@@ -25,7 +25,6 @@ export function ProcessCostAnalysis({
 
   // 處理製程更新
   const handleUpdate = (updatedProcess) => {
-    console.log("🚀 ~ handleUpdate ~ updatedProcess:", updatedProcess);
     updateProcess(updatedProcess);
     // 重新計算成本
     calculateAll();
@@ -80,7 +79,7 @@ export function ProcessCostAnalysis({
       icon={icon}
       OnClick={() => setIsNewDrawerOpen(true)}
     >
-      {/* <ProcessList
+      <ProcessList
         processes={processes}
         costResult={{
           costDetails: processCostDetails,
@@ -88,7 +87,7 @@ export function ProcessCostAnalysis({
         }}
         onUpdate={handleUpdate}
         onDelete={handleDelete}
-      /> */}
+      />
       <TransportationProcessItem
         process={shippingCosts}
         costDetail={calculationResults.transportationCost}

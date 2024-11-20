@@ -194,9 +194,7 @@ export const useQuotationStore = (set, get) => ({
   // 2. 運輸成本計算
   calculateTransportation: () => {
     const { shippingCosts } = get();
-    console.log("🚀 ~ useQuotationStore ~ shippingCosts:", shippingCosts);
     const result = calculateTransportationCost(shippingCosts);
-
     return {
       costSubtotal: result.totalCost || 0,
       costDetails: result.details,
@@ -210,12 +208,13 @@ export const useQuotationStore = (set, get) => ({
     const totalCost = baseCosts.processTotal + transportCosts.costSubtotal;
 
     // 更新 store
-    set({
+    set((state) => ({
       calculationResults: {
-        ...get().calculationResults,
+        ...state.calculationResults,
         costSubtotal: totalCost,
+        transportationCost: transportCosts,
       },
-    });
+    }));
 
     return {
       costSubtotal: totalCost,

@@ -41,13 +41,25 @@ const CostResultHandler = {
    * @returns {number} 項目金額
    */
   getItemAmount(costSubtotalResult, dataKey, index) {
+    console.log("🚀 ~ getItemAmount ~ costSubtotalResult:", costSubtotalResult);
     const amountMap = {
-      SQFreights: costSubtotalResult?.transportAmounts?.[index],
-      SQCustomsDuties: costSubtotalResult?.freightAmounts?.[index],
-      todoItems_原物料成本:
-        costSubtotalResult?.materialCostResult?.amounts?.[index],
-      todoItems_包裝材料費:
+      // 運費
+      SQMaterialCosts: costSubtotalResult?.materialCostResult?.amounts?.[index],
+      // 包材費用
+      SQPackagingCosts:
         costSubtotalResult?.packagingCostResult?.amounts?.[index],
+      // 成型費用
+      SQInjectionMoldingCosts:
+        costSubtotalResult?.injectionMoldingResult?.amounts?.[index],
+      // 後製程費用
+      SQInPostProcessingCosts:
+        costSubtotalResult?.inPostProcessingResult?.amounts?.[index],
+      // 委外後製程費用
+      SQOutPostProcessingCosts:
+        costSubtotalResult?.outPostProcessingResult?.amounts?.[index],
+      SQFreights: costSubtotalResult?.transportAmounts?.[index],
+      // 關稅
+      SQCustomsDuties: costSubtotalResult?.freightAmounts?.[index],
     };
     return amountMap[dataKey] || 0;
   },
@@ -196,7 +208,8 @@ const TableDataHandler = {
  */
 const ProcessTable = ({ processType, formData, costDetail }) => {
   const config = PROCESS_TABLE_CONFIG[processType];
-  if (!config) return null;
+  if (!config || !formData?.SQMaterialCostSetting) return null;
+  // SQMaterialCostSetting
 
   const { costDetails, costSubtotal } = costDetail || {};
 
@@ -204,7 +217,7 @@ const ProcessTable = ({ processType, formData, costDetail }) => {
     <Box>
       {config.summaryFields.map((field) => (
         <Typography key={field.key}>
-          {field.label}: {formData[field.key] || 0}
+          {field.label}: {formData?.SQMaterialCostSetting[field.key] || 0}
           {field.unit}
         </Typography>
       ))}

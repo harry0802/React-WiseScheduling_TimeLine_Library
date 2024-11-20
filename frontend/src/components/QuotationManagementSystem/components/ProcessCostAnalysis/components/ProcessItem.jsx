@@ -2,7 +2,6 @@
 import { useState } from "react";
 import ProcessDrawer from "./ProcessDrawer";
 import RenderProcessTable from "../../ProcessTables";
-import { PROCESS_TYPES } from "../../../config/processTypes";
 import BaseAccordion from "../../../../Global/accordion/BaseAccordion";
 
 function ProcessItem({ index, process, costDetail, onUpdate, onDelete }) {
@@ -10,13 +9,12 @@ function ProcessItem({ index, process, costDetail, onUpdate, onDelete }) {
 
   return (
     <>
-      {/*  如果有 index 就顯示製程編號   */}
       <BaseAccordion
-        title={` 製程${index + 1} ${PROCESS_TYPES[process.processType].value}`}
+        title={` 製程${index + 1} ${process.processCategory}`}
         OnClick={() => setIsDrawerOpen(true)}
       >
         <RenderProcessTable
-          processType={process.processType}
+          processType={process.processCategory}
           formData={process}
           costDetail={costDetail}
         />

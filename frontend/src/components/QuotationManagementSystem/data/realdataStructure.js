@@ -21,7 +21,9 @@ const quotationData = {
       SQMaterialCostSetting: {
         id: 1,
         SQProcessId: 1,
+
         estimatedDefectRate: 0.05,
+
         estimatedMaterialFluctuation: 0,
         extractionCost: 0,
         processingCost: 0,
@@ -83,6 +85,7 @@ const quotationData = {
           id: 1,
           SQProcessId: 1,
           machineId: 10,
+          machineName: "哥吉拉",
           workHoursRatio: 0.95,
           defectiveRate: 0.05,
           cycleTime: 80,

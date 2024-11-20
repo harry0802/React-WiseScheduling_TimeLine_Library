@@ -7,7 +7,7 @@ import mockData from "../../ProductionRecord/data.json";
 function SalesManagementSystem() {
   const { setData, pageStatus } = useSalesHomeSlice();
   const routes = [
-    { path: "/QuotationManagementSystem", Action: <QmsActions /> },
+    { path: "/SalesQuotationManagementSystem", Action: <QmsActions /> },
   ];
 
   useEffect(() => {
@@ -18,7 +18,7 @@ function SalesManagementSystem() {
     })();
   }, [setData]);
 
-  return <SharedManagementSystem title={pageStatus} routes={routes} />;
+  return <SharedManagementSystem title={pageStatus} currentRouter={routes} />;
 }
 
 export default SalesManagementSystem;

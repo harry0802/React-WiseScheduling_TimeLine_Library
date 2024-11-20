@@ -29,10 +29,14 @@ const SystemSections = styled.section`
   margin-top: 1.187rem;
 `;
 
-function SharedManagementSystem({ className, title, routes, defaultAction }) {
+function SharedManagementSystem({
+  className,
+  title,
+  currentRouter,
+  defaultAction,
+}) {
   const location = useLocation();
-
-  const currentRoute = routes?.find(
+  const currentRoute = currentRouter?.find(
     (route) =>
       location.pathname.startsWith(route.path) &&
       (location.pathname === route.path ||
