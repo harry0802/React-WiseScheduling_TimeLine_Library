@@ -20,6 +20,7 @@ const ProcessForm = React.memo(({ initialData, onSubmit, methods }) => {
   const cleanedSelectionFields = React.useMemo(() => {
     return selectionFields.map((field) => {
       const { getDependentOptions, dependsOn, ...rest } = field;
+
       return rest;
     });
   }, [selectionFields]);

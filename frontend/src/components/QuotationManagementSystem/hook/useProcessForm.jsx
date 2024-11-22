@@ -1,23 +1,28 @@
 import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
+import { PROCESS_TYPES } from "../config/processTypes";
 
 export function useProcessForm(initialProcess) {
   const [process, setProcess] = useState(initialProcess);
+
+  // 使用可选链和默认值处理
+  const initProcessSN = initialProcess?.initialData?.processSN;
+  const processOptionId = initialProcess?.initialData?.processOptionId;
+
   const methods = useForm({
-    defaultValues: initialProcess,
+    defaultValues: {
+      processCategory: processOptionId || "", // 提供默认空字符串
+      processSN: initProcessSN || "",
+    },
   });
 
   const handleFormChange = useCallback((data) => {
-    console.log("🚀 ~ handleFormChange ~ data:", data);
     setProcess((prev) => ({ ...prev, ...data }));
   }, []);
 
   const handleSubmit = useCallback(async (formData) => {
     try {
-      // 實現提交邏輯
       console.log("Submitting:", formData);
-
-      // 這裡可以加入 API 調用
       return formData;
     } catch (error) {
       console.error("Submit error:", error);

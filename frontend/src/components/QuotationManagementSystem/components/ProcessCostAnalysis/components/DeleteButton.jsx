@@ -7,7 +7,7 @@ export const DeleteButton = ({
   disabled = false,
   tooltip = "刪除",
   size = "small",
-  userType = "factory",
+  userType = "sales",
 }) => {
   // 只有業務報價可以刪除
   if (userType !== "sales") {

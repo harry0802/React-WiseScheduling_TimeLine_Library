@@ -95,6 +95,7 @@ const quotationData = {
           amount: 3360,
           subtotal: 4.912,
           electricityCost: 0.608,
+          electricityCostPerSecond: 0.0076,
         },
       ],
     },

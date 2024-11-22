@@ -83,13 +83,19 @@ export const calculateOutsourcedMoldingCost = (process) => {
     SQMaterialCostSetting.processingCost
   );
   const packagingCostResult = calculatePackagingCost(SQPackagingCosts);
-  const postProcessingCostResult = SQOutPostProcessingCosts[0].amount;
 
+  const postProcessingCostResult = {
+    totalCost: SQOutPostProcessingCosts.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    ),
+    amounts: SQOutPostProcessingCosts.map((item) => item.amount),
+  };
   return {
     totalCost:
       +materialCostResult.totalCost +
       +packagingCostResult.totalCost +
-      +postProcessingCostResult,
+      +postProcessingCostResult.totalCost,
     details: {
       materialCostResult,
       packagingCostResult,
@@ -120,17 +126,19 @@ export const calculateInHousePostProcessingCost = (process) => {
 
   const packagingCostResult = calculatePackagingCost(SQPackagingCosts);
 
-  const postProcessingData = SQInPostProcessingCosts[0];
-  const postProcessingCostResult = calculatePostProcessingCost(
-    postProcessingData.workSecond,
-    postProcessingData.unitPrice
-  );
+  const postProcessingCostResult = {
+    totalCost: SQInPostProcessingCosts.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    ),
+    amounts: SQInPostProcessingCosts.map((item) => item.amount),
+  };
 
   return {
     totalCost:
       +materialCostResult.totalCost +
       +packagingCostResult.totalCost +
-      +postProcessingCostResult,
+      +postProcessingCostResult.totalCost,
     details: {
       materialCostResult,
       packagingCostResult,
@@ -146,10 +154,17 @@ export const calculateInHousePostProcessingCost = (process) => {
  */
 export const calculateInHouseShippingInspectionCost = (process) => {
   const { SQInPostProcessingCosts } = process;
-  const postProcessingCostResult = SQInPostProcessingCosts[0].amount;
+
+  const postProcessingCostResult = {
+    totalCost: SQInPostProcessingCosts.reduce(
+      (sum, item) => sum + Number(item.amount),
+      0
+    ),
+    amounts: SQInPostProcessingCosts.map((item) => item.amount),
+  };
 
   return {
-    totalCost: postProcessingCostResult,
+    totalCost: postProcessingCostResult.totalCost,
     details: {
       postProcessingCostResult,
     },

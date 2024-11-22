@@ -90,7 +90,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "單位", key: "unit" },
           { label: "重量", key: "weight", unit: "公克" },
           { label: "單價", key: "unitPrice", unit: "元" },
-          { label: "金額", key: "amount", unit: "元" },
+          { label: "金額", key: "amount", unit: "元", span: 6 },
         ],
         dataKey: PROCESS_DATA_KEYS.MATERIAL_COSTS,
         showSubtotal: true,
@@ -115,13 +115,14 @@ export const PROCESS_TABLE_CONFIG = {
         costKey: "packagingCost",
       },
       {
-        sectionTitle: "成型加工成本",
+        sectionTitle: "加工成本與電費計算",
         headers: [
+          { label: "生產機台", key: "machineName" },
           { label: "工時比例", key: "workHoursRatio", unit: "%" },
           { label: "不良率", key: "defectiveRate", unit: "%" },
-          { label: "週期時間", key: "cycleTime", unit: "秒" },
-          { label: "包裝時間", key: "packageTime", unit: "秒" },
-          { label: "模具穴數", key: "moldCavity" },
+          { label: "灌包工時(秒)", key: "packageTime", unit: "秒" },
+          { label: "成型週期", key: "cycleTime", unit: "秒" },
+          { label: "穴數", key: "moldCavity" },
           { label: "單價", key: "unitPrice", unit: "元" },
           { label: "金額", key: "amount", unit: "元" },
           { label: "小計", key: "subtotal", unit: "元" },
@@ -130,7 +131,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "電費", key: "electricityCost", unit: "元" },
         ],
         dataKey: PROCESS_DATA_KEYS.INJECTION_MOLDING_COSTS,
-        showSubtotal: true,
+        showSubtotal: false,
         subtotalLabel: "成型成本小計",
         costKey: "moldingCost",
       },
@@ -201,7 +202,7 @@ export const PROCESS_TABLE_CONFIG = {
     summaryFields: [
       { label: "預估不良率", key: "estimatedDefectRate", unit: "%" },
       { label: "預估材料浮動", key: "estimatedMaterialFluctuation", unit: "%" },
-      { label: "取出費用", key: "extractionCost", unit: "元" },
+      { label: "抽料費用", key: "extractionCost", unit: "元" },
       { label: "加工費用", key: "processingCost", unit: "元" },
     ],
     sections: [
@@ -259,7 +260,7 @@ export const PROCESS_TABLE_CONFIG = {
     summaryFields: [
       { label: "預估不良率", key: "estimatedDefectRate", unit: "%" },
       { label: "預估材料浮動", key: "estimatedMaterialFluctuation", unit: "%" },
-      { label: "取出費用", key: "extractionCost", unit: "元" },
+      { label: "抽料費用", key: "extractionCost", unit: "元" },
       { label: "加工費用", key: "processingCost", unit: "元" },
     ],
     sections: [

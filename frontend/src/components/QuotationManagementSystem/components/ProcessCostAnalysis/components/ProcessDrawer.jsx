@@ -1,6 +1,5 @@
 import { useProcessForm } from "../../../hook/useProcessForm";
 import { DeleteButton } from "./DeleteButton";
-import { PROCESS_TYPES } from "../../../config/processTypes_v1";
 import BaseDrawer from "../../../../Global/Drawer/BaseDrawer";
 import ProcessForm from "../../ProcessForms/index";
 

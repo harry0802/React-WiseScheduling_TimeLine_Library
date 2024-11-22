@@ -71,21 +71,35 @@ function filterCustomProps(props) {
     getDependentValue,
     rules,
     customProps,
+    options, // 添加 options
+    field, // 添加 field
+    controllerField, // 添加 controllerField
+    error, // 添加 error
     ...domProps
   } = props;
   return domProps;
 }
-
 // 渲染表單項目
 function renderFormItem(field, controllerField, restProps, options, error) {
   const mergedProps = mergeProps(field, controllerField, restProps);
+  const {
+    getDependentOptions,
+    dependsOn,
+    rules,
+    customProps,
+    type, // 添加 type
+    label, // 添加 label
+    span, // 添加 span
+    ...cleanProps
+  } = restProps;
   switch (field.type) {
     case "select":
       return (
         <FormControl fullWidth error={!!error}>
           <InputLabel id={`${field.name}-label`}>{field.label}</InputLabel>
           <Select
-            {...mergedProps}
+            {...controllerField} // 先放 controllerField
+            {...cleanProps} // 后放清理过的 props
             labelId={`${field.name}-label`}
             label={field.label}
           >
@@ -182,7 +196,6 @@ function DynamicForm({
   const handleFinish = useCallback(
     (values) => {
       const formattedValues = formatSubmitValues(values);
-      console.log("🚀 ~ formattedValues:", formattedValues);
       onFinish(formattedValues);
     },
     [onFinish]
@@ -216,35 +229,69 @@ function FieldComponent({ field, customProps = {} }) {
   } = useController({
     name: field.name,
     control: methods.control,
-    rules: field.rules,
-    // 使用 react-hook-form 的內建轉換
     defaultValue: field.type === "number" ? null : "",
+    rules: {
+      ...field.rules,
+      ...(field.type === "number" && {
+        validate: (value) =>
+          value === null ||
+          value === "" ||
+          !isNaN(Number(value)) ||
+          "請輸入有效數字",
+      }),
+    },
   });
 
+  const { getDependentOptions, dependsOn, rules, ...cleanCustomProps } =
+    customProps;
+
+  // 添加這個 useEffect 來監聽依賴值的變化
+  useEffect(() => {
+    if (field.dependsOn) {
+      const subscription = methods.watch((value, { name }) => {
+        if (name === field.dependsOn) {
+          console.log(`${field.dependsOn} changed:`, value[field.dependsOn]);
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [field.dependsOn, methods]);
+
+  // 修改數字輸入處理
   const inputProps =
     field.type === "number"
       ? {
           ...controllerField,
-          inputProps: { ...field.inputProps },
-          // 使用 valueAsNumber
-          inputMode: "numeric",
+          value: controllerField.value ?? "",
+          type: "number",
+          inputProps: { step: "any" },
           onChange: (e) => {
-            const value = e.target.valueAsNumber;
-            controllerField.onChange(isNaN(value) ? null : value);
+            const value = e.target.value === "" ? null : Number(e.target.value);
+            controllerField.onChange(value);
           },
         }
-      : controllerField;
+      : {
+          ...controllerField,
+          value: controllerField.value ?? "",
+        };
+  const dependentValue = methods.watch(field.dependsOn); // 直接在組件層級監聽
 
   const options = useMemo(() => {
-    if (field.options) return field.options;
-    if (field.getDependentOptions) {
-      const dependentValue = methods.watch(field.dependsOn);
-      return field.getDependentOptions(dependentValue);
-    }
-    return [];
-  }, [field, methods]);
+    if (!field) return [];
 
-  const domProps = filterCustomProps({ ...field, ...customProps });
+    // 如果有 getDependentOptions，優先使用
+    if (field.getDependentOptions) {
+      return field.getDependentOptions(dependentValue) || [];
+    }
+
+    // 如果沒有 getDependentOptions 才使用靜態 options
+    if (field.options) {
+      return field.options;
+    }
+
+    return [];
+  }, [field, dependentValue]);
 
   return (
     <Grid item xs={field.span || 12}>
@@ -253,12 +300,11 @@ function FieldComponent({ field, customProps = {} }) {
         controllerField={inputProps}
         options={options}
         error={error}
-        {...domProps}
+        {...cleanCustomProps}
       />
     </Grid>
   );
 }
-
 // 表單項目渲染組件
 function FormItem({ field, controllerField, options, error, ...props }) {
   const domProps = filterCustomProps(props);

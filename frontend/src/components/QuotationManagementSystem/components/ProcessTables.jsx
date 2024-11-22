@@ -41,7 +41,15 @@ const CostResultHandler = {
    * @returns {number} 項目金額
    */
   getItemAmount(costSubtotalResult, dataKey, index) {
-    console.log("🚀 ~ getItemAmount ~ costSubtotalResult:", costSubtotalResult);
+    /*
+      {
+    materialCostResult: { totalCost: 4.684, amounts: [...] },
+    packagingCostResult: { totalCost: 3.85, amounts: [...] },
+    postProcessingCostResult: { totalCost: 0.1, amounts: [...] }
+    SQOutPostProcessingCosts
+    SQInPostProcessingCosts
+  }
+    */
     const amountMap = {
       // 運費
       SQMaterialCosts: costSubtotalResult?.materialCostResult?.amounts?.[index],
@@ -49,18 +57,19 @@ const CostResultHandler = {
       SQPackagingCosts:
         costSubtotalResult?.packagingCostResult?.amounts?.[index],
       // 成型費用
-      SQInjectionMoldingCosts:
-        costSubtotalResult?.injectionMoldingResult?.amounts?.[index],
+      SQInjectionMoldingCosts: costSubtotalResult?.moldingCostResult,
       // 後製程費用
       SQInPostProcessingCosts:
-        costSubtotalResult?.inPostProcessingResult?.amounts?.[index],
+        costSubtotalResult?.postProcessingCostResult?.amounts?.[index],
       // 委外後製程費用
       SQOutPostProcessingCosts:
-        costSubtotalResult?.outPostProcessingResult?.amounts?.[index],
+        costSubtotalResult?.postProcessingCostResult?.amounts?.[index],
+      // 運費
       SQFreights: costSubtotalResult?.transportAmounts?.[index],
       // 關稅
       SQCustomsDuties: costSubtotalResult?.freightAmounts?.[index],
     };
+
     return amountMap[dataKey] || 0;
   },
 
@@ -84,10 +93,11 @@ const CostResultHandler = {
     const subtotalMap = {
       materialCost: materialCostResult?.totalCost,
       packagingCost: packagingCostResult?.totalCost,
-      moldingCost: postProcessingCostResult,
       transportCost: transportSubtotal,
       freightCost: freightSubtotal,
       totalCost: totalCost,
+      processingCost: postProcessingCostResult?.totalCost,
+      inspectionCost: postProcessingCostResult?.totalCost,
     };
 
     return subtotalMap[costKey] || 0;
@@ -188,6 +198,7 @@ const TableDataHandler = {
         {
           value: section.subtotalLabel,
           colSpan: section.headers.length - 1,
+          span: section.headers.span,
         },
         {
           value: `${formatAmount(subtotalValue)} 元`,
@@ -208,25 +219,31 @@ const TableDataHandler = {
  */
 const ProcessTable = ({ processType, formData, costDetail }) => {
   const config = PROCESS_TABLE_CONFIG[processType];
-  if (!config || !formData?.SQMaterialCostSetting) return null;
-  // SQMaterialCostSetting
 
   const { costDetails, costSubtotal } = costDetail || {};
 
-  const renderSummaryFields = () => (
-    <Box>
-      {config.summaryFields.map((field) => (
-        <Typography key={field.key}>
-          {field.label}: {formData?.SQMaterialCostSetting[field.key] || 0}
-          {field.unit}
-        </Typography>
-      ))}
-    </Box>
-  );
+  const renderSummaryFields = () => {
+    if (!config.summaryFields.length) return null;
+    return (
+      <Box>
+        {config.summaryFields.map((field) => (
+          <Typography key={field.key}>
+            {field.label}: {formData?.SQMaterialCostSetting[field.key] || 0}
+            {field.unit}
+          </Typography>
+        ))}
+      </Box>
+    );
+  };
 
   const renderSection = (section) => {
     const headers = [
-      [{ title: section.sectionTitle, colSpan: section.headers.length }],
+      [
+        {
+          title: section.sectionTitle,
+          colSpan: section.headers.length,
+        },
+      ],
       section.headers.map((header) => header.label),
     ];
 

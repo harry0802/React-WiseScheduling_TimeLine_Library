@@ -67,7 +67,7 @@ const renderTableHead = (headers) => (
         {headerRow?.map((header, cellIndex) => (
           <StyledTableCell
             key={cellIndex}
-            colSpan={header.colSpan}
+            colSpan={header.span || header.colSpan || 1} // 優先使用span
             align={header.align}
           >
             {header.title ?? header}

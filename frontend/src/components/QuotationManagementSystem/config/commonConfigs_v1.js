@@ -64,6 +64,7 @@ export const createField = (
 });
 
 // =============== 基礎成本設置字段 ===============
+
 const materialCostSettingFields = {
   estimatedDefectRate: createField(
     "estimatedDefectRate",
@@ -81,10 +82,10 @@ const materialCostSettingFields = {
   ),
   extractionCost: createField(
     "extractionCost",
-    "取出費用",
+    "抽料費用",
     "number",
-    createInputProps("元", "取出費用"),
-    createRequiredRule("取出費用")
+    createInputProps("元", "抽料費用"),
+    createRequiredRule("抽料費用")
   ),
   processingCost: createField(
     "processingCost",
@@ -410,7 +411,7 @@ export const commonSections = {
     title: "材料成本設置",
     fields: Object.values(materialCostSettingFields).map((field) => ({
       ...field,
-      span: 3,
+      span: 12,
     })),
   },
   materialCosts: {
@@ -452,14 +453,14 @@ export const commonSections = {
     title: "委外加工成本",
     fields: Object.values(outsourcedProcessingFields).map((field) => ({
       ...field,
-      span: 6,
+      span: 3,
     })),
   },
   internalProcessingCosts: {
     title: "廠內加工成本",
     fields: Object.values(internalProcessingFields).map((field) => ({
       ...field,
-      span: 4,
+      span: 2,
     })),
   },
 };
