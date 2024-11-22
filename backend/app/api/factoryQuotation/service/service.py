@@ -3,6 +3,7 @@ from sqlalchemy import literal
 import sys
 from app import db
 from app.utils_log import message, err_resp, internal_err_resp
+from app.models.machine import Machine
 from app.models.process import Process
 from app.models.product import Product
 from app.models.processMaterial import ProcessMaterial
@@ -103,7 +104,7 @@ def get_processes_by_productSN(productSN):
             ly0000AO_db = db.session.query(LY0000AODetail).filter(
                 LY0000AODetail.SD_SKNO == process_db["materialSN"],
                 LY0000AODetail.SD_NAME == process_db["materialName"]
-            ).first()
+            ).order_by(LY0000AODetail.SD_DATE.desc()).first()
             
             # Set `unitPrice` if found in LY0000AODetail
             if ly0000AO_db:
@@ -527,12 +528,17 @@ class FactoryQuotationService:
                         process_db.FQPackagingCosts = packaging_dump
 
                     # get FQInjectionMoldingCost by FQProcessId
-                    injectionMolding_db = db.session.execute(
+                    # inner join machine on FQInjectionMoldingCost.machineId = machine.id
+                    injectionMolding_db_list = db.session.execute(
                         db.select(FQInjectionMoldingCost)
+                        .join(Machine, FQInjectionMoldingCost.machineId == Machine.id)
                         .filter(FQInjectionMoldingCost.FQProcessId == process_db.id)
                     ).scalars().all()
-                    if injectionMolding_db:
-                        injectionMolding_dump = FQInjectionMoldingCostSchema().dump(injectionMolding_db, many=True)
+                    for injectionMolding_db in injectionMolding_db_list:
+                        injectionMolding_db.machineSN = injectionMolding_db.machines.machineSN
+                        injectionMolding_db.electricityCostPerSec = injectionMolding_db.machines.electricityCostPerSec
+                    if injectionMolding_db_list:
+                        injectionMolding_dump = FQInjectionMoldingCostSchema().dump(injectionMolding_db_list, many=True)
                         process_db.FQInjectionMoldingCosts = injectionMolding_dump
 
                     # get FQInPostProcessingCost by FQProcessId
