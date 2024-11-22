@@ -18,6 +18,8 @@ class SQInjectionMoldingCost(Model):
     amount = Column(db.Float, comment='金額')
     subtotal = Column(db.Float, comment='小計')
     electricityCost = Column(db.Float, comment='電費')
+    
+    machines = db.relationship('Machine', backref='SQInjectionMoldingCost', lazy=True)
 
 
     def __init__(self, **kwargs):

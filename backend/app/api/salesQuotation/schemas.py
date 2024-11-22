@@ -41,6 +41,7 @@ class SQInjectionMoldingCostSchema(Schema):
     id = fields.Integer(dump_only=True)
     SQProcessId = fields.Integer(required=True)
     machineId = fields.Integer(required=False)
+    machineSN = fields.String(required=False)
     workHoursRatio = fields.Float(required=False)
     defectiveRate = fields.Float(required=False)
     cycleTime = fields.Float(required=False)
@@ -49,6 +50,7 @@ class SQInjectionMoldingCostSchema(Schema):
     unitPrice = fields.Float(required=False)
     amount = fields.Float(required=False)
     subtotal = fields.Float(required=False)
+    electricityCostPerSec = fields.Float(required=False)
     electricityCost = fields.Float(required=False)
 
 

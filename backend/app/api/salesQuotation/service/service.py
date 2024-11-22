@@ -2,6 +2,7 @@ from datetime import datetime
 import sys
 from app import db
 from app.utils_log import message, err_resp, internal_err_resp
+from app.models.machine import Machine
 from app.models.processOption import ProcessOption
 from app.models.salesQuotation.salesQuotation import SalesQuotation
 from app.models.salesQuotation.SQProcess import SQProcess
@@ -157,12 +158,17 @@ class SalesQuotationService:
                         process_db.SQPackagingCosts = packaging_dump
 
                     # get SQInjectionMoldingCost by SQProcessId
-                    injectionMolding_db = db.session.execute(
+                    # inner join machine on SQInjectionMoldingCost.machineId = machine.id
+                    injectionMolding_db_list = db.session.execute(
                         db.select(SQInjectionMoldingCost)
+                        .join(Machine, SQInjectionMoldingCost.machineId == Machine.id)
                         .filter(SQInjectionMoldingCost.SQProcessId == process_db.id)
                     ).scalars().all()
-                    if injectionMolding_db:
-                        injectionMolding_dump = SQInjectionMoldingCostSchema().dump(injectionMolding_db, many=True)
+                    for injectionMolding_db in injectionMolding_db_list:
+                        injectionMolding_db.machineSN = injectionMolding_db.machines.machineSN
+                        injectionMolding_db.electricityCostPerSec = injectionMolding_db.machines.electricityCostPerSec
+                    if injectionMolding_db_list:
+                        injectionMolding_dump = SQInjectionMoldingCostSchema().dump(injectionMolding_db_list, many=True)
                         process_db.SQInjectionMoldingCosts = injectionMolding_dump
 
                     # get SQInPostProcessingCost by SQProcessId

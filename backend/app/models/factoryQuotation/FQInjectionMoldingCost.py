@@ -19,6 +19,8 @@ class FQInjectionMoldingCost(Model):
     subtotal = Column(db.Float, comment='小計')
     electricityCost = Column(db.Float, comment='電費')
 
+    machines = db.relationship('Machine', backref='FQInjectionMoldingCost', lazy=True)
+
 
     def __init__(self, **kwargs):
         super(FQInjectionMoldingCost, self).__init__(**kwargs)
