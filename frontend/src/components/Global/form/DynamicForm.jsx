@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect } from "react";
+import React, { useMemo, useCallback, useEffect, useState } from "react";
 import {
   useForm,
   FormProvider,
@@ -23,6 +23,19 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { formatSubmitValues } from "../../../utility/formUtils";
+// 選項合併與去重
+const mergeAndDedupeOptions = (asyncOptions = [], staticOptions = []) => {
+  const uniqueOptions = new Map();
+
+  // 處理異步選項
+  if (Array.isArray(asyncOptions)) {
+    asyncOptions.forEach((option) => uniqueOptions.set(option.value, option));
+  }
+  // 合併靜態選項
+  staticOptions.forEach((option) => uniqueOptions.set(option.value, option));
+
+  return Array.from(uniqueOptions.values());
+};
 
 //* 表單樣式
 const StyledForm = styled("form")(({ theme }) => ({
@@ -80,7 +93,15 @@ function filterCustomProps(props) {
   return domProps;
 }
 // 渲染表單項目
-function renderFormItem(field, controllerField, restProps, options, error) {
+function renderFormItem(
+  field,
+  controllerField,
+  restProps,
+  options,
+  error,
+  loading,
+  asyncOptions
+) {
   const mergedProps = mergeProps(field, controllerField, restProps);
   const {
     getDependentOptions,
@@ -93,17 +114,22 @@ function renderFormItem(field, controllerField, restProps, options, error) {
     ...cleanProps
   } = restProps;
   switch (field.type) {
+    // 在 switch case 中
     case "select":
+      const selectOptions = loading
+        ? []
+        : mergeAndDedupeOptions(asyncOptions, options);
+
       return (
         <FormControl fullWidth error={!!error}>
           <InputLabel id={`${field.name}-label`}>{field.label}</InputLabel>
           <Select
-            {...controllerField} // 先放 controllerField
-            {...cleanProps} // 后放清理过的 props
+            {...controllerField}
+            {...restProps}
             labelId={`${field.name}-label`}
             label={field.label}
           >
-            {options.map((option) => (
+            {selectOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
@@ -223,6 +249,9 @@ function DynamicForm({
 // 表單欄位組件
 function FieldComponent({ field, customProps = {} }) {
   const methods = useFormContext();
+  const [asyncOptions, setAsyncOptions] = useState([]);
+
+  const [loading, setLoading] = useState(false);
   const {
     field: controllerField,
     fieldState: { error },
@@ -257,6 +286,18 @@ function FieldComponent({ field, customProps = {} }) {
       return () => subscription.unsubscribe();
     }
   }, [field.dependsOn, methods]);
+
+  // 處理非同步獲取選項
+  useEffect(() => {
+    if (field.getOptions) {
+      setLoading(true);
+      field
+        .getOptions()
+        .then((data) => setAsyncOptions(data))
+        .catch((err) => console.error("獲取選項失敗:", err))
+        .finally(() => setLoading(false));
+    }
+  }, [field.getOptions]);
 
   // 修改數字輸入處理
   const inputProps =
@@ -300,15 +341,33 @@ function FieldComponent({ field, customProps = {} }) {
         controllerField={inputProps}
         options={options}
         error={error}
+        loading={loading}
+        asyncOptions={asyncOptions}
         {...cleanCustomProps}
       />
     </Grid>
   );
 }
 // 表單項目渲染組件
-function FormItem({ field, controllerField, options, error, ...props }) {
+function FormItem({
+  field,
+  controllerField,
+  options,
+  error,
+  loading,
+  asyncOptions,
+  ...props
+}) {
   const domProps = filterCustomProps(props);
-  return renderFormItem(field, controllerField, domProps, options, error);
+  return renderFormItem(
+    field,
+    controllerField,
+    domProps,
+    options,
+    error,
+    loading,
+    asyncOptions
+  );
 }
 
 // 使用 React.memo 優化渲染效能，避免不必要的重新渲染

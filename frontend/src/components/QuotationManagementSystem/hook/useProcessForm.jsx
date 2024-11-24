@@ -1,34 +1,68 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { PROCESS_TYPES } from "../config/processTypes";
 
 export function useProcessForm(initialProcess) {
+  // 1. 狀態管理
   const [process, setProcess] = useState(initialProcess);
 
-  // 使用可选链和默认值处理
-  const initProcessSN = initialProcess?.initialData?.processSN;
-  const processOptionId = initialProcess?.initialData?.processOptionId;
+  // 2. 表單初始值處理
+  const initialValues = useMemo(() => {
+    if (!initialProcess)
+      return {
+        processCategory: "",
+        processSN: "",
+      };
 
+    return {
+      processCategory: initialProcess.processOptionId || "",
+      processSN: "", // 先給空值,等待選項載入
+      // 其他初始值
+      ...initialProcess?.SQMaterialCostSetting,
+    };
+  }, [initialProcess]);
+
+  // 3. 表單實例
   const methods = useForm({
-    defaultValues: {
-      processCategory: processOptionId || "", // 提供默认空字符串
-      processSN: initProcessSN || "",
-    },
+    defaultValues: initialValues,
   });
 
+  // 4. 表單變更處理
   const handleFormChange = useCallback((data) => {
-    setProcess((prev) => ({ ...prev, ...data }));
+    setProcess((prev) => {
+      // 確保不會覆蓋已有資料
+      return {
+        ...prev,
+        ...data,
+        // 保留 ID 相關欄位
+        id: prev?.id,
+        salesQuotationId: prev?.salesQuotationId,
+        processOptionId: prev?.processOptionId,
+      };
+    });
   }, []);
 
-  const handleSubmit = useCallback(async (formData) => {
-    try {
-      console.log("Submitting:", formData);
-      return formData;
-    } catch (error) {
-      console.error("Submit error:", error);
-      throw error;
-    }
-  }, []);
+  // 5. 提交處理
+  const handleSubmit = useCallback(
+    async (formData) => {
+      console.log("🔥🔥🔥🔥 ~ formData:", formData);
+      try {
+        // 組合最終提交資料
+        const submitData = {
+          ...process,
+          ...formData,
+        };
+        // 可以在這裡加入驗證邏輯
+        const isValid = await methods.trigger();
+        if (!isValid) return;
+
+        return submitData;
+      } catch (error) {
+        console.error("Submit error:", error);
+        throw error;
+      }
+    },
+    [process, methods]
+  );
 
   return {
     process,

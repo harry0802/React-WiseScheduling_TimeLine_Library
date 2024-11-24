@@ -17,7 +17,7 @@ const quotationData = {
       processOptionId: 1,
       processCategory: "In-IJ(廠內成型)",
       processSN: "In-IJ01",
-      processName: "廠內-成型-IJ01",
+      processName: "廠內-成型-一般射出",
       SQMaterialCostSetting: {
         id: 1,
         SQProcessId: 1,
@@ -85,7 +85,7 @@ const quotationData = {
           id: 1,
           SQProcessId: 1,
           machineId: 10,
-          machineName: "哥吉拉",
+          machineSN: "A10",
           workHoursRatio: 0.95,
           defectiveRate: 0.05,
           cycleTime: 80,
@@ -94,18 +94,18 @@ const quotationData = {
           unitPrice: 3200,
           amount: 3360,
           subtotal: 4.912,
+          electricityCostPerSec: 0.0152,
           electricityCost: 0.608,
-          electricityCostPerSecond: 0.0076,
         },
       ],
     },
     {
       id: 2,
       salesQuotationId: 1,
-      processOptionId: 5,
+      processOptionId: 3,
       processCategory: "Out-IJ(委外成型)",
-      processSN: "Out-IJ01",
-      processName: "委外-成型-IJ01",
+      processSN: "Out-IJ02",
+      processName: "委外-成型-一般射出",
       SQMaterialCostSetting: {
         id: 2,
         SQProcessId: 2,
@@ -178,7 +178,7 @@ const quotationData = {
     {
       id: 3,
       salesQuotationId: 1,
-      processOptionId: 9,
+      processOptionId: 5,
       processCategory: "In-BE(廠內後製程)",
       processSN: "In-BESF",
       processName: "廠內-貼膜",
@@ -255,10 +255,10 @@ const quotationData = {
     {
       id: 4,
       salesQuotationId: 1,
-      processOptionId: 20,
+      processOptionId: 8,
       processCategory: "Out-BE(委外後製程)",
       processSN: "Out-BEUL",
-      processName: "委外-超音波(熱熔)",
+      processName: "委外-超音波",
       SQMaterialCostSetting: {
         id: 4,
         SQProcessId: 4,
@@ -331,10 +331,10 @@ const quotationData = {
     {
       id: 5,
       salesQuotationId: 1,
-      processOptionId: 31,
+      processOptionId: 9,
       processCategory: "In-TS(廠內出貨檢驗)",
       processSN: "In-TS01",
-      processName: "廠內-出貨檢驗01",
+      processName: "廠內-一般檢驗",
       SQInPostProcessingCosts: [
         {
           id: 2,

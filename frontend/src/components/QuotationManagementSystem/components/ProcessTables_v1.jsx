@@ -70,7 +70,7 @@ const TableHandler = {
   getBasicInfo(formData) {
     const { processCategory, processSN } = formData;
     const processInfo = utils.getProcessInfo(processCategory, processSN);
-
+    console.log("🔥🔥🔥🔥 ~ getBasicInfo ~ processInfo:", processInfo);
     return [
       { label: "製程類別", value: processCategory },
       { label: "製程編號", value: processSN },

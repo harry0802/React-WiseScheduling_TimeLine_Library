@@ -26,7 +26,7 @@ export const renderGeneralFields = (item, sectionIndex) => {
 export const renderTodoList = (item, sectionIndex) => (
   <CustomTodoList
     key={`${sectionIndex}-${item.title}`}
-    name={`todoItems_${item.title}`}
+    name={item.name}
     fields={item.items}
     renderField={(fieldProps) => <DynamicForm.Field {...fieldProps} />}
   />

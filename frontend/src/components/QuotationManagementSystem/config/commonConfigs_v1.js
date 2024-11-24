@@ -1,24 +1,27 @@
-/**
- * 通用單位常量
- */
-const COMMON_UNITS = [
-  { value: "公克", label: "公克" },
-  { value: "件", label: "件" },
-];
+export const optionsService = {
+  getCommonUnits: async () => {
+    // 模擬 API 呼叫
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return [
+      { value: "公克", label: "公克" },
+      { value: "件", label: "件" },
+    ];
+  },
 
-/**
- * 包材類型常量
- */
-const PACKAGING_TYPES = [{ value: "包材", label: "包材" }];
+  getPackagingTypes: async () => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return [{ value: "包材", label: "包材" }];
+  },
 
-/**
- * 運輸費用類型常量
- */
-const FREIGHT_TYPES = [
-  { value: "空運", label: "空運" },
-  { value: "海運", label: "海運" },
-  { value: "陸運", label: "陸運" },
-];
+  getFreightTypes: async () => {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return [
+      { value: "空運", label: "空運" },
+      { value: "海運", label: "海運" },
+      { value: "陸運", label: "陸運" },
+    ];
+  },
+};
 
 /**
  * 創建輸入屬性
@@ -36,6 +39,7 @@ const createRequiredRule = (label) => ({ required: `${label}為必填` });
 /**
  * @function createField - 優化版本
  */
+// 1. 修改 createField (最小改動)
 export const createField = (
   name,
   label,
@@ -43,7 +47,8 @@ export const createField = (
   props = {},
   rules = {},
   options = null,
-  span
+  span,
+  getOptions
 ) => ({
   name,
   label,
@@ -51,7 +56,6 @@ export const createField = (
   ...props,
   rules: {
     ...rules,
-    // 只為 number 類型添加轉換
     ...(type === "number" && {
       setValueAs: (value) => {
         if (value === "" || value === null) return null;
@@ -60,7 +64,9 @@ export const createField = (
     }),
   },
   ...(span && { span }),
-  ...(options && { options }),
+  // 改為直接傳入 getOptions 函數，而不是呼叫它
+  ...(getOptions ? { getOptions } : {}),
+  ...(options ? { options } : {}),
 });
 
 // =============== 基礎成本設置字段 ===============
@@ -118,7 +124,9 @@ const materialCostFields = {
     "select",
     { placeholder: "請選擇單位" },
     createRequiredRule("單位"),
-    COMMON_UNITS
+    null,
+    3,
+    optionsService.getCommonUnits
   ),
   weight: createField(
     "weight",
@@ -134,13 +142,6 @@ const materialCostFields = {
     createInputProps("元", "單價"),
     createRequiredRule("單價")
   ),
-  amount: createField(
-    "amount",
-    "金額",
-    "number",
-    createInputProps("元", "金額"),
-    createRequiredRule("金額")
-  ),
 };
 
 // =============== 包裝成本字段 ===============
@@ -151,7 +152,9 @@ const packagingCostFields = {
     "select",
     { placeholder: "請選擇包材類型" },
     createRequiredRule("包材類型"),
-    PACKAGING_TYPES
+    null,
+    3,
+    optionsService.getPackagingTypes
   ),
   materialSN: createField(
     "materialSN",
@@ -173,7 +176,9 @@ const packagingCostFields = {
     "select",
     { placeholder: "請選擇單位" },
     createRequiredRule("單位"),
-    COMMON_UNITS
+    null,
+    3,
+    optionsService.getCommonUnits
   ),
   quantity: createField(
     "quantity",
@@ -201,13 +206,6 @@ const packagingCostFields = {
     "number",
     createInputProps("元", "單價"),
     createRequiredRule("單價")
-  ),
-  amount: createField(
-    "amount",
-    "金額",
-    "number",
-    createInputProps("元", "金額"),
-    createRequiredRule("金額")
   ),
 };
 
@@ -325,7 +323,9 @@ const customsDutyFields = {
     "select",
     { placeholder: "請選擇費用類型" },
     createRequiredRule("費用類型"),
-    FREIGHT_TYPES
+    null,
+    3,
+    optionsService.getFreightTypes
   ),
   freight: createField(
     "freight",

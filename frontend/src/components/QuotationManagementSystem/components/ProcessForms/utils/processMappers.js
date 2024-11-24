@@ -6,18 +6,27 @@ import {
 export const processMappers = {
   processTypes: {
     toOptions: (data) =>
-      data.map(({ id, processCategory }) => ({
-        value: id,
-        label: processCategory,
+      data.map(({ id, processName, processCategory }) => ({
+        value: id, // 保持 value 為 id
+        label: processName,
+        // 保存額外資料
+        processCategory,
+        // 或者保存整個原始資料
+        raw: { id, processName, processCategory },
       })),
 
     toSubtypeOptions: (data) =>
-      data.map((item) => ({
-        value: item.processSN,
-        label: item.processName,
+      data.map(({ id, processSN, processName, processCategory }) => ({
+        value: processSN,
+        label: processSN,
+        // 保存需要的資料
+        id,
+        processCategory,
+        processName,
       })),
   },
 };
+
 export const processService = {
   getProcessTypes: async () => {
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -27,9 +36,7 @@ export const processService = {
   getProcessSubtypes: async (categoryId) => {
     await new Promise((resolve) => setTimeout(resolve, 300));
     return PROCESS_TYPES.filter((type) => {
-      const category = BASIC_PROCESS_TYPES.find(
-        (basic) => basic.id === categoryId
-      );
+      const category = PROCESS_TYPES.find((basic) => basic.id === categoryId);
       return type.processCategory === category?.processCategory;
     });
   },
