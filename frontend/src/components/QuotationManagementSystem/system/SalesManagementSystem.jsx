@@ -11,7 +11,6 @@ import { getNow } from "../utility/timeUtils";
 function SalesManagementSystem() {
   const { pageStatus, setAPIData } = useSalesHomeSlice();
   const { data, isSuccess } = useGetQuotationsQuery();
-  console.log("🚀 ~ SalesManagementSystem ~ data:", data);
   const [createQuotation, { isLoading: isCreating, isSuccess: isCreated }] =
     useCreateQuotationMutation();
 

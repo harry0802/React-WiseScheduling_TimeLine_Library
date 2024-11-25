@@ -47,17 +47,19 @@ const fields = (customers) => {
   ];
 };
 
-function QmsPdInfo({ type, productData, onUpdate }) {
-  console.log("🚀 ~ QmsPdInfo ~ productData:", productData);
+function QmsPdInfo({ type, productData, onUpdate, BusinessQuotationStore }) {
   const useSlice = type === "sales" ? useSalesHomeSlice : useFactoryHomeSlice;
   const { data } = useSlice();
-
   const {
     data: customers,
     isLoading: isLoadingCustomers,
     isSuccess: isSuccessCustomers,
     error: errorCustomers,
   } = useGetCustomersQuery();
+
+  const { id, quotationSN, createDate, customerName, productName } =
+    BusinessQuotationStore();
+  console.log("🔥🔥🔥🔥 ~ QmsPdInfo ~ quotationSN:", quotationSN);
 
   // 使用 useMemo 緩存 fields
   const memoizedFields = useMemo(
@@ -85,23 +87,25 @@ function QmsPdInfo({ type, productData, onUpdate }) {
   );
 
   // 等待資料完全載入
-  if (isLoadingCustomers) return <div>載入中...</div>;
-  if (errorCustomers) return <div>載入失敗: {errorCustomers.message}</div>;
-  if (!customers?.data?.length) return <div>無客戶資料</div>;
+  // if (isLoadingCustomers) return <div>載入中...</div>;
+  // if (errorCustomers) return <div>載入失敗: {errorCustomers.message}</div>;
+  // if (!customers?.data?.length) return <div>無客戶資料</div>;
 
   return (
     <BaseProductInfoSection
-      product={productData?.data}
+      product={{
+        id,
+        createDate,
+        productNumber: quotationSN,
+        productName,
+        customerName,
+      }}
       onUpdate={onUpdate}
       title="產品詳情"
     >
       <BaseProductInfoSection.Info render={renderInfo} />
       <BaseProductInfoSection.Drawer title="產品詳情">
-        {isSuccessCustomers && (
-          <>
-            <BaseProductInfoSection.Form formFields={memoizedFields} />
-          </>
-        )}
+        <BaseProductInfoSection.Form formFields={memoizedFields} />
       </BaseProductInfoSection.Drawer>
     </BaseProductInfoSection>
   );
