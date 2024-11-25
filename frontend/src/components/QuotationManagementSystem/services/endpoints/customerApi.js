@@ -1,10 +1,8 @@
 import apiSlice from "../apiSlice";
-import { Customer } from "../type";
 
-// 客戶 API
 export const customerApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getCustomers: builder.query<Customer[], void>({
+    getCustomers: builder.query({
       query: () => "customer/list",
       providesTags: ["Customer"],
     }),

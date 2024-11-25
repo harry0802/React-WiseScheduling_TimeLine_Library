@@ -1,103 +1,107 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
 import { useFactoryHomeSlice, useSalesHomeSlice } from "../slice/qmsHome";
+import { useGetCustomersQuery } from "../services/endpoints/customerApi";
 
-const fields = [
-  {
-    type: "input",
-    name: "productNumber",
-    label: "產品序號",
-    rules: { required: "產品序號是必填的" },
-    props: { placeholder: "請輸入產品序號" },
-  },
-  {
-    type: "input",
-    name: "productName",
-    label: "產品名稱",
-    rules: { required: "產品名稱是必填的" },
-    props: { placeholder: "請輸入產品名稱" },
-  },
-  {
-    type: "autocomplete",
-    name: "customerName",
-    label: "客戶名稱",
-    options: [
-      { value: "clientA", label: "客戶A" },
-      { value: "clientB", label: "客戶B" },
-      { value: "clientC", label: "客戶C" },
-      { value: "clientD", label: "客戶D" },
-    ],
-    rules: { required: "請選擇至少一個客戶" },
-    props: {
-      getOptionLabel: (option) => option.label || option,
-      isOptionEqualToValue: (option, value) =>
-        option.value === value || option === value,
+//  包裝成為函數 帶入 async 的資料
+const fields = (customers) => {
+  return [
+    {
+      type: "input",
+      name: "productNumber",
+      label: "產品序號",
+      rules: { required: "產品序號是必填的" },
+      props: { placeholder: "請輸入產品序號" },
     },
-  },
-];
+    {
+      type: "input",
+      name: "productName",
+      label: "產品名稱",
+      rules: { required: "產品名稱是必填的" },
+      props: { placeholder: "請輸入產品名稱" },
+    },
+    {
+      type: "autocomplete",
+      name: "customerName",
+      label: "客戶名稱",
+      options: customers?.map((customer, index) => ({
+        value: customer.name,
+        label: customer.name,
+        id: index, // 確保每個選項有唯一識別碼
+      })),
+      rules: { required: "請選擇至少一個客戶" },
+      props: {
+        getOptionLabel: (option) => {
+          if (typeof option === "string") return option;
 
-function QmsPdInfo({ type }) {
+          return option?.label || "";
+        },
+        isOptionEqualToValue: (option, value) => {
+          if (!option || !value) return false;
+          if (typeof value === "string") return option.value === value;
+          return option.value === value.value;
+        },
+      },
+    },
+  ];
+};
+
+function QmsPdInfo({ type, productData, onUpdate }) {
+  console.log("🚀 ~ QmsPdInfo ~ productData:", productData);
   const useSlice = type === "sales" ? useSalesHomeSlice : useFactoryHomeSlice;
   const { data } = useSlice();
 
-  const { productId } = useParams();
-  const navigate = useNavigate();
+  const {
+    data: customers,
+    isLoading: isLoadingCustomers,
+    isSuccess: isSuccessCustomers,
+    error: errorCustomers,
+  } = useGetCustomersQuery();
 
-  const [productData, setProductData] = useState({});
+  // 使用 useMemo 緩存 fields
+  const memoizedFields = useMemo(
+    () => fields(customers?.data),
+    [customers?.data]
+  );
 
-  const handleUpdate = useCallback((formData) => {
-    console.log("Form Data:", formData);
-    setProductData((prev) => ({
-      ...prev,
-      ...formData,
-      customerName:
-        formData.customerName && typeof formData.customerName === "object"
-          ? formData.customerName.label
-          : formData.customerName,
-    }));
-    // 這裡可以添加其他更新邏輯，比如發送API請求
-  }, []);
+  // 優化 render 函數,避免不必要重繪
+  const renderInfo = useCallback(
+    (product) =>
+      product ? (
+        <>
+          <p>
+            <strong>產品序號:</strong> {product.productNumber ?? ""}
+          </p>
+          <p>
+            <strong>產品名稱:</strong> {product.productName ?? ""}
+          </p>
+          <p>
+            <strong>客戶名稱:</strong> {product.customerName ?? ""}
+          </p>
+        </>
+      ) : null,
+    []
+  );
 
-  // 監聽產品ID變化，更新產品數據
-  useEffect(() => {
-    if (data === null || !productId) {
-      navigate("/QuotationManagementSystem");
-    } else {
-      const [product] = data?.filter((item) => item.id === productId) || [];
-      if (product) {
-        setProductData(product);
-      }
-    }
-  }, [productId, data, navigate]);
+  // 等待資料完全載入
+  if (isLoadingCustomers) return <div>載入中...</div>;
+  if (errorCustomers) return <div>載入失敗: {errorCustomers.message}</div>;
+  if (!customers?.data?.length) return <div>無客戶資料</div>;
 
   return (
     <BaseProductInfoSection
-      product={productData}
-      onUpdate={handleUpdate}
+      product={productData?.data}
+      onUpdate={onUpdate}
       title="產品詳情"
     >
-      <BaseProductInfoSection.Info
-        render={(product) => (
+      <BaseProductInfoSection.Info render={renderInfo} />
+      <BaseProductInfoSection.Drawer title="產品詳情">
+        {isSuccessCustomers && (
           <>
-            {product && (
-              <>
-                <p>
-                  <strong>產品序號:</strong> {product.productNumber ?? ""}
-                </p>
-                <p>
-                  <strong>產品名稱:</strong> {product.productName ?? ""}
-                </p>
-                <p>
-                  <strong>客戶名稱:</strong> {product.customerName ?? ""}
-                </p>
-              </>
-            )}
+            <BaseProductInfoSection.Form formFields={memoizedFields} />
           </>
         )}
-      />
-      <BaseProductInfoSection.Drawer title="產品詳情">
-        <BaseProductInfoSection.Form formFields={fields} />
       </BaseProductInfoSection.Drawer>
     </BaseProductInfoSection>
   );

@@ -8,6 +8,7 @@ export const useFactoryHomeSlice = create(
     (set, get) => ({
       ...initialState,
       pageStatus: "工廠報價管理系統",
+      type: "factory",
       ...createHomeActions(set, get),
     }),
     {
@@ -23,6 +24,7 @@ export const useSalesHomeSlice = create(
     (set, get) => ({
       ...initialState,
       pageStatus: "業務報價管理系統",
+      type: "sales",
       ...createHomeActions(set, get),
     }),
     {

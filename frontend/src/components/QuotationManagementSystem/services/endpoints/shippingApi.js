@@ -1,19 +1,15 @@
 import apiSlice from "../apiSlice";
-import { ShippingRequest } from "../type";
 
 // 運費 API
 export const shippingApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    updateShipping: builder.mutation<
-      void,
-      { quotationId: number; shipping: ShippingRequest }
-    >({
+    updateShipping: builder.mutation({
       query: ({ quotationId, shipping }) => ({
         url: `salesQuotation/${quotationId}/shipping/`,
         method: "PUT",
         body: shipping,
       }),
-      invalidatesTags: (result, error, { quotationId }) => [
+      invalidatesTags: (result, _error, { quotationId }) => [
         { type: "Quotation", id: quotationId },
       ],
     }),

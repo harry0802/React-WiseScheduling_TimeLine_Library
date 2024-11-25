@@ -85,7 +85,7 @@ const routeConfig = [
           },
         ],
       },
-
+      // SalesQuotationManagementSystem
       {
         path: "SalesQuotationManagementSystem",
         element: <LazyComponents.SalesQuotationManagementSystem />,
@@ -96,15 +96,24 @@ const routeConfig = [
             element: <LazyComponents.SalesQmsHome />,
           },
           {
-            path: "addProductInfo/:productId",
+            path: "create/:productId",
             element: (
-              <React.Suspense fallback={<div> Loading... </div>}>
-                <LazyComponents.QmsAddtions />
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <LazyComponents.SalesQmsCreate mode="create" />
+              </React.Suspense>
+            ),
+          },
+          {
+            path: "edit/:productId",
+            element: (
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <LazyComponents.SalesQmsMaintain mode="edit" />
               </React.Suspense>
             ),
           },
         ],
       },
+      // FactoryQuotationManagementSystem
       {
         path: "FactoryQuotationManagementSystem",
         element: <LazyComponents.FactoryQuotationManagementSystem />,

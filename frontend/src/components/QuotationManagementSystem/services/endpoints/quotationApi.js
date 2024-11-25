@@ -1,26 +1,20 @@
-// services/api/endpoints/quotationApi.ts
 import apiSlice from "../apiSlice";
-import {
-  QuotationResponse,
-  CreateQuotationRequest,
-  UpdateQuotationRequest,
-} from "../type";
 
-// 報價 API
 export const quotationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getQuotations: builder.query<{ data: QuotationResponse[] }, void>({
+    // 取得報價單列表
+    getQuotations: builder.query({
       query: () => "salesQuotation/products/",
       providesTags: ["Quotation"],
     }),
-    getQuotationById: builder.query<{ data: QuotationResponse }, number>({
+    // 取得單一報價單
+    getQuotationById: builder.query({
       query: (id) => `salesQuotation/${id}`,
       providesTags: (result, error, id) => [{ type: "Quotation", id }],
     }),
-    createQuotation: builder.mutation<
-      QuotationResponse,
-      CreateQuotationRequest
-    >({
+    // 新增報價單
+    // 需要帶入 iso 時間  "createDate": "2024-11-08T00:00:00.000+08:00"
+    createQuotation: builder.mutation({
       query: (body) => ({
         url: "salesQuotation/",
         method: "POST",
@@ -28,10 +22,8 @@ export const quotationApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Quotation"],
     }),
-    updateQuotation: builder.mutation<
-      QuotationResponse,
-      UpdateQuotationRequest
-    >({
+    // 更新報價單
+    updateQuotation: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `salesQuotation/${id}`,
         method: "PUT",
@@ -39,7 +31,8 @@ export const quotationApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "Quotation", id }],
     }),
-    deleteQuotation: builder.mutation<void, number>({
+    // 刪除報價單
+    deleteQuotation: builder.mutation({
       query: (id) => ({
         url: `salesQuotation/${id}`,
         method: "DELETE",

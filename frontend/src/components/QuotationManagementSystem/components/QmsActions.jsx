@@ -15,7 +15,7 @@ const options = [
   { label: "客戶名稱", value: "customerName" },
 ];
 
-function QmsActions() {
+function QmsActions({ onCreate, id }) {
   const [userSearch, setUserSearch] = useState("");
   const [userSelect, setUserSelect] = useState(options[0].value);
   const navigate = useNavigate();
@@ -38,7 +38,10 @@ function QmsActions() {
       <div className="record-actions__button">
         <ProductionRecordButton
           tooltip="物料編碼與製程編碼"
-          OnClick={() => navigate("procMaterials")}
+          OnClick={() => {
+            onCreate?.();
+            navigate(`create/${id}`);
+          }}
         >
           <AddIcon />
         </ProductionRecordButton>
