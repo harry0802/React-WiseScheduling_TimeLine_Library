@@ -1,25 +1,90 @@
 export const optionsService = {
   getCommonUnits: async () => {
-    // 模擬 API 呼叫
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return [
-      { value: "公克", label: "公克" },
-      { value: "件", label: "件" },
-    ];
+    const response = await fetch(
+      "http://localhost:5000/api/option/materialUnit"
+    );
+    console.log("🚀 ~ getCommonUnits: ~ response:", response);
+    const data = await response.json();
+    return data.data.map((item) => ({
+      id: item.id,
+      value: item.name,
+      label: `${item.name} (${item.schema})`,
+    }));
   },
 
   getPackagingTypes: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return [{ value: "包材", label: "包材" }];
+    const response = await fetch(
+      "http://localhost:5000/api/option/packagingUnit"
+    );
+    const data = await response.json();
+    return data.data.map((item) => ({
+      id: item.id,
+      value: item.name,
+      label: `${item.name} (${item.schema})`,
+    }));
   },
 
   getFreightTypes: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return [
-      { value: "空運", label: "空運" },
-      { value: "海運", label: "海運" },
-      { value: "陸運", label: "陸運" },
-    ];
+    try {
+      const response = await fetch("http://localhost:5000/api/machine/list");
+      const { data } = await response.json();
+
+      const areaMap = new Map();
+
+      // 使用 Map 保存唯一區域
+      data.forEach((machine) => {
+        if (!areaMap.has(machine.productionArea)) {
+          areaMap.set(machine.productionArea, {
+            id: machine.id,
+            value: machine.id,
+            label: machine.productionArea,
+          });
+        }
+      });
+
+      return Array.from(areaMap.values());
+    } catch (error) {
+      console.error("獲取產線區域失敗:", error);
+      throw error;
+    }
+  },
+
+  // 新增機台相關的選項服務
+  getMachineAreas: async (areaFilter) => {
+    try {
+      // 同時發送兩個請求
+      const [detailResponse, listResponse] = await Promise.all([
+        fetch(`http://localhost:5000/api/machine/?id=${areaFilter}`),
+        fetch("http://localhost:5000/api/machine/list"),
+      ]);
+
+      const [detailResult, listResult] = await Promise.all([
+        detailResponse.json(),
+        listResponse.json(),
+      ]);
+
+      if (!detailResult.status || !detailResult.data?.[0]) {
+        throw new Error(detailResult.message || "獲取機台資訊失敗");
+      }
+
+      if (!listResult.status) {
+        throw new Error(listResult.message || "獲取機台列表失敗");
+      }
+
+      const targetArea = detailResult.data[0].productionArea;
+
+      return listResult.data
+        .filter((machine) => machine.productionArea === targetArea)
+        .map(({ id, machineSN, productionArea }) => ({
+          id,
+          value: machineSN,
+          label: machineSN,
+          productionArea,
+        }));
+    } catch (error) {
+      console.error("取得機台資料失敗:", error);
+      throw error;
+    }
   },
 };
 
@@ -189,7 +254,7 @@ const packagingCostFields = {
   ),
   capacity: createField(
     "capacity",
-    "容量",
+    "量",
     "number",
     createInputProps("件/箱", "容量"),
     createRequiredRule("容量")

@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBusinessQuotationStore } from "../slice/useFactorySalesQuotationSlice_v1";
-import { useGetQuotationByIdQuery } from "../services/endpoints/quotationApi";
+import {
+  useGetQuotationByIdQuery,
+  useUpdateQuotationMutation,
+} from "../services/salesServices/endpoints/quotationApi";
 import { useSalesHomeSlice } from "../slice/qmsHome";
 
 export const useQmsBase = (mode = "create") => {
+  const { productId } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  // Store hooks
   const {
     calculationResults,
     addProcess,
@@ -14,44 +22,36 @@ export const useQmsBase = (mode = "create") => {
     calculateProfit,
     updateStore,
     actualQuotation,
+    updateBasicInfo,
+    calculateTransportationOnly,
   } = useBusinessQuotationStore();
 
-  const { data, type } = useSalesHomeSlice();
-  const { productId } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [productData, setProductData] = useState({});
+  const { data: homeData, type } = useSalesHomeSlice();
 
+  // API hooks
+  const [updateQuotation] = useUpdateQuotationMutation();
   const { data: quotationData, isSuccess: isSuccessQuotation } =
     useGetQuotationByIdQuery(productId, { skip: !productId });
 
-  const handleUpdate = useCallback((formData) => {
-    setProductData((prev) => ({
-      ...prev,
-      ...formData,
-      customerName:
-        formData.customerName && typeof formData.customerName === "object"
-          ? formData.customerName.label
-          : formData.customerName,
-    }));
-  }, []);
-
-  // 監聽產品ID變化
-  useEffect(() => {
-    if (data === null || !productId) {
-      type === "sales"
-        ? navigate("/SalesQuotationManagementSystem")
-        : navigate("/FactoryQuotationManagementSystem");
-    } else {
-      const [product] = data?.filter((item) => item.id === productId) || [];
-      if (product) {
-        setProductData(product);
-      }
+  // Navigation logic
+  const handleNavigation = useCallback(() => {
+    if (homeData === null || !productId) {
+      const path =
+        type === "sales"
+          ? "/SalesQuotationManagementSystem"
+          : "/FactoryQuotationManagementSystem";
+      navigate(path);
     }
-  }, [productId, data, navigate, type]);
+  }, [homeData, productId, type, navigate]);
 
-  const fetchData = useCallback(async () => {
+  useEffect(() => {
+    handleNavigation();
+  }, [handleNavigation]);
+
+  // Data processing logic
+  const processQuotationData = useCallback(async () => {
     if (!quotationData) return;
+
     try {
       resetAll();
       const { processes, ...restData } = quotationData.data;
@@ -69,9 +69,11 @@ export const useQmsBase = (mode = "create") => {
             ...profitResults,
           },
         });
+      } else {
+        calculateTransportationOnly();
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error processing quotation data:", error);
     } finally {
       setLoading(false);
     }
@@ -84,30 +86,67 @@ export const useQmsBase = (mode = "create") => {
     calculateProfit,
   ]);
 
+  // Update handling
+  // 產品資訊更新
+  const handleUpdate = useCallback(
+    (formData) => {
+      const customerName =
+        formData.customerName && typeof formData.customerName === "object"
+          ? formData.customerName.label
+          : formData.customerName;
+
+      // Update API
+      updateQuotation({
+        id: productId,
+        productName: formData.productName,
+        customerName,
+      });
+
+      // Update local state
+      updateBasicInfo(formData);
+    },
+    [productId, updateQuotation, updateBasicInfo]
+  );
+
+  // 利潤管理更新
+  const handleUpdateProfitManagement = useCallback(
+    (data) => {
+      updateQuotation({
+        id: productId,
+        ...data,
+      });
+      updateProfitManagement(data);
+    },
+    [updateProfitManagement, updateQuotation]
+  );
+
+  // Data fetching effect
   useEffect(() => {
     if (!isSuccessQuotation) return;
     setLoading(true);
-    fetchData();
-  }, [fetchData, isSuccessQuotation]);
+    processQuotationData();
+  }, [isSuccessQuotation, processQuotationData]);
 
+  // Memoized common props
   const commonProps = useMemo(
     () => ({
       costAndQuotation: { ...calculationResults, actualQuotation },
       totalCostnoMarketing: calculationResults.costSubtotal,
       setCostAndQuotation: updateProfitManagement,
       BusinessQuotationStore: useBusinessQuotationStore,
-      productData,
       handleUpdate,
+      handleUpdateProfitManagement,
     }),
     [
       calculationResults,
       actualQuotation,
       updateProfitManagement,
-      productData,
       handleUpdate,
+      handleUpdateProfitManagement,
     ]
   );
 
+  // Return unified props
   return {
     ...commonProps,
     loading,

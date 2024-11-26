@@ -24,6 +24,7 @@ export const useBusinessQuotationStore = create(
   persist(
     (set, get) => ({
       ...businessInitialState,
+      type: "sales",
       ...actions(set, get),
     }),
     {
@@ -38,6 +39,7 @@ export const useInternalQuotationStore = create(
   persist(
     (set, get) => ({
       ...internalInitialState,
+      type: "factory",
       ...actions(set, get),
     }),
     {

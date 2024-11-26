@@ -10,13 +10,11 @@ function TransportationProcessItem({ process, onUpdate, costDetail }) {
 
   const handleSubmit = async (formData) => {
     try {
-      // 實現提交邏輯
-      console.log("Submitting:", formData);
-      onUpdate?.({
+      await onUpdate?.({
         SQFreights: formData.SQFreights,
         SQCustomsDuties: formData.SQCustomsDuties,
       });
-      // 這裡可以加入 API 調用
+
       return formData;
     } catch (error) {
       console.error("Submit error:", error);

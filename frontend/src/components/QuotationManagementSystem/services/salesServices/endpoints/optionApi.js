@@ -1,13 +1,12 @@
 import apiSlice from "../apiSlice";
-import { MaterialUnit, PackagingUnit } from "../type";
 
 export const optionApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getMaterialUnits: builder.query<{ data: MaterialUnit[] }, void>({
+    getMaterialUnits: builder.query({
       query: () => "option/materialUnit",
       providesTags: ["Option"],
     }),
-    getPackagingUnits: builder.query<{ data: PackagingUnit[] }, void>({
+    getPackagingUnits: builder.query({
       query: () => "option/packagingUnit",
       providesTags: ["Option"],
     }),

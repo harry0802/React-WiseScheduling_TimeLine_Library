@@ -1,7 +1,10 @@
 // useProfitCalculation.jsx
 import { useCallback, useMemo, useEffect } from "react";
 
-export function useProfitCalculation(BusinessQuotationStore) {
+export function useProfitCalculation(
+  BusinessQuotationStore,
+  handleUpdateProfitManagement
+) {
   const {
     overheadRnd,
     profit,
@@ -95,11 +98,10 @@ export function useProfitCalculation(BusinessQuotationStore) {
         annualDiscount: parseFloat(values.yearFactor) / 100,
         rebate: parseFloat(values.feedback) / 100,
       };
-
       // 更新 store
-      updateProfitManagement(convertedData);
+      handleUpdateProfitManagement(convertedData);
     },
-    [updateProfitManagement]
+    [handleUpdateProfitManagement]
   );
 
   return {

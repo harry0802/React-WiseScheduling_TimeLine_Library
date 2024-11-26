@@ -5,9 +5,12 @@ import { FORM_FIELDS } from "./constants";
 import { useProfitCalculation } from "../../hook/useProfitCalculation";
 import BaseProductInfoSection from "../../../Global/sections/BaseProductInfoSection";
 
-function QmsProfitDashboard({ BusinessQuotationStore }) {
+function QmsProfitDashboard({
+  BusinessQuotationStore,
+  handleUpdateProfitManagement,
+}) {
   const { profitData, quotationAmount, percentages, handleFormSubmit } =
-    useProfitCalculation(BusinessQuotationStore);
+    useProfitCalculation(BusinessQuotationStore, handleUpdateProfitManagement);
 
   const defaultValues = {
     quotationAmount,

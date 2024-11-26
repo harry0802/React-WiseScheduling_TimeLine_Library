@@ -1,6 +1,7 @@
 import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
 import { createField, commonSections } from "./commonConfigs_v1";
 import { machineConfig } from "./machineConfig";
+import { optionsService } from "./commonConfigs_v1";
 
 /**
  * 系統架構說明：
@@ -154,11 +155,9 @@ export const FORM_CONFIGURATIONS = {
           "select",
           { placeholder: "請選擇機台區域" },
           { required: "請選擇機台區域" },
-          machineConfig.areas?.map((area) => ({
-            value: area.value,
-            label: area.label,
-          })),
-          6
+          null,
+          6,
+          optionsService.getFreightTypes
         ),
         createField(
           "machineSN",
@@ -166,16 +165,11 @@ export const FORM_CONFIGURATIONS = {
           "select",
           {
             placeholder: "請選擇機台編號",
-            dependsOn: "machineArea",
-            getDependentOptions: (machineArea) => {
-              return !machineArea
+            dependsOn: "machineId",
+            getDependentOptions: (machineId) => {
+              return !machineId
                 ? []
-                : machineConfig.areas
-                    .find((area) => area.value === machineArea)
-                    ?.machines?.map((machine) => ({
-                      value: machine.value,
-                      label: `${machine.label}_$${machine.rate}`,
-                    })) || [];
+                : optionsService.getMachineAreas(machineId);
             },
           },
           { required: "請選擇機台編號" },

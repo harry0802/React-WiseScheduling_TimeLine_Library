@@ -4,6 +4,7 @@ import DynamicForm from "../../../Global/form/DynamicForm";
 import CustomTodoList from "../CustomTodoList";
 import { FORM_CONFIGURATIONS } from "../../config/processTypes_v1";
 import { useEffect } from "react";
+import { validateTransportationForm } from "../../utility/formValidationUtils";
 
 function TransportationForm({ initialData, onSubmit, setFormMethods }) {
   const methods = useForm({
@@ -13,6 +14,7 @@ function TransportationForm({ initialData, onSubmit, setFormMethods }) {
       SQFreights: initialData?.SQFreights || [],
       SQCustomsDuties: initialData?.SQCustomsDuties || [],
     },
+    resolver: validateTransportationForm,
   });
   useEffect(() => {
     setFormMethods(methods);

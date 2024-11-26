@@ -3,6 +3,7 @@ import ProcessList from "./components/ProcessList";
 import ProductContextCard from "../../../ProductionRecord/utility/ProductContextCard";
 import ProcessDrawer from "./components/ProcessDrawer";
 import TransportationProcessItem from "../TransportationProcessItem";
+import { useUpdateShippingMutation } from "../../services/salesServices/endpoints/shippingApi";
 
 export function ProcessCostAnalysis({
   title = "各製程物料與加工成本分析",
@@ -20,7 +21,11 @@ export function ProcessCostAnalysis({
     id,
     shippingCosts,
     updateShippingCosts,
+    type,
   } = quotationSlice();
+
+  const [updateShipping] = useUpdateShippingMutation();
+
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
 
   // 處理製程更新
@@ -37,12 +42,20 @@ export function ProcessCostAnalysis({
     calculateAll();
   };
   // 更新運輸成本
-  const handleUpdateShippingCosts = (updatedShippingCosts) => {
-    updateShippingCosts(updatedShippingCosts);
-    // 重新計算成本
-    calculateAll();
+  const handleUpdateShippingCosts = async (updatedShippingCosts) => {
+    try {
+      // API 呼叫
+      await (type === "sales" ? updateShipping : updateShippingCosts)({
+        quotationId: id,
+        shipping: updatedShippingCosts,
+      }).unwrap();
+      // 本地狀態更新
+      updateShippingCosts(updatedShippingCosts);
+      calculateAll();
+    } catch (error) {
+      console.error("更新運費失敗:", error);
+    }
   };
-
   // 處理新增製程
   const handleAdd = (newProcess) => {
     addProcess({

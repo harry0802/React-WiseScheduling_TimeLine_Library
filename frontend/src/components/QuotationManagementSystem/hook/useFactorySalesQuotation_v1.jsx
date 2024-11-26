@@ -236,16 +236,15 @@ export const useQuotationStore = (set, get) => ({
     } = get();
 
     // if parameter is 0, don't calculate
-    if (
-      overheadRnd === 0 ||
-      profit === 0 ||
-      risk === 0 ||
-      annualDiscount === 0 ||
-      rebate === 0 ||
-      actualQuotation === 0
-    ) {
-      return;
-    }
+    const requiredFields = [
+      overheadRnd,
+      profit,
+      risk,
+      annualDiscount,
+      rebate,
+      actualQuotation,
+    ];
+    if (requiredFields.some((field) => field === 0)) return;
 
     const profitResult = calculateProfitManagement(
       +calculationResults.costSubtotal,
@@ -259,6 +258,23 @@ export const useQuotationStore = (set, get) => ({
 
     set({ calculationResults: profitResult });
     return profitResult;
+  },
+
+  // 只計算運輸成本
+  calculateTransportationOnly: () => {
+    const transportCosts = get().calculateTransportation();
+    // 更新 store 中的運輸成本
+    set((state) => ({
+      calculationResults: {
+        ...state.calculationResults,
+        transportationCost: transportCosts,
+      },
+    }));
+
+    return {
+      costSubtotal: transportCosts.costSubtotal,
+      transportationCost: transportCosts,
+    };
   },
 
   // ! 更新利潤管理
@@ -289,4 +305,13 @@ export const useQuotationStore = (set, get) => ({
         },
       };
     }),
+
+  updateBasicInfo: (basicInfo) =>
+    set((state) => ({
+      id: basicInfo.id ?? state.id,
+      quotationSN: basicInfo.productNumber ?? state.quotationSN,
+      createDate: basicInfo.createDate ?? state.createDate,
+      customerName: basicInfo.customerName?.value ?? state.customerName?.value,
+      productName: basicInfo.productName ?? state.productName,
+    })),
 });

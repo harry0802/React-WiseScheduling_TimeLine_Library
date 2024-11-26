@@ -13,7 +13,7 @@ services/
 */
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_BASE } from "../../../store/api/apiConfig";
+import { API_BASE } from "../../../../store/api/apiConfig";
 
 const salesQuotationApiSlice = createApi({
   reducerPath: "salesQuotationApi",

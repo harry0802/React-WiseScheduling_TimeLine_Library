@@ -17,6 +17,7 @@ const QmsMaintain = () => {
     totalCostnoMarketing,
     setCostAndQuotation,
     BusinessQuotationStore,
+    handleUpdateProfitManagement,
     loading,
   } = useQmsBase("maintain");
 
@@ -40,6 +41,7 @@ const QmsMaintain = () => {
         totalCostnoMarketing={totalCostnoMarketing}
         setCostAndQuotation={setCostAndQuotation}
         BusinessQuotationStore={BusinessQuotationStore}
+        handleUpdateProfitManagement={handleUpdateProfitManagement}
       />
       <ProcessCostAnalysis
         icon={<AddIcon />}

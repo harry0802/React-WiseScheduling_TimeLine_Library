@@ -5,7 +5,7 @@ import { useSalesHomeSlice } from "../slice/qmsHome";
 import {
   useGetQuotationsQuery,
   useCreateQuotationMutation,
-} from "../services/endpoints/quotationApi";
+} from "../services/salesServices/endpoints/quotationApi";
 import { getNow } from "../utility/timeUtils";
 
 function SalesManagementSystem() {

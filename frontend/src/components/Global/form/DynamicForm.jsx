@@ -1,4 +1,10 @@
-import React, { useMemo, useCallback, useEffect, useState } from "react";
+import React, {
+  useMemo,
+  useCallback,
+  useEffect,
+  useState,
+  useDeferredValue,
+} from "react";
 import {
   useForm,
   FormProvider,
@@ -27,12 +33,23 @@ import { formatSubmitValues } from "../../../utility/formUtils";
 const mergeAndDedupeOptions = (asyncOptions = [], staticOptions = []) => {
   const uniqueOptions = new Map();
 
-  // 處理異步選項
+  // 確保 asyncOptions 是數組
   if (Array.isArray(asyncOptions)) {
-    asyncOptions.forEach((option) => uniqueOptions.set(option.value, option));
+    asyncOptions.forEach((option) => {
+      if (option?.value !== undefined) {
+        uniqueOptions.set(option.value, option);
+      }
+    });
   }
-  // 合併靜態選項
-  staticOptions.forEach((option) => uniqueOptions.set(option.value, option));
+
+  // 確保 staticOptions 是數組
+  if (Array.isArray(staticOptions)) {
+    staticOptions.forEach((option) => {
+      if (option?.value !== undefined) {
+        uniqueOptions.set(option.value, option);
+      }
+    });
+  }
 
   return Array.from(uniqueOptions.values());
 };
@@ -118,7 +135,7 @@ function renderFormItem(
     case "select":
       const selectOptions = loading
         ? []
-        : mergeAndDedupeOptions(asyncOptions, options);
+        : mergeAndDedupeOptions(asyncOptions, options || []);
 
       return (
         <FormControl fullWidth error={!!error}>
@@ -220,11 +237,26 @@ function DynamicForm({
 
   // 處理表單提交
   const handleFinish = useCallback(
-    (values) => {
-      const formattedValues = formatSubmitValues(values);
-      onFinish(formattedValues);
+    async (values) => {
+      try {
+        const result = await methods.trigger();
+        console.log("🚀 ~ result:", result);
+        if (!result) {
+          // 獲取所有錯誤
+          const errors = methods.formState.errors;
+          Object.entries(errors).forEach(([field, error]) => {
+            console.error(`${field}: ${error.message}`);
+          });
+          return;
+        }
+
+        const formattedValues = formatSubmitValues(values);
+        onFinish(formattedValues);
+      } catch (error) {
+        console.error("表單驗證失敗:", error);
+      }
     },
-    [onFinish]
+    [onFinish, methods]
   );
 
   return (
@@ -250,8 +282,10 @@ function DynamicForm({
 function FieldComponent({ field, customProps = {} }) {
   const methods = useFormContext();
   const [asyncOptions, setAsyncOptions] = useState([]);
-
   const [loading, setLoading] = useState(false);
+  const [prevDependentValue, setPrevDependentValue] = useState(null);
+
+  // 修改這裡的驗證規則處理
   const {
     field: controllerField,
     fieldState: { error },
@@ -262,11 +296,21 @@ function FieldComponent({ field, customProps = {} }) {
     rules: {
       ...field.rules,
       ...(field.type === "number" && {
-        validate: (value) =>
-          value === null ||
-          value === "" ||
-          !isNaN(Number(value)) ||
-          "請輸入有效數字",
+        validate: {
+          isNumber: (value) =>
+            value === null ||
+            value === "" ||
+            !isNaN(Number(value)) ||
+            "請輸入有效數字",
+          required: (value) =>
+            (value !== null && value !== "") || `${field.label}為必填`,
+        },
+      }),
+      ...(field.type === "select" && {
+        validate: {
+          required: (value) =>
+            (value !== null && value !== "") || `請選擇${field.label}`,
+        },
       }),
     },
   });
@@ -316,33 +360,76 @@ function FieldComponent({ field, customProps = {} }) {
           ...controllerField,
           value: controllerField.value ?? "",
         };
-  const dependentValue = methods.watch(field.dependsOn); // 直接在組件層級監聽
+  const dependentValue = methods.watch(field.dependsOn);
+  const deferredOptions = useDeferredValue(asyncOptions || []);
 
-  const options = useMemo(() => {
-    if (!field) return [];
+  // 使用 useCallback 來穩定函數引用
+  const fetchDependentOptions = useCallback(
+    async (value) => {
+      // 從 field 而不是 customProps 獲取 getDependentOptions
+      if (!field.getDependentOptions) return [];
 
-    // 如果有 getDependentOptions，優先使用
-    if (field.getDependentOptions) {
-      return field.getDependentOptions(dependentValue) || [];
+      setLoading(true);
+      try {
+        const options = await field.getDependentOptions(value);
+        setAsyncOptions(options);
+      } catch (error) {
+        console.error("獲取依賴選項失敗:", error);
+        setAsyncOptions([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [field] // 依賴 field 而不是 field.getDependentOptions
+  );
+
+  // 優化後的 useEffect
+  useEffect(() => {
+    // 只在以下情況執行：
+    // 1. 有依賴欄位
+    // 2. 依賴值存在
+    // 3. 依賴值與上次不同
+    if (
+      field.dependsOn &&
+      dependentValue &&
+      dependentValue !== prevDependentValue
+    ) {
+      console.log("依賴值變更，重新獲取選項:", {
+        field: field.name,
+        dependentValue,
+        prevValue: prevDependentValue,
+      });
+
+      fetchDependentOptions(dependentValue);
+      setPrevDependentValue(dependentValue);
     }
+  }, [
+    dependentValue,
+    field.dependsOn,
+    fetchDependentOptions,
+    prevDependentValue,
+  ]);
 
-    // 如果沒有 getDependentOptions 才使用靜態 options
-    if (field.options) {
+  const processedOptions = useMemo(() => {
+    if (loading) return [];
+    if (Array.isArray(deferredOptions) && deferredOptions.length > 0) {
+      return deferredOptions;
+    }
+    if (Array.isArray(field.options)) {
       return field.options;
     }
-
     return [];
-  }, [field, dependentValue]);
+  }, [loading, deferredOptions, field.options]);
 
   return (
     <Grid item xs={field.span || 12}>
       <FormItem
         field={field}
         controllerField={inputProps}
-        options={options}
+        options={processedOptions}
         error={error}
         loading={loading}
-        asyncOptions={asyncOptions}
+        asyncOptions={deferredOptions}
         {...cleanCustomProps}
       />
     </Grid>
