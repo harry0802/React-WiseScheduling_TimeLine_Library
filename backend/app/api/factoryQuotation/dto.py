@@ -296,7 +296,7 @@ class FactoryQuotationDto:
     for key in [item for item in FQCustomsDuty_required_list]:
         put_FQCustomsDuty_obj[key].required = True
     shippingCost_put_obj["FQCustomsDuties"] = fields.List(fields.Nested(api.model("put_FQCustomsDuty_obj object", put_FQCustomsDuty_obj)))
-    shippingCost_put = api.model("ShippingCost put", shippingCost_put_obj)
+    shippingCost_put = api.model("Factory Quotation ShippingCost put", shippingCost_put_obj)
 
     #FactoryQuotation response model
     FactoryQuotation_resp = api.model(

@@ -207,7 +207,7 @@ class SalesQuotationService:
     def get_products():
         try:
             query = SalesQuotation.query
-            query = query.with_entities(SalesQuotation.id, SalesQuotation.quotationSN, SalesQuotation.customerName, SalesQuotation.productName)
+            query = query.with_entities(SalesQuotation.id, SalesQuotation.quotationSN, SalesQuotation.createDate, SalesQuotation.customerName, SalesQuotation.productName)
             SalesQuotation_db = query.all()
             SalesQuotation_dump = salesQuotation_schema.dump(SalesQuotation_db, many=True)
             resp = message(True, "products data sent")
