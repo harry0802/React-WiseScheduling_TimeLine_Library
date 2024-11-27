@@ -1,3 +1,5 @@
+//! =============== 1. 設定與常量 ===============
+//* 核心依賴引入
 import React, {
   useMemo,
   useCallback,
@@ -29,32 +31,8 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { formatSubmitValues } from "../../../utility/formUtils";
-// 選項合併與去重
-const mergeAndDedupeOptions = (asyncOptions = [], staticOptions = []) => {
-  const uniqueOptions = new Map();
 
-  // 確保 asyncOptions 是數組
-  if (Array.isArray(asyncOptions)) {
-    asyncOptions.forEach((option) => {
-      if (option?.value !== undefined) {
-        uniqueOptions.set(option.value, option);
-      }
-    });
-  }
-
-  // 確保 staticOptions 是數組
-  if (Array.isArray(staticOptions)) {
-    staticOptions.forEach((option) => {
-      if (option?.value !== undefined) {
-        uniqueOptions.set(option.value, option);
-      }
-    });
-  }
-
-  return Array.from(uniqueOptions.values());
-};
-
-//* 表單樣式
+//* 主題樣式配置
 const StyledForm = styled("form")(({ theme }) => ({
   "& .MuiFormControl-root": {
     width: "100%",
@@ -88,12 +66,47 @@ const StyledForm = styled("form")(({ theme }) => ({
   },
 }));
 
-// 合併 field, controllerField 和其餘 props
+//! =============== 2. 工具函數 ===============
+//* 選項處理工具
+/**
+ * @function mergeAndDedupeOptions
+ * @description 合併並去重選項列表
+ */
+const mergeAndDedupeOptions = (asyncOptions = [], staticOptions = []) => {
+  const uniqueOptions = new Map();
+
+  if (Array.isArray(asyncOptions)) {
+    asyncOptions.forEach((option) => {
+      if (option?.value !== undefined) {
+        uniqueOptions.set(option.value, option);
+      }
+    });
+  }
+
+  if (Array.isArray(staticOptions)) {
+    staticOptions.forEach((option) => {
+      if (option?.value !== undefined) {
+        uniqueOptions.set(option.value, option);
+      }
+    });
+  }
+
+  return Array.from(uniqueOptions.values());
+};
+
+//* Props 處理工具
+/**
+ * @function mergeProps
+ * @description 合併各種 props
+ */
 function mergeProps(field, controllerField, restProps) {
   return { ...field, ...controllerField, ...restProps };
 }
 
-// 過濾掉表單項目的自定義屬性，只保留合法的 DOM 屬性
+/**
+ * @function filterCustomProps
+ * @description 過濾自定義屬性
+ */
 function filterCustomProps(props) {
   const {
     dependsOn,
@@ -101,15 +114,21 @@ function filterCustomProps(props) {
     getDependentValue,
     rules,
     customProps,
-    options, // 添加 options
-    field, // 添加 field
-    controllerField, // 添加 controllerField
-    error, // 添加 error
+    options,
+    field,
+    controllerField,
+    error,
     ...domProps
   } = props;
   return domProps;
 }
-// 渲染表單項目
+
+//! =============== 3. 渲染函數 ===============
+//* 表單項目渲染
+/**
+ * @function renderFormItem
+ * @description 根據欄位類型渲染對應的表單控件
+ */
 function renderFormItem(
   field,
   controllerField,
@@ -117,21 +136,24 @@ function renderFormItem(
   options,
   error,
   loading,
-  asyncOptions
+  asyncOptions,
+  methods
 ) {
   const mergedProps = mergeProps(field, controllerField, restProps);
+  // 先過濾掉所有自定義 props
   const {
-    getDependentOptions,
+    getOptions,
     dependsOn,
+    getDependentOptions,
     rules,
     customProps,
-    type, // 添加 type
-    label, // 添加 label
-    span, // 添加 span
-    ...cleanProps
+    type,
+    label,
+    span,
+    ...domProps
   } = restProps;
+
   switch (field.type) {
-    // 在 switch case 中
     case "select":
       const selectOptions = loading
         ? []
@@ -155,6 +177,7 @@ function renderFormItem(
           {error && <FormHelperText>{error.message}</FormHelperText>}
         </FormControl>
       );
+
     case "radio":
       return (
         <RadioGroup {...mergedProps}>
@@ -175,7 +198,34 @@ function renderFormItem(
           {...restProps}
           options={options}
           value={controllerField.value || null}
-          onChange={(_, newValue) => controllerField.onChange(newValue)}
+          onChange={async (_, newValue) => {
+            controllerField.onChange(newValue);
+
+            // 處理依賴值更新
+            if (newValue && field.getDependentValues) {
+              try {
+                const values = await field.getDependentValues(newValue);
+                if (values && typeof values === "object") {
+                  // 獲取當前字段的基礎路徑
+                  const basePath = field.name.split(".").slice(0, -1).join(".");
+
+                  Object.entries(values).forEach(([key, val]) => {
+                    const fullPath = basePath ? `${basePath}.${key}` : key;
+                    methods.setValue(fullPath, val, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                    });
+                  });
+                }
+              } catch (error) {
+                console.error("設置依賴值失敗:", error);
+              }
+            }
+          }}
+          getOptionKey={(option) => `${option.value}-${Math.random()}`}
+          isOptionEqualToValue={(option, value) =>
+            option?.value === value?.value
+          }
           renderInput={(params) => (
             <TextField
               {...params}
@@ -184,8 +234,17 @@ function renderFormItem(
               helperText={error?.message}
             />
           )}
+          renderOption={(props, option) => (
+            <li
+              {...props}
+              key={`${option.value}-${option.label}-${Math.random()}`}
+            >
+              {option.label}
+            </li>
+          )}
         />
       );
+
     case "checkbox":
       return (
         <FormControlLabel
@@ -201,6 +260,7 @@ function renderFormItem(
           label={field.label}
         />
       );
+
     default:
       return (
         <TextField
@@ -220,7 +280,12 @@ function renderFormItem(
   }
 }
 
-// 表單主體組件
+//! =============== 4. 核心組件 ===============
+//* 主表單組件
+/**
+ * @component DynamicForm
+ * @description 動態表單的主要組件
+ */
 function DynamicForm({
   children,
   onFinish,
@@ -235,14 +300,11 @@ function DynamicForm({
   const internalMethods = useForm();
   const methods = externalMethods || internalMethods;
 
-  // 處理表單提交
   const handleFinish = useCallback(
     async (values) => {
       try {
         const result = await methods.trigger();
-        console.log("🚀 ~ result:", result);
         if (!result) {
-          // 獲取所有錯誤
           const errors = methods.formState.errors;
           Object.entries(errors).forEach(([field, error]) => {
             console.error(`${field}: ${error.message}`);
@@ -278,19 +340,30 @@ function DynamicForm({
   );
 }
 
-// 表單欄位組件
+//! =============== 5. 欄位組件 ===============
+//* 欄位管理組件
+/**
+ * @component FieldComponent
+ * @description 處理表單欄位的主要邏輯
+ */
 function FieldComponent({ field, customProps = {} }) {
   const methods = useFormContext();
   const [asyncOptions, setAsyncOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [prevDependentValue, setPrevDependentValue] = useState(null);
 
-  // 修改這裡的驗證規則處理
+  const uniqueFieldName = useMemo(() => {
+    if (field.name.includes(".")) {
+      return field.name;
+    }
+    return field.name;
+  }, [field.name]);
+
   const {
     field: controllerField,
     fieldState: { error },
   } = useController({
-    name: field.name,
+    name: uniqueFieldName,
     control: methods.control,
     defaultValue: field.type === "number" ? null : "",
     rules: {
@@ -317,8 +390,6 @@ function FieldComponent({ field, customProps = {} }) {
 
   const { getDependentOptions, dependsOn, rules, ...cleanCustomProps } =
     customProps;
-
-  // 添加這個 useEffect 來監聽依賴值的變化
   useEffect(() => {
     if (field.dependsOn) {
       const subscription = methods.watch((value, { name }) => {
@@ -331,7 +402,6 @@ function FieldComponent({ field, customProps = {} }) {
     }
   }, [field.dependsOn, methods]);
 
-  // 處理非同步獲取選項
   useEffect(() => {
     if (field.getOptions) {
       setLoading(true);
@@ -343,7 +413,6 @@ function FieldComponent({ field, customProps = {} }) {
     }
   }, [field.getOptions]);
 
-  // 修改數字輸入處理
   const inputProps =
     field.type === "number"
       ? {
@@ -360,19 +429,18 @@ function FieldComponent({ field, customProps = {} }) {
           ...controllerField,
           value: controllerField.value ?? "",
         };
+
   const dependentValue = methods.watch(field.dependsOn);
   const deferredOptions = useDeferredValue(asyncOptions || []);
 
-  // 使用 useCallback 來穩定函數引用
   const fetchDependentOptions = useCallback(
     async (value) => {
-      // 從 field 而不是 customProps 獲取 getDependentOptions
       if (!field.getDependentOptions) return [];
 
       setLoading(true);
       try {
-        const options = await field.getDependentOptions(value);
-        setAsyncOptions(options);
+        const result = await field.getDependentOptions(value, methods);
+        setAsyncOptions(Array.isArray(result) ? result : []);
       } catch (error) {
         console.error("獲取依賴選項失敗:", error);
         setAsyncOptions([]);
@@ -380,15 +448,10 @@ function FieldComponent({ field, customProps = {} }) {
         setLoading(false);
       }
     },
-    [field] // 依賴 field 而不是 field.getDependentOptions
+    [field, methods]
   );
 
-  // 優化後的 useEffect
   useEffect(() => {
-    // 只在以下情況執行：
-    // 1. 有依賴欄位
-    // 2. 依賴值存在
-    // 3. 依賴值與上次不同
     if (
       field.dependsOn &&
       dependentValue &&
@@ -430,12 +493,18 @@ function FieldComponent({ field, customProps = {} }) {
         error={error}
         loading={loading}
         asyncOptions={deferredOptions}
+        methods={methods}
         {...cleanCustomProps}
       />
     </Grid>
   );
 }
-// 表單項目渲染組件
+
+//* 表單項目組件
+/**
+ * @component FormItem
+ * @description 渲染具體的表單項目
+ */
 function FormItem({
   field,
   controllerField,
@@ -443,6 +512,7 @@ function FormItem({
   error,
   loading,
   asyncOptions,
+  methods,
   ...props
 }) {
   const domProps = filterCustomProps(props);
@@ -453,15 +523,16 @@ function FormItem({
     options,
     error,
     loading,
-    asyncOptions
+    asyncOptions,
+    methods
   );
 }
 
-// 使用 React.memo 優化渲染效能，避免不必要的重新渲染
-const MemoizedField = React.memo(FieldComponent);
-DynamicForm.Field = MemoizedField;
-
-// 處理依賴關係的子組件
+//* 依賴性欄位組件
+/**
+ * @component DependentField
+ * @description 處理欄位間的依賴關係
+ */
 function DependentField({ field }) {
   const methods = useFormContext();
 
@@ -478,64 +549,9 @@ function DependentField({ field }) {
   return <DynamicForm.Field field={field} />;
 }
 
-// 使用 React.memo 優化 DependentField 的渲染
+//! =============== 6. 性能優化 ===============
+const MemoizedField = React.memo(FieldComponent);
+DynamicForm.Field = MemoizedField;
 DynamicForm.DependentField = React.memo(DependentField);
 
 export default DynamicForm;
-
-// !example
-// import React from "react";
-// import DynamicForm from "./DynamicForm";
-
-// * 處理表單提交的回調函數
-// * 當表單提交時，這個函數會接收到所有欄位的值
-// function handleSubmit(values) {
-//   console.log("表單提交的值:", values);  // 顯示提交的表單數據
-// }
-
-// ! 定義表單欄位結構
-// const fields = [
-//   {
-//     name: "processSubtype",           // 欄位名稱，用於識別欄位
-//     label: "製程子類型",               // 欄位的顯示標籤
-//     type: "select",                    // 欄位類型：下拉選單
-//     rules: { required: "請選擇製程子類型" }, // 必填規則，提示訊息
-//     options: [                         // 下拉選單選項
-//       { value: "subtype1", label: "子類型 1" },
-//       { value: "subtype2", label: "子類型 2" },
-//     ],
-//   },
-//   {
-//     name: "preInspectionRate",         // 欄位名稱，用於識別此欄位
-//     label: "預檢不良率",               // 顯示標籤
-//     type: "number",                    // 欄位類型：數字輸入框
-//     rules: { required: "預檢不良率為必填" }, // 必填提示訊息
-//   },
-//   {
-//     name: "dependentField",            // 欄位名稱
-//     label: "依賴欄位",                 // 顯示標籤
-//     type: "text",                      // 欄位類型：文字輸入框
-//     dependsOn: "processSubtype",       // 此欄位的顯示依賴於另一欄位
-//     dependsOnValue: "subtype1",        // 當 `processSubtype` 值為 `subtype1` 時顯示
-//     rules: { required: "此欄位為必填" }, // 驗證規則
-//   },
-// ];
-
-// ! 使用範例：渲染表單
-// function ExampleForm() {
-//   return (
-//     <DynamicForm
-//       fields={fields}                  // 設定表單欄位結構
-//       onFinish={handleSubmit}          // 傳入表單提交的處理函數
-//       submitButton                     // 啟用提交按鈕
-//       submitText="提交"                // 設定提交按鈕的顯示文字
-//     >
-//       {/* 使用 `DynamicForm.Field` 來渲染每個欄位 */}
-//       {fields.map((field) => (
-//         <DynamicForm.Field key={field.name} field={field} />
-//       ))}
-//     </DynamicForm>
-//   );
-// }
-
-// export default ExampleForm;

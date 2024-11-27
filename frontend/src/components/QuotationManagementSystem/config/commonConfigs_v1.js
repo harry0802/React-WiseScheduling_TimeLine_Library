@@ -1,38 +1,81 @@
+//! =============== 1. 設定與常量 ===============
+const API_BASE_URL = "http://localhost:5000/api";
+
+//* API 端點配置
+const API_ENDPOINTS = {
+  MATERIAL_UNIT: `${API_BASE_URL}/option/materialUnit`,
+  PACKAGING_UNIT: `${API_BASE_URL}/option/packagingUnit`,
+  MACHINE_LIST: `${API_BASE_URL}/machine/list`,
+  MACHINE_DETAIL: `${API_BASE_URL}/machine`,
+  MATERIAL_PACKAGINGS: `${API_BASE_URL}/material/packagings`,
+  MATERIAL_MATERIALS: `${API_BASE_URL}/material/materials`,
+  MATERIAL_MATERIALUNITPRICE: `${API_BASE_URL}/material/materialUnitPrice`,
+};
+
+//! =============== 2. 類型與介面 ===============
+/**
+ * @typedef {Object} OptionItem
+ * @property {string|number} id - 選項ID
+ * @property {string} value - 選項值
+ * @property {string} label - 選項標籤
+ * @property {string} [productionArea] - 生產區域（可選）
+ */
+
+/**
+ * @typedef {Object} ApiResponse
+ * @property {boolean} status - API 響應狀態
+ * @property {Array} data - 響應數據
+ * @property {string} message - 響應消息
+ */
+
+//! =============== 3. 核心功能 ===============
+/**
+ * @description 選項服務，用於獲取各種拉選項數據
+ */
 export const optionsService = {
+  /**
+   * @function getCommonUnits
+   * @description 獲取通用單位選項
+   * @returns {Promise<OptionItem[]>} 單位選項列表
+   */
+
   getCommonUnits: async () => {
-    const response = await fetch(
-      "http://localhost:5000/api/option/materialUnit"
-    );
-    console.log("🚀 ~ getCommonUnits: ~ response:", response);
+    const response = await fetch(API_ENDPOINTS.MATERIAL_UNIT);
     const data = await response.json();
-    return data.data.map((item) => ({
+    return data?.data?.map((item) => ({
       id: item.id,
       value: item.name,
       label: `${item.name} (${item.schema})`,
     }));
   },
 
+  /**
+   * @function getPackagingTypes
+   * @description 獲取包裝類型選項
+   * @returns {Promise<OptionItem[]>} 包裝類型選項列表
+   */
   getPackagingTypes: async () => {
-    const response = await fetch(
-      "http://localhost:5000/api/option/packagingUnit"
-    );
+    const response = await fetch(API_ENDPOINTS.PACKAGING_UNIT);
     const data = await response.json();
-    return data.data.map((item) => ({
+    return data?.data?.map((item) => ({
       id: item.id,
       value: item.name,
       label: `${item.name} (${item.schema})`,
     }));
   },
 
+  /**
+   * @function getFreightTypes
+   * @description 獲取貨運類型選項
+   * @returns {Promise<OptionItem[]>} 貨運類型選項列表
+   * @throws {Error} 當獲取失敗時拋出錯誤
+   */
   getFreightTypes: async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/machine/list");
+      const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
       const { data } = await response.json();
-
       const areaMap = new Map();
-
-      // 使用 Map 保存唯一區域
-      data.forEach((machine) => {
+      data?.forEach((machine) => {
         if (!areaMap.has(machine.productionArea)) {
           areaMap.set(machine.productionArea, {
             id: machine.id,
@@ -49,13 +92,18 @@ export const optionsService = {
     }
   },
 
-  // 新增機台相關的選項服務
+  /**
+   * @function getMachineAreas
+   * @description 獲取指定區域的機台列表
+   * @param {string} areaFilter - 區域過濾條件
+   * @returns {Promise<OptionItem[]>} 機台選項列表
+   * @throws {Error} 當獲取失敗時拋出錯誤
+   */
   getMachineAreas: async (areaFilter) => {
     try {
-      // 同時發送兩個請求
       const [detailResponse, listResponse] = await Promise.all([
-        fetch(`http://localhost:5000/api/machine/?id=${areaFilter}`),
-        fetch("http://localhost:5000/api/machine/list"),
+        fetch(`${API_ENDPOINTS.MACHINE_DETAIL}/?id=${areaFilter}`),
+        fetch(API_ENDPOINTS.MACHINE_LIST),
       ]);
 
       const [detailResult, listResult] = await Promise.all([
@@ -86,6 +134,91 @@ export const optionsService = {
       throw error;
     }
   },
+
+  // 取得所有不重複的物料名稱、物料編號
+  // 原物料 -> 物料名稱 -> 物料編號 -> 單價
+  getMaterialOptions: async () => {
+    // GET api/material/materials
+    const response = await fetch(API_ENDPOINTS.MATERIAL_MATERIALS);
+    const data = await response.json();
+    return data?.data?.map((item) => ({
+      id: item.id,
+      value: item.materialSN,
+      label: item.materialName,
+    }));
+  },
+
+  // 取得所有不重複的，屬於包材類別的物料名稱、物料編號
+  // 包材類別 -> 物料名稱 -> 物料編號 -> 單價
+  getPackagingMaterialOptions: async () => {
+    // GET api/material/packagings
+    const response = await fetch(API_ENDPOINTS.MATERIAL_PACKAGINGS);
+    const data = await response.json();
+  },
+  // 取得原物料或者包材的單價
+  getMaterialUnitPrice: async () => {
+    // GET api/material/materialUnitPrice
+    // Parameters  : materialName, materialSN;
+    //  return amount
+  },
+};
+
+const createMaterialScope = () => {
+  // 存放資料狀態
+  let materials = [];
+  let materialOptions = [];
+  let currentMaterial = null;
+
+  return {
+    // 1. 獲取物料選項
+    async getMaterials() {
+      if (!materials.length) {
+        const response = await fetch(API_ENDPOINTS.MATERIAL_MATERIALS);
+        const result = await response.json();
+        materials = result.data;
+        materialOptions = materials.map((item) => ({
+          value: item.materialName,
+          label: item.materialName,
+          materialSN: item.materialSN,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
+        }));
+      }
+      return materialOptions;
+    },
+
+    // 2. 根據物料名稱獲取相關資料
+    setSelectedMaterial(materialName) {
+      if (!materials.length || !materialName) return null;
+
+      currentMaterial = materials.find(
+        (m) => m.materialName === materialName.label
+      );
+
+      if (!currentMaterial) return null;
+
+      return {
+        materialSN: currentMaterial.materialSN,
+        unit: currentMaterial.unit,
+        unitPrice: currentMaterial.unitPrice,
+      };
+    },
+
+    // 3. 獲取物料單價
+    async getMaterialPrice() {
+      if (!currentMaterial) return null;
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${currentMaterial.materialName}&materialSN=${currentMaterial.materialSN}`
+        );
+        const result = await response.json();
+        return result.status ? result.data : null;
+      } catch (error) {
+        console.error("取得單價失敗:", error);
+        return null;
+      }
+    },
+  };
 };
 
 /**
@@ -117,6 +250,7 @@ export const createField = (
 ) => ({
   name,
   label,
+
   type,
   ...props,
   rules: {
@@ -129,7 +263,7 @@ export const createField = (
     }),
   },
   ...(span && { span }),
-  // 改為直接傳入 getOptions 函數，而不是呼叫它
+  // 改為直接傳入 getOptions 函數，而不呼叫
   ...(getOptions ? { getOptions } : {}),
   ...(options ? { options } : {}),
 });
@@ -141,7 +275,7 @@ const materialCostSettingFields = {
     "estimatedDefectRate",
     "預估不良率",
     "number",
-    createInputProps("%", "預估不良率"),
+    createInputProps("%", "預不良率"),
     createRequiredRule("預估不良率")
   ),
   estimatedMaterialFluctuation: createField(
@@ -168,26 +302,53 @@ const materialCostSettingFields = {
 };
 
 // =============== 材料成本字段 ===============
+const materialScope = createMaterialScope();
 const materialCostFields = {
-  materialSN: createField(
-    "materialSN",
-    "物料編號",
-    "input",
-    { placeholder: "請輸入物料編號" },
-    createRequiredRule("物料編號")
-  ),
-  materialName: createField(
-    "materialName",
-    "物料名稱",
-    "input",
-    { placeholder: "請輸入物料名稱" },
-    createRequiredRule("物料名稱")
-  ),
+  materialName: {
+    ...createField(
+      "materialName",
+      "物料名稱",
+      "autocomplete",
+      {
+        placeholder: "請選擇物料名稱",
+      },
+      createRequiredRule("物料名稱")
+    ),
+    getOptions: materialScope.getMaterials,
+    getDependentValues: async (materialName) => {
+      if (!materialName) return null;
+      const material = materialScope.setSelectedMaterial(materialName);
+      if (material) {
+        return {
+          materialName: materialName.label,
+          materialSN: material.materialSN,
+          unit: material.unit,
+          unitPrice: 123,
+        };
+      }
+      return null;
+    },
+  },
+  materialSN: {
+    ...createField(
+      "materialSN",
+      "物料編號",
+      "input",
+      {
+        placeholder: "物料編號將自動填入",
+        readOnly: true,
+      },
+      createRequiredRule("物料編號")
+    ),
+  },
   unit: createField(
     "unit",
     "單位",
     "select",
-    { placeholder: "請選擇單位" },
+    {
+      placeholder: "請選擇單位",
+      dependsOn: "materialName",
+    },
     createRequiredRule("單位"),
     null,
     3,
@@ -204,7 +365,11 @@ const materialCostFields = {
     "unitPrice",
     "單價",
     "number",
-    createInputProps("元", "單價"),
+    {
+      ...createInputProps("元", "單價"),
+      dependsOn: "materialName",
+      readOnly: true,
+    },
     createRequiredRule("單價")
   ),
 };
@@ -388,9 +553,12 @@ const customsDutyFields = {
     "select",
     { placeholder: "請選擇費用類型" },
     createRequiredRule("費用類型"),
-    null,
-    3,
-    optionsService.getFreightTypes
+    [
+      { value: "運費", label: "運費" },
+      { value: "關稅", label: "關稅" },
+      { value: "其他", label: "其他" },
+    ],
+    3
   ),
   freight: createField(
     "freight",
@@ -501,7 +669,7 @@ export const commonSections = {
     })),
   },
   freightCosts: {
-    title: "運輸成本",
+    title: "輸成本",
     fields: Object.values(freightFields).map((field) => ({
       ...field,
       span: 3,

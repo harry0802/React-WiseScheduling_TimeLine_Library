@@ -23,14 +23,16 @@ export const renderGeneralFields = (item, sectionIndex) => {
   ));
 };
 
-export const renderTodoList = (item, sectionIndex) => (
-  <CustomTodoList
-    key={`${sectionIndex}-${item.title}`}
-    name={item.name}
-    fields={item.items}
-    renderField={(fieldProps) => <DynamicForm.Field {...fieldProps} />}
-  />
-);
+export const renderTodoList = (item, sectionIndex) => {
+  return (
+    <CustomTodoList
+      key={`${sectionIndex}-${item.title}`}
+      name={item.name}
+      fields={item.items}
+      renderField={(fieldProps) => <DynamicForm.Field {...fieldProps} />}
+    />
+  );
+};
 
 export const renderNestedItems = (item, sectionIndex) => (
   <React.Fragment key={`${sectionIndex}-${item.title}`}>

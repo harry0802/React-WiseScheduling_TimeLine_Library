@@ -93,7 +93,6 @@ function CustomTodoList({ name, fields, renderField }) {
     control,
     name,
   });
-
   const handleRemove = (index) => {
     remove(index);
   };
@@ -115,16 +114,24 @@ function CustomTodoList({ name, fields, renderField }) {
             <RemoveButton onClick={() => handleRemove(index)}>
               <CloseIcon />
             </RemoveButton>
-            {fields.map((field) =>
-              renderField({
+            {fields.map((field) => {
+              // 處理依賴關係
+              const fieldConfig = {
+                ...field,
+                name: `${name}.${index}.${field.name}`,
+                label: `${field.label}${index + 1}`,
+              };
+
+              // 如果有依賴關係，更新依賴路徑
+              if (field.dependsOn) {
+                fieldConfig.dependsOn = `${name}.${index}.${field.dependsOn}`;
+              }
+
+              return renderField({
                 key: `${name}.${index}.${field.name}`,
-                field: {
-                  ...field,
-                  name: `${name}.${index}.${field.name}`,
-                  label: `${field.label}${index + 1}`,
-                },
-              })
-            )}
+                field: fieldConfig,
+              });
+            })}
           </GroupFormContent>
         ))}
       </GroupFormItem>

@@ -40,11 +40,12 @@ function BaseProductInfoSection({
           throw new Error("自定義驗證失敗");
         }
         await onUpdate(formData);
-        closeDrawer();
         notifySuccess("更新成功");
       } catch (error) {
         console.error("提交失敗:", error);
         notifyError(error.message || "更新失敗");
+      } finally {
+        closeDrawer();
       }
     },
     [customValidation, onUpdate, closeDrawer, notifySuccess, notifyError]

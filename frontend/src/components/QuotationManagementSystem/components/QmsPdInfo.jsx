@@ -29,6 +29,7 @@ const createAutocompleteProps = () => ({
 
 const createCustomerOptions = (customers = []) =>
   customers.map((customer, index) => ({
+    key: index,
     value: customer.name,
     label: customer.name,
     id: index,
@@ -46,6 +47,7 @@ const createBaseFields = (customers = []) => [
     type: FIELD_TYPES.AUTOCOMPLETE,
     name: "customerName",
     label: "客戶名稱",
+
     options: createCustomerOptions(customers),
     rules: FIELD_RULES.CUSTOMER,
     props: createAutocompleteProps(),

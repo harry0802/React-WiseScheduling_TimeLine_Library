@@ -5,20 +5,21 @@ import {
 
 export const processMappers = {
   processTypes: {
-    toOptions: (data) =>
-      data.map(({ id, processName, processCategory }) => ({
+    toOptions: (data) => {
+      return data?.map(({ id, processName, processCategory, category }) => ({
         value: id, // 保持 value 為 id
-        label: processName,
+        label: category,
         // 保存額外資料
-        processCategory,
+        processCategory: category,
         // 或者保存整個原始資料
         raw: { id, processName, processCategory },
-      })),
+      }));
+    },
 
     toSubtypeOptions: (data) =>
       data.map(({ id, processSN, processName, processCategory }) => ({
-        value: processSN,
-        label: processSN,
+        value: id,
+        label: processName,
         // 保存需要的資料
         id,
         processCategory,

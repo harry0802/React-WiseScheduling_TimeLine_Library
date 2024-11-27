@@ -6,7 +6,7 @@ import {
   useGetQuotationsQuery,
   useCreateQuotationMutation,
 } from "../services/salesServices/endpoints/quotationApi";
-import { getNow } from "../utility/timeUtils";
+import { timeUtils } from "../utility/timeUtils";
 
 function SalesManagementSystem() {
   const { pageStatus, setAPIData } = useSalesHomeSlice();
@@ -21,7 +21,7 @@ function SalesManagementSystem() {
       Action: (
         <QmsActions
           id={data?.data.at(-1)?.id + 1}
-          onCreate={() => createQuotation({ createDate: getNow() })}
+          onCreate={() => createQuotation({ createDate: timeUtils.getNow() })}
           isLoading={isCreating}
         />
       ),

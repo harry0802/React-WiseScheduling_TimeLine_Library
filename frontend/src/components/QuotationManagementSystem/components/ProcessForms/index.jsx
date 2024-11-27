@@ -14,6 +14,7 @@ const ProcessForm = React.memo(
       selectionFields,
       handleTabChange,
       loading,
+      isSuccess,
     } = useProcessForm({
       initialData,
       externalMethods: methods,
@@ -26,7 +27,6 @@ const ProcessForm = React.memo(
         return rest;
       });
     }, [selectionFields]);
-
     const sections = formConfig.items || [];
 
     return (

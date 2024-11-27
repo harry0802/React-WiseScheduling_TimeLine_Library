@@ -98,8 +98,13 @@ export function useProfitCalculation(
         annualDiscount: parseFloat(values.yearFactor) / 100,
         rebate: parseFloat(values.feedback) / 100,
       };
-      // 更新 store
-      handleUpdateProfitManagement(convertedData);
+
+      if (handleUpdateProfitManagement) {
+        // 更新 store
+        handleUpdateProfitManagement(convertedData);
+      } else {
+        console.warn("handleUpdateProfitManagement is not defined");
+      }
     },
     [handleUpdateProfitManagement]
   );

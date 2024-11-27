@@ -1,13 +1,9 @@
 import apiSlice from "../apiSlice";
-import { ProcessRequest } from "../type";
 
 // 製程 API
 export const processApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    createProcess: builder.mutation<
-      void,
-      { quotationId: number; process: ProcessRequest }
-    >({
+    createProcess: builder.mutation({
       query: ({ quotationId, process }) => ({
         url: `salesQuotation/${quotationId}/process/`,
         method: "POST",
@@ -17,10 +13,7 @@ export const processApi = apiSlice.injectEndpoints({
         { type: "Quotation", id: quotationId },
       ],
     }),
-    updateProcess: builder.mutation<
-      void,
-      { quotationId: number; process: ProcessRequest }
-    >({
+    updateProcess: builder.mutation({
       query: ({ quotationId, process }) => ({
         url: `salesQuotation/${quotationId}/process/`,
         method: "PUT",
@@ -30,10 +23,7 @@ export const processApi = apiSlice.injectEndpoints({
         { type: "Quotation", id: quotationId },
       ],
     }),
-    deleteProcess: builder.mutation<
-      void,
-      { quotationId: number; processId: number }
-    >({
+    deleteProcess: builder.mutation({
       query: ({ quotationId, processId }) => ({
         url: `salesQuotation/${quotationId}/process/${processId}`,
         method: "DELETE",

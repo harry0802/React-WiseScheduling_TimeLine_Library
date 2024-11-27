@@ -1,58 +1,87 @@
+//! =============== 1. 引入相關依賴 ===============
 import { useState, useEffect } from "react";
-import { processMappers, processService } from "../utils/processMappers";
+import { processMappers } from "../utils/processMappers";
+import { useGetProcessOptionsQuery } from "../../../../ProductionRecord/service/endpoints/processOptionApi";
+import { useGetOptionQuery } from "../../../../ProductionRecord/service/endpoints/optionApi";
 
-//  TODO 這裡未來會是rtk的api
+/**
+ * @typedef {Object} ProcessDataResult
+ * @property {Array} types - 處理類型選項列表
+ * @property {Array} subtypes - 子類型選項列表
+ * @property {boolean} loading - 加載狀態
+ * @property {Object|null} error - 錯誤信息
+ * @property {boolean} isSuccess - 請求是否成功
+ */
+
+/**
+ * @function useProcessData
+ * @description 獲取和管理製程相關數據的自定義 Hook
+ *
+ * @param {string|number} categoryId - 製程分類 ID
+ * @param {Object} [initialData=null] - 初始數據（預留擴展用）
+ *
+ * @returns {ProcessDataResult} 處理後的數據和狀態
+ *
+ * @example
+ * const { types, subtypes, loading, error, isSuccess } = useProcessData(categoryId);
+ *
+ * @notes
+ * - 會同時請求製程類型和子類型數據
+ * - 子類型數據會根據 categoryId 進行過濾
+ * - 當 categoryId 不存在時，會跳過子類型數據請求
+ */
 export const useProcessData = (categoryId, initialData = null) => {
-  const [types, setTypes] = useState([]);
+  //! =============== 2. 狀態管理 ===============
   const [subtypes, setSubtypes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const fetchTypes = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await processService.getProcessTypes();
-      setTypes(processMappers.processTypes.toOptions(data));
-    } catch (err) {
-      setError(err);
-      console.error("Failed to fetch process types:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //! =============== 3. API 請求處理 ===============
+  //* 獲取製程類型數據
+  const {
+    data: types = [],
+    isLoading: loading,
+    isSuccess: typesSuccess,
+    error: typesError,
+  } = useGetOptionQuery("processCategory");
 
-  const fetchSubtypes = async (categoryId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await processService.getProcessSubtypes(categoryId);
-      const mappedSubtypes = processMappers.processTypes.toSubtypeOptions(data);
-      setSubtypes(mappedSubtypes);
-    } catch (err) {
-      setError(err);
-      console.error("Failed to fetch process subtypes:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //* 獲取製程子類型數據
+  const {
+    data: subtypeData,
+    isLoading: subtypeLoading,
+    error: subtypeError,
+  } = useGetProcessOptionsQuery({
+    skip: !categoryId, //* 無 categoryId 時跳過請求
+  });
 
-  // 初始加載製程類型
+  //! =============== 4. 數據轉換處理 ===============
+  //* 轉換製程類型數據
+  const mappedTypes = processMappers?.processTypes?.toOptions(types.data);
+
+  //* 處理並過濾子類型數據
   useEffect(() => {
-    fetchTypes();
-  }, []);
+    if (subtypeData?.data) {
+      //* 轉換子類型數據
+      const mappedSubtypes = processMappers?.processTypes?.toSubtypeOptions(
+        subtypeData.data
+      );
 
-  // 監聽 categoryId 變化加載子類型
-  useEffect(() => {
-    fetchSubtypes(categoryId);
-  }, [categoryId]);
+      //* 根據所選分類過濾子類型
+      const filteredSubtypes = mappedSubtypes?.filter((type) => {
+        const category = mappedTypes?.find(
+          (basic) => basic.value === categoryId
+        );
+        return type.processCategory === category?.processCategory;
+      });
 
+      setSubtypes(filteredSubtypes);
+    }
+  }, [subtypeData, categoryId]);
+
+  //! =============== 5. 返回結果 ===============
   return {
-    types,
+    types: mappedTypes,
     subtypes,
-    loading,
-    error,
-    fetchTypes,
-    fetchSubtypes,
+    loading: loading || subtypeLoading,
+    error: typesError || subtypeError,
+    isSuccess: typesSuccess,
   };
 };

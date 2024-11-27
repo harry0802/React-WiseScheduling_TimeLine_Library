@@ -1,15 +1,14 @@
-// services/api/endpoints/machineApi.ts
+// services/api/endpoints/machineApi.js
 import apiSlice from "../apiSlice";
-import { Machine } from "../type";
 
 // 機台 API
 export const machineApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getMachines: builder.query<Machine[], void>({
+    getMachines: builder.query({
       query: () => "machine/list",
       providesTags: ["Machine"],
     }),
-    getMachineById: builder.query<Machine, number>({
+    getMachineById: builder.query({
       query: (id) => `machine/?id=${id}`,
       providesTags: (result, error, id) => [{ type: "Machine", id }],
     }),

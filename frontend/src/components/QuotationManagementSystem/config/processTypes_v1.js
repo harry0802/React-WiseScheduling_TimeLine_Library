@@ -1,6 +1,5 @@
 import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
 import { createField, commonSections } from "./commonConfigs_v1";
-import { machineConfig } from "./machineConfig";
 import { optionsService } from "./commonConfigs_v1";
 
 /**
@@ -329,12 +328,10 @@ export const PROCESS_SELECTION_FORM = [
       ),
       createField(
         "processSN",
-        "製程代號",
+        "製程名稱",
         "select",
-        {
-          placeholder: "請選擇製程代號",
-        },
-        { required: "製程代號為必填" },
+        null,
+        null,
         [], // options 將由組件提供
         6
       ),

@@ -17,6 +17,7 @@ const QmsCreate = () => {
     handleUpdate,
     productData,
     loading,
+    handleUpdateProfitManagement,
   } = useQmsBase("create");
 
   const breadcrumbs = [
@@ -39,6 +40,7 @@ const QmsCreate = () => {
         totalCostnoMarketing={totalCostnoMarketing}
         setCostAndQuotation={setCostAndQuotation}
         BusinessQuotationStore={useBusinessQuotationStore}
+        handleUpdateProfitManagement={handleUpdateProfitManagement}
       />
       <ProcessCostAnalysis
         icon={<AddIcon />}
