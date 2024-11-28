@@ -330,9 +330,11 @@ export const PROCESS_SELECTION_FORM = [
         "processSN",
         "製程名稱",
         "select",
-        null,
-        null,
-        [], // options 將由組件提供
+        {
+          placeholder: "請選擇製程名稱",
+        },
+        { required: "製程名稱為必填" }, // 空規則，不做驗證
+        [],
         6
       ),
     ],

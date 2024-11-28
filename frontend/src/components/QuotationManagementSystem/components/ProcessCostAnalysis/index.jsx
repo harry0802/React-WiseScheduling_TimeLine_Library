@@ -44,6 +44,10 @@ export function ProcessCostAnalysis({
   // 更新運輸成本
   const handleUpdateShippingCosts = async (updatedShippingCosts) => {
     try {
+      console.log(
+        "🚀 ~ handleUpdateShippingCosts ~ updatedShippingCosts:",
+        updatedShippingCosts
+      );
       // API 呼叫
       await (type === "sales" ? updateShipping : updateShippingCosts)({
         quotationId: id,

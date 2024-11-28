@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { getProcessResolver } from "../utility/formValidationUtils";
 
 export function useProcessForm(initialProcess) {
   // 1. 狀態管理
@@ -24,6 +25,8 @@ export function useProcessForm(initialProcess) {
   // 3. 表單實例
   const methods = useForm({
     defaultValues: initialValues,
+    mode: "onSubmit",
+    resolver: getProcessResolver(initialValues.processCategory),
   });
 
   // 4. 表單變更處理

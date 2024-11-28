@@ -102,7 +102,7 @@ function CustomTodoList({ name, fields, renderField }) {
     const emptyItem = fields.reduce((acc, field) => {
       acc[field.name] = field.type === "number" ? null : "";
       return acc;
-    }, {});
+    });
     append(emptyItem);
   };
 
@@ -120,6 +120,7 @@ function CustomTodoList({ name, fields, renderField }) {
                 ...field,
                 name: `${name}.${index}.${field.name}`,
                 label: `${field.label}${index + 1}`,
+                id: item.id || index,
               };
 
               // 如果有依賴關係，更新依賴路徑
@@ -130,6 +131,7 @@ function CustomTodoList({ name, fields, renderField }) {
               return renderField({
                 key: `${name}.${index}.${field.name}`,
                 field: fieldConfig,
+                id: item.id || index,
               });
             })}
           </GroupFormContent>

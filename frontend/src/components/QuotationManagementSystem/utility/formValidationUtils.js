@@ -1,86 +1,104 @@
-//! =============== 1. 設定與常量 ===============
-//* 引入必要的依賴與常量定義
 import { z } from "zod";
 import { fieldSchemas } from "../schema/processFormValidation";
+import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
 
-//! =============== 2. 類型與介面 ===============
-/**
- * @typedef {Object} ValidationResult
- * @property {Object} values - 驗證成功時的值
- * @property {Object} errors - 驗證錯誤訊息
- */
+// 基本 schema 定義
+const baseSchema = z.object({
+  processCategory: z.string().min(1, "製程類型為必填"),
+  processSN: z.string().min(1, "製程名稱為必填"),
+  activeTab: z.number().optional(),
+  // 可選欄位默認空陣列
+  SQMaterialCostSetting: fieldSchemas.materialCostSetting.optional(),
+  SQMaterialCosts: z.array(fieldSchemas.materialCost).default([]),
+  SQPackagingCosts: z.array(fieldSchemas.packagingCost).default([]),
+  SQInPostProcessingCosts: z
+    .array(fieldSchemas.internalProcessingCost)
+    .default([]),
+  SQOutPostProcessingCosts: z
+    .array(fieldSchemas.outsourcedProcessingCost)
+    .default([]),
+  SQInjectionMoldingCosts: z
+    .array(fieldSchemas.injectionMoldingCost)
+    .default([]),
+});
 
-/**
- * @typedef {Object} ValidationError
- * @property {string} type - 錯誤類型
- * @property {string} message - 錯誤訊息
- */
+// 製程特定的 schema 定義
+const processSchemas = {
+  // 廠內出貨檢驗
+  [PROCESS_CATEGORY_OPTION[4].category]: baseSchema.extend({
+    SQInPostProcessingCosts: z
+      .array(fieldSchemas.internalProcessingCost)
+      .min(1, "至少需要一筆檢驗費用資料"),
+  }),
 
-//! =============== 3. 核心功能 ===============
-/**
- * @function validateTransportationForm
- * @description 驗證運輸表單數據的完整性和正確性
- * @param {Object} values - 要驗證的表單數據
- * @returns {Promise<ValidationResult>} 驗證結果
- *
- * @example
- *  基本使用方式
- * const result = await validateTransportationForm({
- *   SQFreights: [{...}],
- *   SQCustomsDuties: [{...}]
- * });
- *
- * @notes
- * - 使用 Zod 進行數據驗證
- * - 自動處理錯誤格式化
- *
- * @commonErrors
- * - 數據格式不符合 schema 定義
- * - 必填欄位缺失
- */
-export const validateTransportationForm = async (values) => {
+  // 委外成型製程
+  [PROCESS_CATEGORY_OPTION[1].category]: baseSchema.extend({
+    SQMaterialCostSetting: fieldSchemas.materialCostSetting,
+    SQMaterialCosts: z
+      .array(fieldSchemas.materialCost)
+      .min(1, "至少需要一筆材料成本資料"),
+    SQPackagingCosts: z
+      .array(fieldSchemas.packagingCost)
+      .min(1, "至少需要一筆包裝材料費資料"),
+    SQOutPostProcessingCosts: z
+      .array(fieldSchemas.outsourcedProcessingCost)
+      .min(1, "至少需要一筆委外加工費資料"),
+  }),
+
+  // 廠內成型製程
+  [PROCESS_CATEGORY_OPTION[0].category]: baseSchema.extend({
+    SQMaterialCostSetting: fieldSchemas.materialCostSetting,
+    SQMaterialCosts: z
+      .array(fieldSchemas.materialCost)
+      .min(1, "至少需要一筆材料成本資料"),
+    SQPackagingCosts: z
+      .array(fieldSchemas.packagingCost)
+      .min(1, "至少需要一筆包裝材料費資料"),
+    SQInjectionMoldingCosts: z
+      .array(fieldSchemas.injectionMoldingCost)
+      .min(1, "至少需要一筆注塑成型成本資料"),
+  }),
+
+  // 運輸表單
+  TRANSPORTATION: z.object({
+    SQFreights: z.array(fieldSchemas.freightCost),
+    SQCustomsDuties: z.array(fieldSchemas.customsDutyCost),
+  }),
+};
+
+// 統一的錯誤格式化
+const formatErrors = (error) => ({
+  type: "validation",
+  message: error.message,
+});
+
+// 通用的驗證處理
+const validateForm = async (schema, values) => {
   try {
-    await transportationSchema.parseAsync(values);
-    return { values, errors: {} };
+    const validData = await schema.parseAsync(values);
+    return { values: validData, errors: {} };
   } catch (error) {
     if (!(error instanceof z.ZodError)) {
-      //! 重要：非預期的錯誤需要向上拋出
       throw error;
     }
     return {
       values: {},
-      errors: formatValidationErrors(error),
+      errors: error.errors.reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.path.join(".")]: formatErrors(curr),
+        }),
+        {}
+      ),
     };
   }
 };
 
-//! =============== 4. 工具函數 ===============
-/**
- * @function formatValidationErrors
- * @description 將 Zod 錯誤對象轉換為易於使用的格式
- * @param {z.ZodError} error - Zod 驗證錯誤對象
- * @returns {Object<string, ValidationError>} 格式化後的錯誤訊息
- *
- * @example
- * const errors = formatValidationErrors(zodError);
- *  返回格式: { "field.path": { type: "validation", message: "錯誤訊息" } }
- */
-export const formatValidationErrors = (error) =>
-  error.errors.reduce(
-    (acc, { path, message }) => ({
-      ...acc,
-      [path.join(".")]: { type: "validation", message },
-    }),
-    {}
-  );
+// 輸出的驗證函數
+export const validateTransportationForm = (values) =>
+  validateForm(processSchemas.TRANSPORTATION, values);
 
-//* ========= Schema 定義 =========
-/**
- * @description 運輸表單驗證 schema
- * @property {Array} SQFreights - 運費項目陣列
- * @property {Array} SQCustomsDuties - 關稅項目陣列
- */
-const transportationSchema = z.object({
-  SQFreights: z.array(fieldSchemas.freightCost),
-  SQCustomsDuties: z.array(fieldSchemas.customsDutyCost),
-});
+export const getProcessResolver = (processCategory) => {
+  const schema = processSchemas[processCategory] || baseSchema;
+  return (values) => validateForm(schema, values);
+};

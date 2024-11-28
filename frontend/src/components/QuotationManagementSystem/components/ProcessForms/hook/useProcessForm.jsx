@@ -1,12 +1,13 @@
 //! =============== 1. 設定與常量 ===============
 //* 引入必要的依賴和配置
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
   FORM_CONFIGURATIONS,
   PROCESS_SELECTION_FORM,
 } from "../../../config/processTypes_v1";
 import { useProcessData } from "./useProcessData";
+import { getProcessResolver } from "../../../utility/formValidationUtils";
 
 //! =============== 2. 類型與介面 ===============
 /**
@@ -35,35 +36,39 @@ import { useProcessData } from "./useProcessData";
  */
 export const useProcessForm = ({ initialData, externalMethods, visible }) => {
   //* --------- 初始值設定 ---------
-  const initialValues = useMemo(() => {
-    if (!initialData) {
-      return {
-        processCategory: "",
-        processSN: "",
-      };
-    }
-
-    return {
+  const initialValues = useMemo(
+    () => ({
+      // 基礎欄位
+      processCategory: initialData?.processOptionId || "",
+      processSN: "",
+      activeTab: 0,
+      // 動態欄位
       ...initialData,
       ...initialData?.SQMaterialCostSetting,
       ...initialData?.SQInjectionMoldingCosts?.[0],
-      processCategory: initialData.processOptionId || "",
-      processSN: "",
-    };
-  }, [initialData]);
+      // 確保陣列欄位存在
+      SQMaterialCosts: initialData?.SQMaterialCosts || [],
+      SQPackagingCosts: initialData?.SQPackagingCosts || [],
+      SQInPostProcessingCosts: initialData?.SQInPostProcessingCosts || [],
+      SQOutPostProcessingCosts: initialData?.SQOutPostProcessingCosts || [],
+      SQInjectionMoldingCosts: initialData?.SQInjectionMoldingCosts || [],
+    }),
+    [initialData]
+  );
 
-  //* --------- 表單方法初始化 ---------
-  const methods =
-    externalMethods ||
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useForm({
-      defaultValues: {
-        processCategory: initialData?.processCategory || "",
-        processSN: "",
-        activeTab: 0,
-      },
-    });
+  //* --------- 表單實例 ---------
+  const formInstance = useForm({
+    defaultValues: initialValues,
+    mode: "onSubmit",
+    resolver: async (data) => {
+      const category = data.processCategory || initialData?.processCategory;
+      if (!category) return { values: data, errors: {} };
+      const resolver = getProcessResolver(category);
+      return resolver(data);
+    },
+  });
 
+  const methods = externalMethods || formInstance;
   const { watch, setValue, reset } = methods;
   const processCategory = watch("processCategory");
   const activeTab = watch("activeTab");
@@ -74,67 +79,71 @@ export const useProcessForm = ({ initialData, externalMethods, visible }) => {
     initialData
   );
 
-  //* --------- 動態表單配置 ---------
+  //* --------- 表單配置 ---------
   const currentProcessType = useMemo(() => {
     if (!processCategory || !types || !isSuccess) return null;
     return types.find((type) => type.value === processCategory);
   }, [processCategory, types, isSuccess]);
+
   const formConfig = useMemo(
     () => FORM_CONFIGURATIONS[currentProcessType?.processCategory] || {},
     [currentProcessType]
   );
-  //! =============== 4. 工具函數 ===============
-  //* 生成選擇欄位配置
-  const selectionFields = useMemo(() => {
-    return PROCESS_SELECTION_FORM[0].fields.map((field) => ({
-      ...field,
-      options:
-        field.name === "processSN"
-          ? subtypes || []
-          : field.name === "processCategory"
-          ? types || []
-          : field.options,
-    }));
-  }, [types, subtypes]);
 
-  //* --------- 副作用處理 ---------
-  //* 處理表單重置邏輯
-  useEffect(() => {
-    if (!processCategory || !initialData) return;
+  const selectionFields = useMemo(
+    () =>
+      PROCESS_SELECTION_FORM[0].fields.map((field) => ({
+        ...field,
+        options:
+          field.name === "processSN"
+            ? subtypes || []
+            : field.name === "processCategory"
+            ? types || []
+            : field.options,
+      })),
+    [types, subtypes]
+  );
+
+  //* --------- 表單重置處理 ---------
+  const handleProcessCategoryChange = useCallback(() => {
+    if (!processCategory) return;
 
     const isInitialCategory = processCategory === initialData?.processOptionId;
-
     if (!isInitialCategory) {
       const allValues = methods.getValues();
-      const resetValues = Object.keys(allValues).reduce((acc, key) => {
-        acc[key] = ["processCategory"].includes(key) ? allValues[key] : "";
-        return acc;
-      }, {});
+      const resetValues = Object.keys(allValues).reduce(
+        (acc, key) => ({
+          ...acc,
+          [key]: ["processCategory"].includes(key) ? allValues[key] : "",
+        }),
+        {}
+      );
 
       reset({ ...resetValues, activeTab: 0 });
-    }
-    if (isInitialCategory) {
+    } else {
       reset(initialValues);
     }
   }, [processCategory, initialData, methods, reset]);
 
-  //* 處理子類型初始值
+  useEffect(() => {
+    handleProcessCategoryChange();
+  }, [handleProcessCategoryChange]);
+
+  //* --------- 子類型初始值處理 ---------
   useEffect(() => {
     const hasSubtypes = Array.isArray(subtypes) && subtypes.length > 0;
     const hasInitialSN = initialData?.processSN;
     const isInitialCategory = processCategory === initialData?.processOptionId;
-
-    if (!hasSubtypes || !hasInitialSN) return;
-
-    const isValidSN = subtypes.some(
+    const isValidSN = subtypes?.some(
       (opt) => opt.value === initialData?.processSN
     );
-    if (isValidSN && isInitialCategory) {
-      setValue("processSN", initialData?.processSN);
-    }
-  }, [subtypes, initialData?.processSN, setValue]);
 
-  //* 處理表單可見性變化
+    if (hasSubtypes && hasInitialSN && isValidSN && isInitialCategory) {
+      setValue("processSN", initialData.processSN);
+    }
+  }, [subtypes, initialData?.processSN, processCategory, setValue]);
+
+  //* --------- 可見性處理 ---------
   useEffect(() => {
     if (visible) {
       reset(initialValues);

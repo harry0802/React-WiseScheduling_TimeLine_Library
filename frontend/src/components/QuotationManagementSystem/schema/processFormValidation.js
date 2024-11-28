@@ -43,7 +43,12 @@ export const baseSchemas = {
    * @description 正整數欄位驗證
    * @requires 數值為整數且 > 0
    */
-  positiveInteger: z.number().int("必須為整數").positive("必須大於 0"),
+  positiveInteger: z
+    .number({
+      required_error: "此欄位為必填",
+    })
+    .int("必須為整數")
+    .positive("必須大於 0"),
 };
 
 //! =============== 3. 業務邏輯驗證規則 ===============

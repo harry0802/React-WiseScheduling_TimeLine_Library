@@ -1,3 +1,10 @@
+/**
+ * @file commonConfigs_v1.js
+ * @description 報價系統通用配置與字段定義
+ * @version 1.0.0
+ * @lastModified 2024-03-21
+ */
+
 //! =============== 1. 設定與常量 ===============
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -29,9 +36,7 @@ const API_ENDPOINTS = {
  */
 
 //! =============== 3. 核心功能 ===============
-/**
- * @description 選項服務，用於獲取各種拉選項數據
- */
+//* ========= 服務層 Service Layer =========
 export const optionsService = {
   /**
    * @function getCommonUnits
@@ -134,35 +139,9 @@ export const optionsService = {
       throw error;
     }
   },
-
-  // 取得所有不重複的物料名稱、物料編號
-  // 原物料 -> 物料名稱 -> 物料編號 -> 單價
-  getMaterialOptions: async () => {
-    // GET api/material/materials
-    const response = await fetch(API_ENDPOINTS.MATERIAL_MATERIALS);
-    const data = await response.json();
-    return data?.data?.map((item) => ({
-      id: item.id,
-      value: item.materialSN,
-      label: item.materialName,
-    }));
-  },
-
-  // 取得所有不重複的，屬於包材類別的物料名稱、物料編號
-  // 包材類別 -> 物料名稱 -> 物料編號 -> 單價
-  getPackagingMaterialOptions: async () => {
-    // GET api/material/packagings
-    const response = await fetch(API_ENDPOINTS.MATERIAL_PACKAGINGS);
-    const data = await response.json();
-  },
-  // 取得原物料或者包材的單價
-  getMaterialUnitPrice: async () => {
-    // GET api/material/materialUnitPrice
-    // Parameters  : materialName, materialSN;
-    //  return amount
-  },
 };
 
+//* ========= 工廠函數 Factory Functions =========
 const createMaterialScope = () => {
   // 存放資料狀態
   let materials = [];
@@ -180,7 +159,6 @@ const createMaterialScope = () => {
           value: item.materialName,
           label: item.materialName,
           materialSN: item.materialSN,
-          unit: item.unit,
           unitPrice: item.unitPrice,
         }));
       }
@@ -188,7 +166,7 @@ const createMaterialScope = () => {
     },
 
     // 2. 根據物料名稱獲取相關資料
-    setSelectedMaterial(materialName) {
+    async setSelectedMaterial(materialName) {
       if (!materials.length || !materialName) return null;
 
       currentMaterial = materials.find(
@@ -196,20 +174,21 @@ const createMaterialScope = () => {
       );
 
       if (!currentMaterial) return null;
-
+      // 獲取物料單價
+      const unitPrice = await this.getMaterialPrice(currentMaterial);
       return {
         materialSN: currentMaterial.materialSN,
         unit: currentMaterial.unit,
-        unitPrice: currentMaterial.unitPrice,
+        unitPrice: unitPrice,
       };
     },
 
     // 3. 獲取物料單價
-    async getMaterialPrice() {
-      if (!currentMaterial) return null;
+    async getMaterialPrice(material) {
+      if (!material) return null;
       try {
         const response = await fetch(
-          `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${currentMaterial.materialName}&materialSN=${currentMaterial.materialSN}`
+          `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${material.label}&materialSN=${material.materialSN}`
         );
         const result = await response.json();
         return result.status ? result.data : null;
@@ -221,23 +200,71 @@ const createMaterialScope = () => {
   };
 };
 
-/**
- * 創建輸入屬性
- */
+const createPackagingScope = () => {
+  let packagings = [];
+  let packagingOptions = [];
+  let currentPackaging = null;
+
+  return {
+    // 1. 獲取包材選項
+    async getPackagings() {
+      if (!packagings.length) {
+        const response = await fetch(API_ENDPOINTS.MATERIAL_PACKAGINGS);
+        const result = await response.json();
+        packagings = result.data;
+        packagingOptions = packagings.map((item) => ({
+          value: item.materialName,
+          label: item.materialName,
+          materialSN: item.materialSN,
+          unitPrice: item.unitPrice,
+        }));
+      }
+      return packagingOptions;
+    },
+
+    // 2. 設置選中的包材
+    async setSelectedPackaging(packagingName) {
+      if (!packagings.length || !packagingName) return null;
+      currentPackaging = packagings.find(
+        (p) => p.materialName === packagingName.label
+      );
+
+      if (!currentPackaging) return null;
+      // 獲取包材單價
+      const unitPrice = await this.getPackagingPrice(currentPackaging);
+
+      return {
+        packagingSN: currentPackaging.materialSN,
+        unit: currentPackaging.unit,
+        unitPrice: unitPrice,
+      };
+    },
+
+    // 3. 獲取包材單價
+    async getPackagingPrice(packaging) {
+      if (!packaging) return null;
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${packaging.label}&materialSN=${packaging.materialSN}`
+        );
+        const result = await response.json();
+        return result.status ? result.data : null;
+      } catch (error) {
+        console.error("取得包材單價失敗:", error);
+        return null;
+      }
+    },
+  };
+};
+
+//! =============== 4. 工具函數 ===============
 const createInputProps = (unit, label) => ({
   InputProps: { endAdornment: unit },
   placeholder: `請輸入${label || (unit === "元" ? "金額" : unit)}`,
 });
 
-/**
- * 創建必填驗證規則
- */
 const createRequiredRule = (label) => ({ required: `${label}為必填` });
 
-/**
- * @function createField - 優化版本
- */
-// 1. 修改 createField (最小改動)
 export const createField = (
   name,
   label,
@@ -268,8 +295,8 @@ export const createField = (
   ...(options ? { options } : {}),
 });
 
-// =============== 基礎成本設置字段 ===============
-
+//! =============== 5. 字段定義 ===============
+//* 基礎成本設置字段
 const materialCostSettingFields = {
   estimatedDefectRate: createField(
     "estimatedDefectRate",
@@ -301,7 +328,7 @@ const materialCostSettingFields = {
   ),
 };
 
-// =============== 材料成本字段 ===============
+//* 材料成本字段
 const materialScope = createMaterialScope();
 const materialCostFields = {
   materialName: {
@@ -317,13 +344,12 @@ const materialCostFields = {
     getOptions: materialScope.getMaterials,
     getDependentValues: async (materialName) => {
       if (!materialName) return null;
-      const material = materialScope.setSelectedMaterial(materialName);
+      const material = await materialScope.setSelectedMaterial(materialName);
       if (material) {
         return {
           materialName: materialName.label,
           materialSN: material.materialSN,
-          unit: material.unit,
-          unitPrice: 123,
+          unitPrice: material.unitPrice,
         };
       }
       return null;
@@ -374,8 +400,48 @@ const materialCostFields = {
   ),
 };
 
-// =============== 包裝成本字段 ===============
+//* 包裝成本字段
+const packagingScope = createPackagingScope();
 const packagingCostFields = {
+  materialName: {
+    ...createField(
+      "materialName",
+      "包材名稱",
+      "autocomplete",
+      {
+        placeholder: "請選擇包材名稱",
+      },
+      createRequiredRule("包材名稱")
+    ),
+    getOptions: packagingScope.getPackagings,
+    getDependentValues: async (packagingName) => {
+      if (!packagingName) return null;
+      const packaging = await packagingScope.setSelectedPackaging(
+        packagingName
+      );
+      if (packaging) {
+        return {
+          materialName: packagingName.label,
+          materialSN: packaging.packagingSN || "",
+          unitPrice: packaging.unitPrice,
+        };
+      }
+      return null;
+    },
+  },
+  materialSN: {
+    ...createField(
+      "materialSN",
+      "包材編號",
+      "input",
+      {
+        placeholder: "包材編號將自動填入",
+        readOnly: true,
+        dependsOn: "materialName",
+      },
+      createRequiredRule("包材編號")
+    ),
+  },
   packagingType: createField(
     "packagingType",
     "包材類型",
@@ -386,25 +452,14 @@ const packagingCostFields = {
     3,
     optionsService.getPackagingTypes
   ),
-  materialSN: createField(
-    "materialSN",
-    "物料編號",
-    "input",
-    { placeholder: "請輸入物料編號" },
-    createRequiredRule("物料編號")
-  ),
-  materialName: createField(
-    "materialName",
-    "物料名稱",
-    "input",
-    { placeholder: "請輸入物料名稱" },
-    createRequiredRule("物料名稱")
-  ),
   unit: createField(
     "unit",
     "單位",
     "select",
-    { placeholder: "請選擇單位" },
+    {
+      placeholder: "請選擇單位",
+      readOnly: true,
+    },
     createRequiredRule("單位"),
     null,
     3,
@@ -414,32 +469,36 @@ const packagingCostFields = {
     "quantity",
     "數量",
     "number",
-    { placeholder: "請輸入數量" },
+    createInputProps("個", "數量"),
     createRequiredRule("數量")
   ),
-  capacity: createField(
-    "capacity",
-    "量",
+  unitPrice: {
+    ...createField(
+      "unitPrice",
+      "單價",
+      "number",
+      {
+        ...createInputProps("元", "單價"),
+        dependsOn: "materialName",
+        readOnly: true,
+      },
+      createRequiredRule("單價")
+    ),
+  },
+  amount: createField(
+    "amount",
+    "金額",
     "number",
-    createInputProps("件/箱", "容量"),
-    createRequiredRule("容量")
-  ),
-  bagsPerKg: createField(
-    "bagsPerKg",
-    "每公斤袋數",
-    "number",
-    createInputProps("袋/公斤", "每公斤袋數")
-  ),
-  unitPrice: createField(
-    "unitPrice",
-    "單價",
-    "number",
-    createInputProps("元", "單價"),
-    createRequiredRule("單價")
+    {
+      ...createInputProps("元", "金額"),
+      readOnly: true,
+      dependsOn: ["quantity", "unitPrice"],
+    },
+    createRequiredRule("金額")
   ),
 };
 
-// =============== 注塑成型成本字段 ===============
+//* 其他成本字段
 const injectionMoldingCostFields = {
   workHoursRatio: createField(
     "workHoursRatio",
@@ -506,7 +565,6 @@ const injectionMoldingCostFields = {
   ),
 };
 
-// =============== 運輸成本字段 ===============
 const freightFields = {
   deliveryDistance: createField(
     "deliveryDistance",
@@ -545,7 +603,6 @@ const freightFields = {
   ),
 };
 
-// =============== 關稅成本字段 ===============
 const customsDutyFields = {
   feeType: createField(
     "feeType",
@@ -583,7 +640,6 @@ const customsDutyFields = {
   ),
 };
 
-// =============== 委外加工成本字段 ===============
 const outsourcedProcessingFields = {
   unitPrice: createField(
     "unitPrice",
@@ -601,7 +657,6 @@ const outsourcedProcessingFields = {
   ),
 };
 
-// =============== 廠內加工成本字段 ===============
 const internalProcessingFields = {
   workSecond: createField(
     "workSecond",
@@ -626,7 +681,7 @@ const internalProcessingFields = {
   ),
 };
 
-// 導出所有通用字段
+//! =============== 6. 導出配置 ===============
 export const commonFields = {
   ...materialCostSettingFields,
   ...materialCostFields,
@@ -638,7 +693,6 @@ export const commonFields = {
   ...internalProcessingFields,
 };
 
-// 導出通用區段配置
 export const commonSections = {
   materialCostSetting: {
     title: "材料成本設置",
@@ -697,3 +751,17 @@ export const commonSections = {
     })),
   },
 };
+
+/**
+ * @notes
+ * - 主要功能：
+ *   1. API 端點管理
+ *   2. 表單字段配置
+ *   3. 選項數據獲取
+ *   4. 狀態管理
+ *
+ * @optimization
+ * - 使用 Map 優化查找操作
+ * - 實現數據緩存
+ * - 添加錯誤重試機制
+ */

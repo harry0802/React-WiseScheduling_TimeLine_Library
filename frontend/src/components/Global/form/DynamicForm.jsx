@@ -32,36 +32,50 @@ import {
 import { styled } from "@mui/material/styles";
 import { formatSubmitValues } from "../../../utility/formUtils";
 
-//* 主題樣式配置
+//* 主題配置
+const THEME_CONFIG = {
+  spacing: 3,
+  colors: {
+    text: "#8f8f8f",
+    primary: "#83bf45",
+    primaryHover: "#6fc1ae",
+    primaryActive: "#8bc1e3",
+  },
+  typography: {
+    fontFamily: "Inter, sans-serif",
+    fontSize: "0.875rem",
+    fontWeight: 400,
+  },
+};
+
+//* 樣式組件
 const StyledForm = styled("form")(({ theme }) => ({
   "& .MuiFormControl-root": {
     width: "100%",
     marginLeft: 0,
-    marginBottom: theme.spacing(3),
+    marginBottom: theme.spacing(THEME_CONFIG.spacing),
   },
   "& .MuiInputLabel-root": {
-    color: "#8f8f8f",
-    fontFamily: "Inter, sans-serif",
-    fontSize: "0.875rem",
-    fontWeight: 400,
+    color: THEME_CONFIG.colors.text,
+    ...THEME_CONFIG.typography,
   },
   "& .MuiInputBase-input": {
-    color: "#8f8f8f",
-    fontFamily: "Inter, sans-serif",
-    fontSize: "0.875rem",
-    fontWeight: 400,
+    color: THEME_CONFIG.colors.text,
+    fontFamily: THEME_CONFIG.typography.fontFamily,
+    fontSize: THEME_CONFIG.typography.fontSize,
+    fontWeight: THEME_CONFIG.typography.fontWeight,
     padding: "1.0625rem 0.5625rem",
   },
   "& .MuiButton-containedPrimary": {
-    backgroundColor: "#83bf45",
+    backgroundColor: THEME_CONFIG.colors.primary,
     color: "white",
     transition: "background-color 0.3s, transform 0.1s",
     boxShadow: "3px 3px 6px rgba(0, 0, 0, 0.25)",
     "&:hover": {
-      backgroundColor: "#6fc1ae",
+      backgroundColor: THEME_CONFIG.colors.primaryHover,
     },
     "&:active": {
-      backgroundColor: "#8bc1e3",
+      backgroundColor: THEME_CONFIG.colors.primaryActive,
     },
   },
 }));
@@ -303,15 +317,6 @@ function DynamicForm({
   const handleFinish = useCallback(
     async (values) => {
       try {
-        const result = await methods.trigger();
-        if (!result) {
-          const errors = methods.formState.errors;
-          Object.entries(errors).forEach(([field, error]) => {
-            console.error(`${field}: ${error.message}`);
-          });
-          return;
-        }
-
         const formattedValues = formatSubmitValues(values);
         onFinish(formattedValues);
       } catch (error) {
@@ -369,22 +374,24 @@ function FieldComponent({ field, customProps = {} }) {
     rules: {
       ...field.rules,
       ...(field.type === "number" && {
+        setValueAs: (value) => {
+          if (value === "" || value === null || value === undefined)
+            return null;
+          const num = Number(value);
+          return isNaN(num) ? null : num;
+        },
         validate: {
-          isNumber: (value) =>
-            value === null ||
-            value === "" ||
-            !isNaN(Number(value)) ||
-            "請輸入有效數字",
-          required: (value) =>
-            (value !== null && value !== "") || `${field.label}為必填`,
+          isValidNumber: (value) => {
+            if (value === null) return true;
+            const num = Number(value);
+            return !isNaN(num) || "請輸入有效的數字";
+          },
         },
       }),
-      ...(field.type === "select" && {
-        validate: {
-          required: (value) =>
-            (value !== null && value !== "") || `請選擇${field.label}`,
-        },
-      }),
+      ...(field.type === "select" &&
+        field.rules?.required && {
+          required: `請選擇${field.label}`,
+        }),
     },
   });
 
@@ -418,11 +425,23 @@ function FieldComponent({ field, customProps = {} }) {
       ? {
           ...controllerField,
           value: controllerField.value ?? "",
-          type: "number",
-          inputProps: { step: "any" },
           onChange: (e) => {
-            const value = e.target.value === "" ? null : Number(e.target.value);
-            controllerField.onChange(value);
+            const value = e.target.value;
+            if (value === "") {
+              controllerField.onChange(null);
+            } else {
+              const num = Number(value);
+              controllerField.onChange(isNaN(num) ? value : num);
+            }
+          },
+          onBlur: (e) => {
+            const value = e.target.value;
+            if (value === "") {
+              controllerField.onChange(null);
+            } else {
+              const num = Number(value);
+              controllerField.onChange(isNaN(num) ? null : num);
+            }
           },
         }
       : {
