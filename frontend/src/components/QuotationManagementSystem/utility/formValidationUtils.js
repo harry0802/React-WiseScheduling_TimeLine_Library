@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { baseSchemas, fieldSchemas } from "../schema/processFormValidation";
 import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
+// TODO:  表單問題 我需要精準分配給動態表單的欄位
+// FIX: 動態表單的欄位需要精準分配，否則會造成表單驗證失敗
 
 // 基礎必填欄位
 const baseRequiredFields = {

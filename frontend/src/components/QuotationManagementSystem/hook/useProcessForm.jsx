@@ -21,11 +21,14 @@ export function useProcessForm(initialProcess) {
       ...initialProcess?.SQMaterialCostSetting,
     };
   }, [initialProcess]);
-
+  // TODO:  表單問題 我需要精準分配給動態表單的欄位
+  // FIX: 動態表單的欄位需要精準分配，否則會造成表單驗證失敗
   // 3. 表單實例
   const methods = useForm({
     defaultValues: initialValues,
     mode: "onSubmit",
+    // TODO: 表單驗證失敗
+    //! FIX: 因為表單沒有精準分配給動態表單的欄位，導致無法觸發
     resolver: async (data) => {
       console.log("🔥🔥🔥🔥 ~ resolver:", data);
       // 使用當前表單數據中的 processCategory
@@ -48,7 +51,8 @@ export function useProcessForm(initialProcess) {
       };
     });
   }, []);
-
+  // BUG: 函數觸發失敗
+  // FIX: 因為表單沒有精準分配給動態表單的欄位，導致無法觸發
   // 5. 提交處理
   const handleSubmit = useCallback(
     async (formData) => {
