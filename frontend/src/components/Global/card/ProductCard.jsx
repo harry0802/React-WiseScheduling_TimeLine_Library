@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import { Card, Typography } from "antd";
+// mui 的刪除 icon
+import DeleteIcon from "@mui/icons-material/Delete";
 const { Title, Text, Paragraph } = Typography;
 const StyledCard = styled(Card)`
   @property --gradient-start {
@@ -69,54 +71,87 @@ const StyledCard = styled(Card)`
   }
 `;
 
-const CardTitle = styled(Title)`
-  &.ant-typography {
-    display: block;
-    color: currentColor;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: inherit;
-
-    &:hover {
-      color: #fff;
-      text-decoration: underline;
-    }
-  }
+const QuoteNumber = styled(Text)`
+  display: block;
+  font-size: 1.125rem;
+  color: currentColor;
+  margin-bottom: 1.5625rem;
 `;
 
-const CardSubtitle = styled(Text)`
+const Date = styled(Text)`
   display: block;
+  font-size: 1.125rem;
+  font-weight: 500;
   color: currentColor;
+  margin-bottom: 0.3125rem;
+`;
+
+const ProductName = styled(Text)`
+  display: block;
+  font-size: 1.5rem;
+  color: currentColor;
+  margin-bottom: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: inherit;
-  margin-bottom: 1.25rem;
-  margin: auto 0;
-
-  &:hover {
-    color: #fff;
-    text-decoration: underline;
-  }
 `;
 
-const CardContent = styled(Paragraph)`
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+const CustomerName = styled(Text)`
+  display: block;
   color: currentColor;
-  font-size: 1.5rem;
+  font-size: 1.125rem;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
-function SharedCard({ title, subtitle, content, onButtonClick, className }) {
+const DeleteButton = styled.div`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #e74c3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  ${StyledCard}:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    background: #c0392b;
+  }
+`;
+
+function SharedCard({
+  date,
+  quoteNumber,
+  productName,
+  customerName,
+  onDelete,
+  onClick,
+  className,
+}) {
   return (
-    <StyledCard onClick={onButtonClick} className={className} bordered={false}>
-      <CardTitle level={5}>{title}</CardTitle>
-      <CardSubtitle>{subtitle}</CardSubtitle>
-      <CardContent>{content}</CardContent>
+    <StyledCard onClick={onClick} className={className} bordered={false}>
+      <Date>{date}</Date>
+      <QuoteNumber>{quoteNumber}</QuoteNumber>
+      <ProductName>{productName}</ProductName>
+      <CustomerName>{customerName}</CustomerName>
+      <DeleteButton
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete?.();
+        }}
+      >
+        <DeleteIcon style={{ color: "#fff" }} />
+      </DeleteButton>
     </StyledCard>
   );
 }

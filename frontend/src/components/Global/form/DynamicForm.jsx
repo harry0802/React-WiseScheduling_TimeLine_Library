@@ -28,6 +28,8 @@ import {
   InputLabel,
   FormHelperText,
   FormControl,
+  Box,
+  Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { formatSubmitValues } from "../../../utility/formUtils";
@@ -122,19 +124,39 @@ function mergeProps(field, controllerField, restProps) {
  * @description 過濾自定義屬性
  */
 function filterCustomProps(props) {
-  const {
-    dependsOn,
-    getDependentOptions,
-    getDependentValue,
-    rules,
-    customProps,
-    options,
-    field,
-    controllerField,
-    error,
-    ...domProps
-  } = props;
-  return domProps;
+  // 定義所有需要過濾的自定義屬性
+  const CUSTOM_PROPS = [
+    "dependsOn",
+    "getDependentOptions",
+    "getDependentValue",
+    "getDependentValues",
+    "getOptions",
+    "rules",
+    "customProps",
+    "type",
+    "label",
+    "span",
+    "unitPrice",
+    "freeSolo",
+    "materialSN",
+    "field",
+    "controllerField",
+    "options",
+    "error",
+    "loading",
+    "asyncOptions",
+    "methods",
+  ];
+
+  // 創建新的 props 對象，排除自定義屬性
+  const filteredProps = Object.keys(props).reduce((acc, key) => {
+    if (!CUSTOM_PROPS.includes(key)) {
+      acc[key] = props[key];
+    }
+    return acc;
+  }, {});
+
+  return filteredProps;
 }
 
 //! =============== 3. 渲染函數 ===============
@@ -146,26 +168,14 @@ function filterCustomProps(props) {
 function renderFormItem(
   field,
   controllerField,
-  restProps,
+  props,
   options,
   error,
   loading,
   asyncOptions,
   methods
 ) {
-  const mergedProps = mergeProps(field, controllerField, restProps);
-  // 先過濾掉所有自定義 props
-  const {
-    getOptions,
-    dependsOn,
-    getDependentOptions,
-    rules,
-    customProps,
-    type,
-    label,
-    span,
-    ...domProps
-  } = restProps;
+  const filteredProps = filterCustomProps(props);
 
   switch (field.type) {
     case "select":
@@ -178,7 +188,7 @@ function renderFormItem(
           <InputLabel id={`${field.name}-label`}>{field.label}</InputLabel>
           <Select
             {...controllerField}
-            {...restProps}
+            {...filteredProps}
             labelId={`${field.name}-label`}
             label={field.label}
           >
@@ -194,7 +204,7 @@ function renderFormItem(
 
     case "radio":
       return (
-        <RadioGroup {...mergedProps}>
+        <RadioGroup {...filteredProps}>
           {options.map((option) => (
             <FormControlLabel
               key={option.value}
@@ -208,21 +218,16 @@ function renderFormItem(
     case "autocomplete":
       return (
         <Autocomplete
-          {...field}
-          {...restProps}
+          {...filteredProps}
           options={options}
           value={controllerField.value || null}
           onChange={async (_, newValue) => {
             controllerField.onChange(newValue);
-
-            // 處理依賴值更新
             if (newValue && field.getDependentValues) {
               try {
                 const values = await field.getDependentValues(newValue);
                 if (values && typeof values === "object") {
-                  // 獲取當前字段的基礎路徑
                   const basePath = field.name.split(".").slice(0, -1).join(".");
-
                   Object.entries(values).forEach(([key, val]) => {
                     const fullPath = basePath ? `${basePath}.${key}` : key;
                     methods.setValue(fullPath, val, {
@@ -236,25 +241,49 @@ function renderFormItem(
               }
             }
           }}
-          getOptionKey={(option) => `${option.value}-${Math.random()}`}
-          isOptionEqualToValue={(option, value) =>
-            option?.value === value?.value
-          }
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={field.label}
-              error={!!error}
-              helperText={error?.message}
-            />
-          )}
-          renderOption={(props, option) => (
-            <li
+          isOptionEqualToValue={(option, value) => {
+            if (typeof value === "string") {
+              return (
+                option?.value === value ||
+                option?.label === value ||
+                option?.value?.toString() === value
+              );
+            }
+            if (value && typeof value === "object") {
+              return (
+                option?.value === value?.value || option?.label === value?.label
+              );
+            }
+            if (!value) {
+              return !option;
+            }
+            return false;
+          }}
+          getOptionLabel={(option) => {
+            if (!option) return "";
+            if (typeof option === "string") return option;
+            return option.label || option.value?.toString() || "";
+          }}
+          renderInput={(params) => {
+            const inputProps = filterCustomProps(params);
+            return (
+              <TextField
+                {...inputProps}
+                label={field.label}
+                error={!!error}
+                helperText={error?.message}
+              />
+            );
+          }}
+          freeSolo={field.freeSolo}
+          renderOption={(props, option, state) => (
+            <Box
+              component="li"
               {...props}
-              key={`${option.value}-${option.label}-${Math.random()}`}
+              key={option.id || `${option.value}-${state.index}`}
             >
-              {option.label}
-            </li>
+              <Typography noWrap>{option.label || option.value}</Typography>
+            </Box>
           )}
         />
       );
@@ -265,8 +294,7 @@ function renderFormItem(
           control={
             <Checkbox
               {...controllerField}
-              {...field}
-              {...restProps}
+              {...filteredProps}
               checked={controllerField.value}
               onChange={(e) => controllerField.onChange(e.target.checked)}
             />
@@ -275,18 +303,59 @@ function renderFormItem(
         />
       );
 
+    case "number":
+      return (
+        <TextField
+          {...filteredProps}
+          {...controllerField}
+          type="number"
+          label={field.label}
+          error={!!error}
+          helperText={error?.message}
+          InputProps={{
+            inputProps: {
+              min: field.min,
+              max: field.max,
+              step: field.step || 1,
+            },
+          }}
+        />
+      );
+
+    case "date":
+      return (
+        <TextField
+          {...filteredProps}
+          {...controllerField}
+          type="date"
+          label={field.label}
+          error={!!error}
+          helperText={error?.message}
+          InputLabelProps={{ shrink: true }}
+        />
+      );
+
+    case "textarea":
+      return (
+        <TextField
+          {...filteredProps}
+          {...controllerField}
+          multiline
+          rows={field.rows || 4}
+          label={field.label}
+          error={!!error}
+          helperText={error?.message}
+        />
+      );
+
+    case "text":
     default:
       return (
         <TextField
-          {...mergedProps}
-          type={
-            field.type === "number"
-              ? "number"
-              : field.type === "date"
-              ? "date"
-              : "text"
-          }
-          multiline={field.type === "textarea"}
+          {...filteredProps}
+          {...controllerField}
+          type="text"
+          label={field.label}
           error={!!error}
           helperText={error?.message}
         />
@@ -532,13 +601,14 @@ function FormItem({
   loading,
   asyncOptions,
   methods,
-  ...props
+  ...restProps
 }) {
-  const domProps = filterCustomProps(props);
+  const filteredProps = filterCustomProps(restProps);
+
   return renderFormItem(
     field,
     controllerField,
-    domProps,
+    filteredProps,
     options,
     error,
     loading,

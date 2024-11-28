@@ -19,22 +19,13 @@ export const baseSchemas = {
     .min(0, "不能小於 0"),
 
   /**
-   * @description 必填字串欄位驗證
-   * @requires 長度 >= 1
-   */
-  requiredString: z
-    .string({
-      required_error: "此欄位為必填",
-    })
-    .min(1, "此欄位為必填"),
-
-  /**
    * @description 百分比欄位驗證
    * @requires 0 <= 數值 <= 100
    */
   percentage: z
     .number({
       required_error: "此欄位為必填",
+      invalid_type_error: "請輸入有效數字",
     })
     .min(0, "不能小於 0")
     .max(100, "不能大於 100"),
@@ -46,6 +37,7 @@ export const baseSchemas = {
   positiveInteger: z
     .number({
       required_error: "此欄位為必填",
+      invalid_type_error: "請輸入有效數字",
     })
     .int("必須為整數")
     .positive("必須大於 0"),
@@ -75,11 +67,13 @@ export const fieldSchemas = {
    * @requires 重量與單價為非負數
    */
   materialCost: z.object({
-    materialSN: baseSchemas.requiredString,
-    materialName: baseSchemas.requiredString,
-    unit: baseSchemas.requiredString,
+    materialOptionId: baseSchemas.positiveInteger,
+    materialSN: z.string().min(1, "材料編號為必填"),
+    materialName: z.string().min(1, "材料名稱為必填"),
+    unit: z.string().min(1, "單位為必填"),
     weight: baseSchemas.requiredNumber,
     unitPrice: baseSchemas.requiredNumber,
+    amount: baseSchemas.requiredNumber,
   }),
 
   /**
@@ -88,14 +82,14 @@ export const fieldSchemas = {
    * @requires 每公斤袋數可為空值
    */
   packagingCost: z.object({
-    packagingType: baseSchemas.requiredString,
-    materialSN: baseSchemas.requiredString,
-    materialName: baseSchemas.requiredString,
-    unit: baseSchemas.requiredString,
-    quantity: baseSchemas.requiredNumber,
+    packagingType: z.string().min(1, "包裝類型為必填"),
+    materialSN: z.string().min(1, "材料編號為必填"),
+    materialName: z.string().min(1, "材料名稱為必填"),
+    unit: z.string().min(1, "單位為必填"),
+    quantity: baseSchemas.positiveInteger,
     capacity: baseSchemas.requiredNumber,
-    bagsPerKg: baseSchemas.requiredNumber.nullable(),
     unitPrice: baseSchemas.requiredNumber,
+    amount: baseSchemas.requiredNumber,
   }),
 
   /**
@@ -104,6 +98,8 @@ export const fieldSchemas = {
    * @requires 模穴數為正整數
    */
   injectionMoldingCost: z.object({
+    machineId: baseSchemas.positiveInteger,
+    machineSN: z.string().min(1, "機台編號為必填"),
     workHoursRatio: baseSchemas.percentage,
     defectiveRate: baseSchemas.percentage,
     cycleTime: baseSchemas.requiredNumber,
@@ -133,7 +129,7 @@ export const fieldSchemas = {
    * @requires 預估出貨量為正整數
    */
   customsDutyCost: z.object({
-    feeType: baseSchemas.requiredString,
+    feeType: z.string().min(1, "費用類型為必填"),
     freight: baseSchemas.requiredNumber,
     estimatedShipment: baseSchemas.positiveInteger,
     amount: baseSchemas.requiredNumber,

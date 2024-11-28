@@ -7,10 +7,12 @@ import {
   useCreateQuotationMutation,
 } from "../services/salesServices/endpoints/quotationApi";
 import { timeUtils } from "../utility/timeUtils";
+import { useLocation } from "react-router-dom";
 
 function SalesManagementSystem() {
+  const location = useLocation();
   const { pageStatus, setAPIData } = useSalesHomeSlice();
-  const { data, isSuccess } = useGetQuotationsQuery();
+  const { data, isSuccess, refetch } = useGetQuotationsQuery();
   const [createQuotation, { isLoading: isCreating, isSuccess: isCreated }] =
     useCreateQuotationMutation();
 
@@ -29,11 +31,13 @@ function SalesManagementSystem() {
   ];
 
   useEffect(() => {
-    (async function () {
-      if (isSuccess || isCreated) {
-        setAPIData(data);
-      }
-    })();
+    refetch();
+  }, [location.pathname, refetch]);
+
+  useEffect(() => {
+    if (isSuccess || isCreated) {
+      setAPIData(data);
+    }
   }, [isSuccess, isCreated, data, setAPIData]);
 
   return isSuccess || isCreated ? (

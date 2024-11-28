@@ -5,15 +5,15 @@ import { useSalesHomeSlice, useFactoryHomeSlice } from "../slice/qmsHome";
 import PmHomeContent from "../../Global/content/PmHomeContent";
 
 // 抽離卡片組件，避免不必要的重渲染
-const Card = memo(function Card({ data, onCardClick }) {
+const Card = memo(function Card({ data, onCardClick, onDelete }) {
   return (
     <SharedCard
-      key={data.id}
-      data={data}
-      onButtonClick={onCardClick}
-      title={data.customerName || "未命名客戶"} // 增加預設值
-      subtitle={data.productName || "未命名產品"}
-      content={data.additional_info || "無"}
+      date={data.createDate || "無日期"}
+      quoteNumber={data.quotationSN || "無編號"}
+      productName={data.productName || "未命名產品"}
+      customerName={data.customerName || "未命名客戶"}
+      onClick={onCardClick}
+      onDelete={onDelete}
     />
   );
 });
@@ -49,6 +49,11 @@ function QmsHome() {
     [navigate]
   );
 
+  const handleDelete = useCallback((id) => {
+    // TODO: 實現刪除邏輯
+    console.log("Delete:", id);
+  }, []);
+
   // 使用 useMemo 優化渲染列表
   const cardList = useMemo(() => {
     if (!Array.isArray(displayedData)) return null;
@@ -58,9 +63,10 @@ function QmsHome() {
         key={data.id}
         data={data}
         onCardClick={() => handleCardClick(data.id)}
+        onDelete={() => handleDelete(data.id)}
       />
     ));
-  }, [displayedData, handleCardClick]);
+  }, [displayedData, handleCardClick, handleDelete]);
 
   // 錯誤處理
   if (error) {

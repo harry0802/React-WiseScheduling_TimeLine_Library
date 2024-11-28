@@ -26,7 +26,12 @@ export function useProcessForm(initialProcess) {
   const methods = useForm({
     defaultValues: initialValues,
     mode: "onSubmit",
-    resolver: getProcessResolver(initialValues.processCategory),
+    resolver: async (data) => {
+      console.log("🔥🔥🔥🔥 ~ resolver:", data);
+      // 使用當前表單數據中的 processCategory
+      const resolver = getProcessResolver(data.processCategory);
+      return resolver(data);
+    },
   });
 
   // 4. 表單變更處理

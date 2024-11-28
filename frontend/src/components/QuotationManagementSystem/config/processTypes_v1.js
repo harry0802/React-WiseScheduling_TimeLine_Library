@@ -127,6 +127,7 @@ class FormSection {
  * 各製程類型的表單配置
  */
 export const FORM_CONFIGURATIONS = {
+  // 廠內成型製程
   [PROCESS_CATEGORY_OPTION[0].category]: new FormSection("廠內成型製程", [
     new NestedFormItem("材料相關費用", [
       new GeneralFormItem(
@@ -214,7 +215,7 @@ export const FORM_CONFIGURATIONS = {
       "SQInjectionMoldingCosts"
     ),
   ]),
-
+  // 委外成型製程
   [PROCESS_CATEGORY_OPTION[1].category]: new FormSection("委外成型製程", [
     new NestedFormItem("材料相關費用", [
       new GeneralFormItem(
@@ -240,6 +241,7 @@ export const FORM_CONFIGURATIONS = {
     ),
   ]),
 
+  // 廠內後製程
   [PROCESS_CATEGORY_OPTION[2].category]: new FormSection("廠內後製程", [
     new NestedFormItem("材料相關費用", [
       new GeneralFormItem("材料成本設置", [
@@ -262,7 +264,7 @@ export const FORM_CONFIGURATIONS = {
       "SQInPostProcessingCosts"
     ),
   ]),
-
+  // 委外後製程
   [PROCESS_CATEGORY_OPTION[3].category]: new FormSection("委外後製程", [
     new NestedFormItem("材料相關費用", [
       new GeneralFormItem("材料成本設置", [
@@ -286,6 +288,7 @@ export const FORM_CONFIGURATIONS = {
     ),
   ]),
 
+  // 廠內出貨檢驗
   [PROCESS_CATEGORY_OPTION[4].category]: new FormSection("廠內出貨檢驗", [
     new TodoListFormItem(
       "檢驗費用",
@@ -294,6 +297,7 @@ export const FORM_CONFIGURATIONS = {
     ),
   ]),
 
+  // 運輸費用與貨運關稅
   TRANSPORTATION: new FormSection("運輸費用與貨運關稅", [
     new TodoListFormItem(
       "運輸費用",
