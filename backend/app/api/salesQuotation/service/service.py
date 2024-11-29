@@ -18,9 +18,9 @@ from app.api.option.optionEnum import ProcessCategoryEnum
 from .material_service import create_materialSetting, create_material, update_materialSetting, create_update_delete_material
 from .packaging_service import create_packaging, create_update_delete_packaging
 from .injectionMolding_service import create_injectionMolding, update_injectionMolding
-from .inPostProcessing_service import create_inPostProcessing, update_inPostProcessing
-from .outPostProcessing_service import create_outPostProcessing, update_outPostProcessing
-from .shipping_service import update_freight, update_customsDuty
+from .inPostProcessing_service import create_inPostProcessing, create_update_delete_inPostProcessing
+from .outPostProcessing_service import create_outPostProcessing, create_update_delete_outPostProcessing
+from .shipping_service import create_update_delete_freight, create_update_delete_customsDuty
 from ..schemas import SalesQuotationSchema, ShippingCostSchema, SQProcessSchema, SQMaterialCostSettingSchema, SQMaterialCostSchema, SQPackagingCostSchema, SQInjectionMoldingCostSchema, SQInPostProcessingCostSchema, SQOutPostProcessingCostSchema, SQFreightSchema, SQCustomsDutySchema
 salesQuotation_schema = SalesQuotationSchema()
 
@@ -30,6 +30,7 @@ def generate_quotationSN():
        Format: SYYYYMMDDXXX
     """
     try:
+        prefix = "S"
         today = datetime.now()
         year = today.strftime("%Y")
         month = today.strftime("%m")
@@ -37,16 +38,16 @@ def generate_quotationSN():
         # get the last quotationSN
         last_salesQuotation = db.session.query(SalesQuotation).order_by(SalesQuotation.id.desc()).first()
         if last_salesQuotation is None:
-            return f"S{year}{month}{day}001"
+            return f"{prefix}{year}{month}{day}001"
         else:
             last_quotationSN = last_salesQuotation.quotationSN
             last_quotationSN_date = last_quotationSN[1:9]
             last_quotationSN_num = last_quotationSN[9:]
             if last_quotationSN_date == f"{year}{month}{day}":
                 num = int(last_quotationSN_num) + 1
-                return f"S{year}{month}{day}{num:03}"
+                return f"{prefix}{year}{month}{day}{num:03}"
             else:
-                return f"S{year}{month}{day}001"
+                return f"{prefix}{year}{month}{day}001"
     except Exception as error:
         raise error
 
@@ -361,8 +362,11 @@ class SalesQuotationService:
     @staticmethod
     def update_salesQuotationProcess(payload):
         try:
-            # Get the process category
-            if (processOption_db := ProcessOption.query.filter(ProcessOption.id == payload["processOptionId"]).first()) is None:
+            # Get the process category from payload["id"]
+            process_db = SQProcess.query.get(payload["id"])
+            if process_db is None:
+                return err_resp("SQProcess not found", "SQProcess_404", 404)
+            if (processOption_db := ProcessOption.query.filter(ProcessOption.id == process_db.processOptionId).first()) is None:
                 return err_resp("process not found", "process_404", 404)
             
             create_update_session_list = []
@@ -380,29 +384,30 @@ class SalesQuotationService:
                 SQMaterialCostSetting_db = update_materialSetting(payload)
                 created_updated_material_db_list, deleted_material_db_list = create_update_delete_material(payload, SQMaterialCostSetting_db.estimatedMaterialFluctuation)
                 created_updated_packaging_db_list, deleted_packaging_db_list = create_update_delete_packaging(payload)
-                SQOutPostProcessingCost_db_list = update_outPostProcessing(payload)
-                create_update_session_list.extend([SQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *SQOutPostProcessingCost_db_list])
-                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list])
+                created_updated_outPostProcessingCost_db_list, deleted_outPostProcessingCost_db_list = create_update_delete_outPostProcessing(payload)
+                create_update_session_list.extend([SQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *created_updated_outPostProcessingCost_db_list])
+                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list, *deleted_outPostProcessingCost_db_list])
             # 更新 In-BE(廠內後製程) 製程類別的原物料費用、包材費用、廠內後製程與檢驗費用
             elif processOption_db.processCategory == ProcessCategoryEnum.In_BE.value:
                 SQMaterialCostSetting_db = update_materialSetting(payload)
                 created_updated_material_db_list, deleted_material_db_list = create_update_delete_material(payload, SQMaterialCostSetting_db.estimatedMaterialFluctuation)
                 created_updated_packaging_db_list, deleted_packaging_db_list = create_update_delete_packaging(payload)
-                SQInPostProcessingCost_db_list = update_inPostProcessing(payload)
-                create_update_session_list.extend([SQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *SQInPostProcessingCost_db_list])
-                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list])
+                created_updated_inPostProcessingCost_db_list, deleted_inPostProcessingCost_db_list = create_update_delete_inPostProcessing(payload)
+                create_update_session_list.extend([SQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *created_updated_inPostProcessingCost_db_list])
+                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list, *deleted_inPostProcessingCost_db_list])
             # 更新 Out-BE(委外後製程) 製程類別的原物料費用、包材費用、委外後製程與檢驗費用
             elif processOption_db.processCategory == ProcessCategoryEnum.Out_BE.value:
                 SQMaterialCostSetting_db = update_materialSetting(payload)
                 created_updated_material_db_list, deleted_material_db_list = create_update_delete_material(payload, SQMaterialCostSetting_db.estimatedMaterialFluctuation)
                 created_updated_packaging_db_list, deleted_packaging_db_list = create_update_delete_packaging(payload)
-                SQOutPostProcessingCost_db_list = update_outPostProcessing(payload)
-                create_update_session_list.extend([SQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *SQOutPostProcessingCost_db_list])
-                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list])
+                created_updated_outPostProcessingCost_db_list, deleted_outPostProcessingCost_db_list = create_update_delete_outPostProcessing(payload)
+                create_update_session_list.extend([SQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *created_updated_outPostProcessingCost_db_list])
+                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list, *deleted_outPostProcessingCost_db_list])
             # 更新 In-TS(廠內出貨檢驗) 製程類別的廠內後製程與檢驗費用
             elif processOption_db.processCategory == ProcessCategoryEnum.In_TS.value:
-                SQInPostProcessingCost_db_list = update_inPostProcessing(payload)
-                create_update_session_list.extend(SQInPostProcessingCost_db_list)
+                created_updated_inPostProcessingCost_db_list, deleted_inPostProcessingCost_db_list = create_update_delete_inPostProcessing(payload)
+                create_update_session_list.extend(created_updated_inPostProcessingCost_db_list)
+                delete_session_list.extend([*deleted_inPostProcessingCost_db_list])
             
             db.session.add_all(create_update_session_list)
             for delete_session in delete_session_list:
@@ -470,15 +475,18 @@ class SalesQuotationService:
             raise error
 
 
-
     @staticmethod
-    def update_shippingCosts(payload):
+    def update_shippingCosts(salesQuotationId, payload):
         try:
-            add_to_session_list = []
-            SQFreight_db_list = update_freight(payload)
-            SQCustomsDuty_db_list = update_customsDuty(payload)
-            add_to_session_list.extend([*SQFreight_db_list, *SQCustomsDuty_db_list])
-            db.session.add_all(add_to_session_list)
+            create_update_session_list = []
+            delete_session_list = []
+            created_updated_SQFreight_db_list, deleted_SQFreight_db_list = create_update_delete_freight(salesQuotationId, payload)
+            created_updated_SQCustomsDuty_db_list, deleted_SQCustomsDuty_db_list = create_update_delete_customsDuty(salesQuotationId, payload)
+            create_update_session_list.extend([*created_updated_SQFreight_db_list, *created_updated_SQCustomsDuty_db_list])
+            delete_session_list.extend([*deleted_SQFreight_db_list, *deleted_SQCustomsDuty_db_list])
+            db.session.add_all(create_update_session_list)
+            for delete_session in delete_session_list:
+                db.session.delete(delete_session)
             db.session.commit()
 
             resp = message(True, "salesQuotation ShippingCost have been updated..")

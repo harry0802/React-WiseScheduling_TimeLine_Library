@@ -192,4 +192,4 @@ class SalesQuotationProcessController(Resource):
     @api.expect(shippingCost_put, validate=True)
     @controller_entrance_log(description="Update salesQuotatio ShippingCost")
     def put(self, salesQuotationId):
-        return SalesQuotationService.update_shippingCosts(api.payload)
+        return SalesQuotationService.update_shippingCosts(salesQuotationId, api.payload)

@@ -29,16 +29,18 @@ def complete_SQInjectionMoldingCost(db_obj, payload):
         if payload.get("subtotal") is not None else db_obj.subtotal
     db_obj.electricityCost = float(payload["electricityCost"]) \
         if payload.get("electricityCost") is not None else db_obj.electricityCost
+    # 人員選擇「生產機台」帶入「廠內試模費率 8hr」、「每秒電費」
+    machine_db = db.session.query(Machine).filter(Machine.id == db_obj.machineId).first()
+    if machine_db is None:
+        raise err_resp("machine not found", "machine_404", 404)
+    # 「單價」= 「廠內試模費率 8hr」
+    db_obj.unitPrice = machine_db.moldTrialCost
     #  「金額」=「單價」*(1+不良率)
     db_obj.amount = db_obj.unitPrice * (1 + db_obj.defectiveRate)
     db_obj.amount = round(db_obj.amount, 3)
     # 「小計」=金額/((60*60*8)/(成型週期+灌包工時)*穴數*工時比例)
     db_obj.subtotal = db_obj.amount / ((60 * 60 * 8) / (db_obj.cycleTime + db_obj.packageTime) * db_obj.moldCavity * db_obj.workHoursRatio)
     db_obj.subtotal = round(db_obj.subtotal, 3)
-    # 人員選擇「生產機台」帶入「每秒電費」
-    machine_db = db.session.query(Machine).filter(Machine.id == db_obj.machineId).first()
-    if machine_db is None:
-        raise err_resp("machine not found", "machine_404", 404)
     # 「電費」=「每秒電費」*「成型週期」/ 穴數
     db_obj.electricityCost = float(machine_db.electricityCostPerSec) * db_obj.cycleTime / db_obj.moldCavity
     db_obj.electricityCost = round(db_obj.electricityCost, 3)
