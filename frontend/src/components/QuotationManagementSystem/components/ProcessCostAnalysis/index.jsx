@@ -44,11 +44,8 @@ export function ProcessCostAnalysis({
   // 更新運輸成本
   const handleUpdateShippingCosts = async (updatedShippingCosts) => {
     try {
-      console.log(
-        "🚀 ~ handleUpdateShippingCosts ~ updatedShippingCosts:",
-        updatedShippingCosts
-      );
       // API 呼叫
+      // 未來這邊會是區分業務報價與場內 只是現在先統一用 updateShippingCosts
       await (type === "sales" ? updateShipping : updateShippingCosts)({
         quotationId: id,
         shipping: updatedShippingCosts,
@@ -61,28 +58,16 @@ export function ProcessCostAnalysis({
     }
   };
   // 處理新增製程
-  const handleAdd = (newProcess) => {
-    addProcess({
-      id: processes.length + 1,
-      salesQuotationId: id,
-      processCategory: newProcess.processCategory,
-      processSN: newProcess.processSN,
-      processName: newProcess.processName,
-      SQMaterialCostSetting: {
-        estimatedDefectRate: 0,
-        estimatedMaterialFluctuation: 0,
-        extractionCost: 0,
-        processingCost: 0,
-      },
-      SQMaterialCosts: newProcess.SQMaterialCosts || [],
-      SQPackagingCosts: newProcess.SQPackagingCosts || [],
-      SQInjectionMoldingCosts: newProcess.SQInjectionMoldingCosts || [],
-      SQInPostProcessingCosts: newProcess.SQInPostProcessingCosts || [],
-      SQOutPostProcessingCosts: newProcess.SQOutPostProcessingCosts || [],
-    });
-    setIsNewDrawerOpen(false);
-    // 重新計算成本
-    calculateAll();
+  const handleAdd = async (newProcess) => {
+    console.log("🚀 ~ handleAdd ~ newProcess:", newProcess);
+    try {
+      addProcess(newProcess);
+      setIsNewDrawerOpen(false);
+      // 重新計算成本
+      calculateAll();
+    } catch (error) {
+      console.error("新增製程失敗:", error);
+    }
   };
 
   // 計算各製程成本詳情

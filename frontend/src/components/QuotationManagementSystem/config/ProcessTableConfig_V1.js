@@ -117,7 +117,7 @@ export const PROCESS_TABLE_CONFIG = {
       {
         sectionTitle: "加工成本與電費計算",
         headers: [
-          { label: "生產機台", key: "machineName" },
+          { label: "生產機台", key: "machineSN" },
           { label: "工時比例", key: "workHoursRatio", unit: "%" },
           { label: "不良率", key: "defectiveRate", unit: "%" },
           { label: "灌包工時(秒)", key: "packageTime", unit: "秒" },
@@ -127,7 +127,7 @@ export const PROCESS_TABLE_CONFIG = {
           { label: "金額", key: "amount", unit: "元" },
           { label: "小計", key: "subtotal", unit: "元" },
           // 每秒電費
-          { label: "每秒電費", key: "electricityCostPerSecond", unit: "元" },
+          { label: "每秒電費", key: "electricityCostPerSec", unit: "元" },
           { label: "電費", key: "electricityCost", unit: "元" },
         ],
         dataKey: PROCESS_DATA_KEYS.INJECTION_MOLDING_COSTS,

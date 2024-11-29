@@ -171,7 +171,7 @@ function calculateMoldingCost(
  * 計算成型加工電費
  * @param {number} moldingCycle - 成型週期(秒)
  * @param {number} cavityCount - 模具穴數
- * @param {number} [electricityCostPerSecond=0.0152] - 每秒電費
+ * @param {number} [electricityCostPerSec=0.0152] - 每秒電費
  * @returns {number} 成型加工電費(已除以穴數)
  */
 function calculateMoldingElectricityCost(

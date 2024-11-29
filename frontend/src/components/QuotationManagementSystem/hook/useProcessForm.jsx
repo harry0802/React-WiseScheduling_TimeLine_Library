@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { getProcessResolver } from "../utility/formValidationUtils";
 import { transformProcessData } from "../utility/processDataTransformer";
 
-export function useProcessForm(initialProcess) {
+export function useProcessForm(initialProcess, onUpdate) {
   // 1. 狀態管理
   const [process, setProcess] = useState(initialProcess);
 
@@ -28,9 +28,7 @@ export function useProcessForm(initialProcess) {
     defaultValues: initialValues,
     mode: "onSubmit",
     resolver: async (data) => {
-      console.log("🔥🔥🔥🔥 ~ resolver:", data);
       const resolver = getProcessResolver(data.processCategory);
-      console.log("🚀 ~ resolver: ~ resolver:", await resolver(data));
       return await resolver(data);
     },
   });
@@ -51,7 +49,6 @@ export function useProcessForm(initialProcess) {
   // 5. 提交處理
   const handleSubmit = useCallback(
     async (formData) => {
-      console.log("🔥🔥🔥🔥 ~ Raw formData:", formData);
       try {
         // 驗證表單
         const isValid = await methods.trigger();
@@ -63,8 +60,6 @@ export function useProcessForm(initialProcess) {
           formData
         );
 
-        console.log("🔥🔥🔥🔥 ~ Transformed formData:", transformedFormData);
-
         // 合併處理數據和轉換後的表單數據
         const submitData = {
           ...process,
@@ -74,16 +69,14 @@ export function useProcessForm(initialProcess) {
           salesQuotationId: process?.salesQuotationId,
           processOptionId: process?.processOptionId,
         };
-
-        console.log("🔥🔥🔥🔥 ~ Final submitData:", submitData);
-
+        onUpdate?.(submitData);
         return submitData;
       } catch (error) {
         console.error("Submit error:", error);
         throw error;
       }
     },
-    [process, methods]
+    [process, methods, onUpdate]
   );
 
   // 6. 添加用於調試的方法

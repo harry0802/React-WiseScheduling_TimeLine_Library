@@ -12,7 +12,8 @@ function ProcessDrawer({
   onUpdate,
   onDelete,
 }) {
-  const { methods, handleSubmit } = useProcessForm(process, visible);
+  const { methods, handleSubmit } = useProcessForm(process, onUpdate);
+
   return (
     <BaseDrawer visible={visible} onClose={onClose}>
       <BaseDrawer.Header>
