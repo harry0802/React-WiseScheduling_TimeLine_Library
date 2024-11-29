@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { getProcessResolver } from "../utility/formValidationUtils";
+import { transformProcessData } from "../utility/processDataTransformer";
 
 export function useProcessForm(initialProcess) {
   // 1. 狀態管理
@@ -21,51 +22,60 @@ export function useProcessForm(initialProcess) {
       ...initialProcess?.SQMaterialCostSetting,
     };
   }, [initialProcess]);
-  // TODO:  表單問題 我需要精準分配給動態表單的欄位
-  // FIX: 動態表單的欄位需要精準分配，否則會造成表單驗證失敗
+
   // 3. 表單實例
   const methods = useForm({
     defaultValues: initialValues,
     mode: "onSubmit",
-    // TODO: 表單驗證失敗
-    //! FIX: 因為表單沒有精準分配給動態表單的欄位，導致無法觸發
     resolver: async (data) => {
       console.log("🔥🔥🔥🔥 ~ resolver:", data);
-      // 使用當前表單數據中的 processCategory
       const resolver = getProcessResolver(data.processCategory);
-      return resolver(data);
+      console.log("🚀 ~ resolver: ~ resolver:", await resolver(data));
+      return await resolver(data);
     },
   });
 
   // 4. 表單變更處理
   const handleFormChange = useCallback((data) => {
     setProcess((prev) => {
-      // 確保不會覆蓋已有資料
       return {
         ...prev,
         ...data,
-        // 保留 ID 相關欄位
         id: prev?.id,
         salesQuotationId: prev?.salesQuotationId,
         processOptionId: prev?.processOptionId,
       };
     });
   }, []);
-  // BUG: 函數觸發失敗
-  // FIX: 因為表單沒有精準分配給動態表單的欄位，導致無法觸發
+
   // 5. 提交處理
   const handleSubmit = useCallback(
     async (formData) => {
-      console.log("🔥🔥🔥🔥 ~ formData:", formData);
+      console.log("🔥🔥🔥🔥 ~ Raw formData:", formData);
       try {
-        // 組合最終提交資料
-        const submitData = {
-          ...process,
-          ...formData,
-        };
-        // 可以在這裡加入驗證邏輯
+        // 驗證表單
         const isValid = await methods.trigger();
         if (!isValid) return;
+
+        // 根據製程類型轉換數據
+        const transformedFormData = transformProcessData(
+          formData.processCategory,
+          formData
+        );
+
+        console.log("🔥🔥🔥🔥 ~ Transformed formData:", transformedFormData);
+
+        // 合併處理數據和轉換後的表單數據
+        const submitData = {
+          ...process,
+          ...transformedFormData,
+          // 保留重要ID
+          id: process?.id,
+          salesQuotationId: process?.salesQuotationId,
+          processOptionId: process?.processOptionId,
+        };
+
+        console.log("🔥🔥🔥🔥 ~ Final submitData:", submitData);
 
         return submitData;
       } catch (error) {
@@ -76,10 +86,22 @@ export function useProcessForm(initialProcess) {
     [process, methods]
   );
 
+  // 6. 添加用於調試的方法
+  const debugFormState = useCallback(() => {
+    return {
+      formValues: methods.getValues(),
+      formErrors: methods.formState.errors,
+      currentProcess: process,
+      isDirty: methods.formState.isDirty,
+      isSubmitting: methods.formState.isSubmitting,
+    };
+  }, [methods, process]);
+
   return {
     process,
     methods,
     handleFormChange,
     handleSubmit: methods.handleSubmit(handleSubmit),
+    debugFormState, // 導出調試方法
   };
 }

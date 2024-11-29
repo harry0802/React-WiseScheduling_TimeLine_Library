@@ -2,15 +2,8 @@
 import { z } from "zod";
 
 //! =============== 2. 基礎驗證規則定義 ===============
-/**
- * @description 基礎驗證規則集合
- * @namespace baseSchemas
- */
 export const baseSchemas = {
-  /**
-   * @description 必填數字欄位驗證
-   * @requires 數值 >= 0
-   */
+  // 必填數字
   requiredNumber: z
     .number({
       required_error: "此欄位為必填",
@@ -18,10 +11,7 @@ export const baseSchemas = {
     })
     .min(0, "不能小於 0"),
 
-  /**
-   * @description 百分比欄位驗證
-   * @requires 0 <= 數值 <= 100
-   */
+  // 百分比
   percentage: z
     .number({
       required_error: "此欄位為必填",
@@ -30,10 +20,7 @@ export const baseSchemas = {
     .min(0, "不能小於 0")
     .max(100, "不能大於 100"),
 
-  /**
-   * @description 正整數欄位驗證
-   * @requires 數值為整數且 > 0
-   */
+  // 正整數
   positiveInteger: z
     .number({
       required_error: "此欄位為必填",
@@ -44,16 +31,8 @@ export const baseSchemas = {
 };
 
 //! =============== 3. 業務邏輯驗證規則 ===============
-/**
- * @description 各模組的詳細驗證規則
- * @namespace fieldSchemas
- */
 export const fieldSchemas = {
-  /**
-   * @description 材料成本設置驗證
-   * @requires 預估瑕疵率、材料波動率為百分比
-   * @requires 萃取成本、加工成本為非負數
-   */
+  // 材料成本設置驗證
   materialCostSetting: z.object({
     estimatedDefectRate: baseSchemas.percentage,
     estimatedMaterialFluctuation: baseSchemas.percentage,
@@ -61,45 +40,28 @@ export const fieldSchemas = {
     processingCost: baseSchemas.requiredNumber,
   }),
 
-  /**
-   * @description 材料成本驗證
-   * @requires 所有欄位皆為必填
-   * @requires 重量與單價為非負數
-   */
+  // 材料成本驗證
   materialCost: z.object({
-    materialOptionId: baseSchemas.positiveInteger,
-    materialSN: z.string().min(1, "材料編號為必填"),
-    materialName: z.string().min(1, "材料名稱為必填"),
+    materialName: z.string().min(1, "物料名稱為必填"),
+    materialSN: z.string().min(1, "物料編號為必填"),
     unit: z.string().min(1, "單位為必填"),
     weight: baseSchemas.requiredNumber,
     unitPrice: baseSchemas.requiredNumber,
-    amount: baseSchemas.requiredNumber,
   }),
 
-  /**
-   * @description 包裝成本驗證
-   * @requires 數量、容量、單價為非負數
-   * @requires 每公斤袋數可為空值
-   */
+  // 包裝成本驗證
   packagingCost: z.object({
-    packagingType: z.string().min(1, "包裝類型為必填"),
-    materialSN: z.string().min(1, "材料編號為必填"),
-    materialName: z.string().min(1, "材料名稱為必填"),
+    materialName: z.string().min(1, "包材名稱為必填"),
+    materialSN: z.string().min(1, "包材編號為必填"),
+    packagingType: z.string().min(1, "包材類型為必填"),
     unit: z.string().min(1, "單位為必填"),
     quantity: baseSchemas.positiveInteger,
-    capacity: baseSchemas.requiredNumber,
     unitPrice: baseSchemas.requiredNumber,
     amount: baseSchemas.requiredNumber,
   }),
 
-  /**
-   * @description 注塑成型成本驗證
-   * @requires 工時比例與瑕疵率為百分比
-   * @requires 模穴數為正整數
-   */
+  // 注塑成型成本驗證
   injectionMoldingCost: z.object({
-    machineId: baseSchemas.positiveInteger,
-    machineSN: z.string().min(1, "機台編號為必填"),
     workHoursRatio: baseSchemas.percentage,
     defectiveRate: baseSchemas.percentage,
     cycleTime: baseSchemas.requiredNumber,
@@ -107,15 +69,23 @@ export const fieldSchemas = {
     moldCavity: baseSchemas.positiveInteger,
     unitPrice: baseSchemas.requiredNumber,
     amount: baseSchemas.requiredNumber,
-    subtotal: baseSchemas.requiredNumber,
     electricityCost: baseSchemas.requiredNumber,
   }),
 
-  /**
-   * @description 運輸成本驗證
-   * @requires 預估出貨量為正整數
-   * @requires 其他數值欄位為非負數
-   */
+  // 委外加工成本驗證
+  outsourcedProcessingCost: z.object({
+    unitPrice: baseSchemas.requiredNumber,
+    amount: baseSchemas.requiredNumber,
+  }),
+
+  // 廠內加工成本驗證
+  internalProcessingCost: z.object({
+    workSecond: baseSchemas.requiredNumber,
+    unitPrice: baseSchemas.requiredNumber,
+    amount: baseSchemas.requiredNumber,
+  }),
+
+  // 保留原有運輸相關驗證
   freightCost: z.object({
     deliveryDistance: baseSchemas.requiredNumber,
     driverWorkHours: baseSchemas.requiredNumber,
@@ -124,33 +94,10 @@ export const fieldSchemas = {
     amount: baseSchemas.requiredNumber,
   }),
 
-  /**
-   * @description 關稅成本驗證
-   * @requires 預估出貨量為正整數
-   */
   customsDutyCost: z.object({
     feeType: z.string().min(1, "費用類型為必填"),
     freight: baseSchemas.requiredNumber,
     estimatedShipment: baseSchemas.positiveInteger,
-    amount: baseSchemas.requiredNumber,
-  }),
-
-  /**
-   * @description 委外加工成本驗證
-   * @requires 單價與金額為非負數
-   */
-  outsourcedProcessingCost: z.object({
-    unitPrice: baseSchemas.requiredNumber,
-    amount: baseSchemas.requiredNumber,
-  }),
-
-  /**
-   * @description 廠內加工成本驗證
-   * @requires 工時(秒)、單價與金額為非負數
-   */
-  internalProcessingCost: z.object({
-    workSecond: baseSchemas.requiredNumber,
-    unitPrice: baseSchemas.requiredNumber,
     amount: baseSchemas.requiredNumber,
   }),
 };

@@ -115,7 +115,6 @@ export const optionsService = {
         detailResponse.json(),
         listResponse.json(),
       ]);
-
       if (!detailResult.status || !detailResult.data?.[0]) {
         throw new Error(detailResult.message || "獲取機台資訊失敗");
       }
