@@ -4,21 +4,60 @@ import CustomTodoList from "../../CustomTodoList";
 import { Divider } from "@mui/material";
 import FormItems from "../components/FormItems";
 import { PROCESS_TYPES } from "../../../config/processTypes_v1";
+import { useFieldArray, useFormContext } from "react-hook-form";
+
+function InjectionMoldingForm({ fields }) {
+  const { control } = useFormContext();
+  const { fields: formFields } = useFieldArray({
+    name: "SQInjectionMoldingCosts",
+    control,
+  });
+
+  const fieldsToRender = formFields.length > 0 ? formFields : [{ id: "empty" }];
+
+  return fieldsToRender.map((field, index) => (
+    <div
+      style={{ width: "100%", display: "flex", flexFlow: "row wrap" }}
+      key={`injection-form-${field.id}-${index}`}
+    >
+      {fields.map((formField, fieldIndex) => (
+        <DynamicForm.Field
+          key={`injection-field-${field.id}-${formField.name}-${fieldIndex}`}
+          field={{
+            ...formField,
+            name: `SQInjectionMoldingCosts.${index}.${formField.name}`,
+            dependsOn: formField.dependsOn
+              ? `SQInjectionMoldingCosts.${index}.${formField.dependsOn}`
+              : undefined,
+            getDependentOptions: formField.getDependentOptions,
+          }}
+        />
+      ))}
+    </div>
+  ));
+}
 
 export const renderGeneralFields = (item, sectionIndex) => {
-  if (Array.isArray(item.fields[0])) {
-    return item.fields[0].map((field, fieldIndex) => (
-      <DynamicForm.Field
-        key={`${sectionIndex}-${field.name}-${fieldIndex}`}
-        field={field}
+  console.log("🔥🔥🔥🔥 ~ renderGeneralFields ~ item:", item);
+  if (item.name === "SQInjectionMoldingCosts") {
+    return (
+      <InjectionMoldingForm
+        key={`injection-section-${sectionIndex}`}
+        fields={item.fields}
       />
-    ));
+    );
   }
 
   return item.fields.map((field, fieldIndex) => (
     <DynamicForm.Field
-      key={`${sectionIndex}-${field.name}-${fieldIndex}`}
-      field={field}
+      key={`general-field-${sectionIndex}-${field.name}-${fieldIndex}`}
+      field={{
+        ...field,
+        name:
+          item.name === "SQMaterialCostSetting"
+            ? `${item.name}.${field.name}`
+            : field.name,
+      }}
     />
   ));
 };

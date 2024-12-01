@@ -34,6 +34,8 @@ export const baseSchemas = {
 export const fieldSchemas = {
   // 材料成本設置驗證
   materialCostSetting: z.object({
+    // SQProcessId: z.number().nullable().optional(),
+    // id: z.number().nullable().optional(),
     estimatedDefectRate: baseSchemas.percentage,
     estimatedMaterialFluctuation: baseSchemas.percentage,
     extractionCost: baseSchemas.requiredNumber,
@@ -42,6 +44,8 @@ export const fieldSchemas = {
 
   // 材料成本驗證
   materialCost: z.object({
+    // id: z.number().optional(),
+    // materialOptionId: z.number().optional(),
     materialName: z.string().min(1, "物料名稱為必填"),
     materialSN: z.string().min(1, "物料編號為必填"),
     unit: z.string().min(1, "單位為必填"),
@@ -51,6 +55,8 @@ export const fieldSchemas = {
 
   // 包裝成本驗證
   packagingCost: z.object({
+    // SQProcessId: z.number().nullable().optional(),
+    // id: z.number().nullable().optional(),
     materialName: z.string().min(1, "包材名稱為必填"),
     materialSN: z.string().min(1, "包材編號為必填"),
     packagingType: z.string().min(1, "包材類型為必填"),
@@ -58,10 +64,15 @@ export const fieldSchemas = {
     quantity: baseSchemas.positiveInteger,
     unitPrice: baseSchemas.requiredNumber,
     amount: baseSchemas.requiredNumber,
+    // capacity: baseSchemas.positiveInteger.optional(),
+    // bagsPerKg: baseSchemas.positiveInteger.optional(),
   }),
 
   // 注塑成型成本驗證
   injectionMoldingCost: z.object({
+    // id: z.number().nullable().optional(),
+    // SQProcessId: z.number().nullable().optional(),
+    // machineId: z.number().nullable().optional(),
     workHoursRatio: baseSchemas.percentage,
     defectiveRate: baseSchemas.percentage,
     cycleTime: baseSchemas.requiredNumber,

@@ -126,13 +126,14 @@ class FormSection {
 /**
  * 各製程類型的表單配置
  */
+
 export const FORM_CONFIGURATIONS = {
   // 廠內成型製程
   [PROCESS_CATEGORY_OPTION[0].category]: new FormSection("廠內成型製程", [
     new NestedFormItem("材料相關費用", [
       new GeneralFormItem(
         "材料成本設置",
-        [commonSections.materialCostSetting.fields],
+        commonSections.materialCostSetting.fields,
         "SQMaterialCostSetting"
       ),
       new TodoListFormItem(
@@ -167,6 +168,7 @@ export const FORM_CONFIGURATIONS = {
             placeholder: "請選擇機台編號",
             dependsOn: "machineId",
             getDependentOptions: (machineId) => {
+              console.log("🔥🔥🔥🔥 ~ machineId:", machineId);
               return !machineId
                 ? []
                 : optionsService.getMachineAreas(machineId);
@@ -220,7 +222,7 @@ export const FORM_CONFIGURATIONS = {
     new NestedFormItem("材料相關費用", [
       new GeneralFormItem(
         "材料成本設置",
-        [commonSections.materialCostSetting.fields],
+        commonSections.materialCostSetting.fields,
         "SQMaterialCostSetting"
       ),
       new TodoListFormItem(
@@ -244,9 +246,11 @@ export const FORM_CONFIGURATIONS = {
   // 廠內後製程
   [PROCESS_CATEGORY_OPTION[2].category]: new FormSection("廠內後製程", [
     new NestedFormItem("材料相關費用", [
-      new GeneralFormItem("材料成本設置", [
+      new GeneralFormItem(
+        "材料成本設置",
         commonSections.materialCostSetting.fields,
-      ]),
+        "SQMaterialCostSetting"
+      ),
       new TodoListFormItem(
         "材料成本",
         commonSections.materialCosts.fields,
@@ -267,9 +271,11 @@ export const FORM_CONFIGURATIONS = {
   // 委外後製程
   [PROCESS_CATEGORY_OPTION[3].category]: new FormSection("委外後製程", [
     new NestedFormItem("材料相關費用", [
-      new GeneralFormItem("材料成本設置", [
+      new GeneralFormItem(
+        "材料成本設置",
         commonSections.materialCostSetting.fields,
-      ]),
+        "SQMaterialCostSetting"
+      ),
       new TodoListFormItem(
         "材料成本",
         commonSections.materialCosts.fields,

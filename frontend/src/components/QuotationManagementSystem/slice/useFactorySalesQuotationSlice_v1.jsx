@@ -29,7 +29,7 @@ export const useBusinessQuotationStore = create(
     }),
     {
       name: "businessQuotationStore",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );
@@ -44,7 +44,7 @@ export const useInternalQuotationStore = create(
     }),
     {
       name: "internalQuotationStore",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );

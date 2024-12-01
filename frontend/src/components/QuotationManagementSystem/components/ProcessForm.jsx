@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Tabs, Tab, Divider } from "@mui/material";
 import DynamicForm from "../../Global/form/DynamicForm";
@@ -183,8 +183,10 @@ function ProcessForm({ initialData, onSubmit, externalMethods }) {
     });
   }, []);
 
+  const formRef = useRef(null);
+
   return (
-    <DynamicForm externalMethods={methods} onFinish={onSubmit}>
+    <form ref={formRef} onSubmit={onSubmit} noValidate>
       {selectionFields.map((field) => (
         <DynamicForm.Field
           key={field.name}
@@ -206,7 +208,7 @@ function ProcessForm({ initialData, onSubmit, externalMethods }) {
           {sections[activeTab] && renderFormItems([sections[activeTab]])}
         </>
       )}
-    </DynamicForm>
+    </form>
   );
 }
 

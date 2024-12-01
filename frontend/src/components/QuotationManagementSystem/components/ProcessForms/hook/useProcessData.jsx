@@ -1,5 +1,5 @@
 //! =============== 1. 引入相關依賴 ===============
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { processMappers } from "../utils/processMappers";
 import { useGetProcessOptionsQuery } from "../../../../ProductionRecord/service/endpoints/processOptionApi";
 import { useGetOptionQuery } from "../../../../ProductionRecord/service/endpoints/optionApi";
@@ -31,11 +31,7 @@ import { useGetOptionQuery } from "../../../../ProductionRecord/service/endpoint
  * - 當 categoryId 不存在時，會跳過子類型數據請求
  */
 export const useProcessData = (categoryId, initialData = null) => {
-  //! =============== 2. 狀態管理 ===============
-  const [subtypes, setSubtypes] = useState([]);
-
   //! =============== 3. API 請求處理 ===============
-  //* 獲取製程類型數據
   const {
     data: types = [],
     isLoading: loading,
@@ -43,43 +39,39 @@ export const useProcessData = (categoryId, initialData = null) => {
     error: typesError,
   } = useGetOptionQuery("processCategory");
 
-  //* 獲取製程子類型數據
   const {
     data: subtypeData,
     isLoading: subtypeLoading,
     error: subtypeError,
   } = useGetProcessOptionsQuery({
-    skip: !categoryId, //* 無 categoryId 時跳過請求
+    skip: !categoryId,
   });
 
   //! =============== 4. 數據轉換處理 ===============
-  //* 轉換製程類型數據
   const mappedTypes = processMappers?.processTypes?.toOptions(types.data);
 
-  //* 處理並過濾子類型數據
-  useEffect(() => {
-    if (subtypeData?.data) {
-      //* 轉換子類型數據
-      const mappedSubtypes = processMappers?.processTypes?.toSubtypeOptions(
-        subtypeData.data
-      );
+  const mappedSubtypes = useMemo(() => {
+    if (!subtypeData?.data) return [];
+    return processMappers?.processTypes?.toSubtypeOptions(subtypeData.data);
+  }, [subtypeData?.data]);
 
-      //* 根據所選分類過濾子類型
-      const filteredSubtypes = mappedSubtypes?.filter((type) => {
-        const category = mappedTypes?.find(
-          (basic) => basic.value === categoryId
-        );
-        return type.processCategory === category?.processCategory;
-      });
+  const filteredSubtypes = useMemo(() => {
+    if (!categoryId || !mappedTypes?.length || !mappedSubtypes.length)
+      return [];
 
-      setSubtypes(filteredSubtypes);
-    }
-  }, [subtypeData, categoryId]);
+    const category = mappedTypes.find((basic) => basic.value === categoryId);
+
+    if (!category?.processCategory) return [];
+
+    return mappedSubtypes.filter(
+      (type) => type.processCategory === category.processCategory
+    );
+  }, [categoryId, mappedTypes, mappedSubtypes]);
 
   //! =============== 5. 返回結果 ===============
   return {
     types: mappedTypes,
-    subtypes,
+    subtypes: filteredSubtypes,
     loading: loading || subtypeLoading,
     error: typesError || subtypeError,
     isSuccess: typesSuccess,

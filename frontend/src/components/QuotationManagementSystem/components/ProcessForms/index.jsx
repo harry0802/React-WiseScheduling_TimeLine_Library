@@ -13,14 +13,13 @@ const ProcessForm = React.memo(
       formConfig,
       selectionFields,
       handleTabChange,
-      loading,
-      isSuccess,
     } = useProcessForm({
       initialData,
       externalMethods: methods,
       visible,
     });
 
+    // 清理選擇字段以移除不必要的屬性，以防止不必要的重新渲染
     const cleanedSelectionFields = React.useMemo(() => {
       return selectionFields.map((field) => {
         const { getDependentOptions, dependsOn, ...rest } = field;

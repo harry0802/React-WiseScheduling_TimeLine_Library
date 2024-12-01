@@ -146,6 +146,7 @@ function filterCustomProps(props) {
     "loading",
     "asyncOptions",
     "methods",
+    "hidden", // 新增
   ];
 
   // 創建新的 props 對象，排除自定義屬性
@@ -176,6 +177,16 @@ function renderFormItem(
   methods
 ) {
   const filteredProps = filterCustomProps(props);
+  if (field.hidden) {
+    return (
+      <input
+        type="hidden"
+        style={{ display: "none" }}
+        {...controllerField}
+        {...filterCustomProps(props)}
+      />
+    );
+  }
 
   switch (field.type) {
     case "select":
@@ -183,12 +194,50 @@ function renderFormItem(
         ? []
         : mergeAndDedupeOptions(asyncOptions, options || []);
 
+      const normalizeSelectValue = (value, options) => {
+        // 如果沒有選項，返回空字符串
+        if (!options?.length) return "";
+
+        // 處理空值
+        if (value === undefined || value === null || value === 0) return "";
+
+        // 如果value是字符串但options是數字，嘗試轉換
+        if (typeof value === "string" && !isNaN(value)) {
+          const numValue = Number(value);
+          // 確保轉換後的數字存在於選項中
+          return options.some((opt) => opt.value === numValue) ? numValue : "";
+        }
+
+        // 如果value是字符串名稱，找到對應的id
+        const matchedByLabel = options.find((opt) => opt.label === value);
+        if (matchedByLabel) return matchedByLabel.value;
+
+        // 如果value已經是id，確保存在於選項中
+        const matchedById = options.find(
+          (opt) => opt.value.toString() === value.toString()
+        );
+        if (matchedById) return matchedById.value;
+
+        // 如果都不匹配，返回空字符串
+        return "";
+      };
+
+      const selectValue = normalizeSelectValue(
+        controllerField.value,
+        selectOptions
+      );
+
       return (
         <FormControl fullWidth error={!!error}>
           <InputLabel id={`${field.name}-label`}>{field.label}</InputLabel>
           <Select
             {...controllerField}
             {...filteredProps}
+            value={selectValue}
+            onChange={(e) => {
+              const newValue = e.target.value || ""; // 確保空值轉為空字符串
+              controllerField.onChange(newValue);
+            }}
             labelId={`${field.name}-label`}
             label={field.label}
           >

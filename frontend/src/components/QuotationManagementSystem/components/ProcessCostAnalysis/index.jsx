@@ -4,6 +4,11 @@ import ProductContextCard from "../../../ProductionRecord/utility/ProductContext
 import ProcessDrawer from "./components/ProcessDrawer";
 import TransportationProcessItem from "../TransportationProcessItem";
 import { useUpdateShippingMutation } from "../../services/salesServices/endpoints/shippingApi";
+import {
+  useCreateProcessMutation,
+  useDeleteProcessMutation,
+  useUpdateProcessMutation,
+} from "../../services/salesServices/endpoints/processApi";
 
 export function ProcessCostAnalysis({
   title = "各製程物料與加工成本分析",
@@ -24,22 +29,41 @@ export function ProcessCostAnalysis({
     type,
   } = quotationSlice();
 
+  const [createProcess] = useCreateProcessMutation();
   const [updateShipping] = useUpdateShippingMutation();
-
+  const [deleteProcess] = useDeleteProcessMutation();
+  const [updateProcessApi] = useUpdateProcessMutation();
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
 
   // 處理製程更新
-  const handleUpdate = (updatedProcess) => {
-    updateProcess(updatedProcess);
-    // 重新計算成本
-    calculateAll();
+  const handleUpdate = async (updatedProcess) => {
+    try {
+      console.log("🔥🔥🔥🔥 ~ handleUpdate ~ updatedProcess:", updatedProcess);
+      await updateProcessApi({
+        quotationId: id,
+        process: updatedProcess,
+      }).unwrap();
+      updateProcess(updatedProcess.id, updatedProcess);
+
+      // 重新計算成本
+      calculateAll();
+    } catch (error) {
+      console.error("更新製程失敗:", error);
+    }
   };
 
   // 處理製程刪除
-  const handleDelete = (processId) => {
-    removeProcess(processId);
-    // 重新計算成本
-    calculateAll();
+  const handleDelete = async (processId) => {
+    try {
+      await deleteProcess({ quotationId: id, processId }).unwrap();
+      removeProcess(processId);
+      // 重新計算成本
+      calculateAll();
+    } catch (error) {
+      console.error("刪除製程失敗:", error);
+    } finally {
+      setIsNewDrawerOpen(false);
+    }
   };
   // 更新運輸成本
   const handleUpdateShippingCosts = async (updatedShippingCosts) => {
@@ -59,14 +83,32 @@ export function ProcessCostAnalysis({
   };
   // 處理新增製程
   const handleAdd = async (newProcess) => {
-    console.log("🚀 ~ handleAdd ~ newProcess:", newProcess);
+    console.log("🚀 ~ handleAdd ~ newProcess:", {
+      ...newProcess,
+      id,
+    });
+
+    const processData = {
+      ...newProcess,
+      id,
+    };
+
     try {
-      addProcess(newProcess);
+      const result = await createProcess({
+        quotationId: id,
+        process: processData,
+      }).unwrap();
+      console.log("🔥🔥🔥🔥 ~ handleAdd ~ result:", result);
+
+      return;
+      addProcess(result);
       setIsNewDrawerOpen(false);
       // 重新計算成本
       calculateAll();
     } catch (error) {
       console.error("新增製程失敗:", error);
+    } finally {
+      setIsNewDrawerOpen(false);
     }
   };
 

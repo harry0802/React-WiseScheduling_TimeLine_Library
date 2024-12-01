@@ -1,44 +1,46 @@
+import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
+
 /**
  * 轉換委外成型製程數據格式
  * @param {Object} data - 原始表單數據
  * @returns {Object} 轉換後的數據
  */
 export const transformOutsourceInjectionData = (data) => {
+  console.log(
+    "🔥🔥🔥🔥 ~ transformOutsourceInjectionData ~ data:",
+    data.processCategory
+  );
+  // 1. 基礎數據
+  const baseData = {
+    processOptionId: data.processCategory,
+    processCategory: PROCESS_CATEGORY_OPTION[data.processCategory - 1].category,
+    processSN: data.processSN,
+  };
+
   // 提取材料成本設置數據
   const materialCostSetting = {
-    estimatedDefectRate: data.estimatedDefectRate,
-    estimatedMaterialFluctuation: data.estimatedMaterialFluctuation,
-    extractionCost: data.extractionCost,
-    processingCost: data.processingCost,
+    ...data.SQMaterialCostSetting,
   };
 
   // 清理材料成本數組數據
   const materialCosts = data.SQMaterialCosts.map((item) => ({
-    materialName: item.materialName,
-    materialSN: item.materialSN,
-    unit: item.unit,
-    weight: item.weight,
-    unitPrice: item.unitPrice,
+    ...item,
   }));
 
   // 清理包裝成本數組數據
   const packagingCosts = data.SQPackagingCosts.map((item) => ({
-    materialName: item.materialName,
-    materialSN: item.materialSN,
-    packagingType: item.packagingType,
-    unit: item.unit,
-    quantity: item.quantity,
-    unitPrice: item.unitPrice || 0,
-    amount: item.amount,
+    ...item,
+    // unitPrice: item.unitPrice || 0,
+    // amount: item.amount,
+    // capacity: item.capacity,
+    // bagsPerKg: item.bagsPerKg,
   }));
 
   // 清理委外加工費用數據
   const outPostProcessingCosts = data.SQOutPostProcessingCosts || [];
 
   return {
-    processCategory: data.processCategory,
-    processSN: data.processSN,
-    activeTab: data.activeTab,
+    ...baseData,
     SQMaterialCostSetting: materialCostSetting,
     SQMaterialCosts: materialCosts,
     SQPackagingCosts: packagingCosts,
@@ -52,41 +54,48 @@ export const transformOutsourceInjectionData = (data) => {
  * @returns {Object} 轉換後的數據
  */
 export const transformInhousePostProcessData = (data) => {
+  // 1. 基礎數據
+  const baseData = {
+    processOptionId: data.processCategory,
+    processCategory: PROCESS_CATEGORY_OPTION[data.processCategory - 1].category,
+    processSN: data.processSN,
+    activeTab: data.activeTab,
+  };
+
   // 提取材料成本設置數據
   const materialCostSetting = {
-    estimatedDefectRate: data.estimatedDefectRate,
-    estimatedMaterialFluctuation: data.estimatedMaterialFluctuation,
-    extractionCost: data.extractionCost,
-    processingCost: data.processingCost,
+    ...data.SQMaterialCostSetting,
   };
 
   // 清理材料成本數組數據
   const materialCosts = data.SQMaterialCosts.map((item) => ({
-    materialName: item.materialName,
-    materialSN: item.materialSN,
-    unit: item.unit,
-    weight: item.weight,
-    unitPrice: item.unitPrice,
+    ...item,
+    // id: item.id || index + 1,
+    // materialName: item.materialName,
+    // materialSN: item.materialSN,
+    // unit: item.unit,
+    // weight: item.weight,
+    // unitPrice: item.unitPrice,
   }));
 
   // 清理包裝成本數組數據
   const packagingCosts = data.SQPackagingCosts.map((item) => ({
-    materialName: item.materialName,
-    materialSN: item.materialSN,
-    packagingType: item.packagingType,
-    unit: item.unit,
-    quantity: item.quantity,
-    unitPrice: item.unitPrice || 0,
-    amount: item.amount,
+    ...item,
+    // id: item.id || index + 1,
+    // materialName: item.materialName,
+    // materialSN: item.materialSN,
+    // packagingType: item.packagingType,
+    // unit: item.unit,
+    // quantity: item.quantity,
+    // unitPrice: item.unitPrice || 0,
+    // amount: item.amount,
   }));
 
   // 清理廠內加工費用數據
   const inPostProcessingCosts = data.SQInPostProcessingCosts || [];
 
   return {
-    processCategory: data.processCategory,
-    processSN: data.processSN,
-    activeTab: data.activeTab,
+    ...baseData,
     SQMaterialCostSetting: materialCostSetting,
     SQMaterialCosts: materialCosts,
     SQPackagingCosts: packagingCosts,
@@ -100,30 +109,39 @@ export const transformInhousePostProcessData = (data) => {
  * @returns {Object} 轉換後的數據
  */
 export const transformOutsourcePostProcessData = (data) => {
+  // 1. 基礎數據
+  const baseData = {
+    processOptionId: data.processCategory,
+    processCategory: PROCESS_CATEGORY_OPTION[data.processCategory - 1].category,
+    processSN: data.processSN,
+    activeTab: data.activeTab,
+  };
+
   // 提取材料成本設置數據
   const materialCostSetting = {
-    estimatedDefectRate: data.estimatedDefectRate,
-    estimatedMaterialFluctuation: data.estimatedMaterialFluctuation,
-    extractionCost: data.extractionCost,
-    processingCost: data.processingCost,
+    ...data.SQMaterialCostSetting,
   };
 
   // 清理材料成本數組數據
   const materialCosts = data.SQMaterialCosts.map((item) => ({
-    materialName: item.materialName,
-    materialSN: item.materialSN,
-    unit: item.unit,
-    weight: item.weight,
-    unitPrice: item.unitPrice,
+    ...item,
+    // id: item.id || index + 1,
+    // materialName: item.materialName,
+    // materialSN: item.materialSN,
+    // unit: item.unit,
+    // weight: item.weight,
+    // unitPrice: item.unitPrice,
   }));
 
   // 清理包裝成本數組數據
   const packagingCosts = data.SQPackagingCosts.map((item) => ({
-    materialName: item.materialName,
-    materialSN: item.materialSN,
-    packagingType: item.packagingType,
-    unit: item.unit,
-    quantity: item.quantity,
+    ...item,
+    // id: item.id || index + 1,
+    // materialName: item.materialName,
+    // materialSN: item.materialSN,
+    // packagingType: item.packagingType,
+    // unit: item.unit,
+    // quantity: item.quantity,
     unitPrice: item.unitPrice || 0,
     amount: item.amount,
   }));
@@ -132,9 +150,7 @@ export const transformOutsourcePostProcessData = (data) => {
   const outPostProcessingCosts = data.SQOutPostProcessingCosts || [];
 
   return {
-    processCategory: data.processCategory,
-    processSN: data.processSN,
-    activeTab: data.activeTab,
+    ...baseData,
     SQMaterialCostSetting: materialCostSetting,
     SQMaterialCosts: materialCosts,
     SQPackagingCosts: packagingCosts,
@@ -148,13 +164,19 @@ export const transformOutsourcePostProcessData = (data) => {
  * @returns {Object} 轉換後的數據
  */
 export const transformInhouseShipmentInspectionData = (data) => {
+  // 1. 基礎數據
+  const baseData = {
+    processOptionId: data.processCategory,
+    processCategory: PROCESS_CATEGORY_OPTION[data.processCategory - 1].category,
+    processSN: data.processSN,
+    activeTab: data.activeTab,
+  };
+
   // 清理檢驗費用數據
   const inPostProcessingCosts = data.SQInPostProcessingCosts || [];
 
   return {
-    processCategory: data.processCategory,
-    processSN: data.processSN,
-    activeTab: data.activeTab,
+    ...baseData,
     SQInPostProcessingCosts: inPostProcessingCosts,
   };
 };
@@ -164,66 +186,59 @@ export const transformInhouseShipmentInspectionData = (data) => {
  * @returns {Object} 轉換後的數據
  */
 export const transformInhouseInjectionData = (data) => {
+  console.log("🔥🔥🔥🔥 ~ transformInhouseInjectionData ~ data:", data);
   // 1. 基礎數據
   const baseData = {
-    processCategory: data.processCategory,
+    processOptionId: data.processCategory,
+    processCategory: PROCESS_CATEGORY_OPTION[data.processCategory - 1].category,
     processSN: data.processSN,
-    activeTab: data.activeTab,
   };
 
   // 2. 材料成本設置數據
   const materialCostSetting = {
-    estimatedDefectRate: data.estimatedDefectRate || 0,
-    estimatedMaterialFluctuation: data.estimatedMaterialFluctuation || 0,
-    extractionCost: data.extractionCost || 0,
-    processingCost: data.processingCost || 0,
+    ...data.SQMaterialCostSetting,
   };
 
   // 3. 材料成本數組數據
   const materialCosts = Array.isArray(data.SQMaterialCosts)
     ? data.SQMaterialCosts.filter(Boolean).map((item) => ({
-        materialName: item.materialName,
-        materialSN: item.materialSN,
-        unit: item.unit,
-        weight: item.weight || 0,
-        unitPrice: item.unitPrice || 0,
+        ...item,
       }))
     : [];
 
   // 4. 包裝成本數組數據
   const packagingCosts = Array.isArray(data.SQPackagingCosts)
     ? data.SQPackagingCosts.filter(Boolean).map((item) => ({
-        materialName: item.materialName,
-        materialSN: item.materialSN,
-        packagingType: item.packagingType,
-        unit: item.unit,
-        quantity: item.quantity || 0,
-        unitPrice: item.unitPrice || 0,
-        amount: item.amount || 0,
+        ...item,
+        // materialName: item.materialName,
+        // materialSN: item.materialSN,
+        // packagingType: item.packagingType,
+        // unit: item.unit,
+        // quantity: item.quantity || 0,
+        // unitPrice: item.unitPrice || 0,
+        // amount: item.amount || 0,
       }))
     : [];
 
   // 5. 注塑成型數據
-  const injectionMoldingCost = {
-    machineId: data.machineId || 0,
-    machineSN: data.machineSN || "",
-    workHoursRatio: data.workHoursRatio || 0,
-    defectiveRate: data.defectiveRate || 0,
-    cycleTime: data.cycleTime || 0,
-    packageTime: data.packageTime || 0,
-    moldCavity: data.moldCavity || 0,
-    unitPrice: 0,
-    amount: 0,
-    subtotal: 0,
-    electricityCost: 0,
-  };
+  const injectionMoldingCost = Array.isArray(data.SQInjectionMoldingCosts)
+    ? data.SQInjectionMoldingCosts.filter(Boolean).map((item) => ({
+        ...item,
+        // machineId: data.machineId || 0,
+        // machineSN: data.machineSN || "",
+        // workHoursRatio: data.workHoursRatio || 0,
+        // defectiveRate: data.defectiveRate || 0,
+        // cycleTime: data.cycleTime || 0,
+        // packageTime: data.packageTime || 0,
+      }))
+    : [];
 
   return {
     ...baseData,
     SQMaterialCostSetting: materialCostSetting,
     SQMaterialCosts: materialCosts,
     SQPackagingCosts: packagingCosts,
-    SQInjectionMoldingCosts: [injectionMoldingCost],
+    SQInjectionMoldingCosts: injectionMoldingCost,
   };
 };
 /**
@@ -233,6 +248,11 @@ export const transformInhouseInjectionData = (data) => {
  * @returns {Object} 轉換後的數據
  */
 export const transformProcessData = (processCategory, data) => {
+  console.log("🔥🔥🔥🔥 ~ transformProcessData ~ data:", data);
+  console.log(
+    "🔥🔥🔥🔥 ~ transformProcessData ~ processCategory:",
+    processCategory
+  );
   switch (processCategory) {
     case 1: // 廠內成型
       return transformInhouseInjectionData(data);

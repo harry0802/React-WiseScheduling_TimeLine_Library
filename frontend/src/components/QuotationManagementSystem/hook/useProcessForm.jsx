@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { getProcessResolver } from "../utility/formValidationUtils";
 import { transformProcessData } from "../utility/processDataTransformer";
@@ -9,17 +9,29 @@ export function useProcessForm(initialProcess, onUpdate) {
 
   // 2. 表單初始值處理
   const initialValues = useMemo(() => {
-    if (!initialProcess)
+    if (!initialProcess) {
       return {
         processCategory: "",
         processSN: "",
+        SQMaterialCosts: [],
+        SQPackagingCosts: [],
+        SQInPostProcessingCosts: [],
+        SQOutPostProcessingCosts: [],
+        SQInjectionMoldingCosts: [],
       };
+    }
 
     return {
-      processCategory: initialProcess.processOptionId || "",
-      processSN: "", // 先給空值,等待選項載入
-      // 其他初始值
+      ...initialProcess,
       ...initialProcess?.SQMaterialCostSetting,
+      ...(initialProcess?.SQInjectionMoldingCosts || {}),
+      processCategory: initialProcess.processOptionId || "",
+      processSN: initialProcess.processSN || "",
+      SQMaterialCosts: initialProcess?.SQMaterialCosts || [],
+      SQPackagingCosts: initialProcess?.SQPackagingCosts || [],
+      SQInPostProcessingCosts: initialProcess?.SQInPostProcessingCosts || [],
+      SQOutPostProcessingCosts: initialProcess?.SQOutPostProcessingCosts || [],
+      SQInjectionMoldingCosts: initialProcess?.SQInjectionMoldingCosts || [],
     };
   }, [initialProcess]);
 
@@ -28,10 +40,20 @@ export function useProcessForm(initialProcess, onUpdate) {
     defaultValues: initialValues,
     mode: "onSubmit",
     resolver: async (data) => {
-      const resolver = getProcessResolver(data.processCategory);
+      console.log("🔥🔥🔥🔥 ~ resolver: ~ data:", data);
+      const resolver = getProcessResolver(
+        data?.processOptionId || data.processCategory
+      );
       return await resolver(data);
     },
   });
+
+  // 添加 useEffect 來監控初始值變化
+  useEffect(() => {
+    if (initialProcess) {
+      methods.reset(initialValues);
+    }
+  }, [initialProcess, methods.reset]);
 
   // 4. 表單變更處理
   const handleFormChange = useCallback((data) => {
@@ -49,6 +71,7 @@ export function useProcessForm(initialProcess, onUpdate) {
   // 5. 提交處理
   const handleSubmit = useCallback(
     async (formData) => {
+      console.log("🔥🔥🔥🔥 ~ formData:", formData);
       try {
         // 驗證表單
         const isValid = await methods.trigger();
@@ -67,7 +90,6 @@ export function useProcessForm(initialProcess, onUpdate) {
           // 保留重要ID
           id: process?.id,
           salesQuotationId: process?.salesQuotationId,
-          processOptionId: process?.processOptionId,
         };
         onUpdate?.(submitData);
         return submitData;
@@ -76,7 +98,7 @@ export function useProcessForm(initialProcess, onUpdate) {
         throw error;
       }
     },
-    [process, methods, onUpdate]
+    [process, methods.trigger, onUpdate]
   );
 
   // 6. 添加用於調試的方法

@@ -95,8 +95,10 @@ const getProcessFields = (processCategory) => {
   switch (processCategory) {
     case PROCESS_CATEGORY_OPTION[0].category: // 廠內成型製程
       return {
-        ...commonFields.materialCostSetting,
-        ...commonFields.injectionMoldingCost,
+        SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+        SQInjectionMoldingCosts: createArraySchemaWithStringFallback(
+          z.object(commonFields.injectionMoldingCost)
+        ),
         SQMaterialCosts: createArraySchemaWithStringFallback(
           fieldSchemas.materialCost
         ),
@@ -107,7 +109,7 @@ const getProcessFields = (processCategory) => {
 
     case PROCESS_CATEGORY_OPTION[1].category: // 委外成型製程
       return {
-        ...commonFields.materialCostSetting,
+        SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
         SQMaterialCosts: createArraySchemaWithStringFallback(
           fieldSchemas.materialCost
         ),
@@ -121,7 +123,7 @@ const getProcessFields = (processCategory) => {
 
     case PROCESS_CATEGORY_OPTION[2].category: // 廠內後製程
       return {
-        ...commonFields.materialCostSetting,
+        SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
         SQMaterialCosts: createArraySchemaWithStringFallback(
           fieldSchemas.materialCost
         ),
@@ -135,7 +137,7 @@ const getProcessFields = (processCategory) => {
 
     case PROCESS_CATEGORY_OPTION[3].category: // 委外後製程
       return {
-        ...commonFields.materialCostSetting,
+        SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
         SQMaterialCosts: createArraySchemaWithStringFallback(
           fieldSchemas.materialCost
         ),
@@ -225,8 +227,11 @@ export const getProcessResolver = (processCategory) => {
     });
   }
 
-  const processCategoryOption =
-    PROCESS_CATEGORY_OPTION[processCategory - 1].category;
+  let processCategoryOption;
+  if (typeof processCategory === "number")
+    processCategoryOption =
+      PROCESS_CATEGORY_OPTION[processCategory - 1].category;
+  else processCategoryOption = processCategory;
 
   return async (values) => {
     try {

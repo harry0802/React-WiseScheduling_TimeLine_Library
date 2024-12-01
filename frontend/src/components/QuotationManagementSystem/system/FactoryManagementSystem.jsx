@@ -9,7 +9,6 @@ function QuotationManagementSystemFactory() {
   const routes = [
     { path: "/FactoryQuotationManagementSystem", Action: <QmsActions /> },
   ];
-  console.log("🚀 ~ QuotationManagementSystemFactory ~ routes:", routes);
 
   useEffect(() => {
     (async function () {

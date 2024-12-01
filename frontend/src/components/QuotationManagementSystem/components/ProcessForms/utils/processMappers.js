@@ -1,7 +1,4 @@
-import {
-  BASIC_PROCESS_TYPES,
-  PROCESS_TYPES,
-} from "../../../config/processTypes_v1";
+import { PROCESS_TYPES } from "../../../config/processTypes_v1";
 
 export const processMappers = {
   processTypes: {
@@ -19,7 +16,7 @@ export const processMappers = {
     toSubtypeOptions: (data) =>
       data.map(({ id, processSN, processName, processCategory }) => ({
         value: id,
-        label: processName,
+        label: processSN,
         // 保存需要的資料
         id,
         processCategory,

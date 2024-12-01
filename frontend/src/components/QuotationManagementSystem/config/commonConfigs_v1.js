@@ -272,7 +272,8 @@ export const createField = (
   rules = {},
   options = null,
   span,
-  getOptions
+  getOptions,
+  hidden = false // 新增參數
 ) => ({
   name,
   label,
@@ -292,6 +293,7 @@ export const createField = (
   // 改為直接傳入 getOptions 函數，而不呼叫
   ...(getOptions ? { getOptions } : {}),
   ...(options ? { options } : {}),
+  hidden,
 });
 
 //! =============== 5. 字段定義 ===============
@@ -396,6 +398,20 @@ const materialCostFields = {
       readOnly: true,
     },
     createRequiredRule("單價")
+  ),
+  materialOptionId: createField(
+    "materialOptionId",
+    "物料選項ID",
+    "input",
+    {
+      placeholder: "物料選項ID將自動填入",
+      readOnly: true,
+    },
+    {},
+    null,
+    null,
+    null,
+    true // hidden 設為 true
   ),
 };
 
@@ -613,8 +629,7 @@ const customsDutyFields = {
       { value: "運費", label: "運費" },
       { value: "關稅", label: "關稅" },
       { value: "其他", label: "其他" },
-    ],
-    3
+    ]
   ),
   freight: createField(
     "freight",
@@ -640,20 +655,24 @@ const customsDutyFields = {
 };
 
 const outsourcedProcessingFields = {
-  unitPrice: createField(
-    "unitPrice",
-    "單價",
-    "number",
-    createInputProps("元", "單價"),
-    createRequiredRule("單價")
-  ),
-  amount: createField(
-    "amount",
-    "金額",
-    "number",
-    createInputProps("元", "金額"),
-    createRequiredRule("金額")
-  ),
+  unitPrice: {
+    ...createField(
+      "unitPrice",
+      "單價",
+      "number",
+      createInputProps("元", "單價"),
+      createRequiredRule("單價")
+    ),
+  },
+  amount: {
+    ...createField(
+      "amount",
+      "金額",
+      "number",
+      createInputProps("元", "金額"),
+      createRequiredRule("金額")
+    ),
+  },
 };
 
 const internalProcessingFields = {
@@ -704,49 +723,49 @@ export const commonSections = {
     title: "材料成本",
     fields: Object.values(materialCostFields).map((field) => ({
       ...field,
-      span: 3,
+      span: field.span || 3,
     })),
   },
   packagingCosts: {
     title: "包裝成本",
     fields: Object.values(packagingCostFields).map((field) => ({
       ...field,
-      span: 3,
+      span: field.span || 3,
     })),
   },
   injectionMoldingCosts: {
     title: "注塑成型成本",
     fields: Object.values(injectionMoldingCostFields).map((field) => ({
       ...field,
-      span: 3,
+      span: field.span || 3,
     })),
   },
   freightCosts: {
-    title: "輸成本",
+    title: "運輸成本",
     fields: Object.values(freightFields).map((field) => ({
       ...field,
-      span: 3,
+      span: field.span || 2,
     })),
   },
   customsDutyCosts: {
     title: "關稅成本",
     fields: Object.values(customsDutyFields).map((field) => ({
       ...field,
-      span: 3,
+      span: field.span || 2,
     })),
   },
   outsourcedProcessingCosts: {
     title: "委外加工成本",
     fields: Object.values(outsourcedProcessingFields).map((field) => ({
       ...field,
-      span: 3,
+      span: field.span || 3,
     })),
   },
   internalProcessingCosts: {
     title: "廠內加工成本",
     fields: Object.values(internalProcessingFields).map((field) => ({
       ...field,
-      span: 2,
+      span: field.span || 2,
     })),
   },
 };

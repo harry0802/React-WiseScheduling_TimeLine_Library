@@ -84,11 +84,22 @@ export const useQuotationStore = (set, get) => ({
 
   // 製程操作
   updateProcess: (processId, updateData) =>
-    set((state) => ({
-      processes: state.processes.map((process) =>
-        process.id === processId ? { ...process, ...updateData } : process
-      ),
-    })),
+    set((state) => {
+      console.log("🔥🔥🔥🔥 ~ set ~ updateData:", updateData);
+
+      console.log(
+        "🔥🔥🔥🔥 ~ set ~ processes:",
+        state.processes.map((process) =>
+          process.id === processId ? { ...process, ...updateData } : process
+        )
+      );
+
+      return {
+        processes: state.processes.map((process) =>
+          process.id === processId ? { ...process, ...updateData } : process
+        ),
+      };
+    }),
 
   addProcess: (process) =>
     set((state) => ({
@@ -153,39 +164,55 @@ export const useQuotationStore = (set, get) => ({
   // 1. 基礎成本計算
   calculateBaseCosts: () => {
     const { processes } = get();
-    if (!processes?.length) return { totalCostSubtotal: 0, costDetails: [] };
+    if (!Array.isArray(processes) || processes.length === 0) {
+      return { processTotal: 0, costDetails: [] };
+    }
 
-    // 計算各製程成本
     const costDetails = processes.map((process) => {
+      if (!process || !process.processCategory) {
+        return {
+          id: process?.id || "unknown",
+          processCategory: "unknown",
+          costSubtotal: 0,
+          costDetails: [],
+        };
+      }
+
       let result;
-      switch (process.processCategory) {
-        case "In-IJ(廠內成型)":
-          result = calculateInHouseMoldingCost(process);
-          break;
-        case "Out-IJ(委外成型)":
-        case "Out-BE(委外後製程)":
-          result = calculateOutsourcedMoldingCost(process);
-          break;
-        case "In-BE(廠內後製程)":
-          result = calculateInHousePostProcessingCost(process);
-          break;
-        case "In-TS(廠內出貨檢驗)":
-          result = calculateInHouseShippingInspectionCost(process);
-          break;
-        default:
-          throw new Error(`未知的製程類別: ${process.processCategory}`);
+      try {
+        switch (process.processCategory) {
+          case "In-IJ(廠內成型)":
+            result = calculateInHouseMoldingCost(process);
+            break;
+          case "Out-IJ(委外成型)":
+          case "Out-BE(委外後製程)":
+            result = calculateOutsourcedMoldingCost(process);
+            break;
+          case "In-BE(廠內後製程)":
+            result = calculateInHousePostProcessingCost(process);
+            break;
+          case "In-TS(廠內出貨檢驗)":
+            result = calculateInHouseShippingInspectionCost(process);
+            break;
+          default:
+            console.warn(`未知的製程類別: ${process.processCategory}`);
+            result = { totalCost: 0, details: [] };
+        }
+      } catch (error) {
+        console.error(`計算製程成本時發生錯誤:`, error);
+        result = { totalCost: 0, details: [] };
       }
 
       return {
-        id: process.id,
+        id: process.id || "unknown",
         processCategory: process.processCategory,
-        costSubtotal: result.totalCost || 0,
-        costDetails: result.details,
+        costSubtotal: Number(result.totalCost) || 0,
+        costDetails: result.details || [],
       };
     });
 
     const processTotal = costDetails.reduce(
-      (sum, detail) => sum + detail.costSubtotal,
+      (sum, detail) => sum + (Number(detail.costSubtotal) || 0),
       0
     );
     return { processTotal, costDetails };
@@ -194,11 +221,30 @@ export const useQuotationStore = (set, get) => ({
   // 2. 運輸成本計算
   calculateTransportation: () => {
     const { shippingCosts } = get();
-    const result = calculateTransportationCost(shippingCosts);
-    return {
-      costSubtotal: result.totalCost || 0,
-      costDetails: result.details,
-    };
+    if (
+      !shippingCosts ||
+      (!Array.isArray(shippingCosts.SQFreights) &&
+        !Array.isArray(shippingCosts.SQCustomsDuties))
+    ) {
+      return {
+        costSubtotal: 0,
+        costDetails: [],
+      };
+    }
+
+    try {
+      const result = calculateTransportationCost(shippingCosts);
+      return {
+        costSubtotal: Number(result.totalCost) || 0,
+        costDetails: result.details || [],
+      };
+    } catch (error) {
+      console.error("計算運輸成本時發生錯誤:", error);
+      return {
+        costSubtotal: 0,
+        costDetails: [],
+      };
+    }
   },
 
   // 3. 總成本計算（不含利潤）
@@ -225,39 +271,40 @@ export const useQuotationStore = (set, get) => ({
 
   // 4. 利潤計算
   calculateProfit: () => {
-    const {
-      calculationResults,
-      overheadRnd,
-      profit,
-      risk,
-      annualDiscount,
-      rebate,
-      actualQuotation,
-    } = get();
+    const state = get();
+    const requiredFields = {
+      overheadRnd: Number(state.overheadRnd),
+      profit: Number(state.profit),
+      risk: Number(state.risk),
+      annualDiscount: Number(state.annualDiscount),
+      rebate: Number(state.rebate),
+      actualQuotation: Number(state.actualQuotation),
+      costSubtotal: Number(state.calculationResults?.costSubtotal),
+    };
 
-    // if parameter is 0, don't calculate
-    const requiredFields = [
-      overheadRnd,
-      profit,
-      risk,
-      annualDiscount,
-      rebate,
-      actualQuotation,
-    ];
-    if (requiredFields.some((field) => field === 0)) return;
+    // 檢查所有必要欄位是否為有效數字
+    if (Object.values(requiredFields).some(isNaN)) {
+      console.warn("利潤計算所需的欄位包含無效數值");
+      return state.calculationResults;
+    }
 
-    const profitResult = calculateProfitManagement(
-      +calculationResults.costSubtotal,
-      +overheadRnd,
-      +profit,
-      +risk,
-      +annualDiscount,
-      +rebate,
-      +actualQuotation
-    );
+    try {
+      const profitResult = calculateProfitManagement(
+        requiredFields.costSubtotal,
+        requiredFields.overheadRnd,
+        requiredFields.profit,
+        requiredFields.risk,
+        requiredFields.annualDiscount,
+        requiredFields.rebate,
+        requiredFields.actualQuotation
+      );
 
-    set({ calculationResults: profitResult });
-    return profitResult;
+      set({ calculationResults: profitResult });
+      return profitResult;
+    } catch (error) {
+      console.error("計算利潤時發生錯誤:", error);
+      return state.calculationResults;
+    }
   },
 
   // 只計算運輸成本

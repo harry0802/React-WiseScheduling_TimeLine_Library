@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import SharedCard from "../../Global/card/ProductCard";
 import { useSalesHomeSlice, useFactoryHomeSlice } from "../slice/qmsHome";
 import PmHomeContent from "../../Global/content/PmHomeContent";
+import { useDeleteQuotationMutation } from "../services/salesServices/endpoints/quotationApi";
 
 // 抽離卡片組件，避免不必要的重渲染
 const Card = memo(function Card({ data, onCardClick, onDelete }) {
@@ -40,6 +41,7 @@ function QmsHome() {
     error,
     setPage,
     setPageSize,
+    type,
   } = sliceHook();
   // 使用 useCallback 記憶導航函數
   const handleCardClick = useCallback(
@@ -49,11 +51,43 @@ function QmsHome() {
     [navigate]
   );
 
-  const handleDelete = useCallback((id) => {
-    // TODO: 實現刪除邏輯
-    console.log("Delete:", id);
-  }, []);
+  const [deleteQuotation, { isLoading: isDeleting, error: deleteError }] =
+    useDeleteQuotationMutation({
+      skip: type !== "sales",
+    });
 
+  const handleDelete = useCallback(
+    async (id) => {
+      try {
+        const response = await deleteQuotation(id);
+
+        // 檢查響應內容
+        if (response.error) {
+          // RTK Query 錯誤處理
+          const errorMessage =
+            response.error.data?.message || "刪除報價單時發生錯誤";
+          throw new Error(errorMessage);
+        }
+
+        // 成功處理
+        return {
+          success: true,
+          message: "報價單刪除成功",
+        };
+      } catch (error) {
+        // 統一錯誤處理
+        console.error("💣💣💣 刪除報價單失敗:", error.message);
+        return {
+          success: false,
+          error: {
+            message: error.message,
+            details: error.data,
+          },
+        };
+      }
+    },
+    [deleteQuotation]
+  );
   // 使用 useMemo 優化渲染列表
   const cardList = useMemo(() => {
     if (!Array.isArray(displayedData)) return null;
