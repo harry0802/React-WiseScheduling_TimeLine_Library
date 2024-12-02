@@ -183,13 +183,13 @@ class SalesQuotationDto:
     SQProcess_post_obj["SQMaterialCostSetting"] = fields.Nested(api.model("SQMaterialCostSetting_obj object", post_SQMaterialCostSetting_obj))
     # SQMaterialCost_obj
     post_SQMaterialCost_obj = copy.deepcopy(SQMaterialCost_obj)
-    SQMaterialCost_pop_list = ["id", "SQProcessId"]
+    SQMaterialCost_pop_list = ["id", "SQProcessId", "amount"]
     for attr in [item for item in SQMaterialCost_pop_list]:
         post_SQMaterialCost_obj.pop(attr)
     SQProcess_post_obj["SQMaterialCosts"] = fields.List(fields.Nested(api.model("SQMaterialCost_obj object", post_SQMaterialCost_obj)))
     # SQPackagingCost_obj
     post_SQPackagingCost_obj = copy.deepcopy(SQPackagingCost_obj)
-    SQPackagingCost_pop_list = ["id", "SQProcessId"]
+    SQPackagingCost_pop_list = ["id", "SQProcessId", "amount"]
     for attr in [item for item in SQPackagingCost_pop_list]:
         post_SQPackagingCost_obj.pop(attr)
     SQProcess_post_obj["SQPackagingCosts"] = fields.List(fields.Nested(api.model("SQPackagingCost_obj object", post_SQPackagingCost_obj)))
@@ -201,13 +201,13 @@ class SalesQuotationDto:
     SQProcess_post_obj["SQInjectionMoldingCosts"] = fields.List(fields.Nested(api.model("SQInjectionMoldingCost_obj object", post_SQInjectionMoldingCost_obj)))
     # SQInPostProcessingCost_obj
     post_SQInPostProcessingCost_obj = copy.deepcopy(SQInPostProcessingCost_obj)
-    SQInPostProcessingCost_pop_list = ["id", "SQProcessId"]
+    SQInPostProcessingCost_pop_list = ["id", "SQProcessId", "amount"]
     for attr in [item for item in SQInPostProcessingCost_pop_list]:
         post_SQInPostProcessingCost_obj.pop(attr)
     SQProcess_post_obj["SQInPostProcessingCosts"] = fields.List(fields.Nested(api.model("SQInPostProcessingCost_obj object", post_SQInPostProcessingCost_obj)))
     # SQOutPostProcessingCost_obj
     post_SQOutPostProcessingCost_obj = copy.deepcopy(SQOutPostProcessingCost_obj)
-    SQOutPostProcessingCost_pop_list = ["id", "SQProcessId"]
+    SQOutPostProcessingCost_pop_list = ["id", "SQProcessId", "amount"]
     for attr in [item for item in SQOutPostProcessingCost_pop_list]:
         post_SQOutPostProcessingCost_obj.pop(attr)
     SQProcess_post_obj["SQOutPostProcessingCosts"] = fields.List(fields.Nested(api.model("SQOutPostProcessingCost_obj object", post_SQOutPostProcessingCost_obj)))
@@ -234,13 +234,13 @@ class SalesQuotationDto:
     SQProcess_put_obj["SQMaterialCostSetting"] = fields.Nested(api.model("put_SQMaterialCostSetting_obj object", put_SQMaterialCostSetting_obj))
     # SQMaterialCost_obj
     put_SQMaterialCost_obj = copy.deepcopy(SQMaterialCost_obj)
-    SQMaterialCost_pop_list = ["SQProcessId"]
+    SQMaterialCost_pop_list = ["SQProcessId", "amount"]
     for attr in [item for item in SQMaterialCost_pop_list]:
         put_SQMaterialCost_obj.pop(attr)
     SQProcess_put_obj["SQMaterialCosts"] = fields.List(fields.Nested(api.model("put_SQMaterialCost_obj object", put_SQMaterialCost_obj)))
     # SQPackagingCost_obj
     put_SQPackagingCost_obj = copy.deepcopy(SQPackagingCost_obj)
-    SQPackagingCost_pop_list = ["SQProcessId"]
+    SQPackagingCost_pop_list = ["SQProcessId", "amount"]
     for attr in [item for item in SQPackagingCost_pop_list]:
         put_SQPackagingCost_obj.pop(attr)
     SQProcess_put_obj["SQPackagingCosts"] = fields.List(fields.Nested(api.model("put_SQPackagingCost_obj object", put_SQPackagingCost_obj)))
@@ -252,13 +252,13 @@ class SalesQuotationDto:
     SQProcess_put_obj["SQInjectionMoldingCosts"] = fields.List(fields.Nested(api.model("put_SQInjectionMoldingCost_obj object", put_SQInjectionMoldingCost_obj)))
     # SQInPostProcessingCost_obj
     put_SQInPostProcessingCost_obj = copy.deepcopy(SQInPostProcessingCost_obj)
-    SQInPostProcessingCost_pop_list = ["SQProcessId"]
+    SQInPostProcessingCost_pop_list = ["SQProcessId", "amount"]
     for attr in [item for item in SQInPostProcessingCost_pop_list]:
         put_SQInPostProcessingCost_obj.pop(attr)
     SQProcess_put_obj["SQInPostProcessingCosts"] = fields.List(fields.Nested(api.model("put_SQInPostProcessingCost_obj object", put_SQInPostProcessingCost_obj)))
     # SQOutPostProcessingCost_obj
     put_SQOutPostProcessingCost_obj = copy.deepcopy(SQOutPostProcessingCost_obj)
-    SQOutPostProcessingCost_pop_list = ["SQProcessId"]
+    SQOutPostProcessingCost_pop_list = ["SQProcessId", "amount"]
     for attr in [item for item in SQOutPostProcessingCost_pop_list]:
         put_SQOutPostProcessingCost_obj.pop(attr)
     SQProcess_put_obj["SQOutPostProcessingCosts"] = fields.List(fields.Nested(api.model("put_SQOutPostProcessingCost_obj object", put_SQOutPostProcessingCost_obj)))    

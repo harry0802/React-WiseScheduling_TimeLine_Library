@@ -196,7 +196,7 @@ class FactoryQuotationDto:
     FQProcess_post_obj["FQPackagingCosts"] = fields.List(fields.Nested(api.model("FQPackagingCost_obj object", post_FQPackagingCost_obj)))
     # FQInjectionMoldingCost_obj
     post_FQInjectionMoldingCost_obj = copy.deepcopy(FQInjectionMoldingCost_obj)
-    FQInjectionMoldingCost_pop_list = ["id", "FQProcessId"]
+    FQInjectionMoldingCost_pop_list = ["id", "FQProcessId", "unitPrice", "amount", "subtotal", "electricityCost"]
     for attr in [item for item in FQInjectionMoldingCost_pop_list]:
         post_FQInjectionMoldingCost_obj.pop(attr)
     FQProcess_post_obj["FQInjectionMoldingCosts"] = fields.List(fields.Nested(api.model("FQInjectionMoldingCost_obj object", post_FQInjectionMoldingCost_obj)))
@@ -216,8 +216,8 @@ class FactoryQuotationDto:
     
     #FQProcess PUT model
     FQProcess_put_obj = copy.deepcopy(FQProcess_obj)
-    pop_list = ["factoryQuotationId"]
-    required_list = []
+    pop_list = ["factoryQuotationId", "processOptionId"]
+    required_list = ["id"]
     not_required_list = [] # default all not required
     for attr in [item for item in pop_list]:
         FQProcess_put_obj.pop(attr)
@@ -235,31 +235,31 @@ class FactoryQuotationDto:
     FQProcess_put_obj["FQMaterialCostSetting"] = fields.Nested(api.model("put_FQMaterialCostSetting_obj object", put_FQMaterialCostSetting_obj))
     # FQMaterialCost_obj
     put_FQMaterialCost_obj = copy.deepcopy(FQMaterialCost_obj)
-    FQMaterialCost_pop_list = ["FQProcessId"]
+    FQMaterialCost_pop_list = ["FQProcessId", "materialOptionId", "materialSN", "materialName", "amount"]
     for attr in [item for item in FQMaterialCost_pop_list]:
         put_FQMaterialCost_obj.pop(attr)
     FQProcess_put_obj["FQMaterialCosts"] = fields.List(fields.Nested(api.model("put_FQMaterialCost_obj object", put_FQMaterialCost_obj)))
     # FQPackagingCost_obj
     put_FQPackagingCost_obj = copy.deepcopy(FQPackagingCost_obj)
-    FQPackagingCost_pop_list = ["FQProcessId"]
+    FQPackagingCost_pop_list = ["FQProcessId", "packagingType", "materialSN", "materialName", "amount"]
     for attr in [item for item in FQPackagingCost_pop_list]:
         put_FQPackagingCost_obj.pop(attr)
     FQProcess_put_obj["FQPackagingCosts"] = fields.List(fields.Nested(api.model("put_FQPackagingCost_obj object", put_FQPackagingCost_obj)))
     # FQInjectionMoldingCost_obj
     put_FQInjectionMoldingCost_obj = copy.deepcopy(FQInjectionMoldingCost_obj)
-    FQInjectionMoldingCost_pop_list = ["FQProcessId"]
+    FQInjectionMoldingCost_pop_list = ["FQProcessId", "unitPrice", "amount", "subtotal", "electricityCost"]
     for attr in [item for item in FQInjectionMoldingCost_pop_list]:
         put_FQInjectionMoldingCost_obj.pop(attr)
     FQProcess_put_obj["FQInjectionMoldingCosts"] = fields.List(fields.Nested(api.model("put_FQInjectionMoldingCost_obj object", put_FQInjectionMoldingCost_obj)))
     # FQInPostProcessingCost_obj
     put_FQInPostProcessingCost_obj = copy.deepcopy(FQInPostProcessingCost_obj)
-    FQInPostProcessingCost_pop_list = ["FQProcessId"]
+    FQInPostProcessingCost_pop_list = ["FQProcessId", "amount"]
     for attr in [item for item in FQInPostProcessingCost_pop_list]:
         put_FQInPostProcessingCost_obj.pop(attr)
     FQProcess_put_obj["FQInPostProcessingCosts"] = fields.List(fields.Nested(api.model("put_FQInPostProcessingCost_obj object", put_FQInPostProcessingCost_obj)))
     # FQOutPostProcessingCost_obj
     put_FQOutPostProcessingCost_obj = copy.deepcopy(FQOutPostProcessingCost_obj)
-    FQOutPostProcessingCost_pop_list = ["FQProcessId"]
+    FQOutPostProcessingCost_pop_list = ["FQProcessId", "amount"]
     for attr in [item for item in FQOutPostProcessingCost_pop_list]:
         put_FQOutPostProcessingCost_obj.pop(attr)
     FQProcess_put_obj["FQOutPostProcessingCosts"] = fields.List(fields.Nested(api.model("put_FQOutPostProcessingCost_obj object", put_FQOutPostProcessingCost_obj)))    
@@ -281,20 +281,14 @@ class FactoryQuotationDto:
     # FQFreight_obj
     put_FQFreight_obj = copy.deepcopy(FQFreight_obj)
     FQFreight_pop_list = ["factoryQuotationId"]
-    FQFreight_required_list = ["id"]
     for attr in [item for item in FQFreight_pop_list]:
         put_FQFreight_obj.pop(attr)
-    for key in [item for item in FQFreight_required_list]:
-        put_FQFreight_obj[key].required = True
     shippingCost_put_obj["FQFreights"] = fields.List(fields.Nested(api.model("put_FQFreight_obj object", put_FQFreight_obj)))
     # FQCustomsDuty_obj
     put_FQCustomsDuty_obj = copy.deepcopy(FQCustomsDuty_obj)
     FQCustomsDuty_pop_list = ["factoryQuotationId"]
-    FQCustomsDuty_required_list = ["id"]
     for attr in [item for item in FQCustomsDuty_pop_list]:
         put_FQCustomsDuty_obj.pop(attr)
-    for key in [item for item in FQCustomsDuty_required_list]:
-        put_FQCustomsDuty_obj[key].required = True
     shippingCost_put_obj["FQCustomsDuties"] = fields.List(fields.Nested(api.model("put_FQCustomsDuty_obj object", put_FQCustomsDuty_obj)))
     shippingCost_put = api.model("Factory Quotation ShippingCost put", shippingCost_put_obj)
 

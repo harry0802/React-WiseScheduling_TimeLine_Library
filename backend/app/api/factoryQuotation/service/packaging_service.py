@@ -6,6 +6,9 @@ from app.api.option.optionEnum import PackagingUnitEnum
 from ..schemas import FactoryQuotationSchema
 factoryQuotation_schema = FactoryQuotationSchema()
 
+"""廠內報價系統-包材費用服務
+從BOM表同步過去廠內報價之後，製程不能新增跟刪除的，製程裡面的物料/包材必須跟BOM表一樣，只能修改，不能新增刪除
+"""
 
 def complete_FQPackagingCost(db_obj, payload):
     db_obj.FQProcessId = int(payload["FQProcessId"]) \
@@ -84,61 +87,3 @@ def update_packaging(payload):
         return FQPackagingCost_db_list
     except Exception as error:
         raise error
-
-
-def delete_packaging(ids):
-    """刪除包材費用
-
-    Args:
-        ids (_type_): 要刪除的包材費用 id
-    """
-    try:
-        FQPackagingCost_db_list = []
-        for id in ids:
-            if (FQPackagingCost_db := FQPackagingCost.query.filter(FQPackagingCost.id == id).first()):
-                FQPackagingCost_db_list.append(FQPackagingCost_db)
-        return FQPackagingCost_db_list
-    except Exception as error:
-        raise error
-    
-
-def create_update_delete_packaging(payload):
-    # 包材費用沒有id的情況下，判斷為新增
-    # 包材費用有id的情況下，判斷為更新
-    # 包材費用已不存在的id，判斷為刪除
-    delete_packaging_ids = []
-    created_updated_packaging_db_list = []
-    deleted_packaging_db_list = []
-    
-    # 將payload中的包材分為新增和更新
-    new_packagings = [packaging for packaging in payload["FQPackagingCosts"] if "id" not in packaging]
-    updated_packagings = [packaging for packaging in payload["FQPackagingCosts"] if "id" in packaging]
-    
-    # 取得資料庫中的所有包材ID
-    existing_packaging_ids = {
-        pid for pid in db.session.execute(
-            db.select(FQPackagingCost.id)
-            .filter(FQPackagingCost.FQProcessId == payload["id"])
-        ).scalars()
-    }
-    
-    # 取得更新包材中已經存在的ID
-    updated_packaging_ids = {packaging["id"] for packaging in updated_packagings}
-    
-    # 刪除的包材ID：資料庫中有但更新清單中沒有的ID
-    delete_packaging_ids = list(existing_packaging_ids - updated_packaging_ids)
-    
-    # 創建新包材
-    if new_packagings:
-        created_list = create_packaging(payload["id"], {"FQPackagingCosts": new_packagings})
-        created_updated_packaging_db_list.extend(created_list)
-    
-    # 更新已存在的包材
-    if updated_packagings:
-        updated_list = update_packaging({"FQPackagingCosts": updated_packagings})
-        created_updated_packaging_db_list.extend(updated_list)
-    
-    # 刪除包材
-    if delete_packaging_ids:
-        deleted_packaging_db_list = delete_packaging(delete_packaging_ids)
-    return created_updated_packaging_db_list, deleted_packaging_db_list

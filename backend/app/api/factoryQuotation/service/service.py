@@ -23,12 +23,12 @@ from app.models.factoryQuotation.FQFreight import FQFreight
 from app.models.factoryQuotation.FQCustomsDuty import FQCustomsDuty
 from app.api.option.optionEnum import ProcessCategoryEnum
 from ..schemas import FactoryQuotationSchema, ShippingCostSchema, FQProcessSchema, FQMaterialCostSettingSchema, FQMaterialCostSchema, FQPackagingCostSchema, FQInjectionMoldingCostSchema, FQInPostProcessingCostSchema, FQOutPostProcessingCostSchema, FQFreightSchema, FQCustomsDutySchema
-from .material_service import create_materialSetting, create_material, create_update_delete_material, update_materialSetting
-from .packaging_service import create_packaging, create_update_delete_packaging
+from .material_service import create_materialSetting, create_material, update_materialSetting, update_material
+from .packaging_service import create_packaging, update_packaging
 from .injectionMolding_service import create_injectionMolding, update_injectionMolding
-from .inPostProcessing_service import create_inPostProcessing, update_inPostProcessing
-from .outPostProcessing_service import create_outPostProcessing, update_outPostProcessing
-from .shipping_service import update_freight, update_customsDuty
+from .inPostProcessing_service import create_inPostProcessing, create_update_delete_inPostProcessing
+from .outPostProcessing_service import create_outPostProcessing, create_update_delete_outPostProcessing
+from .shipping_service import create_update_delete_freight, create_update_delete_customsDuty
 factoryQuotation_schema = FactoryQuotationSchema()
 
 
@@ -37,6 +37,7 @@ def generate_quotationSN():
        Format: FYYYYMMDDXXX
     """
     try:
+        prefix = "F"
         today = datetime.now()
         year = today.strftime("%Y")
         month = today.strftime("%m")
@@ -44,16 +45,16 @@ def generate_quotationSN():
         # get the last quotationSN
         last_factoryQuotation = db.session.query(FactoryQuotation).order_by(FactoryQuotation.id.desc()).first()
         if last_factoryQuotation is None:
-            return f"F{year}{month}{day}001"
+            return f"{prefix}{year}{month}{day}001"
         else:
             last_quotationSN = last_factoryQuotation.quotationSN
             last_quotationSN_date = last_quotationSN[1:9]
             last_quotationSN_num = last_quotationSN[9:]
             if last_quotationSN_date == f"{year}{month}{day}":
                 num = int(last_quotationSN_num) + 1
-                return f"F{year}{month}{day}{num:03}"
+                return f"{prefix}{year}{month}{day}{num:03}"
             else:
-                return f"F{year}{month}{day}001"
+                return f"{prefix}{year}{month}{day}001"
     except Exception as error:
         raise error
 
@@ -278,7 +279,7 @@ def convert_processes_to_payload_format(process_db_list):
                         )
                     process["FQPackagingCosts"] = packagings
                 if schema == "FQInjectionMoldingCosts":
-                    process["FQInjectionMoldingCosts"] = []
+                    process["FQInjectionMoldingCosts"] = [{"machineId": None}]
                 if schema == "FQInPostProcessingCosts":
                     process["FQInPostProcessingCosts"] = []
                 if schema == "FQOutPostProcessingCosts":
@@ -658,56 +659,59 @@ class FactoryQuotationService:
     @staticmethod
     def update_factoryQuotationProcess(payload):
         try:
-            # Get the process category
-            if (processOption_db := ProcessOption.query.filter(ProcessOption.id == payload["processOptionId"]).first()) is None:
+            # Get the process category from payload["id"]
+            process_db = FQProcess.query.get(payload["id"])
+            if process_db is None:
+                return err_resp("FQProcess not found", "FQProcess_404", 404)
+            if (processOption_db := ProcessOption.query.filter(ProcessOption.id == process_db.processOptionId).first()) is None:
                 return err_resp("process not found", "process_404", 404)
             
-            create_update_session_list = []
-            delete_session_list = []
+            created_update_session_list = []
+            deleted_session_list = []
             # 更新 In-IJ(廠內成型) 製程類別的原物料費用、包材費用、成型加工費用、成型加工電費
             if processOption_db.processCategory == ProcessCategoryEnum.In_IJ.value:
                 FQMaterialCostSetting_db = update_materialSetting(payload)
-                created_updated_material_db_list, deleted_material_db_list = create_update_delete_material(payload, FQMaterialCostSetting_db.estimatedMaterialFluctuation)
-                created_updated_packaging_db_list, deleted_packaging_db_list = create_update_delete_packaging(payload)
+                updated_material_db_list = update_material(payload, FQMaterialCostSetting_db.estimatedMaterialFluctuation)
+                created_updated_packaging_db_list = update_packaging(payload)
                 FQInjectionMoldingCost_db_list = update_injectionMolding(payload)
-                create_update_session_list.extend([FQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *FQInjectionMoldingCost_db_list])
-                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list])
+                created_update_session_list.extend([FQMaterialCostSetting_db, *updated_material_db_list, *created_updated_packaging_db_list, *FQInjectionMoldingCost_db_list])
             
             # 更新 Out-IJ(委外成型) 製程類別的原物料費用、包材費用、委外後製程與檢驗費用
             elif processOption_db.processCategory == ProcessCategoryEnum.Out_IJ.value:
                 FQMaterialCostSetting_db = update_materialSetting(payload)
-                created_updated_material_db_list, deleted_material_db_list = create_update_delete_material(payload, FQMaterialCostSetting_db.estimatedMaterialFluctuation)
-                created_updated_packaging_db_list, deleted_packaging_db_list = create_update_delete_packaging(payload)
-                FQOutPostProcessingCost_db_list = update_outPostProcessing(payload)
-                create_update_session_list.extend([FQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *FQOutPostProcessingCost_db_list])
-                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list])
+                updated_material_db_list = update_material(payload, FQMaterialCostSetting_db.estimatedMaterialFluctuation)
+                created_updated_packaging_db_list = update_packaging(payload)
+                created_updated_FQOutPostProcessingCost_db_list, deleted_FQOutPostProcessingCost_db_list = create_update_delete_outPostProcessing(payload)
+                created_update_session_list.extend([FQMaterialCostSetting_db, *updated_material_db_list, *created_updated_packaging_db_list, *created_updated_FQOutPostProcessingCost_db_list])
+                deleted_session_list.extend(deleted_FQOutPostProcessingCost_db_list)
             
             # 更新 In-BE(廠內後製程) 製程類別的原物料費用、包材費用、廠內後製程與檢驗費用
             elif processOption_db.processCategory == ProcessCategoryEnum.In_BE.value:
                 FQMaterialCostSetting_db = update_materialSetting(payload)
-                created_updated_material_db_list, deleted_material_db_list = create_update_delete_material(payload, FQMaterialCostSetting_db.estimatedMaterialFluctuation)
-                created_updated_packaging_db_list, deleted_packaging_db_list = create_update_delete_packaging(payload)
-                FQInPostProcessingCost_db_list = update_inPostProcessing(payload)
-                create_update_session_list.extend([FQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *FQInPostProcessingCost_db_list])
-                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list])
+                updated_material_db_list = update_material(payload, FQMaterialCostSetting_db.estimatedMaterialFluctuation)
+                created_updated_packaging_db_list = update_packaging(payload)
+                created_updated_FQInPostProcessingCost_db_list, deleted_FQInPostProcessingCost_db_list = create_update_delete_inPostProcessing(payload)
+                created_update_session_list.extend([FQMaterialCostSetting_db, *updated_material_db_list, *created_updated_packaging_db_list, *created_updated_FQInPostProcessingCost_db_list])
+                deleted_session_list.extend(deleted_FQInPostProcessingCost_db_list)
            
             # 更新 Out-BE(委外後製程) 製程類別的原物料費用、包材費用、委外後製程與檢驗費用
             elif processOption_db.processCategory == ProcessCategoryEnum.Out_BE.value:
                 FQMaterialCostSetting_db = update_materialSetting(payload)
-                created_updated_material_db_list, deleted_material_db_list = create_update_delete_material(payload, FQMaterialCostSetting_db.estimatedMaterialFluctuation)
-                created_updated_packaging_db_list, deleted_packaging_db_list = create_update_delete_packaging(payload)
-                FQOutPostProcessingCost_db_list = update_outPostProcessing(payload)
-                create_update_session_list.extend([FQMaterialCostSetting_db, *created_updated_material_db_list, *created_updated_packaging_db_list, *FQOutPostProcessingCost_db_list])
-                delete_session_list.extend([*deleted_material_db_list, *deleted_packaging_db_list])
+                updated_material_db_list = update_material(payload, FQMaterialCostSetting_db.estimatedMaterialFluctuation)
+                created_updated_packaging_db_list = update_packaging(payload)
+                created_updated_FQOutPostProcessingCost_db_list, deleted_FQOutPostProcessingCost_db_list = create_update_delete_outPostProcessing(payload)
+                created_update_session_list.extend([FQMaterialCostSetting_db, *updated_material_db_list, *created_updated_packaging_db_list, *created_updated_FQOutPostProcessingCost_db_list])
+                deleted_session_list.extend(deleted_FQOutPostProcessingCost_db_list)
             
             # 更新 In-TS(廠內出貨檢驗) 製程類別的廠內後製程與檢驗費用
             elif processOption_db.processCategory == ProcessCategoryEnum.In_TS.value:
-                FQInPostProcessingCost_db_list = update_inPostProcessing(payload)
-                create_update_session_list.extend(FQInPostProcessingCost_db_list)
+                created_updated_FQInPostProcessingCost_db_list, deleted_FQInPostProcessingCost_db_list = create_update_delete_inPostProcessing(payload)
+                created_update_session_list.extend(created_updated_FQInPostProcessingCost_db_list)
+                deleted_session_list.extend(deleted_FQInPostProcessingCost_db_list)
             
-            db.session.add_all(create_update_session_list)
-            for delete_session in delete_session_list:
-                db.session.delete(delete_session)
+            db.session.add_all(created_update_session_list)
+            for deleted_session in deleted_session_list:
+                db.session.delete(deleted_session)
             db.session.commit()
 
             resp = message(True, "factoryQuotation process have been updated..")
@@ -719,13 +723,17 @@ class FactoryQuotationService:
     
 
     @staticmethod
-    def update_shippingCosts(payload):
+    def update_shippingCosts(factoryQuotationId, payload):
         try:
-            add_to_session_list = []
-            FQFreight_db_list = update_freight(payload)
-            FQCustomsDuty_db_list = update_customsDuty(payload)
-            add_to_session_list.extend([*FQFreight_db_list, *FQCustomsDuty_db_list])
-            db.session.add_all(add_to_session_list)
+            created_update_session_list = []
+            deleted_session_list = []
+            created_updated_FQFreight_db_list, deleted_FQFreight_db_list = create_update_delete_freight(factoryQuotationId, payload)
+            created_updated_FQCustomsDuty_db_list, deleted_FQCustomsDuty_db_list = create_update_delete_customsDuty(factoryQuotationId, payload)
+            created_update_session_list.extend([*created_updated_FQFreight_db_list, *created_updated_FQCustomsDuty_db_list])
+            deleted_session_list.extend([*deleted_FQFreight_db_list, *deleted_FQCustomsDuty_db_list])
+            db.session.add_all(created_update_session_list)
+            for deleted_session in deleted_session_list:
+                db.session.delete(deleted_session)
             db.session.commit()
 
             resp = message(True, "factoryQuotation ShippingCost have been updated..")

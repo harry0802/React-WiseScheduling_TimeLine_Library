@@ -7,6 +7,9 @@ from app.api.option.optionEnum import MaterialUnitEnum
 from ..schemas import FactoryQuotationSchema
 factoryQuotation_schema = FactoryQuotationSchema()
 
+"""廠內報價系統-原物料費用服務
+從BOM表同步過去廠內報價之後，製程不能新增跟刪除的，製程裡面的物料/包材必須跟BOM表一樣，只能修改，不能新增刪除
+"""
 
 def complete_FQMaterialCostSetting(db_obj, payload):
     db_obj.FQProcessId = int(payload["FQProcessId"]) \
@@ -138,61 +141,3 @@ def update_material(payload, estimatedMaterialFluctuation):
         return FQMaterialCost_db_list
     except Exception as error:
         raise error
-
-
-def delete_material(ids):
-    """刪除原物料費用
-
-    Args:
-        ids (_type_): 要刪除的原物料費用 id
-    """
-    try:
-        FQMaterialCost_db_list = []
-        for id in ids:
-            if (FQMaterialCost_db := FQMaterialCost.query.filter(FQMaterialCost.id == id).first()):
-                FQMaterialCost_db_list.append(FQMaterialCost_db)
-        return FQMaterialCost_db_list
-    except Exception as error:
-        raise error
-
-
-def create_update_delete_material(payload, estimatedMaterialFluctuation):
-    # 原物料費用沒有id的情況下，判斷為新增
-    # 原物料費用有id的情況下，判斷為更新
-    # 原物料費用已不存在的id，判斷為刪除
-    delete_material_ids = []
-    created_updated_material_db_list = []
-    deleted_material_db_list = []
-
-    # 將payload中的原物料分為新增和更新
-    new_materials = [material for material in payload["FQMaterialCosts"] if "id" not in material]
-    updated_materials = [material for material in payload["FQMaterialCosts"] if "id" in material]
-    
-    # 取得資料庫中的所有原物料ID
-    existing_material_ids = {
-        mid for mid in db.session.execute(
-            db.select(FQMaterialCost.id).filter(FQMaterialCost.FQProcessId == payload["id"])
-        ).scalars()
-    }
-
-    # 取得更新原物料中已經存在的ID
-    updated_material_ids = {material["id"] for material in updated_materials}
-
-    # 刪除的原物料ID：資料庫中有但更新清單中沒有的ID
-    delete_material_ids = list(existing_material_ids - updated_material_ids)
-
-    # 創建新原物料
-    if new_materials:
-        created_list = create_material(payload["id"], {"FQMaterialCosts": new_materials}, estimatedMaterialFluctuation)
-        created_updated_material_db_list.extend(created_list)
-
-    # 更新已存在的原物料
-    if updated_materials:
-        updated_list = update_material({"FQMaterialCosts": updated_materials}, estimatedMaterialFluctuation)
-        created_updated_material_db_list.extend(updated_list)
-
-    # 刪除原物料
-    if delete_material_ids:
-        deleted_material_db_list = delete_material(delete_material_ids)
-
-    return created_updated_material_db_list, deleted_material_db_list
