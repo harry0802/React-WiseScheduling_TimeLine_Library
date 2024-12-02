@@ -30,12 +30,14 @@ export const baseSchemas = {
     .positive("必須大於 0"),
 };
 
+export const nullableNumber = z.coerce.number().nullable().optional();
+
 //! =============== 3. 業務邏輯驗證規則 ===============
 export const fieldSchemas = {
   // 材料成本設置驗證
   materialCostSetting: z.object({
-    // SQProcessId: z.number().nullable().optional(),
-    // id: z.number().nullable().optional(),
+    SQProcessId: nullableNumber,
+    id: nullableNumber,
     estimatedDefectRate: baseSchemas.percentage,
     estimatedMaterialFluctuation: baseSchemas.percentage,
     extractionCost: baseSchemas.requiredNumber,
@@ -44,8 +46,9 @@ export const fieldSchemas = {
 
   // 材料成本驗證
   materialCost: z.object({
-    // id: z.number().optional(),
-    // materialOptionId: z.number().optional(),
+    id: nullableNumber,
+    SQProcessId: nullableNumber,
+    materialOptionId: nullableNumber,
     materialName: z.string().min(1, "物料名稱為必填"),
     materialSN: z.string().min(1, "物料編號為必填"),
     unit: z.string().min(1, "單位為必填"),
@@ -55,24 +58,25 @@ export const fieldSchemas = {
 
   // 包裝成本驗證
   packagingCost: z.object({
-    // SQProcessId: z.number().nullable().optional(),
-    // id: z.number().nullable().optional(),
+    SQProcessId: nullableNumber,
+    id: nullableNumber,
     materialName: z.string().min(1, "包材名稱為必填"),
     materialSN: z.string().min(1, "包材編號為必填"),
-    packagingType: z.string().min(1, "包材類型為必填"),
+    packagingType: z.string().optional(),
     unit: z.string().min(1, "單位為必填"),
     quantity: baseSchemas.positiveInteger,
     unitPrice: baseSchemas.requiredNumber,
     amount: baseSchemas.requiredNumber,
-    // capacity: baseSchemas.positiveInteger.optional(),
-    // bagsPerKg: baseSchemas.positiveInteger.optional(),
+    capacity: baseSchemas.positiveInteger,
+    bagsPerKg: baseSchemas.positiveInteger,
   }),
 
   // 注塑成型成本驗證
   injectionMoldingCost: z.object({
-    // id: z.number().nullable().optional(),
-    // SQProcessId: z.number().nullable().optional(),
-    // machineId: z.number().nullable().optional(),
+    id: nullableNumber,
+    SQProcessId: nullableNumber,
+    machineId: nullableNumber,
+    machineSN: z.string().optional(),
     workHoursRatio: baseSchemas.percentage,
     defectiveRate: baseSchemas.percentage,
     cycleTime: baseSchemas.requiredNumber,
@@ -80,7 +84,9 @@ export const fieldSchemas = {
     moldCavity: baseSchemas.positiveInteger,
     unitPrice: baseSchemas.requiredNumber,
     amount: baseSchemas.requiredNumber,
-    electricityCost: baseSchemas.requiredNumber,
+    subtotal: nullableNumber,
+    electricityCostPerSec: nullableNumber,
+    electricityCost: nullableNumber,
   }),
 
   // 委外加工成本驗證

@@ -38,7 +38,6 @@ function InjectionMoldingForm({ fields }) {
 }
 
 export const renderGeneralFields = (item, sectionIndex) => {
-  console.log("🔥🔥🔥🔥 ~ renderGeneralFields ~ item:", item);
   if (item.name === "SQInjectionMoldingCosts") {
     return (
       <InjectionMoldingForm

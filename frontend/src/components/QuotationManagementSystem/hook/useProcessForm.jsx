@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { getProcessResolver } from "../utility/formValidationUtils";
 import { transformProcessData } from "../utility/processDataTransformer";
 
-export function useProcessForm(initialProcess, onUpdate) {
+export function useProcessForm(initialProcess, onUpdate, onClose) {
   // 1. 狀態管理
   const [process, setProcess] = useState(initialProcess);
 
@@ -25,7 +25,7 @@ export function useProcessForm(initialProcess, onUpdate) {
       ...initialProcess,
       ...initialProcess?.SQMaterialCostSetting,
       ...(initialProcess?.SQInjectionMoldingCosts || {}),
-      processCategory: initialProcess.processOptionId || "",
+      processCategory: initialProcess?.processCategory || "",
       processSN: initialProcess.processSN || "",
       SQMaterialCosts: initialProcess?.SQMaterialCosts || [],
       SQPackagingCosts: initialProcess?.SQPackagingCosts || [],
@@ -40,9 +40,8 @@ export function useProcessForm(initialProcess, onUpdate) {
     defaultValues: initialValues,
     mode: "onSubmit",
     resolver: async (data) => {
-      console.log("🔥🔥🔥🔥 ~ resolver: ~ data:", data);
       const resolver = getProcessResolver(
-        data?.processOptionId || data.processCategory
+        data?.processCategory || initialProcess?.processCategory
       );
       return await resolver(data);
     },
@@ -71,7 +70,6 @@ export function useProcessForm(initialProcess, onUpdate) {
   // 5. 提交處理
   const handleSubmit = useCallback(
     async (formData) => {
-      console.log("🔥🔥🔥🔥 ~ formData:", formData);
       try {
         // 驗證表單
         const isValid = await methods.trigger();
@@ -91,7 +89,7 @@ export function useProcessForm(initialProcess, onUpdate) {
           id: process?.id,
           salesQuotationId: process?.salesQuotationId,
         };
-        onUpdate?.(submitData);
+        onUpdate?.(submitData, onClose);
         return submitData;
       } catch (error) {
         console.error("Submit error:", error);

@@ -110,15 +110,6 @@ const mergeAndDedupeOptions = (asyncOptions = [], staticOptions = []) => {
   return Array.from(uniqueOptions.values());
 };
 
-//* Props 處理工具
-/**
- * @function mergeProps
- * @description 合併各種 props
- */
-function mergeProps(field, controllerField, restProps) {
-  return { ...field, ...controllerField, ...restProps };
-}
-
 /**
  * @function filterCustomProps
  * @description 過濾自定義屬性
@@ -193,32 +184,28 @@ function renderFormItem(
       const selectOptions = loading
         ? []
         : mergeAndDedupeOptions(asyncOptions, options || []);
-
       const normalizeSelectValue = (value, options) => {
-        // 如果沒有選項，返回空字符串
+        // Early return for empty options or missing value
         if (!options?.length) return "";
-
-        // 處理空值
         if (value === undefined || value === null || value === 0) return "";
 
-        // 如果value是字符串但options是數字，嘗試轉換
-        if (typeof value === "string" && !isNaN(value)) {
-          const numValue = Number(value);
-          // 確保轉換後的數字存在於選項中
-          return options.some((opt) => opt.value === numValue) ? numValue : "";
-        }
+        // Convert value to string for consistent comparison
+        const valueStr = String(value).trim();
+        if (!valueStr) return "";
 
-        // 如果value是字符串名稱，找到對應的id
-        const matchedByLabel = options.find((opt) => opt.label === value);
-        if (matchedByLabel) return matchedByLabel.value;
-
-        // 如果value已經是id，確保存在於選項中
+        // Try to match by value first
         const matchedById = options.find(
-          (opt) => opt.value.toString() === value.toString()
+          (opt) => String(opt.value) === valueStr
         );
         if (matchedById) return matchedById.value;
 
-        // 如果都不匹配，返回空字符串
+        // Then try to match by label
+        const matchedByLabel = options.find(
+          (opt) => String(opt.label) === valueStr
+        );
+        if (matchedByLabel) return matchedByLabel.value;
+
+        // If no match found, return empty string
         return "";
       };
 

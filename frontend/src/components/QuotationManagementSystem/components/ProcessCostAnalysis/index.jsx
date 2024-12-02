@@ -36,19 +36,19 @@ export function ProcessCostAnalysis({
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
 
   // 處理製程更新
-  const handleUpdate = async (updatedProcess) => {
+  const handleUpdate = async (updatedProcess, onClose) => {
     try {
-      console.log("🔥🔥🔥🔥 ~ handleUpdate ~ updatedProcess:", updatedProcess);
       await updateProcessApi({
         quotationId: id,
         process: updatedProcess,
       }).unwrap();
       updateProcess(updatedProcess.id, updatedProcess);
-
       // 重新計算成本
       calculateAll();
     } catch (error) {
       console.error("更新製程失敗:", error);
+    } finally {
+      onClose?.();
     }
   };
 
@@ -66,7 +66,7 @@ export function ProcessCostAnalysis({
     }
   };
   // 更新運輸成本
-  const handleUpdateShippingCosts = async (updatedShippingCosts) => {
+  const handleUpdateShippingCosts = async (updatedShippingCosts, onClose) => {
     try {
       // API 呼叫
       // 未來這邊會是區分業務報價與場內 只是現在先統一用 updateShippingCosts
@@ -79,15 +79,12 @@ export function ProcessCostAnalysis({
       calculateAll();
     } catch (error) {
       console.error("更新運費失敗:", error);
+    } finally {
+      onClose?.();
     }
   };
   // 處理新增製程
   const handleAdd = async (newProcess) => {
-    console.log("🚀 ~ handleAdd ~ newProcess:", {
-      ...newProcess,
-      id,
-    });
-
     const processData = {
       ...newProcess,
       id,
@@ -98,10 +95,7 @@ export function ProcessCostAnalysis({
         quotationId: id,
         process: processData,
       }).unwrap();
-      console.log("🔥🔥🔥🔥 ~ handleAdd ~ result:", result);
-
-      return;
-      addProcess(result);
+      addProcess(processData);
       setIsNewDrawerOpen(false);
       // 重新計算成本
       calculateAll();

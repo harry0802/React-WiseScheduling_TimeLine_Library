@@ -64,7 +64,7 @@ export const useProcessForm = ({ initialData, externalMethods, visible }) => {
       ...initialData,
       ...initialData?.SQMaterialCostSetting,
       ...initialData?.SQInjectionMoldingCosts?.[0],
-      processCategory: initialData?.processOptionId || "",
+      processCategory: initialData?.processCategory || "",
       processSN: initialData?.processSN || "",
       activeTab: DEFAULT_ACTIVE_TAB,
       SQMaterialCosts: initialData?.SQMaterialCosts || [],
@@ -81,18 +81,12 @@ export const useProcessForm = ({ initialData, externalMethods, visible }) => {
     defaultValues: initialValues,
     mode: "onSubmit",
     resolver: async (data) => {
-      const category =
-        data?.processCategory ||
-        initialData?.processOptionId ||
-        initialData?.processCategory;
-
+      const category = data?.processCategory || initialData?.processCategory;
       if (!category) return { values: data, errors: {} };
-
       const resolver = getProcessResolver(category);
       return resolver(data);
     },
   });
-
   const methods = externalMethods || formInstance;
   const { watch, setValue, reset } = methods;
   const processCategory = watch("processCategory");
@@ -127,7 +121,7 @@ export const useProcessForm = ({ initialData, externalMethods, visible }) => {
   const handleProcessCategoryChange = useCallback(() => {
     if (!processCategory) return;
 
-    const isInitialCategory = processCategory === initialData?.processOptionId;
+    const isInitialCategory = processCategory === initialData?.processCategory;
     if (!isInitialCategory) {
       const allValues = methods.getValues();
       const resetValues = createResetValues(allValues, PRESERVED_FIELDS);
@@ -213,7 +207,7 @@ const handleSubtypeInitialization = ({
   const hasSubtypes = Array.isArray(subtypes) && subtypes.length > 0;
   const hasInitialSN = initialData?.processSN;
 
-  const isInitialCategory = processCategory === initialData?.processOptionId;
+  const isInitialCategory = processCategory === initialData?.processCategory;
   const isValidSN = subtypes?.some(
     (opt) => opt.processSN === initialData?.processSN
   );

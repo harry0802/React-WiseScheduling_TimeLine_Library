@@ -8,51 +8,53 @@
  */
 
 import { z } from "zod";
-import { baseSchemas, fieldSchemas } from "../schema/processFormValidation";
+import {
+  baseSchemas,
+  fieldSchemas,
+  nullableNumber,
+} from "../schema/processFormValidation";
 import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
 
 //! =============== 1. 設定與常量 ===============
+
 //* 基礎必填欄位定義，用於所有製程類型
 const baseRequiredFields = {
-  processCategory: z
-    .number({
-      required_error: "製程類型為必填",
-      invalid_type_error: "製程類型為必填",
-    })
-    .min(1, "製程類型為必填"),
-  processSN: z
-    .string({ required_error: "製程名稱為必填" })
-    .min(1, "製程名稱為必填")
-    .or(z.number({ required_error: "製程名稱為必填" })),
-  activeTab: z.number().optional(),
+  id: nullableNumber,
+  salesQuotationId: nullableNumber,
+  processOptionId: nullableNumber,
+  processCategory: z.union([
+    z
+      .number({
+        required_error: "製程類型為必填",
+        invalid_type_error: "製程類型為必填",
+      })
+      .min(1, "製程類型為必填"),
+    z.string(),
+  ]),
+  processSN: z.union([
+    z.string().min(1, "製程序號為必填"),
+    z.number().min(0, "製程序號為必填"),
+  ]),
+  processName: z.string().optional(),
 };
 
 //! =============== 2. 類型與介面 ===============
 //* 共用欄位定義
 const commonFields = {
-  //* 基本機台資訊
-  machineInfo: {
-    machineId: z
-      .number({
-        required_error: "請選擇機台區域",
-        invalid_type_error: "請選擇機台區域",
-      })
-      .min(1, "請選擇機台區域"),
-    machineSN: z
-      .string({ required_error: "請選擇機台編號" })
-      .min(1, "請選擇機台編號"),
-  },
-
   //* 材料成本設置
   materialCostSetting: {
+    id: nullableNumber,
     estimatedDefectRate: baseSchemas.percentage,
     estimatedMaterialFluctuation: baseSchemas.percentage,
     extractionCost: baseSchemas.requiredNumber,
     processingCost: baseSchemas.requiredNumber,
   },
 
+  //* 基本機台資訊
   //* 成型加工費用
   injectionMoldingCost: {
+    id: nullableNumber,
+    SQProcessId: nullableNumber,
     machineId: z
       .number({
         required_error: "請選擇機台區域",
@@ -65,6 +67,11 @@ const commonFields = {
     cycleTime: baseSchemas.requiredNumber,
     packageTime: baseSchemas.requiredNumber,
     moldCavity: baseSchemas.positiveInteger,
+    unitPrice: nullableNumber,
+    amount: nullableNumber,
+    subtotal: nullableNumber,
+    electricityCostPerSec: nullableNumber,
+    electricityCost: nullableNumber,
   },
 };
 
@@ -88,77 +95,63 @@ const createArraySchemaWithStringFallback = (schema) =>
  * @returns {Object} 對應的欄位驗證規則
  */
 const getProcessFields = (processCategory) => {
-  //* ========= 製程類型對應邏輯 =========
-  // 1. 每個 case 對應一種製程類型
-  // 2. 根據不同類型組合不同的驗證規則
-  // 3. 使用擴展運算符合併共用欄位
-  switch (processCategory) {
-    case PROCESS_CATEGORY_OPTION[0].category: // 廠內成型製程
-      return {
-        SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-        SQInjectionMoldingCosts: createArraySchemaWithStringFallback(
-          z.object(commonFields.injectionMoldingCost)
-        ),
-        SQMaterialCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.materialCost
-        ),
-        SQPackagingCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.packagingCost
-        ),
-      };
-
-    case PROCESS_CATEGORY_OPTION[1].category: // 委外成型製程
-      return {
-        SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-        SQMaterialCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.materialCost
-        ),
-        SQPackagingCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.packagingCost
-        ),
-        SQOutPostProcessingCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.outsourcedProcessingCost
-        ),
-      };
-
-    case PROCESS_CATEGORY_OPTION[2].category: // 廠內後製程
-      return {
-        SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-        SQMaterialCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.materialCost
-        ),
-        SQPackagingCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.packagingCost
-        ),
-        SQInPostProcessingCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.internalProcessingCost
-        ),
-      };
-
-    case PROCESS_CATEGORY_OPTION[3].category: // 委外後製程
-      return {
-        SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-        SQMaterialCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.materialCost
-        ),
-        SQPackagingCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.packagingCost
-        ),
-        SQOutPostProcessingCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.outsourcedProcessingCost
-        ),
-      };
-
-    case PROCESS_CATEGORY_OPTION[4].category: // 廠內出貨檢驗
-      return {
-        SQInPostProcessingCosts: createArraySchemaWithStringFallback(
-          fieldSchemas.internalProcessingCost
-        ),
-      };
-
-    default:
-      return commonFields;
-  }
+  const categoryMap = {
+    [PROCESS_CATEGORY_OPTION[0].category]: {
+      SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+      SQInjectionMoldingCosts: createArraySchemaWithStringFallback(
+        z.object(commonFields.injectionMoldingCost)
+      ),
+      SQMaterialCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.materialCost
+      ),
+      SQPackagingCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.packagingCost
+      ),
+    },
+    [PROCESS_CATEGORY_OPTION[1].category]: {
+      SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+      SQMaterialCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.materialCost
+      ),
+      SQPackagingCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.packagingCost
+      ),
+      SQOutPostProcessingCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.outsourcedProcessingCost
+      ),
+    },
+    [PROCESS_CATEGORY_OPTION[2].category]: {
+      SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+      SQMaterialCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.materialCost
+      ),
+      SQPackagingCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.packagingCost
+      ),
+      SQInPostProcessingCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.internalProcessingCost
+      ),
+    },
+    [PROCESS_CATEGORY_OPTION[3].category]: {
+      SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+      SQMaterialCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.materialCost
+      ),
+      SQPackagingCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.packagingCost
+      ),
+      SQOutPostProcessingCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.outsourcedProcessingCost
+      ),
+    },
+    [PROCESS_CATEGORY_OPTION[4].category]: {
+      SQInPostProcessingCosts: createArraySchemaWithStringFallback(
+        fieldSchemas.internalProcessingCost
+      ),
+    },
+  };
+  console.log(processCategory);
+  return categoryMap[processCategory] || {};
 };
 
 /**
@@ -218,31 +211,31 @@ const validateWithSchema = async (schema, values) => {
  */
 export const getProcessResolver = (processCategory) => {
   if (!processCategory) {
-    return () => ({
+    return async () => ({
       values: {},
       errors: {
-        type: "validation",
-        message: "製程類型為必填",
+        processCategory: {
+          type: "validation",
+          message: "製程類型為必填",
+        },
       },
     });
   }
-
-  let processCategoryOption;
-  if (typeof processCategory === "number")
-    processCategoryOption =
-      PROCESS_CATEGORY_OPTION[processCategory - 1].category;
-  else processCategoryOption = processCategory;
+  console.log("🚀 ~ getProcessResolver ~ processCategory:", processCategory);
 
   return async (values) => {
     try {
-      const schema = createDynamicSchema(processCategoryOption);
-      return validateWithSchema(schema, values);
+      console.log("🚀 ~ return ~ values:", values);
+      const schema = createDynamicSchema(processCategory);
+      const result = await validateWithSchema(schema, values);
+      console.log("🚀 ~ return ~ result:", result);
+      return result;
     } catch (error) {
       console.error("Validation error:", error);
       return {
         values: {},
         errors: {
-          processCategoryOption: {
+          processCategory: {
             type: "validation",
             message: "驗證過程發生錯誤",
           },

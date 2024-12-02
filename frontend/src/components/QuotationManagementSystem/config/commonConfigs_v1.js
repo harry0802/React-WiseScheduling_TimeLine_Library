@@ -17,6 +17,7 @@ const API_ENDPOINTS = {
   MATERIAL_PACKAGINGS: `${API_BASE_URL}/material/packagings`,
   MATERIAL_MATERIALS: `${API_BASE_URL}/material/materials`,
   MATERIAL_MATERIALUNITPRICE: `${API_BASE_URL}/material/materialUnitPrice`,
+  MATERIAL_OPTION: `${API_BASE_URL}/materialOption`,
 };
 
 //! =============== 2. 類型與介面 ===============
@@ -138,6 +139,26 @@ export const optionsService = {
       throw error;
     }
   },
+
+  /**
+   * @function getMaterialOptions
+   * @description 獲取物料選項
+   * @returns {Promise<OptionItem[]>} 物料選項列表
+   */
+  getMaterialOptions: async () => {
+    try {
+      const response = await fetch(API_ENDPOINTS.MATERIAL_OPTION);
+      const data = await response.json();
+      return data?.data?.map((item) => ({
+        id: item.id,
+        value: item.id,
+        label: item.materialType,
+      }));
+    } catch (error) {
+      console.error("獲取物料選項失敗:", error);
+      throw error;
+    }
+  },
 };
 
 //* ========= 工廠函數 Factory Functions =========
@@ -159,6 +180,7 @@ const createMaterialScope = () => {
           label: item.materialName,
           materialSN: item.materialSN,
           unitPrice: item.unitPrice,
+          materialOptionId: item.materialOptionId,
         }));
       }
       return materialOptions;
@@ -179,6 +201,7 @@ const createMaterialScope = () => {
         materialSN: currentMaterial.materialSN,
         unit: currentMaterial.unit,
         unitPrice: unitPrice,
+        materialOptionId: currentMaterial.materialOptionId,
       };
     },
 
@@ -351,6 +374,7 @@ const materialCostFields = {
           materialName: materialName.label,
           materialSN: material.materialSN,
           unitPrice: material.unitPrice,
+          materialOptionId: material.materialOptionId,
         };
       }
       return null;
@@ -368,6 +392,16 @@ const materialCostFields = {
       createRequiredRule("物料編號")
     ),
   },
+  materialOptionId: createField(
+    "materialOptionId",
+    "原物料種類",
+    "select",
+    { placeholder: "請選擇原物料種類" },
+    createRequiredRule("原物料種類"),
+    null,
+    3,
+    optionsService.getMaterialOptions
+  ),
   unit: createField(
     "unit",
     "單位",
@@ -399,20 +433,6 @@ const materialCostFields = {
     },
     createRequiredRule("單價")
   ),
-  materialOptionId: createField(
-    "materialOptionId",
-    "物料選項ID",
-    "input",
-    {
-      placeholder: "物料選項ID將自動填入",
-      readOnly: true,
-    },
-    {},
-    null,
-    null,
-    null,
-    true // hidden 設為 true
-  ),
 };
 
 //* 包裝成本字段
@@ -439,6 +459,7 @@ const packagingCostFields = {
           materialName: packagingName.label,
           materialSN: packaging.packagingSN || "",
           unitPrice: packaging.unitPrice,
+          packagingType: "包材",
         };
       }
       return null;
@@ -460,12 +481,17 @@ const packagingCostFields = {
   packagingType: createField(
     "packagingType",
     "包材類型",
-    "select",
-    { placeholder: "請選擇包材類型" },
-    createRequiredRule("包材類型"),
+    "input",
+    {
+      placeholder: "請選擇包材類型",
+      readOnly: true,
+    },
+    {
+      ...createRequiredRule("包材類型"),
+    },
     null,
     3,
-    optionsService.getPackagingTypes
+    null
   ),
   unit: createField(
     "unit",
@@ -478,7 +504,7 @@ const packagingCostFields = {
     createRequiredRule("單位"),
     null,
     3,
-    optionsService.getCommonUnits
+    optionsService.getPackagingTypes
   ),
   quantity: createField(
     "quantity",
@@ -486,6 +512,19 @@ const packagingCostFields = {
     "number",
     createInputProps("個", "數量"),
     createRequiredRule("數量")
+  ),
+  capacity: createField(
+    "capacity",
+    "容量",
+    "number",
+    createInputProps("件/箱", "容量"),
+    createRequiredRule("容量")
+  ),
+  bagsPerKg: createField(
+    "bagsPerKg",
+    "每公斤袋數",
+    "number",
+    createInputProps("袋/公斤", "每公斤袋數")
   ),
   unitPrice: {
     ...createField(

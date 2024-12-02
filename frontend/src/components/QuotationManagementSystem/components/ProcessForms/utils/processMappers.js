@@ -4,7 +4,7 @@ export const processMappers = {
   processTypes: {
     toOptions: (data) => {
       return data?.map(({ id, processName, processCategory, category }) => ({
-        value: id, // 保持 value 為 id
+        value: category, // 保持 value 為 id
         label: category,
         // 保存額外資料
         processCategory: category,
