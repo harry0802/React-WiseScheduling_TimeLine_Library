@@ -63,18 +63,12 @@ class materialDto:
         }
     )
 
-    # Control models
-    control_input = api.model(
-        "Control input",
-        {
-            "command": fields.String(required=True)
-        }
-    )
-
-    control_resp = api.model(
-        "Control response",
+        
+    unitPrice_resp = api.model(
+        "material unit price response",
         {
             "status": fields.Boolean,
             "message": fields.String,
+            "data": fields.Integer,
         }
     )

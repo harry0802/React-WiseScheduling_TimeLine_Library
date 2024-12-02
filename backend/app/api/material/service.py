@@ -58,9 +58,9 @@ class materialService:
             _type_: _description_
         """
         try:
-            # Get distinct material names and its material number
             query = Material.query
-            query = query.with_entities(Material.materialSN, Material.materialName).distinct()
+            query = query.with_entities(Material.materialSN, Material.materialName, MaterialOption.id.label('materialOptionId'), MaterialOption.materialType).distinct()
+            query = query.join(MaterialOption, Material.materialOptionId == MaterialOption.id, isouter = True) # left outer join
             query = query.filter(or_(Material.materialSN != None, Material.materialSN != ""))
             material_db_list = query.all()
 
@@ -86,7 +86,7 @@ class materialService:
         try:
             # Get distinct material names and its material number which material type is packaging
             query = Material.query
-            query = query.with_entities(Material.materialSN, Material.materialName).distinct()
+            query = query.with_entities(Material.materialSN, Material.materialName, MaterialOption.id.label('materialOptionId'), MaterialOption.materialType).distinct()
             query = query.join(MaterialOption, Material.materialOptionId == MaterialOption.id, isouter = True) # left outer join
             query = query.filter(or_(Material.materialSN != None, Material.materialSN != ""))
             query = query.filter(MaterialOption.materialType == '包材')

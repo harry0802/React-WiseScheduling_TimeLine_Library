@@ -58,7 +58,7 @@ class MaterialController(Resource):
     material_put = materialDto.material_put
 
     # GET
-    @api.doc(description="取得所有不重複的物料名稱、物料編號")
+    @api.doc(description="取得所有不重複的物料類別ID、物料類別、物料名稱、物料編號")
     @api.doc(
         "Get distinct materials",
         responses={
@@ -77,7 +77,7 @@ class MaterialPackagingController(Resource):
     material_put = materialDto.material_put
 
     # GET
-    @api.doc(description="取得所有不重複的，屬於包材類別的物料名稱、物料編號")
+    @api.doc(description="取得所有不重複的，屬於包材類別的物料類別ID、物料類別、物料名稱、物料編號")
     @api.doc(
         "Get distinct packagings",
         responses={
@@ -92,6 +92,7 @@ class MaterialPackagingController(Resource):
 @api.route("/materialUnitPrice")
 class MaterialController(Resource):
     material_resp = materialDto.material_resp
+    unitPrice_resp = materialDto.unitPrice_resp
     material_put = materialDto.material_put
 
     # GET
@@ -99,7 +100,7 @@ class MaterialController(Resource):
     @api.doc(
         "Get material unit price",
         responses={
-            200: ("material data successfully sent", material_resp),
+            200: ("material data successfully sent", unitPrice_resp),
             404: "material not found",
         },
     )
