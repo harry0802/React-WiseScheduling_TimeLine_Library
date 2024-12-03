@@ -650,13 +650,6 @@ const freightFields = {
     { placeholder: "請輸入預估出貨量" },
     createRequiredRule("預估出貨量")
   ),
-  amount: createField(
-    "amount",
-    "金額",
-    "number",
-    createInputProps("元", "金額"),
-    createRequiredRule("金額")
-  ),
 };
 
 const customsDutyFields = {
@@ -685,13 +678,6 @@ const customsDutyFields = {
     "number",
     { placeholder: "請輸入預估出貨量" },
     createRequiredRule("預估出貨量")
-  ),
-  amount: createField(
-    "amount",
-    "金額",
-    "number",
-    createInputProps("元", "金額"),
-    createRequiredRule("金額")
   ),
 };
 

@@ -1,9 +1,10 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SharedCard from "../../Global/card/ProductCard";
 import { useSalesHomeSlice, useFactoryHomeSlice } from "../slice/qmsHome";
 import PmHomeContent from "../../Global/content/PmHomeContent";
 import { useDeleteQuotationMutation } from "../services/salesServices/endpoints/quotationApi";
+import ConfirmationDialog from "../../Global/dialog/BaseDialog";
 
 // 抽離卡片組件，避免不必要的重渲染
 const Card = memo(function Card({ data, onCardClick, onDelete }) {
@@ -22,6 +23,14 @@ const Card = memo(function Card({ data, onCardClick, onDelete }) {
 function QmsHome() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [dialogConfig, setDialogConfig] = useState({
+    title: "",
+    message: "",
+    confirmText: "",
+    cancelText: "",
+  });
 
   // 使用 useMemo 記憶 slice hook 的選擇
   const sliceHook = useMemo(
@@ -58,36 +67,51 @@ function QmsHome() {
 
   const handleDelete = useCallback(
     async (id) => {
-      try {
-        const response = await deleteQuotation(id);
-
-        // 檢查響應內容
-        if (response.error) {
-          // RTK Query 錯誤處理
-          const errorMessage =
-            response.error.data?.message || "刪除報價單時發生錯誤";
-          throw new Error(errorMessage);
+      setPendingAction(() => async () => {
+        try {
+          const response = await deleteQuotation(id);
+          if (response.error) {
+            const errorMessage =
+              response.error.data?.message || "刪除報價單時發生錯誤";
+            throw new Error(errorMessage);
+          }
+          return {
+            success: true,
+            message: "報價單刪除成功",
+          };
+        } catch (error) {
+          console.error("💣💣💣 刪除報價單失敗:", error.message);
+          return {
+            success: false,
+            error: {
+              message: error.message,
+              details: error.data,
+            },
+          };
         }
-
-        // 成功處理
-        return {
-          success: true,
-          message: "報價單刪除成功",
-        };
-      } catch (error) {
-        // 統一錯誤處理
-        console.error("💣💣💣 刪除報價單失敗:", error.message);
-        return {
-          success: false,
-          error: {
-            message: error.message,
-            details: error.data,
-          },
-        };
-      }
+      });
+      setDialogConfig({
+        title: "確認刪除",
+        message: "你確定要刪除這個報價單嗎？此操作無法撤銷。",
+        confirmText: "確認刪除",
+        cancelText: "取消",
+      });
+      setConfirmOpen(true);
     },
     [deleteQuotation]
   );
+
+  const handleConfirm = async () => {
+    if (pendingAction) {
+      try {
+        await pendingAction();
+      } catch (error) {
+        console.error("Action error:", error);
+      }
+    }
+    setConfirmOpen(false);
+  };
+
   // 使用 useMemo 優化渲染列表
   const cardList = useMemo(() => {
     if (!Array.isArray(displayedData)) return null;
@@ -136,6 +160,12 @@ function QmsHome() {
           setPageSize={setPageSize}
         />
       )}
+      <ConfirmationDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        {...dialogConfig}
+      />
     </PmHomeContent>
   );
 }
