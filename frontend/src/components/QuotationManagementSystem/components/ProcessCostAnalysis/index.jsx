@@ -9,6 +9,7 @@ import {
   useDeleteProcessMutation,
   useUpdateProcessMutation,
 } from "../../services/salesServices/endpoints/processApi";
+import ConfirmationDialog from "../../../Global/dialog/BaseDialog";
 
 export function ProcessCostAnalysis({
   title = "各製程物料與加工成本分析",
@@ -34,55 +35,85 @@ export function ProcessCostAnalysis({
   const [deleteProcess] = useDeleteProcessMutation();
   const [updateProcessApi] = useUpdateProcessMutation();
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [dialogConfig, setDialogConfig] = useState({
+    title: "",
+    message: "",
+    confirmText: "",
+    cancelText: "",
+  });
 
   // 處理製程更新
   const handleUpdate = async (updatedProcess, onClose) => {
-    try {
-      await updateProcessApi({
-        quotationId: id,
-        process: updatedProcess,
-      }).unwrap();
-      updateProcess(updatedProcess.id, updatedProcess);
-      // 重新計算成本
-      calculateAll();
-    } catch (error) {
-      console.error("更新製程失敗:", error);
-    } finally {
-      onClose?.();
-    }
+    setPendingAction(() => async () => {
+      try {
+        await updateProcessApi({
+          quotationId: id,
+          process: updatedProcess,
+        }).unwrap();
+        updateProcess(updatedProcess.id, updatedProcess);
+        calculateAll();
+        onClose?.();
+      } catch (error) {
+        console.error("更新製程失敗:", error);
+      }
+    });
+    setDialogConfig({
+      title: "確認更新",
+      message: "你確定要更新這個製程嗎？",
+      confirmText: "確認更新",
+      cancelText: "取消",
+    });
+    setConfirmOpen(true);
   };
 
   // 處理製程刪除
   const handleDelete = async (processId) => {
-    try {
-      await deleteProcess({ quotationId: id, processId }).unwrap();
-      removeProcess(processId);
-      // 重新計算成本
-      calculateAll();
-    } catch (error) {
-      console.error("刪除製程失敗:", error);
-    } finally {
-      setIsNewDrawerOpen(false);
-    }
+    setPendingAction(() => async () => {
+      try {
+        await deleteProcess({ quotationId: id, processId }).unwrap();
+        removeProcess(processId);
+        calculateAll();
+      } catch (error) {
+        console.error("刪除製程失敗:", error);
+      } finally {
+        setIsNewDrawerOpen(false);
+      }
+    });
+    setDialogConfig({
+      title: "確認刪除",
+      message: "你確定要刪除這個製程嗎？此操作無法撤銷。",
+      confirmText: "確認刪除",
+      cancelText: "取消",
+    });
+    setConfirmOpen(true);
   };
+
   // 更新運輸成本
   const handleUpdateShippingCosts = async (updatedShippingCosts, onClose) => {
-    try {
-      // API 呼叫
-      // 未來這邊會是區分業務報價與場內 只是現在先統一用 updateShippingCosts
-      await (type === "sales" ? updateShipping : updateShippingCosts)({
-        quotationId: id,
-        shipping: updatedShippingCosts,
-      }).unwrap();
-      // 本地狀態更新
-      updateShippingCosts(updatedShippingCosts);
-      calculateAll();
-    } catch (error) {
-      console.error("更新運費失敗:", error);
-    } finally {
-      onClose?.();
-    }
+    setPendingAction(() => async () => {
+      try {
+        await (type === "sales" ? updateShipping : updateShippingCosts)({
+          quotationId: id,
+          shipping: updatedShippingCosts,
+        }).unwrap();
+        updateShippingCosts(updatedShippingCosts);
+        calculateAll();
+        onClose?.();
+      } catch (error) {
+        console.error("更新運費失敗:", error);
+      }
+    });
+    setDialogConfig({
+      title: "確認更新運輸成本",
+      message: "你確定要更新運輸成本嗎？",
+      confirmText: "確認更新",
+      cancelText: "取消",
+    });
+    setConfirmOpen(true);
   };
+
   // 處理新增製程
   const handleAdd = async (newProcess) => {
     const processData = {
@@ -90,20 +121,38 @@ export function ProcessCostAnalysis({
       id,
     };
 
-    try {
-      const result = await createProcess({
-        quotationId: id,
-        process: processData,
-      }).unwrap();
-      addProcess(processData);
-      setIsNewDrawerOpen(false);
-      // 重新計算成本
-      calculateAll();
-    } catch (error) {
-      console.error("新增製程失敗:", error);
-    } finally {
-      setIsNewDrawerOpen(false);
+    setPendingAction(() => async () => {
+      try {
+        await createProcess({
+          quotationId: id,
+          process: processData,
+        }).unwrap();
+        addProcess(processData);
+        calculateAll();
+      } catch (error) {
+        console.error("新增製程失敗:", error);
+      } finally {
+        setIsNewDrawerOpen(false);
+      }
+    });
+    setDialogConfig({
+      title: "確認新增",
+      message: "你確定要新增這個製程嗎？",
+      confirmText: "確認新增",
+      cancelText: "取消",
+    });
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    if (pendingAction) {
+      try {
+        await pendingAction();
+      } catch (error) {
+        console.error("Action error:", error);
+      }
     }
+    setConfirmOpen(false);
   };
 
   // 計算各製程成本詳情
@@ -140,6 +189,13 @@ export function ProcessCostAnalysis({
           onUpdate={handleAdd}
         />
       )}
+
+      <ConfirmationDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        {...dialogConfig}
+      />
     </ProductContextCard>
   );
 }

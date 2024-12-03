@@ -3,10 +3,13 @@ import { Tab, Tabs } from "@mui/material";
 import DynamicForm from "../../../Global/form/DynamicForm";
 import CustomTodoList from "../CustomTodoList";
 import { FORM_CONFIGURATIONS } from "../../config/processTypes_v1";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { validateTransportationForm } from "../../utility/formValidationUtils";
+import ConfirmationDialog from "../../../Global/dialog/BaseDialog";
 
 function TransportationForm({ initialData, onSubmit, setFormMethods }) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [formData, setFormData] = useState(null);
   const methods = useForm({
     defaultValues: {
       processType: "TRANSPORTATION",
@@ -29,35 +32,60 @@ function TransportationForm({ initialData, onSubmit, setFormMethods }) {
     setValue("activeTab", newValue);
   };
 
-  return (
-    <DynamicForm externalMethods={methods} onFinish={onSubmit}>
-      <Tabs
-        value={activeTab}
-        onChange={handleTabChange}
-        variant="scrollable"
-        scrollButtons="auto"
-      >
-        {sections.map((section) => (
-          <Tab key={section.title} label={section.title} />
-        ))}
-      </Tabs>
+  const handleFormSubmit = (data) => {
+    setFormData(data);
+    setConfirmOpen(true);
+    return false; // 阻止表單默認提交
+  };
 
-      {sections.map(
-        (section, index) =>
-          activeTab === index && (
-            <CustomTodoList
-              key={section.title}
-              name={
-                section.title === "運輸費用" ? "SQFreights" : "SQCustomsDuties"
-              }
-              fields={section.items}
-              renderField={(fieldProps) => (
-                <DynamicForm.Field {...fieldProps} />
-              )}
-            />
-          )
-      )}
-    </DynamicForm>
+  const handleConfirm = () => {
+    if (formData) {
+      console.log("Confirmed form data:", formData);
+      onSubmit(formData);
+    }
+    setConfirmOpen(false);
+  };
+
+  return (
+    <>
+      <DynamicForm externalMethods={methods} onFinish={handleFormSubmit}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          {sections.map((section) => (
+            <Tab key={section.title} label={section.title} />
+          ))}
+        </Tabs>
+
+        {sections.map(
+          (section, index) =>
+            activeTab === index && (
+              <CustomTodoList
+                key={section.title}
+                name={
+                  section.title === "運輸費用"
+                    ? "SQFreights"
+                    : "SQCustomsDuties"
+                }
+                fields={section.items}
+                renderField={(fieldProps) => (
+                  <DynamicForm.Field {...fieldProps} />
+                )}
+              />
+            )
+        )}
+      </DynamicForm>
+      <ConfirmationDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        title="確認操作"
+        message="你確定要提交這些更改嗎？"
+      />
+    </>
   );
 }
 

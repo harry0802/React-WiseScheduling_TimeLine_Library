@@ -3,25 +3,33 @@ import BaseDrawer from "../../../Global/Drawer/BaseDrawer";
 import BaseAccordion from "../../../Global/accordion/BaseAccordion";
 import ProcessTable from "../ProcessTables";
 import TransportationForm from "./TransportationForm";
+import ConfirmationDialog from "../../../Global/dialog/BaseDialog";
 
 function TransportationProcessItem({ process, onUpdate, costDetail }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formMethods, setFormMethods] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingData, setPendingData] = useState(null);
 
   const handleSubmit = async (formData) => {
-    try {
-      await onUpdate?.({
-        SQFreights: formData.SQFreights,
-        SQCustomsDuties: formData.SQCustomsDuties,
-      });
+    setPendingData(formData);
+    setConfirmOpen(true);
+  };
 
-      return formData;
-    } catch (error) {
-      console.error("Submit error:", error);
-      throw error;
-    } finally {
-      setIsDrawerOpen(false);
+  const handleConfirm = async () => {
+    if (pendingData) {
+      try {
+        await onUpdate?.({
+          SQFreights: pendingData.SQFreights,
+          SQCustomsDuties: pendingData.SQCustomsDuties,
+        });
+        setIsDrawerOpen(false);
+      } catch (error) {
+        console.error("Submit error:", error);
+        throw error;
+      }
     }
+    setConfirmOpen(false);
   };
 
   return (
@@ -47,9 +55,17 @@ function TransportationProcessItem({ process, onUpdate, costDetail }) {
           />
         </BaseDrawer.Body>
         <BaseDrawer.Footer
-          onSubmit={formMethods ? formMethods.handleSubmit(handleSubmit) : null}
+          onSubmit={() => formMethods?.handleSubmit(handleSubmit)()}
         />
       </BaseDrawer>
+
+      <ConfirmationDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        title="確認操作"
+        message="你確定要提交這些更改嗎？"
+      />
     </>
   );
 }

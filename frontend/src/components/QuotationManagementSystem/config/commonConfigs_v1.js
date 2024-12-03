@@ -362,6 +362,7 @@ const materialCostFields = {
       "autocomplete",
       {
         placeholder: "請選擇物料名稱",
+        freeSolo: true,
       },
       createRequiredRule("物料名稱")
     ),
@@ -445,6 +446,7 @@ const packagingCostFields = {
       "autocomplete",
       {
         placeholder: "請選擇包材名稱",
+        freeSolo: true,
       },
       createRequiredRule("包材名稱")
     ),

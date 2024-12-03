@@ -21,7 +21,7 @@ import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
 const baseRequiredFields = {
   id: nullableNumber,
   salesQuotationId: nullableNumber,
-  processOptionId: nullableNumber,
+  processOptionId: z.any(),
   processCategory: z.union([
     z
       .number({
@@ -67,8 +67,8 @@ const commonFields = {
     cycleTime: baseSchemas.requiredNumber.min(0.01, "週期時間不能為0"),
     packageTime: baseSchemas.requiredNumber.min(0, "包裝時間不能小於0"),
     moldCavity: baseSchemas.positiveInteger.min(1, "模具穴數至少為1"),
-    unitPrice: baseSchemas.requiredNumber.min(0.01, "單價不能為0"),
-    amount: baseSchemas.requiredNumber.min(0, "金額不能小於0"),
+    unitPrice: nullableNumber,
+    amount: nullableNumber,
     subtotal: nullableNumber,
     electricityCostPerSec: nullableNumber,
     electricityCost: nullableNumber,
@@ -105,9 +105,10 @@ const getProcessFields = (processCategory) => {
   const categoryMap = {
     [PROCESS_CATEGORY_OPTION[0].category]: {
       SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-      SQInjectionMoldingCosts: createArraySchemaWithStringFallback(
-        z.object(commonFields.injectionMoldingCost)
-      ),
+      SQInjectionMoldingCosts: z
+        .array(z.object(commonFields.injectionMoldingCost))
+        .min(1, "至少需要一筆注射成型費用資料")
+        .nonempty("注射成型費用不能為空"),
       SQMaterialCosts: createArraySchemaWithStringFallback(
         fieldSchemas.materialCost
       ),
@@ -190,18 +191,34 @@ const validateWithSchema = async (schema, values) => {
     if (!(error instanceof z.ZodError)) {
       throw error;
     }
-    return {
-      values: {},
-      errors: error.errors.reduce(
-        (acc, curr) => ({
+
+    // 改进错误处理，确保数组验证错误也能被捕获
+    const errors = error.errors.reduce((acc, curr) => {
+      // 处理数组验证错误
+      if (curr.path.length === 1 && Array.isArray(values[curr.path[0]])) {
+        return {
           ...acc,
-          [curr.path.join(".")]: {
+          [curr.path[0]]: {
             type: "validation",
             message: curr.message,
+            root: true, // 标记为根级错误
           },
-        }),
-        {}
-      ),
+        };
+      }
+
+      // 处理其他错误
+      return {
+        ...acc,
+        [curr.path.join(".")]: {
+          type: "validation",
+          message: curr.message,
+        },
+      };
+    }, {});
+
+    return {
+      values: {},
+      errors,
     };
   }
 };

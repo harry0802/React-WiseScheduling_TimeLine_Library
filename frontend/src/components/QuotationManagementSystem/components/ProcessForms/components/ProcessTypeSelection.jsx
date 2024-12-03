@@ -8,7 +8,7 @@ function ProcessTypeSelection({ fields, isNew = false }) {
           key={field.name}
           field={{
             ...field,
-            disabled: !isNew && field.name === "processCategory",
+            disabled: !isNew && field.name,
           }}
         />
       ))}
