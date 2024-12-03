@@ -15,9 +15,7 @@ const HomeContent = styled.div`
   gap: 1.25rem;
 `;
 
-function PmHomeContent({ children, setPageStatus, pageTitle, className }) {
-  // useEffectOnce(() => setPageStatus(pageTitle));
-
+function PmHomeContent({ children, className }) {
   return <HomeWrapper className={className}>{children}</HomeWrapper>;
 }
 

@@ -116,12 +116,7 @@ export const transformOutsourcePostProcessData = (data) => {
   // 清理包裝成本數組數據
   const packagingCosts = data.SQPackagingCosts.map((item) => ({
     ...item,
-    // id: item.id || index + 1,
-    // materialName: item.materialName,
-    // materialSN: item.materialSN,
-    // packagingType: item.packagingType,
-    // unit: item.unit,
-    // quantity: item.quantity,
+
     unitPrice: item.unitPrice || 0,
     amount: item.amount,
   }));

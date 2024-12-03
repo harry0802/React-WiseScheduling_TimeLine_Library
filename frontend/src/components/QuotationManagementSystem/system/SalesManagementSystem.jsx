@@ -47,7 +47,12 @@ function SalesManagementSystem() {
   //* ========= 1. Hooks 初始化 =========
   const location = useLocation();
   const navigate = useNavigate();
-  const { pageStatus, setAPIData } = useSalesHomeSlice();
+  const {
+    pageStatus,
+    setAPIData,
+    data: homeData,
+    searchData,
+  } = useSalesHomeSlice();
 
   //* ========= 2. API Hooks =========
   const { data, isSuccess, refetch } = useGetQuotationsQuery();
@@ -77,6 +82,11 @@ function SalesManagementSystem() {
     }
   };
 
+  function handleSearch(search, type) {
+    if (!homeData) return;
+    searchData(search, type);
+  }
+
   //* ========= 4. 副作用處理 =========
   // 路由變化時重新獲取數據
   useEffect(() => {
@@ -94,7 +104,13 @@ function SalesManagementSystem() {
   const routes = [
     {
       path: ROUTES.BASE_PATH,
-      Action: <QmsActions onCreate={handleCreate} isLoading={isCreating} />,
+      Action: (
+        <QmsActions
+          onCreate={handleCreate}
+          isLoading={isCreating}
+          onSearch={handleSearch}
+        />
+      ),
     },
   ];
 

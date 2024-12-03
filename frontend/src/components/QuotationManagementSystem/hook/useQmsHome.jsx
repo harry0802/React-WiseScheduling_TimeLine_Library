@@ -6,7 +6,7 @@ export const initialState = {
   data: [],
   displayedData: [],
   currentPage: 1,
-  itemsPerPage: 10,
+  itemsPerPage: 12,
   total: 0,
   filteredData: null,
   isLoading: false,
@@ -227,7 +227,7 @@ export const createHomeActions = (set, get) => ({
       () =>
         set({
           currentPage: 1,
-          itemsPerPage: 10,
+          itemsPerPage: 12,
         }),
       set
     ),

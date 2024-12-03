@@ -91,6 +91,7 @@ export const SalesQmsMaintain = lazyImport(() =>
 );
 
 // FactoryQuotationManagementSystem
+
 export const FactoryQuotationManagementSystem = lazyImport(() =>
   import("../pages/FactoryQuotationManagementSystemPage")
 );

@@ -62,13 +62,13 @@ const commonFields = {
       })
       .min(1, "請選擇機台區域"),
     machineSN: z.string().min(1, "請選擇機台編號"),
-    workHoursRatio: baseSchemas.percentage,
-    defectiveRate: baseSchemas.percentage,
-    cycleTime: baseSchemas.requiredNumber,
-    packageTime: baseSchemas.requiredNumber,
-    moldCavity: baseSchemas.positiveInteger,
-    unitPrice: nullableNumber,
-    amount: nullableNumber,
+    workHoursRatio: baseSchemas.percentage.min(0.01, "工時比例不能為0"),
+    defectiveRate: baseSchemas.percentage.min(0, "不良率不能小於0"),
+    cycleTime: baseSchemas.requiredNumber.min(0.01, "週期時間不能為0"),
+    packageTime: baseSchemas.requiredNumber.min(0, "包裝時間不能小於0"),
+    moldCavity: baseSchemas.positiveInteger.min(1, "模具穴數至少為1"),
+    unitPrice: baseSchemas.requiredNumber.min(0.01, "單價不能為0"),
+    amount: baseSchemas.requiredNumber.min(0, "金額不能小於0"),
     subtotal: nullableNumber,
     electricityCostPerSec: nullableNumber,
     electricityCost: nullableNumber,
@@ -84,7 +84,14 @@ const commonFields = {
  */
 const createArraySchemaWithStringFallback = (schema) =>
   z.preprocess((val) => {
-    if (!val || val === "") return [];
+    if (
+      !val ||
+      val === "" ||
+      (Array.isArray(val) &&
+        val.every((item) => Object.keys(item).length === 0))
+    ) {
+      return [];
+    }
     return Array.isArray(val) ? val : [];
   }, z.array(schema).optional());
 
