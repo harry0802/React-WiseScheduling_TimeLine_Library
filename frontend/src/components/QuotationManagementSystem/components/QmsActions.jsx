@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 // UI Icon
 import AddIcon from "@mui/icons-material/Add";
@@ -10,15 +9,12 @@ import { useSalesHomeSlice } from "../slice/qmsHome.jsx";
 
 const options = [
   { label: "產品名稱", value: "productName" },
-  { label: "產品編號", value: "productSN" },
-  { label: "舊產品編號", value: "oldProductSN" },
   { label: "客戶名稱", value: "customerName" },
 ];
 
-function QmsActions({ onCreate, id }) {
+function QmsActions({ onCreate }) {
   const [userSearch, setUserSearch] = useState("");
   const [userSelect, setUserSelect] = useState(options[0].value);
-  const navigate = useNavigate();
   const { searchData, data } = useSalesHomeSlice();
   function handleSearch() {
     if (!data || !userSelect) return;
@@ -40,7 +36,6 @@ function QmsActions({ onCreate, id }) {
           tooltip="物料編碼與製程編碼"
           OnClick={() => {
             onCreate?.();
-            navigate(`create/${id}`);
           }}
         >
           <AddIcon />

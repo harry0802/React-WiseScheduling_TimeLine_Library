@@ -168,7 +168,6 @@ export const FORM_CONFIGURATIONS = {
             placeholder: "請選擇機台編號",
             dependsOn: "machineId",
             getDependentOptions: (machineId) => {
-              console.log("🔥🔥🔥🔥 ~ machineId:", machineId);
               return !machineId
                 ? []
                 : optionsService.getMachineAreas(machineId);

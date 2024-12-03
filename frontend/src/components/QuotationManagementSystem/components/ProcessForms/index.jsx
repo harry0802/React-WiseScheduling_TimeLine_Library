@@ -6,7 +6,7 @@ import { useProcessForm } from "./hook/useProcessForm";
 import DynamicForm from "../../../Global/form/DynamicForm";
 
 const ProcessForm = React.memo(
-  ({ initialData, onSubmit, methods, visible }) => {
+  ({ initialData, onSubmit, methods, visible, isNew }) => {
     const {
       processCategory,
       activeTab,
@@ -30,7 +30,7 @@ const ProcessForm = React.memo(
 
     return (
       <DynamicForm externalMethods={methods} onFinish={onSubmit}>
-        <ProcessTypeSelection fields={cleanedSelectionFields} />
+        <ProcessTypeSelection fields={cleanedSelectionFields} isNew={isNew} />
         {processCategory && (
           <ProcessSections
             sections={sections}

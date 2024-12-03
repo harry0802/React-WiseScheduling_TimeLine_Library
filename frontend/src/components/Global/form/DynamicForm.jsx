@@ -137,7 +137,8 @@ function filterCustomProps(props) {
     "loading",
     "asyncOptions",
     "methods",
-    "hidden", // 新增
+    "hidden",
+    "disabled", // 新增這行
   ];
 
   // 創建新的 props 對象，排除自定義屬性
@@ -167,7 +168,10 @@ function renderFormItem(
   asyncOptions,
   methods
 ) {
-  const filteredProps = filterCustomProps(props);
+  const filteredProps = {
+    ...filterCustomProps(props),
+    disabled: props.disabled || field.disabled, // 確保 disabled 被保留
+  };
   if (field.hidden) {
     return (
       <input
@@ -220,6 +224,7 @@ function renderFormItem(
           <Select
             {...controllerField}
             {...filteredProps}
+            disabled={filteredProps.disabled}
             value={selectValue}
             onChange={(e) => {
               const newValue = e.target.value || ""; // 確保空值轉為空字符串
@@ -390,6 +395,7 @@ function renderFormItem(
         <TextField
           {...filteredProps}
           {...controllerField}
+          disabled={filteredProps.disabled}
           type="text"
           label={field.label}
           error={!!error}
@@ -456,7 +462,7 @@ function DynamicForm({
  * @component FieldComponent
  * @description 處理表單欄位的主要邏輯
  */
-function FieldComponent({ field, customProps = {} }) {
+function FieldComponent({ field, customProps = {}, onChange, disabled }) {
   const methods = useFormContext();
   const [asyncOptions, setAsyncOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -618,6 +624,7 @@ function FieldComponent({ field, customProps = {} }) {
         loading={loading}
         asyncOptions={deferredOptions}
         methods={methods}
+        disabled={disabled}
         {...cleanCustomProps}
       />
     </Grid>
@@ -640,7 +647,6 @@ function FormItem({
   ...restProps
 }) {
   const filteredProps = filterCustomProps(restProps);
-
   return renderFormItem(
     field,
     controllerField,

@@ -1,15 +1,19 @@
 import React from "react";
 import DynamicForm from "../../../../Global/form/DynamicForm";
-const ProcessTypeSelection = React.memo(({ fields, onChange }) => (
-  <>
-    {fields.map((field) => (
-      <DynamicForm.Field
-        key={field.name}
-        field={field}
-        onChange={(value) => field.name === "processType" && onChange(value)}
-      />
-    ))}
-  </>
-));
+function ProcessTypeSelection({ fields, isNew = false }) {
+  return (
+    <>
+      {fields.map((field) => (
+        <DynamicForm.Field
+          key={field.name}
+          field={{
+            ...field,
+            disabled: !isNew && field.name === "processCategory",
+          }}
+        />
+      ))}
+    </>
+  );
+}
 
-export default ProcessTypeSelection;
+export default React.memo(ProcessTypeSelection);

@@ -25,6 +25,7 @@ function ProcessDrawer({
           methods={methods}
           onSubmit={handleSubmit}
           visible={visible}
+          isNew={isNew}
         />
       </BaseDrawer.Body>
       <BaseDrawer.Footer onSubmit={handleSubmit} />
