@@ -1,10 +1,10 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import SharedCard from "../../Global/card/ProductCard";
-import { useSalesHomeSlice, useFactoryHomeSlice } from "../slice/qmsHome";
-import PmHomeContent from "../../Global/content/PmHomeContent";
-import { useDeleteQuotationMutation } from "../services/salesServices/endpoints/quotationApi";
-import ConfirmationDialog from "../../Global/dialog/BaseDialog";
+import SharedCard from "../../../Global/card/ProductCard";
+import { useFactoryHomeSlice, useSalesHomeSlice } from "../../slice/qmsHome";
+import { useDeleteQuotationMutation } from "../../services/salesServices/endpoints/quotationApi";
+import PmHomeContent from "../../../Global/content/PmHomeContent";
+import ConfirmationDialog from "../../../Global/dialog/BaseDialog";
 
 // 抽離卡片組件，避免不必要的重渲染
 const Card = memo(function Card({ data, onCardClick, onDelete }) {

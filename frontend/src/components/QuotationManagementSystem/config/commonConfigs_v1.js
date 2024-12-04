@@ -541,17 +541,17 @@ const packagingCostFields = {
       createRequiredRule("單價")
     ),
   },
-  amount: createField(
-    "amount",
-    "金額",
-    "number",
-    {
-      ...createInputProps("元", "金額"),
-      readOnly: true,
-      dependsOn: ["quantity", "unitPrice"],
-    },
-    createRequiredRule("金額")
-  ),
+  // amount: createField(
+  //   "amount",
+  //   "金額",
+  //   "number",
+  //   {
+  //     ...createInputProps("元", "金額"),
+  //     readOnly: true,
+  //     dependsOn: ["quantity", "unitPrice"],
+  //   },
+  //   createRequiredRule("金額")
+  // ),
 };
 
 //* 其他成本字段

@@ -66,7 +66,7 @@ export const fieldSchemas = {
     unit: z.string().min(1, "單位為必填"),
     quantity: baseSchemas.positiveInteger,
     unitPrice: baseSchemas.requiredNumber,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
     capacity: baseSchemas.positiveInteger,
     bagsPerKg: baseSchemas.positiveInteger,
   }),
@@ -108,13 +108,13 @@ export const fieldSchemas = {
     driverWorkHours: baseSchemas.requiredNumber,
     fuelCostPerKM: baseSchemas.requiredNumber,
     estimatedShipment: baseSchemas.positiveInteger,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
   }),
 
   customsDutyCost: z.object({
     feeType: z.string().min(1, "費用類型為必填"),
     freight: baseSchemas.requiredNumber,
     estimatedShipment: baseSchemas.positiveInteger,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
   }),
 };

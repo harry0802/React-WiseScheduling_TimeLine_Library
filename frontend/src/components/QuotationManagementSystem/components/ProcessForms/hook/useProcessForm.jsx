@@ -79,7 +79,7 @@ export const useProcessForm = ({ initialData, externalMethods, visible }) => {
   //* ========= 表單實例創建 =========
   const formInstance = useForm({
     defaultValues: initialValues,
-    mode: "onSubmit",
+    mode: "onChange",
     resolver: async (data) => {
       const category = data?.processCategory || initialData?.processCategory;
       if (!category) return { values: data, errors: {} };

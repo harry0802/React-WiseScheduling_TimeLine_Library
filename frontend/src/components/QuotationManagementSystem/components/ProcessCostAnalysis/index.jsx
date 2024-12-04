@@ -46,26 +46,17 @@ export function ProcessCostAnalysis({
 
   // 處理製程更新
   const handleUpdate = async (updatedProcess, onClose) => {
-    setPendingAction(() => async () => {
-      try {
-        await updateProcessApi({
-          quotationId: id,
-          process: updatedProcess,
-        }).unwrap();
-        updateProcess(updatedProcess.id, updatedProcess);
-        calculateAll();
-        onClose?.();
-      } catch (error) {
-        console.error("更新製程失敗:", error);
-      }
-    });
-    setDialogConfig({
-      title: "確認更新",
-      message: "你確定要更新這個製程嗎？",
-      confirmText: "確認更新",
-      cancelText: "取消",
-    });
-    setConfirmOpen(true);
+    try {
+      await updateProcessApi({
+        quotationId: id,
+        process: updatedProcess,
+      }).unwrap();
+      updateProcess(updatedProcess.id, updatedProcess);
+      calculateAll();
+      onClose?.();
+    } catch (error) {
+      console.error("更新製程失敗:", error);
+    }
   };
 
   // 處理製程刪除
@@ -92,26 +83,28 @@ export function ProcessCostAnalysis({
 
   // 更新運輸成本
   const handleUpdateShippingCosts = async (updatedShippingCosts, onClose) => {
-    setPendingAction(() => async () => {
-      try {
-        await (type === "sales" ? updateShipping : updateShippingCosts)({
-          quotationId: id,
-          shipping: updatedShippingCosts,
-        }).unwrap();
-        updateShippingCosts(updatedShippingCosts);
-        calculateAll();
-        onClose?.();
-      } catch (error) {
-        console.error("更新運費失敗:", error);
-      }
-    });
-    setDialogConfig({
-      title: "確認更新運輸成本",
-      message: "你確定要更新運輸成本嗎？",
-      confirmText: "確認更新",
-      cancelText: "取消",
-    });
-    setConfirmOpen(true);
+    const transformedShippingCosts = {
+      SQFreights: updatedShippingCosts.SQFreights.map((freight) => ({
+        ...freight,
+        amount: freight.amount ?? 0,
+      })),
+      SQCustomsDuties: updatedShippingCosts.SQCustomsDuties.map((duty) => ({
+        ...duty,
+        amount: duty.amount ?? 0,
+      })),
+    };
+
+    try {
+      await (type === "sales" ? updateShipping : updateShippingCosts)({
+        quotationId: id,
+        shipping: transformedShippingCosts,
+      }).unwrap();
+      updateShippingCosts(transformedShippingCosts);
+      calculateAll();
+      onClose?.();
+    } catch (error) {
+      console.error("更新運費失敗:", error);
+    }
   };
 
   // 處理新增製程
@@ -121,27 +114,17 @@ export function ProcessCostAnalysis({
       id,
     };
 
-    setPendingAction(() => async () => {
-      try {
-        await createProcess({
-          quotationId: id,
-          process: processData,
-        }).unwrap();
-        addProcess(processData);
-        calculateAll();
-      } catch (error) {
-        console.error("新增製程失敗:", error);
-      } finally {
-        setIsNewDrawerOpen(false);
-      }
-    });
-    setDialogConfig({
-      title: "確認新增",
-      message: "你確定要新增這個製程嗎？",
-      confirmText: "確認新增",
-      cancelText: "取消",
-    });
-    setConfirmOpen(true);
+    try {
+      await createProcess({
+        quotationId: id,
+        process: processData,
+      }).unwrap();
+      addProcess(processData);
+      calculateAll();
+      setIsNewDrawerOpen(false);
+    } catch (error) {
+      console.error("新增製程失敗:", error);
+    }
   };
 
   const handleConfirm = async () => {
