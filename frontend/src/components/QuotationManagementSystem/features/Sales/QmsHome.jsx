@@ -77,6 +77,7 @@ function QmsHome() {
             notify({
               message: "刪除報價單失敗",
               description: "此報價單已被使用，無法刪除",
+              seconds: 1.5,
               icon: (
                 <CloseIcon
                   sx={{
@@ -97,6 +98,7 @@ function QmsHome() {
           notify({
             message: "更新成功",
             description: "報價單刪除成功",
+            seconds: 1.5,
           });
           return {
             success: true,

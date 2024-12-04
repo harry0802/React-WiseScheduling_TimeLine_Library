@@ -20,7 +20,13 @@ const useNotificationStore = create((set, get) => ({
    * If the API is available, it triggers a notification with the provided parameters.
    * If the API is not initialized, it logs an error and throws an exception.
    */
-  triggerNotification: ({ message, description, notificationStyle, icon }) => {
+  triggerNotification: ({
+    message,
+    description,
+    notificationStyle,
+    icon,
+    seconds,
+  }) => {
     // Get the current API instance from the state
     const api = get().api;
 
@@ -33,7 +39,7 @@ const useNotificationStore = create((set, get) => ({
         className: "notificationStyle", // Optional class name for custom styling
         style: notificationStyle || { width: 600 }, // Apply custom or default styles
         placement: "bottomRight",
-        duration: 1,
+        duration: seconds || 1,
         pauseOnHover: false,
         icon: icon || (
           <CheckIcon
