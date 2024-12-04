@@ -1,8 +1,8 @@
 import sys
-from flask import current_app
 from sqlalchemy import or_
 from app import db
 from app.utils_log import message, err_resp, internal_err_resp
+from app.models.ly0000AO import LY0000AODetail
 from app.models.materialOption import MaterialOption
 from app.models.material import Material
 from .schemas import materialSchema
@@ -42,6 +42,94 @@ class materialService:
             material_dto = material_schema.dump(material_db_list, many=True)
             resp = message(True, "material data sent")
             resp["data"] = material_dto
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+        
+    
+    @staticmethod
+    def get_distinct_materials():
+        """取得所有不重複的物料名稱、物料編號
+
+        Raises:
+            error: _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            query = Material.query
+            query = query.with_entities(Material.materialSN, Material.materialName, MaterialOption.id.label('materialOptionId'), MaterialOption.materialType).distinct()
+            query = query.join(MaterialOption, Material.materialOptionId == MaterialOption.id, isouter = True) # left outer join
+            query = query.filter(or_(Material.materialSN != None, Material.materialSN != ""))
+            material_db_list = query.all()
+
+            material_dto = material_schema.dump(material_db_list, many=True)
+            resp = message(True, "material data sent")
+            resp["data"] = material_dto
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+        
+    
+    @staticmethod
+    def get_distinct_packagings():
+        """取得所有不重複，且物料類型為包材的物料名稱、物料編號
+
+        Raises:
+            error: _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            # Get distinct material names and its material number which material type is packaging
+            query = Material.query
+            query = query.with_entities(Material.materialSN, Material.materialName, MaterialOption.id.label('materialOptionId'), MaterialOption.materialType).distinct()
+            query = query.join(MaterialOption, Material.materialOptionId == MaterialOption.id, isouter = True) # left outer join
+            query = query.filter(or_(Material.materialSN != None, Material.materialSN != ""))
+            query = query.filter(MaterialOption.materialType == '包材')
+            material_db_list = query.all()
+
+            material_dto = material_schema.dump(material_db_list, many=True)
+            resp = message(True, "material data sent")
+            resp["data"] = material_dto
+            return resp, 200
+        # exception without handling should raise to the caller
+        except Exception as error:
+            raise error
+
+
+    @staticmethod
+    def get_material_unitPrice(materialSN, materialName):
+        """取得原物料或者包材的單價
+
+        Args:
+            materialSN (_type_): 物料編號
+            materialName (_type_): 物料名稱
+
+        Raises:
+            error: _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            unitPrice = None
+            # Get distinct material names and its material number which material type is packaging
+            ly0000AO_db = db.session.query(LY0000AODetail).filter(
+                LY0000AODetail.SD_SKNO == materialSN,
+                LY0000AODetail.SD_NAME == materialName
+            ).order_by(LY0000AODetail.SD_DATE.desc()).first()
+            
+            # Set `unitPrice` if found in LY0000AODetail
+            if ly0000AO_db:
+                unitPrice = ly0000AO_db.SD_PRICE
+
+            resp = message(True, "material unit price data sent")
+            resp["data"] = unitPrice
             return resp, 200
         # exception without handling should raise to the caller
         except Exception as error:

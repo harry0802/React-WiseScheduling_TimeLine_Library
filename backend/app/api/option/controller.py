@@ -14,6 +14,8 @@ from .schemas import optionSchema
 from .models.processCategory import ProcessCategory
 from .models.inspectionType import InspectionType
 from .models.workOrderStatus import WorkOrderStatus
+from .models.materialUnit import MaterialUnit
+from .models.packagingUnit import PackagingUnit
 
 api = optionDto.api
 control_schema = optionSchema()
@@ -21,6 +23,9 @@ name_param = f"""The name of the option:
            (製令單狀態) {WorkOrderStatus().__name__}: {WorkOrderStatus().__dict__}
            (製程選項的分類) {ProcessCategory().__name__}: {ProcessCategory().__dict__}
            (檢驗類別) {InspectionType().__name__}: {InspectionType().__dict__}
+           (原物料單位) {MaterialUnit().__name__}: {MaterialUnit().__dict__}
+           (包材單位) {PackagingUnit().__name__}: {PackagingUnit().__dict__}
+
            """
 
 

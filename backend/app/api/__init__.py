@@ -19,6 +19,10 @@ from .material.controller import api as material_ns
 from .option.controller import api as option_ns
 from .lysErp.controller import api as lysErp_ns
 from .qualityInspection.controller import api as qualityInspection_ns
+from .machine.controller import api as machine_ns
+from .customer.controller import api as customer_ns
+from .salesQuotation.controller import api as salesQuotation_ns
+from .factoryQuotation.controller import api as factoryQuotation_ns
 from app.api.calendar.service import CalendarService
 from app.api.lysErp.service import LyService
 from app.api.productionSchedule.service import shift_by_holiday
@@ -55,6 +59,10 @@ api.add_namespace(material_ns)
 api.add_namespace(option_ns)
 api.add_namespace(lysErp_ns)
 api.add_namespace(qualityInspection_ns)
+api.add_namespace(machine_ns)
+api.add_namespace(customer_ns)
+api.add_namespace(salesQuotation_ns)
+api.add_namespace(factoryQuotation_ns)
 
 @api_bp.cli.command('update_calendar')
 def update_calendar():
@@ -88,3 +96,10 @@ if LY_ERP_ON.lower() == "true":
         """Sync 0000AB Data from LY ERP"""
         print("sync_ly_0000AB")
         return LyService.sync_ly_0000AB()
+    
+
+    @api_bp.cli.command('sync_ly_0000AO')
+    def sync_ly_data():
+        """Sync 0000AO Data from LY ERP"""
+        print("sync_ly_0000AO")
+        return LyService.sync_ly_0000AO()

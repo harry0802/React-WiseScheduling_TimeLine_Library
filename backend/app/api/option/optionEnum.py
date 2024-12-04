@@ -10,10 +10,15 @@ class OptionDataSource():
         self.workOrderStatusOptions = optionService.get_all_options("workOrderStatus")
         self.processCategoryOptions = optionService.get_all_options("processCategory")
         self.inspectionTypeOptions = optionService.get_all_options("inspectionType")
+        self.materialUnitOptions = optionService.get_all_options("materialUnit")
+        self.packagingUnitOptions = optionService.get_all_options("packagingUnit")
+    
     def set_enum(self):
         WorkOrderStatusEnum.set_values(self.workOrderStatusOptions)
         ProcessCategoryEnum.set_values(self.processCategoryOptions)
         InspectionTypeEnum.set_values(self.inspectionTypeOptions)
+        MaterialUnitEnum.set_values(self.materialUnitOptions)
+        PackagingUnitEnum.set_values(self.packagingUnitOptions)
 
 
 class WorkOrderStatusEnum(Enum):
@@ -71,3 +76,39 @@ class InspectionTypeEnum(Enum):
     def set_values(cls, options):
         cls.FIRST._value_ = next((option.get("name") for option in options if option.get("schema") == 'FIRST'), "")
         cls.IN_PROCESS._value_ = next((option.get("name") for option in options if option.get("schema") == 'IN_PROCESS'), "")
+
+
+class MaterialUnitEnum(Enum):
+    """原物料單位
+
+    Args:
+        Enum (_type_): _description_
+    """
+    G = "公克"
+    PIECE = "件"
+    ITEM = "個"
+
+    @classmethod
+    def set_values(cls, options):
+        cls.G._value_ = next((option.get("name") for option in options if option.get("schema") == 'G'), "")
+        cls.PIECE._value_ = next((option.get("name") for option in options if option.get("schema") == 'PIECE'), "")
+        cls.ITEM._value_ = next((option.get("name") for option in options if option.get("schema") == 'ITEM'), "")
+
+
+class PackagingUnitEnum(Enum):
+    """包材單位
+
+    Args:
+        Enum (_type_): _description_
+    """
+    KG = "公斤"
+    POUND = "磅"
+    PIECE = "件"
+    ITEM = "個"
+
+    @classmethod
+    def set_values(cls, options):
+        cls.KG._value_ = next((option.get("name") for option in options if option.get("schema") == 'KG'), "")
+        cls.POUND._value_ = next((option.get("name") for option in options if option.get("schema") == 'POUND'), "")
+        cls.PIECE._value_ = next((option.get("name") for option in options if option.get("schema") == 'PIECE'), "")
+        cls.ITEM._value_ = next((option.get("name") for option in options if option.get("schema") == 'ITEM'), "")

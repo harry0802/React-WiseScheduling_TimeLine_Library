@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Tabs, Tab, Button, Box, TextField } from "@mui/material";
+import { Tabs, Tab, Divider } from "@mui/material";
 import DynamicForm from "../../Global/form/DynamicForm";
+import CustomTodoList from "./CustomTodoList";
 import {
   PROCESS_SELECTION_FORM,
   FORM_CONFIGURATIONS,
@@ -11,205 +10,188 @@ import {
   PROCESS_SUBTYPES,
 } from "../config/processTypes";
 
-// zod schema handle validation
-const schema = z.object({
-  processType: z.string().min(1, "請選擇製程類型"),
-  processSubtype: z.string().min(1, "請選擇製程子類型"),
-});
+const tabStyles = {
+  marginBottom: 3,
+  width: "100%",
+  position: "relative",
 
-const processTypeOptions = () =>
-  Object.values(PROCESS_TYPES).map(({ key, value }) => ({
-    value: key,
-    label: value,
-  }));
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    width: "99%",
+    bottom: "1px",
+    right: 0,
+    borderBottom: "1px solid #8f8f8f",
+  },
 
-// function ProcessForm({ initialData, onSubmit }) {
-//   const methods = useForm({
-//     defaultValues: initialData || {},
-//     // resolver: zodResolver(schema),
-//   });
+  "& .MuiTab-root": {
+    margin: "0 4px",
+    padding: "12px 16px",
+    minHeight: "48px",
+    transition: "all 0.2s ease",
+    color: "#757575",
+    fontSize: "18px",
+    fontWeight: 400,
+    "&:hover": {
+      // 可選的 hover 狀態樣式
+    },
+    "&:active": {
+      // 可選的 active 狀態樣式
+    },
+  },
 
-//   const { watch, setValue } = methods;
-//   const processType = watch("processType");
-//   const activeTab = watch("activeTab") || 0;
+  "& .Mui-selected": {
+    fontSize: "19px",
+    color: "#8bc1e3 !important",
+    fontWeight: 500,
+  },
 
-//   //  處理 sections 的邏輯
-//   const sections = useMemo(
-//     () => FORM_CONFIGURATIONS[processType] || [],
-//     [processType]
-//   );
+  "& .MuiTabs-indicator": {
+    height: "3px",
+    backgroundColor: "#8bc1e3",
+    transition: "all 0.3s ease",
+  },
+};
 
-//   //  根據processType 來決定 processSubtype 的選項
-//   const processSubtypeOptions = useMemo(
-//     () => PROCESS_SUBTYPES[processType] || [],
-//     [processType]
-//   );
+//  TODO 需要改善當下拉選單改變時  表單數據不會跟著改變的問題
+// ! 目前問題是就算我改變我也無法提供他 初始值 因為我並不知道他原本的表單設定有哪些
+function ProcessForm({ initialData, onSubmit, externalMethods }) {
+  const initialProcessType = initialData?.processType;
+  const methods =
+    externalMethods ||
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useForm({
+      defaultValues:
+        initialProcessType === initialData?.processType
+          ? initialData
+          : { processType: initialProcessType },
+    });
 
-//   function handleTabChange(_, newValue) {
-//     setValue("activeTab", newValue);
-//   }
-
-//   //  處理 selectionFields 的邏輯
-//   const selectionFields = useMemo(() => {
-//     return PROCESS_SELECTION_FORM[0].fields.map((field) => ({
-//       ...field,
-//       options:
-//         field.name === "processType"
-//           ? processTypeOptions()
-//           : field.name === "processSubtype"
-//           ? processSubtypeOptions
-//           : field.options,
-//     }));
-//   }, [processTypeOptions, processSubtypeOptions]);
-
-//   //  處理 tabFields 的邏輯
-//   const tabFields = useMemo(() => {
-//     return processType ? sections[activeTab]?.fields || [] : [];
-//   }, [processType, sections, activeTab]);
-
-//   //  todo 我需要處理手動添加表單的功能 按下按鈕就添加表單的 todo list 功能
-
-//   //  處理 processType 的邏輯
-//   const handleProcessTypeChange = useCallback(
-//     (value) => {
-//       setValue("processType", value);
-//       setValue("processSubtype", "");
-//       setValue("activeTab", 0);
-//     },
-//     [setValue]
-//   );
-
-//   //  當processType 改變時我的  activeTab 將會設定初始值
-//   useEffect(() => {
-//     setValue("activeTab", 0);
-//   }, [processType, setValue]);
-
-//   return (
-//     <>
-//       <DynamicForm
-//         externalMethods={methods}
-//         onFinish={onSubmit}
-//         submitButton={true}
-//       >
-//         {/* 選擇製程類型和製程子類型 */}
-//         {selectionFields.map((field) => (
-//           <DynamicForm.Field
-//             key={field.name}
-//             field={{
-//               ...field,
-//               onChange:
-//                 field.name === "processType"
-//                   ? handleProcessTypeChange
-//                   : undefined,
-//             }}
-//           />
-//         ))}
-//         {/* 動態顯示 tab 和 fields */}
-//         {processType && (
-//           <>
-//             {sections.length > 0 && (
-//               <Tabs value={activeTab} onChange={handleTabChange}>
-//                 {sections.map((section, index) => (
-//                   <Tab key={index} label={section.title} />
-//                 ))}
-//               </Tabs>
-//             )}
-//             {/* 顯示 tab 的 fields */}
-//             {tabFields.map((field) => (
-//               <DynamicForm.Field key={field.name} field={field} />
-//             ))}
-//             {/* 手動添加表 */}
-//           </>
-//         )}
-//       </DynamicForm>
-//     </>
-//   );
-// }
-function ProcessForm({ initialData, onSubmit }) {
-  const methods = useForm({
-    defaultValues: initialData || {},
-  });
-
-  const { watch, setValue } = methods;
+  const { watch, setValue, reset } = methods;
   const processType = watch("processType");
   const activeTab = watch("activeTab") || 0;
 
-  // Get the form configuration and formType
+  // * 取得表單配置
   const formConfig = FORM_CONFIGURATIONS[processType] || {};
-  const { formType, sections } = formConfig;
+  const sections = formConfig.items || [];
 
-  const [todoItems, setTodoItems] = useState(initialData?.items || []);
-
-  const handleAddItem = () => {
-    setTodoItems([...todoItems, { id: Date.now(), task: "", quantity: 0 }]);
-  };
-
-  const handleRemoveItem = (id) => {
-    setTodoItems(todoItems.filter((item) => item.id !== id));
-  };
-
-  const handleItemChange = (id, field, value) => {
-    setTodoItems(
-      todoItems.map((item) =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    );
-  };
-
-  const handleTabChange = (_, newValue) => {
-    setValue("activeTab", newValue);
-  };
+  // * 切換 Tab
+  const handleTabChange = useCallback(
+    (_, newValue) => {
+      setValue("activeTab", newValue);
+    },
+    [setValue]
+  );
 
   const processSubtypeOptions = useMemo(
     () => PROCESS_SUBTYPES[processType] || [],
     [processType]
   );
 
-  const selectionFields = useMemo(() => {
-    return PROCESS_SELECTION_FORM[0].fields.map((field) => ({
-      ...field,
-      options:
-        field.name === "processType"
-          ? processTypeOptions()
-          : field.name === "processSubtype"
-          ? processSubtypeOptions
-          : field.options,
-    }));
-  }, [processTypeOptions, processSubtypeOptions]);
-
-  const tabFields = useMemo(() => {
-    return processType ? sections[activeTab]?.fields || [] : [];
-  }, [processType, sections, activeTab]);
-
-  const handleProcessTypeChange = useCallback(
-    (value) => {
-      setValue("processType", value);
-      setValue("processSubtype", "");
-      setValue("activeTab", 0);
-    },
-    [setValue]
+  // * 選擇欄位
+  const selectionFields = useMemo(
+    () =>
+      PROCESS_SELECTION_FORM[0].fields.map((field) => ({
+        ...field,
+        options:
+          field.name === "processType"
+            ? Object.values(PROCESS_TYPES).map(({ key, value }) => ({
+                value: key,
+                label: value,
+              }))
+            : field.name === "processSubtype"
+            ? processSubtypeOptions
+            : field.options,
+      })),
+    [processSubtypeOptions]
   );
 
+  // * 當 processType 改變時觸發更新邏輯
   useEffect(() => {
-    setValue("activeTab", 0);
-  }, [processType, setValue]);
+    if (!processType) return;
+
+    if (processType === initialData?.processType) {
+      // 如果選擇的類型與初始值相同，重置回初始值
+      reset(initialData);
+    } else {
+      // 如果選擇的類型與初始值不同，重置所有欄位
+      console.log("processType", processType);
+      reset({
+        processType,
+        activeTab: 0,
+        processSubtype: "",
+      });
+    }
+  }, [processType, initialData, reset, setValue]);
+
+  // * 關閉表單時重置所有數據
+  useEffect(() => {
+    return () => {
+      reset(initialData || {}); // 重置回初始數據
+    };
+  }, [reset, initialData]);
+
+  // * 渲染表單項目
+  const renderFormItems = useCallback((items) => {
+    if (!Array.isArray(items)) {
+      console.warn("items is not an array:", items);
+      return null;
+    }
+    // ! 渲染表單項目
+    // * 1. case "general":  一般欄位
+    // * 2. case "todolist": 待辦事項
+    // * 3. case "nested": 巢狀欄位  遞迴渲染 : 如果巢狀欄位中還有巢狀欄位  則會繼續遞迴渲染
+    return items.map((item, sectionIndex) => {
+      switch (item.type) {
+        case "general":
+          return Array.isArray(item.fields[0])
+            ? item.fields[0].map((field, fieldIndex) => (
+                <DynamicForm.Field
+                  key={`${sectionIndex}-${field.name}-${fieldIndex}`}
+                  field={field}
+                />
+              ))
+            : item.fields.map((field, fieldIndex) => (
+                <DynamicForm.Field
+                  key={`${sectionIndex}-${field.name}-${fieldIndex}`}
+                  field={field}
+                />
+              ));
+        case "todolist":
+          return (
+            <CustomTodoList
+              key={`${sectionIndex}-${item.title}`}
+              name={`todoItems_${item.title}`}
+              fields={item.items}
+              renderField={(fieldProps) => (
+                <DynamicForm.Field {...fieldProps} />
+              )}
+            />
+          );
+        case "nested":
+          return (
+            <React.Fragment key={`${sectionIndex}-${item.title}`}>
+              <Divider sx={{ my: 1 }} />
+              {renderFormItems(item.items)}
+            </React.Fragment>
+          );
+        // * 預設情況 不會進入
+        default:
+          console.warn(`Unknown item type: ${item.type}`);
+          return null;
+      }
+    });
+  }, []);
+
+  const formRef = useRef(null);
 
   return (
-    <DynamicForm
-      externalMethods={methods}
-      onFinish={onSubmit}
-      submitButton={true}
-    >
-      {/* Render process type and subtype selection */}
+    <form ref={formRef} onSubmit={onSubmit} noValidate>
       {selectionFields.map((field) => (
         <DynamicForm.Field
           key={field.name}
           field={{
             ...field,
-            onChange:
-              field.name === "processType"
-                ? handleProcessTypeChange
-                : undefined,
           }}
         />
       ))}
@@ -217,49 +199,17 @@ function ProcessForm({ initialData, onSubmit }) {
       {processType && (
         <>
           {sections.length > 0 && (
-            <Tabs value={activeTab} onChange={handleTabChange}>
+            <Tabs sx={tabStyles} value={activeTab} onChange={handleTabChange}>
               {sections.map((section, index) => (
                 <Tab key={index} label={section.title} />
               ))}
             </Tabs>
           )}
-          {formType === "general" && (
-            <>
-              {tabFields.map((field) => (
-                <DynamicForm.Field key={field.name} field={field} />
-              ))}
-            </>
-          )}
-          {formType === "todolist" && (
-            <>
-              <Button onClick={handleAddItem}>Add Task</Button>
-              {todoItems.map((item) => (
-                <Box key={item.id}>
-                  <TextField
-                    label="Task"
-                    value={item.task}
-                    onChange={(e) =>
-                      handleItemChange(item.id, "task", e.target.value)
-                    }
-                  />
-                  <TextField
-                    label="Quantity"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      handleItemChange(item.id, "quantity", e.target.value)
-                    }
-                  />
-                  <Button onClick={() => handleRemoveItem(item.id)}>
-                    Remove
-                  </Button>
-                </Box>
-              ))}
-            </>
-          )}
+          {sections[activeTab] && renderFormItems([sections[activeTab]])}
         </>
       )}
-    </DynamicForm>
+    </form>
   );
 }
 
-export default React.memo(ProcessForm);
+export default ProcessForm;

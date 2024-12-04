@@ -75,3 +75,36 @@ export const QmsProductionInspection = lazyImport(() =>
     "../components/QualityManagementSystem/feature/QmsProductionInspection/Index"
   )
 );
+
+// SalesQuotationManagementSystem
+export const SalesQuotationManagementSystem = lazyImport(() =>
+  import("../pages/SalesQuotationManagementSystemPage")
+);
+export const SalesQmsHome = lazyImport(() =>
+  import("../components/QuotationManagementSystem/features/QmsHome")
+);
+export const SalesQmsCreate = lazyImport(() =>
+  import("../components/QuotationManagementSystem/features/Sales/QmsCreate")
+);
+export const SalesQmsMaintain = lazyImport(() =>
+  import("../components/QuotationManagementSystem/features/Sales/QmsMaintain")
+);
+
+// FactoryQuotationManagementSystem
+
+export const FactoryQuotationManagementSystem = lazyImport(() =>
+  import("../pages/FactoryQuotationManagementSystemPage")
+);
+export const FactoryQmsHome = lazyImport(() =>
+  import("../components/QuotationManagementSystem/features/QmsHome")
+);
+export const FactoryQmsAddtions = lazyImport(() =>
+  import(
+    "../components/QuotationManagementSystem/features/Factory/FactoryQmsAddtions"
+  )
+);
+export const QmsAddtions = lazyImport(() =>
+  import(
+    "../components/QuotationManagementSystem/features/Sales/QmsAddtionInfos"
+  )
+);
