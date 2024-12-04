@@ -52,7 +52,6 @@ export const calculateInHouseMoldingCost = (process) => {
     totalCost:
       +materialCostResult.totalCost +
       +packagingCostResult.totalCost +
-      +moldingCostResult +
       +moldingElectricityCost,
     details: {
       materialCostResult,
