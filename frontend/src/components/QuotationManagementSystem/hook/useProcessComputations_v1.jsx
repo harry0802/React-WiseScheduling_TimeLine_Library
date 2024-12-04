@@ -48,10 +48,6 @@ export const calculateInHouseMoldingCost = (process) => {
     moldingData.cycleTime,
     moldingData.electricityCostPerSec
   );
-  console.log(
-    "🚀 ~ calculateInHouseMoldingCost ~ moldingCostResult:",
-    moldingCostResult.totalCost
-  );
   return {
     totalCost:
       +materialCostResult.totalCost +

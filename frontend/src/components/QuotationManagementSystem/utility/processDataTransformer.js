@@ -1,4 +1,30 @@
 import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
+import { convertToPercentage } from "./commonUtils";
+
+/**
+ * 轉換材料成本設置數據
+ * @param {Object} setting - 材料成本設置
+ * @returns {Object} - 轉換後的設置
+ */
+const transformMaterialCostSetting = (setting) => ({
+  ...setting,
+  estimatedDefectRate: convertToPercentage(setting.estimatedDefectRate),
+  estimatedMaterialFluctuation: convertToPercentage(
+    setting.estimatedMaterialFluctuation
+  ),
+});
+
+/**
+ * 轉換注塑成型數據
+ * @param {Array} costs - 注塑成型成本數組
+ * @returns {Array} - 轉換後的成本數組
+ */
+const transformInjectionMoldingCosts = (costs) =>
+  costs.map((cost) => ({
+    ...cost,
+    workHoursRatio: convertToPercentage(cost.workHoursRatio),
+    defectiveRate: convertToPercentage(cost.defectiveRate),
+  }));
 
 /**
  * 轉換委外成型製程數據格式
@@ -14,9 +40,9 @@ export const transformOutsourceInjectionData = (data) => {
   };
 
   // 提取材料成本設置數據
-  const materialCostSetting = {
-    ...data.SQMaterialCostSetting,
-  };
+  const materialCostSetting = transformMaterialCostSetting(
+    data.SQMaterialCostSetting
+  );
 
   // 清理材料成本數組數據
   const materialCosts = data.SQMaterialCosts.map((item) => ({
@@ -55,9 +81,9 @@ export const transformInhousePostProcessData = (data) => {
   };
 
   // 提取材料成本設置數據
-  const materialCostSetting = {
-    ...data.SQMaterialCostSetting,
-  };
+  const materialCostSetting = transformMaterialCostSetting(
+    data.SQMaterialCostSetting
+  );
 
   // 清理材料成本數組數據
   const materialCosts = data.SQMaterialCosts.map((item) => ({
@@ -67,14 +93,6 @@ export const transformInhousePostProcessData = (data) => {
   // 清理包裝成本數組數據
   const packagingCosts = data.SQPackagingCosts.map((item) => ({
     ...item,
-    // id: item.id || index + 1,
-    // materialName: item.materialName,
-    // materialSN: item.materialSN,
-    // packagingType: item.packagingType,
-    // unit: item.unit,
-    // quantity: item.quantity,
-    // unitPrice: item.unitPrice || 0,
-    // amount: item.amount,
   }));
 
   // 清理廠內加工費用數據
@@ -95,7 +113,7 @@ export const transformInhousePostProcessData = (data) => {
  * @returns {Object} 轉換後的數據
  */
 export const transformOutsourcePostProcessData = (data) => {
-  // 1. 基礎���據
+  // 1. 基礎數據
   const baseData = {
     processOptionId: data.processSN,
     processCategory: data.processCategory,
@@ -104,9 +122,9 @@ export const transformOutsourcePostProcessData = (data) => {
   };
 
   // 提取材料成本設置數據
-  const materialCostSetting = {
-    ...data.SQMaterialCostSetting,
-  };
+  const materialCostSetting = transformMaterialCostSetting(
+    data.SQMaterialCostSetting
+  );
 
   // 清理材料成本數組數據
   const materialCosts = data.SQMaterialCosts.map((item) => ({
@@ -172,9 +190,9 @@ export const transformInhouseInjectionData = (data) => {
   };
 
   // 2. 材料成本設置數據
-  const materialCostSetting = {
-    ...data.SQMaterialCostSetting,
-  };
+  const materialCostSetting = transformMaterialCostSetting(
+    data.SQMaterialCostSetting
+  );
 
   // 3. 材料成本數組數據
   const materialCosts = Array.isArray(data.SQMaterialCosts)
@@ -192,11 +210,10 @@ export const transformInhouseInjectionData = (data) => {
 
   // 5. 注塑成型數據
   const injectionMoldingCost = Array.isArray(data.SQInjectionMoldingCosts)
-    ? data.SQInjectionMoldingCosts.filter(Boolean).map((item) => ({
-        ...item,
-      }))
+    ? transformInjectionMoldingCosts(
+        data.SQInjectionMoldingCosts.filter(Boolean)
+      )
     : [];
-
   return {
     ...baseData,
     SQMaterialCostSetting: materialCostSetting,

@@ -1,10 +1,135 @@
-// useProfitCalculation.jsx
-import { useCallback, useMemo, useEffect } from "react";
+// useProfitCalculation.js
 
+//! =============== 1. 設定與常量 ===============
+import { useCallback, useMemo } from "react";
+
+//* 數值計算相關常量
+const DECIMAL_PLACES = 3;
+const PERCENTAGE_FACTOR = 100;
+
+//* 利潤相關欄位定義
+const PROFIT_FIELDS = {
+  QUOTATION: "quotationAmount",
+  MARKETING: "marketingDiscount",
+  PROFIT: "profit",
+  RISK: "risk",
+  YEAR_FACTOR: "yearFactor",
+  FEEDBACK: "feedback",
+  SUBTOTAL_WITHOUT_MARKETING: "subtotalWithoutMarketing",
+  SUBTOTAL_WITH_SGA: "subtotalWithSGA",
+  SUBTOTAL_WITH_COSTS: "subtotalWithCosts",
+  GROSS_PROFIT_MARGIN: "grossProfitMargin",
+};
+
+//! =============== 2. 工具函數 ===============
+/**
+ * @function formatCurrency
+ * @description 格式化貨幣顯示，統一金額展示格式
+ * @param {number} value - 待格式化的數值
+ * @returns {string} 格式化後的貨幣字串
+ */
+const formatCurrency = (value) =>
+  `${(value || 0).toFixed(DECIMAL_PLACES)} 元/pcs`;
+
+/**
+ * @function formatPercentage
+ * @description 格式化百分比顯示
+ * @param {number} value - 待格式化的數值
+ * @returns {string} 格式化後的百分比字串
+ */
+const formatPercentage = (value) => `${(value || 0).toFixed(DECIMAL_PLACES)}%`;
+
+/**
+ * @function convertFormValuesToApiFormat
+ * @description 將表單數據轉換為 API 所需格式
+ * @param {Object} values - 表單值物件
+ * @returns {Object} 轉換後的數據物件
+ */
+const convertFormValuesToApiFormat = (values) => ({
+  actualQuotation: parseFloat(values.quotationAmount),
+  overheadRnd: parseFloat(values.marketingDiscount) / PERCENTAGE_FACTOR,
+  profit: parseFloat(values.profit) / PERCENTAGE_FACTOR,
+  risk: parseFloat(values.risk) / PERCENTAGE_FACTOR,
+  annualDiscount: parseFloat(values.yearFactor) / PERCENTAGE_FACTOR,
+  rebate: parseFloat(values.feedback) / PERCENTAGE_FACTOR,
+});
+
+/**
+ * @function generateProfitDataArray
+ * @description 生成利潤數據陣列
+ * @param {Object} params - 包含所需參數的物件
+ * @returns {Array} 格式化後的利潤數據陣列
+ */
+const generateProfitDataArray = ({
+  actualQuotation,
+  percentages,
+  calculationResults,
+}) => [
+  {
+    key: PROFIT_FIELDS.QUOTATION,
+    label: "報價金額",
+    value: formatCurrency(actualQuotation),
+  },
+  {
+    key: PROFIT_FIELDS.MARKETING,
+    label: `管銷研(${percentages.marketingDiscount}%)`,
+    value: formatCurrency(calculationResults?.sgAndAdminFee),
+  },
+  {
+    key: PROFIT_FIELDS.PROFIT,
+    label: `利潤(${percentages.profit}%)`,
+    value: formatCurrency(calculationResults?.profitFee),
+  },
+  {
+    key: PROFIT_FIELDS.RISK,
+    label: `風險(${percentages.risk}%)`,
+    value: formatCurrency(calculationResults?.riskFee),
+  },
+  {
+    key: PROFIT_FIELDS.YEAR_FACTOR,
+    label: `年降(${percentages.yearFactor}%)`,
+    value: formatCurrency(calculationResults?.annualReductionAmount),
+  },
+  {
+    key: PROFIT_FIELDS.SUBTOTAL_WITHOUT_MARKETING,
+    label: "成本小計(不含管銷研)",
+    value: formatCurrency(calculationResults?.costSubtotal),
+  },
+  {
+    key: PROFIT_FIELDS.SUBTOTAL_WITH_SGA,
+    label: "成本小計(含管銷研)",
+    value: formatCurrency(calculationResults?.subtotalWithSGA),
+  },
+  {
+    key: PROFIT_FIELDS.SUBTOTAL_WITH_COSTS,
+    label: "總成本",
+    value: formatCurrency(calculationResults?.totalCost),
+  },
+  {
+    key: PROFIT_FIELDS.FEEDBACK,
+    label: `回饋(${percentages.feedback}%)`,
+    value: formatCurrency(calculationResults?.rebateAmount),
+  },
+  {
+    key: PROFIT_FIELDS.GROSS_PROFIT_MARGIN,
+    label: "毛利率",
+    value: formatPercentage(calculationResults?.grossProfitMargin),
+  },
+];
+
+//! =============== 3. 核心 Hook ===============
+/**
+ * @function useProfitCalculation
+ * @description 處理利潤計算的自定義 Hook
+ * @param {Function} BusinessQuotationStore - 報價資料管理store
+ * @param {Function} handleUpdateProfitManagement - 更新利潤管理的回調函數
+ * @returns {Object} 包含計算結果和處理方法的物件
+ */
 export function useProfitCalculation(
   BusinessQuotationStore,
   handleUpdateProfitManagement
 ) {
+  //* 從 store 中解構所需數據
   const {
     overheadRnd,
     profit,
@@ -13,98 +138,41 @@ export function useProfitCalculation(
     rebate,
     actualQuotation,
     calculationResults,
-    updateProfitManagement,
   } = BusinessQuotationStore();
-  // !百分比計算
-  //  四捨五入 保留小數點後三位
+
+  //* 計算各項百分比
   const percentages = useMemo(
     () => ({
-      marketingDiscount: parseFloat((overheadRnd * 100).toFixed(3)),
-      profit: parseFloat((profit * 100).toFixed(3)),
-      risk: parseFloat((risk * 100).toFixed(3)),
-      yearFactor: parseFloat((annualDiscount * 100).toFixed(3)),
-      feedback: parseFloat((rebate * 100).toFixed(3)),
+      marketingDiscount: overheadRnd,
+      profit,
+      risk,
+      yearFactor: annualDiscount,
+      feedback: rebate,
     }),
     [overheadRnd, profit, risk, annualDiscount, rebate]
   );
 
-  // !顯示數據計算
+  //* 生成利潤數據陣列
   const profitData = useMemo(
-    () => [
-      {
-        key: "quotationAmount",
-        label: "報價金額",
-        value: `${actualQuotation?.toFixed(3) || 0} 元/pcs`,
-      },
-      {
-        key: "marketingDiscount",
-        label: `管銷研(${percentages.marketingDiscount}%)`,
-        value: `${calculationResults?.sgAndAdminFee?.toFixed(3) || 0} 元/pcs`,
-      },
-      {
-        key: "profit",
-        label: `利潤(${percentages.profit}%)`,
-        value: `${calculationResults?.profitFee?.toFixed(3) || 0} 元/pcs`,
-      },
-      {
-        key: "risk",
-        label: `風險(${percentages.risk}%)`,
-        value: `${calculationResults?.riskFee?.toFixed(3) || 0} 元/pcs`,
-      },
-      {
-        key: "yearFactor",
-        label: `年降(${percentages.yearFactor}%)`,
-        value: `${
-          calculationResults?.annualReductionAmount?.toFixed(3) || 0
-        } 元/pcs`,
-      },
-      {
-        key: "subtotalWithoutMarketing",
-        label: "成本小計(不含管銷研)",
-        value: `${calculationResults?.costSubtotal?.toFixed(3) || 0} 元/pcs`,
-      },
-      {
-        key: "subtotalWithSGA",
-        label: "成本小計(含管銷研)",
-        value: `${calculationResults?.subtotalWithSGA?.toFixed(3) || 0} 元/pcs`,
-      },
-      {
-        key: "subtotalWithCosts",
-        label: "總成本",
-        value: `${calculationResults?.totalCost?.toFixed(3) || 0} 元/pcs`,
-      },
-      {
-        key: "feedback",
-        label: `回饋(${percentages.feedback}%)`,
-        value: `${calculationResults?.rebateAmount?.toFixed(3) || 0} 元/pcs`,
-      },
-      {
-        key: "grossProfitMargin",
-        label: "毛利率",
-        value: `${calculationResults?.grossProfitMargin?.toFixed(3) || 0}%`,
-      },
-    ],
+    () =>
+      generateProfitDataArray({
+        actualQuotation,
+        percentages,
+        calculationResults,
+      }),
     [actualQuotation, percentages, calculationResults]
   );
 
-  // !表單提交處理
+  //* 處理表單提交
   const handleFormSubmit = useCallback(
     (values) => {
-      const convertedData = {
-        actualQuotation: parseFloat(values.quotationAmount),
-        overheadRnd: parseFloat(values.marketingDiscount) / 100,
-        profit: parseFloat(values.profit) / 100,
-        risk: parseFloat(values.risk) / 100,
-        annualDiscount: parseFloat(values.yearFactor) / 100,
-        rebate: parseFloat(values.feedback) / 100,
-      };
-
-      if (handleUpdateProfitManagement) {
-        // 更新 store
-        handleUpdateProfitManagement(convertedData);
-      } else {
+      if (!handleUpdateProfitManagement) {
         console.warn("handleUpdateProfitManagement is not defined");
+        return;
       }
+
+      const convertedData = convertFormValuesToApiFormat(values);
+      handleUpdateProfitManagement(convertedData);
     },
     [handleUpdateProfitManagement]
   );
@@ -116,3 +184,5 @@ export function useProfitCalculation(
     handleFormSubmit,
   };
 }
+
+export default useProfitCalculation;

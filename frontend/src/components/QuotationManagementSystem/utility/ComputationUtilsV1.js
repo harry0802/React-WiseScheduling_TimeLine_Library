@@ -59,16 +59,15 @@ function calculateMaterialCost(
     };
   }
 
-  // 把參數轉為百分比 但我要先確保他是沒有被轉換過的數字
-  const fluctuationPercentage_ = parseFloat(fluctuationPercentage) / 100;
+  // 使用 convertToPercentage 轉換百分比
+  const fluctuationPercentage_ = convertToPercentage(fluctuationPercentage);
   const materialWithdrawalFee_ = parseFloat(materialWithdrawalFee);
-  const defectRate_ = parseFloat(defectRate) / 100;
+  const defectRate_ = convertToPercentage(defectRate);
 
   // 計算各項金額
   const amounts = items.map((item) => {
     const { unitPrice, weight, unit } = item;
     let amount = 0;
-    // 只有當單位為「公克」時才需要除以1000，其他單位不用
     if (unit === "公克") {
       amount = (unitPrice / 1000) * weight * (1 + fluctuationPercentage_);
     } else if (unit === "件" || unit === "個") {
@@ -77,12 +76,10 @@ function calculateMaterialCost(
     return amount;
   });
 
-  // 計算金額總和並加上抽料費用
   const subtotal =
     amounts.reduce((total, amount) => total + amount, 0) +
     materialWithdrawalFee_;
 
-  // 計算最終小計，考慮預估不良率
   const totalCost = Number((subtotal * (1 + defectRate_)).toFixed(3));
   return {
     totalCost,
@@ -155,9 +152,8 @@ function calculateMoldingCost(
   workHourRatio,
   unitPrice = 3000
 ) {
-  // 把參數轉為百分比 但我要先確保他是沒有被轉換過的數字
-  const defectRate_ = parseFloat(defectRate) / 100;
-  const workHourRatio_ = parseFloat(workHourRatio) / 100;
+  const defectRate_ = convertToPercentage(defectRate);
+  const workHourRatio_ = convertToPercentage(workHourRatio);
 
   const amount = unitPrice * (1 + defectRate_);
   const totalShots =
@@ -273,7 +269,7 @@ function calculateAdditionalFees(transportFees, freightAndCustomsFees) {
  * @param {number} value - 百分比值(1-100或0.01-1)
  * @returns {number} 轉換後的小數(0.01-1)
  */
-function convertToDecimalPercentage(value) {
+function convertToPercentage(value) {
   const numValue = parseFloat(value);
   return numValue >= 1 ? numValue / 100 : numValue;
 }
@@ -317,13 +313,11 @@ function calculateProfitManagement(
   rebatePercentage = 0.02,
   actualQuotation
 ) {
-  const sgAndAdminRate = convertToDecimalPercentage(sgAndAdminPercentage);
-  const profitRate = convertToDecimalPercentage(profitPercentage);
-  const riskRate = convertToDecimalPercentage(riskPercentage);
-  const annualReductionRate = convertToDecimalPercentage(
-    annualReductionPercentage
-  );
-  const rebateRate = convertToDecimalPercentage(rebatePercentage);
+  const sgAndAdminRate = convertToPercentage(sgAndAdminPercentage);
+  const profitRate = convertToPercentage(profitPercentage);
+  const riskRate = convertToPercentage(riskPercentage);
+  const annualReductionRate = convertToPercentage(annualReductionPercentage);
+  const rebateRate = convertToPercentage(rebatePercentage);
 
   const sgAndAdminFee = costSubtotal * sgAndAdminRate;
   const profitFee = (costSubtotal + sgAndAdminFee) * profitRate;

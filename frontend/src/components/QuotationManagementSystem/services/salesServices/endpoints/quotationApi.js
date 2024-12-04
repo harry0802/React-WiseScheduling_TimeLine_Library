@@ -1,3 +1,4 @@
+import { transformResponse } from "../../../utility/commonUtils";
 import apiSlice from "../apiSlice";
 
 export const quotationApi = apiSlice.injectEndpoints({
@@ -11,6 +12,13 @@ export const quotationApi = apiSlice.injectEndpoints({
     getQuotationById: builder.query({
       query: (id) => `salesQuotation/${id}`,
       providesTags: (result, error, id) => [{ type: "Quotation", id }],
+      transformResponse: (response, meta, arg) => {
+        // 強制每次都轉換
+        return transformResponse({
+          ...response,
+          _timestamp: Date.now(), // 加入時間戳確保每次都不同
+        });
+      },
     }),
     // 新增報價單
     // 需要帶入 iso 時間  "createDate": "2024-11-08T00:00:00.000+08:00"

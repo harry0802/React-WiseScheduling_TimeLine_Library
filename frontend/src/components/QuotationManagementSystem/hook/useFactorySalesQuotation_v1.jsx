@@ -206,8 +206,6 @@ export const useQuotationStore = (set, get) => ({
       (sum, detail) => sum + (Number(detail.costSubtotal) || 0),
       0
     );
-    console.log("🚀 ~ useQuotationStore ~ processTotal:", processTotal);
-    console.log("🚀 ~ useQuotationStore ~ costDetails:", costDetails);
     return { processTotal, costDetails };
   },
 
