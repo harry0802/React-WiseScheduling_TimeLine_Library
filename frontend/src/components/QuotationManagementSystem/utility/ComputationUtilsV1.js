@@ -155,6 +155,7 @@ function calculateMoldingCost(
   workHourRatio,
   unitPrice = 3000
 ) {
+  // 把參數轉為百分比 但我要先確保他是沒有被轉換過的數字
   const defectRate_ = parseFloat(defectRate) / 100;
   const workHourRatio_ = parseFloat(workHourRatio) / 100;
 
@@ -164,7 +165,8 @@ function calculateMoldingCost(
     cavityCount *
     workHourRatio_;
 
-  return Number((amount / totalShots).toFixed(3));
+  const moldingCost = amount / totalShots;
+  return { amounts: amount, totalCost: moldingCost };
 }
 
 /**

@@ -50,6 +50,7 @@ const CostResultHandler = {
     SQInPostProcessingCosts
   }
     */
+
     const amountMap = {
       // 運費
       SQMaterialCosts: costSubtotalResult?.materialCostResult?.amounts?.[index],
@@ -187,6 +188,7 @@ const TableDataHandler = {
 
   // 生成小計行
   generateSubtotalRow(section, costSubtotalResult) {
+    console.log("🚀 ~ generateSubtotalRow ~ section:", section);
     if (!section.showSubtotal) return null;
     const subtotalValue = CostResultHandler.getSubtotalValue(
       section.costKey,
