@@ -20,12 +20,7 @@ const useNotificationStore = create((set, get) => ({
    * If the API is available, it triggers a notification with the provided parameters.
    * If the API is not initialized, it logs an error and throws an exception.
    */
-  triggerNotification: ({
-    message,
-    description,
-    notificationStyle,
-    iconOptions,
-  }) => {
+  triggerNotification: ({ message, description, notificationStyle, icon }) => {
     // Get the current API instance from the state
     const api = get().api;
 
@@ -40,7 +35,7 @@ const useNotificationStore = create((set, get) => ({
         placement: "bottomRight",
         duration: 1,
         pauseOnHover: false,
-        icon: iconOptions || (
+        icon: icon || (
           <CheckIcon
             className="notificationStyle__icon"
             style={{

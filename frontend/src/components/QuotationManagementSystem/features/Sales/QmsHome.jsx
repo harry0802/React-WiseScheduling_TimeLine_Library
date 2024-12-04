@@ -5,7 +5,8 @@ import { useFactoryHomeSlice, useSalesHomeSlice } from "../../slice/qmsHome";
 import { useDeleteQuotationMutation } from "../../services/salesServices/endpoints/quotationApi";
 import PmHomeContent from "../../../Global/content/PmHomeContent";
 import ConfirmationDialog from "../../../Global/dialog/BaseDialog";
-
+import useNotification from "../../../ProductionRecord/hook/useNotification";
+import CloseIcon from "@mui/icons-material/Close";
 // 抽離卡片組件，避免不必要的重渲染
 const Card = memo(function Card({ data, onCardClick, onDelete }) {
   return (
@@ -31,6 +32,8 @@ function QmsHome() {
     confirmText: "",
     cancelText: "",
   });
+
+  const { notify } = useNotification();
 
   // 使用 useMemo 記憶 slice hook 的選擇
   const sliceHook = useMemo(
@@ -80,7 +83,21 @@ function QmsHome() {
             message: "報價單刪除成功",
           };
         } catch (error) {
-          console.error("💣💣💣 刪除報價單失敗:", error.message);
+          notify({
+            message: "刪除報價單失敗",
+            description: "此報價單已被使用，無法刪除",
+            icon: (
+              <CloseIcon
+                sx={{
+                  color: "#dc2626", // 更鮮艷的紅色
+                  fontSize: "24px", // 更大的尺寸
+                  fontWeight: "bold",
+                  strokeWidth: "2px",
+                  stroke: "currentColor",
+                }}
+              />
+            ),
+          });
           return {
             success: false,
             error: {
