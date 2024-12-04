@@ -74,30 +74,35 @@ function QmsHome() {
         try {
           const response = await deleteQuotation(id);
           if (response.error) {
+            notify({
+              message: "刪除報價單失敗",
+              description: "此報價單已被使用，無法刪除",
+              icon: (
+                <CloseIcon
+                  sx={{
+                    color: "#dc2626", // 更鮮艷的紅色
+                    fontSize: "24px", // 更大的尺寸
+                    fontWeight: "bold",
+                    strokeWidth: "2px",
+                    stroke: "currentColor",
+                  }}
+                />
+              ),
+            });
             const errorMessage =
               response.error.data?.message || "刪除報價單時發生錯誤";
             throw new Error(errorMessage);
           }
+
+          notify({
+            message: "更新成功",
+            description: "報價單刪除成功",
+          });
           return {
             success: true,
             message: "報價單刪除成功",
           };
         } catch (error) {
-          notify({
-            message: "刪除報價單失敗",
-            description: "此報價單已被使用，無法刪除",
-            icon: (
-              <CloseIcon
-                sx={{
-                  color: "#dc2626", // 更鮮艷的紅色
-                  fontSize: "24px", // 更大的尺寸
-                  fontWeight: "bold",
-                  strokeWidth: "2px",
-                  stroke: "currentColor",
-                }}
-              />
-            ),
-          });
           return {
             success: false,
             error: {
