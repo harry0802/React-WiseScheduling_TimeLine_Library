@@ -18,7 +18,7 @@ const API_ENDPOINTS = {
   MATERIAL_PACKAGINGS: `${API_BASE}material/packagings`,
   MATERIAL_MATERIALS: `${API_BASE}material/materials`,
   MATERIAL_MATERIALUNITPRICE: `${API_BASE}material/materialUnitPrice`,
-  MATERIAL_OPTION: `${API_BASE}materialOption`,
+  MATERIAL_OPTION: `${API_BASE}materialOption/`,
 };
 
 //! =============== 2. 類型與介面 ===============
