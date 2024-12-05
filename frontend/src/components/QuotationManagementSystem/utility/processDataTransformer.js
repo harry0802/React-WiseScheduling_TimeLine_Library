@@ -27,6 +27,35 @@ const transformInjectionMoldingCosts = (costs) =>
   }));
 
 /**
+ * 處理包裝成本數據
+ * @param {Object} item - 包裝成本項目
+ * @returns {Object} - 處理後的包裝成本項目
+ */
+const processPackagingCost = (item) => {
+  const unitLowerCase = item.unit?.toLowerCase();
+
+  // 如果單位是「件」或「個」，則 bagsPerKg 設為 0
+  if (unitLowerCase === "件" || unitLowerCase === "個") {
+    return {
+      ...item,
+      bagsPerKg: 0,
+    };
+  }
+
+  // 如果單位是「公斤」或「磅」，保持原值
+  if (unitLowerCase === "公斤" || unitLowerCase === "磅") {
+    return {
+      ...item,
+    };
+  }
+
+  // 其他情況保持原值
+  return {
+    ...item,
+  };
+};
+
+/**
  * 轉換委外成型製程數據格式
  * @param {Object} data - 原始表單數據
  * @returns {Object} 轉換後的數據
@@ -50,9 +79,7 @@ export const transformOutsourceInjectionData = (data) => {
   }));
 
   // 清理包裝成本數組數據
-  const packagingCosts = data.SQPackagingCosts.map((item) => ({
-    ...item,
-  }));
+  const packagingCosts = data.SQPackagingCosts.map(processPackagingCost);
 
   // 清理委外加工費用數據
   const outPostProcessingCosts = data.SQOutPostProcessingCosts || [];
@@ -91,9 +118,7 @@ export const transformInhousePostProcessData = (data) => {
   }));
 
   // 清理包裝成本數組數據
-  const packagingCosts = data.SQPackagingCosts.map((item) => ({
-    ...item,
-  }));
+  const packagingCosts = data.SQPackagingCosts.map(processPackagingCost);
 
   // 清理廠內加工費用數據
   const inPostProcessingCosts = data.SQInPostProcessingCosts || [];
@@ -132,12 +157,7 @@ export const transformOutsourcePostProcessData = (data) => {
   }));
 
   // 清理包裝成本數組數據
-  const packagingCosts = data.SQPackagingCosts.map((item) => ({
-    ...item,
-
-    unitPrice: item.unitPrice || 0,
-    amount: item.amount,
-  }));
+  const packagingCosts = data.SQPackagingCosts.map(processPackagingCost);
 
   // 清理委外加工費用數據
   const outPostProcessingCosts = data.SQOutPostProcessingCosts || [];
@@ -203,9 +223,7 @@ export const transformInhouseInjectionData = (data) => {
 
   // 4. 包裝成本數組數據
   const packagingCosts = Array.isArray(data.SQPackagingCosts)
-    ? data.SQPackagingCosts.filter(Boolean).map((item) => ({
-        ...item,
-      }))
+    ? data.SQPackagingCosts.filter(Boolean).map(processPackagingCost)
     : [];
 
   // 5. 注塑成型數據

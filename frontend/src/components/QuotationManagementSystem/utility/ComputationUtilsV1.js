@@ -48,8 +48,8 @@ const MATERIAL_TYPES = [
  */
 function calculateMaterialCost(
   items,
-  fluctuationPercentage,
   defectRate,
+  fluctuationPercentage,
   materialWithdrawalFee
 ) {
   if (!items || items.length === 0) {
@@ -58,6 +58,7 @@ function calculateMaterialCost(
       amounts: [],
     };
   }
+  console.log(items, fluctuationPercentage, defectRate, materialWithdrawalFee);
 
   // 使用 convertToPercentage 轉換百分比
   const fluctuationPercentage_ = convertToPercentage(fluctuationPercentage);
@@ -110,13 +111,14 @@ function calculatePackagingCost(items) {
       amounts: [],
     };
   }
+  console.log("🚀 ~ calculatePackagingCost ~ items:", items);
 
   const amounts = items.map((item) => {
     let amount = 0;
 
     if (item.unit === "件" || item.unit === "個") {
       // 單位為「件」「個」時:金額 = 單價 × 數量
-      amount = item.unitPrice * item.quantity;
+      amount = item.unitPrice * item.capacity;
     } else if (item.unit === "公斤" || item.unit === "磅") {
       // 金額 = 單價 / 每公斤幾個袋子 / 容量
       amount = item.unitPrice / item.bagsPerKg / item.capacity;
@@ -124,6 +126,7 @@ function calculatePackagingCost(items) {
 
     return amount || item.amount || 0;
   });
+  console.log("🚀 ~ amounts ~ amounts:", amounts);
 
   return {
     totalCost: amounts.reduce((sum, amt) => sum + amt, 0),
@@ -178,7 +181,6 @@ function calculateMoldingElectricityCost(
   electricityCost
 ) {
   const electricityCost_ = (+electricityCost * +moldingCycle) / +cavityCount;
-
   return Number(electricityCost_.toFixed(3));
 }
 

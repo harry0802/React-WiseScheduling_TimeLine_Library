@@ -67,8 +67,18 @@ export const fieldSchemas = {
     quantity: baseSchemas.positiveInteger,
     unitPrice: baseSchemas.requiredNumber,
     amount: nullableNumber,
-    capacity: baseSchemas.positiveInteger,
-    bagsPerKg: baseSchemas.positiveInteger,
+    capacity: z
+      .number({
+        required_error: "容量為必填",
+        invalid_type_error: "請輸入有效數字",
+      })
+      .min(0, "不能小於 0"),
+    bagsPerKg: z
+      .number({
+        invalid_type_error: "請輸入有效數字",
+      })
+      .nullable()
+      .optional(),
   }),
 
   // 注塑成型成本驗證

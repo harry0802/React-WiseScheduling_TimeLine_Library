@@ -520,13 +520,25 @@ const packagingCostFields = {
     "容量",
     "number",
     createInputProps("件/箱", "容量"),
-    createRequiredRule("容量")
+    {
+      required: "容量為必填",
+      setValueAs: (value) => {
+        if (value === "" || value === null) return null;
+        return Number(value);
+      },
+    }
   ),
   bagsPerKg: createField(
     "bagsPerKg",
     "每公斤袋數",
     "number",
-    createInputProps("袋/公斤", "每公斤袋數")
+    createInputProps("袋/公斤", "每公斤袋數"),
+    {
+      setValueAs: (value) => {
+        if (value === "" || value === null) return null;
+        return Number(value);
+      },
+    }
   ),
   unitPrice: {
     ...createField(

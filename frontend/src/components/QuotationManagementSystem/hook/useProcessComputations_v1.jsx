@@ -23,13 +23,17 @@ export const calculateInHouseMoldingCost = (process) => {
     SQPackagingCosts,
     SQInjectionMoldingCosts,
   } = process;
+  console.log(
+    "🚀 ~ calculateInHouseMoldingCost ~ SQMaterialCostSetting:",
+    SQMaterialCostSetting
+  );
   const moldingData = SQInjectionMoldingCosts[0];
 
   const materialCostResult = calculateMaterialCost(
     SQMaterialCosts,
     SQMaterialCostSetting.estimatedDefectRate,
     SQMaterialCostSetting.estimatedMaterialFluctuation,
-    SQMaterialCostSetting.processingCost
+    SQMaterialCostSetting.extractionCost
   );
 
   const packagingCostResult = calculatePackagingCost(SQPackagingCosts);
@@ -44,8 +48,8 @@ export const calculateInHouseMoldingCost = (process) => {
   );
 
   const moldingElectricityCost = calculateMoldingElectricityCost(
-    moldingData.moldCavity,
     moldingData.cycleTime,
+    moldingData.moldCavity,
     moldingData.electricityCostPerSec
   );
   return {
@@ -80,7 +84,7 @@ export const calculateOutsourcedMoldingCost = (process) => {
     SQMaterialCosts,
     SQMaterialCostSetting.estimatedDefectRate,
     SQMaterialCostSetting.estimatedMaterialFluctuation,
-    SQMaterialCostSetting.processingCost
+    SQMaterialCostSetting.extractionCost
   );
   const packagingCostResult = calculatePackagingCost(SQPackagingCosts);
 
@@ -121,7 +125,7 @@ export const calculateInHousePostProcessingCost = (process) => {
     SQMaterialCosts,
     SQMaterialCostSetting.estimatedDefectRate,
     SQMaterialCostSetting.estimatedMaterialFluctuation,
-    SQMaterialCostSetting.processingCost
+    SQMaterialCostSetting.extractionCost
   );
 
   const packagingCostResult = calculatePackagingCost(SQPackagingCosts);
