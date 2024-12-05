@@ -54,23 +54,42 @@ def generate_quotationSN():
 
 def calculate_subtotalCostWithoutOverhead(salesQuotationId):
     # Get all processes for the salesQuotation
-    processes = SQProcess.query.filter(SQProcess.factoryQuotationId == salesQuotationId).all()
+    processes = SQProcess.query.filter(SQProcess.salesQuotationId == salesQuotationId).all()
     subtotalCostWithoutOverhead = 0
     # Calculate all costs for each process
-    cost_models = [
-        SQMaterialCost,
-        SQPackagingCost,
-        SQInjectionMoldingCost,
-        SQInPostProcessingCost,
-        SQOutPostProcessingCost
-    ]
-
     for process in processes:
-        for model in cost_models:
-            costs = model.query.filter(model.SQProcessId == process.id).all()
-            subtotalCostWithoutOverhead += sum(cost.amount or 0 for cost in costs)
+        # 原物料費用小計(SQMaterialCost) = (「金額」加總 + 抽料費用) * (1+預估不良率)
+        SQMaterialCost_total = 0
+        SQMaterialCostSetting_db = SQMaterialCostSetting.query.filter(SQMaterialCostSetting.SQProcessId == process.id).first()
+        if SQMaterialCostSetting_db:
+            SQMaterialCost_db_list = SQMaterialCost.query.filter(SQMaterialCost.SQProcessId == process.id).all()
+            SQMaterialCost_total = sum([material.amount for material in SQMaterialCost_db_list])
+            SQMaterialCost_total = (SQMaterialCost_total + SQMaterialCostSetting_db.extractionCost) * (1 + SQMaterialCostSetting_db.estimatedDefectRate)
+        # 包材費用小計(SQPackagingCost) = 「金額」加總
+        SQPackagingCost_db_list = SQPackagingCost.query.filter(SQPackagingCost.SQProcessId == process.id).all()
+        SQPackagingCost_total = sum([packaging.amount for packaging in SQPackagingCost_db_list])
+        # 成型加工費用小計(SQInjectionMoldingCost) = 小計 + 電費
+        SQInjectionMoldingCost_db_list = SQInjectionMoldingCost.query.filter(SQInjectionMoldingCost.SQProcessId == process.id).all()
+        SQInjectionMoldingCost_total = sum([injectionMolding.subtotal for injectionMolding in SQInjectionMoldingCost_db_list]) + \
+                                    sum([injectionMolding.electricityCost for injectionMolding in SQInjectionMoldingCost_db_list])
+        # 廠內後製程費用小計(SQInPostProcessingCost) = 「金額」加總
+        SQInPostProcessingCost_db_list = SQInPostProcessingCost.query.filter(SQInPostProcessingCost.SQProcessId == process.id).all()
+        SQInPostProcessingCost_total = sum([inPostProcessing.amount for inPostProcessing in SQInPostProcessingCost_db_list])
+        # 委外後製程費用小計(SQOutPostProcessingCost) = 「金額」加總
+        SQOutPostProcessingCost_db_list = SQOutPostProcessingCost.query.filter(SQOutPostProcessingCost.SQProcessId == process.id).all()
+        SQOutPostProcessingCost_total = sum([outPostProcessing.amount for outPostProcessing in SQOutPostProcessingCost_db_list])
+
+        subtotalCostWithoutOverhead += SQMaterialCost_total + SQPackagingCost_total + \
+                                    SQInjectionMoldingCost_total + SQInPostProcessingCost_total + SQOutPostProcessingCost_total
 
     return subtotalCostWithoutOverhead
+
+
+def update_subtotalCostWithoutOverhead(salesQuotationId):
+    salesQuotation_db = SalesQuotation.query.get(salesQuotationId)
+    salesQuotation_db.subtotalCostWithoutOverhead = calculate_subtotalCostWithoutOverhead(salesQuotationId)
+    db.session.add(salesQuotation_db)
+    db.session.commit()
 
 
 def complete_salesQuotation(db_obj, payload):
@@ -78,6 +97,8 @@ def complete_salesQuotation(db_obj, payload):
         if payload.get("customerName") is not None else db_obj.customerName
     db_obj.productName = payload["productName"] \
         if payload.get("productName") is not None else db_obj.productName
+    db_obj.subtotalCostWithoutOverhead = float(payload["subtotalCostWithoutOverhead"]) \
+        if payload.get("subtotalCostWithoutOverhead") is not None else db_obj.subtotalCostWithoutOverhead
     db_obj.overheadRnd = float(payload["overheadRnd"]) \
         if payload.get("overheadRnd") is not None else db_obj.overheadRnd
     db_obj.profit = float(payload["profit"]) \
@@ -226,6 +247,13 @@ class SalesQuotationService:
             salesQuotation_db = SalesQuotation()
             salesQuotation_db.quotationSN = generate_quotationSN()
             salesQuotation_db.createDate = datetime.fromisoformat(payload["createDate"])
+            # 給予利潤管裡的預設值
+            salesQuotation_db.overheadRnd = 0.07
+            salesQuotation_db.profit = 0.05
+            salesQuotation_db.risk = 0.02
+            salesQuotation_db.annualDiscount = 0.02
+            salesQuotation_db.rebate = 0.02
+            
             db.session.add(salesQuotation_db)
             db.session.flush()
             
@@ -350,6 +378,9 @@ class SalesQuotationService:
             db.session.add_all(add_to_session_list)
             db.session.commit()
 
+            # 更新 SalesQuotation 的 subtotalCostWithoutOverhead
+            update_subtotalCostWithoutOverhead(salesQuotationId)
+
             resp = message(True, "salesQuotation process have been created..")
             return resp, 200
         # exception without handling should raise to the caller
@@ -360,7 +391,7 @@ class SalesQuotationService:
     
     # update SalesQuotationProcess
     @staticmethod
-    def update_salesQuotationProcess(payload):
+    def update_salesQuotationProcess(salesQuotationId, payload):
         try:
             # Get the process category from payload["id"]
             process_db = SQProcess.query.get(payload["id"])
@@ -414,6 +445,9 @@ class SalesQuotationService:
                 db.session.delete(delete_session)
             db.session.commit()
 
+            # 更新 SalesQuotation 的 subtotalCostWithoutOverhead
+            update_subtotalCostWithoutOverhead(salesQuotationId)
+
             resp = message(True, "salesQuotation process have been updated..")
             return resp, 200
         # exception without handling should raise to the caller
@@ -424,7 +458,7 @@ class SalesQuotationService:
 
     # update SalesQuotationProcess
     @staticmethod
-    def delete_salesQuotationProcess(SQProcessId):
+    def delete_salesQuotationProcess(salesQuotationId, SQProcessId):
         try:
             # Retrieve main SQProcess record
             if (SQProcess_db := SQProcess.query.get(SQProcessId)) is None:
@@ -466,6 +500,9 @@ class SalesQuotationService:
             # Delete the main SQProcess record
             db.session.delete(SQProcess_db)
             db.session.commit()
+
+            # 更新 SalesQuotation 的 subtotalCostWithoutOverhead
+            update_subtotalCostWithoutOverhead(salesQuotationId)
 
             resp = message(True, "salesQuotation process has been deleted.")
             return resp, 200

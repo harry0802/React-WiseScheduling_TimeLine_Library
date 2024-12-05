@@ -296,25 +296,46 @@ def calculate_subtotalCostWithoutOverhead(factoryQuotationId):
     processes = FQProcess.query.filter(FQProcess.factoryQuotationId == factoryQuotationId).all()
     subtotalCostWithoutOverhead = 0
     # Calculate all costs for each process
-    cost_models = [
-        FQMaterialCost,
-        FQPackagingCost,
-        FQInjectionMoldingCost,
-        FQInPostProcessingCost,
-        FQOutPostProcessingCost
-    ]
-
     for process in processes:
-        for model in cost_models:
-            costs = model.query.filter(model.FQProcessId == process.id).all()
-            subtotalCostWithoutOverhead += sum(cost.amount or 0 for cost in costs)
+        # 原物料費用小計(FQMaterialCost) = (「金額」加總 + 抽料費用) * (1+預估不良率)
+        FQMaterialCost_total = 0
+        FQMaterialCostSetting_db = FQMaterialCostSetting.query.filter(FQMaterialCostSetting.FQProcessId == process.id).first()
+        if FQMaterialCostSetting_db:
+            FQMaterialCost_db_list = FQMaterialCost.query.filter(FQMaterialCost.FQProcessId == process.id).all()
+            FQMaterialCost_total = sum([material.amount for material in FQMaterialCost_db_list])
+            FQMaterialCost_total = (FQMaterialCost_total + FQMaterialCostSetting_db.extractionCost) * (1 + FQMaterialCostSetting_db.estimatedDefectRate)
+        # 包材費用小計(FQPackagingCost) = 「金額」加總
+        FQPackagingCost_db_list = FQPackagingCost.query.filter(FQPackagingCost.FQProcessId == process.id).all()
+        FQPackagingCost_total = sum([packaging.amount for packaging in FQPackagingCost_db_list])
+        # 成型加工費用小計(FQInjectionMoldingCost) = 小計 + 電費
+        FQInjectionMoldingCost_db_list = FQInjectionMoldingCost.query.filter(FQInjectionMoldingCost.FQProcessId == process.id).all()
+        FQInjectionMoldingCost_total = sum([injectionMolding.subtotal for injectionMolding in FQInjectionMoldingCost_db_list]) + \
+                                    sum([injectionMolding.electricityCost for injectionMolding in FQInjectionMoldingCost_db_list])
+        # 廠內後製程費用小計(FQInPostProcessingCost) = 「金額」加總
+        FQInPostProcessingCost_db_list = FQInPostProcessingCost.query.filter(FQInPostProcessingCost.FQProcessId == process.id).all()
+        FQInPostProcessingCost_total = sum([inPostProcessing.amount for inPostProcessing in FQInPostProcessingCost_db_list])
+        # 委外後製程費用小計(FQOutPostProcessingCost) = 「金額」加總
+        FQOutPostProcessingCost_db_list = FQOutPostProcessingCost.query.filter(FQOutPostProcessingCost.FQProcessId == process.id).all()
+        FQOutPostProcessingCost_total = sum([outPostProcessing.amount for outPostProcessing in FQOutPostProcessingCost_db_list])
+
+        subtotalCostWithoutOverhead += FQMaterialCost_total + FQPackagingCost_total + \
+                                    FQInjectionMoldingCost_total + FQInPostProcessingCost_total + FQOutPostProcessingCost_total
 
     return subtotalCostWithoutOverhead
+
+
+def update_subtotalCostWithoutOverhead(factoryQuotationId):
+    factoryQuotation_db = FactoryQuotation.query.get(factoryQuotationId)
+    factoryQuotation_db.subtotalCostWithoutOverhead = calculate_subtotalCostWithoutOverhead(factoryQuotationId)
+    db.session.add(factoryQuotation_db)
+    db.session.commit()
 
 
 def complete_factoryQuotation(db_obj, payload):
     db_obj.customerName = payload["customerName"] \
         if payload.get("customerName") is not None else db_obj.customerName
+    db_obj.productSN = payload["productSN"] \
+        if payload.get("productSN") is not None else db_obj.productSN
     db_obj.productName = payload["productName"] \
         if payload.get("productName") is not None else db_obj.productName
     db_obj.subtotalCostWithoutOverhead = float(payload["subtotalCostWithoutOverhead"]) \
@@ -448,6 +469,9 @@ class FactoryQuotationService:
                 process_dump_list.append(process_dump)
             
             db.session.commit()
+
+            # 更新 FactoryQuotation 的 subtotalCostWithoutOverhead
+            update_subtotalCostWithoutOverhead(factoryQuotationId)
         
             factoryQuotation_db.processes = process_dump_list
             factoryQuotation_dto = factoryQuotation_schema.dump(factoryQuotation_db)
@@ -581,6 +605,12 @@ class FactoryQuotationService:
             factoryQuotation_db = FactoryQuotation()
             factoryQuotation_db.quotationSN = generate_quotationSN()
             factoryQuotation_db.createDate = datetime.fromisoformat(payload["createDate"])
+            # 給予利潤管裡的預設值
+            factoryQuotation_db.overheadRnd = 0.07
+            factoryQuotation_db.profit = 0.05
+            factoryQuotation_db.risk = 0.02
+            factoryQuotation_db.annualDiscount = 0.02
+            factoryQuotation_db.rebate = 0.02
             db.session.add(factoryQuotation_db)
             db.session.flush()
             
@@ -657,7 +687,7 @@ class FactoryQuotationService:
     
     # update FactoryQuotationProcess
     @staticmethod
-    def update_factoryQuotationProcess(payload):
+    def update_factoryQuotationProcess(factoryQuotationId, payload):
         try:
             # Get the process category from payload["id"]
             process_db = FQProcess.query.get(payload["id"])
@@ -713,6 +743,9 @@ class FactoryQuotationService:
             for deleted_session in deleted_session_list:
                 db.session.delete(deleted_session)
             db.session.commit()
+
+            # 更新 FactoryQuotation 的 subtotalCostWithoutOverhead
+            update_subtotalCostWithoutOverhead(factoryQuotationId)
 
             resp = message(True, "factoryQuotation process have been updated..")
             return resp, 200
