@@ -665,7 +665,7 @@ class FactoryQuotationService:
             if(factoryQuotation_db := FactoryQuotation.query.get(factoryQuotationId)) is None:
                 return err_resp("factoryQuotation not found", "factoryQuotation_404", 404)
             # check if factoryQuotation is empty, except quotationSN and createDate
-            if factoryQuotation_db.customerName is not None or factoryQuotation_db.productName is not None or factoryQuotation_db.overheadRnd is not None or factoryQuotation_db.profit is not None or factoryQuotation_db.risk is not None or factoryQuotation_db.annualDiscount is not None or factoryQuotation_db.rebate is not None or factoryQuotation_db.actualQuotation is not None:
+            if factoryQuotation_db.customerName is not None or factoryQuotation_db.productSN is not None or factoryQuotation_db.productName is not None:
                 return err_resp("factoryQuotation cannot be deleted", "factoryQuotation_409", 409)
             
             # delete freight and customsDuty
