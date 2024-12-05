@@ -21,10 +21,10 @@ const QmsBasePage = ({ type }) => {
 
   const breadcrumbs = [
     {
-      to: "/SalesQuotationManagementSystem",
+      to: "/FactoryQuotationManagementSystem",
       label: type === "create" ? "產品資訊建立" : "產品資訊維護",
     },
-    { label: "業務報價管理系統" },
+    { label: "工廠報價管理系統" },
   ];
 
   if (loading) return <Spin size="large" />;
@@ -33,7 +33,7 @@ const QmsBasePage = ({ type }) => {
     <ProductAddtionLayout breadcrumbs={breadcrumbs}>
       <QmsDashbord costAndQuotation={costAndQuotation} />
       <QmsPdInfo
-        type="sales"
+        type="factory"
         onUpdate={handleUpdate}
         productData={productData}
         BusinessQuotationStore={useBusinessQuotationStore}
