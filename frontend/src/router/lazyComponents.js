@@ -105,8 +105,8 @@ export const FactoryQmsAddtions = lazyImport(() =>
     "../components/QuotationManagementSystem/features/Factory/FactoryQmsAddtions"
   )
 );
-export const QmsAddtions = lazyImport(() =>
-  import(
-    "../components/QuotationManagementSystem/features/Sales/QmsAddtionInfos"
-  )
-);
+// export const QmsAddtions = lazyImport(() =>
+//   import(
+//     "../components/QuotationManagementSystem/features/Sales/QmsAddtionInfos"
+//   )
+// );

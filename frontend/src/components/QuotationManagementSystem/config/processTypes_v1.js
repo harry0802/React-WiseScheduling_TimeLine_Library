@@ -314,16 +314,12 @@ export const FORM_CONFIGURATIONS = {
   TRANSPORTATION: new FormSection("運輸費用與貨運關稅", [
     new TodoListFormItem(
       "運輸費用",
-      commonSections.freightCosts.fields.filter(
-        (field) => field.name !== "fuelCostPerKM"
-      ),
+      commonSections.freightCosts.fields,
       "SQFreightCosts"
     ),
     new TodoListFormItem(
       "貨運關稅",
-      commonSections.customsDutyCosts.fields.filter(
-        (field) => field.name !== "freight"
-      ),
+      commonSections.customsDutyCosts.fields,
       "SQCustomsDutyCosts"
     ),
   ]),

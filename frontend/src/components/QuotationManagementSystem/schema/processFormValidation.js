@@ -126,14 +126,14 @@ export const fieldSchemas = {
   // 委外加工成本驗證
   outsourcedProcessingCost: z.object({
     unitPrice: baseSchemas.requiredNumber,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
   }),
 
   // 廠內加工成本驗證
   internalProcessingCost: z.object({
     workSecond: baseSchemas.requiredNumber,
     unitPrice: baseSchemas.requiredNumber,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
   }),
 
   // 保留原有運輸相關驗證

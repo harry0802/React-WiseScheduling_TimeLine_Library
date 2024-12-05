@@ -6,6 +6,8 @@
  * 3. 所有數值精度到小數點後三位(第四位四捨五入)
  */
 
+import { convertToDisplayPercentage } from "./commonUtils";
+
 /**
  * 通用單位列表
  * @constant {Array<{value: string, label: string}>}
@@ -324,7 +326,16 @@ function calculateProfitManagement(
   const totalCost = subtotalWithSGA + riskFee;
   const annualReductionAmount = totalCost * (1 + annualReductionRate);
   const rebateAmount = annualReductionAmount * (1 + rebateRate);
-  const grossProfitMargin = (actualQuotation - costSubtotal) / costSubtotal;
+
+  // 實際毛利率=(「實際報價」-「成本小計(不含) 」)/「成本小計(不含)」
+  const grossProfitMargin = convertToDisplayPercentage(
+    (actualQuotation - costSubtotal) / costSubtotal
+  );
+
+  // 估算毛利率=(「總成本」-「成本小計(不含) 」)/「成本小計(不含) 」)
+  const estimatedGrossProfitMargin = convertToDisplayPercentage(
+    (totalCost - costSubtotal) / costSubtotal
+  );
 
   return {
     costSubtotal: formatToThreeDecimals(costSubtotal),
@@ -336,6 +347,9 @@ function calculateProfitManagement(
     annualReductionAmount: formatToThreeDecimals(annualReductionAmount),
     rebateAmount: formatToThreeDecimals(rebateAmount),
     grossProfitMargin: formatToThreeDecimals(grossProfitMargin),
+    estimatedGrossProfitMargin: formatToThreeDecimals(
+      estimatedGrossProfitMargin
+    ),
   };
 }
 

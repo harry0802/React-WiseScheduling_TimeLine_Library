@@ -23,10 +23,6 @@ export const calculateInHouseMoldingCost = (process) => {
     SQPackagingCosts,
     SQInjectionMoldingCosts,
   } = process;
-  console.log(
-    "🚀 ~ calculateInHouseMoldingCost ~ SQMaterialCostSetting:",
-    SQMaterialCostSetting
-  );
   const moldingData = SQInjectionMoldingCosts[0];
 
   const materialCostResult = calculateMaterialCost(

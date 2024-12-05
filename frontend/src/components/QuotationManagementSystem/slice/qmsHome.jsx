@@ -84,7 +84,7 @@ export const useFactoryHomeSlice = create(
     (set, get) => ({
       queryParams: DEFAULT_PARAMS,
       pagination: DEFAULT_PAGINATION,
-      pageStatus: "工廠報價管理系統",
+      pageStatus: "工廠報價單管理系統",
       type: "factory",
       ...factoryHomeActions(set, get),
     }),

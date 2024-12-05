@@ -19,6 +19,7 @@ const PROFIT_FIELDS = {
   SUBTOTAL_WITH_SGA: "subtotalWithSGA",
   SUBTOTAL_WITH_COSTS: "subtotalWithCosts",
   GROSS_PROFIT_MARGIN: "grossProfitMargin",
+  ESTIMATED_GROSS_PROFIT_MARGIN: "estimatedGrossProfitMargin",
 };
 
 //! =============== 2. 工具函數 ===============
@@ -112,8 +113,13 @@ const generateProfitDataArray = ({
   },
   {
     key: PROFIT_FIELDS.GROSS_PROFIT_MARGIN,
-    label: "毛利率",
+    label: "實際毛利率",
     value: formatPercentage(calculationResults?.grossProfitMargin),
+  },
+  {
+    key: PROFIT_FIELDS.ESTIMATED_GROSS_PROFIT_MARGIN,
+    label: "估算毛利率",
+    value: formatPercentage(calculationResults?.estimatedGrossProfitMargin),
   },
 ];
 
@@ -139,7 +145,6 @@ export function useProfitCalculation(
     actualQuotation,
     calculationResults,
   } = BusinessQuotationStore();
-
   //* 計算各項百分比
   const percentages = useMemo(
     () => ({
@@ -162,7 +167,6 @@ export function useProfitCalculation(
       }),
     [actualQuotation, percentages, calculationResults]
   );
-
   //* 處理表單提交
   const handleFormSubmit = useCallback(
     (values) => {

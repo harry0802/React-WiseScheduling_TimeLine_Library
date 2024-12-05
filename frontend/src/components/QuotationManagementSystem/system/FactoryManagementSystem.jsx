@@ -13,11 +13,12 @@ import { useNavigate } from "react-router-dom";
 //! =============== 2. 常量定義 ===============
 const ROUTES = {
   BASE_PATH: "/FactoryQuotationManagementSystem",
+  CREATE: "create",
 };
 
 //! =============== 3. 核心組件 ===============
 function FactoryManagementSystem() {
-  const { updateSearchParams } = useFactoryHomeSlice();
+  const { updateSearchParams, pageStatus } = useFactoryHomeSlice();
   const [createQuotation] = useCreateQuotationMutation();
 
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ function FactoryManagementSystem() {
     });
     const quotationId = response?.data?.data?.id;
     if (quotationId) {
-      navigate(`${ROUTES.CREATE}/${quotationId}`);
+      navigate(`${ROUTES.BASE_PATH}/${ROUTES.CREATE}/${quotationId}`);
     }
   };
 
@@ -41,7 +42,7 @@ function FactoryManagementSystem() {
   ];
 
   return (
-    <SharedManagementSystem currentRouter={routes}>
+    <SharedManagementSystem title={pageStatus} currentRouter={routes}>
       <QmsHome />
     </SharedManagementSystem>
   );
