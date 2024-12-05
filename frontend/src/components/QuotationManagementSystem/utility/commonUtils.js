@@ -31,19 +31,19 @@ export const transformResponse = (response) => {
       processes: data.processes?.map((process) => ({
         ...process,
         SQMaterialCostSetting: {
-          ...process.SQMaterialCostSetting,
+          ...process?.SQMaterialCostSetting,
           estimatedDefectRate: convertToDisplayPercentage(
-            process.SQMaterialCostSetting.estimatedDefectRate
+            process?.SQMaterialCostSetting?.estimatedDefectRate
           ),
           estimatedMaterialFluctuation: convertToDisplayPercentage(
-            process.SQMaterialCostSetting.estimatedMaterialFluctuation
+            process?.SQMaterialCostSetting?.estimatedMaterialFluctuation
           ),
         },
-        SQInjectionMoldingCosts: process.SQInjectionMoldingCosts?.map(
+        SQInjectionMoldingCosts: process?.SQInjectionMoldingCosts?.map(
           (cost) => ({
             ...cost,
-            workHoursRatio: convertToDisplayPercentage(cost.workHoursRatio),
-            defectiveRate: convertToDisplayPercentage(cost.defectiveRate),
+            workHoursRatio: convertToDisplayPercentage(cost?.workHoursRatio),
+            defectiveRate: convertToDisplayPercentage(cost?.defectiveRate),
           })
         ),
       })),

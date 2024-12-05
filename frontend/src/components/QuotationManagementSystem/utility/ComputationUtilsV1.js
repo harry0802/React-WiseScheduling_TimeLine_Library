@@ -111,8 +111,6 @@ function calculatePackagingCost(items) {
       amounts: [],
     };
   }
-  console.log("🚀 ~ calculatePackagingCost ~ items:", items);
-
   const amounts = items.map((item) => {
     let amount = 0;
 
@@ -126,8 +124,6 @@ function calculatePackagingCost(items) {
 
     return amount || item.amount || 0;
   });
-  console.log("🚀 ~ amounts ~ amounts:", amounts);
-
   return {
     totalCost: amounts.reduce((sum, amt) => sum + amt, 0),
     amounts,
