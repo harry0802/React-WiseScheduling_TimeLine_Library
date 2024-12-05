@@ -5,19 +5,20 @@
  * @lastModified 2024-03-21
  */
 
+import { API_BASE } from "../../../store/api/apiConfig";
+
 //! =============== 1. 設定與常量 ===============
-const API_BASE_URL = "http://localhost:5000/api";
 
 //* API 端點配置
 const API_ENDPOINTS = {
-  MATERIAL_UNIT: `${API_BASE_URL}/option/materialUnit`,
-  PACKAGING_UNIT: `${API_BASE_URL}/option/packagingUnit`,
-  MACHINE_LIST: `${API_BASE_URL}/machine/list`,
-  MACHINE_DETAIL: `${API_BASE_URL}/machine`,
-  MATERIAL_PACKAGINGS: `${API_BASE_URL}/material/packagings`,
-  MATERIAL_MATERIALS: `${API_BASE_URL}/material/materials`,
-  MATERIAL_MATERIALUNITPRICE: `${API_BASE_URL}/material/materialUnitPrice`,
-  MATERIAL_OPTION: `${API_BASE_URL}/materialOption`,
+  MATERIAL_UNIT: `${API_BASE}/option/materialUnit`,
+  PACKAGING_UNIT: `${API_BASE}/option/packagingUnit`,
+  MACHINE_LIST: `${API_BASE}/machine/list`,
+  MACHINE_DETAIL: `${API_BASE}/machine`,
+  MATERIAL_PACKAGINGS: `${API_BASE}/material/packagings`,
+  MATERIAL_MATERIALS: `${API_BASE}/material/materials`,
+  MATERIAL_MATERIALUNITPRICE: `${API_BASE}/material/materialUnitPrice`,
+  MATERIAL_OPTION: `${API_BASE}/materialOption`,
 };
 
 //! =============== 2. 類型與介面 ===============

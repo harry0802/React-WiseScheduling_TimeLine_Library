@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useCallback, useMemo } from "react";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
 import { useFactoryHomeSlice, useSalesHomeSlice } from "../slice/qmsHome";
 import { useGetCustomersQuery } from "../services/salesServices/endpoints/customerApi";
