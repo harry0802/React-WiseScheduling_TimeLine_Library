@@ -100,9 +100,14 @@ export const FactoryQmsHome = lazyImport(() =>
     "../components/QuotationManagementSystem/features/Factory/FactoryQmsHome"
   )
 );
-export const FactoryQmsAddtions = lazyImport(() =>
+export const FactoryQmsCreate = lazyImport(() =>
   import(
-    "../components/QuotationManagementSystem/features/Factory/FactoryQmsAddtions"
+    "../components/QuotationManagementSystem/features/Factory/FactoryQmsCreate"
+  )
+);
+export const FactoryQmsMaintain = lazyImport(() =>
+  import(
+    "../components/QuotationManagementSystem/features/Factory/FactoryQmsMaintain"
   )
 );
 // export const QmsAddtions = lazyImport(() =>

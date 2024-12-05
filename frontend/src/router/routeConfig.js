@@ -120,13 +120,22 @@ const routeConfig = [
         children: [
           {
             index: true,
+            replace: true,
             element: <LazyComponents.FactoryQmsHome />,
           },
           {
-            path: "addProductInfo/:productId",
+            path: "create/:productId",
             element: (
               <React.Suspense fallback={<div> Loading... </div>}>
-                <LazyComponents.FactoryQmsAddtions />
+                <LazyComponents.FactoryQmsCreate mode="create" />
+              </React.Suspense>
+            ),
+          },
+          {
+            path: "edit/:productId",
+            element: (
+              <React.Suspense fallback={<div> Loading... </div>}>
+                <LazyComponents.FactoryQmsMaintain mode="edit" />
               </React.Suspense>
             ),
           },

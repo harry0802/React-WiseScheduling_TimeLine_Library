@@ -1,5 +1,5 @@
 import FactoryQmsBasePage from "./FactoruQmsBasePage";
 
-const QmsMaintain = () => <FactoryQmsBasePage type="maintain" />;
+const FactoryQmsMaintain = () => <FactoryQmsBasePage mode="maintain" />;
 
-export default QmsMaintain;
+export default FactoryQmsMaintain;

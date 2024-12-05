@@ -10,9 +10,11 @@ services/
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE } from "../../../../store/api/apiConfig";
 
-export const apiSlice = createApi({
-  reducerPath: "api",
+const factoryQuotationApiSlice = createApi({
+  reducerPath: "factoryQuotationApi",
   baseQuery: fetchBaseQuery({ baseUrl: API_BASE }),
   tagTypes: ["Quotation", "Process", "Shipping"],
   endpoints: () => ({}),
 });
+
+export default factoryQuotationApiSlice;

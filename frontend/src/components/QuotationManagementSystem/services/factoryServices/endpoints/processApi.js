@@ -1,6 +1,6 @@
-import { apiSlice } from "../apiSlice";
+import factoryQuotationApiSlice from "../apiSlice";
 
-export const processApi = apiSlice.injectEndpoints({
+export const processApi = factoryQuotationApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     syncProcess: builder.mutation({
       query: ({ quotationId, productSN }) => ({

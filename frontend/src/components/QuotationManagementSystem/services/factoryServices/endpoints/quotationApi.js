@@ -1,6 +1,6 @@
-import { apiSlice } from "../apiSlice";
+import factoryQuotationApiSlice from "../apiSlice";
 
-export const quotationApi = apiSlice.injectEndpoints({
+export const quotationApi = factoryQuotationApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // ! 這邊後端將會編寫新的 API 來取代
     getQuotations: builder.query({

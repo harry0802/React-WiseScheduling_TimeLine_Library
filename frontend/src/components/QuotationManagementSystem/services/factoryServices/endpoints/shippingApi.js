@@ -1,6 +1,6 @@
-import { apiSlice } from "../apiSlice";
+import factoryQuotationApiSlice from "../apiSlice";
 
-export const shippingApi = apiSlice.injectEndpoints({
+export const shippingApi = factoryQuotationApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     updateShipping: builder.mutation({
       query: ({ quotationId, data }) => ({

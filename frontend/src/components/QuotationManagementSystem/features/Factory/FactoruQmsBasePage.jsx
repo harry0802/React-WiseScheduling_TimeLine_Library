@@ -4,9 +4,11 @@ import QmsPdInfo from "../../components/QmsPdInfo";
 import QmsProfitDashboard from "../../components/ProfitDashboard/QmsProfitDashboard";
 import { ProcessCostAnalysis } from "../../components/ProcessCostAnalysis";
 import AddIcon from "@mui/icons-material/Add";
-import { useBusinessQuotationStore } from "../../slice/useFactorySalesQuotationSlice_v1";
+import { useInternalQuotationStore } from "../../slice/useFactorySalesQuotationSlice_v1";
 import { Spin } from "antd";
 import { useQmsBase } from "../../hook/useQmsBase";
+import { useFactoryHomeSlice } from "../../slice/qmsHome";
+import { useFactoryApi } from "./useFactoryApi";
 
 const QmsBasePage = ({ type }) => {
   const {
@@ -17,7 +19,12 @@ const QmsBasePage = ({ type }) => {
     productData,
     loading,
     handleUpdateProfitManagement,
-  } = useQmsBase(type);
+  } = useQmsBase(
+    type,
+    useInternalQuotationStore,
+    useFactoryHomeSlice,
+    useFactoryApi
+  );
 
   const breadcrumbs = [
     {
@@ -36,17 +43,17 @@ const QmsBasePage = ({ type }) => {
         type="factory"
         onUpdate={handleUpdate}
         productData={productData}
-        BusinessQuotationStore={useBusinessQuotationStore}
+        BusinessQuotationStore={useInternalQuotationStore}
       />
       <QmsProfitDashboard
         totalCostnoMarketing={totalCostnoMarketing}
         setCostAndQuotation={setCostAndQuotation}
-        BusinessQuotationStore={useBusinessQuotationStore}
+        BusinessQuotationStore={useInternalQuotationStore}
         handleUpdateProfitManagement={handleUpdateProfitManagement}
       />
       <ProcessCostAnalysis
         icon={<AddIcon />}
-        quotationSlice={useBusinessQuotationStore}
+        quotationSlice={useInternalQuotationStore}
       />
     </ProductAddtionLayout>
   );

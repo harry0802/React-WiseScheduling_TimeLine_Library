@@ -1,5 +1,5 @@
-import FactoryQmsBasePage from "./FactoryQmsBasePage";
+import FactoruQmsBasePage from "./FactoruQmsBasePage";
 
-const QmsCreate = () => <FactoryQmsBasePage type="create" />;
+const FactoryQmsCreate = () => <FactoruQmsBasePage mode="create" />;
 
-export default QmsCreate;
+export default FactoryQmsCreate;

@@ -6,11 +6,9 @@ import {
   calculatePackagingCost,
   calculateMoldingCost,
   calculateMoldingElectricityCost,
-  calculatePostProcessingCost,
   calculateAdditionalFees,
   calculateProfitManagement,
 } from "../utility/ComputationUtilsV1";
-
 /**
  * 計算廠內成型成本
  * @param {Object} process - 製程資料
