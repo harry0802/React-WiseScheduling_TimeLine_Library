@@ -278,13 +278,13 @@ class SalesQuotationDto:
         shippingCost_put_obj[key].required = False
     # SQFreight_obj
     put_SQFreight_obj = copy.deepcopy(SQFreight_obj)
-    SQFreight_pop_list = ["salesQuotationId"]
+    SQFreight_pop_list = ["salesQuotationId", "amount"]
     for attr in [item for item in SQFreight_pop_list]:
         put_SQFreight_obj.pop(attr)
     shippingCost_put_obj["SQFreights"] = fields.List(fields.Nested(api.model("put_SQFreight_obj object", put_SQFreight_obj)))
     # SQCustomsDuty_obj
     put_SQCustomsDuty_obj = copy.deepcopy(SQCustomsDuty_obj)
-    SQCustomsDuty_pop_list = ["salesQuotationId"]
+    SQCustomsDuty_pop_list = ["salesQuotationId", "amount"]
     for attr in [item for item in SQCustomsDuty_pop_list]:
         put_SQCustomsDuty_obj.pop(attr)
     shippingCost_put_obj["SQCustomsDuties"] = fields.List(fields.Nested(api.model("put_SQCustomsDuty_obj object", put_SQCustomsDuty_obj)))

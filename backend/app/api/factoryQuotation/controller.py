@@ -133,7 +133,7 @@ class FactoryQuotationProcessController(Resource):
     @api.expect(FQProcess_put, validate=True)
     @controller_entrance_log(description="Update factoryQuotation process")
     def put(self, factoryQuotationId):
-        return FactoryQuotationService.update_factoryQuotationProcess(api.payload)
+        return FactoryQuotationService.update_factoryQuotationProcess(factoryQuotationId, api.payload)
 
 
 

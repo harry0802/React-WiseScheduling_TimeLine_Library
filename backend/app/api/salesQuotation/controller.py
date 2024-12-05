@@ -152,7 +152,7 @@ class SalesQuotationProcessController(Resource):
     @api.expect(SQProcess_put, validate=True)
     @controller_entrance_log(description="Update salesQuotatio process")
     def put(self, salesQuotationId):
-        return SalesQuotationService.update_salesQuotationProcess(api.payload)
+        return SalesQuotationService.update_salesQuotationProcess(salesQuotationId, api.payload)
 
 
 @api.route("/<int:salesQuotationId>/process/<int:SQProcessId>")
@@ -170,7 +170,7 @@ class SalesQuotationProcessController(Resource):
     )
     @controller_entrance_log(description="Delete salesQuotatio process")
     def delete(self, salesQuotationId, SQProcessId):
-        return SalesQuotationService.delete_salesQuotationProcess(SQProcessId)
+        return SalesQuotationService.delete_salesQuotationProcess(salesQuotationId, SQProcessId)
     
 
 
