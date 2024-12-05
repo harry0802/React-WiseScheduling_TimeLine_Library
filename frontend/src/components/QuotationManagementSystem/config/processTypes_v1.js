@@ -237,7 +237,9 @@ export const FORM_CONFIGURATIONS = {
     ),
     new TodoListFormItem(
       "委外加工費",
-      commonSections.outsourcedProcessingCosts.fields,
+      commonSections.outsourcedProcessingCosts.fields.filter(
+        (field) => field.name !== "amount"
+      ),
       "SQOutPostProcessingCosts"
     ),
   ]),
@@ -263,7 +265,9 @@ export const FORM_CONFIGURATIONS = {
     ),
     new TodoListFormItem(
       "廠內加工費",
-      commonSections.internalProcessingCosts.fields,
+      commonSections.internalProcessingCosts.fields.filter(
+        (field) => field.name !== "amount"
+      ),
       "SQInPostProcessingCosts"
     ),
   ]),
@@ -288,7 +292,9 @@ export const FORM_CONFIGURATIONS = {
     ),
     new TodoListFormItem(
       "委外加工費",
-      commonSections.outsourcedProcessingCosts.fields,
+      commonSections.outsourcedProcessingCosts.fields.filter(
+        (field) => field.name !== "amount"
+      ),
       "SQOutPostProcessingCosts"
     ),
   ]),
@@ -297,7 +303,9 @@ export const FORM_CONFIGURATIONS = {
   [PROCESS_CATEGORY_OPTION[4].category]: new FormSection("廠內出貨檢驗", [
     new TodoListFormItem(
       "檢驗費用",
-      commonSections.internalProcessingCosts.fields,
+      commonSections.internalProcessingCosts.fields.filter(
+        (field) => field.name !== "amount"
+      ),
       "SQInPostProcessingCosts"
     ),
   ]),

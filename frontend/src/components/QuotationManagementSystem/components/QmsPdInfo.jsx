@@ -103,7 +103,7 @@ const QmsPdInfo = React.memo(({ type, onUpdate, BusinessQuotationStore }) => {
     if (!product) return null;
 
     const fields = [
-      { label: "產品序號", value: product.productNumber },
+      { label: "產品編號", value: product.productNumber },
       { label: "產品名稱", value: product.productName },
       { label: "客戶名稱", value: product.customerName },
     ].filter(Boolean);

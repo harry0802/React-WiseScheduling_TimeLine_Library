@@ -24,7 +24,8 @@ const useNotificationStore = create((set, get) => ({
     message,
     description,
     notificationStyle,
-    iconOptions,
+    icon,
+    seconds,
   }) => {
     // Get the current API instance from the state
     const api = get().api;
@@ -38,9 +39,9 @@ const useNotificationStore = create((set, get) => ({
         className: "notificationStyle", // Optional class name for custom styling
         style: notificationStyle || { width: 600 }, // Apply custom or default styles
         placement: "bottomRight",
-        duration: 1,
+        duration: seconds || 1,
         pauseOnHover: false,
-        icon: iconOptions || (
+        icon: icon || (
           <CheckIcon
             className="notificationStyle__icon"
             style={{

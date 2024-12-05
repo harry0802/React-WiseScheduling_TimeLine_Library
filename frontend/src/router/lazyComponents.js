@@ -81,7 +81,7 @@ export const SalesQuotationManagementSystem = lazyImport(() =>
   import("../pages/SalesQuotationManagementSystemPage")
 );
 export const SalesQmsHome = lazyImport(() =>
-  import("../components/QuotationManagementSystem/features/QmsHome")
+  import("../components/QuotationManagementSystem/features/Sales/QmsHome")
 );
 export const SalesQmsCreate = lazyImport(() =>
   import("../components/QuotationManagementSystem/features/Sales/QmsCreate")
@@ -96,15 +96,17 @@ export const FactoryQuotationManagementSystem = lazyImport(() =>
   import("../pages/FactoryQuotationManagementSystemPage")
 );
 export const FactoryQmsHome = lazyImport(() =>
-  import("../components/QuotationManagementSystem/features/QmsHome")
+  import(
+    "../components/QuotationManagementSystem/features/Factory/FactoryQmsHome"
+  )
 );
 export const FactoryQmsAddtions = lazyImport(() =>
   import(
     "../components/QuotationManagementSystem/features/Factory/FactoryQmsAddtions"
   )
 );
-export const QmsAddtions = lazyImport(() =>
-  import(
-    "../components/QuotationManagementSystem/features/Sales/QmsAddtionInfos"
-  )
-);
+// export const QmsAddtions = lazyImport(() =>
+//   import(
+//     "../components/QuotationManagementSystem/features/Sales/QmsAddtionInfos"
+//   )
+// );

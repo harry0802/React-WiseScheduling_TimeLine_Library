@@ -123,6 +123,8 @@ export const useQmsBase = (mode = "create") => {
    */
   const handleUpdate = useCallback(
     (formData) => {
+      //* 處理客戶名稱
+      // 如果客戶名稱是物件，則取 label 值
       const customerName =
         formData.customerName && typeof formData.customerName === "object"
           ? formData.customerName.label

@@ -4,6 +4,7 @@ import { Typography, Box } from "@mui/material";
 import QmsCasTable from "../../Global/table/QmsCasTable";
 import { PROCESS_TABLE_CONFIG } from "../config/ProcessTableConfig_V1";
 import styled from "styled-components";
+import { convertToDisplayPercentage } from "../utility/commonUtils";
 
 //  使用 styled-components 來設定 總成本統計
 const TotalCostContainer = styled(Box)`
@@ -50,6 +51,7 @@ const CostResultHandler = {
     SQInPostProcessingCosts
   }
     */
+
     const amountMap = {
       // 運費
       SQMaterialCosts: costSubtotalResult?.materialCostResult?.amounts?.[index],
@@ -228,7 +230,10 @@ const ProcessTable = ({ processType, formData, costDetail }) => {
       <Box>
         {config.summaryFields.map((field) => (
           <Typography key={field.key}>
-            {field.label}: {formData?.SQMaterialCostSetting[field.key] || 0}
+            {field.label}:{" "}
+            {convertToDisplayPercentage(
+              formData?.SQMaterialCostSetting[field.key] || 0
+            )}
             {field.unit}
           </Typography>
         ))}

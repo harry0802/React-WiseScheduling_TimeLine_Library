@@ -224,10 +224,10 @@ function renderFormItem(
           <Select
             {...controllerField}
             {...filteredProps}
-            disabled={filteredProps.disabled}
+            disabled={Boolean(filteredProps.disabled)}
             value={selectValue}
             onChange={(e) => {
-              const newValue = e.target.value || ""; // 確保空值轉為空字符串
+              const newValue = e.target.value || "";
               controllerField.onChange(newValue);
             }}
             labelId={`${field.name}-label`}

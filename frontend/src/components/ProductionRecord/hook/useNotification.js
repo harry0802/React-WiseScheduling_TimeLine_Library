@@ -35,12 +35,20 @@ function useNotification() {
   };
 
   // General notification function for custom messages
-  const notify = ({ message, description, notificationStyle }) => {
+  const notify = ({
+    message,
+    description,
+    notificationStyle,
+    icon,
+    seconds,
+  }) => {
     try {
       triggerNotification({
         message: message || "Default Notification Title",
         description: description || "",
         notificationStyle,
+        icon,
+        seconds,
       });
     } catch (error) {
       console.error("Error triggering notification:", error.message);

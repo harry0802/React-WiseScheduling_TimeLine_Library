@@ -15,6 +15,7 @@ class CustomerService:
             # Get the customer list
             query = Customers.query
             query = query.with_entities(Customers.id, Customers.name)
+            query = query.order_by(Customers.name)
             customer_db_list = query.all()
 
             customer_dto = customer_schema.dump(customer_db_list, many=True)

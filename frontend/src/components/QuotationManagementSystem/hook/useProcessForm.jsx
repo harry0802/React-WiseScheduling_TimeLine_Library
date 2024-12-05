@@ -38,7 +38,7 @@ export function useProcessForm(initialProcess, onUpdate, onClose) {
   // 3. 表單實例
   const methods = useForm({
     defaultValues: initialValues,
-    mode: "onSubmit",
+    mode: "onChange",
     resolver: async (data) => {
       const resolver = getProcessResolver(
         data?.processCategory || initialProcess?.processCategory

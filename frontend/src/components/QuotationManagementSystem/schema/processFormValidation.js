@@ -57,19 +57,53 @@ export const fieldSchemas = {
   }),
 
   // 包裝成本驗證
-  packagingCost: z.object({
-    SQProcessId: nullableNumber,
-    id: nullableNumber,
-    materialName: z.string().min(1, "包材名稱為必填"),
-    materialSN: z.string().min(1, "包材編號為必填"),
-    packagingType: z.string().optional(),
-    unit: z.string().min(1, "單位為必填"),
-    quantity: baseSchemas.positiveInteger,
-    unitPrice: baseSchemas.requiredNumber,
-    amount: baseSchemas.requiredNumber,
-    capacity: baseSchemas.positiveInteger,
-    bagsPerKg: baseSchemas.positiveInteger,
-  }),
+  packagingCost: z
+    .object({
+      SQProcessId: nullableNumber,
+      id: nullableNumber,
+      materialName: z.string().min(1, "包材名稱為必填"),
+      materialSN: z.string().min(1, "包材編號為必填"),
+      packagingType: z.string().optional(),
+      unit: z.string().min(1, "單位為必填"),
+      quantity: baseSchemas.positiveInteger,
+      unitPrice: baseSchemas.requiredNumber,
+      amount: nullableNumber,
+      capacity: z.number({
+        required_error: "容量為必填",
+        invalid_type_error: "請輸入有效數字",
+      }),
+      bagsPerKg: z
+        .number({
+          invalid_type_error: "請輸入有效數字",
+        })
+        .nullable()
+        .optional(),
+    })
+    .refine(
+      (schema) => {
+        if (!schema) return false;
+
+        const unit = schema.unit?.trim().toLowerCase();
+
+        // 公斤或磅：capacity 和 bagsPerKg 必須大於 0
+        if (unit === "公斤" || unit === "磅") {
+          if (
+            schema.capacity <= 0 ||
+            !schema.bagsPerKg ||
+            schema.bagsPerKg <= 0
+          ) {
+            return false;
+          }
+          return true;
+        }
+
+        return true;
+      },
+      {
+        message: "當單位為公斤或磅時，容量和每公斤袋數必須大於0",
+        path: ["bagsPerKg"],
+      }
+    ),
 
   // 注塑成型成本驗證
   injectionMoldingCost: z.object({
@@ -92,14 +126,14 @@ export const fieldSchemas = {
   // 委外加工成本驗證
   outsourcedProcessingCost: z.object({
     unitPrice: baseSchemas.requiredNumber,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
   }),
 
   // 廠內加工成本驗證
   internalProcessingCost: z.object({
     workSecond: baseSchemas.requiredNumber,
     unitPrice: baseSchemas.requiredNumber,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
   }),
 
   // 保留原有運輸相關驗證
@@ -108,13 +142,13 @@ export const fieldSchemas = {
     driverWorkHours: baseSchemas.requiredNumber,
     fuelCostPerKM: baseSchemas.requiredNumber,
     estimatedShipment: baseSchemas.positiveInteger,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
   }),
 
   customsDutyCost: z.object({
     feeType: z.string().min(1, "費用類型為必填"),
     freight: baseSchemas.requiredNumber,
     estimatedShipment: baseSchemas.positiveInteger,
-    amount: baseSchemas.requiredNumber,
+    amount: nullableNumber,
   }),
 };

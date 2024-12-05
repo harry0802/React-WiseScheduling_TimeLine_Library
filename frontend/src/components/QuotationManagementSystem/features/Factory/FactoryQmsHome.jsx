@@ -1,8 +1,9 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetProductsWithPaginationQuery } from "../../../ProductionRecord/service/endpoints/productApi";
 import PmHomeContent from "../../../Global/content/PmHomeContent";
 import SharedCard from "../../../Global/card/ProductCard";
+import { useFactoryHomeSlice } from "../../slice/qmsHome";
 
 // 抽離展示組件到單獨文件更好，這裡為了方便展示
 const DisplayComponents = {
@@ -42,18 +43,10 @@ const Card = memo(function Card({ data, onCardClick }) {
   );
 });
 
-const DEFAULT_PARAMS = {
-  productName: undefined,
-  oldProductSN: undefined,
-  productSN: undefined,
-  sort: undefined,
-  size: "10",
-  page: "1",
-};
-
 function QmsHome() {
   const navigate = useNavigate();
-  const [queryParams, setQueryParams] = useState(DEFAULT_PARAMS);
+  const { queryParams, pagination, setPage, setPageSize, setPagination } =
+    useFactoryHomeSlice();
 
   const { data, isLoading, isError, error } = useGetProductsWithPaginationQuery(
     queryParams,
@@ -62,13 +55,26 @@ function QmsHome() {
     }
   );
 
-  const handlePageChange = useCallback((page) => {
-    setQueryParams((prev) => ({ ...prev, page: String(page) }));
-  }, []);
+  // 當 API 返回數據時更新分頁信息
+  useEffect(() => {
+    if (data?.meta) {
+      setPagination(data.meta);
+    }
+  }, [data?.meta, setPagination]);
 
-  const handlePageSizeChange = useCallback((size) => {
-    setQueryParams((prev) => ({ ...prev, size: String(size) }));
-  }, []);
+  const handlePageChange = useCallback(
+    (page) => {
+      setPage(page);
+    },
+    [setPage]
+  );
+
+  const handlePageSizeChange = useCallback(
+    (size) => {
+      setPageSize(size);
+    },
+    [setPageSize]
+  );
 
   const handleCardClick = useCallback(
     (id) => id && navigate(`edit/${id}`),
@@ -76,7 +82,7 @@ function QmsHome() {
   );
 
   const cardList = useMemo(() => {
-    const items = data?.items || [];
+    const items = data?.data || [];
     if (!Array.isArray(items)) return null;
 
     return items.map((item) => (
@@ -86,19 +92,19 @@ function QmsHome() {
         onCardClick={() => handleCardClick(item.id)}
       />
     ));
-  }, [data?.items, handleCardClick]);
+  }, [data?.data, handleCardClick]);
 
   if (isError) return <DisplayComponents.Error message={error?.message} />;
   if (isLoading) return <DisplayComponents.Loading />;
-  if (!data?.items?.length) return <DisplayComponents.Empty />;
+  if (!data?.data?.length) return <DisplayComponents.Empty />;
 
   return (
     <PmHomeContent>
       <PmHomeContent.Content>{cardList}</PmHomeContent.Content>
       <PmHomeContent.Pagination
-        currentPage={Number(queryParams.page)}
-        itemsPerPage={Number(queryParams.size)}
-        total={data.total || 0}
+        currentPage={pagination.current_page}
+        itemsPerPage={pagination.page_size}
+        total={pagination.total_count}
         setPage={handlePageChange}
         setPageSize={handlePageSizeChange}
       />

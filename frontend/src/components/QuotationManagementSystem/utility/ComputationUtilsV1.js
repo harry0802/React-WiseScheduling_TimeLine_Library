@@ -6,6 +6,8 @@
  * 3. 所有數值精度到小數點後三位(第四位四捨五入)
  */
 
+import { convertToDisplayPercentage } from "./commonUtils";
+
 /**
  * 通用單位列表
  * @constant {Array<{value: string, label: string}>}
@@ -48,8 +50,8 @@ const MATERIAL_TYPES = [
  */
 function calculateMaterialCost(
   items,
-  fluctuationPercentage,
   defectRate,
+  fluctuationPercentage,
   materialWithdrawalFee
 ) {
   if (!items || items.length === 0) {
@@ -58,17 +60,17 @@ function calculateMaterialCost(
       amounts: [],
     };
   }
+  console.log(items, fluctuationPercentage, defectRate, materialWithdrawalFee);
 
-  // 把參數轉為百分比 但我要先確保他是沒有被轉換過的數字
-  const fluctuationPercentage_ = parseFloat(fluctuationPercentage) / 100;
+  // 使用 convertToPercentage 轉換百分比
+  const fluctuationPercentage_ = convertToPercentage(fluctuationPercentage);
   const materialWithdrawalFee_ = parseFloat(materialWithdrawalFee);
-  const defectRate_ = parseFloat(defectRate) / 100;
+  const defectRate_ = convertToPercentage(defectRate);
 
   // 計算各項金額
   const amounts = items.map((item) => {
     const { unitPrice, weight, unit } = item;
     let amount = 0;
-    // 只有當單位為「公克」時才需要除以1000，其他單位不用
     if (unit === "公克") {
       amount = (unitPrice / 1000) * weight * (1 + fluctuationPercentage_);
     } else if (unit === "件" || unit === "個") {
@@ -77,12 +79,10 @@ function calculateMaterialCost(
     return amount;
   });
 
-  // 計算金額總和並加上抽料費用
   const subtotal =
     amounts.reduce((total, amount) => total + amount, 0) +
     materialWithdrawalFee_;
 
-  // 計算最終小計，考慮預估不良率
   const totalCost = Number((subtotal * (1 + defectRate_)).toFixed(3));
   return {
     totalCost,
@@ -113,13 +113,12 @@ function calculatePackagingCost(items) {
       amounts: [],
     };
   }
-
   const amounts = items.map((item) => {
     let amount = 0;
 
     if (item.unit === "件" || item.unit === "個") {
       // 單位為「件」「個」時:金額 = 單價 × 數量
-      amount = item.unitPrice * item.quantity;
+      amount = item.unitPrice * item.capacity;
     } else if (item.unit === "公斤" || item.unit === "磅") {
       // 金額 = 單價 / 每公斤幾個袋子 / 容量
       amount = item.unitPrice / item.bagsPerKg / item.capacity;
@@ -127,7 +126,6 @@ function calculatePackagingCost(items) {
 
     return amount || item.amount || 0;
   });
-
   return {
     totalCost: amounts.reduce((sum, amt) => sum + amt, 0),
     amounts,
@@ -155,8 +153,8 @@ function calculateMoldingCost(
   workHourRatio,
   unitPrice = 3000
 ) {
-  const defectRate_ = parseFloat(defectRate) / 100;
-  const workHourRatio_ = parseFloat(workHourRatio) / 100;
+  const defectRate_ = convertToPercentage(defectRate);
+  const workHourRatio_ = convertToPercentage(workHourRatio);
 
   const amount = unitPrice * (1 + defectRate_);
   const totalShots =
@@ -164,7 +162,8 @@ function calculateMoldingCost(
     cavityCount *
     workHourRatio_;
 
-  return Number((amount / totalShots).toFixed(3));
+  const moldingCost = amount / totalShots;
+  return { amounts: amount, totalCost: moldingCost };
 }
 
 /**
@@ -180,7 +179,6 @@ function calculateMoldingElectricityCost(
   electricityCost
 ) {
   const electricityCost_ = (+electricityCost * +moldingCycle) / +cavityCount;
-
   return Number(electricityCost_.toFixed(3));
 }
 
@@ -271,7 +269,7 @@ function calculateAdditionalFees(transportFees, freightAndCustomsFees) {
  * @param {number} value - 百分比值(1-100或0.01-1)
  * @returns {number} 轉換後的小數(0.01-1)
  */
-function convertToDecimalPercentage(value) {
+function convertToPercentage(value) {
   const numValue = parseFloat(value);
   return numValue >= 1 ? numValue / 100 : numValue;
 }
@@ -315,13 +313,11 @@ function calculateProfitManagement(
   rebatePercentage = 0.02,
   actualQuotation
 ) {
-  const sgAndAdminRate = convertToDecimalPercentage(sgAndAdminPercentage);
-  const profitRate = convertToDecimalPercentage(profitPercentage);
-  const riskRate = convertToDecimalPercentage(riskPercentage);
-  const annualReductionRate = convertToDecimalPercentage(
-    annualReductionPercentage
-  );
-  const rebateRate = convertToDecimalPercentage(rebatePercentage);
+  const sgAndAdminRate = convertToPercentage(sgAndAdminPercentage);
+  const profitRate = convertToPercentage(profitPercentage);
+  const riskRate = convertToPercentage(riskPercentage);
+  const annualReductionRate = convertToPercentage(annualReductionPercentage);
+  const rebateRate = convertToPercentage(rebatePercentage);
 
   const sgAndAdminFee = costSubtotal * sgAndAdminRate;
   const profitFee = (costSubtotal + sgAndAdminFee) * profitRate;
@@ -330,7 +326,16 @@ function calculateProfitManagement(
   const totalCost = subtotalWithSGA + riskFee;
   const annualReductionAmount = totalCost * (1 + annualReductionRate);
   const rebateAmount = annualReductionAmount * (1 + rebateRate);
-  const grossProfitMargin = (actualQuotation - costSubtotal) / costSubtotal;
+
+  // 實際毛利率=(「實際報價」-「成本小計(不含) 」)/「成本小計(不含)」
+  const grossProfitMargin = convertToDisplayPercentage(
+    (actualQuotation - costSubtotal) / costSubtotal
+  );
+
+  // 估算毛利率=(「總成本」-「成本小計(不含) 」)/「成本小計(不含) 」)
+  const estimatedGrossProfitMargin = convertToDisplayPercentage(
+    (totalCost - costSubtotal) / costSubtotal
+  );
 
   return {
     costSubtotal: formatToThreeDecimals(costSubtotal),
@@ -342,6 +347,9 @@ function calculateProfitManagement(
     annualReductionAmount: formatToThreeDecimals(annualReductionAmount),
     rebateAmount: formatToThreeDecimals(rebateAmount),
     grossProfitMargin: formatToThreeDecimals(grossProfitMargin),
+    estimatedGrossProfitMargin: formatToThreeDecimals(
+      estimatedGrossProfitMargin
+    ),
   };
 }
 

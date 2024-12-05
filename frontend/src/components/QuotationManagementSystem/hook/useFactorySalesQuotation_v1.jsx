@@ -85,16 +85,6 @@ export const useQuotationStore = (set, get) => ({
   // 製程操作
   updateProcess: (processId, updateData) =>
     set((state) => {
-      console.log("🚀 ~ set ~ state:", state);
-      console.log("🔥🔥🔥🔥 ~ set ~ updateData:", updateData);
-
-      console.log(
-        "🔥🔥🔥🔥 ~ set ~ processes:",
-        state.processes.map((process) =>
-          process.id === processId ? { ...process, ...updateData } : process
-        )
-      );
-
       return {
         processes: state.processes.map((process) =>
           process.id === processId ? { ...process, ...updateData } : process

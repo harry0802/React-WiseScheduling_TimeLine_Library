@@ -31,10 +31,10 @@ def complete_FQPackagingCost(db_obj, payload):
         if payload.get("unitPrice") is not None else db_obj.unitPrice
     db_obj.amount = float(payload["amount"]) \
         if payload.get("amount") is not None else db_obj.amount
-    #  「單位為「件」「個」時「金額」=「單價」*「數量」
+    #  「單位為「件」「個」時「金額」=「單價」*「容量」
     #  「單位為「公斤」「磅」時「金額」=「單價」/「每公斤幾個」/容量
     if db_obj.unit in [PackagingUnitEnum.PIECE.value, PackagingUnitEnum.ITEM.value]:
-        db_obj.amount = db_obj.unitPrice * db_obj.quantity if db_obj.unitPrice and db_obj.quantity else db_obj.amount
+        db_obj.amount = db_obj.unitPrice * db_obj.capacity if db_obj.unitPrice and db_obj.capacity else db_obj.amount
     else:
         db_obj.amount = db_obj.unitPrice / db_obj.bagsPerKg / db_obj.capacity if db_obj.unitPrice and db_obj.bagsPerKg and db_obj.capacity else db_obj.amount
     db_obj.amount = round(db_obj.amount, 3) if db_obj.amount else db_obj.amount
