@@ -304,7 +304,7 @@ class SalesQuotationService:
             if(salesQuotation_db := SalesQuotation.query.get(salesQuotationId)) is None:
                 return err_resp("salesQuotation not found", "salesQuotation_404", 404)
             # check if salesQuotation is empty, except quotationSN and createDate
-            if salesQuotation_db.customerName is not None or salesQuotation_db.productName is not None or salesQuotation_db.overheadRnd is not None or salesQuotation_db.profit is not None or salesQuotation_db.risk is not None or salesQuotation_db.annualDiscount is not None or salesQuotation_db.rebate is not None or salesQuotation_db.actualQuotation is not None:
+            if salesQuotation_db.customerName is not None or salesQuotation_db.productName is not None:
                 return err_resp("salesQuotation cannot be deleted", "salesQuotation_409", 409)
             
             # delete freight and customsDuty
