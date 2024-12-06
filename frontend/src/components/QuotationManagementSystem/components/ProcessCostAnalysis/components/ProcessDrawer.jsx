@@ -17,7 +17,9 @@ function ProcessDrawer({
     <BaseDrawer visible={visible} onClose={onClose}>
       <BaseDrawer.Header>
         {isNew ? "添加新製程" : `製程${index + 1} ${process?.processCategory}`}
-        {!isNew && <DeleteButton onDelete={() => onDelete(process.id)} />}
+        {!isNew && onDelete && (
+          <DeleteButton onDelete={() => onDelete(process.id)} />
+        )}
       </BaseDrawer.Header>
       <BaseDrawer.Body>
         <ProcessForm

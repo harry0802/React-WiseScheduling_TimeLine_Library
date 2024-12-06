@@ -1,8 +1,42 @@
+/**
+ * @fileoverview 報價系統狀態管理
+ * @description
+ * 使用 Zustand 管理工廠端和業務端的報價系統狀態
+ * 包含查詢參數、分頁設置及相關操作方法
+ *
+ * @version 1.0.0
+ * @lastModified 2024-12-06
+ */
+
+//! =============== 1. 依賴導入 ===============
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { initialState, createHomeActions } from "../hook/useQmsHome";
 
-// 查詢參數常量
+//! =============== 2. 類型定義 ===============
+/**
+ * @typedef {Object} QueryParams
+ * @property {string} [productName] - 產品名稱
+ * @property {string} [oldProductSN] - 舊產品編號
+ * @property {string} [productSN] - 產品編號
+ * @property {string} [sort] - 排序方式
+ * @property {string} size - 每頁數量
+ * @property {string} page - 當前頁碼
+ */
+
+/**
+ * @typedef {Object} PaginationState
+ * @property {number} total_pages - 總頁數
+ * @property {number} total_count - 總記錄數
+ * @property {number} current_page - 當前頁碼
+ * @property {number} page_size - 每頁數量
+ */
+
+//! =============== 3. 默認值配置 ===============
+/**
+ * @constant {QueryParams} DEFAULT_PARAMS
+ * @description 查詢參數默認值
+ */
 const DEFAULT_PARAMS = {
   productName: undefined,
   oldProductSN: undefined,
@@ -12,7 +46,10 @@ const DEFAULT_PARAMS = {
   page: "1",
 };
 
-// 分頁相關的初始狀態
+/**
+ * @constant {PaginationState} DEFAULT_PAGINATION
+ * @description 分頁狀態默認值
+ */
 const DEFAULT_PAGINATION = {
   total_pages: 0,
   total_count: 0,
@@ -20,9 +57,18 @@ const DEFAULT_PAGINATION = {
   page_size: 10,
 };
 
-// 工廠端專用的 actions
+//! =============== 4. Store Actions ===============
+/**
+ * @function factoryHomeActions
+ * @description 工廠端專用的狀態操作方法
+ * @param {Function} set - Zustand 的 set 方法
+ * @param {Function} get - Zustand 的 get 方法
+ */
 const factoryHomeActions = (set, get) => ({
-  // 查詢參數相關
+  /**
+   * @function setQueryParams
+   * @description 更新查詢參數
+   */
   setQueryParams: (newParams) =>
     set((state) => ({
       queryParams: {
@@ -32,12 +78,22 @@ const factoryHomeActions = (set, get) => ({
       },
     })),
 
+  /**
+   * @function resetQueryParams
+   * @description 重置所有查詢參數到默認值
+   */
   resetQueryParams: () =>
     set({
       queryParams: DEFAULT_PARAMS,
       pagination: DEFAULT_PAGINATION,
     }),
 
+  /**
+   * @function updateSearchParams
+   * @description 更新搜索條件
+   * @param {string} searchText - 搜索文本
+   * @param {string} searchType - 搜索類型
+   */
   updateSearchParams: (searchText, searchType) =>
     set((state) => ({
       queryParams: {
@@ -47,7 +103,10 @@ const factoryHomeActions = (set, get) => ({
       },
     })),
 
-  // 更新分頁信息
+  /**
+   * @function setPagination
+   * @description 更新分頁信息
+   */
   setPagination: (meta) =>
     set((state) => ({
       pagination: {
@@ -58,7 +117,10 @@ const factoryHomeActions = (set, get) => ({
       },
     })),
 
-  // 設置頁碼
+  /**
+   * @function setPage
+   * @description 設置當前頁碼
+   */
   setPage: (page) =>
     set((state) => ({
       queryParams: {
@@ -67,7 +129,10 @@ const factoryHomeActions = (set, get) => ({
       },
     })),
 
-  // 設置每頁數量
+  /**
+   * @function setPageSize
+   * @description 設置每頁顯示數量
+   */
   setPageSize: (size) =>
     set((state) => ({
       queryParams: {
@@ -78,7 +143,15 @@ const factoryHomeActions = (set, get) => ({
     })),
 });
 
-// 工廠報價系統 store
+//! =============== 5. Store 創建 ===============
+/**
+ * @constant useFactoryHomeSlice
+ * @description 工廠報價系統狀態管理器
+ *
+ * @example
+ * const { queryParams, setPage } = useFactoryHomeSlice();
+ * setPage(2);
+ */
 export const useFactoryHomeSlice = create(
   persist(
     (set, get) => ({
@@ -95,7 +168,10 @@ export const useFactoryHomeSlice = create(
   )
 );
 
-// 業務報價系統 store (保持原有邏輯)
+/**
+ * @constant useSalesHomeSlice
+ * @description 業務報價系統狀態管理器
+ */
 export const useSalesHomeSlice = create(
   persist(
     (set, get) => ({

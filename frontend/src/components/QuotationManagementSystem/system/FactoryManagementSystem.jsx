@@ -3,12 +3,10 @@ import SharedManagementSystem from "../../Global/content/ProductManagementConten
 import QmsActions from "../components/QmsActions";
 import { useFactoryHomeSlice } from "../slice/qmsHome";
 import QmsHome from "../features/Factory/FactoryQmsHome";
-import {
-  quotationApi,
-  useCreateQuotationMutation,
-} from "../services/salesServices/endpoints/quotationApi";
+
 import timeUtils from "../utility/timeUtils";
 import { useNavigate } from "react-router-dom";
+import { useCreateQuotationMutation } from "../services/factoryServices/endpoints/quotationApi";
 
 //! =============== 2. 常量定義 ===============
 const ROUTES = {

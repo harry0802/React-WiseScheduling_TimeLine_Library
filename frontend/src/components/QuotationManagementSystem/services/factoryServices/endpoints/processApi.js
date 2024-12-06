@@ -11,7 +11,7 @@ export const processApi = factoryQuotationApiSlice.injectEndpoints({
     }),
     updateProcess: builder.mutation({
       query: ({ quotationId, data }) => ({
-        url: `/factoryQuotation/${quotationId}/process`,
+        url: `/factoryQuotation/${quotationId}/process/`,
         method: "PUT",
         body: data,
       }),

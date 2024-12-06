@@ -9,6 +9,7 @@ import { Spin } from "antd";
 import { useQmsBase } from "../../hook/useQmsBase";
 import { useFactoryHomeSlice } from "../../slice/qmsHome";
 import { useFactoryApi } from "./useFactoryApi";
+import { useFactoryProcessApi } from "../../hook/useFactoryProcessService";
 
 const QmsBasePage = ({ type }) => {
   const {
@@ -54,6 +55,7 @@ const QmsBasePage = ({ type }) => {
       <ProcessCostAnalysis
         icon={<AddIcon />}
         quotationSlice={useInternalQuotationStore}
+        processService={useFactoryProcessApi}
       />
     </ProductAddtionLayout>
   );
