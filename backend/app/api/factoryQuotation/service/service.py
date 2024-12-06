@@ -1,16 +1,11 @@
 from datetime import datetime
-from sqlalchemy import literal
 import sys
 from app import db
-from app.utils_log import message, err_resp, internal_err_resp
+from app.utils_log import message, err_resp
 from app.models.machine import Machine
 from app.models.process import Process
 from app.models.product import Product
-from app.models.processMaterial import ProcessMaterial
-from app.models.material import Material
-from app.models.materialOption import MaterialOption
 from app.models.processOption import ProcessOption
-from app.models.ly0000AO import LY0000AODetail
 from app.models.factoryQuotation.factoryQuotation import FactoryQuotation
 from app.models.factoryQuotation.FQProcess import FQProcess
 from app.models.factoryQuotation.FQMaterialCostSetting import FQMaterialCostSetting
@@ -23,12 +18,14 @@ from app.models.factoryQuotation.FQFreight import FQFreight
 from app.models.factoryQuotation.FQCustomsDuty import FQCustomsDuty
 from app.api.option.optionEnum import ProcessCategoryEnum
 from ..schemas import FactoryQuotationSchema, ShippingCostSchema, FQProcessSchema, FQMaterialCostSettingSchema, FQMaterialCostSchema, FQPackagingCostSchema, FQInjectionMoldingCostSchema, FQInPostProcessingCostSchema, FQOutPostProcessingCostSchema, FQFreightSchema, FQCustomsDutySchema
-from .material_service import create_materialSetting, create_material, update_materialSetting, update_material
-from .packaging_service import create_packaging, update_packaging
-from .injectionMolding_service import create_injectionMolding, update_injectionMolding
-from .inPostProcessing_service import create_inPostProcessing, create_update_delete_inPostProcessing
-from .outPostProcessing_service import create_outPostProcessing, create_update_delete_outPostProcessing
+from .syncProcesses_service import sync_processes
+from .material_service import update_materialSetting, update_material
+from .packaging_service import update_packaging
+from .injectionMolding_service import update_injectionMolding
+from .inPostProcessing_service import create_update_delete_inPostProcessing
+from .outPostProcessing_service import create_update_delete_outPostProcessing
 from .shipping_service import create_update_delete_freight, create_update_delete_customsDuty
+from app.api.product.schemas import productSchema
 factoryQuotation_schema = FactoryQuotationSchema()
 
 
@@ -59,238 +56,6 @@ def generate_quotationSN():
         raise error
 
 
-def get_processes_by_productSN(productSN):
-    """根據產品編號，到Process表中找出該產品所有製程
-
-    Args:
-        productSN (_type_): 產品編號
-
-    Raises:
-        ValueError: _description_
-        error: _description_
-
-    Returns:
-        _type_: _description_
-    """
-    try:
-        query = Process.query
-        query = query.with_entities(
-            Process.id, 
-            Process.processOptionId, 
-            ProcessOption.processCategory, 
-            ProcessOption.processName,
-            Product.productSN, 
-            Product.productName,
-            Material.materialOptionId,
-            Material.materialSN, 
-            Material.materialName, 
-            Material.quantity,
-            Material.unit,
-            MaterialOption.materialType,
-            literal(None).label("unitPrice")  # Default unitPrice to NULL
-        )
-        query = query.join(Product, Product.id == Process.productId)
-        query = query.join(ProcessOption, ProcessOption.id == Process.processOptionId)
-        query = query.join(ProcessMaterial, ProcessMaterial.processId == Process.id)
-        query = query.join(Material, Material.id == ProcessMaterial.materialId)
-        query = query.join(MaterialOption, MaterialOption.id == Material.materialOptionId)
-        query = query.filter(Product.productSN == productSN)
-        
-        # Use _mapping to convert rows to dictionaries
-        process_db_list = [dict(row._mapping) for row in query.all()]
-        if not process_db_list:
-            raise ValueError("Product not found", "Product_404")
-        # Update unitPrice dynamically
-        for process_db in process_db_list:
-            ly0000AO_db = db.session.query(LY0000AODetail).filter(
-                LY0000AODetail.SD_SKNO == process_db["materialSN"],
-                LY0000AODetail.SD_NAME == process_db["materialName"]
-            ).order_by(LY0000AODetail.SD_DATE.desc()).first()
-            
-            # Set `unitPrice` if found in LY0000AODetail
-            if ly0000AO_db:
-                process_db["unitPrice"] = ly0000AO_db.SD_PRICE
-        return process_db_list
-    
-    except Exception as error:
-        raise error
-
-
-def convert_prosses_list_to_nested(process_db_list):
-    """透過產品編號找出來的所有製程，轉換成以製程編號為 key 的 dictionary
-
-    Args:
-        process_db_list (_type_): 透過產品編號找出來的所有製程
-
-    Returns:
-        _type_: _description_
-    """
-    # Create a dictionary to group by process ID
-    grouped_processes = {}
-    
-    for item in process_db_list:
-        process_id = item['id']
-        
-        # Create material dict for current item
-        material = {
-            'materialOptionId': item['materialOptionId'],
-            'materialSN': item['materialSN'],
-            'materialName': item['materialName'],
-            'quantity': item['quantity'],
-            'unit': item['unit'],
-            'materialType': item['materialType'],
-            'unitPrice': item['unitPrice']
-        }
-        
-        # If process ID doesn't exist in grouped_processes, create new process entry
-        if process_id not in grouped_processes:
-            grouped_processes[process_id] = {
-                'id': item['id'],
-                'processOptionId': item['processOptionId'],
-                'processCategory': item['processCategory'],
-                'processName': item['processName'],
-                'productSN': item['productSN'],
-                'productName': item['productName'],
-                'materials': [],
-                'packagings': []
-            }
-            
-        # Add material to the process's materials list
-        if item['materialType'] == '包材':
-            grouped_processes[process_id]['packagings'].append(material)
-        else:
-            grouped_processes[process_id]['materials'].append(material)
-    
-    # Convert dictionary to list and sort by id
-    result = list(grouped_processes.values())
-    result.sort(key=lambda x: x['id'])
-    # Output the result as JSON
-    return result
-
-
-def delete_all_processes(factoryQuotationId):
-    """刪除該廠內報價單下的所有製程
-
-    Args:
-        factoryQuotationId (_type_): 廠內報價單ID
-    """
-    FQProcess_db_list = FQProcess.query.filter(FQProcess.factoryQuotationId == factoryQuotationId).all()
-    for FQProcess_db in FQProcess_db_list:
-        processOption_db = ProcessOption.query.filter_by(id = FQProcess_db.processOptionId).first()
-        # Define deletions by process category
-        deletion_map = {
-            ProcessCategoryEnum.In_IJ.value: [
-                FQMaterialCostSetting, FQMaterialCost, FQPackagingCost, FQInjectionMoldingCost
-            ],
-            ProcessCategoryEnum.Out_IJ.value: [
-                FQMaterialCostSetting, FQMaterialCost, FQPackagingCost, FQOutPostProcessingCost
-            ],
-            ProcessCategoryEnum.In_BE.value: [
-                FQMaterialCostSetting, FQMaterialCost, FQPackagingCost, FQInPostProcessingCost
-            ],
-            ProcessCategoryEnum.Out_BE.value: [
-                FQMaterialCostSetting, FQMaterialCost, FQPackagingCost, FQOutPostProcessingCost
-            ],
-            ProcessCategoryEnum.In_TS.value: [
-                FQInPostProcessingCost
-            ]
-        }
-        # Get models to delete based on the process category
-        models_to_delete = deletion_map.get(processOption_db.processCategory, [])
-        # Perform deletions for related records
-        for model in models_to_delete:
-            related_records = model.query.filter_by(FQProcessId=FQProcess_db.id).all()
-            for record in related_records:
-                db.session.delete(record)
-        # Delete the main FQProcess record
-        db.session.delete(FQProcess_db)
-    db.session.commit()
-    
-
-def convert_processes_to_payload_format(process_db_list):
-    try:
-        formatted_processes = convert_prosses_list_to_nested(process_db_list)
-        payloads = []
-        schema_map = {
-            ProcessCategoryEnum.In_IJ.value: [
-                "FQMaterialCostSetting", "FQMaterialCosts", "FQPackagingCosts", "FQInjectionMoldingCosts"
-            ],
-            ProcessCategoryEnum.Out_IJ.value: [
-                "FQMaterialCostSetting", "FQMaterialCosts", "FQPackagingCosts", "FQOutPostProcessingCosts"
-            ],
-            ProcessCategoryEnum.In_BE.value: [
-                "FQMaterialCostSetting", "FQMaterialCosts", "FQPackagingCosts", "FQInPostProcessingCosts"
-            ],
-            ProcessCategoryEnum.Out_BE.value: [
-                "FQMaterialCostSetting", "FQMaterialCosts", "FQPackagingCosts", "FQOutPostProcessingCosts"
-            ],
-            ProcessCategoryEnum.In_TS.value: [
-                "FQInPostProcessingCosts"
-            ]
-        }
-        for process_db in formatted_processes:
-            if process_db["processCategory"] not in schema_map:
-                continue
-            process = {
-                "processOptionId": process_db["processOptionId"],
-                "processCategory": process_db["processCategory"],
-                'processName': process_db['processName'],
-                'productSN': process_db['productSN'],
-                'productName': process_db['productName'],
-            }
-            for schema in schema_map[process_db["processCategory"]]:
-                if schema == "FQMaterialCostSetting":
-                    process["FQMaterialCostSetting"] = {
-                        "estimatedDefectRate": 0.05,
-                        "estimatedMaterialFluctuation": 0,
-                        "extractionCost": 0,
-                        "processingCost": 0
-                    }
-                if schema == "FQMaterialCosts":
-                    materials = []
-                    for material in process_db["materials"]:
-                        materials.append(
-                            {
-                                "materialOptionId": material["materialOptionId"],
-                                "materialSN": material["materialSN"],
-                                "materialName": material["materialName"],
-                                "unit": material["unit"],
-                                "weight": material["quantity"],
-                                "unitPrice": material["unitPrice"],
-                                "amount": None
-                            }
-                        )
-                    process["FQMaterialCosts"] = materials
-                if schema == "FQPackagingCosts":
-                    packagings = []
-                    for packaging in process_db["packagings"]:
-                        packagings.append(
-                            {
-                                "packagingType": "包材",
-                                "materialSN": packaging["materialSN"],
-                                "materialName": packaging["materialName"],
-                                "unit": packaging["unit"],
-                                "quantity": packaging["quantity"],
-                                "capacity": None,
-                                "bagsPerKg": None,
-                                "unitPrice": packaging["unitPrice"],
-                                "amount": None
-                            }
-                        )
-                    process["FQPackagingCosts"] = packagings
-                if schema == "FQInjectionMoldingCosts":
-                    process["FQInjectionMoldingCosts"] = [{"machineId": None}]
-                if schema == "FQInPostProcessingCosts":
-                    process["FQInPostProcessingCosts"] = []
-                if schema == "FQOutPostProcessingCosts":
-                    process["FQOutPostProcessingCosts"] = []
-
-            payloads.append(process)
-        return payloads
-    except Exception as error:
-        raise error
-
-
 def calculate_subtotalCostWithoutOverhead(factoryQuotationId):
     # Get all processes for the factoryQuotation
     processes = FQProcess.query.filter(FQProcess.factoryQuotationId == factoryQuotationId).all()
@@ -302,21 +67,21 @@ def calculate_subtotalCostWithoutOverhead(factoryQuotationId):
         FQMaterialCostSetting_db = FQMaterialCostSetting.query.filter(FQMaterialCostSetting.FQProcessId == process.id).first()
         if FQMaterialCostSetting_db:
             FQMaterialCost_db_list = FQMaterialCost.query.filter(FQMaterialCost.FQProcessId == process.id).all()
-            FQMaterialCost_total = sum([material.amount for material in FQMaterialCost_db_list])
+            FQMaterialCost_total = sum([material.amount if material.amount else 0 for material in FQMaterialCost_db_list])
             FQMaterialCost_total = (FQMaterialCost_total + FQMaterialCostSetting_db.extractionCost) * (1 + FQMaterialCostSetting_db.estimatedDefectRate)
         # 包材費用小計(FQPackagingCost) = 「金額」加總
         FQPackagingCost_db_list = FQPackagingCost.query.filter(FQPackagingCost.FQProcessId == process.id).all()
-        FQPackagingCost_total = sum([packaging.amount for packaging in FQPackagingCost_db_list])
+        FQPackagingCost_total = sum([packaging.amount if packaging.amount else 0 for packaging in FQPackagingCost_db_list])
         # 成型加工費用小計(FQInjectionMoldingCost) = 小計 + 電費
         FQInjectionMoldingCost_db_list = FQInjectionMoldingCost.query.filter(FQInjectionMoldingCost.FQProcessId == process.id).all()
-        FQInjectionMoldingCost_total = sum([injectionMolding.subtotal for injectionMolding in FQInjectionMoldingCost_db_list]) + \
-                                    sum([injectionMolding.electricityCost for injectionMolding in FQInjectionMoldingCost_db_list])
+        FQInjectionMoldingCost_total = sum([injectionMolding.subtotal if injectionMolding.subtotal else 0 for injectionMolding in FQInjectionMoldingCost_db_list]) + \
+                                    sum([injectionMolding.electricityCost if injectionMolding.electricityCost else 0 for injectionMolding in FQInjectionMoldingCost_db_list])
         # 廠內後製程費用小計(FQInPostProcessingCost) = 「金額」加總
         FQInPostProcessingCost_db_list = FQInPostProcessingCost.query.filter(FQInPostProcessingCost.FQProcessId == process.id).all()
-        FQInPostProcessingCost_total = sum([inPostProcessing.amount for inPostProcessing in FQInPostProcessingCost_db_list])
+        FQInPostProcessingCost_total = sum([inPostProcessing.amount if inPostProcessing.amount else 0 for inPostProcessing in FQInPostProcessingCost_db_list])
         # 委外後製程費用小計(FQOutPostProcessingCost) = 「金額」加總
         FQOutPostProcessingCost_db_list = FQOutPostProcessingCost.query.filter(FQOutPostProcessingCost.FQProcessId == process.id).all()
-        FQOutPostProcessingCost_total = sum([outPostProcessing.amount for outPostProcessing in FQOutPostProcessingCost_db_list])
+        FQOutPostProcessingCost_total = sum([outPostProcessing.amount if outPostProcessing.amount else 0 for outPostProcessing in FQOutPostProcessingCost_db_list])
 
         subtotalCostWithoutOverhead += FQMaterialCost_total + FQPackagingCost_total + \
                                     FQInjectionMoldingCost_total + FQInPostProcessingCost_total + FQOutPostProcessingCost_total
@@ -357,137 +122,82 @@ def complete_factoryQuotation(db_obj, payload):
 
 class FactoryQuotationService:
     @staticmethod
-    def sync_processes(factoryQuotationId, productSN):
+    def get_factoryQuotation_index(page, size, sort, productSN, productName, customerName):
+        """廠內報價系統首頁，列出所有的產品
+
+        Args:
+            page (_type_): _description_
+            size (_type_): _description_
+            sort (_type_): _description_
+            productSN (_type_): _description_
+            productName (_type_): _description_
+            customerName (_type_): _description_
+
+        Raises:
+            error: _description_
+
+        Returns:
+            _type_: _description_
+        """
         try:
-            # 先確認此次選擇的產品是否跟資料庫中的產品一樣
-            factoryQuotation_db = FactoryQuotation.query.filter(FactoryQuotation.id == factoryQuotationId).first()
-            if factoryQuotation_db is None:
-                raise err_resp("factoryQuotation not found", "factoryQuotation_404", 404)
-            
-            # 如果選擇的產品與資料庫中的產品一樣，則不重複新增，不做任何動作
-            if factoryQuotation_db.productSN == productSN:
-                return message(True, "This productSN is already synchronised."), 200
-            
-            # 如果選擇的產品與資料庫中的產品不一樣，則先刪除所有製程，再新增。
-            # 刪除所有製程
-            delete_all_processes(factoryQuotationId)
+            query = FactoryQuotation.query
+            query = query.with_entities(FactoryQuotation.id, FactoryQuotation.quotationSN, FactoryQuotation.createDate, FactoryQuotation.customerName, FactoryQuotation.productSN, FactoryQuotation.productName)
+            query = query.filter(FactoryQuotation.productSN.like(f"%{productSN}%")) if productSN else query
+            query = query.filter(FactoryQuotation.productName.like(f"%{productName}%")) if productName else query
+            query = query.filter(FactoryQuotation.customerName.like(f"%{customerName}%")) if customerName else query
+            if hasattr(FactoryQuotation, sort):
+                query = query.order_by(getattr(FactoryQuotation, sort).desc())
+            else:
+                query = query.order_by(FactoryQuotation.id.desc())
+            if size:
+                pagination = query.paginate(page=page, per_page=size)
+                factoryQuotation_db = pagination.items
+                total_pages = pagination.pages
+                total_count = pagination.total
+            else:
+                factoryQuotation_db = query.all()
+                total_pages = 1
+                total_count = len(factoryQuotation_db)
 
-            # 透過產品編號，從BOM表取得製程，並轉換成payload格式
-            process_db_list = get_processes_by_productSN(productSN)
-            payloads = convert_processes_to_payload_format(process_db_list)
-
-            # 更新產品編號和產品名稱到報價單
-            factoryQuotation_db.productSN = productSN
-            factoryQuotation_db.productName = payloads[0]['productName']
-            db.session.add(factoryQuotation_db)
-            
-            # 新增全部製程以及費用
-            process_dump_list = []
-            for payload in payloads:
-                # 新增製程
-                process_db = FQProcess()
-                process_db.factoryQuotationId = factoryQuotationId
-                process_db.processOptionId = payload["processOptionId"]
-                db.session.add(process_db)
-                db.session.flush()
-                # Get the new id of FQProcess
-                newProcessId = process_db.id
-                
-                # Map process categories to cost creation functions
-                process_category_map = {
-                    # 新增 In-IJ(廠內成型) 製程類別的原物料費用、包材費用、成型加工費用、成型加工電費
-                    ProcessCategoryEnum.In_IJ.value: [create_materialSetting, create_material,create_packaging, create_injectionMolding,],
-                    # 新增 Out-IJ(委外成型) 製程類別的原物料費用、包材費用、委外後製程與檢驗費用
-                    ProcessCategoryEnum.Out_IJ.value: [create_materialSetting, create_material, create_packaging, create_outPostProcessing,],
-                    # 新增 In-BE(廠內後製程) 製程類別的原物料費用、包材費用、廠內後製程與檢驗費用
-                    ProcessCategoryEnum.In_BE.value: [create_materialSetting, create_material, create_packaging, create_inPostProcessing,],
-                    # 新增 Out-BE(委外後製程) 製程類別的原物料費用、包材費用、委外後製程與檢驗費用
-                    ProcessCategoryEnum.Out_BE.value: [create_materialSetting, create_material, create_packaging, create_outPostProcessing,],
-                    # 新增 In-TS(廠內出貨檢驗) 製程類別的廠內後製程與檢驗費用
-                    ProcessCategoryEnum.In_TS.value: [create_inPostProcessing,],
-                }
-
-                # Create costs based on process category
-                materialSetting_db = None
-                material_db_list = []
-                packaging_db_list = []
-                injectionMolding_db_list = []
-                inPostProcessing_db_list = []
-                outPostProcessing_db_list = []
-                for cost_function in process_category_map.get(payload["processCategory"], []):
-                    # 原物料費用參數設定
-                    if cost_function == create_materialSetting:
-                        materialSetting_db = cost_function(newProcessId, payload)
-                        if materialSetting_db:
-                            db.session.add(materialSetting_db)
-                            db.session.flush()
-                            materialSetting_dump = FQMaterialCostSettingSchema().dump(materialSetting_db)
-                            process_db.FQMaterialCostSetting = materialSetting_dump
-                    # 原物料費用
-                    elif cost_function == create_material:
-                        estimatedMaterialFluctuation = materialSetting_db.estimatedMaterialFluctuation if materialSetting_db else None
-                        material_db_list = cost_function(newProcessId, payload, estimatedMaterialFluctuation)
-                        if material_db_list:
-                            db.session.add_all(material_db_list)
-                            db.session.flush()
-                            material_list_dump = FQMaterialCostSchema().dump(material_db_list, many=True)
-                            process_db.FQMaterialCosts = material_list_dump
-                    # 包材費用
-                    elif cost_function == create_packaging:
-                        packaging_db_list = cost_function(newProcessId, payload)
-                        if packaging_db_list:
-                            db.session.add_all(packaging_db_list)
-                            db.session.flush()
-                            packaging_list_dump = FQPackagingCostSchema().dump(packaging_db_list, many=True)
-                            process_db.FQPackagingCosts = packaging_list_dump
-                    # 成型加工費用
-                    elif cost_function == create_injectionMolding:
-                        injectionMolding_db_list = cost_function(newProcessId, payload)
-                        if injectionMolding_db_list:
-                            db.session.add_all(injectionMolding_db_list)
-                            db.session.flush()
-                            injectionMolding_list_dump = FQInjectionMoldingCostSchema().dump(injectionMolding_db_list, many=True)
-                            process_db.FQInjectionMoldingCosts = injectionMolding_list_dump
-                    # 廠內後製程與檢驗費用
-                    elif cost_function == create_inPostProcessing:
-                        inPostProcessing_db_list = cost_function(newProcessId, payload)
-                        if inPostProcessing_db_list:
-                            db.session.add_all(inPostProcessing_db_list)
-                            db.session.flush()
-                            inPostProcessing_list_dump = FQInPostProcessingCostSchema().dump(inPostProcessing_db_list, many=True)
-                            process_db.FQInPostProcessingCosts = inPostProcessing_list_dump
-                    # 委外後製程與檢驗費用
-                    elif cost_function == create_outPostProcessing:
-                        outPostProcessing_db_list = cost_function(newProcessId, payload)
-                        if outPostProcessing_db_list:
-                            db.session.add_all(outPostProcessing_db_list)
-                            db.session.flush()
-                            outPostProcessing_list_dump = FQOutPostProcessingCostSchema().dump(outPostProcessing_db_list, many=True)
-                            process_db.FQOutPostProcessingCosts = outPostProcessing_list_dump
-                
-                process_dump = FQProcessSchema().dump(process_db)
-                process_dump_list.append(process_dump)
-            
-            db.session.commit()
-
-            # 更新 FactoryQuotation 的 subtotalCostWithoutOverhead
-            update_subtotalCostWithoutOverhead(factoryQuotationId)
-        
-            factoryQuotation_db.processes = process_dump_list
-            factoryQuotation_dto = factoryQuotation_schema.dump(factoryQuotation_db)
-            resp = message(True, "BOM data have been synchronised to factoryQuotation successfully..")
-            resp["data"] = factoryQuotation_dto
+            FactoryQuotation_dump = factoryQuotation_schema.dump(factoryQuotation_db, many=True)
+            resp = message(True, "products data sent")
+            resp["data"] = FactoryQuotation_dump
+            resp["meta"] = {
+                "page": page,
+                "size": size,
+                "sort": sort if hasattr(FactoryQuotation, sort) else "id",
+                "total_pages": total_pages,
+                "total_count": total_count,
+            }
             return resp, 200
-        
-        except ValueError as error:
-            msg = error.args[0] if len(error.args) > 0 else ""
-            err_reason = error.args[1] if len(error.args) > 1 else ""
-            return err_resp(msg, err_reason, 404)
         except Exception as error:
-            db.session.rollback()
             raise error
+        
 
+    @staticmethod
+    def get_products():
+        """廠內報價，產品下拉選單的資料來源，只列出BOM表有製程的產品
 
+        Raises:
+            error: _description_
+
+        Returns:
+            _type_: _description_
+        """
+        try:
+            query = Product.query
+            query = query.with_entities(Product.id, Product.productSN, Product.productName)
+            query = query.filter(Product.id.in_(db.session.query(Process.productId).distinct()))
+            product_db = query.all()
+
+            product_dump = productSchema().dump(product_db, many=True)
+            resp = message(True, "products data sent")
+            resp["data"] = product_dump
+            return resp, 200
+        except Exception as error:
+            raise error
+    
+    
     @staticmethod
     def get_factoryQuotation(factoryQuotationId):
         try:
@@ -595,7 +305,7 @@ class FactoryQuotationService:
             return resp, 200
         except Exception as error:
             raise error
-        
+    
         
     # create FactoryQuotation
     @staticmethod
@@ -638,12 +348,13 @@ class FactoryQuotationService:
     @staticmethod
     def update_factoryQuotation(factoryQuotationId, payload):
         try:
+            # 如果payload有productSN，則同步產品履歷(BOM表)的製程到報價單，並更新報價單的subtotalCostWithoutOverhead
+            if "productSN" in payload:
+                sync_processes(factoryQuotationId, payload["productSN"])
+                update_subtotalCostWithoutOverhead(factoryQuotationId)
+
             if(factoryQuotation_db := FactoryQuotation.query.get(factoryQuotationId)) is None:
                 return err_resp("factoryQuotation not found", "factoryQuotation_404", 404)
-            # 如果 payload裡面有actualQuotation，表示要更新利潤管理，要計算 subtotalCostWithoutOverhead，並更新到payload
-            if payload.get("actualQuotation") is not None:
-                subtotalCostWithoutOverhead = calculate_subtotalCostWithoutOverhead(factoryQuotation_db.id)
-                payload["subtotalCostWithoutOverhead"] = subtotalCostWithoutOverhead
             factoryQuotation_db = complete_factoryQuotation(factoryQuotation_db, payload)
             db.session.add(factoryQuotation_db)
             db.session.commit()
@@ -655,6 +366,7 @@ class FactoryQuotationService:
             return resp, 200
         # exception without handling should raise to the caller
         except Exception as error:
+            db.session.rollback()
             raise error
         
     

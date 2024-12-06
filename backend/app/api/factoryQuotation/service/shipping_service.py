@@ -21,8 +21,9 @@ def complete_FQFreight(db_obj, payload):
     db_obj.amount = float(payload["amount"]) \
         if payload.get("amount") is not None else db_obj.amount
     # 金額 = (「送貨距離」* 2 *「油錢單價」/「預估出貨數」) + 司機工時
-    db_obj.amount = (db_obj.deliveryDistance * 2 * db_obj.fuelCostPerKM / db_obj.estimatedShipment) + db_obj.driverWorkHours
-    db_obj.amount = round(db_obj.amount, 3)
+    if db_obj.deliveryDistance and db_obj.fuelCostPerKM and db_obj.estimatedShipment and db_obj.driverWorkHours:
+        db_obj.amount = (db_obj.deliveryDistance * 2 * db_obj.fuelCostPerKM / db_obj.estimatedShipment) + db_obj.driverWorkHours
+        db_obj.amount = round(db_obj.amount, 3)
     return db_obj
 
 
