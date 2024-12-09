@@ -100,7 +100,7 @@ class CalendarService:
         try:
             # Get the calendar from 新北API
             url = "https://data.ntpc.gov.tw/api/datasets/308dcd75-6434-45bc-a95f-584da4fed251/json?size=3000"
-            response = requests.get(url)
+            response = requests.get(url, timeout=300)
             response.raise_for_status() # Raise exception if invalid response
             calendar = response.json() # Convert response to json
 
