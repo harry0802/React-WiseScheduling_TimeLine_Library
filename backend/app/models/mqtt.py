@@ -40,7 +40,7 @@ def exec_IoT_command(command):
     device_command = json_data['command']
     api_plc = f"{url}/{device_id}"
     conn_logger.info(api_plc)
-    r = requests.post(api_plc, json={"command": device_command})
+    r = requests.post(api_plc, json={"command": device_command}, timeout=300)
     if r.status_code == 200:
         main_logger.info(f"Executed IoT command for device {device_id}")
     else:
