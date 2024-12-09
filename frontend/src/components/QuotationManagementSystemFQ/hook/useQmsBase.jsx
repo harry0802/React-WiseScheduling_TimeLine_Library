@@ -1,7 +1,7 @@
 //! =============== 1. 引入相依套件 ===============
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useBusinessQuotationStore } from "../slice/useFactorySalesQuotationSlice_v1";
+import { useInternalQuotationStore } from "../slice/useFactorySalesQuotationSlice_v1";
 
 /**
  * @typedef {Object} QMSBaseResult
@@ -28,7 +28,6 @@ export const useQmsBase = (
 ) => {
   //! =============== 2. 狀態與 Hooks 初始化 ===============
   const { productId } = useParams();
-  console.log("🔥🔥🔥🔥 ~ productId:", productId);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -58,10 +57,7 @@ export const useQmsBase = (
    */
   const handleNavigation = useCallback(() => {
     if (!productId) {
-      const path =
-        type === "sales"
-          ? "/SalesQuotationManagementSystem"
-          : "/FactoryQuotationManagementSystem";
+      const path = "/FactoryQuotationManagementSystem";
       navigate(path);
     }
   }, [productId, type, navigate]);
@@ -77,7 +73,6 @@ export const useQmsBase = (
    */
   const processQuotationData = useCallback(async () => {
     if (!quotationData) return;
-
     try {
       resetAll();
       const { processes, ...restData } = quotationData.data;
@@ -164,7 +159,7 @@ export const useQmsBase = (
       costAndQuotation: { ...calculationResults, actualQuotation },
       totalCostnoMarketing: calculationResults.costSubtotal,
       setCostAndQuotation: updateProfitManagement,
-      BusinessQuotationStore: useBusinessQuotationStore,
+      BusinessQuotationStore: useInternalQuotationStore,
       handleUpdate,
       handleUpdateProfitManagement,
     }),
@@ -181,5 +176,6 @@ export const useQmsBase = (
     ...commonProps,
     loading,
     mode,
+    isSuccessQuotation,
   };
 };

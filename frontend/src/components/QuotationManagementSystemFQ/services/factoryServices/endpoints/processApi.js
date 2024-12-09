@@ -2,13 +2,6 @@ import factoryQuotationApiSlice from "../apiSlice";
 
 export const processApi = factoryQuotationApiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    syncProcess: builder.mutation({
-      query: ({ quotationId, productSN }) => ({
-        url: `/factoryQuotation/${quotationId}/syncProcess/${productSN}`,
-        method: "GET",
-      }),
-      invalidatesTags: ["Process", "Quotation"],
-    }),
     updateProcess: builder.mutation({
       query: ({ quotationId, data }) => ({
         url: `/factoryQuotation/${quotationId}/process/`,
@@ -20,4 +13,4 @@ export const processApi = factoryQuotationApiSlice.injectEndpoints({
   }),
 });
 
-export const { useSyncProcessMutation, useUpdateProcessMutation } = processApi;
+export const { useUpdateProcessMutation } = processApi;

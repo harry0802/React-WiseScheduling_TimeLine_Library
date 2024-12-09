@@ -3,10 +3,10 @@ import factoryQuotationApiSlice from "../apiSlice";
 export const shippingApi = factoryQuotationApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     updateShipping: builder.mutation({
-      query: ({ quotationId, data }) => ({
-        url: `/factoryQuotation/${quotationId}/shipping`,
+      query: ({ quotationId, ...body }) => ({
+        url: `/factoryQuotation/${quotationId}/shipping/`,
         method: "PUT",
-        body: data,
+        body,
       }),
       invalidatesTags: ["Shipping"],
     }),

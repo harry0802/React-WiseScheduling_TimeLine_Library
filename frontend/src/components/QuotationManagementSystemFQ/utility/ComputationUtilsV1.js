@@ -151,7 +151,7 @@ function calculateMoldingCost(
   shallowPackageWorkHour,
   cavityCount,
   workHourRatio,
-  unitPrice = 3000
+  unitPrice
 ) {
   const defectRate_ = convertToPercentage(defectRate);
   const workHourRatio_ = convertToPercentage(workHourRatio);

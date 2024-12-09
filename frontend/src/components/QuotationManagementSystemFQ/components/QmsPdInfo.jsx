@@ -5,7 +5,7 @@
 
 import React, { useCallback, useMemo } from "react";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
-import { useGetCustomersQuery } from "../services/factoryServices/endpoints/customerApi";
+import { useGetCustomersQuery } from "../../QuotationManagementSystem/services/salesServices/endpoints/customerApi";
 
 //! =============== 1. 設定與常量 ===============
 const FIELD_TYPES = {

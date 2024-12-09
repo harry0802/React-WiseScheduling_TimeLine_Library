@@ -1,4 +1,4 @@
-import FactoryManagementSystem from "../components/QuotationManagementSystem/system/FactoryManagementSystem";
+import FactoryManagementSystem from "../components/QuotationManagementSystemFQ/system/FactoryManagementSystem";
 
 // 正名工廠報價管理系統
 function FactoryQuotationManagementSystemPage() {

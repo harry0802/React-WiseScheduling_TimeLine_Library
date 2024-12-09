@@ -10,6 +10,7 @@ import { useQmsBase } from "../../hook/useQmsBase";
 import { useFactoryHomeSlice } from "../../slice/qmsHome";
 import { useFactoryApi } from "./useFactoryApi";
 import { useFactoryProcessApi } from "../../hook/useFactoryProcessService";
+import { LoadingSkeleton } from "../../components/LoadingSkeleton";
 
 const QmsBasePage = ({ type }) => {
   const {
@@ -20,6 +21,7 @@ const QmsBasePage = ({ type }) => {
     productData,
     loading,
     handleUpdateProfitManagement,
+    isSuccessQuotation,
   } = useQmsBase(
     type,
     useInternalQuotationStore,
@@ -52,11 +54,15 @@ const QmsBasePage = ({ type }) => {
         BusinessQuotationStore={useInternalQuotationStore}
         handleUpdateProfitManagement={handleUpdateProfitManagement}
       />
-      <ProcessCostAnalysis
-        icon={<AddIcon />}
-        quotationSlice={useInternalQuotationStore}
-        processService={useFactoryProcessApi}
-      />
+      {isSuccessQuotation ? (
+        <ProcessCostAnalysis
+          icon={<AddIcon />}
+          quotationSlice={useInternalQuotationStore}
+          processService={useFactoryProcessApi}
+        />
+      ) : (
+        <LoadingSkeleton />
+      )}
     </ProductAddtionLayout>
   );
 };

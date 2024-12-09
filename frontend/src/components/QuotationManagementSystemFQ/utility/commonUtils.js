@@ -17,7 +17,6 @@ export const convertToDisplayPercentage = (value) => {
 // 轉換報價單回傳的數據
 export const transformResponse = (response) => {
   if (!response?.data) return response;
-
   const data = response.data;
   return {
     ...response,

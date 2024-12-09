@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import ProcessList from "./components/ProcessList";
 import ProductContextCard from "../../../ProductionRecord/utility/ProductContextCard";
-import ProcessDrawer from "./components/ProcessDrawer";
+// import ProcessDrawer from "./components/ProcessDrawer";
 import TransportationProcessItem from "../TransportationProcessItem";
 import ConfirmationDialog from "../../../Global/dialog/BaseDialog";
 import { LoadingSkeleton } from "../LoadingSkeleton";
@@ -136,14 +136,14 @@ export function ProcessCostAnalysis({
         onUpdate={handleShippingUpdate}
       />
 
-      {isNewDrawerOpen && (
+      {/* {isNewDrawerOpen && (
         <ProcessDrawer
           isNew={true}
           visible={isNewDrawerOpen}
           onClose={() => setIsNewDrawerOpen(false)}
           onUpdate={handleAdd}
         />
-      )}
+      )} */}
 
       <ConfirmationDialog
         open={confirmOpen}

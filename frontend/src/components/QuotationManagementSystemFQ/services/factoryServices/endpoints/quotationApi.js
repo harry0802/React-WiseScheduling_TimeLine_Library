@@ -37,6 +37,17 @@ const TAG_TYPES = {
  */
 export const quotationApi = factoryQuotationApiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    // Endpoint for fetching quotations with pagination and filtering
+    getQuotationList: builder.query({
+      query: (params = {}) => ({
+        url: "factoryQuotation/", // API endpoint path
+        params: Object.fromEntries(
+          Object.entries(params).filter(([_, v]) => v !== undefined)
+        ), // Filter out undefined parameters
+      }),
+      providesTags: ["Quotation"], // Caching tag to optimize performance
+    }),
+
     /**
      * @query getQuotations
      * @description 獲取所有報價單列表
@@ -131,4 +142,5 @@ export const {
   useCreateQuotationMutation,
   useUpdateQuotationMutation,
   useDeleteQuotationMutation,
+  useGetQuotationListQuery,
 } = quotationApi;

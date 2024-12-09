@@ -1,22 +1,19 @@
-import {
-  useDeleteQuotationMutation,
-  useUpdateQuotationMutation,
-} from "../services/factoryServices/endpoints/quotationApi";
+import { useUpdateProcessMutation } from "../services/factoryServices/endpoints/processApi";
+import { useDeleteQuotationMutation } from "../services/factoryServices/endpoints/quotationApi";
 
 import { useUpdateShippingMutation } from "../services/factoryServices/endpoints/shippingApi";
 
 export const useFactoryProcessApi = (id) => {
-  console.log("🚀 ~ useFactoryProcessApi ~ id:", id);
   const [updateShipping] = useUpdateShippingMutation();
   const [deleteProcess] = useDeleteQuotationMutation();
-  const [updateProcessApi] = useUpdateQuotationMutation();
+  const [updateProcessApi] = useUpdateProcessMutation();
 
   // Update process
   const handleUpdateProcess = async (updatedProcess, onClose) => {
     try {
       await updateProcessApi({
         quotationId: id,
-        process: updatedProcess,
+        data: updatedProcess,
       }).unwrap();
       onClose?.();
       return true;
@@ -53,7 +50,7 @@ export const useFactoryProcessApi = (id) => {
     try {
       await updateShipping({
         quotationId: id,
-        shipping: transformedShippingCosts,
+        ...transformedShippingCosts,
       }).unwrap();
       onClose?.();
       return transformedShippingCosts;

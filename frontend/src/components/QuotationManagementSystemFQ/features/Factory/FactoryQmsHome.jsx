@@ -12,7 +12,7 @@
 //! =============== 1. 設定與常量 ===============
 import { memo, useCallback, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetProductsWithPaginationQuery } from "../../../ProductionRecord/service/endpoints/productApi";
+import { useGetQuotationListQuery } from "../../services/factoryServices/endpoints/quotationApi";
 import PmHomeContent from "../../../Global/content/PmHomeContent";
 import SharedCard from "../../../Global/card/ProductCard";
 import { useFactoryHomeSlice } from "../../slice/qmsHome";
@@ -101,7 +101,7 @@ function QmsHome() {
     useFactoryHomeSlice();
 
   //* API 查詢與數據獲取
-  const { data, isLoading, isError, error } = useGetProductsWithPaginationQuery(
+  const { data, isLoading, isError, error } = useGetQuotationListQuery(
     queryParams,
     {
       refetchOnMountOrArgChange: true,
