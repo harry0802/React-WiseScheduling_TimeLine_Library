@@ -123,6 +123,8 @@ export const quotationApi = factoryQuotationApiSlice.injectEndpoints({
       }),
       invalidatesTags: [TAG_TYPES.QUOTATION],
     }),
+
+    //
   }),
 });
 

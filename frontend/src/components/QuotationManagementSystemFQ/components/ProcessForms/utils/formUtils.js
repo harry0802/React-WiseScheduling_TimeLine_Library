@@ -69,6 +69,8 @@ export const renderTodoList = (item, sectionIndex) => {
       name={item.name}
       fields={item.items}
       renderField={(fieldProps) => <DynamicForm.Field {...fieldProps} />}
+      canDelete={item.canDelete}
+      canAdd={item.canAdd}
     />
   );
 };

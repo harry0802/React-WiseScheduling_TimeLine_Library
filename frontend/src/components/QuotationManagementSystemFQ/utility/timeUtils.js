@@ -166,6 +166,13 @@ const formatters = {
   iso: (date) => dayjs(date).toISOString(),
   utc: (date) => dayjs(date).utc().format(),
   isoWithTZ: (date = new Date()) => coreUtils.formatISOWithTZ(date),
+  /**
+   * 轉換為中文年月日時分秒格式
+   * @param {Date|string|number} date - 日期
+   * @returns {string} 例如：2024年12月09日16時00分00秒
+   */
+  chineseDateTime: (date) =>
+    coreUtils.formatDate(date, "YYYY年MM月DD日HH時mm分ss秒"),
 };
 
 //! =============== 7. 輔助函數 ===============

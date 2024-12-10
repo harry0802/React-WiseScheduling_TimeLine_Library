@@ -27,9 +27,11 @@ class GeneralFormItem extends FormItem {
 }
 
 class TodoListFormItem extends FormItem {
-  constructor(title, items, name) {
+  constructor(title, items, name, canDelete = false, canAdd = false) {
     super("todolist", title, name);
     this.items = items;
+    this.canDelete = canDelete;
+    this.canAdd = canAdd;
   }
 }
 
@@ -83,7 +85,7 @@ export const FORM_CONFIGURATIONS = {
           { required: "請選擇機台區域" },
           null,
           6,
-          optionsService.getFreightTypes
+          () => optionsService.getFreightTypes()
         ),
         createField(
           "machineSN",
@@ -102,6 +104,7 @@ export const FORM_CONFIGURATIONS = {
           [],
           6
         ),
+        // :3215-0028-003 鐘型調整蓋15-M028T深藍色
         createField(
           "workHoursRatio",
           "工時比例",
@@ -170,7 +173,7 @@ export const FORM_CONFIGURATIONS = {
   ]),
 
   // 廠內後製程
-  [PROCESS_CATEGORY_OPTION[2].category]: new FormSection("廠內後製程", [
+  [PROCESS_CATEGORY_OPTION[2].category]: new FormSection("廠���後製程", [
     new NestedFormItem("材料相關費用", [
       new GeneralFormItem(
         "材料成本設置",

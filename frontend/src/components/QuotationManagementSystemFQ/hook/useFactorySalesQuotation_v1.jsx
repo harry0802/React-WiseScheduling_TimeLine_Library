@@ -174,32 +174,16 @@ export const useQuotationStore = (set, get) => ({
       try {
         switch (process.processCategory) {
           case "In-IJ(廠內成型)":
-            if (!process.FQInjectionMoldingCosts?.length) {
-              result = { totalCost: 0, details: [] };
-              break;
-            }
             result = calculateInHouseMoldingCost(process);
             break;
           case "Out-IJ(委外成型)":
           case "Out-BE(委外後製程)":
-            if (!process.FQOutsourcedMoldingCosts?.length) {
-              result = { totalCost: 0, details: [] };
-              break;
-            }
             result = calculateOutsourcedMoldingCost(process);
             break;
           case "In-BE(廠內後製程)":
-            if (!process.FQInHousePostProcessingCosts?.length) {
-              result = { totalCost: 0, details: [] };
-              break;
-            }
             result = calculateInHousePostProcessingCost(process);
             break;
           case "In-TS(廠內出貨檢驗)":
-            if (!process.FQShippingInspectionCosts?.length) {
-              result = { totalCost: 0, details: [] };
-              break;
-            }
             result = calculateInHouseShippingInspectionCost(process);
             break;
           default:

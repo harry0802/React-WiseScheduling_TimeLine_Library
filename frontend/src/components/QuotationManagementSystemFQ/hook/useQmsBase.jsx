@@ -125,6 +125,7 @@ export const useQmsBase = (
       handleUpdateQuotation({
         productName: formData.productName,
         customerName,
+        productSN: formData.productSN,
       });
 
       updateBasicInfo(formData);

@@ -310,6 +310,7 @@ function renderFormItem(
             return (
               <TextField
                 {...inputProps}
+                disabled={field.disabled || filteredProps.disabled} // 新增 disabled 屬性
                 label={field.label}
                 error={!!error}
                 helperText={error?.message}
@@ -395,7 +396,9 @@ function renderFormItem(
         <TextField
           {...filteredProps}
           {...controllerField}
-          disabled={filteredProps.disabled}
+          disabled={
+            field.disabled || field.props?.disabled || filteredProps.disabled
+          }
           type="text"
           label={field.label}
           error={!!error}
@@ -615,7 +618,7 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
   }, [loading, deferredOptions, field.options]);
 
   return (
-    <Grid item xs={field.span || 12}>
+    <Grid item xs={field?.span || 12}>
       <FormItem
         field={field}
         controllerField={inputProps}
@@ -624,7 +627,7 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
         loading={loading}
         asyncOptions={deferredOptions}
         methods={methods}
-        disabled={disabled}
+        disabled={disabled || field?.disabled}
         {...cleanCustomProps}
       />
     </Grid>
@@ -644,9 +647,19 @@ function FormItem({
   loading,
   asyncOptions,
   methods,
+  disabled,
   ...restProps
 }) {
-  const filteredProps = filterCustomProps(restProps);
+  if (!field) {
+    console.error("Field object is undefined");
+    return null;
+  }
+
+  const filteredProps = {
+    ...filterCustomProps(restProps),
+    disabled: disabled || field.disabled,
+  };
+
   return renderFormItem(
     field,
     controllerField,

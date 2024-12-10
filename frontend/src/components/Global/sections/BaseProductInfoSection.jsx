@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import ProductContextCard from "../../ProductionRecord/utility/ProductContextCard.jsx";
 import useNotification from "../../ProductionRecord/hook/useNotification.js";
@@ -25,9 +33,8 @@ function BaseProductInfoSection({
   const [infoDrawer, setInfoDrawer] = useState(false);
   const methods = useForm({ defaultValues: product });
   const { notifySuccess, notifyError } = useNotification();
-
   const openDrawer = useCallback(() => {
-    methods.reset(product); // 打開抽屜時重置表單
+    methods.reset(product); // 打開抽屜重置表單
     setInfoDrawer(true);
   }, [methods, product]);
 
@@ -51,16 +58,28 @@ function BaseProductInfoSection({
     [customValidation, onUpdate, closeDrawer, notifySuccess, notifyError]
   );
 
-  const contextValue = {
-    product,
-    openDrawer,
-    closeDrawer,
-    handleConfirm,
-    infoDrawer,
-    config,
-    editingItem,
-    methods,
-  };
+  const contextValue = useMemo(
+    () => ({
+      product,
+      openDrawer,
+      closeDrawer,
+      handleConfirm,
+      infoDrawer,
+      config,
+      editingItem,
+      methods,
+    }),
+    [
+      product,
+      openDrawer,
+      closeDrawer,
+      handleConfirm,
+      infoDrawer,
+      config,
+      editingItem,
+      methods,
+    ]
+  );
 
   return (
     <ProductInfoContext.Provider value={contextValue}>
@@ -84,7 +103,7 @@ function Info({ render }) {
   );
 }
 
-// Table 子組件 處理表格類別
+// Table 子組�� 處理表格類別
 function Table({ columns, data }) {
   const { openDrawer } = useContext(ProductInfoContext);
   return (
@@ -115,12 +134,105 @@ function Drawer({ title, children }) {
 
 // Form 子組件
 function Form({ formFields }) {
-  const { methods, product } = useContext(ProductInfoContext);
+  console.log("🚀 ~ Form ~ formFields:", formFields);
+  const methods = useFormContext();
+  const { product } = useContext(ProductInfoContext);
+
+  // 1. 優化需要監聽的欄位
+  const watchedFields = useMemo(
+    () =>
+      formFields
+        .filter((field) => field.getDependentValues)
+        .map((field) => field.name),
+    [formFields]
+  );
+
+  // 2. 使用 ref 來追踪上一次的值
+  const previousValuesRef = useRef({});
+
+  // 3. 優化更新函數，增加值比較
+  const updateDependentValues = useCallback(
+    (currentValues) => {
+      // 檢查值是否真的改變
+      const hasChanged = Object.entries(currentValues).some(
+        ([key, value]) => previousValuesRef.current[key] !== value
+      );
+
+      if (!hasChanged) return;
+
+      const allValues = methods.getValues();
+      formFields.forEach((field) => {
+        if (field.getDependentValues) {
+          field.getDependentValues(
+            {
+              ...allValues,
+              ...currentValues,
+            },
+            methods
+          );
+        }
+      });
+
+      // 更新 ref
+      previousValuesRef.current = { ...currentValues };
+    },
+    [formFields, methods]
+  );
+
+  // 4. 使用 useRef 來防止首次渲染時觸發
+  const isFirstRender = useRef(true);
+
+  // 5. 只監聽需要的欄位值變化
+  const formValues = methods.watch(watchedFields);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (Object.keys(formValues).length > 0) {
+      updateDependentValues(formValues);
+    }
+  }, [formValues, updateDependentValues]);
+
+  // 6. 優化 onChange handler
+  const handleFieldChange = useCallback(
+    (field, value) => {
+      const prevValue = methods.getValues(field.name);
+      if (prevValue === value) return;
+
+      methods.setValue(field.name, value, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+
+      if (field.getDependentValues) {
+        const allValues = methods.getValues();
+        field.getDependentValues(
+          {
+            ...allValues,
+            [field.name]: value,
+          },
+          methods
+        );
+      }
+    },
+    [methods]
+  );
 
   return (
     <DynamicForm externalMethods={methods}>
       {formFields.map((field, index) => (
-        <DynamicForm.Field key={index} field={field} initialValues={product} />
+        <DynamicForm.Field
+          key={`${field.name}-${index}`}
+          field={field}
+          methods={methods}
+          initialValues={product}
+          value={methods.watch(field.name)}
+          onChange={(value) => handleFieldChange(field, value)}
+        />
       ))}
     </DynamicForm>
   );
