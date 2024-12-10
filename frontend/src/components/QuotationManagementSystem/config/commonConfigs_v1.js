@@ -5,6 +5,7 @@
  * @lastModified 2024-03-21
  */
 
+import { getMachinesByArea } from "../../../config/config";
 import { API_BASE } from "../../../store/api/apiConfig";
 
 //! =============== 1. 設定與常量 ===============
@@ -72,12 +73,12 @@ export const optionsService = {
   },
 
   /**
-   * @function getFreightTypes
-   * @description 獲取貨運類型選項
-   * @returns {Promise<OptionItem[]>} 貨運類型選項列表
+   * @function getMachinesByArea
+   * @description 獲取機台列表
+   * @returns {Promise<OptionItem[]>} 機台選項列表
    * @throws {Error} 當獲取失敗時拋出錯誤
    */
-  getFreightTypes: async () => {
+  getMachinesByArea: async () => {
     try {
       const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
       const { data } = await response.json();
@@ -91,7 +92,6 @@ export const optionsService = {
           });
         }
       });
-
       return Array.from(areaMap.values());
     } catch (error) {
       console.error("獲取產線區域失敗:", error);
@@ -100,40 +100,28 @@ export const optionsService = {
   },
 
   /**
-   * @function getMachineAreas
+   * @function getMachinesByMachineSN
    * @description 獲取指定區域的機台列表
    * @param {string} areaFilter - 區域過濾條件
    * @returns {Promise<OptionItem[]>} 機台選項列表
    * @throws {Error} 當獲取失敗時拋出錯誤
    */
-  getMachineAreas: async (areaFilter) => {
+  getMachinesByMachineSN: async (areaFilter) => {
     try {
-      const [detailResponse, listResponse] = await Promise.all([
-        fetch(`${API_ENDPOINTS.MACHINE_DETAIL}/?id=${areaFilter}`),
-        fetch(API_ENDPOINTS.MACHINE_LIST),
-      ]);
+      const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
+      const { data } = await response.json();
 
-      const [detailResult, listResult] = await Promise.all([
-        detailResponse.json(),
-        listResponse.json(),
-      ]);
-      if (!detailResult.status || !detailResult.data?.[0]) {
-        throw new Error(detailResult.message || "獲取機台資訊失敗");
-      }
+      const targetArea = data.find(
+        (m) => m.id === Number(areaFilter)
+      )?.productionArea;
+      if (!targetArea) return [];
 
-      if (!listResult.status) {
-        throw new Error(listResult.message || "獲取機台列表失敗");
-      }
-
-      const targetArea = detailResult.data[0].productionArea;
-
-      return listResult.data
+      return data
         .filter((machine) => machine.productionArea === targetArea)
-        .map(({ id, machineSN, productionArea }) => ({
+        .map(({ id, machineSN }) => ({
           id,
           value: machineSN,
           label: machineSN,
-          productionArea,
         }));
     } catch (error) {
       console.error("取得機台資料失敗:", error);
@@ -157,6 +145,23 @@ export const optionsService = {
       }));
     } catch (error) {
       console.error("獲取物料選項失敗:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * @function getMachineById
+   * @description 獲取單一機台詳細資訊
+   * @param {number} id - 機台ID
+   * @returns {Promise<Object>} 機台詳細資訊
+   */
+  getMachineById: async (id) => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.MACHINE_DETAIL}/?id=${id}`);
+      const { data } = await response.json();
+      return data?.[0] || null;
+    } catch (error) {
+      console.error("取得機台詳細資訊失敗:", error);
       throw error;
     }
   },
@@ -275,6 +280,72 @@ const createPackagingScope = () => {
       } catch (error) {
         console.error("取得包材單價失敗:", error);
         return null;
+      }
+    },
+  };
+};
+export const createMachineScope = () => {
+  let machines = [];
+  let machineOptions = [];
+  let areaOptions = [];
+
+  return {
+    // 1. 獲取機台區域選項
+    async getMachinesByArea() {
+      if (!areaOptions.length) {
+        const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
+        const { data } = await response.json();
+        machines = data;
+
+        const areaMap = new Map();
+        data?.forEach((machine) => {
+          if (!areaMap.has(machine.productionArea)) {
+            areaMap.set(machine.productionArea, {
+              id: machine.id,
+              value: machine.id,
+              label: machine.productionArea,
+            });
+          }
+        });
+        areaOptions = Array.from(areaMap.values());
+      }
+      return areaOptions;
+    },
+
+    // 2. 根據區域獲取機台列表
+    async getMachinesByMachineSN(areaFilter) {
+      if (!machines.length) {
+        await this.getMachinesByArea();
+      }
+
+      const targetArea = machines.find(
+        (m) => m.id === Number(areaFilter)
+      )?.productionArea;
+      if (!targetArea) return [];
+
+      machineOptions = machines
+        .filter((machine) => machine.productionArea === targetArea)
+        .map(({ id, machineSN }) => ({
+          id,
+          value: machineSN,
+          label: machineSN,
+        }));
+      return machineOptions;
+    },
+
+    // 3. 獲取單一機台詳細資訊
+    async getMachineById(machineSN) {
+      try {
+        const machine = machineOptions.find((m) => m.value === machineSN);
+        if (!machine) return null;
+        const response = await fetch(
+          `${API_ENDPOINTS.MACHINE_DETAIL}/?id=${machine.id}`
+        );
+        const { data } = await response.json();
+        return data?.[0] || null;
+      } catch (error) {
+        console.error("取得機台詳細資訊失敗:", error);
+        throw error;
       }
     },
   };

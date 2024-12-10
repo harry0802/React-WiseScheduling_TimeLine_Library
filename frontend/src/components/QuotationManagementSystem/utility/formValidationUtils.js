@@ -54,6 +54,7 @@ const commonFields = {
   //* 成型加工費用
   injectionMoldingCost: {
     id: nullableNumber,
+    OptionsId: nullableNumber,
     SQProcessId: nullableNumber,
     machineId: z
       .number({
@@ -246,6 +247,7 @@ export const getProcessResolver = (processCategory) => {
     });
   }
   return async (values) => {
+    console.log("🔥🔥🔥🔥 ~ return ~ values:", values);
     try {
       const schema = createDynamicSchema(processCategory);
       const result = await validateWithSchema(schema, values);

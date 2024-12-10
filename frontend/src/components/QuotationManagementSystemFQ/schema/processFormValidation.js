@@ -110,7 +110,7 @@ export const fieldSchemas = {
     id: nullableNumber,
     FQProcessId: nullableNumber,
     machineId: baseSchemas.requiredNumber,
-    machineSN: z.string().optional(),
+    machineSN: z.number().optional(),
     workHoursRatio: baseSchemas.percentage,
     defectiveRate: baseSchemas.percentage,
     cycleTime: baseSchemas.requiredNumber,

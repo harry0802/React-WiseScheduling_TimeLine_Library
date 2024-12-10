@@ -573,7 +573,19 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
       setLoading(true);
       try {
         const result = await field.getDependentOptions(value, methods);
-        setAsyncOptions(Array.isArray(result) ? result : []);
+        if (field.type === "hidden") {
+          // 只有當值真的改變時才設置
+          const currentValue = methods.getValues(field.name);
+          if (currentValue !== result) {
+            methods.setValue(field.name, result, {
+              shouldValidate: true,
+              shouldDirty: true,
+              shouldTouch: true,
+            });
+          }
+        } else {
+          setAsyncOptions(Array.isArray(result) ? result : []);
+        }
       } catch (error) {
         console.error("獲取依賴選項失敗:", error);
         setAsyncOptions([]);
