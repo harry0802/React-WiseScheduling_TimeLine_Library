@@ -263,15 +263,15 @@ class FactoryQuotationService:
                         process_db.FQPackagingCosts = packaging_dump
 
                     # get FQInjectionMoldingCost by FQProcessId
-                    # inner join machine on FQInjectionMoldingCost.machineId = machine.id
+                    # left join machine on FQInjectionMoldingCost.machineId = machine.id
                     injectionMolding_db_list = db.session.execute(
                         db.select(FQInjectionMoldingCost)
-                        .join(Machine, FQInjectionMoldingCost.machineId == Machine.id)
+                        .join(Machine, FQInjectionMoldingCost.machineId == Machine.id, isouter=True)
                         .filter(FQInjectionMoldingCost.FQProcessId == process_db.id)
                     ).scalars().all()
                     for injectionMolding_db in injectionMolding_db_list:
-                        injectionMolding_db.machineSN = injectionMolding_db.machines.machineSN
-                        injectionMolding_db.electricityCostPerSec = injectionMolding_db.machines.electricityCostPerSec
+                        injectionMolding_db.machineSN = injectionMolding_db.machines.machineSN if injectionMolding_db.machines else None
+                        injectionMolding_db.electricityCostPerSec = injectionMolding_db.machines.electricityCostPerSec if injectionMolding_db.machines else None
                     if injectionMolding_db_list:
                         injectionMolding_dump = FQInjectionMoldingCostSchema().dump(injectionMolding_db_list, many=True)
                         process_db.FQInjectionMoldingCosts = injectionMolding_dump

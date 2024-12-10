@@ -15,8 +15,9 @@ def complete_SQInPostProcessingCost(db_obj, payload):
     db_obj.amount = float(payload["amount"]) \
         if payload.get("amount") is not None else db_obj.amount
     # 「金額」=「工時」*「單價」
-    db_obj.amount = db_obj.workSecond * db_obj.unitPrice
-    db_obj.amount = round(db_obj.amount, 3)
+    if db_obj.workSecond and db_obj.unitPrice:
+        db_obj.amount = db_obj.workSecond * db_obj.unitPrice
+        db_obj.amount = round(db_obj.amount, 3)
     return db_obj
 
 
