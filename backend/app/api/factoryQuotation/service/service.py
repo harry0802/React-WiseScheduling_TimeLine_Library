@@ -270,6 +270,7 @@ class FactoryQuotationService:
                         .filter(FQInjectionMoldingCost.FQProcessId == process_db.id)
                     ).scalars().all()
                     for injectionMolding_db in injectionMolding_db_list:
+                        injectionMolding_db.productionArea = injectionMolding_db.machines.productionArea if injectionMolding_db.machines else None
                         injectionMolding_db.machineSN = injectionMolding_db.machines.machineSN if injectionMolding_db.machines else None
                         injectionMolding_db.electricityCostPerSec = injectionMolding_db.machines.electricityCostPerSec if injectionMolding_db.machines else None
                     if injectionMolding_db_list:
