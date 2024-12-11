@@ -1,9 +1,4 @@
 import sys
-from flask import current_app
-from sqlalchemy.orm import load_only
-from sqlalchemy.orm import contains_eager
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload
 from app import db
 from app.utils_log import message, err_resp, internal_err_resp
 from app.models.product import Product
@@ -14,8 +9,11 @@ from app.models.processMold import ProcessMold
 from app.models.processMaterial import ProcessMaterial
 from app.models.ltmoldmap import LtMoldMap
 from app.models.productionSchedule import ProductionSchedule
+from app.models.factoryQuotation.factoryQuotation import FactoryQuotation
 from app.api.option.optionEnum import WorkOrderStatusEnum
 from .schemas import processSchema, moldsSchema, materialsSchema
+from app.api.factoryQuotation.service.syncProcesses_service import sync_processes
+from app.api.factoryQuotation.service.service import update_subtotalCostWithoutOverhead
 process_schema = processSchema()
 molds_schema = moldsSchema()
 materials_schema = materialsSchema()
@@ -49,6 +47,35 @@ def complete_process(db_obj, payload):
         if payload.get("jigSN") is not None else db_obj.jigSN
     return db_obj
 
+
+def sync_process_to_factoryQuotation(productIds):
+    """每當BOM表有新增/更新/刪除製程時，同步更新廠內報價表的製程資料
+
+    Args:
+        productIds (_type_): _description_
+
+    Raises:
+        error: _description_
+
+    Returns:
+        _type_: _description_
+    """
+    try:
+        for productId in productIds:
+            # Get the productSN by productId
+            product_db = Product.query.filter(Product.id == productId).first()
+            if product_db is None:
+                return err_resp("product not found", "product_404", 404)
+            # Get the factoryQuotation by productSN
+            factoryQuotation_db = FactoryQuotation.query.filter(FactoryQuotation.productSN == product_db.productSN).first()
+            if factoryQuotation_db:
+                # update process data to factoryQuotation
+                sync_processes(factoryQuotation_db.id, product_db.productSN)
+                update_subtotalCostWithoutOverhead(factoryQuotation_db.id)
+
+    # exception without handling should raise to the caller
+    except Exception as error:
+        raise error
 
 class processService:
     @staticmethod
@@ -177,9 +204,11 @@ class processService:
     def create_processes(payloads):
         try:
             process_db_list = []
+            productIds = []
             for data in payloads:
                 process_db = complete_process(Process(), data)
                 # insert to db and get the new primary key
+                productIds.append(process_db.productId)
                 db.session.add(process_db)
                 db.session.flush()
                 process_db_list.append(process_db)
@@ -218,6 +247,9 @@ class processService:
                 
             db.session.commit()
 
+            # sync process data to factoryQuotation
+            sync_process_to_factoryQuotation(productIds)
+
             process_dto = process_schema.dump(process_db_list, many=True)
             resp = message(True, "processes have been created..")
             resp["data"] = process_dto
@@ -233,6 +265,7 @@ class processService:
     def update_processes(payloads):
         try:
             process_db_list = []
+            productIds = []
             for data in payloads:
                 if isEditable_isDeletable(data["id"]) == False:
                     return err_resp("process cannot be edited", "process_409", 409)
@@ -245,6 +278,7 @@ class processService:
                 
                 process_db = complete_process(process_db, data)
                 # insert to db and get the new primary key
+                productIds.append(process_db.productId)
                 db.session.add(process_db)
                 db.session.flush()
                 process_db_list.append(process_db)
@@ -303,6 +337,9 @@ class processService:
                 
             db.session.commit()
 
+            # sync process data to factoryQuotation
+            sync_process_to_factoryQuotation(productIds)
+
             process_dto = process_schema.dump(process_db_list, many=True)
             resp = message(True, "processes have been updated..")
             resp["data"] = process_dto
@@ -320,10 +357,12 @@ class processService:
                     return err_resp("process cannot be deleted", "process_409", 409)
             
             # Get the process by id
+            productIds = []
             process_db = Process.query.filter(Process.id == id).first()
             if process_db is None:
                 return err_resp("process not found", "process_404", 404)
-            
+            productIds.append(process_db.productId)
+
             # delete data from processmold table where processId = id
             ltmoldmapId_list = db.session.execute(
                                     db.select(ProcessMold.ltmoldmapId).filter(ProcessMold.processId == id)
@@ -344,6 +383,9 @@ class processService:
             db.session.delete(process_db)
             db.session.flush()
             db.session.commit()
+
+            # sync process data to factoryQuotation
+            sync_process_to_factoryQuotation(productIds)
 
             resp = message(True, "process has been deleted")
             return resp, 200

@@ -261,16 +261,17 @@ def convert_processes_to_payload_format(process_db_list):
 
 
 def sync_processes(factoryQuotationId, productSN):
+    """根據選擇的產品，將其BOM表製程同步到廠內報價單中
+
+    Args:
+        factoryQuotationId (_type_): _description_
+        productSN (_type_): _description_
+
+    Raises:
+        ValueError: _description_
+        error: _description_
+    """
     try:
-        # 先確認此次選擇的產品是否跟資料庫中的產品一樣
-        factoryQuotation_db = FactoryQuotation.query.filter(FactoryQuotation.id == factoryQuotationId).first()
-        if factoryQuotation_db is None:
-            raise ValueError("factoryQuotation not found", "factoryQuotation_404")
-        
-        # 如果選擇的產品與資料庫中的產品一樣，則不重複新增，不做任何動作
-        if factoryQuotation_db.productSN == productSN:
-            return
-        
         # 如果選擇的產品與資料庫中的產品不一樣，則先刪除所有製程，再新增。
         # 刪除所有製程
         delete_all_processes(factoryQuotationId)

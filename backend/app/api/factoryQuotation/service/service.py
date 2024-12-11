@@ -90,6 +90,11 @@ def calculate_subtotalCostWithoutOverhead(factoryQuotationId):
 
 
 def update_subtotalCostWithoutOverhead(factoryQuotationId):
+    """當廠內報價的製程有變動時，更新廠內報價的成本小計(不含管銷研)
+
+    Args:
+        factoryQuotationId (_type_): _description_
+    """
     factoryQuotation_db = FactoryQuotation.query.get(factoryQuotationId)
     factoryQuotation_db.subtotalCostWithoutOverhead = calculate_subtotalCostWithoutOverhead(factoryQuotationId)
     db.session.add(factoryQuotation_db)
@@ -349,13 +354,17 @@ class FactoryQuotationService:
     @staticmethod
     def update_factoryQuotation(factoryQuotationId, payload):
         try:
-            # 如果payload有productSN，則同步產品履歷(BOM表)的製程到報價單，並更新報價單的subtotalCostWithoutOverhead
-            if "productSN" in payload:
-                sync_processes(factoryQuotationId, payload["productSN"])
-                update_subtotalCostWithoutOverhead(factoryQuotationId)
-
             if(factoryQuotation_db := FactoryQuotation.query.get(factoryQuotationId)) is None:
                 return err_resp("factoryQuotation not found", "factoryQuotation_404", 404)
+            
+            # 如果payload有productSN，則同步產品履歷(BOM表)的製程到報價單，並更新報價單的subtotalCostWithoutOverhead
+            if "productSN" in payload:
+                # 先確認此次選擇的產品是否跟資料庫中的產品一樣
+                # 產品不一樣才同步，如果選擇的產品與資料庫中的產品一樣，則不重複新增，不做任何動作
+                if factoryQuotation_db.productSN != payload["productSN"]:
+                    sync_processes(factoryQuotationId, payload["productSN"])
+                    update_subtotalCostWithoutOverhead(factoryQuotationId)
+
             factoryQuotation_db = complete_factoryQuotation(factoryQuotation_db, payload)
             db.session.add(factoryQuotation_db)
             db.session.commit()

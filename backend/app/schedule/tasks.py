@@ -2,6 +2,7 @@ import os
 from flask import current_app
 from app import scheduler, db
 from app.api.calendar.service import CalendarService
+from app.api.productionCost.service import ProductionCostService
 from app.api.lysErp.service import LyService
 
 @scheduler.task(
@@ -16,6 +17,21 @@ def update_calendar():
             CalendarService.update_calendar()
         except Exception as error:
             current_app.logger.error(error)
+
+
+@scheduler.task(
+    "cron",
+    id="create_productionCost_realTime",
+    minute='*',
+    max_instances=1,
+    )
+def create_productionCost_realTime():
+    with scheduler.app.app_context():
+        try:
+            ProductionCostService.create_productionCost_realTime()
+        except Exception as error:
+            current_app.logger.error(error)
+
 
 LY_ERP_ON = os.getenv("LY_ERP_ON", "False")
 if LY_ERP_ON.lower() == "true":

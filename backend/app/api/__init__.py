@@ -23,6 +23,7 @@ from .machine.controller import api as machine_ns
 from .customer.controller import api as customer_ns
 from .salesQuotation.controller import api as salesQuotation_ns
 from .factoryQuotation.controller import api as factoryQuotation_ns
+from .productionCost.controller import api as productionCost_ns
 from app.api.calendar.service import CalendarService
 from app.api.lysErp.service import LyService
 from app.api.productionSchedule.service import shift_by_holiday
@@ -63,6 +64,7 @@ api.add_namespace(machine_ns)
 api.add_namespace(customer_ns)
 api.add_namespace(salesQuotation_ns)
 api.add_namespace(factoryQuotation_ns)
+api.add_namespace(productionCost_ns)
 
 @api_bp.cli.command('update_calendar')
 def update_calendar():
