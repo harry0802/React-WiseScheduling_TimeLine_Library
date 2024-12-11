@@ -126,7 +126,7 @@ def convert_prosses_list_to_nested(process_db_list):
         # Add material to the process's materials list
         if item['materialType'] == '包材':
             grouped_processes[process_id]['packagings'].append(material)
-        else:
+        elif item['materialSN']: # Skip materials without SN
             grouped_processes[process_id]['materials'].append(material)
     
     # Convert dictionary to list and sort by id
@@ -254,7 +254,6 @@ def convert_processes_to_payload_format(process_db_list):
                     process["FQOutPostProcessingCosts"] = [{"FQProcessId": None}]
 
             payloads.append(process)
-        print("payloads", payloads, file=sys.stderr)    
         return payloads
     except Exception as error:
         raise error
@@ -270,7 +269,6 @@ def sync_processes(factoryQuotationId, productSN):
         
         # 如果選擇的產品與資料庫中的產品一樣，則不重複新增，不做任何動作
         if factoryQuotation_db.productSN == productSN:
-            print("return here", file=sys.stderr)
             return
         
         # 如果選擇的產品與資料庫中的產品不一樣，則先刪除所有製程，再新增。
@@ -283,7 +281,6 @@ def sync_processes(factoryQuotationId, productSN):
         
         # 新增全部製程以及費用
         for payload in payloads:
-            print("processCategory", payload["processCategory"], file=sys.stderr)
             # 新增製程
             process_db = FQProcess()
             process_db.factoryQuotationId = factoryQuotationId
