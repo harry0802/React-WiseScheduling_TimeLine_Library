@@ -5,7 +5,6 @@
  * @lastModified 2024-03-21
  */
 
-import { getMachinesByArea } from "../../../config/config";
 import { API_BASE } from "../../../store/api/apiConfig";
 
 //! =============== 1. 設定與常量 ===============
@@ -302,7 +301,7 @@ export const createMachineScope = () => {
           if (!areaMap.has(machine.productionArea)) {
             areaMap.set(machine.productionArea, {
               id: machine.id,
-              value: machine.id,
+              value: machine.productionArea,
               label: machine.productionArea,
             });
           }
@@ -317,10 +316,7 @@ export const createMachineScope = () => {
       if (!machines.length) {
         await this.getMachinesByArea();
       }
-
-      const targetArea = machines.find(
-        (m) => m.id === Number(areaFilter)
-      )?.productionArea;
+      const targetArea = areaOptions.find((m) => m.value === areaFilter)?.value;
       if (!targetArea) return [];
 
       machineOptions = machines

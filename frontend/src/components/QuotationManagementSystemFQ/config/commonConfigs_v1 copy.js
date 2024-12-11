@@ -6,6 +6,7 @@
  */
 
 import { API_BASE } from "../../../store/api/apiConfig";
+import { cacheService } from "../../../services/cacheService";
 
 //! =============== 1. 設定與常量 ===============
 
@@ -40,20 +41,42 @@ const API_ENDPOINTS = {
 //! =============== 3. 核心功能 ===============
 //* ========= 服務層 Service Layer =========
 export const optionsService = {
+  pendingRequests: {},
+
   /**
    * @function getCommonUnits
    * @description 獲取通用單位選項
    * @returns {Promise<OptionItem[]>} 單位選項列表
    */
 
-  getCommonUnits: async () => {
-    const response = await fetch(API_ENDPOINTS.MATERIAL_UNIT);
-    const data = await response.json();
-    return data?.data?.map((item) => ({
-      id: item.id,
-      value: item.name,
-      label: `${item.name} (${item.schema})`,
-    }));
+  async getCommonUnits() {
+    const cacheKey = "commonUnits";
+    const cached = cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    if (this.pendingRequests[cacheKey]) {
+      return this.pendingRequests[cacheKey];
+    }
+
+    const request = fetch(API_ENDPOINTS.MATERIAL_UNIT)
+      .then((response) => response.json())
+      .then((data) => {
+        const result = data?.data?.map((item) => ({
+          id: item.id,
+          value: item.name,
+          label: `${item.name} (${item.schema})`,
+        }));
+        cacheService.set(cacheKey, result);
+        delete this.pendingRequests[cacheKey];
+        return result;
+      })
+      .catch((error) => {
+        delete this.pendingRequests[cacheKey];
+        throw error;
+      });
+
+    this.pendingRequests[cacheKey] = request;
+    return request;
   },
 
   /**
@@ -61,14 +84,34 @@ export const optionsService = {
    * @description 獲取包裝類型選項
    * @returns {Promise<OptionItem[]>} 包裝類型選項列表
    */
-  getPackagingTypes: async () => {
-    const response = await fetch(API_ENDPOINTS.PACKAGING_UNIT);
-    const data = await response.json();
-    return data?.data?.map((item) => ({
-      id: item.id,
-      value: item.name,
-      label: `${item.name} (${item.schema})`,
-    }));
+  async getPackagingTypes() {
+    const cacheKey = "packagingTypes";
+    const cached = cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    if (this.pendingRequests[cacheKey]) {
+      return this.pendingRequests[cacheKey];
+    }
+
+    const request = fetch(API_ENDPOINTS.PACKAGING_UNIT)
+      .then((response) => response.json())
+      .then((data) => {
+        const result = data?.data?.map((item) => ({
+          id: item.id,
+          value: item.name,
+          label: `${item.name} (${item.schema})`,
+        }));
+        cacheService.set(cacheKey, result);
+        delete this.pendingRequests[cacheKey];
+        return result;
+      })
+      .catch((error) => {
+        delete this.pendingRequests[cacheKey];
+        throw error;
+      });
+
+    this.pendingRequests[cacheKey] = request;
+    return request;
   },
 
   /**
@@ -77,26 +120,41 @@ export const optionsService = {
    * @returns {Promise<OptionItem[]>} 貨運類型選項列表
    * @throws {Error} 當獲取失敗時拋出錯誤
    */
-  getFreightTypes: async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
-      const { data } = await response.json();
-      const areaMap = new Map();
-      data?.forEach((machine) => {
-        if (!areaMap.has(machine.productionArea)) {
-          areaMap.set(machine.productionArea, {
-            id: machine.id,
-            value: machine.id,
-            label: machine.productionArea,
-          });
-        }
+  async getFreightTypes() {
+    const cacheKey = "freightTypes";
+    const cached = cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    if (this.pendingRequests[cacheKey]) {
+      return this.pendingRequests[cacheKey];
+    }
+
+    const request = fetch(API_ENDPOINTS.MACHINE_LIST)
+      .then((response) => response.json())
+      .then(({ data }) => {
+        const areaMap = new Map();
+        data?.forEach((machine) => {
+          if (!areaMap.has(machine.productionArea)) {
+            areaMap.set(machine.productionArea, {
+              id: machine.id,
+              value: machine.id,
+              label: machine.productionArea,
+            });
+          }
+        });
+        const result = Array.from(areaMap.values());
+        cacheService.set(cacheKey, result);
+        delete this.pendingRequests[cacheKey];
+        return result;
+      })
+      .catch((error) => {
+        delete this.pendingRequests[cacheKey];
+        console.error("獲取產線區域失敗:", error);
+        throw error;
       });
 
-      return Array.from(areaMap.values());
-    } catch (error) {
-      console.error("獲取產線區域失敗:", error);
-      throw error;
-    }
+    this.pendingRequests[cacheKey] = request;
+    return request;
   },
 
   /**
@@ -106,39 +164,53 @@ export const optionsService = {
    * @returns {Promise<OptionItem[]>} 機台選項列表
    * @throws {Error} 當獲取失敗時拋出錯誤
    */
-  getMachineAreas: async (areaFilter) => {
-    try {
-      const [detailResponse, listResponse] = await Promise.all([
-        fetch(`${API_ENDPOINTS.MACHINE_DETAIL}/?id=${areaFilter}`),
-        fetch(API_ENDPOINTS.MACHINE_LIST),
-      ]);
+  async getMachineAreas(areaFilter) {
+    const cacheKey = `machineAreas_${areaFilter}`;
+    const cached = cacheService.get(cacheKey);
+    if (cached) return cached;
 
-      const [detailResult, listResult] = await Promise.all([
-        detailResponse.json(),
-        listResponse.json(),
-      ]);
-      if (!detailResult.status || !detailResult.data?.[0]) {
-        throw new Error(detailResult.message || "獲取機台資訊失敗");
-      }
-
-      if (!listResult.status) {
-        throw new Error(listResult.message || "獲取機台列表失敗");
-      }
-
-      const targetArea = detailResult.data[0].productionArea;
-
-      return listResult.data
-        .filter((machine) => machine.productionArea === targetArea)
-        .map(({ id, machineSN, productionArea }) => ({
-          id,
-          value: machineSN,
-          label: machineSN,
-          productionArea,
-        }));
-    } catch (error) {
-      console.error("取得機台資料失敗:", error);
-      throw error;
+    if (this.pendingRequests[cacheKey]) {
+      return this.pendingRequests[cacheKey];
     }
+
+    const request = Promise.all([
+      fetch(`${API_ENDPOINTS.MACHINE_DETAIL}/?id=${areaFilter}`),
+      fetch(API_ENDPOINTS.MACHINE_LIST),
+    ])
+      .then(([detailResponse, listResponse]) =>
+        Promise.all([detailResponse.json(), listResponse.json()])
+      )
+      .then(([detailResult, listResult]) => {
+        if (!detailResult.status || !detailResult.data?.[0]) {
+          throw new Error(detailResult.message || "獲取機台資訊失敗");
+        }
+
+        if (!listResult.status) {
+          throw new Error(listResult.message || "獲取機台列表失敗");
+        }
+
+        const targetArea = detailResult.data[0].productionArea;
+        const result = listResult.data
+          .filter((machine) => machine.productionArea === targetArea)
+          .map(({ id, machineSN, productionArea }) => ({
+            id,
+            value: machineSN,
+            label: machineSN,
+            productionArea,
+          }));
+
+        cacheService.set(cacheKey, result);
+        delete this.pendingRequests[cacheKey];
+        return result;
+      })
+      .catch((error) => {
+        delete this.pendingRequests[cacheKey];
+        console.error("取得機台資料失敗:", error);
+        throw error;
+      });
+
+    this.pendingRequests[cacheKey] = request;
+    return request;
   },
 
   /**
@@ -146,136 +218,235 @@ export const optionsService = {
    * @description 獲取物料選項
    * @returns {Promise<OptionItem[]>} 物料選項列表
    */
-  getMaterialOptions: async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.MATERIAL_OPTION);
-      const data = await response.json();
-      return data?.data?.map((item) => ({
-        id: item.id,
-        value: item.id,
-        label: item.materialType,
-      }));
-    } catch (error) {
-      console.error("獲取物料選項失敗:", error);
-      throw error;
+  async getMaterialOptions() {
+    const cacheKey = "materialOptions";
+    const cached = cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    if (this.pendingRequests[cacheKey]) {
+      return this.pendingRequests[cacheKey];
     }
+
+    const request = fetch(API_ENDPOINTS.MATERIAL_OPTION)
+      .then((response) => response.json())
+      .then((data) => {
+        const result = data?.data?.map((item) => ({
+          id: item.id,
+          value: item.id,
+          label: item.materialType,
+        }));
+        cacheService.set(cacheKey, result);
+        delete this.pendingRequests[cacheKey];
+        return result;
+      })
+      .catch((error) => {
+        delete this.pendingRequests[cacheKey];
+        console.error("獲取物料選項失敗:", error);
+        throw error;
+      });
+
+    this.pendingRequests[cacheKey] = request;
+    return request;
   },
 };
 
 //* ========= 工廠函數 Factory Functions =========
+const createSharedRequest = (cacheKey, fetchFn, ttl = 300000) => {
+  let sharedPromise = null;
+  let lastFetchTime = 0;
+
+  return async (forceRefresh = false) => {
+    const now = Date.now();
+    const cached = cacheService.get(cacheKey);
+
+    // 如果有緩存且未過期，直接返回
+    if (cached && !forceRefresh) {
+      return cached;
+    }
+
+    // 如果已經有進行中的請求且未超時，返回該請求
+    if (sharedPromise && now - lastFetchTime < 5000) {
+      return sharedPromise;
+    }
+
+    // 創建新的請求
+    lastFetchTime = now;
+    sharedPromise = fetchFn()
+      .then((result) => {
+        cacheService.set(cacheKey, result, ttl);
+        return result;
+      })
+      .finally(() => {
+        // 5秒後清除共享請求
+        setTimeout(() => {
+          sharedPromise = null;
+        }, 5000);
+      });
+
+    return sharedPromise;
+  };
+};
+
+// 修改 createMaterialScope
 const createMaterialScope = () => {
-  // 存放資料狀態
-  let materials = [];
-  let materialOptions = [];
   let currentMaterial = null;
 
+  // 一般共享請求 - 不需要參數
+  const fetchMaterials = createSharedRequest("materials", async () => {
+    const response = await fetch(API_ENDPOINTS.MATERIAL_MATERIALS);
+    const result = await response.json();
+    return result.data.map((item) => ({
+      value: item.materialName,
+      label: item.materialName,
+      materialSN: item.materialSN,
+      unitPrice: item.unitPrice,
+      materialOptionId: item.materialOptionId,
+      unit: item.unit,
+    }));
+  });
+
+  // 特殊處理 - 需要參數的請求
+  const materialPriceCache = new Map();
+  const getMaterialPrice = async (material) => {
+    if (!material) return null;
+
+    const cacheKey = `${material.label}_${material.materialSN}`;
+    if (materialPriceCache.has(cacheKey)) {
+      return materialPriceCache.get(cacheKey);
+    }
+
+    const response = await fetch(
+      `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${material.label}&materialSN=${material.materialSN}`
+    );
+    const result = await response.json();
+    const price = result.status ? result.data : null;
+
+    materialPriceCache.set(cacheKey, price);
+
+    // 5分鐘後清除緩存
+    setTimeout(() => {
+      materialPriceCache.delete(cacheKey);
+    }, 300000);
+
+    return price;
+  };
+
   return {
-    // 1. 獲取物料選項
-    async getMaterials() {
-      if (!materials.length) {
-        const response = await fetch(API_ENDPOINTS.MATERIAL_MATERIALS);
-        const result = await response.json();
-        materials = result.data;
-        materialOptions = materials.map((item) => ({
-          value: item.materialName,
-          label: item.materialName,
-          materialSN: item.materialSN,
-          unitPrice: item.unitPrice,
-          materialOptionId: item.materialOptionId,
-        }));
-      }
-      return materialOptions;
-    },
+    getMaterials: () => fetchMaterials(),
 
-    // 2. 根據物料名稱獲取相關資料
     async setSelectedMaterial(materialName) {
-      if (!materials.length || !materialName) return null;
+      if (!materialName) return null;
 
-      currentMaterial = materials.find(
-        (m) => m.materialName === materialName.label
-      );
+      const materials = await fetchMaterials();
+      currentMaterial = materials.find((m) => m.label === materialName.label);
 
       if (!currentMaterial) return null;
-      // 獲取物料單價
-      const unitPrice = await this.getMaterialPrice(currentMaterial);
+      const unitPrice = await getMaterialPrice(currentMaterial);
+
       return {
         materialSN: currentMaterial.materialSN,
-        unit: currentMaterial.unit,
-        unitPrice: unitPrice,
+        unitPrice,
         materialOptionId: currentMaterial.materialOptionId,
       };
     },
 
-    // 3. 獲取物料單價
-    async getMaterialPrice(material) {
-      if (!material) return null;
-      try {
-        const response = await fetch(
-          `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${material.label}&materialSN=${material.materialSN}`
-        );
-        const result = await response.json();
-        return result.status ? result.data : null;
-      } catch (error) {
-        console.error("取得單價失敗:", error);
-        return null;
-      }
+    getCurrentMaterial() {
+      return currentMaterial;
+    },
+
+    getMaterialPrice,
+
+    async getDependentValues(materialName) {
+      if (!materialName) return null;
+      const result = await this.setSelectedMaterial(materialName);
+      if (!result) return null;
+
+      return {
+        materialName: materialName.label,
+        materialSN: result.materialSN,
+        unitPrice: result.unitPrice,
+        materialOptionId: result.materialOptionId,
+      };
     },
   };
 };
 
 const createPackagingScope = () => {
-  let packagings = [];
-  let packagingOptions = [];
   let currentPackaging = null;
 
-  return {
-    // 1. 獲取包材選項
-    async getPackagings() {
-      if (!packagings.length) {
-        const response = await fetch(API_ENDPOINTS.MATERIAL_PACKAGINGS);
-        const result = await response.json();
-        packagings = result.data;
-        packagingOptions = packagings.map((item) => ({
-          value: item.materialName,
-          label: item.materialName,
-          materialSN: item.materialSN,
-          unitPrice: item.unitPrice,
-        }));
-      }
-      return packagingOptions;
-    },
+  // 使用共享請求獲取包材列表
+  const fetchPackagings = createSharedRequest("packagings", async () => {
+    const response = await fetch(API_ENDPOINTS.MATERIAL_PACKAGINGS);
+    const result = await response.json();
+    return result.data.map((item) => ({
+      value: item.materialName,
+      label: item.materialName,
+      materialSN: item.materialSN,
+      unitPrice: item.unitPrice,
+      unit: item.unit,
+    }));
+  });
 
-    // 2. 設置選中的包材
+  // 特殊處理包材單價的緩存
+  const packagingPriceCache = new Map();
+  const getPackagingPrice = async (packaging) => {
+    if (!packaging) return null;
+
+    const cacheKey = `${packaging.label}_${packaging.materialSN}`;
+    if (packagingPriceCache.has(cacheKey)) {
+      return packagingPriceCache.get(cacheKey);
+    }
+
+    const response = await fetch(
+      `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${packaging.label}&materialSN=${packaging.materialSN}`
+    );
+    const result = await response.json();
+    const price = result.status ? result.data : null;
+
+    packagingPriceCache.set(cacheKey, price);
+
+    // 5分鐘後清除緩存
+    setTimeout(() => {
+      packagingPriceCache.delete(cacheKey);
+    }, 300000);
+
+    return price;
+  };
+
+  return {
+    getPackagings: () => fetchPackagings(),
+
     async setSelectedPackaging(packagingName) {
-      if (!packagings.length || !packagingName) return null;
+      if (!packagingName) return null;
+
+      const packagings = await fetchPackagings();
       currentPackaging = packagings.find(
-        (p) => p.materialName === packagingName.label
+        (p) => p.label === packagingName.label
       );
 
       if (!currentPackaging) return null;
-      // 獲取包材單價
-      const unitPrice = await this.getPackagingPrice(currentPackaging);
+      const unitPrice = await getPackagingPrice(currentPackaging);
 
       return {
         packagingSN: currentPackaging.materialSN,
         unit: currentPackaging.unit,
-        unitPrice: unitPrice,
+        unitPrice,
       };
     },
 
-    // 3. 獲取包材單價
-    async getPackagingPrice(packaging) {
-      if (!packaging) return null;
-      try {
-        const response = await fetch(
-          `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${packaging.label}&materialSN=${packaging.materialSN}`
-        );
-        const result = await response.json();
-        return result.status ? result.data : null;
-      } catch (error) {
-        console.error("取得包材單價失敗:", error);
-        return null;
-      }
+    getPackagingPrice,
+
+    async getDependentValues(packagingName) {
+      if (!packagingName) return null;
+      const result = await this.setSelectedPackaging(packagingName);
+      if (!result) return null;
+
+      return {
+        materialName: packagingName.label,
+        materialSN: result.packagingSN,
+        unitPrice: result.unitPrice,
+        packagingType: "包材",
+      };
     },
   };
 };
@@ -314,13 +485,13 @@ export const createField = (
     }),
   },
   ...(span && { span }),
-  // 改為直接傳入 getOptions 函數，而不呼叫
+  // 為直接傳入 getOptions 函數，而不呼叫
   ...(getOptions ? { getOptions } : {}),
   ...(options ? { options } : {}),
   hidden,
 });
 
-//! =============== 5. 字段定義 ===============
+//! =============== 5. 段定義 ===============
 //* 基礎成本設置字段
 const materialCostSettingFields = {
   estimatedDefectRate: createField(
@@ -367,20 +538,9 @@ const materialCostFields = {
       },
       createRequiredRule("物料名稱")
     ),
-    getOptions: materialScope.getMaterials,
-    getDependentValues: async (materialName) => {
-      if (!materialName) return null;
-      const material = await materialScope.setSelectedMaterial(materialName);
-      if (material) {
-        return {
-          materialName: materialName.label,
-          materialSN: material.materialSN,
-          unitPrice: material.unitPrice,
-          materialOptionId: material.materialOptionId,
-        };
-      }
-      return null;
-    },
+    getOptions: () => materialScope.getMaterials(),
+    getDependentValues: (materialName) =>
+      materialScope.getDependentValues(materialName),
   },
   materialSN: {
     ...createField(
@@ -402,7 +562,7 @@ const materialCostFields = {
     createRequiredRule("原物料種類"),
     null,
     3,
-    optionsService.getMaterialOptions
+    () => optionsService.getMaterialOptions()
   ),
   unit: createField(
     "unit",
@@ -415,7 +575,7 @@ const materialCostFields = {
     createRequiredRule("單位"),
     null,
     3,
-    optionsService.getCommonUnits
+    () => optionsService.getCommonUnits()
   ),
   weight: createField(
     "weight",
@@ -503,11 +663,12 @@ const packagingCostFields = {
     {
       placeholder: "請選擇單位",
       readOnly: true,
+      dependsOn: "materialName",
     },
     createRequiredRule("單位"),
     null,
     3,
-    optionsService.getPackagingTypes
+    () => optionsService.getCommonUnits()
   ),
   quantity: createField(
     "quantity",

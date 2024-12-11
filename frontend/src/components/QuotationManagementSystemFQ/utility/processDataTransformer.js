@@ -22,6 +22,7 @@ const transformMaterialCostSetting = (setting) => ({
 const transformInjectionMoldingCosts = (costs) =>
   costs.map((cost) => ({
     ...cost,
+    machineId: cost.OptionsId || cost.machineId,
     workHoursRatio: convertToPercentage(cost.workHoursRatio),
     defectiveRate: convertToPercentage(cost.defectiveRate),
   }));

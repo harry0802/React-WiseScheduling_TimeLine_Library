@@ -12,6 +12,7 @@ import {
   FormProvider,
   useFormContext,
   useController,
+  Controller,
 } from "react-hook-form";
 import {
   Button,
@@ -172,16 +173,6 @@ function renderFormItem(
     ...filterCustomProps(props),
     disabled: props.disabled || field.disabled, // 確保 disabled 被保留
   };
-  if (field.hidden) {
-    return (
-      <input
-        type="hidden"
-        style={{ display: "none" }}
-        {...controllerField}
-        {...filterCustomProps(props)}
-      />
-    );
-  }
 
   switch (field.type) {
     case "select":
@@ -515,7 +506,7 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
     if (field.dependsOn) {
       const subscription = methods.watch((value, { name }) => {
         if (name === field.dependsOn) {
-          console.log(`${field.dependsOn} changed:`, value[field.dependsOn]);
+          // console.log(`${field.dependsOn} changed:`, value[field.dependsOn]);
         }
       });
 
@@ -602,11 +593,11 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
       dependentValue &&
       dependentValue !== prevDependentValue
     ) {
-      console.log("依賴值變更，重新獲取選項:", {
-        field: field.name,
-        dependentValue,
-        prevValue: prevDependentValue,
-      });
+      // console.log("依賴值變更，重新獲取選項:", {
+      //   field: field.name,
+      //   dependentValue,
+      //   prevValue: prevDependentValue,
+      // });
 
       fetchDependentOptions(dependentValue);
       setPrevDependentValue(dependentValue);
@@ -628,6 +619,18 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
     }
     return [];
   }, [loading, deferredOptions, field.options]);
+  if (field.hidden || field.type === "hidden") {
+    return (
+      <>
+        <Controller
+          name={field.name}
+          control={methods.control}
+          defaultValue=""
+          render={() => null}
+        />
+      </>
+    );
+  }
 
   return (
     <Grid item xs={field?.span || 12}>

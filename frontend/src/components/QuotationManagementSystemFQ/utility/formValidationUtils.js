@@ -20,7 +20,7 @@ import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
 //* 基礎必填欄位定義，用於所有製程類型
 const baseRequiredFields = {
   id: nullableNumber,
-  salesQuotationId: nullableNumber,
+  factoryQuotationId: nullableNumber,
   processOptionId: z.any(),
   processCategory: z.union([
     z
@@ -39,7 +39,7 @@ const baseRequiredFields = {
 };
 
 //! =============== 2. 類型與介面 ===============
-//* 共用欄位定義
+//* 共用欄位��義
 const commonFields = {
   //* 材料成本設置
   materialCostSetting: {
@@ -55,7 +55,8 @@ const commonFields = {
   injectionMoldingCost: {
     id: nullableNumber,
     OptionsId: nullableNumber,
-    SQProcessId: nullableNumber,
+
+    FQProcessId: nullableNumber,
     machineId: z
       .number({
         required_error: "請選擇機台區域",
@@ -105,56 +106,56 @@ const createArraySchemaWithStringFallback = (schema) =>
 const getProcessFields = (processCategory) => {
   const categoryMap = {
     [PROCESS_CATEGORY_OPTION[0].category]: {
-      SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-      SQInjectionMoldingCosts: z
+      FQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+      FQInjectionMoldingCosts: z
         .array(z.object(commonFields.injectionMoldingCost))
         .min(1, "至少需要一筆注射成型費用資料")
         .nonempty("注射成型費用不能為空"),
-      SQMaterialCosts: createArraySchemaWithStringFallback(
+      FQMaterialCosts: createArraySchemaWithStringFallback(
         fieldSchemas.materialCost
       ),
-      SQPackagingCosts: createArraySchemaWithStringFallback(
+      FQPackagingCosts: createArraySchemaWithStringFallback(
         fieldSchemas.packagingCost
       ),
     },
     [PROCESS_CATEGORY_OPTION[1].category]: {
-      SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-      SQMaterialCosts: createArraySchemaWithStringFallback(
+      FQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+      FQMaterialCosts: createArraySchemaWithStringFallback(
         fieldSchemas.materialCost
       ),
-      SQPackagingCosts: createArraySchemaWithStringFallback(
+      FQPackagingCosts: createArraySchemaWithStringFallback(
         fieldSchemas.packagingCost
       ),
-      SQOutPostProcessingCosts: createArraySchemaWithStringFallback(
+      FQOutPostProcessingCosts: createArraySchemaWithStringFallback(
         fieldSchemas.outsourcedProcessingCost
       ),
     },
     [PROCESS_CATEGORY_OPTION[2].category]: {
-      SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-      SQMaterialCosts: createArraySchemaWithStringFallback(
+      FQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+      FQMaterialCosts: createArraySchemaWithStringFallback(
         fieldSchemas.materialCost
       ),
-      SQPackagingCosts: createArraySchemaWithStringFallback(
+      FQPackagingCosts: createArraySchemaWithStringFallback(
         fieldSchemas.packagingCost
       ),
-      SQInPostProcessingCosts: createArraySchemaWithStringFallback(
+      FQInPostProcessingCosts: createArraySchemaWithStringFallback(
         fieldSchemas.internalProcessingCost
       ),
     },
     [PROCESS_CATEGORY_OPTION[3].category]: {
-      SQMaterialCostSetting: z.object(commonFields.materialCostSetting),
-      SQMaterialCosts: createArraySchemaWithStringFallback(
+      FQMaterialCostSetting: z.object(commonFields.materialCostSetting),
+      FQMaterialCosts: createArraySchemaWithStringFallback(
         fieldSchemas.materialCost
       ),
-      SQPackagingCosts: createArraySchemaWithStringFallback(
+      FQPackagingCosts: createArraySchemaWithStringFallback(
         fieldSchemas.packagingCost
       ),
-      SQOutPostProcessingCosts: createArraySchemaWithStringFallback(
+      FQOutPostProcessingCosts: createArraySchemaWithStringFallback(
         fieldSchemas.outsourcedProcessingCost
       ),
     },
     [PROCESS_CATEGORY_OPTION[4].category]: {
-      SQInPostProcessingCosts: createArraySchemaWithStringFallback(
+      FQInPostProcessingCosts: createArraySchemaWithStringFallback(
         fieldSchemas.internalProcessingCost
       ),
     },
@@ -195,7 +196,7 @@ const validateWithSchema = async (schema, values) => {
 
     // 改进错误处理，确保数组验证错误也能被捕获
     const errors = error.errors.reduce((acc, curr) => {
-      // 处理数组验证错误
+      // 处理数组验���错误
       if (curr.path.length === 1 && Array.isArray(values[curr.path[0]])) {
         return {
           ...acc,
@@ -298,6 +299,6 @@ export const validateTransportationForm = async (values) => {
 };
 
 const transportationSchema = z.object({
-  SQFreights: z.array(fieldSchemas.freightCost),
-  SQCustomsDuties: z.array(fieldSchemas.customsDutyCost),
+  FQFreights: z.array(fieldSchemas.freightCost),
+  FQCustomsDuties: z.array(fieldSchemas.customsDutyCost),
 });

@@ -1,5 +1,3 @@
-import { PROCESS_TYPES } from "../../../../../assets/QuotationManagementSystem copy/config/processTypes_v1";
-
 export const processMappers = {
   processTypes: {
     toOptions: (data) => {
@@ -22,20 +20,5 @@ export const processMappers = {
         processCategory,
         processName,
       })),
-  },
-};
-
-export const processService = {
-  getProcessTypes: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return PROCESS_TYPES;
-  },
-
-  getProcessSubtypes: async (categoryId) => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return PROCESS_TYPES.filter((type) => {
-      const category = PROCESS_TYPES.find((basic) => basic.id === categoryId);
-      return type.processCategory === category?.processCategory;
-    });
   },
 };

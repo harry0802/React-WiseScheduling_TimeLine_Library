@@ -28,7 +28,6 @@ export const useQmsBase = (
 ) => {
   //! =============== 2. 狀態與 Hooks 初始化 ===============
   const { productId } = useParams();
-  console.log("🔥🔥🔥🔥 ~ productId:", productId);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 

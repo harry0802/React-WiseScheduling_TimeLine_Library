@@ -10,7 +10,7 @@ import { convertToDisplayPercentage } from "../utility/commonUtils";
 const TotalCostContainer = styled(Box)`
   display: flex;
   justify-content: space-between;
-  font-size: 18px;
+  font-size: 20px;
   color: #ffffff;
   background: #555659;
   border-radius: 4px;
@@ -229,7 +229,7 @@ const ProcessTable = ({ processType, formData, costDetail }) => {
     return (
       <Box>
         {config.summaryFields.map((field) => (
-          <Typography key={field.key}>
+          <Typography variant="h6" key={field.key}>
             {field.label}:{" "}
             {convertToDisplayPercentage(
               formData?.FQMaterialCostSetting[field.key] || 0

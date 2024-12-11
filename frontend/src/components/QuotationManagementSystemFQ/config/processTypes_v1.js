@@ -1,6 +1,7 @@
 import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
 import { createField, commonSections } from "./commonConfigs_v1";
-import { optionsService } from "./commonConfigs_v1";
+import { optionsService } from "../../../services/QuotationManagement/optionsService";
+import { createMachineScope } from "../../../services/QuotationManagement/machineService";
 
 /**
  * 系統架構說明：
@@ -53,7 +54,7 @@ class FormSection {
 /**
  * 各製程類型的表單配置
  */
-
+const machineScope = createMachineScope();
 export const FORM_CONFIGURATIONS = {
   // 廠內成型製程
   [PROCESS_CATEGORY_OPTION[0].category]: new FormSection("廠內成型製程", [
@@ -77,15 +78,26 @@ export const FORM_CONFIGURATIONS = {
     new GeneralFormItem(
       "成型加工費",
       [
+        createField("machineId", "機台ID", "hidden", {
+          dependsOn: "OptionsId",
+          getDependentOptions: (productionArea, methods) => {
+            console.log("🚀 ~ productionArea:", productionArea);
+
+            if (!productionArea) return "";
+            return productionArea;
+          },
+        }),
         createField(
-          "machineId",
+          "productionArea",
           "機台區域",
           "select",
-          { placeholder: "請選擇機台區域" },
-          { required: "請選擇機台區域" },
+          {
+            placeholder: "請選擇生產區域",
+          },
+          { required: "請選擇生產區域" },
           null,
           6,
-          () => optionsService.getFreightTypes()
+          machineScope.getMachinesByArea
         ),
         createField(
           "machineSN",
@@ -93,18 +105,30 @@ export const FORM_CONFIGURATIONS = {
           "select",
           {
             placeholder: "請選擇機台編號",
-            dependsOn: "machineId",
-            getDependentOptions: (machineId) => {
-              return !machineId
-                ? []
-                : optionsService.getMachineAreas(machineId);
+            dependsOn: "productionArea",
+            getDependentOptions: (machineId, methods) => {
+              if (!machineId) {
+                methods.setValue("OptionsId", "");
+                return [];
+              }
+              const machines = machineScope.getMachinesByMachineSN(machineId);
+              console.log(methods.watch("machineSN"));
+
+              // 當選擇機台時，設置對應的 id
+              methods.watch("machineSN", (value) => {
+                const selectedMachine = machines.find((m) => m.value === value);
+                if (selectedMachine) {
+                  methods.setValue("OptionsId", selectedMachine.id);
+                }
+              });
+
+              return machines;
             },
           },
           { required: "請選擇機台編號" },
           [],
           6
         ),
-        // :3215-0028-003 鐘型調整蓋15-M028T深藍色
         createField(
           "workHoursRatio",
           "工時比例",
@@ -139,6 +163,25 @@ export const FORM_CONFIGURATIONS = {
           "number",
           { placeholder: "請輸入穴數" },
           { required: "穴數為必填" }
+        ),
+        // 給我一個隱藏的紀錄 id 字段
+        createField(
+          "OptionsId",
+          "id",
+          "hidden",
+          {
+            dependsOn: "machineSN",
+            getDependentOptions: async (machineSN, methods) => {
+              if (!machineSN) return "";
+              const machine = await machineScope.getMachineById(machineSN);
+              if (!machine) return "";
+              // 直接返回值，不需要調用 setValue
+              return machine?.id || "";
+            },
+          },
+          {},
+          [],
+          6
         ),
       ],
       "FQInjectionMoldingCosts"

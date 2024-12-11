@@ -154,12 +154,23 @@ export const FORM_CONFIGURATIONS = {
     new GeneralFormItem(
       "成型加工費",
       [
+        createField("machineId", "機台ID", "hidden", {
+          dependsOn: "OptionsId",
+          getDependentOptions: (productionArea, methods) => {
+            console.log("🚀 ~ productionArea:", productionArea);
+
+            if (!productionArea) return "";
+            return productionArea;
+          },
+        }),
         createField(
-          "machineId",
+          "productionArea",
           "機台區域",
           "select",
-          { placeholder: "請選擇機台區域" },
-          { required: "請選擇機台區域" },
+          {
+            placeholder: "請選擇生產區域",
+          },
+          { required: "請選擇生產區域" },
           null,
           6,
           machineScope.getMachinesByArea
@@ -170,7 +181,7 @@ export const FORM_CONFIGURATIONS = {
           "select",
           {
             placeholder: "請選擇機台編號",
-            dependsOn: "machineId",
+            dependsOn: "productionArea",
             getDependentOptions: (machineId, methods) => {
               if (!machineId) {
                 methods.setValue("OptionsId", "");

@@ -49,7 +49,13 @@ export const fieldSchemas = {
     id: nullableNumber,
     FQProcessId: nullableNumber,
     materialOptionId: nullableNumber,
-    materialName: z.string().min(1, "物料名稱為必填"),
+    materialName: z.union([
+      z.string().min(1, "物料名稱為必填"),
+      z
+        .object({})
+        .transform(() => "")
+        .pipe(z.string().min(1, "載入中請稍後...")),
+    ]),
     materialSN: z.string().min(1, "物料編號為必填"),
     unit: z.string().min(1, "單位為必填"),
     weight: baseSchemas.requiredNumber,

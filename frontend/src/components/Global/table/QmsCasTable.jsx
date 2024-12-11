@@ -25,7 +25,7 @@ const StyledTable = styled(Table)`
     .MuiTableCell-root {
       color: var(--color-text);
       font-family: Roboto, sans-serif;
-      font-size: 0.875rem;
+      font-size: 1.25rem;
       font-weight: 400;
       line-height: 1.25rem;
       border: 1px solid var(--color-text);
@@ -52,7 +52,7 @@ const StyledTableCell = styled(TableCell)`
   && {
     color: var(--color-text);
     font-family: Roboto, sans-serif;
-    font-size: 0.875rem;
+    font-size: 1.25rem;
     font-weight: 400;
     line-height: 1.25rem;
     border: 1px solid var(--color-text);
