@@ -5,21 +5,13 @@
  * @lastModified 2024-03-21
  */
 
-import { API_BASE } from "../../../store/api/apiConfig";
+import { createMaterialScope } from "../../../services/QuotationManagement/materialService";
+import { createPackagingScope } from "../../../services/QuotationManagement/packagingService";
+import { optionsService } from "../../../services/QuotationManagement/optionsService";
 
 //! =============== 1. 設定與常量 ===============
 
 //* API 端點配置
-const API_ENDPOINTS = {
-  MATERIAL_UNIT: `${API_BASE}option/materialUnit`,
-  PACKAGING_UNIT: `${API_BASE}option/packagingUnit`,
-  MACHINE_LIST: `${API_BASE}machine/list`,
-  MACHINE_DETAIL: `${API_BASE}machine`,
-  MATERIAL_PACKAGINGS: `${API_BASE}material/packagings`,
-  MATERIAL_MATERIALS: `${API_BASE}material/materials`,
-  MATERIAL_MATERIALUNITPRICE: `${API_BASE}material/materialUnitPrice`,
-  MATERIAL_OPTION: `${API_BASE}materialOption/`,
-};
 
 //! =============== 2. 類型與介面 ===============
 /**
@@ -39,313 +31,13 @@ const API_ENDPOINTS = {
 
 //! =============== 3. 核心功能 ===============
 //* ========= 服務層 Service Layer =========
-export const optionsService = {
-  /**
-   * @function getCommonUnits
-   * @description 獲取通用單位選項
-   * @returns {Promise<OptionItem[]>} 單位選項列表
-   */
-
-  getCommonUnits: async () => {
-    const response = await fetch(API_ENDPOINTS.MATERIAL_UNIT);
-    const data = await response.json();
-    return data?.data?.map((item) => ({
-      id: item.id,
-      value: item.name,
-      label: `${item.name} (${item.schema})`,
-    }));
-  },
-
-  /**
-   * @function getPackagingTypes
-   * @description 獲取包裝類型選項
-   * @returns {Promise<OptionItem[]>} 包裝類型選項列表
-   */
-  getPackagingTypes: async () => {
-    const response = await fetch(API_ENDPOINTS.PACKAGING_UNIT);
-    const data = await response.json();
-    return data?.data?.map((item) => ({
-      id: item.id,
-      value: item.name,
-      label: `${item.name} (${item.schema})`,
-    }));
-  },
-
-  /**
-   * @function getMachinesByArea
-   * @description 獲取機台列表
-   * @returns {Promise<OptionItem[]>} 機台選項列表
-   * @throws {Error} 當獲取失敗時拋出錯誤
-   */
-  getMachinesByArea: async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
-      const { data } = await response.json();
-      const areaMap = new Map();
-      data?.forEach((machine) => {
-        if (!areaMap.has(machine.productionArea)) {
-          areaMap.set(machine.productionArea, {
-            id: machine.id,
-            value: machine.id,
-            label: machine.productionArea,
-          });
-        }
-      });
-      return Array.from(areaMap.values());
-    } catch (error) {
-      console.error("獲取產線區域失敗:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * @function getMachinesByMachineSN
-   * @description 獲取指定區域的機台列表
-   * @param {string} areaFilter - 區域過濾條件
-   * @returns {Promise<OptionItem[]>} 機台選項列表
-   * @throws {Error} 當獲取失敗時拋出錯誤
-   */
-  getMachinesByMachineSN: async (areaFilter) => {
-    try {
-      const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
-      const { data } = await response.json();
-
-      const targetArea = data.find(
-        (m) => m.id === Number(areaFilter)
-      )?.productionArea;
-      if (!targetArea) return [];
-
-      return data
-        .filter((machine) => machine.productionArea === targetArea)
-        .map(({ id, machineSN }) => ({
-          id,
-          value: machineSN,
-          label: machineSN,
-        }));
-    } catch (error) {
-      console.error("取得機台資料失敗:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * @function getMaterialOptions
-   * @description 獲取物料選項
-   * @returns {Promise<OptionItem[]>} 物料選項列表
-   */
-  getMaterialOptions: async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.MATERIAL_OPTION);
-      const data = await response.json();
-      return data?.data?.map((item) => ({
-        id: item.id,
-        value: item.id,
-        label: item.materialType,
-      }));
-    } catch (error) {
-      console.error("獲取物料選項失敗:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * @function getMachineById
-   * @description 獲取單一機台詳細資訊
-   * @param {number} id - 機台ID
-   * @returns {Promise<Object>} 機台詳細資訊
-   */
-  getMachineById: async (id) => {
-    try {
-      const response = await fetch(`${API_ENDPOINTS.MACHINE_DETAIL}/?id=${id}`);
-      const { data } = await response.json();
-      return data?.[0] || null;
-    } catch (error) {
-      console.error("取得機台詳細資訊失敗:", error);
-      throw error;
-    }
-  },
-};
+// 已移至獨立的服務文件
 
 //* ========= 工廠函數 Factory Functions =========
-const createMaterialScope = () => {
-  // 存放資料狀態
-  let materials = [];
-  let materialOptions = [];
-  let currentMaterial = null;
 
-  return {
-    // 1. 獲取物料選項
-    async getMaterials() {
-      if (!materials.length) {
-        const response = await fetch(API_ENDPOINTS.MATERIAL_MATERIALS);
-        const result = await response.json();
-        materials = result.data;
-        materialOptions = materials.map((item) => ({
-          value: item.materialName,
-          label: item.materialName,
-          materialSN: item.materialSN,
-          unitPrice: item.unitPrice,
-          materialOptionId: item.materialOptionId,
-        }));
-      }
-      return materialOptions;
-    },
-
-    // 2. 根據物料名稱獲取相關資料
-    async setSelectedMaterial(materialName) {
-      if (!materials.length || !materialName) return null;
-
-      currentMaterial = materials.find(
-        (m) => m.materialName === materialName.label
-      );
-
-      if (!currentMaterial) return null;
-      // 獲取物料單價
-      const unitPrice = await this.getMaterialPrice(currentMaterial);
-      return {
-        materialSN: currentMaterial.materialSN,
-        unit: currentMaterial.unit,
-        unitPrice: unitPrice,
-        materialOptionId: currentMaterial.materialOptionId,
-      };
-    },
-
-    // 3. 獲取物料單價
-    async getMaterialPrice(material) {
-      if (!material) return null;
-      try {
-        const response = await fetch(
-          `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${material.label}&materialSN=${material.materialSN}`
-        );
-        const result = await response.json();
-        return result.status ? result.data : null;
-      } catch (error) {
-        console.error("取得單價失敗:", error);
-        return null;
-      }
-    },
-  };
-};
-
-const createPackagingScope = () => {
-  let packagings = [];
-  let packagingOptions = [];
-  let currentPackaging = null;
-
-  return {
-    // 1. 獲取包材選項
-    async getPackagings() {
-      if (!packagings.length) {
-        const response = await fetch(API_ENDPOINTS.MATERIAL_PACKAGINGS);
-        const result = await response.json();
-        packagings = result.data;
-        packagingOptions = packagings.map((item) => ({
-          value: item.materialName,
-          label: item.materialName,
-          materialSN: item.materialSN,
-          unitPrice: item.unitPrice,
-        }));
-      }
-      return packagingOptions;
-    },
-
-    // 2. 設置選中的包材
-    async setSelectedPackaging(packagingName) {
-      if (!packagings.length || !packagingName) return null;
-      currentPackaging = packagings.find(
-        (p) => p.materialName === packagingName.label
-      );
-
-      if (!currentPackaging) return null;
-      // 獲取包材單價
-      const unitPrice = await this.getPackagingPrice(currentPackaging);
-
-      return {
-        packagingSN: currentPackaging.materialSN,
-        unit: currentPackaging.unit,
-        unitPrice: unitPrice,
-      };
-    },
-
-    // 3. 獲取包材單價
-    async getPackagingPrice(packaging) {
-      if (!packaging) return null;
-      try {
-        const response = await fetch(
-          `${API_ENDPOINTS.MATERIAL_MATERIALUNITPRICE}?materialName=${packaging.label}&materialSN=${packaging.materialSN}`
-        );
-        const result = await response.json();
-        return result.status ? result.data : null;
-      } catch (error) {
-        console.error("取得包材單價失敗:", error);
-        return null;
-      }
-    },
-  };
-};
-export const createMachineScope = () => {
-  let machines = [];
-  let machineOptions = [];
-  let areaOptions = [];
-
-  return {
-    // 1. 獲取機台區域選項
-    async getMachinesByArea() {
-      if (!areaOptions.length) {
-        const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
-        const { data } = await response.json();
-        machines = data;
-
-        const areaMap = new Map();
-        data?.forEach((machine) => {
-          if (!areaMap.has(machine.productionArea)) {
-            areaMap.set(machine.productionArea, {
-              id: machine.id,
-              value: machine.productionArea,
-              label: machine.productionArea,
-            });
-          }
-        });
-        areaOptions = Array.from(areaMap.values());
-      }
-      return areaOptions;
-    },
-
-    // 2. 根據區域獲取機台列表
-    async getMachinesByMachineSN(areaFilter) {
-      if (!machines.length) {
-        await this.getMachinesByArea();
-      }
-      const targetArea = areaOptions.find((m) => m.value === areaFilter)?.value;
-      if (!targetArea) return [];
-
-      machineOptions = machines
-        .filter((machine) => machine.productionArea === targetArea)
-        .map(({ id, machineSN }) => ({
-          id,
-          value: machineSN,
-          label: machineSN,
-        }));
-      return machineOptions;
-    },
-
-    // 3. 獲取單一機台詳細資訊
-    async getMachineById(machineSN) {
-      try {
-        const machine = machineOptions.find((m) => m.value === machineSN);
-        if (!machine) return null;
-        const response = await fetch(
-          `${API_ENDPOINTS.MACHINE_DETAIL}/?id=${machine.id}`
-        );
-        const { data } = await response.json();
-        return data?.[0] || null;
-      } catch (error) {
-        console.error("取得機台詳細資訊失敗:", error);
-        throw error;
-      }
-    },
-  };
-};
+// 初始化 scopes
+const materialScope = createMaterialScope();
+const packagingScope = createPackagingScope();
 
 //! =============== 4. 工具函數 ===============
 const createInputProps = (unit, label) => ({
@@ -364,11 +56,10 @@ export const createField = (
   options = null,
   span,
   getOptions,
-  hidden = false // 新增參數
+  hidden = false
 ) => ({
   name,
   label,
-
   type,
   ...props,
   rules: {
@@ -381,13 +72,12 @@ export const createField = (
     }),
   },
   ...(span && { span }),
-  // 改為直接傳入 getOptions 函數，而不呼叫
   ...(getOptions ? { getOptions } : {}),
   ...(options ? { options } : {}),
   hidden,
 });
 
-//! =============== 5. 字段定義 ===============
+//! =============== 5. 段定義 ===============
 //* 基礎成本設置字段
 const materialCostSettingFields = {
   estimatedDefectRate: createField(
@@ -421,7 +111,6 @@ const materialCostSettingFields = {
 };
 
 //* 材料成本字段
-const materialScope = createMaterialScope();
 const materialCostFields = {
   materialName: {
     ...createField(
@@ -434,20 +123,9 @@ const materialCostFields = {
       },
       createRequiredRule("物料名稱")
     ),
-    getOptions: materialScope.getMaterials,
-    getDependentValues: async (materialName) => {
-      if (!materialName) return null;
-      const material = await materialScope.setSelectedMaterial(materialName);
-      if (material) {
-        return {
-          materialName: materialName.label,
-          materialSN: material.materialSN,
-          unitPrice: material.unitPrice,
-          materialOptionId: material.materialOptionId,
-        };
-      }
-      return null;
-    },
+    getOptions: () => materialScope.getMaterials(),
+    getDependentValues: (materialName) =>
+      materialScope.getDependentValues(materialName),
   },
   materialSN: {
     ...createField(
@@ -469,7 +147,7 @@ const materialCostFields = {
     createRequiredRule("原物料種類"),
     null,
     3,
-    optionsService.getMaterialOptions
+    () => optionsService.getMaterialOptions()
   ),
   unit: createField(
     "unit",
@@ -482,7 +160,7 @@ const materialCostFields = {
     createRequiredRule("單位"),
     null,
     3,
-    optionsService.getCommonUnits
+    () => optionsService.getCommonUnits()
   ),
   weight: createField(
     "weight",
@@ -505,7 +183,6 @@ const materialCostFields = {
 };
 
 //* 包裝成本字段
-const packagingScope = createPackagingScope();
 const packagingCostFields = {
   materialName: {
     ...createField(
@@ -570,11 +247,12 @@ const packagingCostFields = {
     {
       placeholder: "請選擇單位",
       readOnly: true,
+      dependsOn: "materialName",
     },
     createRequiredRule("單位"),
     null,
     3,
-    optionsService.getPackagingTypes
+    () => optionsService.getCommonUnits()
   ),
   quantity: createField(
     "quantity",
@@ -621,17 +299,6 @@ const packagingCostFields = {
       createRequiredRule("單價")
     ),
   },
-  // amount: createField(
-  //   "amount",
-  //   "金額",
-  //   "number",
-  //   {
-  //     ...createInputProps("元", "金額"),
-  //     readOnly: true,
-  //     dependsOn: ["quantity", "unitPrice"],
-  //   },
-  //   createRequiredRule("金額")
-  // ),
 };
 
 //* 其他成本字段
@@ -876,17 +543,3 @@ export const commonSections = {
     })),
   },
 };
-
-/**
- * @notes
- * - 主要功能：
- *   1. API 端點管理
- *   2. 表單字段配置
- *   3. 選項數據獲取
- *   4. 狀態管理
- *
- * @optimization
- * - 使用 Map 優化查找操作
- * - 實現數據緩存
- * - 添加錯誤重試機制
- */

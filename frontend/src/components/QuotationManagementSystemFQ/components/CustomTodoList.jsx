@@ -171,7 +171,6 @@ function CustomTodoList({
   canDelete = true,
   canAdd = true,
 }) {
-  console.log("🚀 ~ canDelete:", canDelete);
   const { control } = useFormContext();
   const {
     fields: items,

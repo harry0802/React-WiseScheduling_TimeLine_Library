@@ -67,7 +67,13 @@ export const fieldSchemas = {
     .object({
       SQProcessId: nullableNumber,
       id: nullableNumber,
-      materialName: z.string().min(1, "包材名稱為必填"),
+      materialName: z.union([
+        z.string().min(1, "物料名稱為必填"),
+        z
+          .object({})
+          .transform(() => "")
+          .pipe(z.string().min(1, "載入中請稍後...")),
+      ]),
       materialSN: z.string().min(1, "包材編號為必填"),
       packagingType: z.string().optional(),
       unit: z.string().min(1, "單位為必填"),

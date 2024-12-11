@@ -1,10 +1,7 @@
 import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
-import {
-  createField,
-  commonSections,
-  createMachineScope,
-} from "./commonConfigs_v1";
-import { optionsService } from "./commonConfigs_v1";
+import { createField, commonSections } from "./commonConfigs_v1";
+
+import { createMachineScope } from "../../../services/QuotationManagement/machineService";
 
 /**
  * 系統架構說明：

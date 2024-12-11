@@ -6,6 +6,7 @@
 import React, { useCallback, useMemo } from "react";
 import BaseProductInfoSection from "../../Global/sections/BaseProductInfoSection";
 import { useGetCustomersQuery } from "../services/salesServices/endpoints/customerApi";
+import { LoadingSkeleton } from "./LoadingSkeleton";
 
 //! =============== 1. 設定與常量 ===============
 const FIELD_TYPES = {
@@ -153,7 +154,7 @@ const QmsPdInfo = React.memo(({ type, onUpdate, BusinessQuotationStore }) => {
   }, []);
 
   //* --------- Loading & Error States ---------
-  if (isLoadingCustomers) return <div>Loading...</div>;
+  if (isLoadingCustomers) return <LoadingSkeleton />;
   if (errorCustomers) return <div>Error loading customer data</div>;
 
   //* --------- Render ---------

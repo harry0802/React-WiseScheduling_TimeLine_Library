@@ -10,12 +10,18 @@
  */
 
 //! =============== 1. 設定與常量 ===============
-import { memo, useCallback, useMemo, useEffect } from "react";
+import { memo, useCallback, useMemo, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetQuotationListQuery } from "../../services/factoryServices/endpoints/quotationApi";
+import {
+  useDeleteQuotationMutation,
+  useGetQuotationListQuery,
+} from "../../services/factoryServices/endpoints/quotationApi";
 import PmHomeContent from "../../../Global/content/PmHomeContent";
 import SharedCard from "../../../Global/card/ProductCard";
 import { useFactoryHomeSlice } from "../../slice/qmsHome";
+import ConfirmationDialog from "../../../Global/dialog/BaseDialog";
+import useNotification from "../../../ProductionRecord/hook/useNotification";
+import CloseIcon from "@mui/icons-material/Close";
 
 //* 預設值配置
 const DEFAULT_VALUES = {
@@ -67,7 +73,7 @@ const DisplayComponents = {
  * @param {ProductData} props.data - 產品數據
  * @param {Function} props.onCardClick - 點擊卡片的回調函數
  */
-const Card = memo(function Card({ data, onCardClick }) {
+const Card = memo(function Card({ data, onCardClick, onDelete }) {
   const {
     createDate = DEFAULT_VALUES.DATE,
     quotationSN = DEFAULT_VALUES.SERIAL_NUMBER,
@@ -82,6 +88,7 @@ const Card = memo(function Card({ data, onCardClick }) {
       productName={productName}
       customerName={customerName}
       onClick={onCardClick}
+      onDelete={onDelete}
     />
   );
 });
@@ -107,6 +114,8 @@ function QmsHome() {
       refetchOnMountOrArgChange: true,
     }
   );
+
+  const [deleteQuotation] = useDeleteQuotationMutation();
 
   //* 分頁數據更新
   useEffect(() => {
@@ -137,6 +146,81 @@ function QmsHome() {
     [navigate]
   );
 
+  // 添加確認視窗相關的狀態
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [dialogConfig, setDialogConfig] = useState({
+    title: "",
+    message: "",
+    confirmText: "",
+    cancelText: "",
+  });
+
+  const { notify } = useNotification();
+
+  // 修改 handleDelete 函數
+  const handleDelete = useCallback(
+    async (id) => {
+      setPendingAction(() => async () => {
+        try {
+          const response = await deleteQuotation(id);
+          if (response.error) {
+            notify({
+              message: "刪除報價單失敗",
+              description: "此報價單已被使用，無法刪除",
+              seconds: 1.5,
+              icon: (
+                <CloseIcon
+                  sx={{
+                    color: "#dc2626",
+                    fontSize: "24px",
+                    fontWeight: "bold",
+                    strokeWidth: "2px",
+                    stroke: "currentColor",
+                  }}
+                />
+              ),
+            });
+            throw new Error(
+              response.error.data?.message || "刪除報價單時發生錯誤"
+            );
+          }
+
+          notify({
+            message: "更新成功",
+            description: "報價單刪除成功",
+            seconds: 1.5,
+          });
+          return { success: true, message: "報價單刪除成功" };
+        } catch (error) {
+          return {
+            success: false,
+            error: { message: error.message, details: error.data },
+          };
+        }
+      });
+      setDialogConfig({
+        title: "確認刪除",
+        message: "你確定要刪除這個報價單嗎？此操作無法撤銷。",
+        confirmText: "確認刪除",
+        cancelText: "取消",
+      });
+      setConfirmOpen(true);
+    },
+    [deleteQuotation, notify]
+  );
+
+  const handleConfirm = async () => {
+    if (pendingAction) {
+      try {
+        await pendingAction();
+      } catch (error) {
+        console.error("Action error:", error);
+      }
+    }
+    setConfirmOpen(false);
+  };
+
   //* 卡片列表渲染優化
   const cardList = useMemo(() => {
     const items = data?.data || [];
@@ -147,6 +231,7 @@ function QmsHome() {
         key={item.id}
         data={item}
         onCardClick={() => handleCardClick(item.id)}
+        onDelete={() => handleDelete(item.id)}
       />
     ));
   }, [data?.data, handleCardClick]);
@@ -165,6 +250,12 @@ function QmsHome() {
         total={pagination.total_count}
         setPage={handlePageChange}
         setPageSize={handlePageSizeChange}
+      />
+      <ConfirmationDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        {...dialogConfig}
       />
     </PmHomeContent>
   );

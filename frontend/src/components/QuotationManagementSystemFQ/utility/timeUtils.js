@@ -158,21 +158,17 @@ const workdayUtils = {
  * @description 日期格式化工具集合
  */
 const formatters = {
-  fullDateTime: (date) => coreUtils.formatDate(date, "YYYY-MM-DD HH:mm:ss"),
-  dateOnly: (date) => coreUtils.formatDate(date, "YYYY-MM-DD"),
-  timeOnly: (date) => coreUtils.formatDate(date, "HH:mm:ss"),
-  monthAndDay: (date) => coreUtils.formatDate(date, "MM-DD"),
-  yearAndMonth: (date) => coreUtils.formatDate(date, "YYYY-MM"),
+  fullDateTime: (date) => dayjs(date).local().format("YYYY-MM-DD HH:mm:ss"),
+  dateOnly: (date) => dayjs(date).local().format("YYYY-MM-DD"),
+  timeOnly: (date) => dayjs(date).local().format("HH:mm:ss"),
+  monthAndDay: (date) => dayjs(date).local().format("MM-DD"),
+  yearAndMonth: (date) => dayjs(date).local().format("YYYY-MM"),
   iso: (date) => dayjs(date).toISOString(),
   utc: (date) => dayjs(date).utc().format(),
-  isoWithTZ: (date = new Date()) => coreUtils.formatISOWithTZ(date),
-  /**
-   * 轉換為中文年月日時分秒格式
-   * @param {Date|string|number} date - 日期
-   * @returns {string} 例如：2024年12月09日16時00分00秒
-   */
+  isoWithTZ: (date = new Date()) =>
+    dayjs(date).local().format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
   chineseDateTime: (date) =>
-    coreUtils.formatDate(date, "YYYY年MM月DD日HH時mm分ss秒"),
+    dayjs(date).local().format("YYYY年MM月DD日HH時mm分ss秒"),
 };
 
 //! =============== 7. 輔助函數 ===============

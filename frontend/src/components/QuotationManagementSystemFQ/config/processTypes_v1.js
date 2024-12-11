@@ -1,6 +1,6 @@
 import { PROCESS_CATEGORY_OPTION } from "../../../config/config";
 import { createField, commonSections } from "./commonConfigs_v1";
-import { optionsService } from "../../../services/QuotationManagement/optionsService";
+
 import { createMachineScope } from "../../../services/QuotationManagement/machineService";
 
 /**
