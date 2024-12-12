@@ -8,7 +8,10 @@ export const processApi = factoryQuotationApiSlice.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["Process"],
+      invalidatesTags: (result, error, { quotationId }) => [
+        { type: "Process" },
+        { type: "Quotation", id: quotationId },
+      ],
     }),
     // 產品下拉選單的資料來源，只列出BOM表有製程的產品 (done)
     getProductList: builder.query({

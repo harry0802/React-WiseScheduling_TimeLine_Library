@@ -28,7 +28,7 @@ class GeneralFormItem extends FormItem {
 }
 
 class TodoListFormItem extends FormItem {
-  constructor(title, items, name, canDelete = false, canAdd = false) {
+  constructor(title, items, name, canDelete = true, canAdd = true) {
     super("todolist", title, name);
     this.items = items;
     this.canDelete = canDelete;
@@ -67,13 +67,17 @@ export const FORM_CONFIGURATIONS = {
       new TodoListFormItem(
         "材料成本",
         commonSections.materialCosts.fields,
-        "FQMaterialCosts"
+        "FQMaterialCosts",
+        false,
+        false
       ),
     ]),
     new TodoListFormItem(
       "包裝材料費",
       commonSections.packagingCosts.fields,
-      "FQPackagingCosts"
+      "FQPackagingCosts",
+      false,
+      false
     ),
     new GeneralFormItem(
       "成型加工費",
@@ -81,8 +85,6 @@ export const FORM_CONFIGURATIONS = {
         createField("machineId", "機台ID", "hidden", {
           dependsOn: "OptionsId",
           getDependentOptions: (productionArea, methods) => {
-            console.log("🚀 ~ productionArea:", productionArea);
-
             if (!productionArea) return "";
             return productionArea;
           },
@@ -112,8 +114,6 @@ export const FORM_CONFIGURATIONS = {
                 return [];
               }
               const machines = machineScope.getMachinesByMachineSN(machineId);
-              console.log(methods.watch("machineSN"));
-
               // 當選擇機台時，設置對應的 id
               methods.watch("machineSN", (value) => {
                 const selectedMachine = machines.find((m) => m.value === value);
@@ -164,7 +164,6 @@ export const FORM_CONFIGURATIONS = {
           { placeholder: "請輸入穴數" },
           { required: "穴數為必填" }
         ),
-        // 給我一個隱藏的紀錄 id 字段
         createField(
           "OptionsId",
           "id",
@@ -198,13 +197,17 @@ export const FORM_CONFIGURATIONS = {
       new TodoListFormItem(
         "材料成本",
         commonSections.materialCosts.fields,
-        "FQMaterialCosts"
+        "FQMaterialCosts",
+        false,
+        false
       ),
     ]),
     new TodoListFormItem(
       "包裝材料費",
       commonSections.packagingCosts.fields,
-      "FQPackagingCosts"
+      "FQPackagingCosts",
+      false,
+      false
     ),
     new TodoListFormItem(
       "委外加工費",
@@ -216,7 +219,7 @@ export const FORM_CONFIGURATIONS = {
   ]),
 
   // 廠內後製程
-  [PROCESS_CATEGORY_OPTION[2].category]: new FormSection("廠���後製程", [
+  [PROCESS_CATEGORY_OPTION[2].category]: new FormSection("廠內後製程", [
     new NestedFormItem("材料相關費用", [
       new GeneralFormItem(
         "材料成本設置",
@@ -226,13 +229,17 @@ export const FORM_CONFIGURATIONS = {
       new TodoListFormItem(
         "材料成本",
         commonSections.materialCosts.fields,
-        "FQMaterialCosts"
+        "FQMaterialCosts",
+        false,
+        false
       ),
     ]),
     new TodoListFormItem(
       "包裝材料費",
       commonSections.packagingCosts.fields,
-      "FQPackagingCosts"
+      "FQPackagingCosts",
+      false,
+      false
     ),
     new TodoListFormItem(
       "廠內加工費",
@@ -253,13 +260,17 @@ export const FORM_CONFIGURATIONS = {
       new TodoListFormItem(
         "材料成本",
         commonSections.materialCosts.fields,
-        "FQMaterialCosts"
+        "FQMaterialCosts",
+        false,
+        false
       ),
     ]),
     new TodoListFormItem(
       "包裝材料費",
       commonSections.packagingCosts.fields,
-      "FQPackagingCosts"
+      "FQPackagingCosts",
+      false,
+      false
     ),
     new TodoListFormItem(
       "委外加工費",
