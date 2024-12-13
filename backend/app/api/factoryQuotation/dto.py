@@ -150,7 +150,7 @@ class FactoryQuotationDto:
 
     #FactoryQuotation PUT model
     FactoryQuotation_put_obj = copy.deepcopy(base_obj)
-    pop_list = ["id", "productSN", "productName", "quotationSN", "createDate", "processes", "shippingCosts"]
+    pop_list = ["id", "quotationSN", "createDate", "processes", "shippingCosts"]
     required_list = []
     not_required_list = []
     for attr in [item for item in pop_list]:

@@ -12,6 +12,7 @@ import {
   FormProvider,
   useFormContext,
   useController,
+  Controller,
 } from "react-hook-form";
 import {
   Button,
@@ -172,16 +173,6 @@ function renderFormItem(
     ...filterCustomProps(props),
     disabled: props.disabled || field.disabled, // 確保 disabled 被保留
   };
-  if (field.hidden) {
-    return (
-      <input
-        type="hidden"
-        style={{ display: "none" }}
-        {...controllerField}
-        {...filterCustomProps(props)}
-      />
-    );
-  }
 
   switch (field.type) {
     case "select":
@@ -310,6 +301,7 @@ function renderFormItem(
             return (
               <TextField
                 {...inputProps}
+                disabled={field.disabled || filteredProps.disabled} // 新增 disabled 屬性
                 label={field.label}
                 error={!!error}
                 helperText={error?.message}
@@ -395,7 +387,9 @@ function renderFormItem(
         <TextField
           {...filteredProps}
           {...controllerField}
-          disabled={filteredProps.disabled}
+          disabled={
+            field.disabled || field.props?.disabled || filteredProps.disabled
+          }
           type="text"
           label={field.label}
           error={!!error}
@@ -481,7 +475,7 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
   } = useController({
     name: uniqueFieldName,
     control: methods.control,
-    defaultValue: field.type === "number" ? null : "",
+    defaultValue: field?.defaultValue ?? field.type === "number" ? null : "",
     rules: {
       ...field.rules,
       ...(field.type === "number" && {
@@ -512,7 +506,7 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
     if (field.dependsOn) {
       const subscription = methods.watch((value, { name }) => {
         if (name === field.dependsOn) {
-          console.log(`${field.dependsOn} changed:`, value[field.dependsOn]);
+          // console.log(`${field.dependsOn} changed:`, value[field.dependsOn]);
         }
       });
 
@@ -570,7 +564,19 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
       setLoading(true);
       try {
         const result = await field.getDependentOptions(value, methods);
-        setAsyncOptions(Array.isArray(result) ? result : []);
+        if (field.type === "hidden") {
+          // 只有當值真的改變時才設置
+          const currentValue = methods.getValues(field.name);
+          if (currentValue !== result) {
+            methods.setValue(field.name, result, {
+              shouldValidate: true,
+              shouldDirty: true,
+              shouldTouch: true,
+            });
+          }
+        } else {
+          setAsyncOptions(Array.isArray(result) ? result : []);
+        }
       } catch (error) {
         console.error("獲取依賴選項失敗:", error);
         setAsyncOptions([]);
@@ -587,11 +593,11 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
       dependentValue &&
       dependentValue !== prevDependentValue
     ) {
-      console.log("依賴值變更，重新獲取選項:", {
-        field: field.name,
-        dependentValue,
-        prevValue: prevDependentValue,
-      });
+      // console.log("依賴值變更，重新獲取選項:", {
+      //   field: field.name,
+      //   dependentValue,
+      //   prevValue: prevDependentValue,
+      // });
 
       fetchDependentOptions(dependentValue);
       setPrevDependentValue(dependentValue);
@@ -613,9 +619,21 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
     }
     return [];
   }, [loading, deferredOptions, field.options]);
+  if (field.hidden || field.type === "hidden") {
+    return (
+      <>
+        <Controller
+          name={field.name}
+          control={methods.control}
+          defaultValue=""
+          render={() => null}
+        />
+      </>
+    );
+  }
 
   return (
-    <Grid item xs={field.span || 12}>
+    <Grid item xs={field?.span || 12}>
       <FormItem
         field={field}
         controllerField={inputProps}
@@ -624,7 +642,7 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
         loading={loading}
         asyncOptions={deferredOptions}
         methods={methods}
-        disabled={disabled}
+        disabled={disabled || field?.disabled}
         {...cleanCustomProps}
       />
     </Grid>
@@ -644,9 +662,19 @@ function FormItem({
   loading,
   asyncOptions,
   methods,
+  disabled,
   ...restProps
 }) {
-  const filteredProps = filterCustomProps(restProps);
+  if (!field) {
+    console.error("Field object is undefined");
+    return null;
+  }
+
+  const filteredProps = {
+    ...filterCustomProps(restProps),
+    disabled: disabled || field.disabled,
+  };
+
   return renderFormItem(
     field,
     controllerField,

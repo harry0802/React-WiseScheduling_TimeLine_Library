@@ -22,6 +22,7 @@ const transformMaterialCostSetting = (setting) => ({
 const transformInjectionMoldingCosts = (costs) =>
   costs.map((cost) => ({
     ...cost,
+    machineId: cost.OptionsId || cost.machineId,
     workHoursRatio: convertToPercentage(cost.workHoursRatio),
     defectiveRate: convertToPercentage(cost.defectiveRate),
   }));
@@ -38,7 +39,7 @@ const processPackagingCost = (item) => {
   if (unitLowerCase === "件" || unitLowerCase === "個") {
     return {
       ...item,
-      bagsPerKg: 0,
+      // bagsPerKg: 0,
     };
   }
 

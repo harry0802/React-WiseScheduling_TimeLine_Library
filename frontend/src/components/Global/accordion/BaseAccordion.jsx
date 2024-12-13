@@ -13,7 +13,7 @@ const StyledAccordion = styled(Accordion)`
     width: 100%;
     color: #8f8f8f;
     font-family: Roboto, sans-serif;
-    font-size: 16px;
+    font-size: 1.125rem;
     font-style: normal;
     font-weight: 400;
     line-height: 1.25rem; /* 125% */

@@ -2,11 +2,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useBusinessQuotationStore } from "../slice/useFactorySalesQuotationSlice_v1";
-import {
-  useGetQuotationByIdQuery,
-  useUpdateQuotationMutation,
-} from "../services/salesServices/endpoints/quotationApi";
-import { useSalesHomeSlice } from "../slice/qmsHome";
 
 /**
  * @typedef {Object} QMSBaseResult
@@ -25,7 +20,12 @@ import { useSalesHomeSlice } from "../slice/qmsHome";
  * @param {string} [mode="create"] - 操作模式
  * @returns {QMSBaseResult} QMS 操作相關的狀態和方法
  */
-export const useQmsBase = (mode = "create") => {
+export const useQmsBase = (
+  mode = "create",
+  processStore,
+  homeStore,
+  useQmsApi
+) => {
   //! =============== 2. 狀態與 Hooks 初始化 ===============
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -43,14 +43,12 @@ export const useQmsBase = (mode = "create") => {
     actualQuotation,
     updateBasicInfo,
     calculateTransportationOnly,
-  } = useBusinessQuotationStore();
+  } = processStore();
 
-  const { data: homeData, type } = useSalesHomeSlice();
+  const { type } = homeStore();
 
-  //* API hooks
-  const [updateQuotation] = useUpdateQuotationMutation();
-  const { data: quotationData, isSuccess: isSuccessQuotation } =
-    useGetQuotationByIdQuery(productId, { skip: !productId });
+  const { quotationData, isSuccessQuotation, handleUpdateQuotation } =
+    useQmsApi(productId);
 
   //! =============== 3. 導航邏輯 ===============
   /**
@@ -58,14 +56,14 @@ export const useQmsBase = (mode = "create") => {
    * 當無首頁數據或產品ID時導航到對應頁面
    */
   const handleNavigation = useCallback(() => {
-    if (homeData === null || !productId) {
+    if (!productId) {
       const path =
         type === "sales"
           ? "/SalesQuotationManagementSystem"
           : "/FactoryQuotationManagementSystem";
       navigate(path);
     }
-  }, [homeData, productId, type, navigate]);
+  }, [productId, type, navigate]);
 
   useEffect(() => {
     handleNavigation();
@@ -123,24 +121,19 @@ export const useQmsBase = (mode = "create") => {
    */
   const handleUpdate = useCallback(
     (formData) => {
-      //* 處理客戶名稱
-      // 如果客戶名稱是物件，則取 label 值
       const customerName =
         formData.customerName && typeof formData.customerName === "object"
           ? formData.customerName.label
           : formData.customerName;
 
-      //* 更新 API 數據
-      updateQuotation({
-        id: productId,
+      handleUpdateQuotation({
         productName: formData.productName,
         customerName,
       });
 
-      //* 更新本地狀態
       updateBasicInfo(formData);
     },
-    [productId, updateQuotation, updateBasicInfo]
+    [productId, handleUpdateQuotation, updateBasicInfo]
   );
 
   /**
@@ -149,13 +142,10 @@ export const useQmsBase = (mode = "create") => {
    */
   const handleUpdateProfitManagement = useCallback(
     (data) => {
-      updateQuotation({
-        id: productId,
-        ...data,
-      });
+      handleUpdateQuotation(data);
       updateProfitManagement(data);
     },
-    [productId, updateQuotation, updateProfitManagement]
+    [handleUpdateQuotation, updateProfitManagement]
   );
 
   //! =============== 6. 效果處理 ===============

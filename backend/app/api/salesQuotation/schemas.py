@@ -41,6 +41,7 @@ class SQInjectionMoldingCostSchema(Schema):
     id = fields.Integer(dump_only=True)
     SQProcessId = fields.Integer(required=True)
     machineId = fields.Integer(required=False)
+    productionArea = fields.String(required=False)
     machineSN = fields.String(required=False)
     workHoursRatio = fields.Float(required=False)
     defectiveRate = fields.Float(required=False)

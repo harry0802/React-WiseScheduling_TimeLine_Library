@@ -97,12 +97,17 @@ export const FactoryQuotationManagementSystem = lazyImport(() =>
 );
 export const FactoryQmsHome = lazyImport(() =>
   import(
-    "../components/QuotationManagementSystem/features/Factory/FactoryQmsHome"
+    "../components/QuotationManagementSystemFQ/features/Factory/FactoryQmsHome"
   )
 );
-export const FactoryQmsAddtions = lazyImport(() =>
+export const FactoryQmsCreate = lazyImport(() =>
   import(
-    "../components/QuotationManagementSystem/features/Factory/FactoryQmsAddtions"
+    "../components/QuotationManagementSystemFQ/features/Factory/FactoryQmsCreate"
+  )
+);
+export const FactoryQmsMaintain = lazyImport(() =>
+  import(
+    "../components/QuotationManagementSystemFQ/features/Factory/FactoryQmsMaintain"
   )
 );
 // export const QmsAddtions = lazyImport(() =>

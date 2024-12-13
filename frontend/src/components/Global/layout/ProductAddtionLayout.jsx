@@ -9,11 +9,11 @@ const ContentWrapper = styled.div`
 
 const BreadcrumbWrapper = styled.div`
   font-family: Roboto;
-  font-size: 0.875rem;
+  font-size: 1.25rem;
   font-style: normal;
   font-weight: 400;
   color: #fff;
-  line-height: 1.25rem;
+  line-height: 1.125rem;
 `;
 
 const StyledNavLink = styled(NavLink)`

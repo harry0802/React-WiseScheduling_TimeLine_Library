@@ -11,6 +11,30 @@ control_schema = FactoryQuotationSchema()
 @api.route("/")
 class FactoryQuotationController(Resource):
     factoryQuotation_post = FactoryQuotationDto.FactoryQuotation_post
+    # GET
+    @api.doc(description="""廠內報價系統首頁，列出所有的產品""")
+    @api.doc(
+        "Get factoryQuotation's products",
+        responses={
+            200: ("factoryQuotation's products  successfully sent"),
+            404: "factoryQuotation not found",
+        },
+    )
+    @api.param("page", "Page number")
+    @api.param("size", "Size of the page")
+    @api.param("sort", "Sort by a column")
+    @api.param("productSN", "productSN")
+    @api.param("productName", "productName")
+    @api.param("customerName", "customerName")
+    @controller_entrance_log(description="Get factoryQuotation' products")
+    def get(self):
+        page = request.args.get('page', default=1, type=int)
+        size = request.args.get('size', default=10, type=int)
+        sort = request.args.get('sort', default="id", type=str)
+        productSN = request.args.get('productSN', default=None, type=str)
+        productName = request.args.get('productName', default=None, type=str)
+        customerName = request.args.get('customerName', default=None, type=str)
+        return FactoryQuotationService.get_factoryQuotation_index(page, size, sort, productSN, productName, customerName)
 
     # POST
     @api.doc(description="""新增空的報價單
@@ -29,26 +53,6 @@ class FactoryQuotationController(Resource):
     def post(self):
         return FactoryQuotationService.create_factoryQuotation(api.payload)
     
-
-@api.route("/<int:factoryQuotationId>/syncProcess/<string:productSN>")
-class FactoryQuotationController(Resource):
-    factoryQuotation_resp = FactoryQuotationDto.FactoryQuotation_resp
-    # GET
-    @api.doc(description="""根據產品編號同步產品履歷(BOM表)的製程到報價單
-                            """
-            )
-    @api.doc(
-        "Sync processes in BOM to factory quotation",
-        responses={
-            200: ("BOM data have been synchronised to factoryQuotation successfully", factoryQuotation_resp),
-            404: "productSN not found",
-        },
-    )
-    @controller_entrance_log(description="Sync processes in BOM to factory quotation")
-    def get(self, factoryQuotationId, productSN):
-        return FactoryQuotationService.sync_processes(factoryQuotationId, productSN)
-    
-
 
 @api.route("/<int:factoryQuotationId>")
 class FactoryQuotationController(Resource):
@@ -105,6 +109,22 @@ class FactoryQuotationController(Resource):
     def delete(self, factoryQuotationId):
         return FactoryQuotationService.delete_factoryQuotation(factoryQuotationId)
 
+
+@api.route("/products/")
+class FactoryQuotationController(Resource):
+    # GET
+    @api.doc(description="""廠內報價系統，產品下拉選單的資料來源，只列出BOM表有製程的產品""")
+    @api.doc(
+        "Get factoryQuotation's product dropdown list data source",
+        responses={
+            200: ("factoryQuotation's products  successfully sent"),
+            404: "factoryQuotation not found",
+        },
+    )
+    @controller_entrance_log(description="Get factoryQuotation's product dropdown list data source")
+    def get(self):
+        return FactoryQuotationService.get_products()
+    
 
 @api.route("/<int:factoryQuotationId>/process/")
 class FactoryQuotationProcessController(Resource):

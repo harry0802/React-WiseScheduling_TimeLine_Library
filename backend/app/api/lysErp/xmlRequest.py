@@ -44,7 +44,8 @@ class LyDataOutRequest(XMLRoot):
     """
     def __init__(self, lyDataOutRequestParameter):
         # check if lyDataOutRequestParameter is an instance of LyDataOutRequestParameter
-        assert isinstance(lyDataOutRequestParameter, LyDataOutRequestParameter)
+        if not isinstance(lyDataOutRequestParameter, LyDataOutRequestParameter):
+            raise TypeError("lyDataOutRequestParameter must be an instance of LyDataOutRequestParameter")
         super().__init__()
         self.lyDataOutRequestParameter = lyDataOutRequestParameter
         LyDataOut = ET.SubElement(self.body, f'{{{LY_XML_TEMPURI_NAMESPACE}}}LyDataOut')

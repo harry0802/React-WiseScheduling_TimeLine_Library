@@ -25,7 +25,7 @@ class TimestampDatetime(TypeDecorator):
     def process_result_value(self, value, dialect):
         # when selecting from database, convert unix timestamp to ISO format datetime
         if value is not None:
-            return value
+            return value.astimezone(pytz.timezone('UTC'))
         else:
             return None
         

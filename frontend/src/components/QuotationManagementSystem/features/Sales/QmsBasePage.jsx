@@ -7,6 +7,9 @@ import AddIcon from "@mui/icons-material/Add";
 import { useBusinessQuotationStore } from "../../slice/useFactorySalesQuotationSlice_v1";
 import { Spin } from "antd";
 import { useQmsBase } from "../../hook/useQmsBase";
+import { useSalesHomeSlice } from "../../slice/qmsHome";
+import { useQmsApi } from "./useQmsApi";
+import { useSalesProcessApi } from "../../hook/useSalesProcessService";
 
 const QmsBasePage = ({ type }) => {
   const {
@@ -17,7 +20,7 @@ const QmsBasePage = ({ type }) => {
     productData,
     loading,
     handleUpdateProfitManagement,
-  } = useQmsBase(type);
+  } = useQmsBase(type, useBusinessQuotationStore, useSalesHomeSlice, useQmsApi);
 
   const breadcrumbs = [
     {
@@ -47,6 +50,7 @@ const QmsBasePage = ({ type }) => {
       <ProcessCostAnalysis
         icon={<AddIcon />}
         quotationSlice={useBusinessQuotationStore}
+        processService={useSalesProcessApi}
       />
     </ProductAddtionLayout>
   );

@@ -9,7 +9,7 @@ export const ProductInfo = styled.div`
   font-family: Roboto, sans-serif;
   font-size: 16px;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.25rem;
   border-radius: 4px;
   width: 100%;
@@ -17,7 +17,7 @@ export const ProductInfo = styled.div`
 
 export const ProductInfoText = styled.div`
   height: 100%;
-  font-size: 0.875rem;
+  font-size: 1.125rem;
 
   > p:not(:first-child) {
     margin-top: 1.25rem;

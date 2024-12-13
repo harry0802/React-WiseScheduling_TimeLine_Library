@@ -32,7 +32,7 @@ def complete_SQInjectionMoldingCost(db_obj, payload):
     # 人員選擇「生產機台」帶入「廠內試模費率 8hr」、「每秒電費」
     machine_db = db.session.query(Machine).filter(Machine.id == db_obj.machineId).first()
     if machine_db is None:
-        raise err_resp("machine not found", "machine_404", 404)
+        return db_obj
     # 「單價」= 「廠內試模費率 8hr」
     db_obj.unitPrice = machine_db.moldTrialCost
     #  「金額」=「單價」*(1+不良率)

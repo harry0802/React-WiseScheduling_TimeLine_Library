@@ -5,6 +5,7 @@ from flask import current_app
 from sqlalchemy import func
 from app import db
 from app.utils_log import message, err_resp, internal_err_resp
+from app.service.utils_iot import get_current_modulus_from_injector
 from app.models.productionReport import ProductionReport
 from app.models.injector import Injector
 from app.models.injectorOee15m import InjectorOee15m
@@ -16,6 +17,7 @@ from app.models.processMold import ProcessMold
 from .schemas import productionReportSchema, productionScheduleReportSchema
 from sqlalchemy import or_
 from app.models.productionSchedule import ProductionSchedule
+from app.api.productionCost.service import ProductionCostService
 productionReport_schema = productionReportSchema()
 productionScheduleReport_schema = productionScheduleReportSchema()
 
@@ -34,37 +36,6 @@ def get_sum_of_run_from_injector_oee_15m(machineSN, endTime):
         current_app.logger.error(f"get_sum_of_run_from_injector_oee_15m error: {error}")
         return None
     
-
-def get_current_modulus_from_injector(machineSN, startTime, endTime):
-    # SELECT current_modulus FROM opcua.injector WHERE last_updated BETWEEN '母批/子批結束時間 - 1分鐘' AND '母批/子批結束時間' AND name = '機台號碼' ORDER BY last_updated DESC LIMIT 1;
-    # SELECT current_modulus FROM opcua.injector WHERE last_updated BETWEEN '母批/子批開始時間' AND '母批/子批開始時間 + 1分鐘' AND name = '機台號碼' ORDER BY last_updated ASC LIMIT 1;
-    try:
-        # convert startTime to user's local timezone according to the endTime
-        startTime = startTime.astimezone(timezone(endTime.tzinfo.utcoffset(startTime)))
-
-        query = Injector.query
-        query = query.filter(
-            Injector.last_updated.between(endTime - timedelta(minutes=1), endTime),
-            Injector.name == machineSN.lower()
-        )
-        query = query.order_by(Injector.last_updated.desc())
-        end_current_modulus = query.with_entities(Injector.current_modulus).first()
-        end_current_modulus = int(end_current_modulus[0]) if end_current_modulus else 0
-
-        query = Injector.query
-        query = query.filter(
-            Injector.last_updated.between(startTime, startTime + timedelta(minutes=1)),
-            Injector.name == machineSN.lower()
-        )
-        query = query.order_by(Injector.last_updated.asc())
-        start_current_modulus = query.with_entities(Injector.current_modulus).first()
-        start_current_modulus = int(start_current_modulus[0]) if start_current_modulus else 0
-        return start_current_modulus, end_current_modulus
-    except Exception as error:
-        # log the error message
-        current_app.logger.error(f"get_current_modulus_from_injector error: {error}")
-        return None, None
-
     
 def get_operating_mode_from_injector(machineSN, startTime):
     # SELECT operating_mode FROM opcua.injector WHERE last_updated >= '母批/子批開始時間 - 10秒' AND name = '機台號碼' ORDER BY last_updated ASC LIMIT 1;
@@ -471,6 +442,15 @@ class productionReportService:
         try:
             productionReport_db_list = []
             for data in payload:
+                # 確認data中是否有pschedule_id，如果有，則從productionSchedule中取得moldingSecond 和 moldCavity，並更新至data中
+                if data.get("pschedule_id"):
+                    productionSchedule_db = ProductionSchedule.query.filter(
+                        ProductionSchedule.id == data["pschedule_id"]
+                    ).first()
+                    if productionSchedule_db:
+                        data["moldingSecond"] = productionSchedule_db.moldingSecond
+                        data["moldCavity"] = productionSchedule_db.moldCavity
+                        
                 productionReport_db_list.append(complete_productionReport(mode, ProductionReport(), data))
             db.session.add_all(productionReport_db_list)
             db.session.flush()
@@ -528,7 +508,12 @@ class productionReportService:
             db.session.add_all(productionReport_db_list)
             db.session.flush()
             db.session.commit()
-
+            
+            # 用於智慧成本分析，子批或母批結束時，將製令單的最終資料寫入productionCost資料表
+            for data in payload:
+                if data.get("endTime", None):
+                    ProductionCostService.create_productionCost_final(data["id"])
+                    
             productionReport_dto = productionReport_schema.dump(productionReport_db_list, many=True)
             resp = message(True, "productionReports have been updated..")
             resp["data"] = productionReport_dto

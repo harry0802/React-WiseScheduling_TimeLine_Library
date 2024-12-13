@@ -1,6 +1,13 @@
 import ProductionRecordButton from "./ProductionRecordButton";
 
-function ProductContextCard({ children, icon, title, OnClick, style }) {
+function ProductContextCard({
+  children,
+  icon,
+  title,
+  OnClick,
+  style,
+  hideButton,
+}) {
   // pd =product
   // PdId =產品編號
 
@@ -12,9 +19,11 @@ function ProductContextCard({ children, icon, title, OnClick, style }) {
         </div>
 
         <div className="header__button">
-          <ProductionRecordButton OnClick={OnClick}>
-            {icon}
-          </ProductionRecordButton>
+          {!hideButton && (
+            <ProductionRecordButton OnClick={OnClick}>
+              {icon}
+            </ProductionRecordButton>
+          )}
         </div>
       </div>
       {children}

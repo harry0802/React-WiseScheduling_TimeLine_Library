@@ -1,39 +1,43 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import ProcessList from "./components/ProcessList";
 import ProductContextCard from "../../../ProductionRecord/utility/ProductContextCard";
 import ProcessDrawer from "./components/ProcessDrawer";
 import TransportationProcessItem from "../TransportationProcessItem";
-import { useUpdateShippingMutation } from "../../services/salesServices/endpoints/shippingApi";
-import {
-  useCreateProcessMutation,
-  useDeleteProcessMutation,
-  useUpdateProcessMutation,
-} from "../../services/salesServices/endpoints/processApi";
 import ConfirmationDialog from "../../../Global/dialog/BaseDialog";
+import { LoadingSkeleton } from "../LoadingSkeleton";
 
 export function ProcessCostAnalysis({
   title = "各製程物料與加工成本分析",
   icon,
   quotationSlice,
+  processService,
 }) {
   const {
-    processes, // 從 store 取得製程列表
-    updateProcess, // 更新製程方法
-    addProcess, // 新增製程方法
-    removeProcess, // 刪除製程方法
-    calculateBaseCosts, // 計算基礎成本
-    calculateAll, // 計算總成本
-    calculationResults, // 成本計算結果
+    processes,
+    updateProcess,
+    addProcess,
+    removeProcess,
+    calculateBaseCosts,
+    calculateAll,
+    calculationResults,
     id,
     shippingCosts,
     updateShippingCosts,
     type,
-  } = quotationSlice();
+  } = quotationSlice?.();
 
-  const [createProcess] = useCreateProcessMutation();
-  const [updateShipping] = useUpdateShippingMutation();
-  const [deleteProcess] = useDeleteProcessMutation();
-  const [updateProcessApi] = useUpdateProcessMutation();
+  const {
+    handleUpdateProcess,
+    handleDeleteProcess,
+    handleUpdateShippingCosts,
+    handleAddProcess,
+  } = processService?.(id) ?? {
+    handleUpdateProcess: async () => false,
+    handleDeleteProcess: async () => false,
+    handleUpdateShippingCosts: async () => null,
+    handleAddProcess: async () => null,
+  };
+
   const [isNewDrawerOpen, setIsNewDrawerOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -44,31 +48,20 @@ export function ProcessCostAnalysis({
     cancelText: "",
   });
 
-  // 處理製程更新
   const handleUpdate = async (updatedProcess, onClose) => {
-    try {
-      await updateProcessApi({
-        quotationId: id,
-        process: updatedProcess,
-      }).unwrap();
+    const success = await handleUpdateProcess(updatedProcess, onClose);
+    if (success) {
       updateProcess(updatedProcess.id, updatedProcess);
       calculateAll();
-      onClose?.();
-    } catch (error) {
-      console.error("更新製程失敗:", error);
     }
   };
 
-  // 處理製程刪除
   const handleDelete = async (processId) => {
     setPendingAction(() => async () => {
-      try {
-        await deleteProcess({ quotationId: id, processId }).unwrap();
+      const success = await handleDeleteProcess(processId);
+      if (success) {
         removeProcess(processId);
         calculateAll();
-      } catch (error) {
-        console.error("刪除製程失敗:", error);
-      } finally {
         setIsNewDrawerOpen(false);
       }
     });
@@ -81,49 +74,23 @@ export function ProcessCostAnalysis({
     setConfirmOpen(true);
   };
 
-  // 更新運輸成本
-  const handleUpdateShippingCosts = async (updatedShippingCosts, onClose) => {
-    const transformedShippingCosts = {
-      SQFreights: updatedShippingCosts.SQFreights.map((freight) => ({
-        ...freight,
-        amount: freight.amount ?? 0,
-      })),
-      SQCustomsDuties: updatedShippingCosts.SQCustomsDuties.map((duty) => ({
-        ...duty,
-        amount: duty.amount ?? 0,
-      })),
-    };
-
-    try {
-      await (type === "sales" ? updateShipping : updateShippingCosts)({
-        quotationId: id,
-        shipping: transformedShippingCosts,
-      }).unwrap();
-      updateShippingCosts(transformedShippingCosts);
+  const handleShippingUpdate = async (updatedShippingCosts, onClose) => {
+    const result = await handleUpdateShippingCosts(
+      updatedShippingCosts,
+      onClose
+    );
+    if (result) {
+      updateShippingCosts(result);
       calculateAll();
-      onClose?.();
-    } catch (error) {
-      console.error("更新運費失敗:", error);
     }
   };
 
-  // 處理新增製程
   const handleAdd = async (newProcess) => {
-    const processData = {
-      ...newProcess,
-      id,
-    };
-
-    try {
-      await createProcess({
-        quotationId: id,
-        process: processData,
-      }).unwrap();
-      addProcess(processData);
+    const result = await handleAddProcess(newProcess);
+    if (result) {
+      addProcess(result);
       calculateAll();
       setIsNewDrawerOpen(false);
-    } catch (error) {
-      console.error("新增製程失敗:", error);
     }
   };
 
@@ -138,16 +105,21 @@ export function ProcessCostAnalysis({
     setConfirmOpen(false);
   };
 
-  // 計算各製程成本詳情
   const processCostDetails = useMemo(() => {
     return calculateBaseCosts().costDetails;
   }, [processes, calculateBaseCosts]);
 
+  if (!processService) {
+    return <LoadingSkeleton />;
+  }
+
   return (
     <ProductContextCard
+      type={type}
       title={title}
       icon={icon}
       OnClick={() => setIsNewDrawerOpen(true)}
+      hideButton={type === "factory"}
     >
       <ProcessList
         processes={processes}
@@ -156,12 +128,12 @@ export function ProcessCostAnalysis({
           totalCostSubtotal: calculationResults.costSubtotal,
         }}
         onUpdate={handleUpdate}
-        onDelete={handleDelete}
+        onDelete={type === "sales" ? handleDelete : null}
       />
       <TransportationProcessItem
         process={shippingCosts}
         costDetail={calculationResults.transportationCost}
-        onUpdate={handleUpdateShippingCosts}
+        onUpdate={handleShippingUpdate}
       />
 
       {isNewDrawerOpen && (

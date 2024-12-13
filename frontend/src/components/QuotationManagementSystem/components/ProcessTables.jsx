@@ -229,7 +229,7 @@ const ProcessTable = ({ processType, formData, costDetail }) => {
     return (
       <Box>
         {config.summaryFields.map((field) => (
-          <Typography key={field.key}>
+          <Typography variant="h6" key={field.key}>
             {field.label}:{" "}
             {convertToDisplayPercentage(
               formData?.SQMaterialCostSetting[field.key] || 0

@@ -16,7 +16,7 @@ from app.models.ly0000AO import LY0000AODetail
 from app.api.lysErp.xmlEnum import DataKind, Ixmlda00000R_Title, Ixmlda00000R_Detail, Ixmlda0000AB_Title, Ixmlda0000AO_Detail
 from app.api.lysErp.xmlRequest import LyDataOutRequestParameter, LyGetPassKeyRequest, LyDataOutRequest
 from app.api.lysErp.xmlParser import parse_LyGetPassKey, parse_LyDataOut
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -38,7 +38,7 @@ def call_LyGetPassKey() -> str:
             'Content-type': "text/xml",
             'SOAPAction': f"{LY_XML_TEMPURI_NAMESPACE}IErpService/LyGetPassKey",
         }
-        response = requests.post(LY_ERP_URL, headers=headers, data=payload)
+        response = requests.post(LY_ERP_URL, headers=headers, data=payload, timeout=300)
         result = parse_LyGetPassKey(response.text)
         return result
     except Exception as error:
@@ -60,7 +60,7 @@ def call_LyDataOut(lyDataOutRequestParameter) -> str:
             'Content-type': "text/xml",
             'SOAPAction': f"{LY_XML_TEMPURI_NAMESPACE}IErpService/LyDataOut",
         }
-        response = requests.post(LY_ERP_URL, headers=headers, data=payload)
+        response = requests.post(LY_ERP_URL, headers=headers, data=payload, timeout=300)
         result = parse_LyDataOut(response.text)
         return result
     except Exception as error:
