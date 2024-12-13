@@ -39,7 +39,7 @@ const processPackagingCost = (item) => {
   if (unitLowerCase === "件" || unitLowerCase === "個") {
     return {
       ...item,
-      bagsPerKg: 0,
+      // bagsPerKg: 0,
     };
   }
 
