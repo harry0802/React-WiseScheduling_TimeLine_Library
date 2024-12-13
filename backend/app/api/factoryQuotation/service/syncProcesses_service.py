@@ -240,7 +240,7 @@ def convert_processes_to_payload_format(process_db_list):
                                 "unit": packaging["unit"],
                                 "quantity": packaging["quantity"],
                                 "capacity": None,
-                                "bagsPerKg": None,
+                                "bagsPerKg": 100, # Default value
                                 "unitPrice": packaging["unitPrice"],
                                 "amount": None
                             }
