@@ -238,7 +238,7 @@ def convert_processes_to_payload_format(process_db_list):
                                 "materialSN": packaging["materialSN"],
                                 "materialName": packaging["materialName"],
                                 "unit": packaging["unit"],
-                                "quantity": packaging["quantity"],
+                                "quantity": packaging["quantity"] if packaging["quantity"] else 1,
                                 "capacity": None,
                                 "bagsPerKg": 100, # Default value
                                 "unitPrice": packaging["unitPrice"],
