@@ -1,12 +1,22 @@
 import { transformResponse } from "../../../utility/commonUtils";
 import apiSlice from "../apiSlice";
-
+import { timeUtils } from "../../../../QuotationManagementSystemFQ/utility/timeUtils";
 export const quotationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // 取得報價單列表
     getQuotations: builder.query({
       query: () => "salesQuotation/products/",
       providesTags: ["Quotation"],
+      transformResponse: (response, meta, arg) => {
+        if (!response?.data) return response;
+        return {
+          ...response,
+          data: response.data.map((item) => ({
+            ...item,
+            createDate: timeUtils.formatters.chineseDateTime(item.createDate),
+          })),
+        };
+      },
     }),
     // 取得單一報價單
     getQuotationById: builder.query({

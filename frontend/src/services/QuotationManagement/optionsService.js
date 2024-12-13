@@ -28,6 +28,7 @@ export const createOptionsScope = () => {
   };
 
   return {
+    // 取得通用單位
     async getCommonUnits() {
       return createCachedRequest("commonUnits", async () => {
         const response = await fetch(API_ENDPOINTS.MATERIAL_UNIT);
@@ -40,6 +41,7 @@ export const createOptionsScope = () => {
       });
     },
 
+    // 取得包裝類型
     async getPackagingTypes() {
       return createCachedRequest("packagingTypes", async () => {
         const response = await fetch(API_ENDPOINTS.PACKAGING_UNIT);
@@ -52,6 +54,7 @@ export const createOptionsScope = () => {
       });
     },
 
+    // 取得運費類型
     async getFreightTypes() {
       return createCachedRequest("freightTypes", async () => {
         const response = await fetch(API_ENDPOINTS.MACHINE_LIST);
@@ -72,6 +75,7 @@ export const createOptionsScope = () => {
       });
     },
 
+    // 取得機台區域
     async getMachineAreas(areaFilter) {
       return createCachedRequest(`machineAreas_${areaFilter}`, async () => {
         const [detailResponse, listResponse] = await Promise.all([
@@ -103,7 +107,7 @@ export const createOptionsScope = () => {
           }));
       });
     },
-
+    // 取得物料選項
     async getMaterialOptions() {
       return createCachedRequest("materialOptions", async () => {
         const response = await fetch(API_ENDPOINTS.MATERIAL_OPTION);

@@ -254,7 +254,7 @@ const packagingCostFields = {
     createRequiredRule("單位"),
     null,
     3,
-    () => optionsService.getCommonUnits()
+    () => optionsService.getPackagingTypes()
   ),
   quantity: createField(
     "quantity",
@@ -280,13 +280,7 @@ const packagingCostFields = {
     "bagsPerKg",
     "每公斤袋數",
     "number",
-    createInputProps("袋/公斤", "每公斤袋數"),
-    {
-      setValueAs: (value) => {
-        if (value === "" || value === null) return null;
-        return Number(value);
-      },
-    }
+    createInputProps("袋/公斤", "每公斤袋數")
   ),
   unitPrice: {
     ...createField(

@@ -103,8 +103,8 @@ function calculateMaterialCost(
  *   amounts: Array<number>
  * }} 總成本與個別金額列表
  * @description
- * 1. 包材類型為「包材」時: 金額 = 單價 × 數量
- * 2. 單位為「公斤」「磅」時: 金額 = (單價 × 數量) / 容量
+ * 1. 包材類型為「包材」時: 金額 = 單價 / 數量
+ * 2. 單位為「公斤」「磅」時: 金額 = 單價 / 每公斤幾個袋子 / 容量
  */
 function calculatePackagingCost(items) {
   if (!items || items.length === 0) {
@@ -117,8 +117,8 @@ function calculatePackagingCost(items) {
     let amount = 0;
 
     if (item.unit === "件" || item.unit === "個") {
-      // 單位為「件」「個」時:金額 = 單價 × 數量
-      amount = item.unitPrice * item.capacity;
+      // 單位為「件」「個」時:金額 = 單價 / 數量
+      amount = item.unitPrice / item.capacity;
     } else if (item.unit === "公斤" || item.unit === "磅") {
       // 金額 = 單價 / 每公斤幾個袋子 / 容量
       amount = item.unitPrice / item.bagsPerKg / item.capacity;

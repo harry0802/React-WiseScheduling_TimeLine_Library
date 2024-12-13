@@ -475,7 +475,7 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
   } = useController({
     name: uniqueFieldName,
     control: methods.control,
-    defaultValue: field.type === "number" ? null : "",
+    defaultValue: field?.defaultValue ?? field.type === "number" ? null : "",
     rules: {
       ...field.rules,
       ...(field.type === "number" && {

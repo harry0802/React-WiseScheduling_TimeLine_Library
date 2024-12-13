@@ -10,6 +10,7 @@
 
 //! =============== 1. 依賴導入 ===============
 import { transformResponse } from "../../../utility/commonUtils";
+import timeUtils from "../../../utility/timeUtils";
 import factoryQuotationApiSlice from "../apiSlice";
 
 //! =============== 2. API 端點配置 ===============
@@ -45,6 +46,16 @@ export const quotationApi = factoryQuotationApiSlice.injectEndpoints({
           Object.entries(params).filter(([_, v]) => v !== undefined)
         ), // Filter out undefined parameters
       }),
+      transformResponse: (response, meta, arg) => {
+        if (!response?.data) return response;
+        return {
+          ...response,
+          data: response.data.map((item) => ({
+            ...item,
+            createDate: timeUtils.formatters.chineseDateTime(item.createDate),
+          })),
+        };
+      },
       providesTags: ["Quotation"], // Caching tag to optimize performance
     }),
 

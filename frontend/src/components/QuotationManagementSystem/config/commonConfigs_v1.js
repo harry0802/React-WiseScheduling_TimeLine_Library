@@ -252,7 +252,7 @@ const packagingCostFields = {
     createRequiredRule("單位"),
     null,
     3,
-    () => optionsService.getCommonUnits()
+    () => optionsService.getPackagingTypes()
   ),
   quantity: createField(
     "quantity",
@@ -278,11 +278,15 @@ const packagingCostFields = {
     "bagsPerKg",
     "每公斤袋數",
     "number",
-    createInputProps("袋/公斤", "每公斤袋數"),
+    {
+      ...createInputProps("袋/公斤", "每公斤袋數"),
+      defaultValue: 100,
+    },
     {
       setValueAs: (value) => {
-        if (value === "" || value === null) return null;
-        return Number(value);
+        if (value === "" || value === null || value === undefined) return 100;
+        const num = Number(value);
+        return isNaN(num) ? 100 : num;
       },
     }
   ),
@@ -508,7 +512,7 @@ export const commonSections = {
     })),
   },
   injectionMoldingCosts: {
-    title: "注塑成型成本",
+    title: "注塑成型��本",
     fields: Object.values(injectionMoldingCostFields).map((field) => ({
       ...field,
       span: field.span || 3,

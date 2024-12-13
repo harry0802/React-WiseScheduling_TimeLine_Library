@@ -154,8 +154,6 @@ export const FORM_CONFIGURATIONS = {
         createField("machineId", "機台ID", "hidden", {
           dependsOn: "OptionsId",
           getDependentOptions: (productionArea, methods) => {
-            console.log("🚀 ~ productionArea:", productionArea);
-
             if (!productionArea) return "";
             return productionArea;
           },
