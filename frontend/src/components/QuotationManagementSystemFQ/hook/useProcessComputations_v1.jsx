@@ -73,7 +73,6 @@ export const calculateOutsourcedMoldingCost = (process) => {
     FQPackagingCosts,
     FQOutPostProcessingCosts,
   } = process;
-
   const materialCostResult = calculateMaterialCost(
     FQMaterialCosts,
     FQMaterialCostSetting.estimatedDefectRate,

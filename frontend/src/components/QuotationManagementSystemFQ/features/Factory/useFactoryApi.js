@@ -9,7 +9,6 @@ export const useFactoryApi = (productId) => {
   const [updateQuotation] = useUpdateQuotationMutation();
 
   const handleUpdateQuotation = (data) => {
-    console.log("data", data);
     return updateQuotation({
       id: productId,
       ...data,
