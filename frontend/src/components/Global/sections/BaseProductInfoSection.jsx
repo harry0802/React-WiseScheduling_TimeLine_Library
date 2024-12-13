@@ -134,7 +134,6 @@ function Drawer({ title, children }) {
 
 // Form 子組件
 function Form({ formFields }) {
-  console.log("🚀 ~ Form ~ formFields:", formFields);
   const methods = useFormContext();
   const { product } = useContext(ProductInfoContext);
 

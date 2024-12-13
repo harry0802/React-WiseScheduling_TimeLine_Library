@@ -160,7 +160,6 @@ const getProcessFields = (processCategory) => {
       ),
     },
   };
-  console.log(processCategory);
   return categoryMap[processCategory] || {};
 };
 

@@ -155,11 +155,9 @@ export const useQuotationStore = (set, get) => ({
   // 1. 基礎成本計算
   calculateBaseCosts: () => {
     const { processes } = get();
-    console.log("🚀 ~ useQuotationStore ~ processes:", processes);
     if (!Array.isArray(processes) || processes.length === 0) {
       return { processTotal: 0, costDetails: [] };
     }
-
     const costDetails = processes.map((process) => {
       if (!process || !process.processCategory) {
         return {
@@ -244,7 +242,6 @@ export const useQuotationStore = (set, get) => ({
     const baseCosts = get().calculateBaseCosts();
     const transportCosts = get().calculateTransportation();
     const totalCost = baseCosts.processTotal + transportCosts.costSubtotal;
-
     // 更新 store
     set((state) => ({
       calculationResults: {

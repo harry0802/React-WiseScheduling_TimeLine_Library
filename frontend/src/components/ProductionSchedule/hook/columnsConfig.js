@@ -162,24 +162,21 @@ export const getDefaultColumns = (
     dataIndex: "machineSN",
     ellipsis: true,
     width: 50,
-    render: (text, record) =>
-      renderSelect(
-        MACHINE_LIST.map((item) => ({
-          value: item.machineSN,
-          label: item.machineSN,
-        })),
-        text,
-        (value) => handleMachineSNChange(value, record)
-      ),
-    filters: MACHINE_LIST.map((item) => ({
-      text: item.machineSN,
-      value: item.machineSN,
-    })),
-    filterSearch: true,
-    onFilter: (value, record) => record.machineSN.startsWith(value),
-    sorter: (a, b) =>
-      a.machineSN < b.machineSN ? -1 : a.machineSN > b.machineSN ? 1 : 0,
+    render: (text, record) => {
+      // 過濾出當前生產區域的機台
+      const filteredMachines = MACHINE_LIST.filter(
+        (item) => item.productionArea === record.productionArea
+      ).map((item) => ({
+        value: item.machineSN,
+        label: item.machineSN,
+      }));
+
+      return renderSelect(filteredMachines, text, (value) =>
+        handleMachineSNChange(value, record)
+      );
+    },
   },
+
   {
     title: "預計上機日",
     dataIndex: "planOnMachineDate",

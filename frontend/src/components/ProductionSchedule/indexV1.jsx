@@ -225,6 +225,11 @@ function ProductionSchedule() {
       const defaultMachineSN = MACHINE_LIST.filter((item) => {
         return item.productionArea === value;
       })[0].machineSN;
+      console.log(
+        "🚀 ~ defaultMachineSN ~ defaultMachineSN:",
+        defaultMachineSN
+      );
+
       const defaultSingleOrDoubleColor = MACHINE_LIST.find(
         (item) => item.machineSN === defaultMachineSN
       ).singleOrDoubleColor;
@@ -248,7 +253,6 @@ function ProductionSchedule() {
       const defaultSingleOrDoubleColor = MACHINE_LIST.find(
         (item) => item.machineSN === value
       ).singleOrDoubleColor;
-
       await UpdateProductionSchedule({
         id: record.id,
         data: {

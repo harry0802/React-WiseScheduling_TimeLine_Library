@@ -9,32 +9,6 @@
 import { convertToDisplayPercentage } from "./commonUtils";
 
 /**
- * 通用單位列表
- * @constant {Array<{value: string, label: string}>}
- */
-const COMMON_UNITS = [
-  { value: "kg", label: "kg" },
-  { value: "g", label: "g" },
-  { value: "pcs", label: "pcs" },
-  { value: "set", label: "set" },
-  { value: "個", label: "個" },
-  { value: "件", label: "件" },
-  { value: "磅", label: "磅" },
-  { value: "公斤", label: "公斤" },
-  { value: "公克", label: "公克" },
-];
-
-/**
- * 材料類型列表
- * @constant {Array<{value: string, label: string}>}
- */
-const MATERIAL_TYPES = [
-  { value: "鋼鐵", label: "鋼鐵" },
-  { value: "包材", label: "包材" },
-  { value: "色母", label: "色母" },
-];
-
-/**
  * 計算原物料費用
  * @param {Array<Object>} items - 原物料清單
  * @param {string} items[].unit - 單位
@@ -60,7 +34,6 @@ function calculateMaterialCost(
       amounts: [],
     };
   }
-  console.log(items, fluctuationPercentage, defectRate, materialWithdrawalFee);
 
   // 使用 convertToPercentage 轉換百分比
   const fluctuationPercentage_ = convertToPercentage(fluctuationPercentage);
@@ -126,6 +99,7 @@ function calculatePackagingCost(items) {
 
     return amount || item.amount || 0;
   });
+
   return {
     totalCost: amounts.reduce((sum, amt) => sum + amt, 0),
     amounts,
