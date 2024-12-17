@@ -1,0 +1,15 @@
+export const columns = [
+  //   { field: "machineId", headerName: "機台編號" },
+  //   { field: "week", headerName: "建立週" },
+  //   { field: "createDate", headerName: "建立日期" },
+  { field: "maintenanceCheckItem", headerName: "保養檢查項目" },
+  { field: "maintenanceMethod", headerName: "保養方式" },
+  { field: "inspectionResult", headerName: "檢查結果" },
+  { field: "inspector", headerName: "檢查者" },
+  { field: "inspectionDate", headerName: "檢查日期" },
+  { field: "reinspectionResult", headerName: "複查結果" },
+  { field: "reinspector", headerName: "複查者" },
+  { field: "reinspectionDate", headerName: "複查日期" },
+  { field: "approver", headerName: "承認者" },
+  { field: "approvalDate", headerName: "承認日期" },
+];

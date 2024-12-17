@@ -110,6 +110,12 @@ export const FactoryQmsMaintain = lazyImport(() =>
     "../components/QuotationManagementSystemFQ/features/Factory/FactoryQmsMaintain"
   )
 );
+
+// MachineMaintenance
+export const MachineMaintenancePage = lazyImport(() =>
+  import("../pages/MachineMaintenancePage")
+);
+
 // export const QmsAddtions = lazyImport(() =>
 //   import(
 //     "../components/QuotationManagementSystem/features/Sales/QmsAddtionInfos"
