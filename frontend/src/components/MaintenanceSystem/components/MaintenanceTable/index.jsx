@@ -101,7 +101,11 @@ const MaintenanceTable = ({
       {config?.rows?.map((row, rowIndex) => (
         <StyledTableRow key={rowIndex}>
           {columns.map((column, colIndex) => (
-            <StyledTableCell key={`${rowIndex}-${colIndex}`}>
+            <StyledTableCell
+              key={`${rowIndex}-${colIndex}`}
+              $field={column.field}
+              $isOdd={rowIndex % 2 === 1}
+            >
               {row[column.field]}
             </StyledTableCell>
           ))}

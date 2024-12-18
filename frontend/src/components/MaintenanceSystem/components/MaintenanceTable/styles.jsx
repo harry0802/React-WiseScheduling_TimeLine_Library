@@ -40,6 +40,17 @@ export const groupMappings = {
   approvalDate: "approve",
 };
 
+/**
+ * @constant {Object} cellColors
+ * @description 定義表格單元格的淺色背景顏色
+ */
+export const cellColors = {
+  maintenance: "rgba(24, 108, 152, 0.1)", // #186C98 的淺色版
+  result: "rgba(200, 132, 0, 0.1)", // #C88400 的淺色版
+  review: "rgba(24, 108, 152, 0.1)", // #186C98 的淺色版
+  approve: "rgba(24, 152, 60, 0.1)", // #18983C 的淺色版
+};
+
 //! =============== 2. 樣式組件 ===============
 
 /**
@@ -98,11 +109,18 @@ export const StyledTableHead = styled(TableHead)`
  * @param {boolean} $isHeader - 是否為標題單元格
  */
 export const StyledTableCell = styled(TableCell)`
-  background-color: ${(props) => (props.$isHeader ? "#1976d2" : "inherit")};
-  color: ${(props) => (props.$isHeader ? "white" : "inherit")};
-  font-weight: ${(props) => (props.$isHeader ? "bold" : "normal")};
-  padding: 12px;
-  position: relative;
+  && {
+    padding: 12px;
+    position: relative;
+    background-color: ${(props) => {
+      if (!props.$field) return "inherit";
+      const group = groupMappings[props.$field];
+      return props ? cellColors[group] : "inherit";
+    }};
+    color: ${(props) => (props.$isHeader ? "white" : "#8F8F8F")};
+    font-weight: ${(props) => (props.$isHeader ? "bold" : 400)};
+    font-size: 1.125rem;
+  }
 `;
 
 /**
@@ -110,11 +128,12 @@ export const StyledTableCell = styled(TableCell)`
  * @description 表格行組件，包含隔行變色和懸停效果
  */
 export const StyledTableRow = styled(TableRow)`
-  &:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+  && {
+    height: 3.125rem;
+    transition: background-color 0.3s ease;
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
   }
 `;
 

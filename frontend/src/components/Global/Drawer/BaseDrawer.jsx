@@ -58,7 +58,6 @@ const DrawerHeader = styled.div`
 
 const DrawerBody = styled.div`
   flex: 1;
-  /* margin-top: 3.125rem; */
   padding: 1.5rem;
   overflow-y: auto;
 `;
