@@ -156,6 +156,13 @@ export const getDefaultColumns = (
       renderSelect(PRODUCTION_AREA, text, (value) =>
         handleProductionAreaChange(value, record)
       ),
+    filters: PRODUCTION_AREA.map((item, index) => {
+      return { text: item.value, value: item.value };
+    }),
+    filterSearch: true,
+    onFilter: (value, record) => record.machineSN.startsWith(value),
+    sorter: (a, b) =>
+      a.machineSN < b.machineSN ? -1 : a.machineSN > b.machineSN ? 1 : 0,
   },
   {
     title: "機台編號",
@@ -175,6 +182,15 @@ export const getDefaultColumns = (
         handleMachineSNChange(value, record)
       );
     },
+
+    filters: MACHINE_LIST.map((item) => ({
+      text: item.machineSN,
+      value: item.machineSN,
+    })),
+    filterSearch: true,
+    onFilter: (value, record) => record.machineSN.startsWith(value),
+    sorter: (a, b) =>
+      a.machineSN < b.machineSN ? -1 : a.machineSN > b.machineSN ? 1 : 0,
   },
 
   {
