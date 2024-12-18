@@ -175,6 +175,15 @@ export const getDefaultColumns = (
         handleMachineSNChange(value, record)
       );
     },
+
+    filters: MACHINE_LIST.map((item) => ({
+      text: item.machineSN,
+      value: item.machineSN,
+    })),
+    filterSearch: true,
+    onFilter: (value, record) => record.machineSN.startsWith(value),
+    sorter: (a, b) =>
+      a.machineSN < b.machineSN ? -1 : a.machineSN > b.machineSN ? 1 : 0,
   },
 
   {
