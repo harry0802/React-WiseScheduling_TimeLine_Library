@@ -156,6 +156,9 @@ export const getDefaultColumns = (
       renderSelect(PRODUCTION_AREA, text, (value) =>
         handleProductionAreaChange(value, record)
       ),
+    onFilter: (value, record) => record.machineSN.startsWith(value),
+    sorter: (a, b) =>
+      a.machineSN < b.machineSN ? -1 : a.machineSN > b.machineSN ? 1 : 0,
   },
   {
     title: "機台編號",
