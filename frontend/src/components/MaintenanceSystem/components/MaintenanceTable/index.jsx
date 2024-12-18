@@ -1,158 +1,124 @@
 import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-} from "@mui/material";
-import styled from "styled-components";
-import { columns } from "./columns";
+import { Paper, IconButton, TableRow, TableBody } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import { columns } from "./columns";
+import {
+  StyledTableContainer,
+  StyledTable,
+  StyledTableHead,
+  StyledTableCell,
+  StyledTableRow,
+  StyledHeaderCell,
+  HeaderContent,
+  headerColors,
+  groupMappings,
+} from "./styles";
 
-const headerColors = {
-  maintenance: "#186C98",
-  result: "#C88400",
-  review: "#186C98",
-  approve: "#18983C",
-};
+//! =============== 1. 常量定義 ===============
 
-const columnGroups = {
-  maintenance: ["maintenanceCheckItem", "maintenanceMethod"],
-  result: ["inspectionResult", "inspector", "inspectionDate"],
-  review: ["reinspectionResult", "reinspector", "reinspectionDate"],
-  approve: ["approver", "approvalDate"],
-};
-
-const StyledTableContainer = styled(TableContainer)`
-  && {
-    margin-top: 16px;
-    max-width: 100%;
-    overflow-x: auto;
-    font-size: 20px;
-    border: 1px solid rgba(224, 224, 224, 1);
-  }
-`;
-
-const StyledTable = styled(Table)`
-  min-width: 800px;
-`;
-
-const StyledTableHead = styled(TableHead)`
-  && {
-    font-size: 20px;
-  }
-`;
-
-const StyledTableCell = styled(TableCell)`
-  background-color: ${(props) => (props.$isHeader ? "#1976d2" : "inherit")};
-  color: ${(props) => (props.$isHeader ? "white" : "inherit")};
-  font-weight: ${(props) => (props.$isHeader ? "bold" : "normal")};
-  padding: 12px;
-  border: 1px solid rgba(224, 224, 224, 1);
-`;
-
-const StyledTableRow = styled(TableRow)`
-  &:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.08);
-  }
-`;
-
-const StyledHeaderCell = styled(StyledTableCell)`
-  && {
-    font-size: 20px;
-    color: #fff;
-    font-weight: 400;
-    position: relative;
-    background-color: ${(props) => {
-      const field = props.column?.field;
-      if (columnGroups.maintenance.includes(field))
-        return headerColors.maintenance;
-      if (columnGroups.result.includes(field)) return headerColors.result;
-      if (columnGroups.review.includes(field)) return headerColors.review;
-      if (columnGroups.approve.includes(field)) return headerColors.approve;
-      return headerColors.maintenance;
-    }};
-  }
-`;
-
-const EditIconWrapper = styled.div`
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  z-index: 1;
-`;
-
-const ConfigurableTable = ({ config, onEdit }) => {
-  const allColumns = columns;
-
-  const handleEdit = (group) => {
-    onEdit?.(group);
+/**
+ * @component MaintenanceTable
+ * @description 維護表格組件，用於展示和編輯維護相關的數據
+ *
+ * @param {Object} props
+ * @param {Object} props.config - 表格配置，包含行數據
+ * @param {Function} props.onEditInspector - 編輯檢查員信息的回調
+ * @param {Function} props.onEditReinspector - 編輯複查員信息的回調
+ * @param {Function} props.onEditApprover - 編輯核准人信息的回調
+ *
+ * @example
+ * // 基礎使用示例
+ * <MaintenanceTable
+ *   config={{ rows: [...] }}
+ *   onEditInspector={() => {}}
+ *   onEditReinspector={() => {}}
+ *   onEditApprover={() => {}}
+ * />
+ *
+ * @notes
+ * - 表格標題顏色根據欄位分組自動分配
+ * - 可編輯欄位顯示編輯圖標
+ */
+const MaintenanceTable = ({
+  config,
+  onEditInspector,
+  onEditReinspector,
+  onEditApprover,
+}) => {
+  //! =============== 2. 輔助函數 ===============
+  /**
+   * @function getHeaderColor
+   * @description 根據欄位名獲取對應的標題顏色
+   * @param {string} field - 欄位名稱
+   * @returns {string} 顏色代碼
+   */
+  const getHeaderColor = (field) => {
+    return headerColors[groupMappings[field]] || headerColors.maintenance;
   };
 
-  const getColumnGroup = (field) => {
-    for (const [group, fields] of Object.entries(columnGroups)) {
-      if (fields.includes(field)) {
-        return group;
-      }
-    }
-    return null;
+  /**
+   * @function editableFields
+   * @description 可編輯欄位與對應處理函數的映射
+   */
+  const editableFields = {
+    inspectionDate: onEditInspector,
+    reinspectionDate: onEditReinspector,
+    approvalDate: onEditApprover,
   };
 
-  const shouldShowEditIcon = (colIndex) => {
-    const column = allColumns[colIndex];
-    const currentGroup = getColumnGroup(column.field);
-    const nextColumn = allColumns[colIndex + 1];
-    const nextGroup = nextColumn ? getColumnGroup(nextColumn.field) : null;
+  //! =============== 3. 渲染邏輯 ===============
+  //* 渲染表格標題
+  const renderHeaders = () => (
+    <StyledTableHead>
+      <TableRow>
+        {columns.map((column, index) => (
+          <StyledHeaderCell
+            key={index}
+            $backgroundColor={getHeaderColor(column.field)}
+            $width={column.width}
+          >
+            <HeaderContent>
+              {column.headerName}
+              {column.editable && (
+                <IconButton
+                  size="medium"
+                  onClick={() => editableFields[column.field]?.()}
+                  sx={{ color: "#fff", marginLeft: 1 }}
+                >
+                  <EditIcon fontSize="large" />
+                </IconButton>
+              )}
+            </HeaderContent>
+          </StyledHeaderCell>
+        ))}
+      </TableRow>
+    </StyledTableHead>
+  );
 
-    return currentGroup && currentGroup !== nextGroup;
-  };
+  //* 渲染表格內容
+  const renderBody = () => (
+    <TableBody>
+      {config?.rows?.map((row, rowIndex) => (
+        <StyledTableRow key={rowIndex}>
+          {columns.map((column, colIndex) => (
+            <StyledTableCell key={`${rowIndex}-${colIndex}`}>
+              {row[column.field]}
+            </StyledTableCell>
+          ))}
+        </StyledTableRow>
+      ))}
+    </TableBody>
+  );
 
+  //! =============== 4. 組件主體 ===============
   return (
     <StyledTableContainer component={Paper}>
       <StyledTable>
-        <StyledTableHead>
-          <TableRow>
-            {allColumns.map((column, index) => (
-              <StyledHeaderCell $isHeader column={column} key={index}>
-                {column.headerName}
-                {/*   */}
-                {shouldShowEditIcon(index) && (
-                  <EditIconWrapper>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEdit(getColumnGroup(column.field))}
-                      sx={{ color: "#fff" }}
-                    >
-                      <EditIcon fontSize="medium" />
-                    </IconButton>
-                  </EditIconWrapper>
-                )}
-              </StyledHeaderCell>
-            ))}
-          </TableRow>
-        </StyledTableHead>
-        <TableBody>
-          {config?.rows?.map((row, rowIndex) => (
-            <StyledTableRow key={rowIndex}>
-              {allColumns.map((column, colIndex) => (
-                <StyledTableCell key={`${rowIndex}-${colIndex}`}>
-                  {row[column.field]}
-                </StyledTableCell>
-              ))}
-            </StyledTableRow>
-          ))}
-        </TableBody>
+        {renderHeaders()}
+        {renderBody()}
       </StyledTable>
     </StyledTableContainer>
   );
 };
 
-export default ConfigurableTable;
+export default MaintenanceTable;
