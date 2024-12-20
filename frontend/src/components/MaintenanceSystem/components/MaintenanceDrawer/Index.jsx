@@ -9,7 +9,7 @@ const TITLE_MAP = {
   approver: "承認",
 };
 
-function MaintenanceDrawer({ type, onClose, visible, data, config }) {
+function MaintenanceDrawer({ type, onClose, visible, config, initialData }) {
   const [formMethods, setFormMethods] = useState(null);
 
   if (!type) return null;
@@ -31,7 +31,7 @@ function MaintenanceDrawer({ type, onClose, visible, data, config }) {
       <BaseDrawer.Body>
         <DrawerForm
           type={type}
-          initialData={data}
+          initialData={initialData}
           config={config}
           onSubmit={handleSubmit}
           setFormMethods={setFormMethods}

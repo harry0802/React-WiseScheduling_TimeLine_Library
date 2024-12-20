@@ -2,15 +2,12 @@ import { useState } from "react";
 import HeaderControls from "../../components/HeaderControls";
 import MaintenanceTable from "../../components/MaintenanceTable";
 import { Stack } from "@mui/material";
-import {
-  getMaintenanceMethod,
-  MAINTENANCE_ITEMS,
-  mockMaintenanceData,
-} from "./configs/maintenanceItems";
+import { MAINTENANCE_ITEMS } from "./configs/maintenanceItems";
 import MaintenanceDrawer from "../../components/MaintenanceDrawer/Index";
 import { FORM_CONFIGS } from "./configs/formConfigs";
 import { useMaintenanceHeaderParams } from "../../slice/MainteanceSlice";
 import { useGetWeeklyMaintenanceQuery } from "./services/maintenanceApi";
+import { Loading3QuartersOutlined } from "@ant-design/icons";
 
 function MachineMaintenance() {
   // 統一的抽屜狀態管理
@@ -25,8 +22,6 @@ function MachineMaintenance() {
     data: maintenanceData,
     isLoading,
     isFetching,
-    isError,
-    error,
   } = useGetWeeklyMaintenanceQuery(
     {
       machineId: maintenance.machineId,
@@ -37,20 +32,6 @@ function MachineMaintenance() {
       skip: !maintenance.machineId || !maintenance.year || !maintenance.week,
     }
   );
-  console.log("🚀 ~ MachineMaintenance ~ isFetching:", maintenanceData);
-
-  // API 資料處理
-  const processApiData = (apiData) => {
-    return {
-      rows: apiData.rows.map((row) => ({
-        ...row,
-        // 確保 maintenanceCheckItem 存在於我們的固定配置中
-        maintenanceMethod:
-          getMaintenanceMethod(row.maintenanceCheckItem) ||
-          row.maintenanceMethod,
-      })),
-    };
-  };
 
   // 統一的處理函數
   const handleEdit = (type, rowData) => {
@@ -69,17 +50,25 @@ function MachineMaintenance() {
       isOpen: false,
     });
   };
+  console.log(
+    "🔥🔥🔥🔥 ~ MachineMaintenance ~ maintenanceData:",
+    maintenanceData
+  );
 
   return (
     <Stack direction="column" width="100%">
       <HeaderControls />
-      <MaintenanceTable
-        config={mockMaintenanceData}
-        onEditInspector={(rowData) => handleEdit("inspector", rowData)}
-        onEditReinspector={(rowData) => handleEdit("reinspector", rowData)}
-        onEditApprover={(rowData) => handleEdit("approver", rowData)}
-        fixedItems={MAINTENANCE_ITEMS}
-      />
+      {isFetching ? (
+        <Loading3QuartersOutlined />
+      ) : (
+        <MaintenanceTable
+          config={maintenanceData?.table}
+          onEditInspector={(rowData) => handleEdit("inspector", rowData)}
+          onEditReinspector={(rowData) => handleEdit("reinspector", rowData)}
+          onEditApprover={(rowData) => handleEdit("approver", rowData)}
+          fixedItems={MAINTENANCE_ITEMS}
+        />
+      )}
 
       {/* 這裡可以加入 MaintenanceDrawer 組件 */}
       {drawerState.isOpen && (
@@ -88,6 +77,7 @@ function MachineMaintenance() {
           onClose={handleCloseDrawer}
           visible={drawerState.isOpen}
           config={FORM_CONFIGS[drawerState.type]}
+          initialData={maintenanceData?.forms[drawerState.type]}
         />
       )}
     </Stack>

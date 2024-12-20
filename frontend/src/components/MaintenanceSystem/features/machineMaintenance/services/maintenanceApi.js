@@ -1,6 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE } from "../../../../../store/api/apiConfig";
-import { transformFromApi, transformToApi } from "../utils/dataTransformers";
+import {
+  transformFromApi,
+  transformApiToForm,
+} from "../utils/dataTransformers";
 
 const maintenanceApi = createApi({
   reducerPath: "maintenanceApi",
@@ -13,7 +16,16 @@ const maintenanceApi = createApi({
         url: "maintenance/machine",
         params: { machineId, year, week },
       }),
-      transformResponse: transformFromApi,
+      transformResponse: (response) => {
+        return {
+          table: transformFromApi(response),
+          forms: {
+            inspector: transformApiToForm(response, "inspector"),
+            reinspector: transformApiToForm(response, "reinspector"),
+            approver: transformApiToForm(response, "approver"),
+          },
+        };
+      },
       refetchOnMountOrArgChange: true,
       refetchOnFocus: true,
     }),
@@ -23,7 +35,7 @@ const maintenanceApi = createApi({
       query: ({ id, data }) => ({
         url: `maintenance/machine/${id}`,
         method: "PUT",
-        body: transformToApi(data),
+        body: data,
       }),
       invalidatesTags: ["Maintenance"],
     }),

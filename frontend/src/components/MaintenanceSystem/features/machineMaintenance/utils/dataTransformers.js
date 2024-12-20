@@ -7,29 +7,36 @@ import { timeUtils } from "../../../../QuotationManagementSystem/utility/timeUti
  * @description 將 API 資料轉換為前端格式
  */
 export const transformFromApi = (apiData) => {
-  if (!apiData) return { rows: [] };
+  if (!apiData?.data || !Array.isArray(apiData.data)) return { rows: [] };
 
-  // 將每個維護項目轉換為獨立的行
-  const rows = MAINTENANCE_ITEMS.map((item) => {
-    const itemId = item.id;
+  // 用 Map 優化查找效率
+  const maintenanceMap = new Map(
+    apiData.data.map((item) => [item.maintenanceItem, item])
+  );
+
+  const rows = MAINTENANCE_ITEMS.map((config) => {
+    // 直接用 config.id 對應 API 的 maintenanceItem
+    const data = maintenanceMap.get(config.id) || {};
 
     return {
-      id: apiData.id,
-      machineId: apiData.machineId,
-      week: apiData.week,
-      maintenanceCheckItem: item.label,
-      maintenanceMethod: item.method,
-      inspectionResult: apiData[itemId] || null,
-      inspector: apiData.inspector,
-      inspectionDate: timeUtils.formatters.isoWithTZ(apiData.inspectionDate),
-      reinspectionResult: apiData[`${itemId}Reinspection`] || null,
-      reinspector: apiData.reinspector,
-      reinspectionDate: apiData.reinspectionDate
-        ? timeUtils.formatters.isoWithTZ(apiData.reinspectionDate)
+      id: data.id,
+      machineId: data.machineId,
+      week: data.week,
+      maintenanceCheckItem: config.label,
+      maintenanceMethod: config.method,
+      inspectionResult: data.inspectionResult || null,
+      inspector: data.inspector || null,
+      inspectionDate: data.inspectionDate
+        ? timeUtils.formatters.dateOnly(data.inspectionDate)
         : null,
-      approver: apiData.approver,
-      approvalDate: apiData.approvalDate
-        ? timeUtils.formatters.isoWithTZ(apiData.approvalDate)
+      reinspectionResult: data.reinspectionResult || null,
+      reinspector: data.reinspector || null,
+      reinspectionDate: data.reinspectionDate
+        ? timeUtils.formatters.dateOnly(data.reinspectionDate)
+        : null,
+      approver: data.approver || null,
+      approvalDate: data.approvalDate
+        ? timeUtils.formatters.dateOnly(data.approvalDate)
         : null,
     };
   });
@@ -70,4 +77,99 @@ export const transformToApi = (formData, originalData) => {
 // 輔助函數：查找項目資訊
 export const findMaintenanceItem = (itemId) => {
   return MAINTENANCE_ITEMS.find((item) => item.id === itemId);
+};
+
+// ��增表單數據過濾函數
+export const filterFormData = (type, data) => {
+  if (!data?.rows?.length) return null;
+
+  const row = data.rows[0]; // 因為同一批次的數據共用這些信息
+
+  switch (type) {
+    case "inspector":
+      return {
+        inspector: row.inspector,
+        inspectionDate: row.inspectionDate,
+        inspectionResults: data.rows.map((item) => ({
+          id: item.id,
+          maintenanceCheckItem: item.maintenanceCheckItem,
+          inspectionResult: item.inspectionResult,
+        })),
+      };
+
+    case "reinspector":
+      return {
+        reinspector: row.reinspector,
+        reinspectionDate: row.reinspectionDate,
+        reinspectionResults: data.rows.map((item) => ({
+          id: item.id,
+          maintenanceCheckItem: item.maintenanceCheckItem,
+          reinspectionResult: item.reinspectionResult,
+        })),
+      };
+
+    case "approver":
+      return {
+        approver: row.approver,
+        approvalDate: row.approvalDate,
+        approvalResults: data.rows.map((item) => ({
+          id: item.id,
+          maintenanceCheckItem: item.maintenanceCheckItem,
+          inspectionResult: item.inspectionResult,
+          reinspectionResult: item.reinspectionResult,
+        })),
+      };
+
+    default:
+      return null;
+  }
+};
+
+// 轉換 API 數據為表單格式
+export const transformApiToForm = (apiData, type) => {
+  if (!apiData?.data?.length) return null;
+
+  const checkItems = apiData.data.reduce((acc, item) => {
+    switch (type) {
+      case "inspector":
+        acc[item.maintenanceItem] = item.inspectionResult;
+        break;
+      case "reinspector":
+        acc[item.maintenanceItem] = item.reinspectionResult;
+        break;
+      case "approver":
+        acc[item.maintenanceItem] = item.approvalResult;
+        break;
+      default:
+        break;
+    }
+
+    return acc;
+  }, {});
+
+  const firstItem = apiData.data[0];
+  const personnel =
+    type === "inspector"
+      ? firstItem.inspector
+      : type === "reinspector"
+      ? firstItem.reinspector
+      : type === "approver"
+      ? firstItem.approver
+      : null;
+
+  const date =
+    type === "inspector"
+      ? firstItem.inspectionDate
+      : type === "reinspector"
+      ? firstItem.reinspectionDate
+      : type === "approver"
+      ? firstItem.approvalDate
+      : null;
+
+  return {
+    checkItems,
+    personnel,
+    date: date ? timeUtils.formatters.dateOnly(date) : timeUtils.getNow(),
+    type,
+  };
 };

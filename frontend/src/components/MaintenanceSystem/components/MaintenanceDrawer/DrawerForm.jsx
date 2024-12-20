@@ -20,25 +20,35 @@ import {
 import { createMaintenanceSchema } from "../../validations/maintenanceSchema";
 import { useEffect } from "react";
 import timeUtils from "../../utils/timeUtils";
+import {
+  transformApiToForm,
+  transformFormToApi,
+} from "../../utils/formDataTransformers";
 
 function DrawerForm({ type, initialData, config, onSubmit, setFormMethods }) {
+  console.log("🔥🔥🔥🔥 ~ DrawerForm ~ initialData:", initialData);
   const schema = createMaintenanceSchema(config);
   const methods = useForm({
     mode: "onTouched",
     resolver: zodResolver(schema),
-    defaultValues: initialData || {
+    defaultValues: transformApiToForm(initialData, type) || {
       checkItems: {},
       personnel: "",
       date: timeUtils.getNow(),
     },
   });
 
+  const handleSubmit = (data) => {
+    const apiData = transformFormToApi(data, type, initialData);
+    onSubmit(apiData);
+  };
+
   useEffect(() => {
     setFormMethods(methods);
   }, [methods, setFormMethods]);
 
   return (
-    <FormContainer>
+    <FormContainer onSubmit={methods.handleSubmit(handleSubmit)}>
       {config.fields.map((field) => (
         <FormRow key={field.id}>
           <span>{field.label}</span>
@@ -66,7 +76,6 @@ function DrawerForm({ type, initialData, config, onSubmit, setFormMethods }) {
       ))}
 
       <FormRow>
-        {/* <span>{config.personnel.label}</span> */}
         {config.personnel.type === "select" ? (
           <FormControl fullWidth>
             <InputLabel>{config.personnel.label}</InputLabel>
@@ -83,7 +92,7 @@ function DrawerForm({ type, initialData, config, onSubmit, setFormMethods }) {
           </FormControl>
         ) : (
           <StyledTextField
-            label="請輸入人員"
+            label={config.personnel.label}
             {...methods.register("personnel")}
           />
         )}

@@ -121,7 +121,6 @@ const MaintenanceTable = ({
               <StyledTableRow key={rowIndex}>
                 {columns.map((column, colIndex) => {
                   let cellContent = matchingRow[column.field];
-
                   if (column.field === "maintenanceCheckItem") {
                     cellContent = item.label;
                   } else if (column.field === "maintenanceMethod") {
@@ -132,7 +131,6 @@ const MaintenanceTable = ({
                     <StyledTableCell
                       key={`${rowIndex}-${colIndex}`}
                       $field={column.field}
-                      $isOdd={rowIndex % 2 === 1}
                     >
                       {cellContent}
                     </StyledTableCell>
@@ -153,7 +151,6 @@ const MaintenanceTable = ({
               <StyledTableCell
                 key={`${rowIndex}-${colIndex}`}
                 $field={column.field}
-                $isOdd={rowIndex % 2 === 1}
               >
                 {row[column.field]}
               </StyledTableCell>
