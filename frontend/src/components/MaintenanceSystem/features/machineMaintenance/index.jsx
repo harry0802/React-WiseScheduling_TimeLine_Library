@@ -2,101 +2,95 @@ import { useState } from "react";
 import HeaderControls from "../../components/HeaderControls";
 import MaintenanceTable from "../../components/MaintenanceTable";
 import { Stack } from "@mui/material";
-const testConfig = {
-  rows: [
-    {
-      maintenanceCheckItem: "boxClean",
-      maintenanceMethod: "詳細檢查",
-      inspectionResult: "OK",
-      inspector: "inspector",
-      inspectionDate: "2024-12-16",
-      reinspectionResult: "OK",
-      reinspector: "reinspector",
-      reinspectionDate: "2024-12-17",
-      approver: "approver",
-      approvalDate: "2024-12-18",
-    },
-    {
-      maintenanceCheckItem: "boxClean",
-      maintenanceMethod: "詳細檢查",
-      inspectionResult: "OK",
-      inspector: "inspector",
-      inspectionDate: "2024-12-16",
-      reinspectionResult: "OK",
-      reinspector: "reinspector",
-      reinspectionDate: "2024-12-17",
-      approver: "approver",
-      approvalDate: "2024-12-18",
-    },
-    {
-      maintenanceCheckItem: "boxClean",
-      maintenanceMethod: "詳細檢查",
-      inspectionResult: "OK",
-      inspector: "inspector",
-      inspectionDate: "2024-12-16",
-      reinspectionResult: "OK",
-      reinspector: "reinspector",
-      reinspectionDate: "2024-12-17",
-      approver: "approver",
-      approvalDate: "2024-12-18",
-    },
-    {
-      maintenanceCheckItem: "boxClean",
-      maintenanceMethod: "詳細檢查",
-      inspectionResult: "OK",
-      inspector: "inspector",
-      inspectionDate: "2024-12-16",
-      reinspectionResult: "OK",
-      reinspector: "reinspector",
-      reinspectionDate: "2024-12-17",
-      approver: "approver",
-      approvalDate: "2024-12-18",
-    },
-    {
-      maintenanceCheckItem: "boxClean",
-      maintenanceMethod: "詳細檢查",
-      inspectionResult: "OK",
-      inspector: "inspector",
-      inspectionDate: "2024-12-16",
-      reinspectionResult: "OK",
-      reinspector: "reinspector",
-      reinspectionDate: "2024-12-17",
-      approver: "approver",
-      approvalDate: "2024-12-18",
-    },
-  ],
-};
+import {
+  getMaintenanceMethod,
+  MAINTENANCE_ITEMS,
+  mockMaintenanceData,
+} from "./configs/maintenanceItems";
+import MaintenanceDrawer from "../../components/MaintenanceDrawer/Index";
+import { FORM_CONFIGS } from "./configs/formConfigs";
+import { useMaintenanceHeaderParams } from "../../slice/MainteanceSlice";
+import { useGetWeeklyMaintenanceQuery } from "./services/maintenanceApi";
+
 function MachineMaintenance() {
-  const [editInspector, setEditInspector] = useState(null);
-  const [editReinspector, setEditReinspector] = useState(null);
-  const [editApprover, setEditApprover] = useState(null);
+  // 統一的抽屜狀態管理
+  const [drawerState, setDrawerState] = useState({
+    isOpen: false,
+    type: null, // 'inspector' | 'reinspector' | 'approver'
+    currentRow: null,
+  });
+  const { maintenance } = useMaintenanceHeaderParams();
 
-  const handleEditInspector = () => {
-    console.log("editInspector");
-    setEditInspector(true);
+  const {
+    data: maintenanceData,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  } = useGetWeeklyMaintenanceQuery(
+    {
+      machineId: maintenance.machineId,
+      year: maintenance.year,
+      week: maintenance.week,
+    },
+    {
+      skip: !maintenance.machineId || !maintenance.year || !maintenance.week,
+    }
+  );
+  console.log("🚀 ~ MachineMaintenance ~ isFetching:", maintenanceData);
+
+  // API 資料處理
+  const processApiData = (apiData) => {
+    return {
+      rows: apiData.rows.map((row) => ({
+        ...row,
+        // 確保 maintenanceCheckItem 存在於我們的固定配置中
+        maintenanceMethod:
+          getMaintenanceMethod(row.maintenanceCheckItem) ||
+          row.maintenanceMethod,
+      })),
+    };
   };
 
-  const handleEditReinspector = () => {
-    console.log("editReinspector");
-    setEditReinspector(true);
+  // 統一的處理函數
+  const handleEdit = (type, rowData) => {
+    setDrawerState({
+      isOpen: true,
+      type,
+      currentRow: rowData,
+    });
   };
 
-  const handleEditApprover = () => {
-    console.log("editApprover");
-    setEditApprover(true);
+  // 關閉抽屜
+  const handleCloseDrawer = () => {
+    setDrawerState({
+      type: null,
+      currentRow: null,
+      isOpen: false,
+    });
   };
 
   return (
     <Stack direction="column" width="100%">
       <HeaderControls />
       <MaintenanceTable
-        config={testConfig}
-        onEditInspector={handleEditInspector}
-        onEditReinspector={handleEditReinspector}
-        onEditApprover={handleEditApprover}
+        config={mockMaintenanceData}
+        onEditInspector={(rowData) => handleEdit("inspector", rowData)}
+        onEditReinspector={(rowData) => handleEdit("reinspector", rowData)}
+        onEditApprover={(rowData) => handleEdit("approver", rowData)}
+        fixedItems={MAINTENANCE_ITEMS}
       />
+
+      {/* 這裡可以加入 MaintenanceDrawer 組件 */}
+      {drawerState.isOpen && (
+        <MaintenanceDrawer
+          type={drawerState.type}
+          onClose={handleCloseDrawer}
+          visible={drawerState.isOpen}
+          config={FORM_CONFIGS[drawerState.type]}
+        />
+      )}
     </Stack>
   );
 }
-
 export default MachineMaintenance;

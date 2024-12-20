@@ -118,6 +118,7 @@ export const StyledTableCell = styled(TableCell)`
       return props ? cellColors[group] : "inherit";
     }};
     color: ${(props) => (props.$isHeader ? "white" : "#8F8F8F")};
+    border: 1px solid rgba(224, 224, 224, 1);
     font-weight: ${(props) => (props.$isHeader ? "bold" : 400)};
     font-size: 1.125rem;
   }

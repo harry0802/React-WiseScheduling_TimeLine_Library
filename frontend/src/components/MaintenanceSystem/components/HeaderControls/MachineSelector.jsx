@@ -1,24 +1,28 @@
-import { useState, useEffect, useMemo, memo } from "react";
+//! =============== 1. 設定與常量 ===============
+import { useState, useEffect } from "react";
 import {
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 import styled from "styled-components";
+import { createMachineScope } from "../../../../services/QuotationManagement/machineService";
 
-const areaOptions = ["A區", "B區", "C區"];
+//! =============== 2. 類型與介面 ===============
+/**
+ * @typedef {Object} AreaOption
+ * @property {string} value - 區域值
+ *
+ * @typedef {Object} MachineOption
+ * @property {string} id - 機台 ID
+ * @property {string} value - 機台名稱
+ */
 
-const getMachinesByArea = (area) => {
-  const mockData = {
-    A區: ["A01", "A02", "A03"],
-    B區: ["B01", "B02", "B03"],
-    C區: ["C01", "C02", "C03"],
-  };
-  return mockData[area] || [];
-};
-
+//! =============== 3. 樣式元件 ===============
+//* 表單控制項樣式
 const StyledFormControl = styled(FormControl)`
   && {
     color: #fff;
@@ -27,6 +31,7 @@ const StyledFormControl = styled(FormControl)`
       font-size: 1.25rem;
       border-radius: 4px;
       color: currentColor;
+
       .MuiOutlinedInput-notchedOutline {
         border: 1px solid currentColor;
         transition: all 0.3s ease;
@@ -35,6 +40,7 @@ const StyledFormControl = styled(FormControl)`
       &:hover .MuiOutlinedInput-notchedOutline {
         border-color: #666;
       }
+
       .MuiSelect-icon {
         color: currentColor;
       }
@@ -49,6 +55,7 @@ const StyledFormControl = styled(FormControl)`
   }
 `;
 
+//* 選項樣式
 const StyledMenuItem = styled(MenuItem)`
   color: #fff;
   &.Mui-selected {
@@ -60,6 +67,7 @@ const StyledMenuItem = styled(MenuItem)`
   }
 `;
 
+//* 下拉選單樣式
 const StyledSelect = styled(Select)`
   && {
     color: currentColor;
@@ -69,49 +77,102 @@ const StyledSelect = styled(Select)`
   }
 `;
 
-function MachineSelector({ value, onChange }) {
-  const [selectedArea, setSelectedArea] = useState(
-    value?.area || areaOptions[0]
-  );
-  const [selectedMachine, setSelectedMachine] = useState(() => {
-    const initialArea = value?.area || areaOptions[0];
-    const machines = getMachinesByArea(initialArea);
-    return value?.machineId || (machines.length > 0 ? machines[0] : "");
-  });
+//! =============== 4. 主要元件 ===============
+/**
+ * @component MachineSelect
+ * @description 機台選擇元件，包含區域選擇和機台選擇兩個下拉選單
+ *
+ * @example
+ * // 基本使用
+ * <MachineSelect />
+ *
+ * @notes
+ * - 元件會在掛載時自動獲取區域列表
+ * - 選擇區域後會自動獲取該區域的機台列表
+ * - 載入數據時會顯示 loading 狀態
+ *
+ * @commonErrors
+ * - 獲取數據失敗時會在控制台顯示錯誤信息
+ * - 區域為空時機台選單會被禁用
+ */
+function MachineSelect({ value, onChange }) {
+  //! =============== 狀態管理 ===============
+  const [loading, setLoading] = useState(true);
+  const [areas, setAreas] = useState([]);
+  const [machines, setMachines] = useState([]);
+  const [selectedArea, setSelectedArea] = useState("");
+  const [selectedMachineId, setSelectedMachineId] = useState("");
 
-  const machines = useMemo(
-    () => getMachinesByArea(selectedArea),
-    [selectedArea]
-  );
+  const machineScope = createMachineScope();
 
-  const handleAreaChange = (event) => {
-    const newArea = event.target.value;
-    const newMachines = getMachinesByArea(newArea);
-    const newMachine = newMachines.length > 0 ? newMachines[0] : "";
-
-    setSelectedArea(newArea);
-    setSelectedMachine(newMachine);
-    onChange?.({ area: newArea, machineId: newMachine });
-  };
-
-  const handleMachineChange = (event) => {
-    const newMachine = event.target.value;
-    setSelectedMachine(newMachine);
-    onChange?.({ area: selectedArea, machineId: newMachine });
-  };
-
+  //! =============== 副作用處理 ===============
+  //* 獲取區域列表
   useEffect(() => {
-    if (value?.area && value?.machineId) {
-      const machines = getMachinesByArea(value.area);
-      if (machines.includes(value.machineId)) {
-        setSelectedArea(value.area);
-        setSelectedMachine(value.machineId);
+    const fetchAreas = async () => {
+      try {
+        setLoading(true);
+        const areaOptions = await machineScope.getMachinesByArea();
+        setAreas(areaOptions);
+        if (areaOptions.length > 0) {
+          setSelectedArea(areaOptions[0].value);
+        }
+      } catch (error) {
+        console.error("獲取區域失敗:", error);
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [value]);
+    };
+    fetchAreas();
+  }, []);
+
+  //* 根據選擇的區域獲取機台列表
+  useEffect(() => {
+    const fetchMachines = async () => {
+      if (!selectedArea) {
+        setMachines([]);
+        setSelectedMachineId("");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const machineOptions = await machineScope.getMachinesByMachineSN(
+          selectedArea
+        );
+        setMachines(machineOptions);
+        if (machineOptions.length > 0) {
+          setSelectedMachineId(machineOptions[0].id);
+          onChange?.({ area: selectedArea, machineId: machineOptions[0].id });
+        }
+      } catch (error) {
+        console.error("獲取機台失敗:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMachines();
+  }, [selectedArea]);
+
+  const handleAreaChange = (e) => {
+    const newArea = e.target.value;
+    setSelectedArea(newArea);
+    onChange?.({ area: newArea, machineId: selectedMachineId });
+  };
+
+  const handleMachineChange = (e) => {
+    const newMachineId = e.target.value;
+    setSelectedMachineId(newMachineId);
+    onChange?.({ area: selectedArea, machineId: newMachineId });
+  };
+
+  //! =============== 渲染處理 ===============
+  if (loading) {
+    return <CircularProgress />;
+  }
 
   return (
     <Stack direction="row" spacing={2} sx={{ minWidth: 400 }}>
+      {/* 區域選擇 */}
       <StyledFormControl fullWidth>
         <InputLabel>機台區域</InputLabel>
         <StyledSelect
@@ -119,24 +180,26 @@ function MachineSelector({ value, onChange }) {
           onChange={handleAreaChange}
           label="機台區域"
         >
-          {areaOptions.map((area) => (
-            <StyledMenuItem key={area} value={area}>
-              {area}
+          {areas.map((area) => (
+            <StyledMenuItem key={area.value} value={area.value}>
+              {area.value}區
             </StyledMenuItem>
           ))}
         </StyledSelect>
       </StyledFormControl>
 
+      {/* 機台選擇 */}
       <StyledFormControl fullWidth>
-        <InputLabel>機台編號</InputLabel>
+        <InputLabel>機台</InputLabel>
         <StyledSelect
-          value={selectedMachine}
+          value={selectedMachineId}
           onChange={handleMachineChange}
-          label="機台編號"
+          label="機台"
+          disabled={!selectedArea}
         >
           {machines.map((machine) => (
-            <StyledMenuItem key={machine} value={machine}>
-              {machine}
+            <StyledMenuItem key={machine.id} value={machine.id}>
+              {machine.value}
             </StyledMenuItem>
           ))}
         </StyledSelect>
@@ -145,4 +208,4 @@ function MachineSelector({ value, onChange }) {
   );
 }
 
-export default memo(MachineSelector);
+export default MachineSelect;

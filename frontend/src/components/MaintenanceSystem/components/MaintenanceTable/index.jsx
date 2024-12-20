@@ -3,7 +3,6 @@ import { Paper, IconButton, TableRow, TableBody } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import { columns } from "./columns";
 import {
-  StyledTableContainer,
   StyledTable,
   StyledTableHead,
   StyledTableCell,
@@ -12,6 +11,7 @@ import {
   HeaderContent,
   headerColors,
   groupMappings,
+  StyledTableContainer,
 } from "./styles";
 
 //! =============== 1. 常量定義 ===============
@@ -25,6 +25,8 @@ import {
  * @param {Function} props.onEditInspector - 編輯檢查員信息的回調
  * @param {Function} props.onEditReinspector - 編輯複查員信息的回調
  * @param {Function} props.onEditApprover - 編輯核准人信息的回調
+ * @param {boolean} props.useFixedRows - 是否使用固定行
+ * @param {Array} props.fixedItems - 固定行項目配置
  *
  * @example
  * // 基礎使用示例
@@ -33,17 +35,23 @@ import {
  *   onEditInspector={() => {}}
  *   onEditReinspector={() => {}}
  *   onEditApprover={() => {}}
+ *   useFixedRows={true}
+ *   fixedItems={MAINTENANCE_ITEMS}
  * />
  *
  * @notes
  * - 表格標題顏色根據欄位分組自動分配
  * - 可編輯欄位顯示編輯圖標
  */
+
+//
 const MaintenanceTable = ({
   config,
   onEditInspector,
   onEditReinspector,
   onEditApprover,
+  useFixedRows = false,
+  fixedItems,
 }) => {
   //! =============== 2. 輔助函數 ===============
   /**
@@ -82,7 +90,10 @@ const MaintenanceTable = ({
               {column.editable && (
                 <IconButton
                   size="medium"
-                  onClick={() => editableFields[column.field]?.()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    editableFields[column.field]?.(config.rows[0]);
+                  }}
                   sx={{ color: "#fff", marginLeft: 1 }}
                 >
                   <EditIcon fontSize="large" />
@@ -96,23 +107,62 @@ const MaintenanceTable = ({
   );
 
   //* 渲染表格內容
-  const renderBody = () => (
-    <TableBody>
-      {config?.rows?.map((row, rowIndex) => (
-        <StyledTableRow key={rowIndex}>
-          {columns.map((column, colIndex) => (
-            <StyledTableCell
-              key={`${rowIndex}-${colIndex}`}
-              $field={column.field}
-              $isOdd={rowIndex % 2 === 1}
-            >
-              {row[column.field]}
-            </StyledTableCell>
-          ))}
-        </StyledTableRow>
-      ))}
-    </TableBody>
-  );
+  const renderBody = () => {
+    if (useFixedRows) {
+      return (
+        <TableBody>
+          {fixedItems.map((item, rowIndex) => {
+            const matchingRow =
+              config?.rows?.find(
+                (row) => row.maintenanceCheckItem === item.id
+              ) || {};
+
+            return (
+              <StyledTableRow key={rowIndex}>
+                {columns.map((column, colIndex) => {
+                  let cellContent = matchingRow[column.field];
+
+                  if (column.field === "maintenanceCheckItem") {
+                    cellContent = item.label;
+                  } else if (column.field === "maintenanceMethod") {
+                    cellContent = item.method;
+                  }
+
+                  return (
+                    <StyledTableCell
+                      key={`${rowIndex}-${colIndex}`}
+                      $field={column.field}
+                      $isOdd={rowIndex % 2 === 1}
+                    >
+                      {cellContent}
+                    </StyledTableCell>
+                  );
+                })}
+              </StyledTableRow>
+            );
+          })}
+        </TableBody>
+      );
+    }
+
+    return (
+      <TableBody>
+        {config?.rows?.map((row, rowIndex) => (
+          <StyledTableRow key={rowIndex}>
+            {columns.map((column, colIndex) => (
+              <StyledTableCell
+                key={`${rowIndex}-${colIndex}`}
+                $field={column.field}
+                $isOdd={rowIndex % 2 === 1}
+              >
+                {row[column.field]}
+              </StyledTableCell>
+            ))}
+          </StyledTableRow>
+        ))}
+      </TableBody>
+    );
+  };
 
   //! =============== 4. 組件主體 ===============
   return (
