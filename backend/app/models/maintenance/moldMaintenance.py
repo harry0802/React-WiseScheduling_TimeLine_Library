@@ -17,6 +17,7 @@ class MoldMaintenance(Model):
     reinspectionResult = Column(db.String(255), nullable=True, comment='複查結果。有兩種結果：OK/NG')
     reinspector = Column(db.String(255), nullable=True, comment='複查者')
     reinspectionDate = Column(TimestampDatetime, nullable=True, comment='複查日期')
+    approveResult = Column(db.String(255), nullable=True, comment='複查結果。有兩種結果：OK/NG')
     approver = Column(db.String(255), nullable=True, comment='承認者')
     approvalDate = Column(TimestampDatetime, nullable=True, comment='承認日期')
 

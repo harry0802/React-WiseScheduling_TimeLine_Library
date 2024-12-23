@@ -31,10 +31,12 @@ def upgrade():
     sa.Column('reinspectionResult', sa.String(length=255), nullable=True, comment='複查結果。有兩種結果：OK/NG'),
     sa.Column('reinspector', sa.String(length=255), nullable=True, comment='複查者'),
     sa.Column('reinspectionDate', sa.TIMESTAMP(), nullable=True, comment='複查日期'),
+    sa.Column('approveResult', sa.String(length=255), nullable=True, comment='承認結果。有兩種結果：OK/NG'),
     sa.Column('approver', sa.String(length=255), nullable=True, comment='承認者'),
     sa.Column('approvalDate', sa.TIMESTAMP(), nullable=True, comment='承認日期'),
     sa.PrimaryKeyConstraint('id'),
     sa.Index('idx_machineMaintenance_machineId_year_week', 'machineId', 'year', 'week'),
+    comment='機台保養紀錄'
     )
 
     # 模具保養紀錄表
@@ -50,10 +52,12 @@ def upgrade():
     sa.Column('reinspectionResult', sa.String(length=255), nullable=True, comment='複查結果。有兩種結果：OK/NG'),
     sa.Column('reinspector', sa.String(length=255), nullable=True, comment='複查者'),
     sa.Column('reinspectionDate', sa.TIMESTAMP(), nullable=True, comment='複查日期'),
+    sa.Column('approveResult', sa.String(length=255), nullable=True, comment='承認結果。有兩種結果：OK/NG'),
     sa.Column('approver', sa.String(length=255), nullable=True, comment='承認者'),
     sa.Column('approvalDate', sa.TIMESTAMP(), nullable=True, comment='承認日期'),
     sa.PrimaryKeyConstraint('id'),
     sa.Index('idx_machineMaintenance_moldSN_year_week', 'moldSN', 'year', 'week'),
+    comment='模具保養紀錄'
     )
     # ### end Alembic commands ###
 

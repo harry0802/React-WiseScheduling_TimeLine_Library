@@ -14,6 +14,7 @@ class MaintenanceSchema(Schema):
     reinspectionResult = fields.String(required=True)
     reinspector = fields.String(required=True)
     reinspectionDate = fields.DateTime(required=True)
+    approveResult = fields.String(required=True)
     approver = fields.String(required=True)
     approvalDate = fields.DateTime(required=True)
     

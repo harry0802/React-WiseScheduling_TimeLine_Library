@@ -54,16 +54,6 @@ def convert_date_to_week(date_str):
         raise error
 
 
-def complete_product(db_obj, payload):
-    db_obj.productSN = payload["productSN"] \
-        if payload.get("productSN") is not None else db_obj.productSN
-    db_obj.productName = payload["productName"] \
-        if payload.get("productName") is not None else db_obj.productName
-    db_obj.oldProductSN = payload["oldProductSN"] \
-        if payload.get("oldProductSN") is not None else db_obj.oldProductSN
-    return db_obj
-
-
 class MaintenanceService:
     @staticmethod
     def get_machineMaintenance(machineId, year, week):
@@ -89,20 +79,29 @@ class MaintenanceService:
         
     
     @staticmethod
-    def create_machineMaintenances_weekly():
+    def create_machineMaintenances_weekly(createDate:str = None, createWeek:str = None):
         """Create multiple machineMaintenances weekly
+
+        Args:
+            createDate (str, optional): _description_. Defaults to None.
+            createWeek (str, optional): _description_. Defaults to None.
 
         Raises:
             error: _description_
         """
         try:
-            date = datetime.now()
-            # get the current year
-            currentYear = date.year
-            # get the current date
-            currentDate = date.strftime("%Y-%m-%d")
-            # get the current week
-            currentWeek = convert_date_to_week(currentDate)
+            if createWeek is not None:
+                currentWeek = int(createWeek)
+                currentYear = datetime.now().year  # 加入年份處理
+            else:
+                current_datetime = (
+                    datetime.strptime(createDate, '%Y-%m-%d')
+                    if createDate
+                    else datetime.now()
+                )
+                currentYear = current_datetime.year
+                currentDate = current_datetime.date().isoformat()
+                currentWeek = convert_date_to_week(currentDate)
 
             # check if the current year and the current week exist in the machineMaintenance table
             machineMaintenance = MachineMaintenance.query.filter(
@@ -113,20 +112,26 @@ class MaintenanceService:
                 return
 
             # get all machineIds from machine table
-            machine_db_list = Machine.query.with_entities(Machine.id).all()
+            machine_db_list = Machine.query.with_entities(Machine.id).distinct().all()
+            maintenance_records = []
             for machine_db in machine_db_list:
                 # get all item from MachineMaintenanceItemEnum
                 for item in MachineMaintenanceItemEnum:
-                    machineMaintenance = MachineMaintenance(
-                        machineId=machine_db.id,
-                        year=currentYear,
-                        week=currentWeek,
-                        maintenanceItem=item.value
+                    maintenance_records.append(
+                        MachineMaintenance(
+                            machineId=machine_db.id,
+                            year=currentYear,
+                            week=currentWeek,
+                            maintenanceItem=item.value
+                        )
                     )
-                    db.session.add(machineMaintenance)
-            db.session.commit()
+            # 批次保存記錄
+            if maintenance_records:
+                db.session.bulk_save_objects(maintenance_records)
+                db.session.commit()
         # exception without handling should raise to the caller
         except Exception as error:
+            db.session.rollback()  # 加入錯誤回滾
             raise error
 
 
@@ -167,6 +172,7 @@ class MaintenanceService:
                         machine_db.reinspectionResult = payload[item.value] if payload.get(item.value) is not None else machine_db.reinspectionResult
                         machine_db.approver = payload["approver"] if payload.get("approver") is not None else machine_db.approver
                         machine_db.approvalDate = datetime.fromisoformat(payload["approvalDate"]) if payload.get("approvalDate") is not None else machine_db.approvalDate
+                        machine_db.approveResult = payload[item.value] if payload.get(item.value) is not None else machine_db.approveResult
                         db.session.add(machine_db)
             db.session.commit()
             resp = message(True, "machineMaintenance data has been updated.")
@@ -215,20 +221,29 @@ class MaintenanceService:
         
 
     @staticmethod
-    def create_moldMaintenances_weekly():
+    def create_moldMaintenances_weekly(createDate:str = None, createWeek:str = None):
         """Create multiple moldMaintenances weekly
+
+        Args:
+            createDate (str, optional): _description_. Defaults to None.
+            createWeek (str, optional): _description_. Defaults to None.
 
         Raises:
             error: _description_
         """
         try:
-            date = datetime.now()
-            # get the current year
-            currentYear = date.year
-            # get the current date
-            currentDate = date.strftime("%Y-%m-%d")
-            # get the current week
-            currentWeek = convert_date_to_week(currentDate)
+            if createWeek is not None:
+                currentWeek = int(createWeek)
+                currentYear = datetime.now().year  # 加入年份處理
+            else:
+                current_datetime = (
+                    datetime.strptime(createDate, '%Y-%m-%d')
+                    if createDate
+                    else datetime.now()
+                )
+                currentYear = current_datetime.year
+                currentDate = current_datetime.date().isoformat()
+                currentWeek = convert_date_to_week(currentDate)
 
             # check if the current year and the current week exist in the moldMaintenance table
             moldMaintenance = MoldMaintenance.query.filter(
@@ -239,20 +254,26 @@ class MaintenanceService:
                 return
 
             # get all moldno from ltmoldmap table
-            ltmoldmap_db_list = LtMoldMap.query.with_entities(LtMoldMap.moldno).all()
+            ltmoldmap_db_list = LtMoldMap.query.with_entities(LtMoldMap.moldno).distinct().all()
+            maintenance_records = []
             for ltmoldmap_db in ltmoldmap_db_list:
                 # get all item from MoldMaintenanceItemEnum
                 for item in MoldMaintenanceItemEnum:
-                    moldMaintenance = MoldMaintenance(
-                        moldSN=ltmoldmap_db.moldno,
-                        year=currentYear,
-                        week=currentWeek,
-                        maintenanceItem=item.value
+                    maintenance_records.append(
+                        MoldMaintenance(
+                            moldSN=ltmoldmap_db.moldno,
+                            year=currentYear,
+                            week=currentWeek,
+                            maintenanceItem=item.value
+                        )
                     )
-                    db.session.add(moldMaintenance)
-            db.session.commit()
+            # 批次保存記錄
+            if maintenance_records:
+                db.session.bulk_save_objects(maintenance_records)
+                db.session.commit()
         # exception without handling should raise to the caller
         except Exception as error:
+            db.session.rollback()  # 加入錯誤回滾
             raise error
 
 
@@ -293,6 +314,7 @@ class MaintenanceService:
                         mold_db.reinspectionResult = payload[item.value] if payload.get(item.value) is not None else mold_db.reinspectionResult
                         mold_db.approver = payload["approver"] if payload.get("approver") is not None else mold_db.approver
                         mold_db.approvalDate = datetime.fromisoformat(payload["approvalDate"]) if payload.get("approvalDate") is not None else mold_db.approvalDate
+                        mold_db.approveResult = payload[item.value] if payload.get(item.value) is not None else mold_db.approveResult
                         db.session.add(mold_db)
             db.session.commit()
             resp = message(True, "moldMaintenance data has been updated.")

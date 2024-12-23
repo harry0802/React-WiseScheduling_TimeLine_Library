@@ -90,17 +90,21 @@ def shift_test(start_date, workdays):
 
 
 @api_bp.cli.command('create_machineMaintenances_weekly')
-def update_calendar():
+@click.option('--date', '-d', help='Create date in YYYY-MM-DD format')
+@click.option('--week', '-w', help='Week number')
+def update_calendar(date, week):
     """Create machineMaintenances weekly"""
-    print("Create machineMaintenances weekly")
-    return MaintenanceService.create_machineMaintenances_weekly()
+    print(f"Create MoldMaintenances Weekly for date: {date}, week: {week}")
+    return MaintenanceService.create_machineMaintenances_weekly(createDate=date, createWeek=week)
 
 
 @api_bp.cli.command('create_moldMaintenances_weekly')
-def update_calendar():
+@click.option('--date', '-d', help='Create date in YYYY-MM-DD format')
+@click.option('--week', '-w', help='Week number')
+def update_calendar(date, week):
     """Create MoldMaintenances Weekly"""
-    print("Create MoldMaintenances Weekly")
-    return MaintenanceService.create_moldMaintenances_weekly()
+    print(f"Create MoldMaintenances Weekly for date: {date}, week: {week}")
+    return MaintenanceService.create_moldMaintenances_weekly(createDate=date, createWeek=week)
 
 
 LY_ERP_ON = os.getenv("LY_ERP_ON", "False")

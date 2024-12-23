@@ -20,6 +20,7 @@ class MaintenanceDto:
         "reinspectionResult": NullableString(required=False, description="複查結果", example="OK", enum=["OK", "NG"]),
         "reinspector": NullableString(required=False, description="複查者", example="reinspector"),
         "reinspectionDate": NullableDateTime(required=False, description="複查日期", example="2024-12-31T00:00:00.000+08:00"),
+        "approveResult": NullableString(required=False, description="承認結果", example="OK", enum=["OK", "NG"]),
         "approver": NullableString(required=False, description="承認者", example="approver"),
         "approvalDate": NullableDateTime(required=False, description="承認日期", example="2024-12-31T00:00:00.000+08:00"),
     }
@@ -39,6 +40,7 @@ class MaintenanceDto:
         "inspectionDate": NullableDateTime(required=False, description="檢查日期", example="2024-12-31T00:00:00.000+08:00"),
         "reinspector": NullableString(required=False, description="複查者", example="reinspector"),
         "reinspectionDate": NullableDateTime(required=False, description="複查日期", example="2024-12-31T00:00:00.000+08:00"),
+        "approveResult": NullableString(required=False, description="承認結果", example="OK", enum=["OK", "NG"]),
         "approver": NullableString(required=False, description="承認者", example="approver"),
         "approvalDate": NullableDateTime(required=False, description="承認日期", example="2024-12-31T00:00:00.000+08:00"),
     }
@@ -58,6 +60,7 @@ class MaintenanceDto:
         "inspectionDate": NullableDateTime(required=False, description="檢查日期", example="2024-12-31T00:00:00.000+08:00"),
         "reinspector": NullableString(required=False, description="複查者", example="reinspector"),
         "reinspectionDate": NullableDateTime(required=False, description="複查日期", example="2024-12-31T00:00:00.000+08:00"),
+        "approveResult": NullableString(required=False, description="承認結果", example="OK", enum=["OK", "NG"]),
         "approver": NullableString(required=False, description="承認者", example="approver"),
         "approvalDate": NullableDateTime(required=False, description="承認日期", example="2024-12-31T00:00:00.000+08:00"),
     }
