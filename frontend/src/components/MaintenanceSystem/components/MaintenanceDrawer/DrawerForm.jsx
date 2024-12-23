@@ -20,18 +20,14 @@ import {
 import { createMaintenanceSchema } from "../../validations/maintenanceSchema";
 import { useEffect } from "react";
 import timeUtils from "../../utils/timeUtils";
-import {
-  transformApiToForm,
-  transformFormToApi,
-} from "../../utils/formDataTransformers";
+import { transformFormToApi } from "../../utils/formDataTransformers";
 
 function DrawerForm({ type, initialData, config, onSubmit, setFormMethods }) {
-  console.log("🔥🔥🔥🔥 ~ DrawerForm ~ initialData:", initialData);
   const schema = createMaintenanceSchema(config);
   const methods = useForm({
     mode: "onTouched",
     resolver: zodResolver(schema),
-    defaultValues: transformApiToForm(initialData, type) || {
+    defaultValues: initialData || {
       checkItems: {},
       personnel: "",
       date: timeUtils.getNow(),
@@ -79,16 +75,20 @@ function DrawerForm({ type, initialData, config, onSubmit, setFormMethods }) {
         {config.personnel.type === "select" ? (
           <FormControl fullWidth>
             <InputLabel>{config.personnel.label}</InputLabel>
-            <StyledSelect
-              label={config.personnel.label}
-              {...methods.register("personnel")}
-            >
-              {config.personnel.options.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </StyledSelect>
+            <Controller
+              name="personnel"
+              control={methods.control}
+              defaultValue={initialData?.personnel || ""}
+              render={({ field }) => (
+                <StyledSelect {...field} label={config.personnel.label}>
+                  {config.personnel.options.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </StyledSelect>
+              )}
+            />
           </FormControl>
         ) : (
           <StyledTextField

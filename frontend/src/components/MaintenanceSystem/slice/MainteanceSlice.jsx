@@ -9,6 +9,7 @@ export const useMaintenanceHeaderParams = create(
       maintenance: {
         area: "",
         machineId: "",
+        moldSN: "",
         date: timeUtils.getNow(),
         week: timeUtils.getISOWeek(),
         year: timeUtils.getYear(),

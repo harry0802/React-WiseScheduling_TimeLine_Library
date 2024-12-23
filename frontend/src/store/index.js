@@ -7,6 +7,7 @@ import qmsApiSlice from "../components/QualityManagementSystem/service/qmsApiSli
 import salesQuotationApiSlice from "../components/QuotationManagementSystem/services/salesServices/apiSlice.js";
 import factoryQuotationApiSlice from "../components/QuotationManagementSystemFQ/services/factoryServices/apiSlice.js";
 import maintenanceApi from "../components/MaintenanceSystem/features/machineMaintenance/services/maintenanceApi.js";
+import moldMaintenanceApi from "../components/MaintenanceSystem/features/moldMaintenance/services/moldMaintenanceApi.js";
 const store = configureStore({
   reducer: {
     [productionScheduleApi.reducerPath]: productionScheduleApi.reducer,
@@ -16,6 +17,7 @@ const store = configureStore({
     [salesQuotationApiSlice.reducerPath]: salesQuotationApiSlice.reducer,
     [factoryQuotationApiSlice.reducerPath]: factoryQuotationApiSlice.reducer,
     [maintenanceApi.reducerPath]: maintenanceApi.reducer,
+    [moldMaintenanceApi.reducerPath]: moldMaintenanceApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -26,7 +28,8 @@ const store = configureStore({
       qmsApiSlice.middleware,
       salesQuotationApiSlice.middleware,
       factoryQuotationApiSlice.middleware,
-      maintenanceApi.middleware
+      maintenanceApi.middleware,
+      moldMaintenanceApi.middleware
     ),
 });
 

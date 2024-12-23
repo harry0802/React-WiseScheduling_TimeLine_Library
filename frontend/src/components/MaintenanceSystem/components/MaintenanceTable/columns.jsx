@@ -42,10 +42,16 @@ export const columns = [
     width: 120,
   },
   {
+    field: "approveResult",
+    headerName: "承認結果",
+    width: 120,
+  },
+  {
     field: "approver",
     headerName: "承認者",
     width: 120,
   },
+
   {
     field: "approvalDate",
     headerName: "承認日期",

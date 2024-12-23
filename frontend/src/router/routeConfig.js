@@ -146,6 +146,10 @@ const routeConfig = [
         path: "MachineMaintenance",
         element: <LazyComponents.MachineMaintenancePage />,
       },
+      {
+        path: "MoldMaintenance",
+        element: <LazyComponents.MoldMaintenancePage />,
+      },
     ],
   },
 ];

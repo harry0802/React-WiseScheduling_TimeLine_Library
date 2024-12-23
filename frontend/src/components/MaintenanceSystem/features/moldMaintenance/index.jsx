@@ -6,14 +6,14 @@ import { MAINTENANCE_ITEMS } from "./configs/maintenanceItems";
 import MaintenanceDrawer from "../../components/MaintenanceDrawer/Index";
 import { FORM_CONFIGS } from "./configs/formConfigs";
 import { useMaintenanceHeaderParams } from "../../slice/MainteanceSlice";
-import {
-  useGetWeeklyMaintenanceQuery,
-  useUpdateMaintenanceMutation,
-} from "./services/maintenanceApi";
+
 import { transformToMaintenanceApiFormat } from "../../utils/dataTransformers";
 import { FullScreenSpin } from "../../../Global/layout/FullScreenSpin";
-
-function MachineMaintenance() {
+import {
+  useGetMoldMaintenanceQuery,
+  useUpdateMoldMaintenanceMutation,
+} from "./services/moldMaintenanceApi";
+function MoldMaintenance() {
   // 統一的抽屜狀態管理
   const [drawerState, setDrawerState] = useState({
     isOpen: false,
@@ -22,18 +22,18 @@ function MachineMaintenance() {
   });
   const { maintenance } = useMaintenanceHeaderParams();
 
-  const { data: maintenanceData, isFetching } = useGetWeeklyMaintenanceQuery(
+  const { data: maintenanceData, isFetching } = useGetMoldMaintenanceQuery(
     {
-      machineId: maintenance.machineId,
+      moldSN: maintenance.moldSN,
       year: maintenance.year,
       week: maintenance.week,
     },
     {
-      skip: !maintenance.machineId || !maintenance.year || !maintenance.week,
+      skip: !maintenance.moldSN || !maintenance.year || !maintenance.week,
     }
   );
-  console.log("🚀 ~ MachineMaintenance ~ maintenanceData:", maintenance);
-  const [updateMaintenance] = useUpdateMaintenanceMutation();
+  console.log("🚀 ~ MachineMaintenance ~ maintenanceData:", maintenanceData);
+  const [updateMaintenance] = useUpdateMoldMaintenanceMutation();
 
   // 統一的處理函數
   const handleEdit = (type, rowData) => {
@@ -63,7 +63,7 @@ function MachineMaintenance() {
 
   return (
     <Stack direction="column" width="100%">
-      <HeaderControls />
+      <HeaderControls model="moldMaintenance" />
       {isFetching ? (
         <FullScreenSpin />
       ) : (
@@ -90,4 +90,4 @@ function MachineMaintenance() {
     </Stack>
   );
 }
-export default MachineMaintenance;
+export default MoldMaintenance;

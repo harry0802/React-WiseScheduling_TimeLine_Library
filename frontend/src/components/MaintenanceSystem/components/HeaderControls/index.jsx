@@ -1,25 +1,40 @@
 import { Stack } from "@mui/material";
-import { useState, useEffect } from "react";
 import MachineSelector from "./MachineSelector";
 import DatePicker from "./DatePicker";
 import styled from "@emotion/styled";
-import timeUtils from "../../utils/timeUtils";
 import { useMaintenanceHeaderParams } from "../../slice/MainteanceSlice";
+import { Typography } from "antd";
+import MoldSelector from "./MoldSelector";
 
 const HeaderWrapper = styled(Stack)`
-  padding: 16px;
   width: 100%;
+  padding: 16px;
   height: 80px;
   padding: 16px 0;
   border-bottom: 1px solid #444;
 `;
 
-function HeaderControls() {
+const Title = styled(Typography)`
+  && {
+    color: var(--color-primary-text);
+    margin-right: auto;
+    justify-self: flex-start;
+    font-size: 24px;
+    font-weight: 600;
+  }
+`;
+
+function HeaderControls({ model = "machineMaintenance" }) {
   const { maintenance, updateMaintenanceHeaderParams } =
     useMaintenanceHeaderParams();
 
   const handleMachineChange = ({ area, machineId }) => {
     const newParams = { area, machineId };
+    updateMaintenanceHeaderParams(newParams);
+  };
+
+  const handleMoldChange = (moldId) => {
+    const newParams = { moldId };
     updateMaintenanceHeaderParams(newParams);
   };
 
@@ -30,10 +45,20 @@ function HeaderControls() {
       alignItems="center"
       spacing={8}
     >
-      <MachineSelector
-        value={{ area: maintenance.area, machineId: maintenance.machineId }}
-        onChange={handleMachineChange}
-      />
+      <Title>
+        {model === "machineMaintenance" ? "機台" : "模具"}維護保養紀錄單
+      </Title>
+
+      {model === "machineMaintenance" && (
+        <MachineSelector
+          value={{ area: maintenance.area, machineId: maintenance.machineId }}
+          onChange={handleMachineChange}
+        />
+      )}
+      {model === "moldMaintenance" && (
+        <MoldSelector value={maintenance.moldSN} onChange={handleMoldChange} />
+      )}
+
       <DatePicker />
     </HeaderWrapper>
   );

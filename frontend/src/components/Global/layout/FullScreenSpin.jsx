@@ -10,7 +10,7 @@ const StyledSpinContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 32, 0.6);
+  background-color: rgba(0, 0, 32, 0.205);
   z-index: 9999;
 
   .ant-spin {

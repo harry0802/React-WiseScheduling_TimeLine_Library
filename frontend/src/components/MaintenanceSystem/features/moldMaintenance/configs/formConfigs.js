@@ -1,11 +1,11 @@
 // formConfigs.js
 export const COMMON_FIELDS = [
-  { id: "boxClean", label: "電控箱內清潔", type: "radio" },
-  { id: "hotWire", label: "電熱線路", type: "radio" },
-  { id: "wireCheck", label: "線路完整度", type: "radio" },
-  { id: "oilPipe", label: "曲肘打油管", type: "radio" },
-  { id: "fullClean", label: "全機清潔保養", type: "radio" },
-  { id: "safetyEquipment", label: "安全門及相關安全設備", type: "radio" },
+  { id: "moldClean", label: "模具清潔", type: "radio" },
+  { id: "moldOil", label: "模具上油", type: "radio" },
+  { id: "cavityCheck", label: "模穴外觀面檢查", type: "radio" },
+  { id: "screwCheck", label: "鎖付螺絲是否鬆動", type: "radio" },
+  { id: "partsCheck", label: "易損件是否老化需更換", type: "radio" },
+  { id: "wireCheck", label: "線路檢查是否有壓傷、斷裂或雜亂", type: "radio" },
 ];
 
 export const FORM_CONFIGS = {

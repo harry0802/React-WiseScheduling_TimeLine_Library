@@ -1,5 +1,5 @@
 // MaintenanceDrawer.js
-import { useRef, useState } from "react";
+import { useState } from "react";
 import BaseDrawer from "../../../Global/Drawer/BaseDrawer";
 import DrawerForm from "./DrawerForm";
 
@@ -9,7 +9,14 @@ const TITLE_MAP = {
   approver: "承認",
 };
 
-function MaintenanceDrawer({ type, onClose, visible, config, initialData }) {
+function MaintenanceDrawer({
+  type,
+  onClose,
+  visible,
+  config,
+  initialData,
+  onSubmit,
+}) {
   const [formMethods, setFormMethods] = useState(null);
 
   if (!type) return null;
@@ -17,6 +24,7 @@ function MaintenanceDrawer({ type, onClose, visible, config, initialData }) {
   const handleSubmit = async (formData) => {
     try {
       console.log("表單提交:", formData);
+      onSubmit?.(formData);
       onClose();
       return formData;
     } catch (error) {

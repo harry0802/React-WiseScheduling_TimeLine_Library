@@ -31,31 +31,3 @@ export const MAINTENANCE_ITEMS = [
     method: "檢查、復原",
   },
 ];
-
-// 測試資料
-export const mockMaintenanceData = {
-  rows: MAINTENANCE_ITEMS.map((item) => ({
-    maintenanceCheckItem: item.label,
-    maintenanceMethod: item.method,
-    inspectionResult: "OK",
-    inspector: "王小明",
-    inspectionDate: "2024-12-16",
-    reinspectionResult: "OK",
-    reinspector: "李大華",
-    reinspectionDate: "2024-12-17",
-    approver: "張組長",
-    approvalDate: "2024-12-18",
-  })),
-};
-
-// 工具函數 - 獲取檢查項目的中文標籤
-export const getMaintenanceLabel = (itemId) => {
-  const item = MAINTENANCE_ITEMS.find((item) => item.id === itemId);
-  return item ? item.label : itemId;
-};
-
-// 工具函數 - 獲取檢查項目的方法
-export const getMaintenanceMethod = (itemId) => {
-  const item = MAINTENANCE_ITEMS.find((item) => item.id === itemId);
-  return item ? item.method : "";
-};

@@ -38,6 +38,7 @@ export const groupMappings = {
   reinspectionDate: "review",
   approver: "approve",
   approvalDate: "approve",
+  approveResult: "approve",
 };
 
 /**

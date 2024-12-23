@@ -3,7 +3,7 @@ import { API_BASE } from "../../../../../store/api/apiConfig";
 import {
   transformFromApi,
   transformApiToForm,
-} from "../utils/dataTransformers";
+} from "../../../utils/dataTransformers";
 
 const maintenanceApi = createApi({
   reducerPath: "maintenanceApi",
@@ -26,18 +26,17 @@ const maintenanceApi = createApi({
           },
         };
       },
-      refetchOnMountOrArgChange: true,
-      refetchOnFocus: true,
+      providesTags: ["WeeklyMaintenance"], // 提供標籤
     }),
 
     // 更新保養記錄
     updateMaintenance: builder.mutation({
-      query: ({ id, data }) => ({
-        url: `maintenance/machine/${id}`,
+      query: (data) => ({
+        url: `maintenance/machine/`,
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["Maintenance"],
+      invalidatesTags: ["WeeklyMaintenance"], // 使相關查詢失效
     }),
   }),
 });
