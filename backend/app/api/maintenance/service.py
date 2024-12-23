@@ -164,11 +164,11 @@ class MaintenanceService:
                     # get the machineMaintenance data from machine_db_list by item.value
                     machine_db = next((x for x in machine_db_list if x.maintenanceItem == item.value), None)
                     if machine_db:
-                        machine_db.inspector = payload["inspector"] if payload.get("inspector") is not None else machine_db.checkDate
-                        machine_db.inspectionDate = datetime.fromisoformat(payload["inspectionDate"]) if payload.get("inspectionDate") is not None else machine_db.checker
+                        machine_db.inspector = payload["inspector"] if payload.get("inspector") is not None else machine_db.inspector
+                        machine_db.inspectionDate = datetime.fromisoformat(payload["inspectionDate"]) if payload.get("inspectionDate") is not None else machine_db.inspectionDate
                         machine_db.inspectionResult = payload[item.value] if payload.get(item.value) is not None else machine_db.inspectionResult
-                        machine_db.reinspector = payload["reinspector"] if payload.get("reinspector") is not None else machine_db.rechecker
-                        machine_db.reinspectionDate = datetime.fromisoformat(payload["reinspectionDate"]) if payload.get("reinspectionDate") is not None else machine_db.recheckDate
+                        machine_db.reinspector = payload["reinspector"] if payload.get("reinspector") is not None else machine_db.reinspector
+                        machine_db.reinspectionDate = datetime.fromisoformat(payload["reinspectionDate"]) if payload.get("reinspectionDate") is not None else machine_db.reinspectionDate
                         machine_db.reinspectionResult = payload[item.value] if payload.get(item.value) is not None else machine_db.reinspectionResult
                         machine_db.approver = payload["approver"] if payload.get("approver") is not None else machine_db.approver
                         machine_db.approvalDate = datetime.fromisoformat(payload["approvalDate"]) if payload.get("approvalDate") is not None else machine_db.approvalDate
@@ -306,11 +306,11 @@ class MaintenanceService:
                     # get the moldMaintenance data from mold_db_list by item.value
                     mold_db = next((x for x in mold_db_list if x.maintenanceItem == item.value), None)
                     if mold_db:
-                        mold_db.inspector = payload["inspector"] if payload.get("inspector") is not None else mold_db.checkDate
-                        mold_db.inspectionDate = datetime.fromisoformat(payload["inspectionDate"]) if payload.get("inspectionDate") is not None else mold_db.checker
+                        mold_db.inspector = payload["inspector"] if payload.get("inspector") is not None else mold_db.inspector
+                        mold_db.inspectionDate = datetime.fromisoformat(payload["inspectionDate"]) if payload.get("inspectionDate") is not None else mold_db.inspectionDate
                         mold_db.inspectionResult = payload[item.value] if payload.get(item.value) is not None else mold_db.inspectionResult
-                        mold_db.reinspector = payload["reinspector"] if payload.get("reinspector") is not None else mold_db.rechecker
-                        mold_db.reinspectionDate = datetime.fromisoformat(payload["reinspectionDate"]) if payload.get("reinspectionDate") is not None else mold_db.recheckDate
+                        mold_db.reinspector = payload["reinspector"] if payload.get("reinspector") is not None else mold_db.reinspector
+                        mold_db.reinspectionDate = datetime.fromisoformat(payload["reinspectionDate"]) if payload.get("reinspectionDate") is not None else mold_db.reinspectionDate
                         mold_db.reinspectionResult = payload[item.value] if payload.get(item.value) is not None else mold_db.reinspectionResult
                         mold_db.approver = payload["approver"] if payload.get("approver") is not None else mold_db.approver
                         mold_db.approvalDate = datetime.fromisoformat(payload["approvalDate"]) if payload.get("approvalDate") is not None else mold_db.approvalDate
