@@ -1,5 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_BASE } from "../../../../../store/api/apiConfig";
+import {
+  transformApiToForm,
+  transformFromApi,
+} from "../../../utils/dataTransformers";
+import { MAINTENANCE_ITEMS } from "../configs/maintenanceItems";
 
 const moldMaintenanceApi = createApi({
   reducerPath: "moldMaintenanceApi",
@@ -18,13 +23,29 @@ const moldMaintenanceApi = createApi({
         url: "maintenance/mold",
         params: { moldSN, year, week },
       }),
+      transformResponse: (response) => {
+        if (response.data.length === 0) {
+          return {
+            table: [],
+            forms: {},
+          };
+        }
+        return {
+          table: transformFromApi(response, MAINTENANCE_ITEMS),
+          forms: {
+            inspector: transformApiToForm(response, "inspector"),
+            reinspector: transformApiToForm(response, "reinspector"),
+            approver: transformApiToForm(response, "approver"),
+          },
+        };
+      },
       providesTags: ["MoldMaintenance"],
     }),
 
     // 更新模具保養記錄
     updateMoldMaintenance: builder.mutation({
       query: (body) => ({
-        url: "maintenance/mold",
+        url: "maintenance/mold/",
         method: "PUT",
         body,
       }),

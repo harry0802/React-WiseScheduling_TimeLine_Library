@@ -4,6 +4,7 @@ import {
   transformFromApi,
   transformApiToForm,
 } from "../../../utils/dataTransformers";
+import { MAINTENANCE_ITEMS } from "../configs/maintenanceItems";
 
 const maintenanceApi = createApi({
   reducerPath: "maintenanceApi",
@@ -17,8 +18,14 @@ const maintenanceApi = createApi({
         params: { machineId, year, week },
       }),
       transformResponse: (response) => {
+        if (response.data.length === 0) {
+          return {
+            table: [],
+            forms: {},
+          };
+        }
         return {
-          table: transformFromApi(response),
+          table: transformFromApi(response, MAINTENANCE_ITEMS),
           forms: {
             inspector: transformApiToForm(response, "inspector"),
             reinspector: transformApiToForm(response, "reinspector"),

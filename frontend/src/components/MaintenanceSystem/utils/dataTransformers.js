@@ -1,5 +1,4 @@
 // utils/dataTransformers.js
-import { MAINTENANCE_ITEMS } from "../features/machineMaintenance/configs/maintenanceItems";
 import { timeUtils } from "../../QuotationManagementSystem/utility/timeUtils";
 
 // 新增一個過濾 null 值的輔助函數
@@ -13,15 +12,16 @@ const removeNullValues = (obj) => {
  * @function transformFromApi
  * @description 將 API 資料轉換為前端格式
  */
-export const transformFromApi = (apiData) => {
-  if (!apiData?.data || !Array.isArray(apiData.data)) return { rows: [] };
+export const transformFromApi = (apiData, maintenanceItems) => {
+  if (!apiData?.data || !Array.isArray(apiData.data) || !maintenanceItems)
+    return { rows: [] };
 
   // 用 Map 優化查找效率
   const maintenanceMap = new Map(
     apiData.data.map((item) => [item.maintenanceItem, item])
   );
 
-  const rows = MAINTENANCE_ITEMS.map((config) => {
+  const rows = maintenanceItems?.map((config) => {
     // 直接用 config.id 對應 API 的 maintenanceItem
     const data = maintenanceMap.get(config.id) || {};
 
@@ -160,6 +160,75 @@ export const transformToMaintenanceApiFormat = (
   // 在返回前過濾掉 null 值
   return removeNullValues({
     machineId: baseData.machineId,
+    year: baseData.year,
+    week: baseData.week,
+    ...checkItems,
+    ...personnelData,
+  });
+};
+
+// 轉換 API 數據為表單格式 模具維護
+export const transformToMoldMaintenanceForm = (
+  formData,
+  type,
+  selectedData
+) => {
+  if (!selectedData?.moldSN || !selectedData?.year || !selectedData?.week) {
+    throw new Error("缺少必要欄位: moldSN, year, week");
+  }
+  console.log(
+    "🚀 ~ transformToMoldMaintenanceForm ~ selectedData:",
+    selectedData
+  );
+  // 基礎數據
+  const baseData = {
+    moldSN: selectedData.moldSN,
+    year: selectedData.year,
+    week: selectedData.week,
+  };
+
+  // 轉換檢查項目
+  const checkItems = Object.entries(formData.checkItems).reduce(
+    (acc, [key, value]) => {
+      const apiKey = key;
+      if (apiKey) {
+        acc[apiKey] = value;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  // 根據類型設置人員和日期
+  const personnelData = {
+    inspector: null,
+    inspectionDate: null,
+    reinspector: null,
+    reinspectionDate: null,
+    approver: null,
+    approvalDate: null,
+  };
+
+  switch (type) {
+    case "inspector":
+      personnelData.inspector = formData.personnel;
+      personnelData.inspectionDate = formData.date;
+      break;
+    case "reinspector":
+      personnelData.reinspector = formData.personnel;
+      personnelData.reinspectionDate = formData.date;
+      break;
+    case "approver":
+      personnelData.approver = formData.personnel;
+      personnelData.approvalDate = formData.date;
+      break;
+    default:
+      break;
+  }
+
+  // 在返回前過濾掉 null 值
+  return removeNullValues({
+    moldSN: baseData.moldSN,
     year: baseData.year,
     week: baseData.week,
     ...checkItems,

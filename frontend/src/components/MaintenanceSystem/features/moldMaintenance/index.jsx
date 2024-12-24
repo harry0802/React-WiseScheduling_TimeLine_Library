@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HeaderControls from "../../components/HeaderControls";
 import MaintenanceTable from "../../components/MaintenanceTable";
 import { Stack } from "@mui/material";
@@ -7,8 +7,14 @@ import MaintenanceDrawer from "../../components/MaintenanceDrawer/Index";
 import { FORM_CONFIGS } from "./configs/formConfigs";
 import { useMaintenanceHeaderParams } from "../../slice/MainteanceSlice";
 
-import { transformToMaintenanceApiFormat } from "../../utils/dataTransformers";
-import { FullScreenSpin } from "../../../Global/layout/FullScreenSpin";
+import {
+  transformToMaintenanceApiFormat,
+  transformToMoldMaintenanceForm,
+} from "../../utils/dataTransformers";
+import {
+  FullScreenSpin,
+  useLoadingSpinner,
+} from "../../../Global/layout/FullScreenSpin";
 import {
   useGetMoldMaintenanceQuery,
   useUpdateMoldMaintenanceMutation,
@@ -21,8 +27,12 @@ function MoldMaintenance() {
     currentRow: null,
   });
   const { maintenance } = useMaintenanceHeaderParams();
-
-  const { data: maintenanceData, isFetching } = useGetMoldMaintenanceQuery(
+  const {
+    data: maintenanceData,
+    isSuccess,
+    isLoading,
+    isFetching,
+  } = useGetMoldMaintenanceQuery(
     {
       moldSN: maintenance.moldSN,
       year: maintenance.year,
@@ -32,8 +42,10 @@ function MoldMaintenance() {
       skip: !maintenance.moldSN || !maintenance.year || !maintenance.week,
     }
   );
-  console.log("🚀 ~ MachineMaintenance ~ maintenanceData:", maintenanceData);
+  console.log("🚀 ~ MoldMaintenance ~ maintenanceData:", maintenanceData);
   const [updateMaintenance] = useUpdateMoldMaintenanceMutation();
+
+  const isSpinning = useLoadingSpinner({ isLoading, isFetching });
 
   // 統一的處理函數
   const handleEdit = (type, rowData) => {
@@ -53,20 +65,20 @@ function MoldMaintenance() {
     });
   };
   const handleUpdateMaintenance = async (formData) => {
-    const data = transformToMaintenanceApiFormat(
+    const data = transformToMoldMaintenanceForm(
       formData,
       drawerState.type,
       maintenance
     );
+    console.log("🚀 ~ handleUpdateMaintenance ~ data:", data);
     updateMaintenance(data);
   };
 
   return (
     <Stack direction="column" width="100%">
+      {isSpinning && <FullScreenSpin />}
       <HeaderControls model="moldMaintenance" />
-      {isFetching ? (
-        <FullScreenSpin />
-      ) : (
+      {isSuccess && (
         <MaintenanceTable
           config={maintenanceData?.table}
           onEditInspector={(rowData) => handleEdit("inspector", rowData)}
@@ -75,7 +87,6 @@ function MoldMaintenance() {
           fixedItems={MAINTENANCE_ITEMS}
         />
       )}
-
       {/* 這裡可以加入 MaintenanceDrawer 組件 */}
       {drawerState.isOpen && (
         <MaintenanceDrawer

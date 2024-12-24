@@ -27,14 +27,13 @@ const Title = styled(Typography)`
 function HeaderControls({ model = "machineMaintenance" }) {
   const { maintenance, updateMaintenanceHeaderParams } =
     useMaintenanceHeaderParams();
-
   const handleMachineChange = ({ area, machineId }) => {
     const newParams = { area, machineId };
     updateMaintenanceHeaderParams(newParams);
   };
 
   const handleMoldChange = (moldId) => {
-    const newParams = { moldId };
+    const newParams = { moldSN: moldId };
     updateMaintenanceHeaderParams(newParams);
   };
 
@@ -56,7 +55,10 @@ function HeaderControls({ model = "machineMaintenance" }) {
         />
       )}
       {model === "moldMaintenance" && (
-        <MoldSelector value={maintenance.moldSN} onChange={handleMoldChange} />
+        <MoldSelector
+          value={maintenance.moldSN || ""}
+          onChange={handleMoldChange}
+        />
       )}
 
       <DatePicker />

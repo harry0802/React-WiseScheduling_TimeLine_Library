@@ -59,12 +59,15 @@ const StyledSelect = styled(Select)`
 function MoldSelector({ value, onChange }) {
   const [selectedMoldId, setSelectedMoldId] = useState(value || "");
 
-  const { data: moldSn, isLoading, isFetching } = useGetMoldSNsQuery();
+  const { data: moldSn, isLoading, isSuccess } = useGetMoldSNsQuery();
   const handleMoldChange = (e) => {
     const newMoldId = e.target.value;
     setSelectedMoldId(newMoldId);
     onChange?.(newMoldId);
   };
+  if (isLoading) {
+    return <CircularProgress />;
+  }
 
   return (
     <StyledFormControl sx={{ minWidth: 200 }}>
@@ -74,15 +77,12 @@ function MoldSelector({ value, onChange }) {
         onChange={handleMoldChange}
         label="模具"
       >
-        {isFetching ? (
-          <CircularProgress />
-        ) : (
+        {isSuccess &&
           moldSn.map((mold, index) => (
             <StyledMenuItem key={index} label={mold} value={mold}>
               {mold}
             </StyledMenuItem>
-          ))
-        )}
+          ))}
       </StyledSelect>
     </StyledFormControl>
   );

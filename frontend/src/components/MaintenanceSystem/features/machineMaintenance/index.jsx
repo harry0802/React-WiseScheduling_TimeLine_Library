@@ -11,7 +11,10 @@ import {
   useUpdateMaintenanceMutation,
 } from "./services/maintenanceApi";
 import { transformToMaintenanceApiFormat } from "../../utils/dataTransformers";
-import { FullScreenSpin } from "../../../Global/layout/FullScreenSpin";
+import {
+  FullScreenSpin,
+  useLoadingSpinner,
+} from "../../../Global/layout/FullScreenSpin";
 
 function MachineMaintenance() {
   // 統一的抽屜狀態管理
@@ -22,7 +25,12 @@ function MachineMaintenance() {
   });
   const { maintenance } = useMaintenanceHeaderParams();
 
-  const { data: maintenanceData, isFetching } = useGetWeeklyMaintenanceQuery(
+  const {
+    data: maintenanceData,
+    isFetching,
+    isLoading,
+    isSuccess,
+  } = useGetWeeklyMaintenanceQuery(
     {
       machineId: maintenance.machineId,
       year: maintenance.year,
@@ -32,8 +40,9 @@ function MachineMaintenance() {
       skip: !maintenance.machineId || !maintenance.year || !maintenance.week,
     }
   );
-  console.log("🚀 ~ MachineMaintenance ~ maintenanceData:", maintenance);
   const [updateMaintenance] = useUpdateMaintenanceMutation();
+
+  const isSpinning = useLoadingSpinner({ isLoading, isFetching });
 
   // 統一的處理函數
   const handleEdit = (type, rowData) => {
@@ -64,9 +73,8 @@ function MachineMaintenance() {
   return (
     <Stack direction="column" width="100%">
       <HeaderControls />
-      {isFetching ? (
-        <FullScreenSpin />
-      ) : (
+      {isSpinning && <FullScreenSpin />}
+      {isSuccess && (
         <MaintenanceTable
           config={maintenanceData?.table}
           onEditInspector={(rowData) => handleEdit("inspector", rowData)}
