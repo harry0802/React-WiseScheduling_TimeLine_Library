@@ -24,8 +24,10 @@ from .customer.controller import api as customer_ns
 from .salesQuotation.controller import api as salesQuotation_ns
 from .factoryQuotation.controller import api as factoryQuotation_ns
 from .productionCost.controller import api as productionCost_ns
+from .maintenance.controller import api as maintenance_ns
 from app.api.calendar.service import CalendarService
 from app.api.lysErp.service import LyService
+from app.api.maintenance.service import MaintenanceService
 from app.api.productionSchedule.service import shift_by_holiday
 import click
 
@@ -65,6 +67,8 @@ api.add_namespace(customer_ns)
 api.add_namespace(salesQuotation_ns)
 api.add_namespace(factoryQuotation_ns)
 api.add_namespace(productionCost_ns)
+api.add_namespace(maintenance_ns)
+
 
 @api_bp.cli.command('update_calendar')
 def update_calendar():
@@ -83,6 +87,25 @@ def shift_test(start_date, workdays):
     # end_date = datetime.strptime("2023-01-13", format)
     # workdays = (end_date - start_date).days
     return shift_by_holiday(start_date=start_date.date(), workdays=workdays)
+
+
+@api_bp.cli.command('create_machineMaintenances_weekly')
+@click.option('--date', '-d', help='Create date in YYYY-MM-DD format')
+@click.option('--week', '-w', help='Week number')
+def update_calendar(date, week):
+    """Create machineMaintenances weekly"""
+    print(f"Create MoldMaintenances Weekly for date: {date}, week: {week}")
+    return MaintenanceService.create_machineMaintenances_weekly(createDate=date, createWeek=week)
+
+
+@api_bp.cli.command('create_moldMaintenances_weekly')
+@click.option('--date', '-d', help='Create date in YYYY-MM-DD format')
+@click.option('--week', '-w', help='Week number')
+def update_calendar(date, week):
+    """Create MoldMaintenances Weekly"""
+    print(f"Create MoldMaintenances Weekly for date: {date}, week: {week}")
+    return MaintenanceService.create_moldMaintenances_weekly(createDate=date, createWeek=week)
+
 
 LY_ERP_ON = os.getenv("LY_ERP_ON", "False")
 if LY_ERP_ON.lower() == "true":
