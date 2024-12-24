@@ -20,7 +20,7 @@ const moldMaintenanceApi = createApi({
     // 獲取模具保養記錄
     getMoldMaintenance: builder.query({
       query: ({ moldSN, year, week }) => ({
-        url: "maintenance/mold",
+        url: "maintenance/mold/",
         params: { moldSN, year, week },
       }),
       transformResponse: (response) => {

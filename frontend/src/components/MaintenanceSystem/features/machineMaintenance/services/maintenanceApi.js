@@ -14,7 +14,7 @@ const maintenanceApi = createApi({
     // 獲取機台週保養記錄
     getWeeklyMaintenance: builder.query({
       query: ({ machineId, year, week }) => ({
-        url: "maintenance/machine",
+        url: "maintenance/machine/",
         params: { machineId, year, week },
       }),
       transformResponse: (response) => {
