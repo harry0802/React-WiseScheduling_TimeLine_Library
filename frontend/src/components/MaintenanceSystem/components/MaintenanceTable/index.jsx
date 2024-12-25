@@ -87,7 +87,7 @@ const MaintenanceTable = ({
           >
             <HeaderContent>
               {column.headerName}
-              {column.editable && (
+              {column.editable && config?.rows?.length > 0 && (
                 <IconButton
                   size="medium"
                   onClick={(e) => {
