@@ -37,6 +37,29 @@ import { useProductionScheduleData } from "./hook/useProductionScheduleData";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const hasDataChanged = (oldData, newData) => {
+  const dateKeys = [
+    "workOrderDate",
+    "planOnMachineDate",
+    "planFinishDate",
+    "actualOnMachineDate",
+    "actualFinishDate",
+  ];
+
+  return Object.keys(newData).some((key) => {
+    if (dateKeys.includes(key)) {
+      const oldDate = oldData[key]
+        ? dayjs(oldData[key]).tz(TZ).format("YYYY-MM-DD")
+        : null;
+      const newDate = newData[key]
+        ? dayjs(newData[key]).tz(TZ).format("YYYY-MM-DD")
+        : null;
+      return oldDate !== newDate;
+    }
+    return oldData[key] !== newData[key];
+  });
+};
+
 function ProductionSchedule() {
   const navigate = useNavigate();
   const [UpdateProductionSchedule] = useUpdateProductionScheduleMutation();
@@ -57,7 +80,8 @@ function ProductionSchedule() {
     formatDateTime,
   } = useSearchFilters();
 
-  const { pagination, setPagination, handleTableChange } = usePagination();
+  const { pagination, setPagination, handleTableChange, loading } =
+    usePagination();
 
   const queryParams = {
     size: pagination?.pageSize,
@@ -73,10 +97,11 @@ function ProductionSchedule() {
     dataSource,
     setDataSource,
     totalCurrent,
-    loading,
+    // loading,
     isLoading,
     refetch,
   } = useProductionScheduleData(queryParams);
+  console.log("🚀 ~ ProductionSchedule ~ isLoading:", isLoading);
 
   const { data: workOrderSNData, isSuccess: workOrderSNIsSuccess } =
     useGetWorkOrderSNsQuery();
@@ -140,75 +165,53 @@ function ProductionSchedule() {
       console.error("處理新增製令單時發生錯誤:", error);
     }
   };
+  // handleSave 優化
   const handleSave = useCallback(
     async (row) => {
       const originalDataSource = [...dataSource];
       try {
         const matchedData = dataSource.find((item) => item.id === row.id);
-        if (!matchedData) {
-          throw new Error("未找到匹配的数据");
-        }
+        if (!matchedData) return;
 
-        const dateKeys = [
-          "workOrderDate",
-          "planOnMachineDate",
-          "planFinishDate",
-          "actualOnMachineDate",
-          "actualFinishDate",
-        ];
+        // 檢查數據是否真的變更
+        const isChanged = hasDataChanged(matchedData, row);
+        if (!isChanged) return;
 
-        const isDataChanged = Object.keys(row).some((key) => {
-          if (dateKeys.includes(key)) {
-            const dataDate = matchedData[key]
-              ? dayjs(matchedData[key]).tz(TZ).format("YYYY-MM-DD")
-              : null;
-            const rowDate = row[key]
-              ? dayjs(row[key]).tz(TZ).format("YYYY-MM-DD")
-              : null;
-            return dataDate !== rowDate;
-          }
-          return matchedData[key] !== row[key];
-        });
-
-        if (!isDataChanged) {
-          return;
-        }
-
-        const updatedData = dataSource.map((item) =>
-          item.id === row.id ? { ...item, ...row } : item
+        // 先更新 UI
+        setDataSource((prev) =>
+          prev.map((item) => (item.id === row.id ? { ...item, ...row } : item))
         );
 
-        setDataSource(updatedData);
-
-        // 使用 @excelUtils.js 轉換日期
-        // 2024-09-12T16:00:00
+        // 發送 API 請求
         const convertedRow = convertDatesToCustomFormat(
           [row],
           "YYYY-MM-DDTHH:mm:ss"
         )[0];
-
         const response = await UpdateProductionSchedule({
           id: row.id,
           data: convertedRow,
         });
 
-        if (!response.error) {
-          message.success("修改數據成功");
-        } else {
-          throw new Error("修改數據失敗");
-        }
+        if (response.error) throw response.error;
+
+        message.success("修改數據成功");
       } catch (error) {
-        message.error("修改數據失敗!!!!");
+        message.error("修改數據失敗!");
         setDataSource(originalDataSource);
       }
     },
     [dataSource, UpdateProductionSchedule]
   );
-
   const { queryFromLY } = useLYQuery(handleSave);
 
+  // 修改 handleQueryFromLY
   const handleQueryFromLY = useCallback(
     (row) => {
+      if (!row.workOrderSN) {
+        message.warning("請先輸入製令單號");
+        return;
+      }
+
       if (
         workOrderSNsFromLYState.some((item) => item.value === row.workOrderSN)
       ) {
@@ -407,40 +410,44 @@ function ProductionSchedule() {
         />
 
         {dataSource.length > 0 && (
-          <Button
-            key="downloadExcel"
-            type="ghost"
-            onClick={debouncedExportToExcel}
-            className="exportBtn"
-          >
-            匯出
-          </Button>
+          <>
+            <Button
+              key="downloadExcel"
+              type="ghost"
+              onClick={debouncedExportToExcel}
+              className="exportBtn"
+            >
+              匯出
+            </Button>
+            <Button
+              type="ghost"
+              onClick={() => {
+                navigate("/ImportProductionSchedulePage");
+              }}
+              className={
+                dataSource.length === 0 ? "importBtn-initial" : "importBtn"
+              }
+            >
+              匯入
+            </Button>
+            <a
+              href={ExcelExample}
+              download="生產排程計畫表-匯入範例"
+              target="_blank"
+            >
+              <Button
+                type="ghost"
+                className={
+                  dataSource.length === 0
+                    ? "downloadBtn-initial"
+                    : "downloadBtn"
+                }
+              >
+                下載匯入Excel範例
+              </Button>
+            </a>
+          </>
         )}
-        <Button
-          type="ghost"
-          onClick={() => {
-            navigate("/ImportProductionSchedulePage");
-          }}
-          className={
-            dataSource.length === 0 ? "importBtn-initial" : "importBtn"
-          }
-        >
-          匯入
-        </Button>
-        <a
-          href={ExcelExample}
-          download="生產排程計畫表-匯入範例"
-          target="_blank"
-        >
-          <Button
-            type="ghost"
-            className={
-              dataSource.length === 0 ? "downloadBtn-initial" : "downloadBtn"
-            }
-          >
-            下載匯入Excel範例
-          </Button>
-        </a>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 /**
  * 自定義 Hook，用於處理分頁邏輯
@@ -11,29 +11,30 @@ const usePagination = (initialPageSize = 20) => {
     pageSize: initialPageSize,
   });
 
+  const [loading, setLoading] = useState(false);
+
   /**
    * 處理表格變更
    * @param {number} page - 當前頁碼
-   * @param {number} size - 每頁顯示的條目數
-   * @param {Function} setDataSource - 設置數據源的函數
+   * @param {number} pageSize - 每頁顯示的條目數
    */
-  const handleTableChange = (page, size, setDataSource) => {
-    const newPagination = {
-      ...pagination,
-      page: size !== pagination.pageSize ? 1 : +page,
-      pageSize: size,
-    };
+  const handleTableChange = useCallback(async (page, pageSize) => {
+    setLoading(true);
+    setPagination((prev) => ({
+      page: pageSize !== prev.pageSize ? 1 : page,
+      pageSize,
+    }));
 
-    if (size !== pagination.pageSize) {
-      setDataSource([]);
-    }
-    setPagination(newPagination);
-  };
+    // 添加小延遲讓動畫更流暢
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    setLoading(false);
+  }, []);
 
   return {
     pagination,
     setPagination,
     handleTableChange,
+    loading,
   };
 };
 

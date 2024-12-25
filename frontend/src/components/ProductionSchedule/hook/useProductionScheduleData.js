@@ -11,7 +11,6 @@ export function useProductionScheduleData(queryParams) {
     queryParams,
     { skip: !queryParams }
   );
-
   useEffect(() => {
     if (isSuccess) {
       setLoading(true);

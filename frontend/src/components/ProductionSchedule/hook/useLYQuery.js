@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useGetProductionScheduleThroughLYQuery } from "../../../store/api/productionScheduleApi";
 import { message } from "antd";
 
@@ -9,41 +9,72 @@ import { message } from "antd";
  * @returns {Object} 包含 queryFromLY 函數的物件
  */
 export function useLYQuery(handleSave) {
-  const [lyQuery, setLyQuery] = useState({ id: null, workOrderSN: null });
-  const [isQuerying, setIsQuerying] = useState(false);
+  const [queryState, setQueryState] = useState({
+    isQuerying: false,
+    query: { id: null, workOrderSN: null },
+  });
 
-  /**
-   * 使用 RTK Query 獲取生產計劃數據
-   */
   const {
     data: lyData,
-    isSuccess: lyIsSuccess,
+    isSuccess,
     error,
-  } = useGetProductionScheduleThroughLYQuery(lyQuery, { skip: !isQuerying });
+    isFetching,
+  } = useGetProductionScheduleThroughLYQuery(queryState.query, {
+    skip:
+      !queryState.isQuerying ||
+      !queryState.query.workOrderSN ||
+      !queryState.query.id,
+    // 添加防抖
+    debounceTime: 300,
+  });
 
-  /**
-   * 觸發凌越 ERP 查詢
-   *
-   * @param {Object} row - 包含 id 和 workOrderSN 的物件
-   */
   const queryFromLY = useCallback((row) => {
-    setLyQuery({
-      id: row.id,
-      workOrderSN: row.workOrderSN,
+    if (!row?.workOrderSN || !row?.id) {
+      return;
+    }
+
+    // 只有當數據真的改變時才設置新狀態
+    setQueryState((prev) => {
+      if (
+        prev.query.workOrderSN === row.workOrderSN &&
+        prev.query.id === row.id
+      ) {
+        return prev;
+      }
+      return {
+        isQuerying: true,
+        query: {
+          id: row.id,
+          workOrderSN: row.workOrderSN,
+        },
+      };
     });
-    setIsQuerying(true);
   }, []);
 
-  // 當查詢成功時，調用 handleSave 並重置查詢狀態
-  if (isQuerying && lyIsSuccess && lyData) {
-    handleSave({ ...lyData });
-    setIsQuerying(false);
-    setLyQuery({ id: null, workOrderSN: null });
-  }
+  // 處理成功響應
+  useEffect(() => {
+    if (!isFetching && isSuccess && lyData) {
+      handleSave({ ...lyData });
+      setQueryState((prev) => ({
+        ...prev,
+        isQuerying: false,
+      }));
+    }
+  }, [isSuccess, lyData, handleSave, isFetching]);
 
-  if (error) {
-    message.warning(error.data.message);
-  }
+  // 處理錯誤響應
+  useEffect(() => {
+    if (error) {
+      message.warning(error.data.message);
+      setQueryState((prev) => ({
+        ...prev,
+        isQuerying: false,
+      }));
+    }
+  }, [error]);
 
-  return { queryFromLY };
+  return {
+    queryFromLY,
+    isQuerying: queryState.isQuerying || isFetching,
+  };
 }
