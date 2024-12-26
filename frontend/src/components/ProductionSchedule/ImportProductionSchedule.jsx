@@ -45,7 +45,7 @@ export default function ImportProductionSchedule() {
       element.dailyWorkingHours = parseInt(element.dailyWorkingHours);
       element.moldCavity = parseInt(element.moldCavity);
       element.week = parseInt(element.week);
-      element.conversionRate = parseFloat(element.conversionRate) / 100;
+      element.conversionRate = parseFloat(element.conversionRate);
       element.dailyCapacity = parseFloat(
         parseFloat(element.dailyCapacity).toFixed(2)
       );

@@ -42,7 +42,6 @@ function MoldMaintenance() {
       skip: !maintenance.moldSN || !maintenance.year || !maintenance.week,
     }
   );
-  console.log("🚀 ~ MoldMaintenance ~ maintenanceData:", maintenanceData);
   const [updateMaintenance] = useUpdateMoldMaintenanceMutation();
 
   const isSpinning = useLoadingSpinner({ isLoading, isFetching });
@@ -70,7 +69,6 @@ function MoldMaintenance() {
       drawerState.type,
       maintenance
     );
-    console.log("🚀 ~ handleUpdateMaintenance ~ data:", data);
     updateMaintenance(data);
   };
 
