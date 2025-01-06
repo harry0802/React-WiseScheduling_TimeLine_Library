@@ -51,6 +51,7 @@ const MachineSelect = (props) => {
     refetch: productionScheduleRefetch,
   } = useGetProductionScheduleByMachinesQuery(
     {
+      size: 100,
       machineSNs: machineFilter,
       status: WORKORDER_STATUS.ON_GOING,
     },
