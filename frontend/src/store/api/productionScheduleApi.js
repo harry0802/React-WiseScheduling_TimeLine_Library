@@ -50,10 +50,11 @@ const productionScheduleApi = createApi({
       }),
       getProductionScheduleByMachines: build.query({
         query(arg) {
-          const { machineSNs, status } = arg;
+          const { size, machineSNs, status } = arg;
           return {
             url: "productionSchedule/",
             params: {
+              size: size,
               machineSNs: machineSNs,
               status: status,
             },
