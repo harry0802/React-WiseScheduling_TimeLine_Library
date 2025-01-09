@@ -141,6 +141,21 @@ const routeConfig = [
           },
         ],
       },
+      {
+        path: "CostWiseSystemPage",
+        element: <LazyComponents.CostWiseSystem />,
+        children: [
+          {
+            index: true,
+            replace: true,
+            element: <LazyComponents.MasterBatch />,
+          },
+          {
+            path: "subBatch/:productionReportId",
+            element: <LazyComponents.SubBatch />,
+          },
+        ],
+      },
       // MachineMaintenance
       {
         path: "MachineMaintenance",

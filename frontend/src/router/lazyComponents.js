@@ -124,3 +124,16 @@ export const MoldMaintenancePage = lazyImport(() =>
 //     "../components/QuotationManagementSystem/features/Sales/QmsAddtionInfos"
 //   )
 // );
+
+// CostWiseSystem
+export const CostWiseSystem = lazyImport(() =>
+  import("../components/CostWiseSystem/index")
+);
+export const MasterBatch = lazyImport(() =>
+  import(
+    "../components/CostWiseSystem/features/batchManagement/masterBatch/index"
+  )
+);
+export const SubBatch = lazyImport(() =>
+  import("../components/CostWiseSystem/features/batchManagement/subBatch/index")
+);
