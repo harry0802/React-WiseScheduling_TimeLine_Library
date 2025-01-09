@@ -162,7 +162,7 @@ def calculate_costs(ProductionScheduleReportView_db, data_type):
 
 class ProductionCostService:
     @staticmethod
-    def get_productCosts(page, size, sort, dataType, productionReportId=None):
+    def get_productCosts(page, size, sort, dataType, productionScheduleId=None):
         try:
             # Get the current productionSchedule
             query = ProductionCost.query
@@ -170,7 +170,7 @@ class ProductionCostService:
             query = query.join(ProductionScheduleReportView, ProductionCost.productionReportId == ProductionScheduleReportView.productionReportId, isouter = True) # left outer join
             if dataType != "all":
                 query = query.filter(ProductionScheduleReportView.serialNumber == 0) if dataType == "mother" else query.filter(ProductionScheduleReportView.serialNumber > 0)
-            query = query.filter(ProductionScheduleReportView.productionScheduleId == productionReportId) if productionReportId else query
+            query = query.filter(ProductionScheduleReportView.productionScheduleId == productionScheduleId) if productionScheduleId else query
 
             if hasattr(ProductionCost, sort):
                 query = query.order_by(getattr(ProductionCost, sort).desc())
