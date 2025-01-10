@@ -27,13 +27,13 @@ const ArrowLeftIcon = styled(ArrowLeftOutlined)`
 `;
 
 function SubBatch() {
-  const { productionReportId } = useParams();
+  const { productionScheduleId } = useParams();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const navigate = useNavigate();
   const { data, isLoading, isFetching } = useGetProductionCostsQuery({
     dataType: "child",
-    productionReportId,
+    productionScheduleId,
     page: page + 1,
     size: pageSize,
   });
@@ -43,7 +43,7 @@ function SubBatch() {
     setPageSize(model.pageSize);
   };
 
-  if (!productionReportId) {
+  if (!productionScheduleId) {
     return <div>請選擇母批</div>;
   }
 

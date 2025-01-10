@@ -151,7 +151,7 @@ const routeConfig = [
             element: <LazyComponents.MasterBatch />,
           },
           {
-            path: "subBatch/:productionReportId",
+            path: "subBatch/:productionScheduleId",
             element: <LazyComponents.SubBatch />,
           },
         ],
