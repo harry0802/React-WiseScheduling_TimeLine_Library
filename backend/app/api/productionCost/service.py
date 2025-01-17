@@ -175,7 +175,7 @@ class ProductionCostService:
             if hasattr(ProductionCost, sort):
                 query = query.order_by(getattr(ProductionCost, sort).desc())
             else:
-                query = query.order_by(ProductionCost.id.desc())
+                query = query.order_by(ProductionScheduleReportView.productionScheduleId.desc())
             if size:
                 pagination = query.paginate(page=page, per_page=size)
                 productionCost_db = pagination.items
