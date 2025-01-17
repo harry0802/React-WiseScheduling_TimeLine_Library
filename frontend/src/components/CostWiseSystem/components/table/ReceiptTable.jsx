@@ -94,6 +94,7 @@ const ReceiptTable = ({
       <StyledDataGrid
         {...TABLE_CONFIG.base}
         {...TABLE_CONFIG.toolbar}
+        getRowId={(row) => row.productionScheduleId}
         rows={rows}
         columns={columns}
         loading={loading}
