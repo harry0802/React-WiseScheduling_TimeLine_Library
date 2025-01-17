@@ -165,9 +165,9 @@ class ProductionCostService:
     def get_productCosts(page, size, sort, dataType, productionScheduleId=None):
         try:
             # Get the current productionSchedule
-            query = ProductionCost.query
+            query = ProductionScheduleReportView.query
             query = query.with_entities(*ProductionCost.__table__.columns, *ProductionScheduleReportView.__table__.columns)
-            query = query.join(ProductionScheduleReportView, ProductionCost.productionReportId == ProductionScheduleReportView.productionReportId, isouter = True) # left outer join
+            query = query.join(ProductionCost, ProductionCost.productionReportId == ProductionScheduleReportView.productionReportId, isouter = True) # left outer join
             if dataType != "all":
                 query = query.filter(ProductionScheduleReportView.serialNumber == 0) if dataType == "mother" else query.filter(ProductionScheduleReportView.serialNumber > 0)
             query = query.filter(ProductionScheduleReportView.productionScheduleId == productionScheduleId) if productionScheduleId else query
