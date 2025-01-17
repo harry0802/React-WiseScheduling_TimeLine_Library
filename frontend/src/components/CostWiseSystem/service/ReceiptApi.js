@@ -11,7 +11,7 @@ export const productionCostApi = createApi({
         dataType = "mother",
         page = 1,
         size = 10,
-        sort = "id",
+        sort = "productionReportId",
         productionScheduleId,
       }) => {
         const params = new URLSearchParams({

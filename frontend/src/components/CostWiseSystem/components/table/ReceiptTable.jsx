@@ -29,7 +29,7 @@ const TABLE_CONFIG = {
           debounceMs: 500,
           variant: "outlined",
           // 啟用多欄位搜尋
-          multiSearch: true,
+          multisearch: "true",
           // 可選: 設定搜尋分隔符
           quickFilterParser: (searchInput) => {
             return searchInput.split(",").map((value) => value.trim());
