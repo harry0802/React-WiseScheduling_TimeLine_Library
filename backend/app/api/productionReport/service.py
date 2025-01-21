@@ -204,9 +204,9 @@ def complete_productionReport(mode, db_obj, payload):
         db_obj.productionDefectiveRate = round(db_obj.defectiveQuantity / (db_obj.productionQuantity + db_obj.defectiveQuantity) * 100, 2)
         current_app.logger.debug(f"productionDefectiveRate: {db_obj.productionDefectiveRate}")
 
-    # 生產良率(formula) = 1 - 生產不良率
+    # 生產良率(formula) = (1 - 生產不良率) * 100%
     if (db_obj.productionDefectiveRate):
-        db_obj.productionYield = 1 - db_obj.productionDefectiveRate
+        db_obj.productionYield = round((1 - db_obj.productionDefectiveRate) * 100, 2)
         current_app.logger.debug(f"productionYield: {db_obj.productionYield}")
 
     # 機台生產數量(formula) = 機台生產模數 * 穴數
