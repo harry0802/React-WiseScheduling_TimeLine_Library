@@ -15,6 +15,18 @@ import { getTimeWindow } from "./utils/dateUtils";
 import "dayjs/locale/zh-tw"; // 導入繁體中文語系
 dayjs.locale("zh-tw"); // 設置使用繁體中文
 
+import {
+  BaseTimelineContainer,
+  TimelineGrid,
+  BaseItem,
+  StatusStyles,
+  TimeAxisStyles,
+  CurrentTimeMarker,
+  StatusBase,
+  StatusProgress,
+  StatusLabel,
+} from "./styles";
+
 //* 基礎配置常量
 const DEFAULT_HEIGHT = window.innerHeight - 200;
 
@@ -157,6 +169,7 @@ const DynamicTimeline = () => {
       format: TIME_FORMAT_CONFIG,
       start: timeWindow.start.toDate(),
       end: timeWindow.end.toDate(),
+      snap: null, // 關閉吸附效果
     };
   }, [timeRange]);
 
@@ -339,24 +352,38 @@ const DynamicTimeline = () => {
   //* 渲染區塊
   return (
     <Box sx={{ p: 4 }}>
-      <TimelineControls
-        timeRange={timeRange}
-        onTimeRangeChange={setTimeRange}
-        onAddItem={handleAddItem}
-        onMoveToNow={handleMoveToNow}
-      />
+      <BaseTimelineContainer>
+        <TimelineGrid>
+          <TimeAxisStyles>
+            <CurrentTimeMarker>
+              <BaseItem>
+                <StatusStyles>
+                  <StatusBase>
+                    <StatusProgress>
+                      <TimelineControls
+                        timeRange={timeRange}
+                        onTimeRangeChange={setTimeRange}
+                        onAddItem={handleAddItem}
+                        onMoveToNow={handleMoveToNow}
+                      />
+                      <Paper
+                        ref={containerRef}
+                        elevation={1}
+                        sx={{
+                          border: 1,
+                          borderColor: "grey.200",
+                          borderRadius: 1,
+                        }}
+                      />
+                    </StatusProgress>
+                  </StatusBase>
+                </StatusStyles>
+              </BaseItem>
+            </CurrentTimeMarker>
+          </TimeAxisStyles>
+        </TimelineGrid>
+      </BaseTimelineContainer>
 
-      <Paper
-        ref={containerRef}
-        elevation={1}
-        sx={{
-          border: 1,
-          borderColor: "grey.200",
-          borderRadius: 1,
-        }}
-      />
-
-      {/* 項目編輯對話框 */}
       <ItemDialog
         isOpen={dialogState.isOpen}
         onClose={() =>
@@ -373,7 +400,6 @@ const DynamicTimeline = () => {
         groups={groups}
       />
 
-      {/* 刪除確認對話框 */}
       <OperationDialog
         open={isDeleteDialogOpen}
         title="刪除確認"

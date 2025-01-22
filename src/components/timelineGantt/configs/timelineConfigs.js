@@ -14,11 +14,39 @@ export const TIMELINE_STYLES = `
     }
   `;
 
-//! ============= 1. 工作時間常量配置 =============
-const WORK_HOURS = {
-  START: 8, // 上班開始時間
-  END: 20, // 上班結束時間(暫定12小時)
-  STEP: 1, // 時間刻度(小時)
+//! ============= 1. 工作時間核心配置 =============
+export const WORK_CONFIG = {
+  // 🧠 工作時間核心定義
+  START_HOUR: 8, // 上班開始時間
+  END_HOUR: 20, // 上班結束時間(12小時制)
+  DEFAULT_DURATION: 2, // 預設工時(小時)
+};
+
+//! ============= 2. 時間格式配置 =============
+export const TIME_FORMAT = {
+  // ✨ 小時視圖 - 用於檢視詳細時間
+  hour: {
+    minorLabels: {
+      minute: "mm", // 只顯示分鐘
+      hour: "HH:mm", // 顯示時:分
+    },
+    majorLabels: {
+      minute: "HH:mm", // 主刻度顯示時:分
+      hour: "M月D日", // 顯示月日
+    },
+  },
+
+  // 💡 天視圖 - 最常用的預設視圖
+  day: {
+    minorLabels: {
+      hour: "HH:mm", // 副刻度顯示時:分
+      day: "D日", // 顯示日期
+    },
+    majorLabels: {
+      hour: "M月D日", // 顯示月日
+      day: "YYYY年M月", // 顯示年月
+    },
+  },
 };
 
 export const TIME_RANGES = {
@@ -78,4 +106,9 @@ export const TIME_RANGES = {
       },
     },
   },
+};
+export default {
+  WORK_CONFIG,
+  TIME_FORMAT,
+  TIME_RANGES,
 };
