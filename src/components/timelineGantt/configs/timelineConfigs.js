@@ -13,6 +13,14 @@ export const TIMELINE_STYLES = `
       border-color: #1565c0;
     }
   `;
+
+//! ============= 1. 工作時間常量配置 =============
+const WORK_HOURS = {
+  START: 8, // 上班開始時間
+  END: 20, // 上班結束時間(暫定12小時)
+  STEP: 1, // 時間刻度(小時)
+};
+
 export const TIME_RANGES = {
   hour: {
     label: "小時",
@@ -33,12 +41,12 @@ export const TIME_RANGES = {
     getWindow: (centerTime) => getTimeWindow("day", centerTime),
     format: {
       minorLabels: {
-        hour: "HH:mm", // 副刻度顯示時:分
-        day: "DD日",
+        hour: "HH:mm", // 顯示 "14:00"
+        day: "D日", // 顯示 "20日"
       },
       majorLabels: {
-        hour: "MM-DD", // 主刻度顯示月-日
-        day: "YYYY年MM月",
+        hour: "M月D日", // 顯示 "1月20日"
+        day: "YYYY年M月", // 顯示 "2024年1月"
       },
     },
   },

@@ -1,42 +1,18 @@
+// useTimelineData.js
 import { useRef, useMemo } from "react";
-import { DataSet } from "vis-data/standalone";
+import { generateMachineGroups } from "../configs/machineGroups";
+import { generateInitialOrders } from "../configs/orderItems";
 
 export const useTimelineData = () => {
+  // ✨ 使用 ref 保存訂單資料確保響應性
   const itemsDataRef = useRef(null);
 
-  const generateItems = () => {
-    const items = [];
-    for (let j = 1; j <= 4; j++) {
-      let date = new Date();
-      for (let i = 0; i < 5; i++) {
-        const start = new Date(date.getTime() + 4 * i * 60 * 60 * 1000);
-        const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-        items.push({
-          id: `${j}-${i}`,
-          group: j,
-          start,
-          end,
-          content: `訂單 ${j}-${i}`,
-          className: "custom-item",
-        });
-      }
-    }
-    return new DataSet(items);
-  };
+  // 💡 緩存機台組避免重複計算
+  const groups = useMemo(generateMachineGroups, []);
 
-  const groups = useMemo(
-    () =>
-      new DataSet([
-        { id: 1, content: "Truck 1" },
-        { id: 2, content: "Truck 2" },
-        { id: 3, content: "Truck 3" },
-        { id: 4, content: "Truck 4" },
-      ]),
-    []
-  );
-
+  // 🧠 僅首次渲染時初始化訂單資料
   if (!itemsDataRef.current) {
-    itemsDataRef.current = generateItems();
+    itemsDataRef.current = generateInitialOrders();
   }
 
   return { itemsDataRef, groups };

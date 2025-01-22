@@ -15,10 +15,11 @@
     "@mui/icons-material": "^6.3.1",
     "@mui/material": "^6.3.1",
     "@mui/styled-engine-sc": "^6.3.1",
-    "@mui/x-date-pickers": "^7.23.6",
-    "date-fns": "^4.1.0",
+    "@mui/x-date-pickers": "^7.24.0",
+    "date-fns": "^2.30.0",
     "day": "^0.0.2",
     "dayjs": "^1.11.13",
+    "moment": "^2.30.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "styled-components": "^6.1.14",
@@ -35,6 +36,6 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
-    "vite": "^6.0.5"
+    "vite": "^5.0.12"
   }
 }
