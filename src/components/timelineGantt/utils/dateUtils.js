@@ -22,6 +22,9 @@ export const dateFormats = {
   time: "HH:mm",
 };
 
+const DEFAULT_TIMEZONE = "Asia/Taipei";
+dayjs.tz.setDefault(DEFAULT_TIMEZONE);
+
 // 獲取時間視窗
 // dateUtils.js
 export const getTimeWindow = (range, centerTime = dayjs()) => {
@@ -32,16 +35,18 @@ export const getTimeWindow = (range, centerTime = dayjs()) => {
       end: now.add(1, "hour"),
     },
     day: {
-      start: now.startOf("day"),
-      end: now.endOf("day"),
+      // 💡 調整為從早上 8 點開始
+      start: now.startOf("day").hour(6),
+      // ✨ 調整為隔天凌晨結束
+      end: now.endOf("day").startOf("hour"),
     },
     week: {
-      start: now.startOf("week"),
-      end: now.endOf("week"),
+      start: now.startOf("week").hour(8),
+      end: now.endOf("week").startOf("hour"),
     },
     month: {
-      start: now.startOf("month"),
-      end: now.endOf("month"),
+      start: now.startOf("month").hour(8),
+      end: now.endOf("month").startOf("hour"),
     },
   };
 

@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import { getTimeWindow } from "./utils/dateUtils";
 import "dayjs/locale/zh-tw"; // 導入繁體中文語系
 dayjs.locale("zh-tw"); // 設置使用繁體中文
+import moment from "moment"; // 新增這行
 
 import {
   BaseTimelineContainer,
@@ -34,7 +35,7 @@ const DEFAULT_HEIGHT = window.innerHeight - 200;
 const zhTWLocale = {
   current: "現在",
   time: "時間",
-  deleteSelected: "刪除選中",
+  deleteSelected: "刪除選取",
   editable: {
     add: "新增",
     remove: "刪除",
@@ -42,6 +43,52 @@ const zhTWLocale = {
     updateGroup: "調整群組",
   },
 };
+
+// 修改 moment 相關設定
+if (moment) {
+  moment.updateLocale("zh-tw", {
+    months:
+      "一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月".split(
+        "_"
+      ),
+    monthsShort: "1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月".split(
+      "_"
+    ),
+    weekdays: "星期日_星期一_星期二_星期三_星期四_星期五_星期六".split("_"),
+    weekdaysShort: "週日_週一_週二_週三_週四_週五_週六".split("_"),
+    weekdaysMin: "日_一_二_三_四_五_六".split("_"),
+    meridiem: function (hour, minute) {
+      const hm = hour * 100 + minute;
+      if (hm < 600) {
+        return "凌晨";
+      } else if (hm < 900) {
+        return "早上";
+      } else if (hm < 1130) {
+        return "上午";
+      } else if (hm < 1230) {
+        return "中午";
+      } else if (hm < 1800) {
+        return "下午";
+      } else {
+        return "晚上";
+      }
+    },
+    meridiemParse: /凌晨|早上|上午|中午|下午|晚上/,
+    meridiemHour: function (hour, meridiem) {
+      let h = hour;
+      if (h === 12) {
+        h = 0;
+      }
+      if (meridiem === "凌晨" || meridiem === "早上" || meridiem === "上午") {
+        return h;
+      } else if (meridiem === "中午") {
+        return h >= 11 ? h : h + 12;
+      } else if (meridiem === "下午" || meridiem === "晚上") {
+        return h + 12;
+      }
+    },
+  });
+}
 
 //* Timeline 基礎選項配置
 const BASE_TIMELINE_OPTIONS = {
@@ -54,33 +101,11 @@ const BASE_TIMELINE_OPTIONS = {
   horizontalScroll: true,
   showCurrentTime: true,
   locale: "zh-tw",
-  // 添加 locales 配置
   locales: {
     "zh-tw": zhTWLocale,
   },
-  format: {
-    minorLabels: {
-      millisecond: "SSS",
-      second: "s秒",
-      minute: "H:mm",
-      hour: "H點",
-      weekday: "dd",
-      day: "D日 dd",
-      week: "第w週",
-      month: "M月",
-      year: "YYYY年",
-    },
-    majorLabels: {
-      millisecond: "HH:mm:ss",
-      second: "M月D日 HH:mm",
-      minute: "M月D日 HH:mm",
-      hour: "M月D日",
-      weekday: "YYYY年M月",
-      day: "YYYY年M月",
-      week: "YYYY年M月",
-      month: "YYYY年",
-      year: "",
-    },
+  moment: (date) => {
+    return moment(date).locale("zh-tw").utcOffset("+08:00"); // 使用引入的 moment
   },
 };
 
@@ -89,9 +114,9 @@ const TIME_FORMAT_CONFIG = {
   minorLabels: {
     millisecond: "SSS",
     second: "s秒",
-    minute: "H:mm",
-    hour: "H點",
-    weekday: " M月D日",
+    minute: "a h:mm",
+    hour: "a h點",
+    weekday: "M月D日",
     day: "D日",
     week: "第w週",
     month: "M月",
@@ -100,9 +125,9 @@ const TIME_FORMAT_CONFIG = {
 
   majorLabels: {
     millisecond: "HH:mm:ss",
-    second: "M月D日 HH:mm",
-    minute: "M月D日 HH:mm",
-    hour: "M月D日 ",
+    second: "M月D日 a h:mm",
+    minute: "M月D日 a h:mm",
+    hour: "M月D日 a",
     weekday: "YYYY年M月",
     day: "YYYY年M月",
     week: "YYYY年M月",
