@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@hookform/resolvers": "^3.10.0",
     "@mui/icons-material": "^6.3.1",
     "@mui/material": "^6.3.1",
     "@mui/styled-engine-sc": "^6.3.1",
@@ -23,9 +24,11 @@
     "moment-taiwan": "^0.0.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
     "styled-components": "^6.1.14",
     "vis-data": "^7.1.9",
-    "vis-timeline": "^7.7.3"
+    "vis-timeline": "^7.7.3",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
