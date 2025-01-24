@@ -17,7 +17,7 @@ export const FORM_CONFIG = {
   timePickerProps: {
     type: "datetime-local",
     InputLabelProps: { shrink: true },
-    // inputProps: { step: 300 }, // 5分鐘間隔
+    inputProps: { step: 300 }, // 5分鐘間隔
   },
 };
 

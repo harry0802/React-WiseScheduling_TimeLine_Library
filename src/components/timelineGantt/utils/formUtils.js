@@ -29,6 +29,6 @@ export const formUtils = {
 
   // ✨ 計算結束時間
   calculateEndTime(startTime) {
-    return dayjs(startTime).add(2, "hour").format("YYYY-MM-DDTHH:mm");
+    return dayjs(startTime).add(1, "hour").format("YYYY-MM-DDTHH:mm");
   },
 };

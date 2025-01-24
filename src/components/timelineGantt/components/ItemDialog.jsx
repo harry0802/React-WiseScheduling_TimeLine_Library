@@ -107,7 +107,7 @@ const ItemDialog = ({
               error={!!errors.group}
               helperText={errors.group?.message}
               disabled={mode === "view"}
-              defaultValue={defaultGroup} // 設置默認值
+              defaultValue={item ? item?.group : defaultGroup}
             >
               {groups?.get()?.map((group) => (
                 <MenuItem key={group.id} value={group.id}>
