@@ -24,6 +24,7 @@ export const formUtils = {
       ...formData,
       start: dayjs(formData.start).toDate(),
       end: dayjs(formData.end).toDate(),
+      className: originalItem.className || "custom-item",
     };
   },
 

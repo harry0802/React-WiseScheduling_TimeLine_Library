@@ -278,15 +278,10 @@ const DynamicTimeline = () => {
       if (!itemsDataRef.current) return;
 
       try {
-        const itemWithClass = {
-          ...updatedItem,
-          className: "custom-item",
-        };
-
         if (dialogState.mode === "add") {
-          itemsDataRef.current.add(itemWithClass);
+          itemsDataRef.current.add(updatedItem);
         } else {
-          itemsDataRef.current.update(itemWithClass);
+          itemsDataRef.current.update(updatedItem);
         }
 
         setDialogState((prev) => ({
@@ -296,7 +291,6 @@ const DynamicTimeline = () => {
         }));
       } catch (error) {
         console.error("儲存項目失敗:", error);
-        //TODO: 這裡可以加入錯誤提示 UI
       }
     },
     [dialogState.mode]

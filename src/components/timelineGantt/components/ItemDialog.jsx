@@ -40,15 +40,10 @@ const ItemDialog = ({
     },
   });
 
-  // TODO: 一直都是預設值 需要解決 item 有值時，預設值不會被更新
-  console.log("🚀 ~  item.group:", item?.group);
-
   // 監聽項目變化重置表單
   useEffect(() => {
     if (item) {
-      console.log("重置表單數據:", item); // 添加日誌
       const formData = formUtils.initializeFormData(item);
-      console.log("處理後的表單數據:", formData); // 添加日誌
       reset(formData);
     }
   }, [item, reset]);
@@ -56,6 +51,8 @@ const ItemDialog = ({
   // 處理表單提交
   const onSubmit = (data) => {
     const updatedItem = formUtils.createUpdatedItem(data, item);
+    console.log("🚀 ~ onSubmit ~ updatedItem:", updatedItem);
+
     onSave(updatedItem);
     onClose();
   };
@@ -67,6 +64,10 @@ const ItemDialog = ({
       setValue("end", formUtils.calculateEndTime(startTime));
     }
   }, [startTime, setValue]);
+
+  if (!item) return null;
+  console.log("🚀 ~ item:", item);
+
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -107,7 +108,8 @@ const ItemDialog = ({
               error={!!errors.group}
               helperText={errors.group?.message}
               disabled={mode === "view"}
-              defaultValue={item ? item?.group : defaultGroup}
+              // defaultValue={item ? item?.group : defaultGroup}
+              value={watch("group") || ""} // 添加這行
             >
               {groups?.get()?.map((group) => (
                 <MenuItem key={group.id} value={group.id}>
