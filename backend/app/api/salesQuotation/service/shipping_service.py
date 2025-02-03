@@ -38,7 +38,7 @@ def complete_SQCustomsDuty(db_obj, payload):
     db_obj.amount = float(payload["amount"]) \
         if payload.get("amount") is not None else db_obj.amount
     # 「金額」= 運費 / 預估出貨數
-    db_obj.amount = db_obj.freight / db_obj.estimatedShipment if db_obj.freight and db_obj.estimatedShipment else db_obj.amount
+    db_obj.amount = db_obj.freight / db_obj.estimatedShipment if db_obj.freight and db_obj.estimatedShipment else 0
     db_obj.amount = round(db_obj.amount, 3)
     return db_obj
 
