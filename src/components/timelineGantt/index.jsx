@@ -376,27 +376,25 @@ const DynamicTimeline = () => {
           <TimeAxisStyles>
             <CurrentTimeMarker>
               <BaseItem>
-                <StatusStyles>
-                  <StatusBase>
-                    <StatusProgress>
-                      <TimelineControls
-                        timeRange={timeRange}
-                        onTimeRangeChange={setTimeRange}
-                        onAddItem={handleAddItem}
-                        onMoveToNow={handleMoveToNow}
-                      />
-                      <Paper
-                        ref={containerRef}
-                        elevation={1}
-                        sx={{
-                          border: 1,
-                          borderColor: "grey.200",
-                          borderRadius: 1,
-                        }}
-                      />
-                    </StatusProgress>
-                  </StatusBase>
-                </StatusStyles>
+                <StatusBase>
+                  <StatusProgress>
+                    <TimelineControls
+                      timeRange={timeRange}
+                      onTimeRangeChange={setTimeRange}
+                      onAddItem={handleAddItem}
+                      onMoveToNow={handleMoveToNow}
+                    />
+                    <Paper
+                      ref={containerRef}
+                      elevation={1}
+                      sx={{
+                        border: 1,
+                        borderColor: "grey.200",
+                        borderRadius: 1,
+                      }}
+                    />
+                  </StatusProgress>
+                </StatusBase>
               </BaseItem>
             </CurrentTimeMarker>
           </TimeAxisStyles>

@@ -8,6 +8,9 @@ import {
   Stack,
   TextField,
   MenuItem,
+  Typography,
+  Box,
+  Grid,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { FORM_CONFIG, VALIDATION_RULES } from "../configs/formConfig";
@@ -69,55 +72,163 @@ const ItemDialog = ({
   console.log("🚀 ~ item:", item);
 
   return (
-    <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>製令單詳細資訊</DialogTitle>
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
-          <Stack spacing={3} sx={{ mt: 2 }}>
-            {/* 訂單內容 */}
-            <TextField
-              {...register("content", VALIDATION_RULES.content)}
-              label="訂單內容"
-              error={!!errors.content}
-              helperText={errors.content?.message}
-            />
+          <Grid container spacing={3}>
+            {/* 基本信息組 */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" color="primary" gutterBottom>
+                基本資訊
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    {...register("id")}
+                    label="製令單號"
+                    value={item.id}
+                    disabled
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    {...register("productName")}
+                    label="產品名稱"
+                    value={item.orderInfo.productName}
+                    disabled
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    {...register("group", VALIDATION_RULES.group)}
+                    select
+                    label="機台編號"
+                    error={!!errors.group}
+                    helperText={errors.group?.message}
+                    disabled={mode === "view"}
+                    value={watch("group") || ""}
+                  >
+                    {groups?.get()?.map((group) => (
+                      <MenuItem key={group.id} value={group.id}>
+                        {group.content || group.id}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    {...register("process")}
+                    label="製程名稱"
+                    value={item.orderInfo.process}
+                    disabled
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
 
-            {/* 開始時間 */}
-            <TextField
-              {...register("start", VALIDATION_RULES.start)}
-              {...FORM_CONFIG.timePickerProps}
-              label="開始時間"
-              error={!!errors.start}
-              helperText={errors.start?.message}
-            />
+            {/* 數量組 */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" color="primary" gutterBottom>
+                生產數量
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    {...register("quantity")}
+                    label="製令數量"
+                    value={item.orderInfo.quantity}
+                    disabled
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    {...register("completedQty")}
+                    label="已完成數量"
+                    value={item.orderInfo.completedQty}
+                    disabled
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    label="完成率"
+                    value={`${item.orderInfo.completedQty}/${item.orderInfo.quantity}`}
+                    disabled
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
 
-            {/* 結束時間 */}
-            <TextField
-              {...register("end", VALIDATION_RULES.end)}
-              {...FORM_CONFIG.timePickerProps}
-              label="結束時間"
-              error={!!errors.end}
-              helperText={errors.end?.message}
-              disabled={mode === "view"}
-            />
+            {/* 時間組 */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" color="primary" gutterBottom>
+                時程安排
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    {...register("start", VALIDATION_RULES.start)}
+                    {...FORM_CONFIG.timePickerProps}
+                    label="預計上機日"
+                    error={!!errors.start}
+                    helperText={errors.start?.message}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    {...register("end", VALIDATION_RULES.end)}
+                    {...FORM_CONFIG.timePickerProps}
+                    label="預計完成日"
+                    error={!!errors.end}
+                    helperText={errors.end?.message}
+                    disabled={mode === "view"}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
 
-            {/* ⚠️ 修改機台選擇組件 */}
-            <TextField
-              {...register("group", VALIDATION_RULES.group)}
-              select
-              label="機台編號"
-              error={!!errors.group}
-              helperText={errors.group?.message}
-              disabled={mode === "view"}
-              // defaultValue={item ? item?.group : defaultGroup}
-              value={watch("group") || ""} // 添加這行
-            >
-              {groups?.get()?.map((group) => (
-                <MenuItem key={group.id} value={group.id}>
-                  {group.content || group.id} {/* 添加後備顯示內容 */}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Stack>
+            {/* 狀態組 */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" color="primary" gutterBottom>
+                生產狀態
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="實際上機日"
+                    value={
+                      item.status.startTime
+                        ? new Date(item.status.startTime).toLocaleDateString()
+                        : ""
+                    }
+                    disabled
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField fullWidth label="延遲完成日" value="" disabled />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="狀態"
+                    value={item.orderInfo.orderStatus}
+                    disabled
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
         </DialogContent>
 
         <DialogActions>
