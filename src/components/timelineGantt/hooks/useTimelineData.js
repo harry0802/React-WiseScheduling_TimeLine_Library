@@ -12,7 +12,9 @@ export const useTimelineData = () => {
 
   // 🧠 僅首次渲染時初始化訂單資料
   if (!itemsDataRef.current) {
-    itemsDataRef.current = generateInitialOrders();
+    // ✨ 生成初始訂單資料
+    const data = generateInitialOrders();
+    itemsDataRef.current = data;
   }
 
   return { itemsDataRef, groups };

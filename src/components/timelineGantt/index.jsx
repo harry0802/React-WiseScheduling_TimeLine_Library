@@ -6,10 +6,10 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 import TimelineControls from "./components/TimelineControls";
-import ItemDialog from "./components/ItemDialog";
+// import ItemDialog from "./components/ItemDialog";
 import OperationDialog from "./components/OperationDialog";
 import { useTimelineData } from "./hooks/useTimelineData";
-import { TIME_RANGES, TIMELINE_STYLES } from "./configs/timelineConfigs";
+import { TIMELINE_STYLES } from "./configs/timeline/timelineConfigs";
 import dayjs from "dayjs";
 import { getTimeWindow } from "./utils/dateUtils";
 import "dayjs/locale/zh-tw"; // 導入繁體中文語系
@@ -20,121 +20,25 @@ import {
   BaseTimelineContainer,
   TimelineGrid,
   BaseItem,
-  StatusStyles,
   TimeAxisStyles,
   CurrentTimeMarker,
   StatusBase,
   StatusProgress,
-  StatusLabel,
 } from "./styles";
 
-//* 基礎配置常量
-const DEFAULT_HEIGHT = window.innerHeight - 200;
+import {
+  BASE_TIMELINE_OPTIONS,
+  TIME_FORMAT_CONFIG,
+} from "./configs/timeline/timelineOptions";
 
-// 定義中文本地化配置
-const zhTWLocale = {
-  current: "現在",
-  time: "時間",
-  deleteSelected: "刪除選取",
-  editable: {
-    add: "新增",
-    remove: "刪除",
-    updateTime: "調整時間",
-    updateGroup: "調整群組",
-  },
-};
+import { momentLocaleConfig } from "./configs/timeline/timelineLocale";
+import ItemDialog from "./components/ItemDialog/index";
+import { MACHINE_STATUS } from "./configs/constants";
 
 // 修改 moment 相關設定
 if (moment) {
-  moment.updateLocale("zh-tw", {
-    months:
-      "一月_二月_三月_四月_五月_六月_七月_八月_九月_十月_十一月_十二月".split(
-        "_"
-      ),
-    monthsShort: "1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月".split(
-      "_"
-    ),
-    weekdays: "星期日_星期一_星期二_星期三_星期四_星期五_星期六".split("_"),
-    weekdaysShort: "週日_週一_週二_週三_週四_週五_週六".split("_"),
-    weekdaysMin: "日_一_二_三_四_五_六".split("_"),
-    meridiem: function (hour, minute) {
-      const hm = hour * 100 + minute;
-      if (hm < 600) {
-        return "凌晨";
-      } else if (hm < 900) {
-        return "早上";
-      } else if (hm < 1130) {
-        return "上午";
-      } else if (hm < 1230) {
-        return "中午";
-      } else if (hm < 1800) {
-        return "下午";
-      } else {
-        return "晚上";
-      }
-    },
-    meridiemParse: /凌晨|早上|上午|中午|下午|晚上/,
-    meridiemHour: function (hour, meridiem) {
-      let h = hour;
-      if (h === 12) {
-        h = 0;
-      }
-      if (meridiem === "凌晨" || meridiem === "早上" || meridiem === "上午") {
-        return h;
-      } else if (meridiem === "中午") {
-        return h >= 11 ? h : h + 12;
-      } else if (meridiem === "下午" || meridiem === "晚上") {
-        return h + 12;
-      }
-    },
-  });
+  moment.updateLocale("zh-tw", momentLocaleConfig);
 }
-
-//* Timeline 基礎選項配置
-const BASE_TIMELINE_OPTIONS = {
-  orientation: "top",
-  zoomable: false,
-  moveable: true,
-  stack: true,
-  stackSubgroups: true,
-  verticalScroll: true,
-  horizontalScroll: true,
-  showCurrentTime: true,
-  locale: "zh-tw",
-  locales: {
-    "zh-tw": zhTWLocale,
-  },
-  moment: (date) => {
-    return moment(date).locale("zh-tw").utcOffset("+08:00"); // 使用引入的 moment
-  },
-};
-
-//* 時間格式配置
-const TIME_FORMAT_CONFIG = {
-  minorLabels: {
-    millisecond: "SSS",
-    second: "s秒",
-    minute: "a h:mm",
-    hour: "a h點",
-    weekday: "M月D日",
-    day: "D日",
-    week: "第w週",
-    month: "M月",
-    year: "YYYY年",
-  },
-
-  majorLabels: {
-    millisecond: "HH:mm:ss",
-    second: "M月D日 a h:mm",
-    minute: "M月D日 a h:mm",
-    hour: "M月D日 a",
-    weekday: "YYYY年M月",
-    day: "YYYY年M月",
-    week: "YYYY年M月",
-    month: "YYYY年",
-    year: "",
-  },
-};
 
 //! =============== 2. 類型與介面 ===============
 /**
@@ -168,7 +72,6 @@ const DynamicTimeline = () => {
     isOpen: false,
   });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [timelineHeight] = useState(DEFAULT_HEIGHT);
 
   const { itemsDataRef, groups } = useTimelineData();
 
@@ -278,10 +181,26 @@ const DynamicTimeline = () => {
       if (!itemsDataRef.current) return;
 
       try {
+        const processedItem = {
+          ...updatedItem,
+          // 確保基本時間屬性存在
+          start: updatedItem.orderInfo.start,
+          end: updatedItem.orderInfo.end,
+          // 根據狀態設置不同的時間
+          ...(updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED && {
+            start: updatedItem.status.startTime,
+            end:
+              updatedItem.status.endTime ||
+              new Date(
+                updatedItem.status.startTime.getTime() + 2 * 60 * 60 * 1000
+              ),
+          }),
+        };
+
         if (dialogState.mode === "add") {
-          itemsDataRef.current.add(updatedItem);
+          itemsDataRef.current.add(processedItem);
         } else {
-          itemsDataRef.current.update(updatedItem);
+          itemsDataRef.current.update(processedItem);
         }
 
         setDialogState((prev) => ({
@@ -329,14 +248,37 @@ const DynamicTimeline = () => {
         (window.start.getTime() + window.end.getTime()) / 2
       );
 
-      //* 設置新項目的預設值
       const newItem = {
-        id: Date.now(),
+        id: `ORDER-${Date.now()}`,
         group: "A1",
-        start: centerTime.toDate(),
-        end: centerTime.add(2, "hour").toDate(),
+        area: "A",
+        timeLineStatus: MACHINE_STATUS.ORDER_CREATED,
+
+        // 狀態資訊
+        status: {
+          startTime: null,
+          endTime: null,
+          reason: "",
+          product: "",
+        },
+
+        // 訂單資訊
+        orderInfo: {
+          start: centerTime.toDate(),
+          end: centerTime.add(2, "hour").toDate(),
+          actualStart: null,
+          actualEnd: null,
+          productId: "",
+          productName: "",
+          quantity: 0,
+          completedQty: 0,
+          process: "",
+          orderStatus: "尚未上機",
+        },
+
+        // 視覺相關
+        className: "status-order",
         content: "新訂單",
-        className: "custom-item",
       };
 
       setDialogState({
@@ -367,7 +309,6 @@ const DynamicTimeline = () => {
       console.error("移動到當前時間失敗:", error);
     }
   }, [timeRange]);
-
   //* 渲染區塊
   return (
     <Box sx={{ p: 4 }}>
@@ -400,6 +341,22 @@ const DynamicTimeline = () => {
           </TimeAxisStyles>
         </TimelineGrid>
       </BaseTimelineContainer>
+
+      {/* <ItemDialog
+        isOpen={dialogState.isOpen}
+        onClose={() =>
+          setDialogState((prev) => ({
+            ...prev,
+            isOpen: false,
+            selectedItem: null,
+          }))
+        }
+        item={dialogState.selectedItem}
+        mode={dialogState.mode}
+        onSave={handleSaveItem}
+        onDelete={() => setIsDeleteDialogOpen(true)}
+        groups={groups}
+      /> */}
 
       <ItemDialog
         isOpen={dialogState.isOpen}

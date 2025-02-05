@@ -8,6 +8,7 @@ export const formUtils = {
   // 初始化表單數據
   initializeFormData(item) {
     if (!item) return FORM_CONFIG.defaultValues;
+    console.log("🚀 ~ initializeFormData ~ item:", item);
 
     return {
       content: item.content,
@@ -21,10 +22,14 @@ export const formUtils = {
   createUpdatedItem(formData, originalItem) {
     return {
       ...originalItem,
-      ...formData,
-      start: dayjs(formData.start).toDate(),
-      end: dayjs(formData.end).toDate(),
-      className: originalItem.className || "custom-item",
+      group: formData.group,
+      area: formData.group.charAt(0),
+      orderInfo: {
+        ...originalItem.orderInfo,
+        start: dayjs(formData.start).toDate(),
+        end: dayjs(formData.end).toDate(),
+      },
+      content: originalItem.orderInfo.productName,
     };
   },
 

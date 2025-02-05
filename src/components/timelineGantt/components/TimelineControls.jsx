@@ -2,7 +2,7 @@ import { Stack, Button } from "@mui/material";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { TIME_RANGES } from "../configs/timelineConfigs";
+import { TIME_RANGES } from "../configs/timeline/timelineConfigs";
 
 const TimelineControls = ({
   timeRange,

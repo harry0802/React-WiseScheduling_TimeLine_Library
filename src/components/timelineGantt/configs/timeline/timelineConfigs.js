@@ -1,4 +1,4 @@
-import { getTimeWindow } from "../utils/dateUtils";
+import { getTimeWindow } from "../../utils/dateUtils";
 
 export const TIMELINE_STYLES = `
     .vis-item.custom-item {
