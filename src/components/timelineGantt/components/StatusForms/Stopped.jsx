@@ -1,17 +1,19 @@
-import { Grid, TextField } from "@mui/material";
-import { useStatusForm } from "../../hooks/useStatusForm";
-import { MACHINE_STATUS } from "../../configs/constants";
-
 // components/StatusForms/Stopped.jsx
-const Stopped = ({ item, disabled }) => {
-  const { register, errors } = useStatusForm(MACHINE_STATUS.STOPPED, item);
+import { Grid, TextField } from "@mui/material";
+import { useFormContext } from "react-hook-form";
+
+const Stopped = ({ disabled }) => {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
 
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6}>
         <TextField
           fullWidth
-          {...register("startTime", { required: "必填欄位" })}
+          {...register("startTime")}
           type="datetime-local"
           label="停機時間"
           error={!!errors.startTime}
@@ -24,10 +26,11 @@ const Stopped = ({ item, disabled }) => {
       <Grid item xs={12} sm={6}>
         <TextField
           fullWidth
-          {...register("reason", { required: "必填欄位" })}
+          {...register("reason")}
           label="停機原因"
           error={!!errors.reason}
           helperText={errors.reason?.message}
+          required
           disabled={disabled}
         />
       </Grid>

@@ -1,33 +1,45 @@
 // components/StatusForms/StatusController.jsx
 import { memo } from "react";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getValidationSchema } from "../../configs/validationSchema";
+import { STATUS_FORM_CONFIG } from "../../configs/formConfig";
+import { MACHINE_STATUS } from "../../configs/constants";
 import OrderCreated from "./OrderCreated";
 import Idle from "./Idle";
 import Setup from "./Setup";
 import Testing from "./Testing";
 import Stopped from "./Stopped";
-import { MACHINE_STATUS } from "../../configs/constants";
+// 💡 取得對應的表單組件
 
-// ✨ 狀態表單控制器
-const StatusController = ({ status, item, disabled }) => {
-  // 💡 根據狀態返回對應表單
-  const renderStatusForm = () => {
-    switch (status) {
-      case MACHINE_STATUS.ORDER_CREATED:
-        return <OrderCreated item={item} disabled={disabled} />;
-      case MACHINE_STATUS.IDLE:
-        return <Idle item={item} disabled={disabled} />;
-      case MACHINE_STATUS.SETUP:
-        return <Setup item={item} disabled={disabled} />;
-      case MACHINE_STATUS.TESTING:
-        return <Testing item={item} disabled={disabled} />;
-      case MACHINE_STATUS.STOPPED:
-        return <Stopped item={item} disabled={disabled} />;
-      default:
-        return null;
-    }
-  };
+const StatusController = ({ status, item, disabled, onSubmit, groups }) => {
+  // 🧠 表單配置和驗證
+  const formConfig = STATUS_FORM_CONFIG[status];
+  console.log("🚀 ~ StatusController ~ formConfig:", STATUS_FORM_CONFIG);
 
-  return <div>{renderStatusForm()}</div>;
+  const methods = useForm({
+    defaultValues: {
+      ...formConfig.defaultValues,
+      ...item,
+    },
+    resolver: zodResolver(getValidationSchema(status)),
+  });
+  const FormComponent = {
+    [MACHINE_STATUS.ORDER_CREATED]: OrderCreated,
+    [MACHINE_STATUS.IDLE]: Idle,
+    [MACHINE_STATUS.SETUP]: Setup,
+    [MACHINE_STATUS.TESTING]: Testing,
+    [MACHINE_STATUS.STOPPED]: Stopped,
+  }[status];
+  if (!FormComponent) return null;
+
+  return (
+    <FormProvider {...methods}>
+      <form id="status-form" onSubmit={methods.handleSubmit(onSubmit)}>
+        <FormComponent disabled={disabled} item={item} groups={groups} />
+      </form>
+    </FormProvider>
+  );
 };
 
 export default memo(StatusController);

@@ -54,7 +54,7 @@ export const getTimeWindow = (range, centerTime = dayjs()) => {
 };
 
 // 格式化日期
-export const formatDate = (date, format = dateFormats.dateTime) => {
+export const formatDate = (date, format = "YYYY-MM-DDTHH:mm") => {
   return dayjs(date).format(format);
 };
 

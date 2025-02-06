@@ -1,6 +1,7 @@
 // hooks/useStatusForm.js
 import { useFormContext } from "react-hook-form";
 import { useEffect } from "react";
+import dayjs from "dayjs";
 
 // 🧠 集中管理表單欄位配置
 const FORM_FIELDS = {
@@ -35,7 +36,8 @@ export const useStatusForm = (status, item) => {
 
     // 設置時間資訊
     FORM_FIELDS.time.forEach((field) => {
-      setValue(field, item.orderInfo[field]);
+      const value = item.orderInfo[field];
+      setValue(field, value ? dayjs(value).format("YYYY-MM-DDTHH:mm") : "");
     });
 
     // 設置狀態資訊

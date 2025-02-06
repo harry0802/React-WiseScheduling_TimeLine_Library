@@ -178,6 +178,7 @@ const DynamicTimeline = () => {
    */
   const handleSaveItem = useCallback(
     (updatedItem) => {
+      console.log("🚀 ~ DynamicTimeline ~ updatedItem:", updatedItem);
       if (!itemsDataRef.current) return;
 
       try {
@@ -252,12 +253,12 @@ const DynamicTimeline = () => {
         id: `ORDER-${Date.now()}`,
         group: "A1",
         area: "A",
-        timeLineStatus: MACHINE_STATUS.ORDER_CREATED,
+        timeLineStatus: MACHINE_STATUS.IDLE,
 
         // 狀態資訊
         status: {
-          startTime: null,
-          endTime: null,
+          startTime: dayjs().toDate(),
+          endTime: dayjs().add(2, "hour").toDate(),
           reason: "",
           product: "",
         },
@@ -275,6 +276,8 @@ const DynamicTimeline = () => {
           process: "",
           orderStatus: "尚未上機",
         },
+        startTime: dayjs().toDate(),
+        endTime: dayjs().add(2, "hour").toDate(),
 
         // 視覺相關
         className: "status-order",
@@ -358,21 +361,24 @@ const DynamicTimeline = () => {
         groups={groups}
       /> */}
 
-      <ItemDialog
-        isOpen={dialogState.isOpen}
-        onClose={() =>
-          setDialogState((prev) => ({
-            ...prev,
-            isOpen: false,
-            selectedItem: null,
-          }))
-        }
-        item={dialogState.selectedItem}
-        mode={dialogState.mode}
-        onSave={handleSaveItem}
-        onDelete={() => setIsDeleteDialogOpen(true)}
-        groups={groups}
-      />
+      {/* 訂單對話框 */}
+      {dialogState.selectedItem && (
+        <ItemDialog
+          open={dialogState.isOpen}
+          onClose={() =>
+            setDialogState((prev) => ({
+              ...prev,
+              isOpen: false,
+              selectedItem: null,
+            }))
+          }
+          item={dialogState.selectedItem}
+          mode={dialogState.mode}
+          onSave={handleSaveItem}
+          onDelete={() => setIsDeleteDialogOpen(true)}
+          groups={groups}
+        />
+      )}
 
       <OperationDialog
         open={isDeleteDialogOpen}

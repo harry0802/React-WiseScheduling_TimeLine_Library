@@ -1,10 +1,13 @@
-// constants.js - 配置與常量
+// constants.js
+
+// 🧠 基礎配置
 export const MACHINE_CONFIG = {
   AREAS: ["A", "B", "C", "D"],
   MACHINES_PER_AREA: 10,
   WORK_START_HOUR: 8,
 };
 
+// 💡 狀態定義
 export const MACHINE_STATUS = {
   ORDER_CREATED: "製立單",
   IDLE: "待機中",
@@ -13,53 +16,25 @@ export const MACHINE_STATUS = {
   STOPPED: "機台停機",
 };
 
-// 💡 每個狀態的基本配置
+// ✨ 狀態配置與轉換規則整合
 export const STATUS_CONFIG = {
   [MACHINE_STATUS.ORDER_CREATED]: {
     name: MACHINE_STATUS.ORDER_CREATED,
     description: "新建立的製令單",
-    canSwitch: true,
-    color: "#2196f3", // 藍色
+    color: "#2196f3",
     className: "status-order",
+    canSwitch: false,
+    canDelete: false,
+    allowedTransitions: [],
   },
 
   [MACHINE_STATUS.IDLE]: {
     name: MACHINE_STATUS.IDLE,
     description: "機台空閒狀態",
-    canSwitch: true,
-    color: "#9e9e9e", // 灰色
+    color: "#9e9e9e",
     className: "status-idle",
-  },
-
-  [MACHINE_STATUS.SETUP]: {
-    name: MACHINE_STATUS.SETUP,
-    description: "機台正在進行設定",
     canSwitch: true,
-    color: "#ff9800", // 橘色
-    className: "status-setup",
-  },
-
-  [MACHINE_STATUS.TESTING]: {
-    name: MACHINE_STATUS.TESTING,
-    description: "進行產品測試",
-    canSwitch: true,
-    color: "#4caf50", // 綠色
-    className: "status-testing",
-  },
-
-  [MACHINE_STATUS.STOPPED]: {
-    name: MACHINE_STATUS.STOPPED,
-    canSwitch: true,
-    description: "機台暫停運作",
-    color: "#f44336", // 紅色
-    className: "status-stopped",
-  },
-};
-
-// 🧠 定義狀態轉換規則
-export const STATUS_TRANSITIONS = {
-  // 待機狀態可以切換到所有其他狀態
-  [MACHINE_STATUS.IDLE]: {
+    canDelete: true,
     allowedTransitions: [
       MACHINE_STATUS.SETUP,
       MACHINE_STATUS.TESTING,
@@ -67,31 +42,66 @@ export const STATUS_TRANSITIONS = {
     ],
   },
 
-  // 其他狀態只能切換回待機
   [MACHINE_STATUS.SETUP]: {
+    name: MACHINE_STATUS.SETUP,
+    description: "機台正在進行設定",
+    color: "#ff9800",
+    className: "status-setup",
+    canSwitch: true,
+    canDelete: true,
     allowedTransitions: [MACHINE_STATUS.IDLE],
   },
 
   [MACHINE_STATUS.TESTING]: {
+    name: MACHINE_STATUS.TESTING,
+    description: "進行產品測試",
+    color: "#4caf50",
+    className: "status-testing",
+    canSwitch: true,
+    canDelete: true,
     allowedTransitions: [MACHINE_STATUS.IDLE],
   },
 
   [MACHINE_STATUS.STOPPED]: {
+    name: MACHINE_STATUS.STOPPED,
+    description: "機台暫停運作",
+    color: "#f44336",
+    className: "status-stopped",
+    canSwitch: true,
+    canDelete: true,
     allowedTransitions: [MACHINE_STATUS.IDLE],
   },
 };
 
-// ✨ 簡化的狀態切換檢查
+// 🧠 狀態操作函數
 export const canTransitTo = (currentStatus, targetStatus) => {
-  // 製立單不可切換
-  if (currentStatus === MACHINE_STATUS.ORDER_CREATED) {
+  const config = STATUS_CONFIG[currentStatus];
+
+  // 如果狀態不能切換或配置不存在，返回 false
+  if (!config || !config.canSwitch) {
     return false;
   }
 
-  // 檢查允許的轉換
-  return (
-    STATUS_TRANSITIONS[currentStatus]?.allowedTransitions.includes(
-      targetStatus
-    ) ?? false
-  );
+  return config.allowedTransitions.includes(targetStatus);
+};
+
+// ✨ 新增的輔助函數
+export const canDeleteStatus = (status) => {
+  return STATUS_CONFIG[status]?.canDelete ?? false;
+};
+
+export const getStatusName = (status) => {
+  return STATUS_CONFIG[status]?.name ?? status;
+};
+
+export const getStatusColor = (status) => {
+  return STATUS_CONFIG[status]?.color ?? "#000000";
+};
+
+export const getStatusClass = (status) => {
+  return STATUS_CONFIG[status]?.className ?? "";
+};
+
+export const getAvailableTransitions = (status) => {
+  return STATUS_CONFIG[status]?.allowedTransitions ?? [];
 };

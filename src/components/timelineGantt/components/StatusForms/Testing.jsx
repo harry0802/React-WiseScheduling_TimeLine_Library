@@ -1,16 +1,19 @@
+// components/StatusForms/Testing.jsx
 import { Grid, TextField } from "@mui/material";
-import { useStatusForm } from "../../hooks/useStatusForm";
-import { MACHINE_STATUS } from "../../configs/constants";
+import { useFormContext } from "react-hook-form";
 
-const Testing = ({ item, disabled }) => {
-  const { register, errors } = useStatusForm(MACHINE_STATUS.TESTING, item);
+const Testing = ({ disabled }) => {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
 
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={6}>
         <TextField
           fullWidth
-          {...register("startTime", { required: "必填欄位" })}
+          {...register("startTime")}
           type="datetime-local"
           label="開始時間"
           error={!!errors.startTime}
@@ -25,6 +28,8 @@ const Testing = ({ item, disabled }) => {
           fullWidth
           {...register("product")}
           label="測試產品"
+          error={!!errors.product}
+          helperText={errors.product?.message}
           disabled={disabled}
         />
       </Grid>

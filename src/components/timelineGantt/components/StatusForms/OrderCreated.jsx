@@ -52,13 +52,15 @@ const OrderCreated = ({ item, disabled, groups }) => {
               disabled={disabled}
               value={watch("group") || ""}
             >
-              {Array.isArray(groups)
-                ? groups.map((group) => (
-                    <MenuItem key={group.id} value={group.id}>
-                      {group.content || group.id}
-                    </MenuItem>
-                  ))
-                : null}
+              {Array.isArray(groups?.get?.()) ? (
+                groups.get().map((group) => (
+                  <MenuItem key={group.id} value={group.id}>
+                    {group.content || group.id}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value="">無可用機台</MenuItem>
+              )}
             </TextField>
           </Grid>
           <Grid item xs={12} sm={6}>
