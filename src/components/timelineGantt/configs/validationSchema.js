@@ -33,13 +33,9 @@ export const statusSchemas = {
   }),
 
   // 待機中驗證規則
-  [MACHINE_STATUS.IDLE]: timeSchema.extend({
-    endTime: z
-      .string()
-      .optional()
-      .refine((val) => !val || dayjs(val).isAfter(dayjs()), {
-        message: "結束時間必須晚於現在",
-      }),
+  [MACHINE_STATUS.IDLE]: z.object({
+    start: z.string().min(1, "開始時間為必填"),
+    end: z.string().optional(),
   }),
 
   // 上模與調機驗證規則

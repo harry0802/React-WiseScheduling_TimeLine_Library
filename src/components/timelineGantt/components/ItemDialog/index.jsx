@@ -45,17 +45,28 @@ const ItemDialog = ({
   // ✨ 處理表單提交
   const handleSubmit = async (formData) => {
     if (isSubmitting) return;
+
     try {
       setIsSubmitting(true);
+      console.log("Submitting form data:", formData); // 调试日志
+
       const updatedItem = {
         ...item,
-        ...formData,
-        status: currentStatus,
+        timeLineStatus: currentStatus,
+        status: {
+          ...item.status,
+          ...formData,
+          // 确保时间格式正确
+          startTime: formData.start ? new Date(formData.start) : null,
+          endTime: formData.end ? new Date(formData.end) : null,
+        },
       };
 
+      console.log("Updated item:", updatedItem); // 调试日志
       await onSave(updatedItem);
       onClose();
     } catch (err) {
+      console.error("Submit error:", err); // 调试日志
       setError(handleFormError(err));
     } finally {
       setIsSubmitting(false);
@@ -106,24 +117,11 @@ const ItemDialog = ({
             item={item}
             disabled={mode === "view" || isSubmitting}
             onSubmit={handleSubmit}
-            onCancel={isSubmitting ? undefined : onClose}
+            mode={mode}
+            isSubmitting={isSubmitting}
+            onClose={onClose}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose} disabled={isSubmitting}>
-            取消
-          </Button>
-          {mode !== "view" && (
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isSubmitting}
-              startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
-            >
-              確認
-            </Button>
-          )}
-        </DialogActions>
       </Dialog>
 
       {/* 狀態切換對話框 */}

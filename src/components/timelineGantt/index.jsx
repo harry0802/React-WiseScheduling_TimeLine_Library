@@ -91,7 +91,6 @@ const DynamicTimeline = () => {
         remove: true,
       },
       onMove: function (item, callback) {
-        console.log("🚀 ~ onMove ~ item:", item);
         callback(item); // 接受移动
       },
       format: TIME_FORMAT_CONFIG,
@@ -178,23 +177,18 @@ const DynamicTimeline = () => {
    */
   const handleSaveItem = useCallback(
     (updatedItem) => {
-      console.log("🚀 ~ DynamicTimeline ~ updatedItem:", updatedItem);
       if (!itemsDataRef.current) return;
 
       try {
         const processedItem = {
           ...updatedItem,
-          // 確保基本時間屬性存在
-          start: updatedItem.orderInfo.start,
-          end: updatedItem.orderInfo.end,
-          // 根據狀態設置不同的時間
+          start: dayjs(updatedItem.orderInfo.start).toDate(),
+          end: dayjs(updatedItem.orderInfo.end).toDate(),
           ...(updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED && {
-            start: updatedItem.status.startTime,
-            end:
-              updatedItem.status.endTime ||
-              new Date(
-                updatedItem.status.startTime.getTime() + 2 * 60 * 60 * 1000
-              ),
+            start: dayjs(updatedItem.status.startTime).toDate(),
+            end: updatedItem.status.endTime
+              ? dayjs(updatedItem.status.endTime).toDate()
+              : dayjs(updatedItem.status.startTime).add(2, "hour").toDate(),
           }),
         };
 
@@ -257,8 +251,8 @@ const DynamicTimeline = () => {
 
         // 狀態資訊
         status: {
-          startTime: dayjs().toDate(),
-          endTime: dayjs().add(2, "hour").toDate(),
+          startTime: centerTime.toDate(),
+          endTime: centerTime.add(2, "hour").toDate(),
           reason: "",
           product: "",
         },
@@ -276,9 +270,8 @@ const DynamicTimeline = () => {
           process: "",
           orderStatus: "尚未上機",
         },
-        startTime: dayjs().toDate(),
-        endTime: dayjs().add(2, "hour").toDate(),
-
+        start: centerTime.toDate(),
+        end: centerTime.add(2, "hour").toDate(),
         // 視覺相關
         className: "status-order",
         content: "新訂單",

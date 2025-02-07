@@ -8,7 +8,6 @@ export const formUtils = {
   // 初始化表單數據
   initializeFormData(item) {
     if (!item) return FORM_CONFIG.defaultValues;
-    console.log("🚀 ~ initializeFormData ~ item:", item);
 
     return {
       content: item.content,

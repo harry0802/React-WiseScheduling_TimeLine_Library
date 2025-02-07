@@ -11,19 +11,26 @@ import Setup from "./Setup";
 import Testing from "./Testing";
 import Stopped from "./Stopped";
 // 💡 取得對應的表單組件
+import { Button, CircularProgress, DialogActions } from "@mui/material";
 
-const StatusController = ({ status, item, disabled, onSubmit, groups }) => {
-  // 🧠 表單配置和驗證
+const StatusController = ({
+  status,
+  item,
+  disabled,
+  onSubmit,
+  mode,
+  isSubmitting,
+  onClose,
+}) => {
   const formConfig = STATUS_FORM_CONFIG[status];
-  console.log("🚀 ~ StatusController ~ formConfig:", STATUS_FORM_CONFIG);
-
-  const methods = useForm({
+  const { handleSubmit, ...methods } = useForm({
     defaultValues: {
       ...formConfig.defaultValues,
-      ...item,
+      ...item?.status,
     },
     resolver: zodResolver(getValidationSchema(status)),
   });
+
   const FormComponent = {
     [MACHINE_STATUS.ORDER_CREATED]: OrderCreated,
     [MACHINE_STATUS.IDLE]: Idle,
@@ -31,12 +38,32 @@ const StatusController = ({ status, item, disabled, onSubmit, groups }) => {
     [MACHINE_STATUS.TESTING]: Testing,
     [MACHINE_STATUS.STOPPED]: Stopped,
   }[status];
+  // 🧠 添加 debug 來查看表單狀態
+  const handleFormSubmit = (data) => {
+    console.log("Form submitted:", data);
+    onSubmit(data);
+  };
   if (!FormComponent) return null;
 
   return (
     <FormProvider {...methods}>
-      <form id="status-form" onSubmit={methods.handleSubmit(onSubmit)}>
-        <FormComponent disabled={disabled} item={item} groups={groups} />
+      <form id="status-form" onSubmit={handleSubmit(handleFormSubmit)}>
+        <FormComponent disabled={disabled} item={item} />
+        <DialogActions>
+          <Button onClick={onClose} disabled={isSubmitting}>
+            取消
+          </Button>
+          {mode !== "view" && (
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
+            >
+              確認
+            </Button>
+          )}
+        </DialogActions>
       </form>
     </FormProvider>
   );

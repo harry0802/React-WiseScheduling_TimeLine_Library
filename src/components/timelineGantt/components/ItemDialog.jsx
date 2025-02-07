@@ -54,8 +54,6 @@ const ItemDialog = ({
   // 處理表單提交
   const onSubmit = (data) => {
     const updatedItem = formUtils.createUpdatedItem(data, item);
-    console.log("🚀 ~ onSubmit ~ updatedItem:", updatedItem);
-
     onSave(updatedItem);
     onClose();
   };
@@ -69,8 +67,6 @@ const ItemDialog = ({
   }, [startTime, setValue]);
 
   if (!item) return null;
-  console.log("🚀 ~ item:", item);
-
   return (
     <Dialog open={isOpen} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>製令單詳細資訊</DialogTitle>
