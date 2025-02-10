@@ -67,3 +67,19 @@ export const parseDate = (dateString) => {
 export const isValidDate = (date) => {
   return dayjs(date).isValid();
 };
+
+// 轉換時間格式 (for form display)
+export const formatToFormDateTime = (date) => {
+  console.log("🚀 ~ formatToFormDateTime ~ date:", date);
+  if (!date) return "";
+
+  console.log(dayjs(date).format("YYYY-MM-DDTHH:mm"));
+
+  return dayjs(date).format("YYYY-MM-DDTHH:mm");
+};
+
+// 轉換時間格式 (for vis.js)
+export const formatToVisDateTime = (date) => {
+  if (!date) return null;
+  return dayjs(date).toDate();
+};

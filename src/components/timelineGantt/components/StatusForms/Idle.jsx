@@ -6,8 +6,6 @@ import { MACHINE_STATUS } from "../../configs/constants";
 
 const Idle = ({ disabled, item }) => {
   const { register, errors } = useStatusForm(MACHINE_STATUS.IDLE, item);
-  console.log("🚀 ~ Idle ~ errors:", errors);
-
   if (!item?.status) {
     return null;
   }

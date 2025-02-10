@@ -2,6 +2,7 @@
 import { useFormContext } from "react-hook-form";
 import { useEffect } from "react";
 import dayjs from "dayjs";
+import { formatToFormDateTime } from "../utils/dateUtils";
 
 // 🧠 集中管理表單欄位配置
 const FORM_FIELDS = {
@@ -23,7 +24,7 @@ export const useStatusForm = (status, item) => {
   // ✨ 初始化表單數據
   useEffect(() => {
     if (!item) return;
-
+    console.log("🚀 ~ useEffect ~ item:", item);
     // 設置基本資訊
     FORM_FIELDS.basic.forEach((field) => {
       setValue(field, field === "status" ? status : item[field]);
@@ -36,8 +37,8 @@ export const useStatusForm = (status, item) => {
 
     // 設置時間資訊
     FORM_FIELDS.time.forEach((field) => {
-      const value = item.orderInfo[field];
-      setValue(field, value ? dayjs(value).format("YYYY-MM-DDTHH:mm") : "");
+      const value = item[field];
+      setValue(field, formatToFormDateTime(value));
     });
 
     // 設置狀態資訊

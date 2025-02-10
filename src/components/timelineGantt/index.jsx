@@ -1,21 +1,36 @@
-// export default DynamicTimeline;
 //! =============== 1. 設定與常量 ===============
+//* 這個區塊包含所有專案配置,便於統一管理
+
+//* 基礎 React Hooks
 import { useEffect, useRef, useState, useCallback } from "react";
+
+//* UI 組件相關
 import { Timeline } from "vis-timeline/standalone";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
+
+//* 自定義組件
 import TimelineControls from "./components/TimelineControls";
-// import ItemDialog from "./components/ItemDialog";
 import OperationDialog from "./components/OperationDialog";
+import ItemDialog from "./components/ItemDialog/index";
+
+//* Hooks 與工具函數
 import { useTimelineData } from "./hooks/useTimelineData";
 import { TIMELINE_STYLES } from "./configs/timeline/timelineConfigs";
 import dayjs from "dayjs";
-import { getTimeWindow } from "./utils/dateUtils";
-import "dayjs/locale/zh-tw"; // 導入繁體中文語系
-dayjs.locale("zh-tw"); // 設置使用繁體中文
-import moment from "moment"; // 新增這行
+import {
+  formatToFormDateTime,
+  formatToVisDateTime,
+  getTimeWindow,
+} from "./utils/dateUtils";
 
+//* 多語系設定
+import "dayjs/locale/zh-tw";
+dayjs.locale("zh-tw");
+import moment from "moment";
+
+//* 樣式組件
 import {
   BaseTimelineContainer,
   TimelineGrid,
@@ -26,21 +41,23 @@ import {
   StatusProgress,
 } from "./styles";
 
+//* Timeline 配置
 import {
   BASE_TIMELINE_OPTIONS,
   TIME_FORMAT_CONFIG,
 } from "./configs/timeline/timelineOptions";
 
+//* 其他配置
 import { momentLocaleConfig } from "./configs/timeline/timelineLocale";
-import ItemDialog from "./components/ItemDialog/index";
 import { MACHINE_STATUS } from "./configs/constants";
 
-// 修改 moment 相關設定
+// moment 相關設定
 if (moment) {
   moment.updateLocale("zh-tw", momentLocaleConfig);
 }
 
 //! =============== 2. 類型與介面 ===============
+//* 定義所有資料結構,幫助理解資料流向
 /**
  * @typedef {Object} TimelineItem
  * @property {number|string} id - 項目唯一識別碼
@@ -59,6 +76,7 @@ if (moment) {
  */
 
 //! =============== 3. 核心功能 ===============
+//* 主要業務邏輯區,每個功能都配有詳細說明
 const DynamicTimeline = () => {
   //* 基礎狀態管理
   const containerRef = useRef(null);
@@ -77,7 +95,7 @@ const DynamicTimeline = () => {
 
   /**
    * @function getTimelineOptions
-   *  @description 根據當前時間範圍生成 Timeline 配置
+   * @description 根據當前時間範圍生成 Timeline 配置
    */
   const getTimelineOptions = useCallback(() => {
     const timeWindow = getTimeWindow(timeRange);
@@ -91,12 +109,12 @@ const DynamicTimeline = () => {
         remove: true,
       },
       onMove: function (item, callback) {
-        callback(item); // 接受移动
+        callback(item);
       },
       format: TIME_FORMAT_CONFIG,
       start: timeWindow.start.toDate(),
       end: timeWindow.end.toDate(),
-      snap: null, // 關閉吸附效果
+      snap: null,
     };
   }, [timeRange]);
 
@@ -134,7 +152,6 @@ const DynamicTimeline = () => {
     if (!timelineRef.current) return;
 
     const handleDoubleClick = (properties) => {
-      // 檢查是否有點擊到 item (properties.item 為 undefined 表示沒點到)
       if (!properties.item) return;
 
       const clickedItem = itemsDataRef.current?.get(properties.item);
@@ -170,6 +187,7 @@ const DynamicTimeline = () => {
   }, [initTimeline, handleTimelineEvents]);
 
   //! =============== 4. 工具函數 ===============
+  //* 通用功能區,可被多個模組復用
   /**
    * @function handleSaveItem
    * @description 處理項目保存操作
@@ -226,7 +244,6 @@ const DynamicTimeline = () => {
       }));
     } catch (error) {
       console.error("刪除項目失敗:", error);
-      //TODO: 加入錯誤提示 UI
     }
   }, [dialogState.selectedItem]);
 
@@ -238,29 +255,23 @@ const DynamicTimeline = () => {
     if (!timelineRef.current) return;
 
     try {
-      const window = timelineRef.current.getWindow();
-      const centerTime = dayjs(
-        (window.start.getTime() + window.end.getTime()) / 2
-      );
+      const centerTime = dayjs().tz("Asia/Taipei");
+      const endTime = centerTime.add(2, "hour");
 
       const newItem = {
         id: `ORDER-${Date.now()}`,
         group: "A1",
         area: "A",
         timeLineStatus: MACHINE_STATUS.IDLE,
-
-        // 狀態資訊
         status: {
           startTime: centerTime.toDate(),
-          endTime: centerTime.add(2, "hour").toDate(),
+          endTime: endTime.toDate(),
           reason: "",
           product: "",
         },
-
-        // 訂單資訊
         orderInfo: {
-          start: centerTime.toDate(),
-          end: centerTime.add(2, "hour").toDate(),
+          start: "",
+          end: "",
           actualStart: null,
           actualEnd: null,
           productId: "",
@@ -271,8 +282,7 @@ const DynamicTimeline = () => {
           orderStatus: "尚未上機",
         },
         start: centerTime.toDate(),
-        end: centerTime.add(2, "hour").toDate(),
-        // 視覺相關
+        end: endTime.toDate(),
         className: "status-order",
         content: "新訂單",
       };
@@ -305,6 +315,7 @@ const DynamicTimeline = () => {
       console.error("移動到當前時間失敗:", error);
     }
   }, [timeRange]);
+
   //* 渲染區塊
   return (
     <Box sx={{ p: 4 }}>
@@ -338,23 +349,6 @@ const DynamicTimeline = () => {
         </TimelineGrid>
       </BaseTimelineContainer>
 
-      {/* <ItemDialog
-        isOpen={dialogState.isOpen}
-        onClose={() =>
-          setDialogState((prev) => ({
-            ...prev,
-            isOpen: false,
-            selectedItem: null,
-          }))
-        }
-        item={dialogState.selectedItem}
-        mode={dialogState.mode}
-        onSave={handleSaveItem}
-        onDelete={() => setIsDeleteDialogOpen(true)}
-        groups={groups}
-      /> */}
-
-      {/* 訂單對話框 */}
       {dialogState.selectedItem && (
         <ItemDialog
           open={dialogState.isOpen}
