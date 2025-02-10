@@ -1,6 +1,7 @@
 // components/StatusForms/Setup.jsx
-import { Grid, TextField } from "@mui/material";
+import { Grid, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
+import { FORM_CONFIG } from "../../configs/formConfig";
 
 const Setup = ({ disabled }) => {
   const {
@@ -10,20 +11,42 @@ const Setup = ({ disabled }) => {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12} sm={6}>
-        <TextField
-          fullWidth
-          {...register("startTime")}
-          type="datetime-local"
-          label="開始時間"
-          error={!!errors.startTime}
-          helperText={errors.startTime?.message}
-          disabled={disabled}
-          InputLabelProps={{ shrink: true }}
-        />
+      <Grid item xs={12}>
+        <Typography variant="subtitle1" color="primary" gutterBottom>
+          時程安排
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              {...register("start")}
+              {...FORM_CONFIG.timePickerProps}
+              label="開始時間"
+              error={!!errors.start}
+              helperText={errors.start?.message}
+              disabled={disabled}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              {...register("end")}
+              {...FORM_CONFIG.timePickerProps}
+              label="結束時間"
+              error={!!errors.end}
+              helperText={errors.end?.message}
+              disabled={disabled}
+            />
+          </Grid>
+        </Grid>
       </Grid>
 
       <Grid item xs={12} sm={6}>
+        <Typography
+          variant="subtitle1"
+          color="primary"
+          gutterBottom
+        ></Typography>
         <TextField
           fullWidth
           {...register("setupInfo")}

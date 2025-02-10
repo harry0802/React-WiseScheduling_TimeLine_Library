@@ -14,12 +14,20 @@ const StatusChangeDialog = ({
   currentStatus,
   onStatusChange,
   disabled,
+  mode,
 }) => {
   // 🧠 獲取可用的狀態選項
   const getAvailableStatuses = () => {
     // 製立單不可切換
     if (currentStatus === MACHINE_STATUS.ORDER_CREATED) {
       return [];
+    }
+    // 新增模式時可以切換到所有狀態（除了製立單和當前狀態）
+    if (mode === "add") {
+      return Object.values(MACHINE_STATUS).filter(
+        (status) =>
+          status !== MACHINE_STATUS.ORDER_CREATED && status !== currentStatus
+      );
     }
 
     // 待機狀態可以切換到其他狀態
