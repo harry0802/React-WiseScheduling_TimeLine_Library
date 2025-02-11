@@ -283,7 +283,7 @@ const DynamicTimeline = () => {
         },
         start: centerTime.toDate(),
         end: endTime.toDate(),
-        className: "status-order",
+        className: "status-idle",
         content: "新訂單",
       };
 
