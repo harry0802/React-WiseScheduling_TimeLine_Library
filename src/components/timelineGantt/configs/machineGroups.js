@@ -10,7 +10,7 @@ const createMachine = (area, number) => ({
 });
 
 // ✨ 生成指定區域的所有機台
-const createAreaMachines = (area) => {
+export const createAreaMachines = (area) => {
   return Array.from({ length: MACHINE_CONFIG.MACHINES_PER_AREA }, (_, i) =>
     createMachine(area, i + 1)
   );

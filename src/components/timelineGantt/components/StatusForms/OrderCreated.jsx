@@ -1,15 +1,32 @@
 // components/StatusForms/OrderCreated.jsx
-import { Grid, TextField, Typography, MenuItem } from "@mui/material";
+import {
+  Grid,
+  TextField,
+  Typography,
+  MenuItem,
+  CircularProgress,
+} from "@mui/material";
 import { useStatusForm } from "../../hooks/useStatusForm";
 import { FORM_CONFIG, VALIDATION_RULES } from "../../configs/formConfig";
-import { MACHINE_STATUS } from "../../configs/constants";
+import { MACHINE_CONFIG, MACHINE_STATUS } from "../../configs/constants";
+import { createAreaMachines } from "../../configs/machineGroups";
+import { Controller, useFormContext } from "react-hook-form";
 
-const OrderCreated = ({ item, disabled, groups }) => {
-  const { register, errors, watch } = useStatusForm(
+const OrderCreated = ({ item, disabled }) => {
+  console.log("🚀 ~ OrderCreated ~ item:", item);
+  const { register, errors, watch, control, initialized } = useStatusForm(
     MACHINE_STATUS.ORDER_CREATED,
     item
   );
+  const selectedArea = watch("area");
+  console.log("🚀 ~ OrderCreated ~ selectedArea:", selectedArea);
 
+  // 直接使用 createAreaMachines 生成當前區域的機台
+  const filteredGroups = selectedArea ? createAreaMachines(selectedArea) : [];
+
+  if (!initialized) {
+    return <CircularProgress />; // 或其他 loading 狀態
+  }
   // 添加完整的防護檢查
   if (!item?.id || !item?.orderInfo || !item?.status) {
     return null;
@@ -23,7 +40,7 @@ const OrderCreated = ({ item, disabled, groups }) => {
           基本資訊
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={4}>
             <TextField
               fullWidth
               {...register("id")}
@@ -32,7 +49,7 @@ const OrderCreated = ({ item, disabled, groups }) => {
               disabled
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={4}>
             <TextField
               fullWidth
               {...register("productName")}
@@ -41,6 +58,34 @@ const OrderCreated = ({ item, disabled, groups }) => {
               disabled
             />
           </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              {...register("process")}
+              label="製程名稱"
+              value={item.orderInfo.process}
+              disabled
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              {...register("area", VALIDATION_RULES.area)}
+              select
+              label="區域"
+              error={!!errors.area}
+              helperText={errors.area?.message}
+              disabled={disabled}
+              value={watch("area") || ""}
+            >
+              {MACHINE_CONFIG.AREAS.map((area) => (
+                <MenuItem key={area} value={area}>
+                  {area}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
@@ -49,28 +94,15 @@ const OrderCreated = ({ item, disabled, groups }) => {
               label="機台編號"
               error={!!errors.group}
               helperText={errors.group?.message}
-              disabled={disabled}
-              value={watch("group") || ""}
+              disabled={disabled || !selectedArea}
+              value={watch("group") || filteredGroups[0]?.id || ""}
             >
-              {Array.isArray(groups?.get?.()) ? (
-                groups.get().map((group) => (
-                  <MenuItem key={group.id} value={group.id}>
-                    {group.content || group.id}
-                  </MenuItem>
-                ))
-              ) : (
-                <MenuItem value="">無可用機台</MenuItem>
-              )}
+              {filteredGroups.map((group) => (
+                <MenuItem key={group.id} value={group.id}>
+                  {group.content}
+                </MenuItem>
+              ))}
             </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              {...register("process")}
-              label="製程名稱"
-              value={item.orderInfo.process}
-              disabled
-            />
           </Grid>
         </Grid>
       </Grid>
@@ -117,24 +149,39 @@ const OrderCreated = ({ item, disabled, groups }) => {
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              {...register("start", VALIDATION_RULES.start)}
-              {...FORM_CONFIG.timePickerProps}
-              label="預計上機日"
-              error={!!errors.start}
-              helperText={errors.start?.message}
+            <Controller
+              name="start"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="預計上機日"
+                  type="datetime-local"
+                  error={!!error}
+                  helperText={error?.message || ""}
+                  disabled={disabled}
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              {...register("end", VALIDATION_RULES.end)}
-              {...FORM_CONFIG.timePickerProps}
-              label="預計完成日"
-              error={!!errors.end}
-              helperText={errors.end?.message}
-              disabled={disabled}
+            <Controller
+              name="end"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="預計完成日"
+                  type="datetime-local"
+                  error={!!error}
+                  helperText={error?.message || ""}
+                  disabled={disabled}
+                  InputLabelProps={{ shrink: true }}
+                />
+              )}
             />
           </Grid>
         </Grid>

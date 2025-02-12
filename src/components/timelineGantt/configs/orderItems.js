@@ -34,10 +34,10 @@ const createDemoOrder = (start = getWorkStartTime()) => {
 
     // 訂單資訊
     orderInfo: {
-      start: startTime.toDate(),
-      end: startTime.add(4, "hour").toDate(),
-      actualStart: null,
-      actualEnd: null,
+      scheduledStartTime: startTime.toDate(), // 預計開始時間
+      scheduledEndTime: startTime.add(4, "hour").toDate(), // 預計結束時間
+      actualStartTime: null, // 實際開始時間
+      actualEndTime: null, // 實際結束時間
       productId: "SP-01048-AR1-01",
       productName: "封蓋外(R)灌包 黑VW326",
       quantity: 1100,
@@ -59,12 +59,12 @@ export const generateInitialOrders = () => {
       ...item,
       start: dayjs(
         item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED
-          ? item.orderInfo.start
+          ? item.orderInfo.actualStartTime || item.orderInfo.scheduledStartTime
           : item.status.startTime
       ).toDate(),
       end: dayjs(
         item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED
-          ? item.orderInfo.end
+          ? item.orderInfo.actualEndTime || item.orderInfo.scheduledEndTime
           : item.status.endTime || dayjs(item.status.startTime).add(2, "hour")
       ).toDate(),
     }))

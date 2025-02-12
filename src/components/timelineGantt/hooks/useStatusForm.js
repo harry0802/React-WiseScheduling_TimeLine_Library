@@ -1,12 +1,12 @@
 // hooks/useStatusForm.js
 import { useFormContext } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import dayjs from "dayjs";
 import { formatToFormDateTime } from "../utils/dateUtils";
 
 // 🧠 集中管理表單欄位配置
 const FORM_FIELDS = {
-  basic: ["status", "id", "group"],
+  basic: ["status", "id", "group", "area"],
   order: ["productName", "process", "quantity", "completedQty"],
   time: ["start", "end"],
   status: ["orderStatus", "startTime", "endTime"],
@@ -18,45 +18,82 @@ export const useStatusForm = (status, item) => {
     register,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = methods;
 
-  // ✨ 初始化表單數據
+  // 使用 ref 追踪初始化狀態
+  const isInitialized = useRef(false);
+
+  // 初始化表單數據
   useEffect(() => {
-    if (!item) return;
-    console.log("🚀 ~ useEffect ~ item:", item);
-    // 設置基本資訊
-    FORM_FIELDS.basic.forEach((field) => {
-      setValue(field, field === "status" ? status : item[field]);
-    });
+    if (!item || isInitialized.current) return;
 
-    // 設置訂單資訊
-    FORM_FIELDS.order.forEach((field) => {
-      setValue(field, item.orderInfo[field]);
-    });
+    // 批次設置所有值
+    const updates = {
+      // 基本資訊
+      ...FORM_FIELDS.basic.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field]: field === "status" ? status : item[field],
+        }),
+        {}
+      ),
 
-    // 設置時間資訊
-    FORM_FIELDS.time.forEach((field) => {
-      const value = item[field];
-      setValue(field, formatToFormDateTime(value));
-    });
+      // 訂單資訊
+      ...FORM_FIELDS.order.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field]: item.orderInfo?.[field],
+        }),
+        {}
+      ),
 
-    // 設置狀態資訊
-    FORM_FIELDS.status.forEach((field) => {
-      if (field === "orderStatus") {
-        setValue(field, item.orderInfo[field]);
-      } else {
-        setValue(field, item.status?.[field]);
+      // 時間資訊
+      ...FORM_FIELDS.time.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field]: formatToFormDateTime(item[field]),
+        }),
+        {}
+      ),
+
+      // 狀態資訊
+      ...FORM_FIELDS.status.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field]:
+            field === "orderStatus"
+              ? item.orderInfo?.[field]
+              : item.status?.[field],
+        }),
+        {}
+      ),
+    };
+
+    // 一次性設置所有值
+    Object.entries(updates).forEach(([field, value]) => {
+      if (value !== undefined) {
+        setValue(field, value, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
       }
     });
+
+    isInitialized.current = true;
   }, [item, setValue, status]);
+
+  // 提供初始化狀態
+  const initialized = isInitialized.current;
 
   return {
     register,
     watch,
     errors,
+    control,
     setValue,
-    // 💡 提供一些常用的輔助方法
+    initialized,
     getFieldValue: watch,
     isFieldError: (fieldName) => !!errors[fieldName],
   };

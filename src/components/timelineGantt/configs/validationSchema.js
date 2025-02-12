@@ -1,55 +1,74 @@
-// validationSchema.js
+// validationSchema.ts
 import { z } from "zod";
 import dayjs from "dayjs";
 import { MACHINE_STATUS } from "./constants";
 
 // 🧠 基礎時間驗證
-const timeSchema = z.object({
-  startTime: z
+const timeValidation = {
+  start: z
     .string()
     .min(1, "開始時間為必填")
-    .refine((val) => dayjs(val).isAfter(dayjs()), {
-      message: "開始時間不能早於現在",
-    }),
-});
+    .transform((val) => dayjs(val).toDate())
+    .refine((date) => dayjs(date).isValid(), "時間格式錯誤"),
+  end: z
+    .string()
+    .min(1, "結束時間為必填")
+    .transform((val) => dayjs(val).toDate())
+    .refine((date) => dayjs(date).isValid(), "時間格式錯誤"),
+};
 
-// ✨ 各狀態的驗證 Schema
-export const statusSchemas = {
-  // 製立單驗證規則
-  [MACHINE_STATUS.ORDER_CREATED]: z.object({
+// 💡 製令單驗證
+const orderSchema = z
+  .object({
     group: z.string().min(1, "機台編號為必填"),
-    start: z.string().min(1, "預計開始時間為必填"),
-    end: z
-      .string()
-      .min(1, "預計結束時間為必填")
-      .refine(
-        (end, ctx) => {
-          return dayjs(end).isAfter(dayjs(ctx.data.start));
-        },
-        {
-          message: "結束時間必須晚於開始時間",
-        }
-      ),
-  }),
+    area: z.string().min(1, "區域為必填"),
+    ...timeValidation,
+  })
+  .refine(
+    (data) => {
+      console.log("🚀 ~ data:", data);
+      const now = dayjs();
+      const end = dayjs(data.end);
+      return end.isAfter(now);
+    },
+    { message: "結束時間不能早於現在", path: ["end"] }
+  )
+  .refine(
+    (data) => {
+      const start = dayjs(data.start);
+      const end = dayjs(data.end);
+      return end.isAfter(start);
+    },
+    { message: "結束時間必須晚於開始時間", path: ["end"] }
+  )
+  .refine(
+    (data) => {
+      const start = dayjs(data.start);
+      const end = dayjs(data.end);
+      return end.diff(start, "hour") >= 4;
+    },
+    { message: "排程時間至少需要 4 小時", path: ["end"] }
+  );
+// 其他狀態驗證
+export const statusSchemas = {
+  [MACHINE_STATUS.ORDER_CREATED]: orderSchema,
 
-  // 待機中驗證規則
   [MACHINE_STATUS.IDLE]: z.object({
     start: z.string().min(1, "開始時間為必填"),
     end: z.string().optional(),
+    area: z.string().min(1, "區域為必填"),
+    group: z.string().min(1, "機台編號為必填"),
   }),
 
-  // 上模與調機驗證規則
-  [MACHINE_STATUS.SETUP]: timeSchema.extend({
+  [MACHINE_STATUS.SETUP]: z.object({
     setupInfo: z.string().optional(),
   }),
 
-  // 產品試模驗證規則
-  [MACHINE_STATUS.TESTING]: timeSchema.extend({
+  [MACHINE_STATUS.TESTING]: z.object({
     product: z.string().optional(),
   }),
 
-  // 機台停機驗證規則
-  [MACHINE_STATUS.STOPPED]: timeSchema.extend({
+  [MACHINE_STATUS.STOPPED]: z.object({
     reason: z
       .string()
       .min(2, "停機原因至少需要2個字")
@@ -57,7 +76,5 @@ export const statusSchemas = {
   }),
 };
 
-// 💡 獲取對應狀態的驗證 schema
-export const getValidationSchema = (status) => {
-  return statusSchemas[status] || z.object({});
-};
+export const getValidationSchema = (status) =>
+  statusSchemas[status] || z.object({});

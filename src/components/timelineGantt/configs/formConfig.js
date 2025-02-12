@@ -44,6 +44,10 @@ export const VALIDATION_RULES = {
   group: {
     required: "請選擇機台",
   },
+
+  area: {
+    required: "請選擇區域",
+  },
 };
 
 // 🧠 表單配置
@@ -64,6 +68,8 @@ export const STATUS_FORM_CONFIG = {
     defaultValues: {
       startTime: dayjs().toDate(),
       endTime: dayjs().add(2, "hour").toDate(),
+      group: "",
+      area: "",
     },
   },
 

@@ -75,7 +75,6 @@ export const STATUS_CONFIG = {
 
 // 🧠 狀態操作函數
 export const canTransitTo = (currentStatus) => {
-  console.log("🚀 ~ canTransitTo ~ currentStatus:", currentStatus);
   const config = STATUS_CONFIG[currentStatus];
 
   // 如果狀態不能切換或配置不存在，返回 false

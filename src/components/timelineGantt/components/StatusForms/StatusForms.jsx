@@ -21,6 +21,7 @@ const StatusController = ({
   mode,
   isSubmitting,
   onClose,
+  groups,
 }) => {
   const formConfig = STATUS_FORM_CONFIG[status];
   const { handleSubmit, ...methods } = useForm({
@@ -48,7 +49,7 @@ const StatusController = ({
   return (
     <FormProvider {...methods}>
       <form id="status-form" onSubmit={handleSubmit(handleFormSubmit)}>
-        <FormComponent disabled={disabled} item={item} />
+        <FormComponent disabled={disabled} item={item} groups={groups} />
         <DialogActions>
           <Button onClick={onClose} disabled={isSubmitting}>
             取消

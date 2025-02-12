@@ -37,6 +37,7 @@ const ItemDialog = ({
   item,
   mode = "view", // view, edit, add
   onSave,
+  groups,
 }) => {
   //* 基礎狀態管理
   const [currentStatus, setCurrentStatus] = useState(
@@ -70,12 +71,26 @@ const ItemDialog = ({
 
       const updatedItem = {
         ...item,
-        timeLineStatus: currentStatus,
+        group: formData.group || "",
+        area: formData.area || "",
+        start: formData.start || null,
+        end: formData.end || null,
+        timeLineStatus: formData.timeLineStatus || currentStatus,
         status: {
           ...item.status,
-          ...formData,
-          startTime: formData.start ? new Date(formData.start) : null,
-          endTime: formData.end ? new Date(formData.end) : null,
+          product: formData.product || "",
+          reason: formData.reason || "",
+          startTime: formData.start || null,
+          endTime: formData.end || null,
+        },
+        orderInfo: {
+          ...item.orderInfo,
+          productName: formData.productName || "",
+          process: formData.process || "",
+          scheduledStartTime: formData.start || null,
+          scheduledEndTime: formData.end || null,
+          actualStartTime: formData.start || null,
+          actualEndTime: formData.end || null,
         },
       };
 
@@ -142,6 +157,7 @@ const ItemDialog = ({
             mode={mode}
             isSubmitting={isSubmitting}
             onClose={onClose}
+            groups={groups}
           />
         </DialogContent>
       </Dialog>

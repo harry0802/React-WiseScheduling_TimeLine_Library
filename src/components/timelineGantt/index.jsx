@@ -19,11 +19,7 @@ import ItemDialog from "./components/ItemDialog/index";
 import { useTimelineData } from "./hooks/useTimelineData";
 import { TIMELINE_STYLES } from "./configs/timeline/timelineConfigs";
 import dayjs from "dayjs";
-import {
-  formatToFormDateTime,
-  formatToVisDateTime,
-  getTimeWindow,
-} from "./utils/dateUtils";
+import { getTimeWindow } from "./utils/dateUtils";
 
 //* 多語系設定
 import "dayjs/locale/zh-tw";
@@ -196,20 +192,21 @@ const DynamicTimeline = () => {
   const handleSaveItem = useCallback(
     (updatedItem) => {
       if (!itemsDataRef.current) return;
+      console.log(updatedItem.group.split()[0]);
 
       try {
         const processedItem = {
           ...updatedItem,
-          start: dayjs(updatedItem.orderInfo.start).toDate(),
-          end: dayjs(updatedItem.orderInfo.end).toDate(),
+          start: dayjs(updatedItem.orderInfo.scheduledStartTime).toDate(),
+          end: dayjs(updatedItem.orderInfo.scheduledEndTime).toDate(),
           ...(updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED && {
             start: dayjs(updatedItem.status.startTime).toDate(),
             end: updatedItem.status.endTime
               ? dayjs(updatedItem.status.endTime).toDate()
               : dayjs(updatedItem.status.startTime).add(2, "hour").toDate(),
           }),
+          area: updatedItem.group.match(/[A-Z]/)[0],
         };
-
         if (dialogState.mode === "add") {
           itemsDataRef.current.add(processedItem);
         } else {
