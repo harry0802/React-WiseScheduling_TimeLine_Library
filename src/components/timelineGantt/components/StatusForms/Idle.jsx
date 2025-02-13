@@ -13,13 +13,11 @@ import { createAreaMachines } from "../../configs/machineGroups";
 import { useMemo } from "react";
 
 const Idle = ({ disabled, item }) => {
-  console.log("🚀 ~ Idle ~ item:", item);
   const { register, errors, watch, initialized } = useStatusForm(
     MACHINE_STATUS.IDLE,
     item
   );
   const selectedArea = watch("area");
-  console.log(watch("group"));
 
   const filteredGroups = useMemo(
     () => (selectedArea ? createAreaMachines(selectedArea) : []),

@@ -7,7 +7,10 @@ import styled from "styled-components";
 const StatusBase = styled.div`
   /* 基礎樣式 */
   .vis-item {
-    transition: color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease,
+      color 0.2s ease;
+    cursor: pointer;
+    font-size: 18px;
   }
 
   /* 生產中 */
@@ -15,6 +18,12 @@ const StatusBase = styled.div`
     background-color: #4caf50;
     border-color: #2e7d32;
     color: white;
+
+    &:hover {
+      background-color: #5db761;
+      border-color: #4caf50;
+      color: white;
+    }
   }
 
   /* 待機中 */
@@ -26,16 +35,25 @@ const StatusBase = styled.div`
 
   /* 上模與調機 */
   .vis-item.status-setup {
-    background-color: #2196f3;
-    border-color: #1976d2;
+    background-color: #ff9800;
+    border-color: #f57c00;
     color: white;
+    &:hover {
+      background-color: #ffac32;
+      border-color: #ff9800;
+    }
   }
 
   /* 產品試模 */
   .vis-item.status-testing {
-    background-color: #ff9800;
-    border-color: #f57c00;
+    background-color: #2196f3;
+    border-color: #1976d2;
     color: white;
+    &:hover {
+      background-color: #4dabf5;
+      border-color: #2196f3;
+      color: white;
+    }
   }
 
   /* 異常與警告 */

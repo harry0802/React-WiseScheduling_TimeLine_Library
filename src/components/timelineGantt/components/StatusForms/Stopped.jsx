@@ -2,12 +2,14 @@
 import { Grid, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import { FORM_CONFIG } from "../../configs/formConfig";
+import { MACHINE_STATUS } from "../../configs/constants";
+import { useStatusForm } from "../../hooks/useStatusForm";
 
-const Stopped = ({ disabled }) => {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext();
+const Stopped = ({ disabled, item }) => {
+  const { register, errors, watch, control, initialized } = useStatusForm(
+    MACHINE_STATUS.STOPPED,
+    item
+  );
 
   return (
     <Grid container spacing={2}>

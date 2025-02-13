@@ -6,13 +6,22 @@ import { formatToFormDateTime } from "../utils/dateUtils";
 
 // 🧠 集中管理表單欄位配置
 const FORM_FIELDS = {
-  basic: ["status", "id", "group", "area"],
-  order: ["productName", "process", "quantity", "completedQty"],
+  basic: ["status", "id", "group", "area", "timeLineStatus"],
+  order: [
+    "productName",
+    "process",
+    "quantity",
+    "completedQty",
+    "scheduledStartTime",
+    "scheduledEndTime",
+    "orderStatus",
+  ],
   time: ["start", "end"],
-  status: ["orderStatus", "startTime", "endTime"],
+  status: ["startTime", "endTime", "reason", "product"],
 };
 
 export const useStatusForm = (status, item) => {
+  console.log("🚀 ~ useStatusForm ~ item:", item);
   const methods = useFormContext();
   const {
     register,
@@ -62,14 +71,12 @@ export const useStatusForm = (status, item) => {
       ...FORM_FIELDS.status.reduce(
         (acc, field) => ({
           ...acc,
-          [field]:
-            field === "orderStatus"
-              ? item.orderInfo?.[field]
-              : item.status?.[field],
+          [field]: item.status?.[field],
         }),
         {}
       ),
     };
+    console.log("🚀 ~ useEffect ~ updates:", updates);
 
     // 一次性設置所有值
     Object.entries(updates).forEach(([field, value]) => {

@@ -45,7 +45,12 @@ import {
 
 //* 其他配置
 import { momentLocaleConfig } from "./configs/timeline/timelineLocale";
-import { MACHINE_STATUS } from "./configs/constants";
+import {
+  getStatusClass,
+  getStatusName,
+  MACHINE_STATUS,
+} from "./configs/constants";
+import { tr } from "date-fns/locale";
 
 // moment 相關設定
 if (moment) {
@@ -102,7 +107,7 @@ const DynamicTimeline = () => {
         add: false,
         updateTime: true,
         updateGroup: true,
-        remove: true,
+        // remove: true,
       },
       onMove: function (item, callback) {
         callback(item);
@@ -191,12 +196,15 @@ const DynamicTimeline = () => {
    */
   const handleSaveItem = useCallback(
     (updatedItem) => {
+      console.log("🚀 ~ DynamicTimeline ~ updatedItem:", updatedItem);
+      console.log(getStatusClass(updatedItem.timeLineStatus));
       if (!itemsDataRef.current) return;
-      console.log(updatedItem.group.split()[0]);
 
       try {
         const processedItem = {
           ...updatedItem,
+          //  更新 ui:
+          className: getStatusClass(updatedItem.timeLineStatus),
           start: dayjs(updatedItem.orderInfo.scheduledStartTime).toDate(),
           end: dayjs(updatedItem.orderInfo.scheduledEndTime).toDate(),
           ...(updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED && {
@@ -206,7 +214,14 @@ const DynamicTimeline = () => {
               : dayjs(updatedItem.status.startTime).add(2, "hour").toDate(),
           }),
           area: updatedItem.group.match(/[A-Z]/)[0],
+          updateTime: false,
+          editable: {
+            updateTime: false,
+            updateGroup: false,
+            remove: true,
+          },
         };
+        console.log("🚀 ~ DynamicTimeline ~ processedItem:", processedItem);
         if (dialogState.mode === "add") {
           itemsDataRef.current.add(processedItem);
         } else {

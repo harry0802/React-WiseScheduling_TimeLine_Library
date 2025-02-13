@@ -57,6 +57,7 @@ export const generateInitialOrders = () => {
   return new DataSet(
     [createDemoOrder()].map((item) => ({
       ...item,
+
       start: dayjs(
         item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED
           ? item.orderInfo.actualStartTime || item.orderInfo.scheduledStartTime

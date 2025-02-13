@@ -22,6 +22,15 @@ const orderSchema = z
   .object({
     group: z.string().min(1, "機台編號為必填"),
     area: z.string().min(1, "區域為必填"),
+    // 系統記錄值，不需嚴格驗證
+    actualStartTime: z.optional(z.date()),
+    actualEndTime: z.optional(z.date()),
+    productId: z.optional(z.string()),
+    productName: z.optional(z.string()),
+    quantity: z.optional(z.number()),
+    completedQty: z.optional(z.number()),
+    process: z.optional(z.string()),
+    orderStatus: z.optional(z.string()),
     ...timeValidation,
   })
   .refine(
@@ -49,6 +58,7 @@ const orderSchema = z
     },
     { message: "排程時間至少需要 4 小時", path: ["end"] }
   );
+
 // 其他狀態驗證
 export const statusSchemas = {
   [MACHINE_STATUS.ORDER_CREATED]: orderSchema,
@@ -61,14 +71,31 @@ export const statusSchemas = {
   }),
 
   [MACHINE_STATUS.SETUP]: z.object({
+    start: z.string().min(1, "開始時間為必填"),
+    end: z.string().optional(),
+    area: z.string().min(1, "區域為必填"),
+    group: z.string().min(1, "機台編號為必填"),
     setupInfo: z.string().optional(),
+    className: z.string().optional(),
+    reason: z.string().optional(),
   }),
 
   [MACHINE_STATUS.TESTING]: z.object({
     product: z.string().optional(),
+    start: z.string().min(1, "開始時間為必填"),
+    end: z.string().optional(),
+    area: z.string().min(1, "區域為必填"),
+    group: z.string().min(1, "機台編號為必填"),
+    className: z.string().optional(),
   }),
 
   [MACHINE_STATUS.STOPPED]: z.object({
+    product: z.string().optional(),
+    start: z.string().min(1, "開始時間為必填"),
+    end: z.string().optional(),
+    area: z.string().min(1, "區域為必填"),
+    group: z.string().min(1, "機台編號為必填"),
+    className: z.string().optional(),
     reason: z
       .string()
       .min(2, "停機原因至少需要2個字")

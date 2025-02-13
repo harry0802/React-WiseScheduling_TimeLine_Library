@@ -13,14 +13,11 @@ import { createAreaMachines } from "../../configs/machineGroups";
 import { Controller, useFormContext } from "react-hook-form";
 
 const OrderCreated = ({ item, disabled }) => {
-  console.log("🚀 ~ OrderCreated ~ item:", item);
   const { register, errors, watch, control, initialized } = useStatusForm(
     MACHINE_STATUS.ORDER_CREATED,
     item
   );
   const selectedArea = watch("area");
-  console.log("🚀 ~ OrderCreated ~ selectedArea:", selectedArea);
-
   // 直接使用 createAreaMachines 生成當前區域的機台
   const filteredGroups = selectedArea ? createAreaMachines(selectedArea) : [];
 

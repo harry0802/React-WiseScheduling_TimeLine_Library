@@ -1,13 +1,20 @@
 // components/StatusForms/Setup.jsx
-import { Grid, TextField, Typography } from "@mui/material";
+import { CircularProgress, Grid, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import { FORM_CONFIG } from "../../configs/formConfig";
+import { useStatusForm } from "../../hooks/useStatusForm";
+import { MACHINE_STATUS } from "../../configs/constants";
 
-const Setup = ({ disabled }) => {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext();
+const Setup = ({ disabled, item }) => {
+  console.log("🚀 ~ Setup ~ item:", item);
+  const { register, errors, watch, control, initialized } = useStatusForm(
+    MACHINE_STATUS.SETUP,
+    item
+  );
+
+  if (!item || !initialized) {
+    return <CircularProgress />; // 或其他 loading 狀態
+  }
 
   return (
     <Grid container spacing={2}>
@@ -49,12 +56,12 @@ const Setup = ({ disabled }) => {
         ></Typography>
         <TextField
           fullWidth
-          {...register("setupInfo")}
+          {...register("reason")}
           label="調機說明"
           multiline
           rows={2}
-          error={!!errors.setupInfo}
-          helperText={errors.setupInfo?.message}
+          error={!!errors.reason}
+          helperText={errors.reason?.message}
           disabled={disabled}
         />
       </Grid>

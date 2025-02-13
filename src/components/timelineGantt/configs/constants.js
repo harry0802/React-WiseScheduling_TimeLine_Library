@@ -55,7 +55,7 @@ export const STATUS_CONFIG = {
   [MACHINE_STATUS.TESTING]: {
     name: MACHINE_STATUS.TESTING,
     description: "進行產品測試",
-    color: "#4caf50",
+    color: "#2196f3",
     className: "status-testing",
     canSwitch: true,
     canDelete: true,
