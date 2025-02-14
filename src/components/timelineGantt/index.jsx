@@ -17,6 +17,7 @@ import ItemDialog from "./components/ItemDialog/index";
 
 //* Hooks 與工具函數
 import { useTimelineData } from "./hooks/useTimelineData";
+import { useTimelineOperations } from "./hooks/useTimelineOperations";
 import { TIMELINE_STYLES } from "./configs/timeline/timelineConfigs";
 import dayjs from "dayjs";
 import { getTimeWindow } from "./utils/dateUtils";
@@ -45,12 +46,8 @@ import {
 
 //* 其他配置
 import { momentLocaleConfig } from "./configs/timeline/timelineLocale";
-import {
-  getStatusClass,
-  getStatusName,
-  MACHINE_STATUS,
-} from "./configs/constants";
-import { tr } from "date-fns/locale";
+import { getStatusName, MACHINE_STATUS } from "./configs/constants";
+import { createItemTemplate } from "./components/TimelineContent";
 
 // moment 相關設定
 if (moment) {
@@ -84,20 +81,21 @@ const DynamicTimeline = () => {
   const timelineRef = useRef(null);
   const [timeRange, setTimeRange] = useState("day");
 
-  //* 對話框狀態管理
-  const [dialogState, setDialogState] = useState({
-    selectedItem: null,
-    mode: "view",
-    isOpen: false,
-  });
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
   const { itemsDataRef, groups } = useTimelineData();
 
-  /**
-   * @function getTimelineOptions
-   * @description 根據當前時間範圍生成 Timeline 配置
-   */
+  const {
+    dialogState,
+    setDialogState,
+    isDeleteDialogOpen,
+    handleSaveItem,
+    handleDeleteItem,
+    handleAddItem,
+    handleMoveToNow,
+    closeDialog,
+    openDeleteDialog,
+    closeDeleteDialog,
+  } = useTimelineOperations(timelineRef, itemsDataRef, timeRange, groups);
+
   const getTimelineOptions = useCallback(() => {
     const timeWindow = getTimeWindow(timeRange);
     return {
@@ -107,7 +105,6 @@ const DynamicTimeline = () => {
         add: false,
         updateTime: true,
         updateGroup: true,
-        // remove: true,
       },
       onMove: function (item, callback) {
         callback(item);
@@ -116,18 +113,29 @@ const DynamicTimeline = () => {
       start: timeWindow.start.toDate(),
       end: timeWindow.end.toDate(),
       snap: null,
+      // height: "100%",
+      // minHeight: "600px",
+      orientation: {
+        axis: "top",
+        item: "top",
+      },
+      margin: {
+        item: {
+          vertical: 8,
+        },
+      },
     };
   }, [timeRange]);
 
-  /**
-   * @function initTimeline
-   * @description Timeline 初始化邏輯
-   */
   const initTimeline = useCallback(() => {
     if (!containerRef.current || !itemsDataRef.current || !groups) return;
 
-    const options = getTimelineOptions();
+    const options = {
+      ...getTimelineOptions(),
+      template: createItemTemplate,
+    };
 
+    // ⚠️ Timeline 初始化或更新
     if (!timelineRef.current) {
       containerRef.current.innerHTML = "";
       timelineRef.current = new Timeline(
@@ -144,11 +152,6 @@ const DynamicTimeline = () => {
       });
     }
   }, [groups, getTimelineOptions]);
-
-  /**
-   * @function handleTimelineEvents
-   * @description Timeline 事件綁定處理
-   */
   const handleTimelineEvents = useCallback(() => {
     if (!timelineRef.current) return;
 
@@ -167,9 +170,8 @@ const DynamicTimeline = () => {
 
     timelineRef.current.on("doubleClick", handleDoubleClick);
     return () => timelineRef.current?.off("doubleClick", handleDoubleClick);
-  }, []);
+  }, [setDialogState]);
 
-  //* Timeline 生命週期管理
   useEffect(() => {
     try {
       initTimeline();
@@ -186,147 +188,6 @@ const DynamicTimeline = () => {
       console.error("Timeline 操作失敗:", error);
     }
   }, [initTimeline, handleTimelineEvents]);
-
-  //! =============== 4. 工具函數 ===============
-  //* 通用功能區,可被多個模組復用
-  /**
-   * @function handleSaveItem
-   * @description 處理項目保存操作
-   * @param {TimelineItem} updatedItem - 更新後的項目數據
-   */
-  const handleSaveItem = useCallback(
-    (updatedItem) => {
-      console.log("🚀 ~ DynamicTimeline ~ updatedItem:", updatedItem);
-      console.log(getStatusClass(updatedItem.timeLineStatus));
-      if (!itemsDataRef.current) return;
-
-      try {
-        const processedItem = {
-          ...updatedItem,
-          //  更新 ui:
-          className: getStatusClass(updatedItem.timeLineStatus),
-          start: dayjs(updatedItem.orderInfo.scheduledStartTime).toDate(),
-          end: dayjs(updatedItem.orderInfo.scheduledEndTime).toDate(),
-          ...(updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED && {
-            start: dayjs(updatedItem.status.startTime).toDate(),
-            end: updatedItem.status.endTime
-              ? dayjs(updatedItem.status.endTime).toDate()
-              : dayjs(updatedItem.status.startTime).add(2, "hour").toDate(),
-          }),
-          area: updatedItem.group.match(/[A-Z]/)[0],
-          updateTime: false,
-          editable: {
-            updateTime: false,
-            updateGroup: false,
-            remove: true,
-          },
-        };
-        console.log("🚀 ~ DynamicTimeline ~ processedItem:", processedItem);
-        if (dialogState.mode === "add") {
-          itemsDataRef.current.add(processedItem);
-        } else {
-          itemsDataRef.current.update(processedItem);
-        }
-
-        setDialogState((prev) => ({
-          ...prev,
-          isOpen: false,
-          selectedItem: null,
-        }));
-      } catch (error) {
-        console.error("儲存項目失敗:", error);
-      }
-    },
-    [dialogState.mode]
-  );
-
-  /**
-   * @function handleDeleteItem
-   * @description 處理項目刪除操作
-   */
-  const handleDeleteItem = useCallback(() => {
-    if (!dialogState.selectedItem?.id || !itemsDataRef.current) return;
-
-    try {
-      itemsDataRef.current.remove(dialogState.selectedItem.id);
-      setIsDeleteDialogOpen(false);
-      setDialogState((prev) => ({
-        ...prev,
-        selectedItem: null,
-      }));
-    } catch (error) {
-      console.error("刪除項目失敗:", error);
-    }
-  }, [dialogState.selectedItem]);
-
-  /**
-   * @function handleAddItem
-   * @description 處理新增項目操作
-   */
-  const handleAddItem = useCallback(() => {
-    if (!timelineRef.current) return;
-
-    try {
-      const centerTime = dayjs().tz("Asia/Taipei");
-      const endTime = centerTime.add(2, "hour");
-
-      const newItem = {
-        id: `ORDER-${Date.now()}`,
-        group: "A1",
-        area: "A",
-        timeLineStatus: MACHINE_STATUS.IDLE,
-        status: {
-          startTime: centerTime.toDate(),
-          endTime: endTime.toDate(),
-          reason: "",
-          product: "",
-        },
-        orderInfo: {
-          start: "",
-          end: "",
-          actualStart: null,
-          actualEnd: null,
-          productId: "",
-          productName: "",
-          quantity: 0,
-          completedQty: 0,
-          process: "",
-          orderStatus: "尚未上機",
-        },
-        start: centerTime.toDate(),
-        end: endTime.toDate(),
-        className: "status-idle",
-        content: "新訂單",
-      };
-
-      setDialogState({
-        selectedItem: newItem,
-        mode: "add",
-        isOpen: true,
-      });
-    } catch (error) {
-      console.error("新增項目失敗:", error);
-    }
-  }, []);
-
-  /**
-   * @function handleMoveToNow
-   * @description 移動時間軸到當前時間
-   */
-  const handleMoveToNow = useCallback(() => {
-    if (!timelineRef.current) return;
-
-    try {
-      const timeWindow = getTimeWindow(timeRange, dayjs());
-      timelineRef.current.setWindow(
-        timeWindow.start.toDate(),
-        timeWindow.end.toDate(),
-        { animation: true }
-      );
-    } catch (error) {
-      console.error("移動到當前時間失敗:", error);
-    }
-  }, [timeRange]);
 
   //* 渲染區塊
   return (
@@ -364,17 +225,11 @@ const DynamicTimeline = () => {
       {dialogState.selectedItem && (
         <ItemDialog
           open={dialogState.isOpen}
-          onClose={() =>
-            setDialogState((prev) => ({
-              ...prev,
-              isOpen: false,
-              selectedItem: null,
-            }))
-          }
+          onClose={closeDialog}
           item={dialogState.selectedItem}
           mode={dialogState.mode}
           onSave={handleSaveItem}
-          onDelete={() => setIsDeleteDialogOpen(true)}
+          onDelete={openDeleteDialog}
           groups={groups}
         />
       )}
@@ -384,7 +239,7 @@ const DynamicTimeline = () => {
         title="刪除確認"
         content="確定要刪除這個訂單嗎？"
         onConfirm={handleDeleteItem}
-        onCancel={() => setIsDeleteDialogOpen(false)}
+        onCancel={closeDeleteDialog}
         confirmText="刪除"
         cancelText="取消"
       />

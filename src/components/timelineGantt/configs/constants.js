@@ -20,9 +20,9 @@ export const MACHINE_STATUS = {
 export const STATUS_CONFIG = {
   [MACHINE_STATUS.ORDER_CREATED]: {
     name: MACHINE_STATUS.ORDER_CREATED,
-    description: "新建立的製令單",
-    color: "#2196f3",
-    className: "status-order",
+    description: "製立單模式",
+    color: "#4caf50",
+    className: "status-producing",
     canSwitch: false,
     canDelete: false,
     allowedTransitions: [],

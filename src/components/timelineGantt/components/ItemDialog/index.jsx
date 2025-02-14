@@ -10,8 +10,11 @@ import {
   Alert,
   CircularProgress,
   Typography,
+  IconButton,
+  Box,
 } from "@mui/material";
 import { useState } from "react";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
 //* 引入自定義組件和工具
 import { canTransitTo, MACHINE_STATUS } from "../../configs/constants";
@@ -130,25 +133,34 @@ const ItemDialog = ({
         maxWidth="md"
         fullWidth
         disableEscapeKeyDown={isSubmitting}
+        keepMounted={false}
+        aria-labelledby="item-dialog-title"
       >
-        <DialogTitle>
+        <DialogTitle id="item-dialog-title">
           {getDialogTitle()}
           {isSubmitting && <CircularProgress size={20} sx={{ ml: 1 }} />}
         </DialogTitle>
 
         <DialogContent>
-          <Typography variant="subtitle1" sx={{ mb: 2 }}>
-            當前狀態：{currentStatus}
-          </Typography>
-          {mode !== "view" && canTransitTo(currentStatus) && (
-            <Button
-              onClick={() => setShowStatusDialog(true)}
-              sx={{ mb: 2 }}
-              disabled={isSubmitting}
-            >
-              切換狀態
-            </Button>
-          )}
+          <Box display="flex" alignItems="center" gap={1} sx={{ mb: 2 }}>
+            {mode !== "add" ? (
+              <>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setShowStatusDialog(true)}
+                  disabled={isSubmitting || mode === "view"}
+                  startIcon={<SwapHorizIcon />}
+                >
+                  {currentStatus}
+                </Button>
+              </>
+            ) : (
+              <Typography variant="subtitle1">
+                當前狀態：{currentStatus}
+              </Typography>
+            )}
+          </Box>
           <StatusController
             status={currentStatus}
             item={item}

@@ -11,6 +11,73 @@ const StatusBase = styled.div`
       color 0.2s ease;
     cursor: pointer;
     font-size: 18px;
+    height: auto;
+    .vis-item-overflow {
+      overflow: visible;
+    }
+
+    .timeline-item-content {
+      padding: 4px 8px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+
+      .content {
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 1.2;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .status {
+        font-weight: bold;
+        line-height: 1.2;
+        margin-bottom: 2px;
+      }
+
+      .order-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-bottom: 2px;
+
+        .product-name {
+          font-weight: bold;
+          font-size: 14px;
+          line-height: 1.2;
+        }
+
+        .process {
+          font-size: 12px;
+          line-height: 1.2;
+          opacity: 0.9;
+        }
+      }
+
+      .time {
+        font-size: 12px;
+        line-height: 1.2;
+        opacity: 0.8;
+        position: absolute;
+        bottom: 6px;
+        left: 8px;
+      }
+
+      .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.3);
+        transition: width 0.3s ease;
+      }
+    }
   }
 
   /* 生產中 */
@@ -18,6 +85,10 @@ const StatusBase = styled.div`
     background-color: #4caf50;
     border-color: #2e7d32;
     color: white;
+
+    .progress-bar {
+      background-color: rgba(46, 125, 50, 0.6);
+    }
 
     &:hover {
       background-color: #5db761;
@@ -31,6 +102,10 @@ const StatusBase = styled.div`
     background-color: #9e9e9e;
     border-color: #757575;
     color: white;
+
+    .progress-bar {
+      background-color: rgba(117, 117, 117, 0.6);
+    }
   }
 
   /* 上模與調機 */
@@ -38,6 +113,11 @@ const StatusBase = styled.div`
     background-color: #ff9800;
     border-color: #f57c00;
     color: white;
+
+    .progress-bar {
+      background-color: rgba(245, 124, 0, 0.6);
+    }
+
     &:hover {
       background-color: #ffac32;
       border-color: #ff9800;
@@ -49,6 +129,11 @@ const StatusBase = styled.div`
     background-color: #2196f3;
     border-color: #1976d2;
     color: white;
+
+    .progress-bar {
+      background-color: rgba(25, 118, 210, 0.6);
+    }
+
     &:hover {
       background-color: #4dabf5;
       border-color: #2196f3;
@@ -62,6 +147,10 @@ const StatusBase = styled.div`
     border-color: #d32f2f;
     color: white;
     font-weight: bold;
+
+    .progress-bar {
+      background-color: rgba(211, 47, 47, 0.6);
+    }
   }
 
   /* 衝突警告 */
@@ -69,6 +158,10 @@ const StatusBase = styled.div`
     background-color: #fff3e0;
     border-color: #ff9800;
     color: #e65100;
+
+    .progress-bar {
+      background-color: rgba(230, 81, 0, 0.6);
+    }
   }
 `;
 
