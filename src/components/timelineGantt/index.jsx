@@ -1,121 +1,181 @@
+//! =============== 1. 設定與常量 ===============
+//* 這個區塊包含所有專案配置,便於統一管理
+
+//* 基礎 React Hooks
 import { useEffect, useRef, useState, useCallback } from "react";
+
+//* UI 組件相關
 import { Timeline } from "vis-timeline/standalone";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
+
+//* 自定義組件
 import TimelineControls from "./components/TimelineControls";
-import ItemDialog from "./components/ItemDialog";
 import OperationDialog from "./components/OperationDialog";
+import ItemDialog from "./components/ItemDialog/index";
+
+//* Hooks 與工具函數
 import { useTimelineData } from "./hooks/useTimelineData";
-import { TIME_RANGES, TIMELINE_STYLES } from "./configs/timelineConfigs";
+import { useTimelineOperations } from "./hooks/useTimelineOperations";
+import { TIMELINE_STYLES } from "./configs/timeline/timelineConfigs";
 import dayjs from "dayjs";
 import { getTimeWindow } from "./utils/dateUtils";
+
+//* 多語系設定
+import "dayjs/locale/zh-tw";
+dayjs.locale("zh-tw");
+import moment from "moment";
+
+//* 樣式組件
+import {
+  BaseTimelineContainer,
+  TimelineGrid,
+  BaseItem,
+  TimeAxisStyles,
+  CurrentTimeMarker,
+  StatusBase,
+  StatusProgress,
+} from "./styles";
+
+//* Timeline 配置
+import {
+  BASE_TIMELINE_OPTIONS,
+  TIME_FORMAT_CONFIG,
+} from "./configs/timeline/timelineOptions";
+
+//* 其他配置
+import { momentLocaleConfig } from "./configs/timeline/timelineLocale";
+import { getStatusName, MACHINE_STATUS } from "./configs/constants";
+import { createItemTemplate } from "./components/TimelineContent";
+
+// moment 相關設定
+if (moment) {
+  moment.updateLocale("zh-tw", momentLocaleConfig);
+}
+
+//! =============== 2. 類型與介面 ===============
+//* 定義所有資料結構,幫助理解資料流向
+/**
+ * @typedef {Object} TimelineItem
+ * @property {number|string} id - 項目唯一識別碼
+ * @property {number} group - 群組 ID
+ * @property {Date} start - 開始時間
+ * @property {Date} end - 結束時間
+ * @property {string} content - 顯示內容
+ * @property {string} className - CSS 類名
+ */
+
+/**
+ * @typedef {Object} DialogState
+ * @property {TimelineItem|null} selectedItem - 當前選中的項目
+ * @property {'view'|'edit'|'add'} mode - 對話框模式
+ * @property {boolean} isOpen - 是否開啟
+ */
+
+//! =============== 3. 核心功能 ===============
+//* 主要業務邏輯區,每個功能都配有詳細說明
 const DynamicTimeline = () => {
-  // 基礎狀態管理
+  //* 基礎狀態管理
   const containerRef = useRef(null);
   const timelineRef = useRef(null);
   const [timeRange, setTimeRange] = useState("day");
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [dialogMode, setDialogMode] = useState("view");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [timelineHeight, setTimelineHeight] = useState(
-    window.innerHeight - 200
-  );
 
   const { itemsDataRef, groups } = useTimelineData();
-  console.log(itemsDataRef.current);
 
-  // 將 Timeline 初始化邏�抽出
-  const initTimeline = useCallback(() => {
-    if (!containerRef.current || !itemsDataRef.current || !groups) return;
+  const {
+    dialogState,
+    setDialogState,
+    isDeleteDialogOpen,
+    handleSaveItem,
+    handleDeleteItem,
+    handleAddItem,
+    handleMoveToNow,
+    closeDialog,
+    openDeleteDialog,
+    closeDeleteDialog,
+  } = useTimelineOperations(timelineRef, itemsDataRef, timeRange, groups);
+
+  const getTimelineOptions = useCallback(() => {
     const timeWindow = getTimeWindow(timeRange);
-
-    const baseOptions = {
+    return {
+      ...BASE_TIMELINE_OPTIONS,
       ...TIMELINE_STYLES[timeRange],
-      orientation: "top",
-      zoomable: false,
-      moveable: true,
-      stack: false,
       editable: {
         add: false,
         updateTime: true,
         updateGroup: true,
-        remove: true,
       },
-      height: `${timelineHeight}px`,
-      verticalScroll: true,
-      horizontalScroll: true,
+      onMove: function (item, callback) {
+        callback(item);
+      },
+      format: TIME_FORMAT_CONFIG,
       start: timeWindow.start.toDate(),
       end: timeWindow.end.toDate(),
-      // 移除之前的 moment 和 snap 配置
-      format: {
-        minorLabels: {
-          millisecond: "SSS",
-          second: "s",
-          minute: "HH:mm",
-          hour: "HH:mm",
-          weekday: "ddd",
-          day: "D",
-          month: "MMM",
-          year: "YYYY",
-        },
-        majorLabels: {
-          millisecond: "HH:mm:ss",
-          second: "YYYY/MM/DD",
-          minute: "ddd D MMMM",
-          hour: "ddd D MMMM",
-          weekday: "MMMM YYYY",
-          day: "MMMM YYYY",
-          month: "YYYY",
-          year: "",
+      snap: null,
+      // height: "100%",
+      // minHeight: "600px",
+      orientation: {
+        axis: "top",
+        item: "top",
+      },
+      margin: {
+        item: {
+          vertical: 8,
         },
       },
     };
+  }, [timeRange]);
 
-    // 只在第一次創建實例
+  const initTimeline = useCallback(() => {
+    if (!containerRef.current || !itemsDataRef.current || !groups) return;
+
+    const options = {
+      ...getTimelineOptions(),
+      template: createItemTemplate,
+    };
+
+    // ⚠️ Timeline 初始化或更新
     if (!timelineRef.current) {
       containerRef.current.innerHTML = "";
       timelineRef.current = new Timeline(
         containerRef.current,
         itemsDataRef.current,
         groups,
-        baseOptions
+        options
       );
     } else {
-      // 更新現有實例
-      timelineRef.current.setOptions(baseOptions);
+      timelineRef.current.setOptions(options);
       timelineRef.current.setData({
         items: itemsDataRef.current,
         groups,
       });
     }
-  }, [groups, timeRange, timelineHeight]);
-  // 在 bindTimelineEvents 函數中修改
-  const bindTimelineEvents = useCallback(() => {
+  }, [groups, getTimelineOptions]);
+  const handleTimelineEvents = useCallback(() => {
     if (!timelineRef.current) return;
 
     const handleDoubleClick = (properties) => {
-      const clickedItem = properties.item;
+      if (!properties.item) return;
+
+      const clickedItem = itemsDataRef.current?.get(properties.item);
       if (clickedItem) {
-        const selectedItemData = itemsDataRef.current.get(clickedItem);
-        if (selectedItemData) {
-          setSelectedItem(selectedItemData);
-          setDialogMode("edit");
-          setIsDialogOpen(true);
-        }
+        setDialogState({
+          selectedItem: clickedItem,
+          mode: "edit",
+          isOpen: true,
+        });
       }
     };
 
     timelineRef.current.on("doubleClick", handleDoubleClick);
     return () => timelineRef.current?.off("doubleClick", handleDoubleClick);
-  }, []);
+  }, [setDialogState]);
 
-  // 主要的 useEffect
   useEffect(() => {
     try {
       initTimeline();
-      const cleanup = bindTimelineEvents();
+      const cleanup = handleTimelineEvents();
 
       return () => {
         cleanup?.();
@@ -127,127 +187,59 @@ const DynamicTimeline = () => {
     } catch (error) {
       console.error("Timeline 操作失敗:", error);
     }
-  }, [initTimeline, bindTimelineEvents]);
+  }, [initTimeline, handleTimelineEvents]);
 
-  // 處理項目儲存
-  const handleSaveItem = useCallback(
-    (updatedItem) => {
-      if (!itemsDataRef.current) return;
-
-      try {
-        if (dialogMode === "add") {
-          itemsDataRef.current.add({
-            ...updatedItem,
-            className: "custom-item",
-          });
-        } else if (dialogMode === "edit") {
-          itemsDataRef.current.update({
-            ...updatedItem,
-            className: "custom-item",
-          });
-        }
-        setIsDialogOpen(false);
-        setSelectedItem(null);
-      } catch (error) {
-        console.error("儲存項目時出錯:", error);
-      }
-    },
-    [dialogMode]
-  );
-
-  // 處理項目刪除
-  const handleDeleteItem = useCallback(() => {
-    if (!selectedItem || !itemsDataRef.current) return;
-
-    try {
-      itemsDataRef.current.remove(selectedItem.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedItem(null);
-    } catch (error) {
-      console.error("刪除項目時出錯:", error);
-    }
-  }, [selectedItem]);
-
-  // 處理新增項目
-  const handleAddItem = useCallback(() => {
-    if (!timelineRef.current || !itemsDataRef.current) return;
-
-    try {
-      const window = timelineRef.current.getWindow();
-      const centerTime = dayjs(
-        (window.start.getTime() + window.end.getTime()) / 2
-      );
-
-      setSelectedItem({
-        id: Date.now(),
-        group: 1,
-        start: centerTime.toDate(),
-        end: centerTime.add(2, "hour").toDate(),
-        content: "新訂單",
-        className: "custom-item",
-      });
-      setDialogMode("add");
-      setIsDialogOpen(true);
-    } catch (error) {
-      console.error("新增項目時出錯:", error);
-    }
-  }, []);
-
-  // 處理移動到當前時間
-  const handleMoveToNow = useCallback(() => {
-    if (!timelineRef.current) return;
-
-    try {
-      const now = dayjs();
-      const timeWindow = getTimeWindow(timeRange, now);
-
-      timelineRef.current.setWindow(
-        timeWindow.start.toDate(),
-        timeWindow.end.toDate(),
-        { animation: true }
-      );
-    } catch (error) {
-      console.error("移動到當前時間時出錯:", error);
-    }
-  }, [timeRange]);
+  //* 渲染區塊
   return (
-    <Box sx={{ height: "100vh", p: 4 }}>
-      <TimelineControls
-        timeRange={timeRange}
-        onTimeRangeChange={setTimeRange}
-        onAddItem={handleAddItem}
-        onMoveToNow={handleMoveToNow}
-      />
-      <Paper
-        ref={containerRef}
-        elevation={1}
-        sx={{
-          height: `${timelineHeight}px`,
-          border: 1,
-          borderColor: "grey.200",
-          borderRadius: 1,
-        }}
-      />
+    <Box sx={{ p: 4 }}>
+      <BaseTimelineContainer>
+        <TimelineGrid>
+          <TimeAxisStyles>
+            <CurrentTimeMarker>
+              <BaseItem>
+                <StatusBase>
+                  <StatusProgress>
+                    <TimelineControls
+                      timeRange={timeRange}
+                      onTimeRangeChange={setTimeRange}
+                      onAddItem={handleAddItem}
+                      onMoveToNow={handleMoveToNow}
+                    />
+                    <Paper
+                      ref={containerRef}
+                      elevation={1}
+                      sx={{
+                        border: 1,
+                        borderColor: "grey.200",
+                        borderRadius: 1,
+                      }}
+                    />
+                  </StatusProgress>
+                </StatusBase>
+              </BaseItem>
+            </CurrentTimeMarker>
+          </TimeAxisStyles>
+        </TimelineGrid>
+      </BaseTimelineContainer>
 
-      <ItemDialog
-        isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false);
-          setSelectedItem(null);
-        }}
-        item={selectedItem}
-        mode={dialogMode}
-        onSave={handleSaveItem}
-        onDelete={() => setIsDeleteDialogOpen(true)}
-        groups={groups}
-      />
+      {dialogState.selectedItem && (
+        <ItemDialog
+          open={dialogState.isOpen}
+          onClose={closeDialog}
+          item={dialogState.selectedItem}
+          mode={dialogState.mode}
+          onSave={handleSaveItem}
+          onDelete={openDeleteDialog}
+          groups={groups}
+        />
+      )}
 
       <OperationDialog
         open={isDeleteDialogOpen}
         title="刪除確認"
         content="確定要刪除這個訂單嗎？"
         onConfirm={handleDeleteItem}
-        onCancel={() => setIsDeleteDialogOpen(false)}
+        onCancel={closeDeleteDialog}
         confirmText="刪除"
         cancelText="取消"
       />
