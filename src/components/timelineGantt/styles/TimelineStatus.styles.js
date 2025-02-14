@@ -12,9 +12,6 @@ const StatusBase = styled.div`
     cursor: pointer;
     font-size: 18px;
     height: auto;
-    .vis-item-overflow {
-      overflow: visible;
-    }
 
     .timeline-item-content {
       padding: 4px 8px;
