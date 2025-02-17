@@ -143,7 +143,8 @@ const ItemDialog = ({
 
         <DialogContent>
           <Box display="flex" alignItems="center" gap={1} sx={{ mb: 2 }}>
-            {mode !== "add" ? (
+            {mode !== "add" &&
+            currentStatus !== MACHINE_STATUS.ORDER_CREATED ? (
               <>
                 <Button
                   variant="contained"
