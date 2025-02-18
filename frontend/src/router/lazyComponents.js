@@ -128,3 +128,8 @@ export const MasterBatch = lazyImport(() =>
 export const SubBatch = lazyImport(() =>
   import("../components/CostWiseSystem/features/batchManagement/subBatch/index")
 );
+
+// WiseScheduling
+export const WiseSchedulingPage = lazyImport(() =>
+  import("../pages/WiseSchedulingPage")
+);

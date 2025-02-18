@@ -2,7 +2,7 @@ import React from "react";
 import AppLayout from "./AppLayout";
 import { RecordAddInfoProvider } from "../components/ProductionRecord/context/RecordAddInfoProvider";
 import * as LazyComponents from "./lazyComponents";
-// ProductionReportPage
+
 const routeConfig = [
   {
     path: "/",
@@ -37,6 +37,15 @@ const routeConfig = [
       {
         path: "ProductionInspectionPage",
         element: <LazyComponents.ProductionInspectionPage />,
+      },
+      // 添加 WiseScheduling 路由
+      {
+        path: "WiseSchedulingPage",
+        element: (
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <LazyComponents.WiseSchedulingPage />
+          </React.Suspense>
+        ),
       },
       {
         path: "QualityManagementSystem",
