@@ -6,6 +6,7 @@ import { statusSchema } from "../schemas/status.schema";
 export const useStatusForm = (initialData) => {
   console.log("🚀 ~ useStatusForm ~ initialData:", initialData);
   const form = useForm({
+    mode: "onTouched",
     resolver: zodResolver(statusSchema),
     defaultValues: initialData,
   });
