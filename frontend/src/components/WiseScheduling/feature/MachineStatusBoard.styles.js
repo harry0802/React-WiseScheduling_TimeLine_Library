@@ -33,13 +33,13 @@ export const Container = styled.div`
 
 export const Box = styled.div`
   position: relative;
-  margin-bottom: 0.625rem;
-  padding: 1.25rem 0;
+  margin-bottom: 10px;
+  padding: 20px 0;
 `;
 
 export const FilterSection = styled.div`
   display: flex;
-  gap: 1.875rem;
+  gap: 30px;
 `;
 
 export const SelectBox = styled.div`
@@ -51,16 +51,16 @@ export const SelectBox = styled.div`
 export const StyledSelect = styled(Select)`
   && {
     background: #fff;
-    border-radius: 0.25rem;
-    min-width: 11.25rem;
-    height: 2.8125rem;
+    border-radius: 4px;
+    min-width: 180px;
+    height: 45px;
 
     .MuiSelect-select {
       color: #8f8f8f;
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
-      padding: 0.5rem 1rem;
+      padding: 8px 16px;
     }
 
     .MuiOutlinedInput-notchedOutline {
@@ -125,26 +125,26 @@ export const Title = styled.div`
 
 export const MachinesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15.625rem, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.875rem;
-  padding: 0 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px;
+  margin-top: 30px;
+  padding: 0 16px;
 
-  @media (min-width: 48rem) {
-    grid-template-columns: repeat(auto-fill, minmax(18.75rem, 1fr));
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 
-  @media (min-width: 75rem) {
+  @media (min-width: 1200px) {
     grid-template-columns: repeat(4, 1fr);
   }
 `;
 
 export const MachineBox = styled.div`
   position: relative;
-  margin-top: 1.875rem;
+  margin-top: 30px;
   display: flex;
-  min-height: 9.375rem;
-  padding: 0.9375rem;
+  min-height: 150px;
+  padding: 15px;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
@@ -153,10 +153,10 @@ export const MachineBox = styled.div`
   cursor: pointer;
   background: ${(props) =>
     STATUS_MAP[props.$status]?.color || STATUS_MAP.waiting.color};
-  border: 0.125rem solid transparent;
+  border: 2px solid transparent;
   background-clip: padding-box;
   transition: border-color 0.3s ease;
-
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
   &:hover {
     border-color: #fff;
   }
@@ -175,9 +175,9 @@ export const MachineBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.9375rem;
+    gap: 15px;
     color: #fff;
-    font-size: 1.25rem;
+    font-size: 20px;
     font-style: normal;
     font-weight: 400;
     line-height: 1.25rem;
@@ -188,6 +188,4 @@ export const MachineBox = styled.div`
       flex-shrink: 0;
     }
   }
-
-  box-shadow: 0.25rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.25);
 `;
