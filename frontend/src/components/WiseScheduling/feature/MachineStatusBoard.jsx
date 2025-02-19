@@ -67,7 +67,7 @@ const MachineStatusBoard = () => {
       const isValid = await formRef.current.validateForm();
       console.log("Form Validation:", isValid);
 
-      if (isValid) {
+      if (isValid.isValid) {
         await handleStatusUpdate(data);
         return true;
       }

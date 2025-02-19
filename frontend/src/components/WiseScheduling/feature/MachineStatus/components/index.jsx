@@ -13,6 +13,7 @@ import { statusSchema } from "../schemas/status.schema";
 
 const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
   const form = useForm({
+    mode: "onChange",
     resolver: zodResolver(statusSchema),
     defaultValues: initialData,
   });
@@ -20,20 +21,14 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
   useImperativeHandle(ref, () => ({
     getFormValues: () => form.getValues(),
     validateForm: async () => {
-      const result = await form.trigger();
-      if (!result) return false;
-
-      // 自定義驗證
-      const data = form.getValues();
-      if (data.timeLineStatus === "機台停機" && !data.status.reason) {
-        form.setError("status.reason", {
-          type: "manual",
-          message: "停機狀態必須選擇原因",
-        });
-        return false;
+      try {
+        const isValid = await form.trigger();
+        return isValid
+          ? { isValid: true, data: form.getValues(), step: "complete" }
+          : { isValid: false, errors: form.formState.errors, step: "schema" };
+      } catch (error) {
+        return { isValid: false, error, step: "error" };
       }
-
-      return true;
     },
     setFormValue: (name, value) => form.setValue(name, value),
     getFormErrors: () => form.formState.errors,
