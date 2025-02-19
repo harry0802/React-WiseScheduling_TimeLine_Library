@@ -28,7 +28,7 @@ def upgrade():
 
     # add index to LY0000AODetail
     op.create_index('idx_ly0000AO_detail_SD_NO_SKNO_NAME', 'ly0000AO_detail', ['SD_NO', 'SD_SKNO', 'SD_NAME'])
-    op.create_index('idx_ly0000AO_detail_SD_SKNO_NAME', 'ly0000AO_detail', ['SD_SKNO', 'SD_NAME'])
+    op.create_index('idx_ly0000AO_detail_SD_SKNO_NAME_DATE', 'ly0000AO_detail', ['SD_SKNO', 'SD_NAME', 'SD_DATE'])
 
     # add index to productionCost
     op.create_index('idx_productionCost_type_logTime', 'productionCost', ['type', 'logTime'])
@@ -49,7 +49,7 @@ def downgrade():
     op.drop_index('idx_productionReport_serialNumber_pschedule_id', table_name='productionReport')
     op.drop_index('idx_productionCost_type_logTime', table_name='productionCost')
     op.drop_index('idx_ly0000AO_detail_SD_NO_SKNO_NAME', table_name='ly0000AO_detail')
-    op.drop_index('idx_ly0000AO_detail_SD_SKNO_NAME', table_name='ly0000AO_detail')
+    op.drop_index('idx_ly0000AO_detail_SD_SKNO_NAME_DATE', table_name='ly0000AO_detail')
     op.drop_index('idx_ly0000AB_MP_NO', table_name='ly0000AB')
     op.drop_index('idx_ly0000AB_MP_DATE', table_name='ly0000AB')
     op.drop_index('idx_ltmoldmap_moldno', table_name='ltmoldmap')
