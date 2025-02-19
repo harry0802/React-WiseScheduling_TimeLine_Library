@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { PRODUCTION_AREA } from "../../../config/config";
 import {
   STATUS_MAP,
@@ -12,39 +12,71 @@ import {
   MachinesGrid,
   MachineBox,
 } from "./MachineStatusBoard.styles";
-
 import HandymanIcon from "@mui/icons-material/Handyman";
+import { mockEvents } from "../mock/mockData";
+import { convertTimeLineStatus } from "../utils/statusConverter";
+import BaseDrawer from "../../Global/Drawer/BaseDrawer";
+import MachineStatusManager from "./MachineStatus/components";
 
-const MachineCard = ({ machineSN, status }) => (
-  <MachineBox $status={status}>
+const MachineCard = ({ machine, onClick }) => (
+  <MachineBox
+    $status={convertTimeLineStatus(machine.timeLineStatus)}
+    onClick={() => onClick(machine)}
+  >
     <div className="title-container">
-      <h1>{machineSN}</h1>
+      <h1>{machine.group}</h1>
     </div>
 
     <div className="status-container">
-      <p>{STATUS_MAP[status]?.text || STATUS_MAP.waiting.text}</p>
+      <p>
+        {STATUS_MAP[convertTimeLineStatus(machine.timeLineStatus)]?.text ||
+          STATUS_MAP.waiting.text}
+      </p>
       <HandymanIcon className="icon" />
     </div>
   </MachineBox>
 );
 
 const MachineStatusBoard = () => {
-  const [area, setArea] = React.useState("A");
+  const [area, setArea] = useState("A");
+  const [selectedMachine, setSelectedMachine] = useState(null);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const formRef = useRef(null);
 
-  // 模擬假資料
-  const mockMachines = [
-    { machineSN: "A01", productionArea: "A", status: "production" },
-    { machineSN: "A02", productionArea: "A", status: "waiting" },
-    { machineSN: "A03", productionArea: "A", status: "testing" },
-    { machineSN: "A04", productionArea: "A", status: "error" },
-    { machineSN: "A05", productionArea: "A", status: "tuning" },
-    { machineSN: "B01", productionArea: "B", status: "production" },
-    { machineSN: "B02", productionArea: "B", status: "waiting" },
-  ];
+  const machines = mockEvents[area] || [];
 
-  const filteredMachines = mockMachines.filter(
-    (m) => m.productionArea === area
-  );
+  const handleMachineClick = (machine) => {
+    setSelectedMachine(machine);
+    setDrawerVisible(true);
+  };
+
+  const handleStatusUpdate = async (data) => {
+    console.log("更新機台狀態:", data);
+
+    // 這裡處理狀態更新邏輯
+    setDrawerVisible(false);
+  };
+
+  const handleSubmit = useCallback(async () => {
+    if (!formRef.current) return;
+
+    try {
+      const data = formRef.current.getFormValues();
+      console.log("Form Values:", data);
+
+      const isValid = await formRef.current.validateForm();
+      console.log("Form Validation:", isValid);
+
+      if (isValid) {
+        await handleStatusUpdate(data);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Submit Error:", error);
+      return false;
+    }
+  }, []);
 
   return (
     <Container>
@@ -66,15 +98,33 @@ const MachineStatusBoard = () => {
           </FilterSection>
         </TitleBox>
         <MachinesGrid>
-          {filteredMachines.map((machine) => (
+          {machines.map((machine) => (
             <MachineCard
-              key={machine.machineSN}
-              machineSN={machine.machineSN}
-              status={machine.status}
+              key={machine.id}
+              machine={machine}
+              onClick={handleMachineClick}
             />
           ))}
         </MachinesGrid>
       </Box>
+
+      <BaseDrawer
+        visible={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        width={700}
+      >
+        <BaseDrawer.Header>修改機台狀態</BaseDrawer.Header>
+        <BaseDrawer.Body>
+          {selectedMachine && (
+            <MachineStatusManager
+              ref={formRef}
+              initialData={selectedMachine}
+              onSubmit={handleStatusUpdate}
+            />
+          )}
+        </BaseDrawer.Body>
+        <BaseDrawer.Footer onSubmit={handleSubmit} />
+      </BaseDrawer>
     </Container>
   );
 };
