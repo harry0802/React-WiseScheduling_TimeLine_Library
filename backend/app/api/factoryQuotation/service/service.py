@@ -193,7 +193,7 @@ class FactoryQuotationService:
             query = Product.query
             query = query.with_entities(Product.id, Product.productSN, Product.productName)
             query = query.filter(Product.id.in_(db.session.query(Process.productId).distinct()))
-            query = query.order_by(Product.productSN.asc())
+            query = query.order_by(Product.productName.asc())
             product_db = query.all()
 
             product_dump = productSchema().dump(product_db, many=True)
