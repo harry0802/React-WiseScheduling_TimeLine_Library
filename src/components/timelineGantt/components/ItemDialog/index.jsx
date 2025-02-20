@@ -21,6 +21,7 @@ import { canTransitTo, MACHINE_STATUS } from "../../configs/constants";
 import StatusController from "../StatusForms/StatusForms";
 import StatusChangeDialog from "./StatusChangeDialog";
 import { handleFormError, StatusError } from "../../utils/errorHandler";
+import dayjs from "dayjs";
 
 //! =============== 2. 類型與介面 ===============
 //* 組件屬性定義
@@ -165,12 +166,20 @@ const ItemDialog = ({
           <StatusController
             status={currentStatus}
             item={item}
-            disabled={mode === "view" || isSubmitting}
+            // disabled={mode === "view" || isSubmitting}
             onSubmit={handleSubmit}
             mode={mode}
             isSubmitting={isSubmitting}
             onClose={onClose}
             groups={groups}
+            // 過去的項目不允許修改 , add 模式自由
+            disabled={
+              mode === "view" ||
+              isSubmitting ||
+              (mode !== "add" &&
+                (item.start < dayjs() ||
+                  item.orderInfo.scheduledStartTime < dayjs()))
+            }
           />
         </DialogContent>
       </Dialog>

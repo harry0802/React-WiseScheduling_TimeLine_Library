@@ -68,6 +68,27 @@ export const generateInitialOrders = () => {
           ? item.orderInfo.actualEndTime || item.orderInfo.scheduledEndTime
           : item.status.endTime || dayjs(item.status.startTime).add(2, "hour")
       ).toDate(),
+      editable:
+        item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED
+          ? {
+              //  檢查是否為過去的項目
+              updateTime:
+                item.orderInfo.actualStartTime ||
+                item.orderInfo.scheduledStartTime < dayjs()
+                  ? false
+                  : true,
+              updateGroup:
+                item.orderInfo.actualStartTime ||
+                item.orderInfo.scheduledStartTime < dayjs()
+                  ? false
+                  : true,
+              remove: false,
+            }
+          : {
+              updateTime: false,
+              updateGroup: false,
+              remove: true,
+            },
     }))
   );
 };
