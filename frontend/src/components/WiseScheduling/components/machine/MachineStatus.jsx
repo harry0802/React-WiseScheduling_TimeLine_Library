@@ -1,15 +1,15 @@
 import React, { forwardRef, useImperativeHandle } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+import StatusSlider from "./StatusSlider";
+import ReasonSelector from "./ReasonSelector";
+import { statusSchema } from "../../configs/status.schema";
 import {
-  StatusCard,
   StatusHeader,
   SliderContainer,
   ReasonGrid,
-} from "../styles";
-import StatusSlider from "./StatusSlider";
-import ReasonSelector from "./ReasonSelector";
-import { statusSchema } from "../schemas/status.schema";
+} from "../../assets/machine.styles";
 
 const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
   const form = useForm({
@@ -36,7 +36,7 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
 
   return (
     <FormProvider {...form}>
-      <StatusCard status={form.watch("timeLineStatus")}>
+      <div>
         <StatusHeader>
           <div>
             <h3>
@@ -50,12 +50,13 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
           <StatusSlider />
         </SliderContainer>
 
-        {form.watch("timeLineStatus") === "機台停機" && (
-          <ReasonGrid>
-            <ReasonSelector />
-          </ReasonGrid>
-        )}
-      </StatusCard>
+        {form.watch("timeLineStatus") === "機台停機" ||
+          (form.watch("timeLineStatus") === "異常" && (
+            <ReasonGrid>
+              <ReasonSelector />
+            </ReasonGrid>
+          ))}
+      </div>
     </FormProvider>
   );
 });

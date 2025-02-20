@@ -25,14 +25,31 @@ const ReasonSelector = () => {
   } = useFormContext();
 
   return (
-    <div>
-      <RadioGroup>
+    <div style={{ padding: "0 16px" }}>
+      <RadioGroup
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "8px",
+          width: "100%",
+          "& .MuiFormControlLabel-root": {
+            marginRight: 0,
+            marginLeft: 0,
+          },
+        }}
+      >
         {STOP_REASONS.map((reason) => (
           <FormControlLabel
             key={reason}
             value={reason}
             control={<Radio {...register("status.reason")} />}
             label={reason}
+            sx={{
+              margin: "4px 0",
+              "& .MuiFormControlLabel-label": {
+                fontSize: "14px",
+              },
+            }}
           />
         ))}
       </RadioGroup>

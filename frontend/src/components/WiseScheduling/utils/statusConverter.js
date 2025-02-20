@@ -1,16 +1,18 @@
+const STATUS_MAPPING = {
+  // 新状态
+  試模: "testing",
+  異常: "error",
+  調機: "tuning",
+  待機: "waiting",
+
+  // 兼容旧状态
+  產品試模: "testing",
+  機台停機: "error",
+  上模與調機: "tuning",
+  待機中: "waiting",
+  製立單: "production",
+};
+
 export const convertTimeLineStatus = (timeLineStatus) => {
-  switch (timeLineStatus) {
-    case "製立單":
-      return "production";
-    case "待機中":
-      return "waiting";
-    case "上模與調機":
-      return "tuning";
-    case "產品試模":
-      return "testing";
-    case "機台停機":
-      return "error";
-    default:
-      return "waiting";
-  }
+  return STATUS_MAPPING[timeLineStatus] || "waiting";
 };
