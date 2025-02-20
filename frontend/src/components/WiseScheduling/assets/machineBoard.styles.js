@@ -1,26 +1,33 @@
 import styled from "styled-components";
 import { Select, MenuItem } from "@mui/material";
 
+// 定義斷點
+const BREAKPOINTS = {
+  md: "48rem", // 768px
+  lg: "75rem", // 1200px
+};
+
+// 定義狀態顏色變量
 export const STATUS_MAP = {
-  production: {
-    color: "linear-gradient(180deg, #83BF45 0%, #2A2A2A 100%)",
-    text: "機台生產中",
-  },
-  waiting: {
-    color: "linear-gradient(180deg, #BDBDBD 0%, #2A2A2A 100%)",
-    text: "待機",
-  },
   testing: {
-    color: "linear-gradient(180deg, #00C2FE 0%, #2A2A2A 100%)",
+    color: "rgba(0, 194, 254, 1) 0%, rgba(42, 42, 42, 1) 100%",
     text: "試模",
   },
   error: {
-    color: "linear-gradient(180deg, #EB0004 0%, #2A2A2A 100%)",
-    text: "機台異常",
+    color: "rgba(235, 0, 4, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: "異常",
   },
   tuning: {
-    color: "linear-gradient(180deg, #FFCC00 0%, #2A2A2A 100%)",
-    text: "機台調機中",
+    color: "rgba(255, 204, 0, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: "調機",
+  },
+  waiting: {
+    color: "rgba(189, 189, 189, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: "待機",
+  },
+  production: {
+    color: "rgba(131, 191, 69, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: "製立單",
   },
 };
 
@@ -125,66 +132,79 @@ export const Title = styled.div`
 
 export const MachinesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 24px;
-  margin-top: 30px;
-  padding: 0 16px;
+  gap: 1.5rem;
+  margin-block-start: 1.875rem;
+  padding-inline: 1rem;
 
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  /* 響應式層 */
+  grid-template-columns: repeat(auto-fill, minmax(15.625rem, 1fr));
+
+  @media (min-width: ${BREAKPOINTS.md}) {
+    grid-template-columns: repeat(auto-fill, minmax(18.75rem, 1fr));
   }
 
-  @media (min-width: 1200px) {
+  @media (min-width: ${BREAKPOINTS.lg}) {
     grid-template-columns: repeat(4, 1fr);
   }
 `;
 
 export const MachineBox = styled.div`
+  /* 基礎布局層 */
   position: relative;
-  margin-top: 30px;
   display: flex;
-  min-height: 150px;
-  padding: 15px;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
+
+  /* 盒模型層 */
+  min-height: 9.375rem;
+  min-width: 2.75rem; /* 44px 移動端最小點擊區域 */
+  margin-block-start: 1.875rem;
+  padding: 0.9375rem;
   flex-shrink: 0;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  background: ${(props) =>
-    STATUS_MAP[props.$status]?.color || STATUS_MAP.waiting.color};
-  border: 2px solid transparent;
+
+  /* 視覺樣式層 */
+  background: linear-gradient(
+    180deg,
+    ${(props) => STATUS_MAP[props.$status]?.color || STATUS_MAP.waiting.color}
+  );
+  border-radius: 4px;
+  border: 0.125rem solid transparent;
   background-clip: padding-box;
+  cursor: pointer;
+
+  /* 動效層 */
+  transform: translateZ(0); /* 創建新圖層 */
   transition: border-color 0.3s ease;
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+  will-change: border-color;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+
   &:hover {
-    border-color: #fff;
+    border-color: rgba(100%, 100%, 100%, 1);
   }
 
+  /* 子元素樣式 */
   .title-container {
-    color: #fff;
-    font-family: Roboto;
-    font-size: 50px;
-    font-style: normal;
+    color: rgba(100%, 100%, 100%, 1);
+    font-size: 3.125rem;
     font-weight: 400;
     margin: 0;
   }
 
   .status-container {
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 15px;
-    color: #fff;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 1.25rem;
+    width: 100%;
+    gap: 0.9375rem;
+    color: rgba(100%, 100%, 100%, 1);
+    font-size: 1.25rem;
+    line-height: 1.25;
     margin: 0;
+
     .icon {
-      width: 32px;
-      height: 32px;
+      width: 2rem;
+      height: 2rem;
       flex-shrink: 0;
     }
   }

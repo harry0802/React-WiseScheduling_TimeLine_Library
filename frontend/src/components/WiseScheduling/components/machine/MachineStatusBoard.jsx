@@ -1,5 +1,10 @@
 import React, { useState, useRef, useCallback } from "react";
-import { PRODUCTION_AREA } from "../../../config/config";
+
+import HandymanIcon from "@mui/icons-material/Handyman";
+import BaseDrawer from "../../../Global/Drawer/BaseDrawer";
+import MachineStatusManager from "./MachineStatus";
+import { convertTimeLineStatus } from "../../utils/statusConverter";
+import { mockEvents } from "../../mock/mockData";
 import {
   STATUS_MAP,
   StyledMenuItem,
@@ -11,17 +16,18 @@ import {
   FilterSection,
   MachinesGrid,
   MachineBox,
-} from "./MachineStatusBoard.styles";
-import HandymanIcon from "@mui/icons-material/Handyman";
-import { mockEvents } from "../mock/mockData";
-import { convertTimeLineStatus } from "../utils/statusConverter";
-import BaseDrawer from "../../Global/Drawer/BaseDrawer";
-import MachineStatusManager from "./MachineStatus/components";
+} from "../../assets/machineBoard.styles";
+import { PRODUCTION_AREA } from "../../../../config/config";
 
 const MachineCard = ({ machine, onClick }) => (
   <MachineBox
     $status={convertTimeLineStatus(machine.timeLineStatus)}
-    onClick={() => onClick(machine)}
+    onClick={
+      machine.timeLineStatus !== "製立單" ? () => onClick(machine) : undefined
+    }
+    style={{
+      cursor: machine.timeLineStatus === "製立單" ? "not-allowed" : "pointer",
+    }}
   >
     <div className="title-container">
       <h1>{machine.group}</h1>
@@ -32,7 +38,10 @@ const MachineCard = ({ machine, onClick }) => (
         {STATUS_MAP[convertTimeLineStatus(machine.timeLineStatus)]?.text ||
           STATUS_MAP.waiting.text}
       </p>
-      <HandymanIcon className="icon" />
+      {machine.timeLineStatus !== "production" &&
+        machine.timeLineStatus !== "製立單" && (
+          <HandymanIcon className="icon" />
+        )}
     </div>
   </MachineBox>
 );
@@ -44,7 +53,6 @@ const MachineStatusBoard = () => {
   const formRef = useRef(null);
 
   const machines = mockEvents[area] || [];
-
   const handleMachineClick = (machine) => {
     setSelectedMachine(machine);
     setDrawerVisible(true);
@@ -81,6 +89,7 @@ const MachineStatusBoard = () => {
   return (
     <Container>
       <Box>
+        {/* 標題 */}
         <TitleBox>
           <Title>機台狀態與保養紀錄</Title>
           <FilterSection>
@@ -97,6 +106,7 @@ const MachineStatusBoard = () => {
             </StyledSelect>
           </FilterSection>
         </TitleBox>
+        {/* 機台列表 */}
         <MachinesGrid>
           {machines.map((machine) => (
             <MachineCard

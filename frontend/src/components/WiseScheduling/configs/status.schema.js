@@ -4,13 +4,7 @@ export const statusSchema = z.object({
   id: z.string(),
   group: z.string(),
   area: z.string(),
-  timeLineStatus: z.enum([
-    "製立單",
-    "待機中",
-    "上模與調機",
-    "產品試模",
-    "機台停機",
-  ]),
+  timeLineStatus: z.enum(["試模", "異常", "調機", "待機"]),
 
   status: z.object({
     startTime: z.date(),

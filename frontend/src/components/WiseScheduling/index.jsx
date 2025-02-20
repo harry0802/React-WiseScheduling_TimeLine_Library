@@ -1,4 +1,4 @@
-import MachineStatusBoard from "./feature/MachineStatusBoard";
+import MachineStatusBoard from "./components/machine/MachineStatusBoard";
 
 function WiseSchedulingIndex() {
   return <MachineStatusBoard />;
