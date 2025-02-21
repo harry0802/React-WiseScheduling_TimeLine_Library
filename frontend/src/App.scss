@@ -1,6 +1,6 @@
 .ant-layout {
   background: transparent;
-  // min-height: 100cqh;
+  width: 100%;
   background: linear-gradient(
     275deg,
     #162343 7.95%,
@@ -8,9 +8,11 @@
     #5c5c5c 95.13%
   );
   background-repeat: no-repeat;
-  object-fit: cover;
   background-size: cover;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
+
 a {
   color: inherit;
   text-decoration: none;
@@ -19,6 +21,11 @@ a {
 
 body {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 * {

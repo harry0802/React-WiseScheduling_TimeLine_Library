@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./Topbar.module.scss";
 import { Layout, Dropdown } from "antd";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -33,16 +33,15 @@ const Topbar = () => {
             menu={{
               items,
               selectable: true,
-              defaultSelectedKeys: ["3"],
-              trigger: ["click"],
+              defaultSelectedKeys: ["zh-TW"],
               onClick,
             }}
-            placement="bottomLeft"
+            placement="bottomRight"
+            trigger={["click"]}
           >
             <img src={translation} alt="語言切換" />
           </Dropdown>
-
-          <NotificationsIcon sx={{ color: "#E0E7F5" }} />
+          <NotificationsIcon />
         </div>
       </div>
     </Header>

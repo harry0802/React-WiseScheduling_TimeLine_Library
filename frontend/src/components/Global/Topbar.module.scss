@@ -1,16 +1,45 @@
 :global(.ant-layout-header) {
+  padding: 0;
+  height: 64px;
+  // position: sticky;
   background: transparent;
-  padding: 0 20px;
+  top: 0;
+  z-index: 1000;
+  margin-left: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 100%;
+  padding: 0 24px;
+
+  img {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+  }
 }
 
 .tools {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
   * {
-    margin-left: 15px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    color: #e0e7f5;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  img {
+    height: 24px;
+    width: 24px;
   }
 }
