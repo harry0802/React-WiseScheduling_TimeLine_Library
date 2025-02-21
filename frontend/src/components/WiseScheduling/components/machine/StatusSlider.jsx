@@ -19,7 +19,9 @@ const MARKS = [
 
 const StyledSlider = styled(Slider)`
   .MuiSlider-markLabel {
-    font-size: 16px;
+    font-size: 24px;
+    font-weight: 600;
+    font-family: Roboto;
 
     &[data-index="0"] {
       color: #00b0f0;

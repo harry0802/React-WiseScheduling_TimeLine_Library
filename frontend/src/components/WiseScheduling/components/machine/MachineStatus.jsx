@@ -13,11 +13,12 @@ import {
 
 const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
   const form = useForm({
-    mode: "onChange",
+    mode: "onBlur",
     resolver: zodResolver(statusSchema),
     defaultValues: initialData,
   });
 
+  const timeLineStatus = form.watch("timeLineStatus");
   useImperativeHandle(ref, () => ({
     getFormValues: () => form.getValues(),
     validateForm: async () => {
@@ -37,6 +38,7 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
   return (
     <FormProvider {...form}>
       <div>
+        {/* 機台資訊 */}
         <StatusHeader>
           <div>
             <h3>
@@ -45,17 +47,17 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
             <p>製令單號: {initialData.id}</p>
           </div>
         </StatusHeader>
-
+        {/*  機台狀態 */}
         <SliderContainer>
           <StatusSlider />
         </SliderContainer>
 
-        {form.watch("timeLineStatus") === "機台停機" ||
-          (form.watch("timeLineStatus") === "異常" && (
-            <ReasonGrid>
-              <ReasonSelector />
-            </ReasonGrid>
-          ))}
+        {/* 機台停機或異常 */}
+        {(timeLineStatus === "機台停機" || timeLineStatus === "異常") && (
+          <ReasonGrid>
+            <ReasonSelector />
+          </ReasonGrid>
+        )}
       </div>
     </FormProvider>
   );

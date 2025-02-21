@@ -5,7 +5,7 @@ import Topbar from "../components/Global/Topbar";
 import styled from "styled-components";
 import ProductNotification from "../components/ProductionRecord/utility/ProductNotification";
 import GlobalStyles from "../styles/GlobalStyle";
-
+import Sidebar from "../components/Global/Sidebar";
 const { Content } = Layout;
 
 const StyledLayout = styled(Layout)`
@@ -42,13 +42,16 @@ const AppLayout = () => {
       <StyledLayout>
         <GlobalStyles />
         <Topbar collapsed={collapsed} setCollapsed={setCollapsed} />
-        <StyledContent>
-          <React.Suspense fallback={<Spin size="large" />}>
-            <MainContent>
-              <Outlet />
-            </MainContent>
-          </React.Suspense>
-        </StyledContent>
+        <Layout>
+          <Sidebar collapsed={collapsed} />
+          <StyledContent>
+            <React.Suspense fallback={<Spin size="large" />}>
+              <MainContent>
+                <Outlet />
+              </MainContent>
+            </React.Suspense>
+          </StyledContent>
+        </Layout>
       </StyledLayout>
       <ProductNotification />
     </>

@@ -6,6 +6,34 @@ import {
   FormHelperText,
 } from "@mui/material";
 import { useFormContext } from "react-hook-form";
+import { styled } from "@mui/material/styles";
+
+const StyledRadio = styled(Radio)`
+  padding: 0.5rem;
+
+  &.Mui-checked {
+    color: #186c98;
+  }
+
+  & .MuiSvgIcon-root {
+    font-size: 1.5rem;
+  }
+`;
+
+const StyledFormControlLabel = styled(FormControlLabel)`
+  margin: 0.5rem 0;
+  width: 100%;
+
+  & .MuiFormControlLabel-label {
+    font-size: 1rem;
+    color: #8f8f8f;
+    margin-left: 0.25rem;
+  }
+
+  &.Mui-checked .MuiFormControlLabel-label {
+    color: #186c98;
+  }
+`;
 
 const STOP_REASONS = [
   "機台故障",
@@ -25,31 +53,21 @@ const ReasonSelector = () => {
   } = useFormContext();
 
   return (
-    <div style={{ padding: "0 16px" }}>
+    <div style={{ padding: "1rem 1.5rem" }}>
       <RadioGroup
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "8px",
+          gap: "1rem 8rem ",
           width: "100%",
-          "& .MuiFormControlLabel-root": {
-            marginRight: 0,
-            marginLeft: 0,
-          },
         }}
       >
         {STOP_REASONS.map((reason) => (
-          <FormControlLabel
+          <StyledFormControlLabel
             key={reason}
             value={reason}
-            control={<Radio {...register("status.reason")} />}
+            control={<StyledRadio {...register("status.reason")} />}
             label={reason}
-            sx={{
-              margin: "4px 0",
-              "& .MuiFormControlLabel-label": {
-                fontSize: "14px",
-              },
-            }}
           />
         ))}
       </RadioGroup>
