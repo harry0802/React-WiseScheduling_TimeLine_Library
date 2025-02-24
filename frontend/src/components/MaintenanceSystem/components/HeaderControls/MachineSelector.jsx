@@ -26,6 +26,7 @@ import { createMachineScope } from "../../../../services/QuotationManagement/mac
 const StyledFormControl = styled(FormControl)`
   && {
     color: #fff;
+
     .MuiOutlinedInput-root {
       max-height: 3.4375rem;
       font-size: 1.25rem;
@@ -71,8 +72,28 @@ const StyledMenuItem = styled(MenuItem)`
 const StyledSelect = styled(Select)`
   && {
     color: currentColor;
+    margin-bottom: 0;
+
     .MuiSelect-icon {
       color: currentColor;
+    }
+  }
+`;
+
+//* 自定義 Stack 容器
+const StyledStackContainer = styled(Stack)`
+  && {
+    display: flex;
+    flex-direction: row;
+    min-width: 400px;
+
+    & > * {
+      margin: 0 !important;
+      flex: 1;
+
+      &:not(:first-child) {
+        margin-left: 16px !important;
+      }
     }
   }
 `;
@@ -171,7 +192,7 @@ function MachineSelect({ value, onChange }) {
   }
 
   return (
-    <Stack direction="row" spacing={2} sx={{ minWidth: 400 }}>
+    <StyledStackContainer>
       {/* 區域選擇 */}
       <StyledFormControl fullWidth>
         <InputLabel>機台區域</InputLabel>
@@ -204,7 +225,7 @@ function MachineSelect({ value, onChange }) {
           ))}
         </StyledSelect>
       </StyledFormControl>
-    </Stack>
+    </StyledStackContainer>
   );
 }
 

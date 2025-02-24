@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import styled from "styled-components";
 import { useGetMoldSNsQuery } from "../../features/moldMaintenance/services/moldMaintenanceApi";
+import { Stack } from "@mui/system";
 
 const StyledFormControl = styled(FormControl)`
   && {
@@ -74,21 +75,23 @@ function MoldSelector({ value, onChange }) {
   }
 
   return (
-    <StyledFormControl sx={{ minWidth: 200 }}>
-      <InputLabel>模具</InputLabel>
-      <StyledSelect
-        value={selectedMoldId || ""}
-        onChange={handleMoldChange}
-        label="模具"
-      >
-        {isSuccess &&
-          moldSn.map((mold, index) => (
-            <StyledMenuItem key={index} label={mold} value={mold}>
-              {mold}
-            </StyledMenuItem>
-          ))}
-      </StyledSelect>
-    </StyledFormControl>
+    <Stack direction="row" spacing={1} sx={{ minWidth: 200 }}>
+      <StyledFormControl sx={{ minWidth: 200 }}>
+        <InputLabel>模具</InputLabel>
+        <StyledSelect
+          value={selectedMoldId || ""}
+          onChange={handleMoldChange}
+          label="模具"
+        >
+          {isSuccess &&
+            moldSn.map((mold, index) => (
+              <StyledMenuItem key={index} label={mold} value={mold}>
+                {mold}
+              </StyledMenuItem>
+            ))}
+        </StyledSelect>
+      </StyledFormControl>
+    </Stack>
   );
 }
 

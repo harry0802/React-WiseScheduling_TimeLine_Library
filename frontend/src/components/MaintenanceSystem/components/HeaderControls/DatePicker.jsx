@@ -20,7 +20,6 @@ const StyledDatePicker = styled(MuiDatePicker)`
       height: 3.4375rem;
       font-size: 1.25rem;
       max-width: 17rem;
-      /* color: #fff; */
       margin: 0 1rem;
       .MuiOutlinedInput-notchedOutline {
         border: 1px solid currentColor;
@@ -49,6 +48,15 @@ const NavigationButton = styled(IconButton)`
     transition: all 0.3s ease;
     &:hover {
       background: #186c9888;
+    }
+  }
+`;
+
+// 添加一個新的樣式容器
+const DatePickerWrapper = styled.div`
+  && {
+    .MuiFormControl-root {
+      margin-bottom: 0;
     }
   }
 `;
@@ -111,26 +119,28 @@ function DatePicker() {
             <ExpandLess />
           </NavigationButton>
 
-          <StyledDatePicker
-            value={currentDate}
-            onChange={handleDateUpdate}
-            format="YYYY/MM/DD"
-            views={["day"]}
-            showDaysOutsideCurrentMonth
-            slotProps={{
-              textField: {
-                size: "small",
-                InputProps: {
-                  value: `${currentDate.format(
-                    "YYYY/MM/DD"
-                  )} 第 ${timeUtils.getISOWeek(currentDate)} 週`,
+          <DatePickerWrapper>
+            <StyledDatePicker
+              value={currentDate}
+              onChange={handleDateUpdate}
+              format="YYYY/MM/DD"
+              views={["day"]}
+              showDaysOutsideCurrentMonth
+              slotProps={{
+                textField: {
+                  size: "small",
+                  InputProps: {
+                    value: `${currentDate.format(
+                      "YYYY/MM/DD"
+                    )} 第 ${timeUtils.getISOWeek(currentDate)} 週`,
+                  },
                 },
-              },
-              field: {
-                clearable: false,
-              },
-            }}
-          />
+                field: {
+                  clearable: false,
+                },
+              }}
+            />
+          </DatePickerWrapper>
 
           <NavigationButton
             onClick={() => handleWeekChange("next")}
