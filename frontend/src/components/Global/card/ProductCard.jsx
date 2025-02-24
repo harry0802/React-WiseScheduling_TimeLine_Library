@@ -1,41 +1,83 @@
 import React from "react";
 import styled from "styled-components";
 import { Card, Typography } from "antd";
-// mui 的刪除 icon
 import DeleteIcon from "@mui/icons-material/Delete";
-const { Title, Text, Paragraph } = Typography;
+
+const { Text } = Typography;
+
+const gradientStyles = {
+  start: '#8ac0e2',
+  end: 'rgba(115, 213, 191, 0.2)',
+  hoverStart: '#6ec0ad',
+  hoverEnd: '#20479c',
+  active: '#8bc1e3'
+};
+
 const StyledCard = styled(Card)`
   @property --gradient-start {
     syntax: "<color>";
-    initial-value: #8ac0e2;
+    initial-value: ${gradientStyles.start};
     inherits: false;
   }
 
   @property --gradient-end {
     syntax: "<color>";
-    initial-value: rgba(115, 213, 191, 0.2);
+    initial-value: ${gradientStyles.end};
     inherits: false;
   }
 
-  @property --gradient-rote {
-    syntax: "<angle>";
-    initial-value: 121deg;
-    inherits: false;
-  }
-
+  --gradient-start: ${gradientStyles.start};
+  --gradient-end: ${gradientStyles.end};
+  
   height: 300px;
   border: 1px solid #8f8f8f;
   border-radius: 10px;
+  cursor: pointer;
+  grid-column: span 6;
+
   background: linear-gradient(
-    var(--gradient-rote),
+    121deg,
     var(--gradient-start) 19.1%,
     var(--gradient-end) 100%
   );
 
-  cursor: pointer;
-  transition: border-color 0.4s, --gradient-start 0.8s,
-    --gradient-end 0.8s ease-out, --gradient-rote 0.8s, color 0.8s !important;
-  grid-column: span 6;
+  transition: border-color 0.3s ease,
+              background 0.8s ease-in,
+              --gradient-start 0.8s ease-in,
+              --gradient-end 0.8s ease-in,
+              color 0.8s ease-in-out !important;
+
+  &:hover {
+    --gradient-start: ${gradientStyles.hoverStart};
+    --gradient-end: ${gradientStyles.hoverEnd};
+    border-color: #fff;
+  }
+
+  &:active {
+    --gradient-start: ${gradientStyles.active};
+    --gradient-end: ${gradientStyles.active};
+  }
+
+  // 跨瀏覽器支持
+  @supports not (background: var(--gradient-start)) {
+    background: linear-gradient(
+      121deg,
+      ${gradientStyles.start} 19.1%,
+      ${gradientStyles.end} 100%
+    );
+
+    &:hover {
+      background: linear-gradient(
+        121deg,
+        ${gradientStyles.hoverStart} 19.1%,
+        ${gradientStyles.hoverEnd} 100%
+      );
+    }
+
+    &:active {
+      background: ${gradientStyles.active};
+    }
+  }
 
   .ant-card-body {
     display: flex;
@@ -47,19 +89,6 @@ const StyledCard = styled(Card)`
     font-weight: 400;
     line-height: 3.125rem;
     font-family: Roboto;
-  }
-
-  &:hover {
-    --gradient-start: #6ec0ad;
-    --gradient-end: #20479c;
-    --gradient-rote: 110deg;
-    border-color: #fff;
-  }
-
-  &:active {
-    --gradient-start: #8bc1e3;
-    --gradient-end: #8bc1e3;
-    --gradient-rote: 121deg;
   }
 
   @media only screen and (min-width: 768px) {

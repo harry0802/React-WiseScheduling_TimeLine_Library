@@ -137,18 +137,18 @@ button.ant-btn-default,
   }
 
   // 基本變量定義，作為後備
-  --gradient-start: #8ac0e2;
-  --gradient-end: rgba(115, 213, 191, 0.2);
+  --pr-gradient-start: #8ac0e2;
+  --pr-gradient-end: rgba(115, 213, 191, 0.2);
 
   // @property 定義，用於支持的瀏覽器
   @supports (background: paint(something)) {
-    @property --gradient-start {
+    @property --pr-gradient-start {
       syntax: "<color>";
       initial-value: #8ac0e2;
       inherits: false;
     }
 
-    @property --gradient-end {
+    @property --pr-gradient-end {
       syntax: "<color>";
       initial-value: rgba(115, 213, 191, 0.2);
       inherits: false;
@@ -161,8 +161,8 @@ button.ant-btn-default,
     border-radius: 10px;
     background: linear-gradient(
       121deg,
-      var(--gradient-start) 19.1%,
-      var(--gradient-end) 100%
+      var(--pr-gradient-start) 19.1%,
+      var(--pr-gradient-end) 100%
     );
     cursor: pointer;
     transition: border-color 0.3s ease, background 0.8s ease-in,
@@ -243,14 +243,14 @@ button.ant-btn-default,
     }
 
     &:hover {
-      --gradient-start: #6ec0ad;
-      --gradient-end: #20479c;
+      --pr-gradient-start: #6ec0ad;
+      --pr-gradient-end: #20479c;
       border-color: #fff;
     }
 
     &:active {
-      --gradient-start: #8bc1e3;
-      --gradient-end: #8bc1e3;
+      --pr-gradient-start: #8bc1e3;
+      --pr-gradient-end: #8bc1e3;
     }
 
     // 為不支持 CSS 變量的瀏覽器提供後備樣式

@@ -13,7 +13,7 @@ import {
   StyledButton,
 } from "../utils/styles";
 
-import QuantityInput from "../../../../ProductionInspection/QuantityInput";
+import QuantityInput from "./QuantityInput";
 import { INSPECTION_LIST, TRANSLATION_KEYS } from "../utils/constants";
 import { TZ } from "../../../../../config/config";
 import { useFormContext } from "react-hook-form";

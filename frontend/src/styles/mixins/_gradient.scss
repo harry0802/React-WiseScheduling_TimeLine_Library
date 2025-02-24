@@ -1,0 +1,68 @@
+// 定義漸層色變量
+$gradient-start: #8ac0e2;
+$gradient-end: rgba(115, 213, 191, 0.2);
+$gradient-hover-start: #6ec0ad;
+$gradient-hover-end: #20479c;
+$gradient-active: #8bc1e3;
+
+// 漸層效果的 mixin
+@mixin card-gradient {
+  @property --gradient-start {
+    syntax: "<color>";
+    initial-value: $gradient-start;
+    inherits: false;
+  }
+
+  @property --gradient-end {
+    syntax: "<color>";
+    initial-value: $gradient-end;
+    inherits: false;
+  }
+
+  --gradient-start: $gradient-start;
+  --gradient-end: $gradient-end;
+
+  background: linear-gradient(
+    121deg,
+    var(--gradient-start) 19.1%,
+    var(--gradient-end) 100%
+  );
+
+  transition: border-color 0.3s ease, 
+             background 0.8s ease-in,
+             --gradient-start 0.8s ease-in, 
+             --gradient-end 0.8s ease-in,
+             color 0.8s ease-in-out !important;
+
+  &:hover {
+    --gradient-start: $gradient-hover-start;
+    --gradient-end: $gradient-hover-end;
+    border-color: #fff;
+  }
+
+  &:active {
+    --gradient-start: $gradient-active;
+    --gradient-end: $gradient-active;
+  }
+
+  // 跨瀏覽器支持
+  @supports not (background: var(--gradient-start)) {
+    background: linear-gradient(
+      121deg,
+      $gradient-start 19.1%,
+      $gradient-end 100%
+    );
+
+    &:hover {
+      background: linear-gradient(
+        121deg, 
+        $gradient-hover-start 19.1%, 
+        $gradient-hover-end 100%
+      );
+    }
+
+    &:active {
+      background: $gradient-active;
+    }
+  }
+}
