@@ -9,8 +9,9 @@ import MoldSelector from "./MoldSelector";
 const HeaderWrapper = styled(Stack)`
   width: 100%;
   padding: 16px;
-  height: 80px;
-  padding: 16px 0;
+  min-height: 80px;
+  padding: 16px;
+  background: var(--color-background-base);
   border-bottom: 1px solid #444;
 `;
 
@@ -42,7 +43,7 @@ function HeaderControls({ model = "machineMaintenance" }) {
       direction="row"
       justifyContent="flex-end"
       alignItems="center"
-      spacing={8}
+      spacing={2}
     >
       <Title>
         {model === "machineMaintenance" ? "機台" : "模具"}維護保養紀錄單

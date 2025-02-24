@@ -20,9 +20,20 @@ const StyledDatePicker = styled(MuiDatePicker)`
       height: 3.4375rem;
       font-size: 1.25rem;
       max-width: 17rem;
+      /* color: #fff; */
+      margin: 0 1rem;
+      .MuiOutlinedInput-notchedOutline {
+        border: 1px solid currentColor;
+        transition: all 0.3s ease;
+      }
+
+      &:hover .MuiOutlinedInput-notchedOutline {
+        border-color: #666;
+      }
     }
     & input {
       text-align: center;
+      color: currentColor;
     }
   }
 `;
@@ -35,7 +46,7 @@ const NavigationButton = styled(IconButton)`
     color: #fff;
     stroke-width: 1.5;
     stroke: currentColor;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
     &:hover {
       background: #186c9888;
     }
@@ -92,34 +103,42 @@ function DatePicker() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="zh-tw">
       <Stack direction="row" alignItems="center" spacing={2}>
-        <NavigationButton onClick={() => handleWeekChange("prev")} size="small">
-          <ExpandLess />
-        </NavigationButton>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <NavigationButton
+            onClick={() => handleWeekChange("prev")}
+            size="small"
+          >
+            <ExpandLess />
+          </NavigationButton>
 
-        <StyledDatePicker
-          value={currentDate}
-          onChange={handleDateUpdate}
-          format="YYYY/MM/DD"
-          views={["day"]}
-          showDaysOutsideCurrentMonth
-          slotProps={{
-            textField: {
-              size: "small",
-              InputProps: {
-                value: `${currentDate.format(
-                  "YYYY/MM/DD"
-                )} 第 ${timeUtils.getISOWeek(currentDate)} 週`,
+          <StyledDatePicker
+            value={currentDate}
+            onChange={handleDateUpdate}
+            format="YYYY/MM/DD"
+            views={["day"]}
+            showDaysOutsideCurrentMonth
+            slotProps={{
+              textField: {
+                size: "small",
+                InputProps: {
+                  value: `${currentDate.format(
+                    "YYYY/MM/DD"
+                  )} 第 ${timeUtils.getISOWeek(currentDate)} 週`,
+                },
               },
-            },
-            field: {
-              clearable: false,
-            },
-          }}
-        />
+              field: {
+                clearable: false,
+              },
+            }}
+          />
 
-        <NavigationButton onClick={() => handleWeekChange("next")} size="small">
-          <ExpandMore />
-        </NavigationButton>
+          <NavigationButton
+            onClick={() => handleWeekChange("next")}
+            size="small"
+          >
+            <ExpandMore />
+          </NavigationButton>
+        </div>
       </Stack>
     </LocalizationProvider>
   );

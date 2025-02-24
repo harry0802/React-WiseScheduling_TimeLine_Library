@@ -26,6 +26,10 @@ const StyledFormControl = styled(FormControl)`
       &:hover .MuiOutlinedInput-notchedOutline {
         border-color: #666;
       }
+
+      .MuiSelect-icon {
+        color: currentColor;
+      }
     }
 
     .MuiInputLabel-root {
