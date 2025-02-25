@@ -11,6 +11,12 @@
 # production
 /build
 
+# memory_ban/home/harry/flaskplastic/frontend/docs
+/memory_ban
+
+
+
+
 # misc
 .DS_Store
 .env.local

@@ -3,7 +3,8 @@
     "submitBtn": "Đổi ca",
     "okBtn": "OK",
     "cancelBtn": "Hủy bỏ",
-    "updatingError": "暫時無法更新，請稍後再試"
+    "updatingError": " 暫時無法更新，請稍後再試",
+    "noData": "Chưa có dữ liệu"
   },
   "productionReport": {
     "machineSelect": {

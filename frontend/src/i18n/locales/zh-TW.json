@@ -7,7 +7,8 @@
     "submitBtn": "確認",
     "okBtn": "確定",
     "cancelBtn": "取消",
-    "updatingError": "暫時無法更新，請稍後再試"
+    "updatingError": "暫時無法更新，請稍後再試",
+    "noData": "尚無機台"
   },
   "productionReport": {
     "machineSelect": {
