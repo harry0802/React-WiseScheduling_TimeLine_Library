@@ -47,6 +47,15 @@ const routeConfig = [
           </React.Suspense>
         ),
       },
+      // 添加 TimelineGantt 路由
+      {
+        path: "TimelineGanttPage",
+        element: (
+          <React.Suspense fallback={<div>Loading...</div>}>
+            <LazyComponents.TimelineGanttPage />
+          </React.Suspense>
+        ),
+      },
       {
         path: "QualityManagementSystem",
         element: <LazyComponents.QualityAssuranceSystemPage />,

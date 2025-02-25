@@ -142,3 +142,8 @@ export const SubBatch = lazyImport(() =>
 export const WiseSchedulingPage = lazyImport(() =>
   import("../pages/WiseSchedulingPage")
 );
+
+// TimelineGantt
+export const TimelineGanttPage = lazyImport(() =>
+  import("../pages/TimelineGanttPage")
+);

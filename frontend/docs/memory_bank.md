@@ -1,700 +1,611 @@
-# 專案記憶庫驅動開發系統
-
-_最後更新時間: 2024-02-25_
-
-## 目錄
-
-1. [目的與範圍](#目的與範圍)
-2. [目錄與檔案結構](#目錄與檔案結構)
-3. [套件相依性分析](#套件相依性分析)
-4. [核心功能模組詳解](#核心功能模組詳解)
-5. [開發規範指南](#開發規範指南)
-6. [標準開發流程](#標準開發流程)
-7. [記憶庫維護機制](#記憶庫維護機制)
-8. [更新記錄](#更新記錄)
-
-## 目的與範圍
-
-本記憶庫旨在建立一個結構化的專案知識庫，使開發團隊和人工智能助手能夠快速理解程式碼基礎，最小化溝通成本，並提供高品質的開發協助。透過標準化的文檔格式與流程，確保所有開發活動均基於完整理解的專案結構進行。
-
-記憶庫涵蓋範圍包括：
-
-- 完整的目錄與檔案結構說明
-- 套件相依性與版本管理資訊
-- 核心功能模組與業務邏輯流程
-- 開發規範與最佳實踐指南
-- 測試策略與覆蓋情況分析
+# 專案記憶庫 - FlaskPlastic Frontend
 
 ## 目錄與檔案結構
 
-### 主要目錄層次
+### 根目錄結構
 
 ```
 frontend/
-├── docs/                      # 專案文檔
-│   ├── project_structure.md   # 專案結構文檔
-│   ├── project_memory.md      # 專案記憶文檔
-│   └── memory_bank.md         # 專案記憶庫
-├── public/                    # 靜態資源和HTML模板
-├── src/                       # 源代碼
-│   ├── assets/                # 靜態資源(圖片、字體等)
-│   ├── components/            # React組件
-│   ├── config/                # 配置文件
-│   ├── hooks/                 # 自定義React鉤子
-│   ├── i18n/                  # 國際化資源
-│   ├── layout/                # 布局組件
-│   ├── pages/                 # 頁面組件
-│   ├── router/                # 路由配置
-│   ├── services/              # API服務
-│   ├── store/                 # 狀態管理
-│   ├── styles/                # 全局樣式
-│   ├── utils/                 # 工具函數
-│   ├── utility/               # 實用工具
-│   ├── App.js                 # 應用入口組件
-│   └── index.js               # 應用入口文件
-└── [配置文件]                  # 各種配置文件
+├── docs/                    # 專案文檔
+├── public/                  # 靜態資源
+├── src/                     # 核心源代碼
+│   ├── assets/              # 資源文件 (圖片、圖標等)
+│   ├── components/          # 可重用組件
+│   ├── config/              # 項目配置
+│   ├── hooks/               # 自定義 React Hooks
+│   ├── i18n/                # 國際化相關
+│   ├── layout/              # 頁面佈局組件
+│   ├── pages/               # 頁面級組件
+│   ├── router/              # 路由配置
+│   ├── services/            # API 服務
+│   ├── store/               # Redux 狀態管理
+│   ├── styles/              # 全局樣式
+│   ├── utils/               # 工具函數
+│   ├── utility/             # 通用工具
+│   ├── App.js               # 舊的主應用入口 (目前未使用)
+│   ├── App.scss             # 主應用樣式
+│   ├── App-V1.js            # 當前主應用入口
+│   └── index.js             # 應用初始化入口
+├── .gitignore               # Git 忽略文件
+├── Dockerfile               # Docker 配置
+├── package.json             # 依賴配置
+└── nginx.conf               # Nginx 配置
 ```
 
-### 關鍵目錄詳情
+### 關鍵組件結構
 
-#### `/src/components/`
+#### WiseScheduling 組件結構 (智能排程系統)
 
-包含所有可重用的 React 組件，按功能模組分類：
-
-| 目錄                            | 用途                     | 特殊模式或例外              |
-| ------------------------------- | ------------------------ | --------------------------- |
-| `/BIMVersionCompare/`           | BIM 模型版本比較功能組件 | 使用 WebGL 進行 3D 模型渲染 |
-| `/CostWiseSystem/`              | 成本智能系統相關組件     | 包含數據可視化圖表          |
-| `/Global/`                      | 全局共用組件             | 所有頁面共享的基礎 UI 元素  |
-| `/LeaderSign/`                  | 領導簽名功能組件         | 支持手寫簽名捕獲            |
-| `/Login/`                       | 用戶登錄相關組件         | 多種認證方式支持            |
-| `/MachineSelect/`               | 機器選擇功能組件         | 動態加載機器列表，支援生產狀態判斷與禁止點選  |
-| `/MaintenanceSystem/`           | 維護系統相關組件         | 包含排程和提醒功能          |
-| `/OperatorSign/`                | 操作員簽名功能組件       | 類似 LeaderSign 但權限不同  |
-| `/ProductionDetail/`            | 生產詳情顯示組件         | 多層次數據展示              |
-| `/ProductionInspection/`        | 生產檢查功能組件         | 包含檢查表單和報告生成      |
-| `/ProductionRecord/`            | 生產記錄功能組件         | 支持批量數據錄入            |
-| `/ProductionReport/`            | 生產報告功能組件         | 支持多種格式導出            |
-| `/ProductionSchedule/`          | 生產計劃功能組件         | 包含甘特圖視圖              |
-| `/QualityManagementSystem/`     | 質量管理系統組件         | 整合多種質量控制工具        |
-| `/QuotationManagementSystem/`   | 報價管理系統組件         | 主要報價系統界面            |
-| `/QuotationManagementSystemFQ/` | 報價管理系統 FQ 版本組件 | 快速報價特殊版本            |
-| `/SmsVerification/`             | 簡訊驗證功能組件         | 整合第三方簡訊服務          |
-| `/WiseScheduling/`              | 智能調度功能組件         | 使用算法優化生產排程        |
-
-#### `/src/services/`
-
-包含所有 API 服務和數據處理邏輯：
-
-| 目錄/文件               | 用途             | 關鍵功能                         |
-| ----------------------- | ---------------- | -------------------------------- |
-| `/auth/`                | 認證相關服務     | 登錄、登出、權限驗證、令牌刷新   |
-| `/QuotationManagement/` | 報價管理相關服務 | 報價創建、查詢、修改、審批、導出 |
-| `cacheService.js`       | 緩存服務         | 本地數據緩存、過期策略、同步機制 |
-
-#### `/src/router/`
-
-路由配置和懶加載組件：
-
-| 文件                | 用途           | 特殊處理                     |
-| ------------------- | -------------- | ---------------------------- |
-| `AppLayout.jsx`     | 應用主布局     | 包含全局導航和側邊欄         |
-| `lazyComponents.js` | 組件懶加載配置 | 使用 React.lazy 實現按需加載 |
-| `routeConfig.js`    | 路由配置定義   | 包含路由權限控制和重定向規則 |
-
-### 檔案分佈統計
-
-| 檔案類型       | 數量 | 主要用途             |
-| -------------- | ---- | -------------------- |
-| .jsx/.tsx      | 未知 | React 組件           |
-| .js/.ts        | 未知 | 工具函數、服務和配置 |
-| .scss/.css     | 未知 | 樣式文件             |
-| .json          | 未知 | 配置和靜態數據       |
-| .svg/.png/.jpg | 未知 | 圖像資源             |
-
-### 命名慣例與特殊模式
-
-- **組件目錄**: PascalCase (例如: `ProductionDetail`)
-- **組件文件**: PascalCase (例如: `Button.jsx`)
-- **工具函數文件**: camelCase (例如: `formatDate.js`)
-- **樣式文件**: 與組件同名，使用.scss 擴展名 (例如: `Button.scss`)
-- **特殊模式**:
-  - 高階組件使用`with`前綴 (例如: `withAuth.jsx`)
-  - 自定義鉤子使用`use`前綴 (例如: `useFormValidation.js`)
-  - 常量文件使用`constants`後綴 (例如: `apiConstants.js`)
+```
+components/WiseScheduling/
+├── components/
+│   ├── machine/             # 機台狀態相關組件
+│   │   └── MachineStatusBoard.jsx  # 機台狀態看板
+│   └── timelineGantt/       # 時間軸甘特圖組件
+│       ├── components/      # 子組件
+│       │   ├── ItemDialog.jsx        # 項目詳細信息對話框
+│       │   ├── OperationDialog.jsx   # 操作確認對話框
+│       │   ├── TimelineControls.jsx  # 時間軸控制器
+│       │   └── TimelineContent.jsx   # 時間軸內容模板
+│       ├── configs/         # 配置
+│       │   ├── constants.js          # 常量定義
+│       │   ├── formConfig.js         # 表單配置
+│       │   ├── machineGroups.js      # 機台分組配置
+│       │   ├── orderItems.js         # 訂單項配置
+│       │   └── timeline/            # 時間軸特定配置
+│       │       ├── timelineConfigs.js    # 時間軸樣式配置
+│       │       ├── timelineLocale.js     # 本地化配置
+│       │       └── timelineOptions.js    # 時間軸選項
+│       ├── hooks/           # 自定義 Hooks
+│       │   ├── useStatusForm.js      # 狀態表單 Hook
+│       │   ├── useTimelineData.js    # 時間軸數據 Hook
+│       │   └── useTimelineOperations.js # 時間軸操作 Hook
+│       ├── styles/          # 樣式組件
+│       │   ├── TimelineAxis.styles.js     # 時間軸樣式
+│       │   ├── TimelineBase.styles.js     # 基礎容器樣式
+│       │   ├── TimelineItem.styles.js     # 項目樣式
+│       │   ├── TimelineStatus.styles.js   # 狀態樣式
+│       │   └── index.js               # 樣式導出
+│       ├── utils/           # 工具函數
+│       │   ├── dateUtils.js           # 日期工具
+│       │   └── formUtils.js           # 表單工具
+│       └── index.jsx        # 時間軸甘特圖主組件
+├── api/                     # API 相關
+├── assets/                  # 資源文件
+├── configs/                 # 整體配置
+├── hooks/                   # 模組 Hooks
+├── lib/                     # 自定義庫
+├── mock/                    # 模擬數據
+├── services/                # 服務
+├── states/                  # 狀態管理
+├── utils/                   # 工具
+└── index.jsx                # 主組件入口
+```
 
 ## 套件相依性分析
 
-### 核心套件
+### 核心框架和庫
 
-| 套件名稱         | 版本    | 用途     | 關鍵 API/組件                           | 配置位置                  | 使用狀態 |
-| ---------------- | ------- | -------- | --------------------------------------- | ------------------------- | -------- |
-| react            | ^18.2.0 | UI 庫    | useState, useEffect, Component          | package.json              | 使用中   |
-| react-dom        | ^18.2.0 | DOM 渲染 | render, createPortal                    | package.json              | 使用中   |
-| react-router-dom | ^6.10.0 | 路由管理 | BrowserRouter, Route, Link, useNavigate | src/router/routeConfig.js | 使用中   |
+| 套件名稱         | 版本    | 主要用途         |
+| ---------------- | ------- | ---------------- |
+| react            | ^18.2.0 | 前端 UI 庫       |
+| react-dom        | ^18.2.0 | React DOM 渲染   |
+| react-router-dom | ^6.10.0 | 路由管理         |
+| @reduxjs/toolkit | ^1.9.4  | Redux 狀態管理   |
+| react-redux      | ^8.0.5  | React Redux 綁定 |
+| zustand          | ^4.5.2  | 輕量級狀態管理   |
 
-### UI 與樣式
+### UI 框架和組件
 
-| 套件名稱            | 版本     | 用途                   | 關鍵 API/組件           | 配置位置           | 使用狀態 |
-| ------------------- | -------- | ---------------------- | ----------------------- | ------------------ | -------- |
-| @mui/material       | ^5.12.2  | Material Design UI 庫  | Button, TextField, Grid | package.json       | 使用中   |
-| @mui/icons-material | ^5.11.16 | Material Design 圖標庫 | AddIcon, DeleteIcon     | package.json       | 使用中   |
-| @emotion/react      | ^11.10.8 | CSS-in-JS 樣式引擎     | css, keyframes          | package.json       | 使用中   |
-| @emotion/styled     | ^11.10.8 | 樣式化組件             | styled                  | package.json       | 使用中   |
-| sass                | ^1.62.1  | SCSS 處理              | -                       | package.json       | 使用中   |
-| styled-components   | ^5.3.10  | CSS-in-JS 樣式解決方案 | styled, ThemeProvider   | package.json       | 使用中   |
-| tailwindcss         | ^3.3.2   | 原子化 CSS 框架        | 通過類名應用樣式        | tailwind.config.js | 使用中   |
+| 套件名稱            | 版本    | 主要用途               |
+| ------------------- | ------- | ---------------------- |
+| @mui/material       | ^5.15.4 | Material UI 組件庫     |
+| @mui/icons-material | ^5.15.4 | Material UI 圖標       |
+| @mui/x-data-grid    | ^6.6.0  | 數據表格組件           |
+| @mui/x-date-pickers | ^6.18.7 | 日期選擇器組件         |
+| antd                | ^5.14.0 | Ant Design 組件庫      |
+| @ant-design/icons   | ^4.0.0  | Ant Design 圖標        |
+| styled-components   | ^5.3.11 | CSS-in-JS 樣式解決方案 |
 
-### 國際化
+### 日期和時間處理
 
-| 套件名稱      | 版本     | 用途             | 關鍵 API/組件         | 配置位置        | 使用狀態 |
-| ------------- | -------- | ---------------- | --------------------- | --------------- | -------- |
-| i18next       | ^22.4.15 | 國際化框架       | t, useTranslation     | src/i18n/config | 使用中   |
-| react-i18next | ^12.2.0  | React 國際化整合 | useTranslation, Trans | src/i18n/config | 使用中   |
-
-### 網絡請求
-
-| 套件名稱 | 版本   | 用途        | 關鍵 API/組件           | 配置位置            | 使用狀態 |
-| -------- | ------ | ----------- | ----------------------- | ------------------- | -------- |
-| axios    | ^1.4.0 | HTTP 客戶端 | get, post, interceptors | src/services/api.js | 使用中   |
-
-### 狀態管理
-
-| 套件名稱    | 版本    | 用途                | 關鍵 API/組件                      | 配置位置           | 使用狀態 |
-| ----------- | ------- | ------------------- | ---------------------------------- | ------------------ | -------- |
-| redux       | ^4.2.1  | 狀態管理庫          | createStore, combineReducers       | src/store/index.js | 使用中   |
-| react-redux | ^8.0.5  | Redux 的 React 綁定 | Provider, useSelector, useDispatch | src/store/index.js | 使用中   |
-| redux-thunk | ^2.4.2  | Redux 異步中間件    | thunk                              | src/store/index.js | 使用中   |
-| immer       | ^10.0.1 | 不可變數據處理      | produce                            | src/store/reducers | 使用中   |
-| zustand     | ^4.5.2  | 狀態管理庫          | create, devtools                   | 各組件中           | 使用中   |
+| 套件名稱 | 版本     | 主要用途         |
+| -------- | -------- | ---------------- |
+| dayjs    | ^1.11.10 | 輕量級日期處理庫 |
+| moment   | ^2.29.4  | 日期時間處理     |
 
 ### 表單處理
 
-| 套件名稱        | 版本    | 用途         | 關鍵 API/組件                    | 配置位置   | 使用狀態 |
-| --------------- | ------- | ------------ | -------------------------------- | ---------- | -------- |
-| formik          | ^2.2.9  | 表單狀態管理 | useFormik, Formik, Field         | 各表單組件 | 未使用   |
-| yup             | ^1.1.1  | 表單驗證     | object, string, number, required | 各表單組件 | 使用中   |
-| react-hook-form | ^7.53.0 | 表單狀態管理 | useForm, useController           | 各表單組件 | 使用中   |
-| zod             | ^3.23.8 | 表單驗證     | z.object, z.string               | 各表單組件 | 使用中   |
+| 套件名稱            | 版本    | 主要用途                |
+| ------------------- | ------- | ----------------------- |
+| react-hook-form     | ^7.53.0 | 表單處理和驗證          |
+| @hookform/resolvers | ^3.1.1  | 表單驗證解析器          |
+| yup                 | ^1.2.0  | 表單驗證架構            |
+| zod                 | ^3.23.8 | TypeScript 優先的驗證庫 |
 
-### 圖表與可視化
+### 數據可視化
 
-| 套件名稱          | 版本     | 用途                   | 關鍵 API/組件                | 配置位置     | 使用狀態 |
-| ----------------- | -------- | ---------------------- | ---------------------------- | ------------ | -------- |
-| echarts           | ^5.4.2   | 數據可視化圖表         | init, setOption              | 圖表相關組件 | 使用中   |
-| echarts-for-react | ^3.0.2   | ECharts 的 React 封裝  | ReactECharts                 | 圖表相關組件 | 未使用   |
-| three.js          | ^0.152.2 | 3D 渲染庫              | Scene, Camera, WebGLRenderer | BIM 相關組件 | 未使用   |
-| chart.js          | ^4.4.0   | 數據可視化圖表         | Chart                        | 圖表相關組件 | 使用中   |
-| react-chartjs-2   | ^5.2.0   | Chart.js 的 React 封裝 | Line, Bar, Pie               | 圖表相關組件 | 使用中   |
+| 套件名稱        | 版本   | 主要用途            |
+| --------------- | ------ | ------------------- |
+| chart.js        | ^4.4.0 | 圖表繪製            |
+| react-chartjs-2 | ^5.2.0 | React Chart.js 集成 |
+| echarts         | ^5.4.3 | 大型數據可視化庫    |
+| react-echarts   | ^0.1.1 | React ECharts 集成  |
+| vis-timeline    | ^7.7.3 | 時間軸可視化        |
+| vis-data        | ^7.1.9 | 可視化數據處理      |
 
-### 工具庫
+### 國際化
 
-| 套件名稱   | 版本     | 用途                  | 關鍵 API/組件                 | 配置位置     | 使用狀態 |
-| ---------- | -------- | --------------------- | ----------------------------- | ------------ | -------- |
-| lodash     | ^4.17.21 | JavaScript 工具函數庫 | debounce, throttle, cloneDeep | 全局使用     | 使用中   |
-| dayjs      | ^1.11.7  | 日期處理庫            | format, parse, add            | 全局使用     | 使用中   |
-| uuid       | ^9.0.0   | 唯一 ID 生成          | v4                            | 全局使用     | 使用中   |
-| crypto-js  | ^4.1.1   | 加密庫                | AES, SHA256                   | 認證相關服務 | 使用中   |
-| classnames | ^2.3.2   | CSS 類名處理          | classnames                    | 全局使用     | 使用中   |
-| file-saver | ^2.0.5   | 文件保存              | saveAs                        | 導出功能     | 使用中   |
-| exceljs    | ^4.4.0   | Excel 文件處理        | Workbook, Worksheet           | 導出功能     | 使用中   |
+| 套件名稱                         | 版本    | 主要用途         |
+| -------------------------------- | ------- | ---------------- |
+| i18next                          | ^22.5.0 | 國際化框架       |
+| react-i18next                    | ^12.3.1 | React 國際化綁定 |
+| i18next-browser-languagedetector | ^7.2.1  | 瀏覽器語言檢測   |
 
-### 測試工具
+### 其他工具庫
 
-| 套件名稱               | 版本     | 用途           | 關鍵 API/組件              | 配置位置          | 使用狀態 |
-| ---------------------- | -------- | -------------- | -------------------------- | ----------------- | -------- |
-| jest                   | ^29.5.0  | 測試框架       | describe, it, expect       | jest.config.js    | 未使用   |
-| @testing-library/react | ^14.0.0  | React 組件測試 | render, fireEvent, waitFor | 測試文件          | 未使用   |
-| cypress                | ^12.11.0 | 端到端測試框架 | visit, get, click          | cypress.config.js | 未使用   |
-| msw                    | ^1.2.1   | API 模擬       | rest, setupServer          | src/mocks         | 未使用   |
+| 套件名稱   | 版本    | 主要用途              |
+| ---------- | ------- | --------------------- |
+| classnames | ^2.3.2  | CSS 類名處理          |
+| exceljs    | ^4.4.0  | Excel 文件處理        |
+| file-saver | ^2.0.5  | 文件保存功能          |
+| js-cookie  | ^3.0.5  | Cookie 操作           |
+| xlsx       | ^0.18.5 | Excel 文件解析        |
+| react-use  | ^17.5.1 | React 常用 Hooks 集合 |
 
-### 構建與開發工具
+### 開發工具
 
-| 套件名稱    | 版本    | 用途           | 關鍵 API/組件  | 配置位置       | 使用狀態 |
-| ----------- | ------- | -------------- | -------------- | -------------- | -------- |
-| vite        | ^4.3.5  | 構建工具       | defineConfig   | vite.config.js | 未使用   |
-| eslint      | ^8.39.0 | 代碼檢查工具   | rules, plugins | .eslintrc      | 使用中   |
-| prettier    | ^2.8.8  | 代碼格式化工具 | -              | .prettierrc    | 使用中   |
-| husky       | ^8.0.3  | Git hooks 工具 | -              | .husky         | 未使用   |
-| lint-staged | ^13.2.2 | 暫存文件 lint  | -              | package.json   | 未使用   |
-
-### 套件依賴關係圖
-
-```mermaid
-graph TD
-    A[React] --> B[React DOM]
-    A --> C[React Router DOM]
-    A --> D1[MUI Material]
-    D1 --> D2[MUI Icons]
-    D1 --> D3[@emotion/react]
-    D1 --> D4[@emotion/styled]
-    F[Redux] --> G[React Redux]
-    G --> A
-    F --> H[Redux Thunk]
-    F --> I[Immer]
-    J[React Hook Form] --> A
-    J --> K[Zod]
-    L[ECharts] --> A
-    M[Chart.js] --> N[react-chartjs-2]
-    N --> A
-    O[i18next] --> P[react-i18next]
-    P --> A
-    Q[axios] --> R[API Services]
-    R --> A
-    S[styled-components] --> A
-    T[zustand] --> A
-    U[tailwindcss] -.-> A
-    V[工具庫] -.-> A
-    V --> W[lodash]
-    V --> X[dayjs]
-    V --> Y[uuid]
-    V --> Z[crypto-js]
-    V --> AA[classnames]
-    V --> AB[file-saver]
-    V --> AC[exceljs]
-```
-
-### 未使用套件說明
-
-以下套件已下載但目前未在專案中實際使用：
-
-1. **formik** - 專案使用 react-hook-form 進行表單管理，formik 可能是早期選型或備選方案
-2. **echarts-for-react** - 專案直接使用 echarts 或改用 chart.js+react-chartjs-2
-3. **three.js** - BIM 相關功能可能尚未實現或使用其他技術實現
-4. **測試工具** (jest, @testing-library/react, cypress, msw) - 測試框架已配置但可能尚未編寫測試用例
-5. **vite** - 專案使用 react-scripts (Create React App)進行構建，vite 可能是計劃中的遷移目標
-6. **husky & lint-staged** - Git hooks 工具已安裝但可能未配置使用
-
-這些未使用的套件可以考慮在未來版本中移除，以減少專案依賴和構建大小。
-
-### 環境配置
-
-| 配置類型 | 位置                   | 關鍵參數                      | 說明                   |
-| -------- | ---------------------- | ----------------------------- | ---------------------- |
-| 套件配置 | package.json           | dependencies, scripts         | 定義所有套件依賴和命令 |
-| 環境變量 | .env, .env.production  | VITE_API_URL, VITE_APP_ENV    | 環境特定的配置參數     |
-| 構建配置 | vite.config.js         | plugins, resolve.alias        | Vite 構建工具配置      |
-| 代碼風格 | .eslintrc, .prettierrc | rules, plugins                | 代碼格式和風格規則     |
-| 測試配置 | jest.config.js         | testMatch, setupFilesAfterEnv | Jest 測試框架配置      |
-| 類型檢查 | tsconfig.json          | compilerOptions, include      | TypeScript 配置        |
+| 套件名稱        | 版本    | 主要用途     |
+| --------------- | ------- | ------------ |
+| sass            | ^1.62.0 | CSS 預處理器 |
+| msw             | ^1.2.1  | API 模擬     |
+| @faker-js/faker | ^7.6.0  | 假數據生成   |
 
 ## 核心功能模組詳解
 
-### 主要功能模組
+### 路由系統
 
-| 模組名稱 | 主要功能                   | 關鍵組件                                                                     | API 服務                 | 測試覆蓋 |
-| -------- | -------------------------- | ---------------------------------------------------------------------------- | ------------------------ | -------- |
-| 認證系統 | 用戶登錄、簡訊驗證         | Login, SmsVerification                                                       | auth 服務                | 未知     |
-| 報價管理 | 報價創建、查詢、修改、刪除 | QuotationManagementSystem                                                    | QuotationManagement 服務 | 未知     |
-| 生產管理 | 生產計劃、記錄、報告、檢查 | ProductionSchedule, ProductionRecord, ProductionReport, ProductionInspection | 未知                     | 未知     |
-| 質量管理 | 質量控制與管理             | QualityManagementSystem                                                      | 未知                     | 未知     |
-| 成本管理 | 成本分析與智能管理         | CostWiseSystem                                                               | 未知                     | 未知     |
-| 智能調度 | 生產調度優化               | WiseScheduling                                                               | 未知                     | 未知     |
+使用 React Router v6 進行路由管理，通過 `useRoutes` Hook 實現動態路由配置。路由配置位於 `src/router/routeConfig.js`，使用懶加載方式優化性能。
 
-### 模組互動流程
+**主要特點**:
 
-```mermaid
-graph TD
-    A[用戶] --> B[認證系統]
-    B --> C[主應用]
-    C --> D[報價管理]
-    C --> E[生產管理]
-    C --> F[質量管理]
-    C --> G[成本管理]
-    C --> H[智能調度]
-    D <--> I[報價API]
-    E <--> J[生產API]
-    F <--> K[質量API]
-    G <--> L[成本API]
-    H <--> M[調度API]
-```
+- 使用配置式路由定義
+- 組件懶加載
+- 嵌套路由支持
+- 支持路由參數
 
-### 核心業務邏輯路徑
+### 狀態管理
 
-#### 認證流程
+項目同時使用 Redux 和 Zustand 管理狀態：
 
-1. 用戶輸入帳號密碼
-2. 發送登錄請求到認證 API
-3. 獲取並存儲認證 Token
-4. 重定向到主應用
+- Redux (Redux Toolkit) 用於全局狀態管理
+- Zustand 用於某些組件和功能的局部狀態
 
-#### 報價管理流程
+### 時間軸甘特圖組件 (TimelineGantt)
 
-1. 獲取報價列表
-2. 創建/編輯報價單
-3. 提交報價數據
-4. 更新報價列表
+智能排程系統的核心組件，基於 vis-timeline 實現，用於顯示和管理生產排程。
 
-### API 接口規範
+**主要功能**:
 
-#### 認證 API
+- 時間軸可視化生產訂單
+- 支持拖拽調整訂單時間和位置
+- 多種時間範圍視圖 (小時、天、週、月)
+- 訂單詳情查看與編輯
+- 狀態顏色差異化顯示
 
-```json
-// 登錄請求
-POST /api/auth/login
-{
-  "username": "string",
-  "password": "string"
-}
+**核心文件**:
 
-// 登錄響應
-{
-  "token": "string",
-  "user": {
-    "id": "string",
-    "name": "string",
-    "role": "string"
-  }
-}
-```
+- `timelineGantt/index.jsx`: 主組件
+- `timelineGantt/hooks/useTimelineData.js`: 數據處理 Hook
+- `timelineGantt/hooks/useTimelineOperations.js`: 操作處理 Hook
+- `timelineGantt/configs/constants.js`: 常量定義
 
-#### 報價管理 API
+**數據流程**:
 
-```json
-// 獲取報價列表
-GET /api/quotations?page=1&limit=10
+1. 通過 `useTimelineData` Hook 獲取機台和訂單數據
+2. 使用 `useTimelineOperations` Hook 處理用戶操作
+3. 渲染 Timeline 組件並綁定事件處理
+4. 通過對話框管理訂單編輯
 
-// 創建報價
-POST /api/quotations
-{
-  "customer": "string",
-  "items": [
-    {
-      "product": "string",
-      "quantity": "number",
-      "price": "number"
-    }
-  ],
-  "totalAmount": "number"
-}
-```
+### 機台狀態看板 (MachineStatusBoard)
 
-### 實作模式與設計模式
+顯示所有機台的當前狀態和生產情況。
 
-- **組件結構**: 容器組件 + 展示組件模式
-- **狀態管理**: 
-  - 局部狀態使用 useState
-  - 跨組件狀態使用 Context API 或 Redux
-  - 輕量级共享狀態使用 Zustand如MachineSelect的機台選擇存儲
-- **API 調用**: 
-  - 服務層封裝，組件通過服務層訪問 API
-  - 使用 RTK Query 進行数据獲取與緩存
-  - API錯誤處理統一在放置在interceptors中
-- **路由管理**: 集中式路由配置，懶加載組件
-- **特殊交互模式**:
-  - 狀態控制層: 如MachineSelect中機台狀態常量化管理
-  - 封鎖模式: 禁止點選的功能实現
-  - 可視化狀態反饋: 使用CSS與樣式變量提供清晰的視覺提示
-- **設計模式**:
-  - 工廠模式: 用於創建複雜對象
-  - 觀察者模式: 用於事件處理
-  - 策略模式: 用於表單驗證
-  - 裝飾器模式: 用於高階組件
+**主要功能**:
+
+- 機台狀態實時顯示
+- 狀態分類和過濾
+- 快速狀態切換
+
+### 國際化 (i18n)
+
+使用 i18next 實現多語言支持，主要支持中文和英文。
+
+**主要特點**:
+
+- 語言檢測與切換
+- 資源文件分離
+- 翻譯註入組件
 
 ## 開發規範指南
 
-### 命名慣例
+### 代碼風格與組織
 
-| 元素   | 命名規則          | 示例                                      |
-| ------ | ----------------- | ----------------------------------------- |
-| 組件   | PascalCase        | `ProductDetail.jsx`                       |
-| 函數   | camelCase         | `formatCurrency()`                        |
-| 常量   | UPPER_SNAKE_CASE  | `MAX_RETRY_COUNT`                         |
-| 變量   | camelCase         | `userData`                                |
-| CSS 類 | kebab-case 或 BEM | `button-primary` 或 `button__icon--large` |
+1. **文件結構**:
 
-### 架構原則
+   - 每個功能模組有自己的資料夾
+   - 組件按照功能分類
+   - 共享組件放在 components 文件夾下
+   - 頁面級組件放在 pages 文件夾下
 
-1. **組件化**: 所有 UI 元素應封裝為可重用組件
-2. **關注點分離**:
-   - 組件負責 UI 渲染
-   - 服務負責 API 調用和數據處理
-   - 工具函數負責通用邏輯
-3. **狀態管理**:
-   - 局部狀態使用 useState
-   - 跨組件狀態使用 Context 或 Redux
-   - 輕量級共享狀態使用 Zustand
-4. **交互模式標準**:
-   - 物件狀態組件（如機台）應使用狀態常量進行標準化管理
-   - 非可交互元素應提供清晰的視覺反饋及限制（使用cursor、樣式和裝飾器）
-   - 狀態變更時應有適當的輸入限制和修飾器
-5. **路由管理**:
-   - 集中式路由配置
-   - 懶加載頁面組件
+2. **命名慣例**:
 
-### 測試策略
+   - 組件使用 PascalCase (如 `MachineStatusBoard`)
+   - 函數和變量使用 camelCase (如 `handleChange`)
+   - 常量使用大寫下劃線 (如 `MACHINE_STATUS`)
+   - 文件名與組件名保持一致
 
-- **單元測試**: 針對工具函數和獨立組件
-  - 使用 Jest 和 React Testing Library
-  - 測試覆蓋率目標: 70%以上
-- **集成測試**: 針對複雜組件和業務流程
-  - 使用 Cypress 或類似工具
-  - 關注關鍵用戶流程
-- **測試文件位置**: 與被測試代碼同目錄下的`__tests__`目錄
-- **測試命名**: `[被測試文件名].test.js`
+3. **代碼組織**:
 
-### 代碼質量標準
+   ```jsx
+   //! =============== 1. 設定與常量 ===============
+   // 導入語句和常量定義
 
-- **複雜度閾值**: 循環複雜度不超過 10
-- **函數長度**: 不超過 50 行
-- **文件長度**: 不超過 500 行
-- **註釋要求**: 所有公共 API 和複雜邏輯必須有註釋
-- **代碼審查**: 所有 PR 必須至少有一個審查者批准
+   //! =============== 2. 類型與介面 ===============
+   // 類型定義
 
-### 代碼示例
+   //! =============== 3. 核心功能 ===============
+   // 主要組件和業務邏輯
 
-#### 組件結構示例
+   //! =============== 4. 輔助函數 ===============
+   // 工具函數和輔助方法
+   ```
+
+### React 最佳實踐
+
+1. **Hooks 使用**:
+
+   - 使用自定義 Hooks 抽取複雜邏輯
+   - 遵循 Hooks 使用規則
+   - 使用 useCallback 和 useMemo 優化性能
+
+2. **組件設計**:
+
+   - 組件功能單一
+   - 使用 Props 傳遞數據和回調
+   - 使用 children 和組合模式
+
+3. **性能優化**:
+   - 組件分割和代碼分割
+   - 使用 memo 減少不必要的渲染
+   - 使用懶加載加載組件
+
+### 樣式規範
+
+1. 主要使用 styled-components 定義樣式
+2. 使用 MUI 的 sx 屬性進行局部樣式調整
+3. 全局樣式放在 .scss 文件中
+4. 使用主題變量確保一致性
+
+### 錯誤處理與穩健性
+
+1. **基本錯誤處理**:
+   - 使用 try/catch 處理可能的錯誤
+   - 優雅降級和錯誤邊界處理
+   - 提供清晰的錯誤信息
+
+2. **数据處理穩健性**:
+   - 在處理 API 回應時添加默認值邏輯
+   - 使用可選鏈接運算符 (`?.`)來避免存取空值屬性
+   - 為表單元素和展示元素提供默認值
+   - 對資料模型進行添加防護，確保必要屬性存在
+
+3. **用戶互動容錯**:
+   - 在拖拉和黨擬互動之前進行有效性檢查
+   - 對不預期的狀態切換添加確認提示
+   - 提供可撼攻性強的表單驗證
+
+## 時間軸甘特圖實現細節
+
+### 初始化過程
 
 ```jsx
-// 標準組件結構
-import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import "./ComponentName.scss";
+// 1. 獲取數據
+const { itemsDataRef, groups } = useTimelineData();
 
-const ComponentName = ({ prop1, prop2 }) => {
-  const [state, setState] = useState(initialState);
+// 2. 初始化時間軸
+const initTimeline = useCallback(() => {
+  if (!containerRef.current || !itemsDataRef.current || !groups) return;
 
-  useEffect(() => {
-    // 副作用處理
-  }, [dependencies]);
-
-  const handleEvent = () => {
-    // 事件處理
+  const options = {
+    ...getTimelineOptions(),
+    template: createItemTemplate,
   };
 
-  return <div className="component-name">{/* JSX結構 */}</div>;
-};
-
-ComponentName.propTypes = {
-  prop1: PropTypes.string.isRequired,
-  prop2: PropTypes.number,
-};
-
-ComponentName.defaultProps = {
-  prop2: 0,
-};
-
-export default ComponentName;
+  // 初始化或更新時間軸
+  if (!timelineRef.current) {
+    containerRef.current.innerHTML = "";
+    timelineRef.current = new Timeline(
+      containerRef.current,
+      itemsDataRef.current,
+      groups,
+      options
+    );
+  } else {
+    timelineRef.current.setOptions(options);
+    timelineRef.current.setData({
+      items: itemsDataRef.current,
+      groups,
+    });
+  }
+}, [groups, getTimelineOptions]);
 ```
 
-#### 狀態管理的組件示例
+### 數據結構
+
+```typescript
+// 時間軸項目
+interface TimelineItem {
+  id: string | number;
+  group: string; // 機台ID
+  area: string; // 區域
+  timeLineStatus: string; // 狀態
+  status: {
+    startTime: Date;
+    endTime: Date | null;
+    reason: string;
+    product: string;
+  };
+  orderInfo: {
+    scheduledStartTime: Date;
+    scheduledEndTime: Date;
+    actualStartTime: Date | null;
+    actualEndTime: Date | null;
+    productId: string;
+    productName: string;
+    quantity: number;
+    completedQty: number;
+    process: string;
+    orderStatus: string;
+  };
+  start: Date; // 顯示開始時間
+  end: Date; // 顯示結束時間
+  className: string; // CSS 類名
+  content: string; // 顯示內容
+}
+```
+
+### 操作處理
+
+主要通過 `useTimelineOperations` Hook 處理用戶操作：
+
+- `handleSaveItem`: 保存更新的項目
+- `handleDeleteItem`: 刪除項目
+- `handleAddItem`: 添加新項目
+- `handleMoveToNow`: 移動到當前時間
+
+### 狀態管理
+
+使用機台狀態常量定義：
+
+```js
+export const MACHINE_STATUS = {
+  ORDER_CREATED: "製立單",
+  IDLE: "待機中",
+  SETUP: "上模與調機",
+  TESTING: "產品試模",
+  STOPPED: "機台停機",
+};
+
+export const STATUS_CONFIG = {
+  [MACHINE_STATUS.ORDER_CREATED]: {
+    name: MACHINE_STATUS.ORDER_CREATED,
+    description: "製立單模式",
+    color: "#4caf50",
+    className: "status-producing",
+    canSwitch: false,
+    canDelete: false,
+    allowedTransitions: [],
+  },
+  // ...其他狀態配置
+};
+```
+
+### 日期處理
+
+使用 dayjs 進行日期處理和格式化：
+
+```js
+export const getTimeWindow = (range, centerTime = dayjs()) => {
+  const now = centerTime;
+  const WORK_START_HOUR = 8;
+
+  const windows = {
+    hour: {
+      start: now.subtract(1, "hour"),
+      end: now.add(1, "hour"),
+    },
+    day: {
+      start: now.startOf("day").hour(WORK_START_HOUR),
+      end: now.endOf("day").startOf("hour"),
+    },
+    week: {
+      start: now.startOf("week").hour(WORK_START_HOUR),
+      end: now.endOf("week").startOf("hour"),
+    },
+    month: {
+      start: now.startOf("month").hour(WORK_START_HOUR),
+      end: now.endOf("month").startOf("hour"),
+    },
+  };
+
+  return windows[range] || windows.day;
+};
+```
+
+## 路由與頁面配置
+
+### 主要頁面與路由
+
+專案使用 React Router v6 進行路由管理，路由配置主要位於 `src/router/routeConfig.js`。主要路由包括：
+
+| 路由路徑                           | 頁面組件                       | 功能說明                 |
+| ---------------------------------- | ------------------------------ | ------------------------ |
+| /                                  | LoginPage                      | 登入頁面                 |
+| /ProductionSchedulePage            | ProductionSchedulePage         | 生產排程頁面             |
+| /WiseSchedulingPage                | WiseSchedulingPage             | 智能排程系統             |
+| /TimelineGanttPage                 | TimelineGanttPage              | 時間軸甘特圖獨立頁面     |
+| /ProductionRecordPage/\*           | ProductionRecordPage           | 生產記錄（含子路由）     |
+| /QualityManagementSystem/\*        | QualityAssuranceSystemPage     | 品質管理系統（含子路由） |
+| /SalesQuotationManagementSystem/\* | SalesQuotationManagementSystem | 銷售報價系統（含子路由） |
+| /MachineMaintenance                | MachineMaintenancePage         | 機台維護                 |
+| /MoldMaintenance                   | MoldMaintenancePage            | 模具維護                 |
+
+### 路由配置與懶加載
+
+所有頁面組件都通過懶加載方式導入，減少初始加載時間：
 
 ```jsx
-// MachineSelect組件狀態管理示例
+// lazyComponents.js 示例
+export const WiseSchedulingPage = lazyImport(() =>
+  import("../pages/WiseSchedulingPage")
+);
 
-// 狀態常量定義
-const MACHINE_STATUS = {
-  ACTIVE: 'active',     // 正在生產
-  IDLE: null,           // 待機，可開始新生產
-  DISABLED: 'disabled'  // 尚未生產，禁止點選
-};
-
-// 機台狀態處理邏輯
-const processStatus = (machineData, productionData) => {
-  return machineData.map(machine => {
-    // 檢查機台是否在生產中
-    const isActive = productionData.some(
-      productionMachine => productionMachine.machineSN === machine.machineSN
-    );
-    
-    if (isActive) {
-      return { ...machine, status: MACHINE_STATUS.ACTIVE, isClickable: true };
-    } else {
-      return { ...machine, status: MACHINE_STATUS.DISABLED, isClickable: false };
-    }
-  });
-};
-
-// 渲染機台項目
-const renderMachineItem = (machine, handleClick) => (
-  <div
-    className={`machine-box ${machine.status}`}
-    onClick={() => machine.isClickable && handleClick(machine)}
-    style={{ cursor: machine.isClickable ? 'pointer' : 'not-allowed' }}
-  >
-    <h1>{machine.machineSN}</h1>
-    {machine.status === MACHINE_STATUS.ACTIVE ? (
-      <p>生產中...</p>
-    ) : (
-      <>
-        <p>無生產任務</p>
-        <p className="disabled-message">此機台目前無法選擇</p>
-      </>
-    )}
-  </div>
+export const TimelineGanttPage = lazyImport(() =>
+  import("../pages/TimelineGanttPage")
 );
 ```
 
-#### 服務層示例
+```jsx
+// routeConfig.js 示例
+{
+  path: "WiseSchedulingPage",
+  element: (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <LazyComponents.WiseSchedulingPage />
+    </React.Suspense>
+  ),
+},
+{
+  path: "TimelineGanttPage",
+  element: (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <LazyComponents.TimelineGanttPage />
+    </React.Suspense>
+  ),
+},
+```
 
-```js
-// API服務示例
-import axios from "axios";
-import { API_BASE_URL } from "../config/constants";
+### 頁面整合
 
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-});
+WiseSchedulingPage 頁面使用選項卡 UI 將 MachineStatusBoard 和 DynamicTimeline 組件進行整合：
 
-// 請求攔截器
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+```jsx
+// WiseSchedulingPage.jsx
+const WiseSchedulingPage = () => {
+  const [activeTab, setActiveTab] = useState(0);
 
-export const fetchData = async (endpoint, params) => {
-  try {
-    const response = await apiClient.get(endpoint, { params });
-    return response.data;
-  } catch (error) {
-    console.error("API Error:", error);
-    throw error;
-  }
-};
+  return (
+    <Box sx={{ width: "100%" }}>
+      <Paper sx={{ mb: 2 }}>
+        <Tabs value={activeTab} onChange={handleTabChange}>
+          <Tab label="機台狀態看板" />
+          <Tab label="排程時間軸" />
+        </Tabs>
+      </Paper>
 
-export const postData = async (endpoint, data) => {
-  try {
-    const response = await apiClient.post(endpoint, data);
-    return response.data;
-  } catch (error) {
-    console.error("API Error:", error);
-    throw error;
-  }
+      {activeTab === 0 && <WiseSchedulingIndex />}
+      {activeTab === 1 && <DynamicTimeline />}
+    </Box>
+  );
 };
 ```
 
-## 標準開發流程
+同時，TimelineGanttPage 提供了獨立的路由入口，使用戶可以直接訪問時間軸甘特圖。
 
-### 功能開發流程
+## 最近整合與更新
 
-1. **需求分析**
+### TimelineGantt 組件整合
 
-   - 閱讀並理解需求文檔
-   - 確認功能範圍和驗收標準
-   - 識別潛在的技術挑戰
+最近完成了 TimelineGantt 組件的整合，主要涉及以下工作：
 
-2. **設計階段**
+1. **代碼重構與優化**：
 
-   - 將需求分解為明確的功能組件
-   - 規劃詳細的檔案結構變更
-   - 設計組件層次結構和數據流
-   - 確認與現有架構的一致性
+   - 將所有 import 語句移至文件頂部，避免 ESLint 警告
+   - 優化 import 順序，確保組件加載順序正確
+   - 修復樣式和常量定義問題
 
-3. **實現階段**
+2. **路由配置更新**：
 
-   - 按照設計創建必要的文件和組件
-   - 實現核心功能邏輯
-   - 添加適當的錯誤處理和邊界情況
-   - 確保代碼符合項目風格指南
+   - 添加 TimelineGanttPage 作為獨立頁面
+   - 更新 WiseSchedulingPage 使用選項卡整合機台看板和時間軸視圖
+   - 設置懶加載提高性能
 
-4. **測試階段**
+3. **組件職責優化**：
 
-   - 為新功能編寫單元測試
-   - 進行手動功能測試
-   - 確保所有測試通過
+   - 將 WiseSchedulingIndex 組件恢復到只負責 MachineStatusBoard 的渲染
+   - 在頁面級別實現選項卡邏輯，避免組件層級過度複雜
 
-5. **文檔更新**
-   - 更新記憶庫文件
-   - 添加必要的代碼註釋
-   - 更新用戶文檔(如適用)
+4. **依賴管理**：
+   - 添加 vis-timeline 和 vis-data 依賴
+   - 添加 styled-components 依賴支持樣式定義
 
-### 記憶庫使用流程
+### TimelineGantt 日期拖移功能優化
 
-1. 每次開發活動開始前，閱讀最新的記憶庫文件
-2. 根據記憶庫中的架構原則和模式進行設計
-3. 參考相似功能的實現方式和最佳實踐
-4. 開發完成後更新記憶庫，反映新增內容
+完成了甘特圖日期拖移限制的移除，使用戶可以自由拖動項目到任何日期：
 
-## 記憶庫維護機制
+1. **移除日期限制**：
 
-### 更新觸發條件
+   - 在 `timelineConfigs.js` 中移除各時間範圍的 `min` 和 `max` 限制
+   - 在 `getTimelineOptions` 函數中明確設置 `min` 和 `max` 為 `undefined`
+   - 增加 `zoomMax` 參數以允許更大範圍的視圖
 
-記憶庫應在以下情況下更新：
+2. **時間視窗調整**：
 
-1. 新功能或模組添加
-2. 現有功能重大修改
-3. 依賴關係變更
-4. 架構調整
-5. 開發規範變更
+   - 修改 `getTimeWindow` 函數，從基於 `startOf/endOf` 的視圖改為線性視圖
+   - 擴大初始視圖範圍，例如日視圖從單日變為前後各三天
+   - 保留初始視圖建議但不限制用戶實際操作範圍
 
-### 更新內容要求
+3. **拖動行為優化**：
+   - 設置 `snap: null` 確保拖動時不會強制對齊到特定時間點
+   - 在 `onMove` 回調中直接接受所有移動，取消原有的限制邏輯
 
-當添加新功能或修改現有結構時，記憶庫必須同步更新：
+### 已知問題與待辦事項
 
-- 記錄功能拆解與新增檔案位置
-- 更新變動的目錄結構說明
-- 檢視並更新相依關係變更
-- 補充測試覆蓋範圍資訊
-- 註明任何偏離既有模式的情況
+1. **ESLint 警告處理**：
 
-### 技術債務追蹤
+   - 解決了 import 順序的 ESLint 警告
+   - 後續可考慮添加.eslintrc 配置進一步規範代碼風格
 
-| 問題描述 | 位置 | 影響範圍 | 優先級 | 解決方案 |
-| -------- | ---- | -------- | ------ | -------- |
-| 待添加   | -    | -        | -      | -        |
+2. **樣式整合**：
 
-## 更新記錄
+   - TimelineGantt 組件使用 styled-components
+   - 需要確保與現有的 MUI 和 SCSS 樣式系統無衝突
 
-### 更新功能: MachineSelect組件機台禁止點選功能
+3. **後端集成**：
+   - 目前使用模擬數據，後續需要與後端 API 集成
+   - 實現數據持久化和實時更新
 
-- 位置: /src/components/MachineSelect/index.jsx, /src/components/MachineSelect/index.scss
-- 描述: 優化MachineSelect組件，對非生產中機台實現禁止點選功能，包括視覺反饋與交互限制
-- 依賴: React, antd, zustand
-- 添加時間: 2025-02-25
-- 修改要點:
-  - 添加機台狀態類型常量(ACTIVE/IDLE/DISABLED)進行標準化管理
-  - 實現非生產中機台的禁止點選交互邏輯
-  - 優化CSS樣式，為禁用狀態添加視覺反饋
-  - 重構組件代碼，按照Airbnb風格指南進行分層與註釋
+## 注意事項與維護建議
 
-### 更新功能: 專案記憶庫驅動開發系統
+### 潛在問題
 
-- 位置: /docs/memory_bank.md
-- 描述: 根據專案記憶庫驅動開發協議重新組織專案知識庫，優化結構和內容
-- 依賴: 無
-- 添加時間: 2024-02-25
+1. **依賴衝突**: moment.js 和 dayjs 同時使用可能導致混淆和不一致
+2. **狀態管理混合**: 同時使用 Redux 和 Zustand 可能導致狀態管理混亂
+3. **樣式系統混合**: 同時使用 styled-components, MUI sx, 和 .scss 文件可能導致樣式衝突
 
-### 更新功能: 專案記憶庫重構
+### 優化建議
 
-- 位置: /docs/memory_bank.md
-- 描述: 根據專案記憶庫協議重新組織專案知識庫，優化結構和內容
-- 依賴: 無
-- 添加時間: 2024-02-25
+1. **遷移至單一日期庫**: 建議完全遷移到 dayjs，逐步移除 moment.js
+2. **統一狀態管理**: 為新功能選擇一種狀態管理方案
+3. **組件庫統一**: 盡量統一使用 MUI 或 Ant Design，而非混合使用
+4. **添加單元測試**: 增加測試覆蓋率，尤其是關鍵業務邏輯
+5. **性能優化**: 使用 React.memo, useMemo 和 useCallback 減少不必要的渲染
 
-### 更新功能: 專案知識庫擴展
+### 擴展計劃
 
-- 位置: /docs/memory_bank.md
-- 描述: 擴展專案知識庫為完整的專案知識庫驅動開發系統
-- 依賴: 無
-- 添加時間: 2024-02-25
-
-### 更新功能: 專案知識庫翻譯
-
-- 位置: /docs/memory_bank.md
-- 描述: 將專案知識庫內容翻譯成繁體中文
-- 依賴: 無
-- 添加時間: 2024-02-25
-
-### 新增功能: 專案知識庫
-
-- 位置: /docs/memory_bank.md
-- 描述: 創建專案知識庫，包含完整資料夾結構、模組功能和接口、程式碼依賴關係、測試覆蓋情況
-- 依賴: 無
-- 添加時間: 2024-02-25
-
-### 新增功能: 專案記憶文檔
-
-- 位置: /docs/project_memory.md
-- 描述: 創建專案記憶文檔，包含更詳細的專案結構、功能模組、API 接口、組件依賴關係和配置信息
-- 依賴: 無
-- 添加時間: 2024-02-25
-
-### 新增功能: 專案結構文檔
-
-- 位置: /docs/project_structure.md
-- 描述: 創建專案結構文檔，包含專案的資料夾結構、功能模組和接口規範
-- 依賴: 無
-- 添加時間: 2024-02-25
+1. **數據持久化**: 實現數據持久化和後端集成
+2. **更豐富的甘特圖功能**: 添加更多互動功能和視圖選項
+3. **報表生成**: 添加報表導出功能
+4. **移動響應式設計**: 優化移動設備體驗
+5. **多用戶協作**: 添加實時協作功能
