@@ -16,15 +16,7 @@ import Paper from "@mui/material/Paper";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 
 //* 樣式組件
-import {
-  BaseTimelineContainer,
-  TimelineGrid,
-  BaseItem,
-  TimeAxisStyles,
-  CurrentTimeMarker,
-  StatusBase,
-  StatusProgress,
-} from "./styles";
+import { TimelineContainer, TimelineContent } from "./styles";
 
 //* Timeline 設定與選項
 import { TIMELINE_STYLES } from "./configs/timeline/timelineConfigs";
@@ -108,7 +100,7 @@ const DynamicTimeline = () => {
         add: false,
         updateTime: true,
         updateGroup: true,
-        remove: false
+        remove: false,
       },
       onMove: function (item, callback) {
         // 無條件接受所有移動
@@ -199,35 +191,26 @@ const DynamicTimeline = () => {
   //* 渲染區塊
   return (
     <Box sx={{ width: "100%", p: 4 }}>
-      <BaseTimelineContainer>
-        <TimelineGrid>
-          <TimeAxisStyles>
-            <CurrentTimeMarker>
-              <BaseItem>
-                <StatusBase>
-                  <StatusProgress>
-                    <TimelineControls
-                      timeRange={timeRange}
-                      onTimeRangeChange={setTimeRange}
-                      onAddItem={handleAddItem}
-                      onMoveToNow={handleMoveToNow}
-                    />
-                    <Paper
-                      ref={containerRef}
-                      elevation={1}
-                      sx={{
-                        border: 1,
-                        borderColor: "grey.200",
-                        borderRadius: 1,
-                      }}
-                    />
-                  </StatusProgress>
-                </StatusBase>
-              </BaseItem>
-            </CurrentTimeMarker>
-          </TimeAxisStyles>
-        </TimelineGrid>
-      </BaseTimelineContainer>
+      <TimelineContainer>
+        <TimelineControls
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
+          onAddItem={handleAddItem}
+          onMoveToNow={handleMoveToNow}
+        />
+        <Paper
+          ref={containerRef}
+          elevation={1}
+          sx={{
+            width: "100%",
+            flexGrow: 1,
+            minHeight: "600px",
+            border: 1,
+            borderColor: "grey.200",
+            borderRadius: 1,
+          }}
+        />
+      </TimelineContainer>
 
       <ItemDialog
         open={Boolean(dialogState.isOpen && dialogState.selectedItem)}

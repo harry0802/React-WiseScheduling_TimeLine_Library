@@ -41,7 +41,7 @@ const TimelineControls = ({
             onClick={() => onTimeRangeChange(key)}
             sx={{
               mr: 1,
-              color: timeRange === key ? "white" : "inherit",
+              color: "white",
               borderColor: timeRange === key ? "primary.main" : "grey.300",
             }}
           >
@@ -79,9 +79,9 @@ const TimelineControls = ({
             </MenuItem>
           ))}
         </TextField>
-        <Button 
-          startIcon={<AddIcon />} 
-          onClick={() => onAddItem(null, selectedMachine || null)} 
+        <Button
+          startIcon={<AddIcon />}
+          onClick={() => onAddItem(null, selectedMachine || null)}
           variant="outlined"
         >
           新增
