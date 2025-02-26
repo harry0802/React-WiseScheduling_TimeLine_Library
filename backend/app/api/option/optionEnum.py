@@ -112,3 +112,24 @@ class PackagingUnitEnum(Enum):
         cls.POUND._value_ = next((option.get("name") for option in options if option.get("schema") == 'POUND'), "")
         cls.PIECE._value_ = next((option.get("name") for option in options if option.get("schema") == 'PIECE'), "")
         cls.ITEM._value_ = next((option.get("name") for option in options if option.get("schema") == 'ITEM'), "")
+
+
+class MachineStatusEnum(Enum):
+    """機台狀態
+
+    Args:
+        Enum (_type_): _description_
+    """
+    RUN = "生產中"
+    IDLE = "待機中"
+    TUNING = "上模與調機"
+    TESTING = "產品試模"
+    OFFLINE = "機台停機"
+
+    @classmethod
+    def set_values(cls, options):
+        cls.RUN._value_ = next((option.get("name") for option in options if option.get("schema") == 'RUN'), "")
+        cls.IDLE._value_ = next((option.get("name") for option in options if option.get("schema") == 'IDLE'), "")
+        cls.TUNING._value_ = next((option.get("name") for option in options if option.get("schema") == 'TUNING'), "")
+        cls.TESTING._value_ = next((option.get("name") for option in options if option.get("schema") == 'TESTING'), "")
+        cls.OFFLINE._value_ = next((option.get("name") for option in options if option.get("schema") == 'OFFLINE'), "")

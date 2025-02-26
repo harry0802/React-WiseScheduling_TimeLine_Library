@@ -16,6 +16,7 @@ from .models.inspectionType import InspectionType
 from .models.workOrderStatus import WorkOrderStatus
 from .models.materialUnit import MaterialUnit
 from .models.packagingUnit import PackagingUnit
+from .models.machineStatus import MachineStatus
 
 api = optionDto.api
 control_schema = optionSchema()
@@ -25,6 +26,7 @@ name_param = f"""The name of the option:
            (檢驗類別) {InspectionType().__name__}: {InspectionType().__dict__}
            (原物料單位) {MaterialUnit().__name__}: {MaterialUnit().__dict__}
            (包材單位) {PackagingUnit().__name__}: {PackagingUnit().__dict__}
+           (機台狀態) {MachineStatus().__name__}: {MachineStatus().__dict__}
 
            """
 
