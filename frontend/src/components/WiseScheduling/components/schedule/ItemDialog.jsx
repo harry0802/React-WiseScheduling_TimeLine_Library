@@ -13,9 +13,12 @@ import {
   Grid,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { FORM_CONFIG, VALIDATION_RULES } from "../configs/formConfig";
-import { formUtils } from "../utils/formUtils";
+import {
+  FORM_CONFIG,
+  VALIDATION_RULES,
+} from "../../configs/schedule/formConfig";
 import { useEffect } from "react";
+import { formUtils } from "../../utils/schedule/formUtils";
 
 // 🧠 主對話框組件
 const ItemDialog = ({
@@ -55,7 +58,7 @@ const ItemDialog = ({
         // 如果初始化失敗，提供默認值
         reset({
           ...FORM_CONFIG.defaultValues,
-          group: item?.group || defaultGroup
+          group: item?.group || defaultGroup,
         });
       }
     }
@@ -95,7 +98,7 @@ const ItemDialog = ({
                     fullWidth
                     {...register("id")}
                     label="製令單號"
-                    value={item?.id || ''}
+                    value={item?.id || ""}
                     disabled
                   />
                 </Grid>
@@ -104,7 +107,7 @@ const ItemDialog = ({
                     fullWidth
                     {...register("productName")}
                     label="產品名稱"
-                    value={item?.orderInfo?.productName || ''}
+                    value={item?.orderInfo?.productName || ""}
                     disabled
                   />
                 </Grid>
@@ -131,7 +134,7 @@ const ItemDialog = ({
                     fullWidth
                     {...register("process")}
                     label="製程名稱"
-                    value={item?.orderInfo?.process || ''}
+                    value={item?.orderInfo?.process || ""}
                     disabled
                   />
                 </Grid>
@@ -166,7 +169,9 @@ const ItemDialog = ({
                   <TextField
                     fullWidth
                     label="完成率"
-                    value={`${item?.orderInfo?.completedQty || 0}/${item?.orderInfo?.quantity || 0}`}
+                    value={`${item?.orderInfo?.completedQty || 0}/${
+                      item?.orderInfo?.quantity || 0
+                    }`}
                     disabled
                   />
                 </Grid>
@@ -228,7 +233,7 @@ const ItemDialog = ({
                   <TextField
                     fullWidth
                     label="狀態"
-                    value={item?.orderInfo?.orderStatus || '無資料'}
+                    value={item?.orderInfo?.orderStatus || "無資料"}
                     disabled
                   />
                 </Grid>

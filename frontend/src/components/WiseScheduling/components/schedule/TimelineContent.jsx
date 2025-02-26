@@ -1,5 +1,8 @@
 import dayjs from "dayjs";
-import { getStatusName, MACHINE_STATUS } from "../configs/constants";
+import {
+  getStatusName,
+  MACHINE_STATUS,
+} from "../../configs/schedule/constants";
 
 // 🧠 基本樣式定義
 const TIMELINE_ITEM_STYLES = {

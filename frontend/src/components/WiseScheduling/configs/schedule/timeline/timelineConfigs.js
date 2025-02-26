@@ -1,4 +1,4 @@
-import { getTimeWindow } from "../../utils/dateUtils";
+import { getTimeWindow } from "../../../utils/schedule/dateUtils";
 
 export const TIMELINE_STYLES = {
   hour: {

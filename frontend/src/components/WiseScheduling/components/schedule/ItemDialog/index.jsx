@@ -17,10 +17,16 @@ import { useState } from "react";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
 //* 引入自定義組件和工具
-import { canTransitTo, MACHINE_STATUS } from "../../configs/constants";
+import {
+  canTransitTo,
+  MACHINE_STATUS,
+} from "../../../configs/schedule/constants";
 import StatusController from "../StatusForms/StatusForms";
 import StatusChangeDialog from "./StatusChangeDialog";
-import { handleFormError, StatusError } from "../../utils/errorHandler";
+import {
+  handleFormError,
+  StatusError,
+} from "../../timelineGantt/utils/errorHandler";
 import dayjs from "dayjs";
 
 //! =============== 2. 類型與介面 ===============

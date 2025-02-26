@@ -16,29 +16,32 @@ import Paper from "@mui/material/Paper";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 
 //* 樣式組件
-import { TimelineContainer, TimelineContent } from "./styles";
+import { TimelineContainer, TimelineContent } from "../../assets/schedule";
 
 //* Timeline 設定與選項
-import { TIMELINE_STYLES } from "./configs/timeline/timelineConfigs";
+import { TIMELINE_STYLES } from "../../configs/schedule/timeline/timelineConfigs";
 import {
   BASE_TIMELINE_OPTIONS,
   TIME_FORMAT_CONFIG,
-} from "./configs/timeline/timelineOptions";
+} from "../../configs/schedule/timeline/timelineOptions";
 
 //* 其他配置和常量
-import { momentLocaleConfig } from "./configs/timeline/timelineLocale";
-import { getStatusName, MACHINE_STATUS } from "./configs/constants";
+import { momentLocaleConfig } from "../../configs/schedule/timeline/timelineLocale";
+import {
+  getStatusName,
+  MACHINE_STATUS,
+} from "../../configs/schedule/constants";
 
 //* Hooks 與工具函數
-import { useTimelineData } from "./hooks/useTimelineData";
-import { useTimelineOperations } from "./hooks/useTimelineOperations";
-import { getTimeWindow } from "./utils/dateUtils";
+import { useTimelineData } from "../../hooks/schedule/useTimelineData";
+import { useTimelineOperations } from "../../hooks/schedule/useTimelineOperations";
 
 //* 自定義組件
-import TimelineControls from "./components/TimelineControls";
-import OperationDialog from "./components/OperationDialog";
-import ItemDialog from "./components/ItemDialog";
-import { createItemTemplate } from "./components/TimelineContent";
+import TimelineControls from "./TimelineControls";
+import OperationDialog from "./OperationDialog";
+import ItemDialog from "./ItemDialog";
+import { createItemTemplate } from "./TimelineContent";
+import { getTimeWindow } from "../../utils/schedule/dateUtils";
 
 //! =============== 2. 單獨設定版塊 ===============
 // 設定日期本地化
@@ -109,8 +112,6 @@ const DynamicTimeline = () => {
       format: TIME_FORMAT_CONFIG,
       start: timeWindow.start.toDate(),
       end: timeWindow.end.toDate(),
-      min: undefined, // 明確移除最小日期限制
-      max: undefined, // 明確移除最大日期限制
       zoomMin: TIMELINE_STYLES[timeRange].zoomMin,
       zoomMax: 1000 * 60 * 60 * 24 * 31 * 12 * 10, // 10年的毫秒數
       snap: null, // 關閉對齊功能，允許自由拖動

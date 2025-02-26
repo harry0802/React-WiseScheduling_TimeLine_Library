@@ -1,7 +1,7 @@
 // useTimelineData.js
 import { useRef, useMemo } from "react";
-import { generateMachineGroups } from "../configs/machineGroups";
-import { generateInitialOrders } from "../configs/orderItems";
+import { generateMachineGroups } from "../../configs/schedule/machineGroups";
+import { generateInitialOrders } from "../../configs/schedule/orderItems";
 
 export const useTimelineData = () => {
   // ✨ 使用 ref 保存訂單資料確保響應性

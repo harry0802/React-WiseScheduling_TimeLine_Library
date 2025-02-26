@@ -6,7 +6,10 @@ import {
   Button,
   Stack,
 } from "@mui/material";
-import { MACHINE_STATUS, STATUS_CONFIG } from "../../configs/constants";
+import {
+  MACHINE_STATUS,
+  STATUS_CONFIG,
+} from "../../../configs/schedule/constants";
 
 const StatusChangeDialog = ({
   open,

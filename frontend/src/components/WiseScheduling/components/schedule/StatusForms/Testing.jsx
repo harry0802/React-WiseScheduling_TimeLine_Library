@@ -1,23 +1,18 @@
-// components/StatusForms/Setup.jsx
-import { CircularProgress, Grid, TextField, Typography } from "@mui/material";
+// components/StatusForms/Testing.jsx
+import { Grid, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
-import { FORM_CONFIG } from "../../configs/formConfig";
-import { useStatusForm } from "../../hooks/useStatusForm";
-import { MACHINE_STATUS } from "../../configs/constants";
+import { FORM_CONFIG } from "../../../configs/schedule/formConfig";
+import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
+import { MACHINE_STATUS } from "../../../configs/schedule/constants";
 
-const Setup = ({ disabled, item }) => {
-  console.log("🚀 ~ Setup ~ item:", item);
+const Testing = ({ disabled, item }) => {
   const { register, errors, watch, control, initialized } = useStatusForm(
-    MACHINE_STATUS.SETUP,
+    MACHINE_STATUS.TESTING,
     item
   );
 
-  if (!item || !initialized) {
-    return <CircularProgress />; // 或其他 loading 狀態
-  }
-
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={1}>
       <Grid item xs={12}>
         <Typography variant="subtitle1" color="primary" gutterBottom>
           時程安排
@@ -49,19 +44,12 @@ const Setup = ({ disabled, item }) => {
       </Grid>
 
       <Grid item xs={12} sm={6}>
-        <Typography
-          variant="subtitle1"
-          color="primary"
-          gutterBottom
-        ></Typography>
         <TextField
           fullWidth
-          {...register("reason")}
-          label="調機說明"
-          multiline
-          rows={2}
-          error={!!errors.reason}
-          helperText={errors.reason?.message}
+          {...register("product")}
+          label="測試產品"
+          error={!!errors.product}
+          helperText={errors.product?.message}
           disabled={disabled}
         />
       </Grid>
@@ -69,4 +57,4 @@ const Setup = ({ disabled, item }) => {
   );
 };
 
-export default Setup;
+export default Testing;

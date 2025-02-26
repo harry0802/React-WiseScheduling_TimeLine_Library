@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import WiseSchedulingIndex from "../components/WiseScheduling";
-import DynamicTimeline from "../components/WiseScheduling/components/timelineGantt";
+import DynamicTimeline from "../components/WiseScheduling/components/schedule";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -21,7 +21,7 @@ const WiseSchedulingPage = () => {
           <Tab label="排程時間軸" />
         </Tabs>
       </Paper>
-      
+
       {activeTab === 0 && <WiseSchedulingIndex />}
       {activeTab === 1 && <DynamicTimeline />}
     </Box>

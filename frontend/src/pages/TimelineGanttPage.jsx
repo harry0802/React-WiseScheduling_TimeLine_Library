@@ -1,5 +1,5 @@
 import React from "react";
-import DynamicTimeline from "../components/WiseScheduling/components/timelineGantt";
+import DynamicTimeline from "../components/WiseScheduling/components/schedule";
 
 const TimelineGanttPage = () => {
   return <DynamicTimeline />;

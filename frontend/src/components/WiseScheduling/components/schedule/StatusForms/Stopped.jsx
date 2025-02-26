@@ -1,9 +1,9 @@
 // components/StatusForms/Stopped.jsx
 import { Grid, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
-import { FORM_CONFIG } from "../../configs/formConfig";
-import { MACHINE_STATUS } from "../../configs/constants";
-import { useStatusForm } from "../../hooks/useStatusForm";
+import { FORM_CONFIG } from "../../../configs/schedule/formConfig";
+import { MACHINE_STATUS } from "../../../configs/schedule/constants";
+import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
 
 const Stopped = ({ disabled, item }) => {
   const { register, errors, watch, control, initialized } = useStatusForm(

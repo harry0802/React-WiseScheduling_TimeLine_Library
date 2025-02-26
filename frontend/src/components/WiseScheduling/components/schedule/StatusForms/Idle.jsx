@@ -6,10 +6,16 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { useStatusForm } from "../../hooks/useStatusForm";
-import { FORM_CONFIG, VALIDATION_RULES } from "../../configs/formConfig";
-import { MACHINE_CONFIG, MACHINE_STATUS } from "../../configs/constants";
-import { createAreaMachines } from "../../configs/machineGroups";
+import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
+import {
+  FORM_CONFIG,
+  VALIDATION_RULES,
+} from "../../../configs/schedule/formConfig";
+import {
+  MACHINE_CONFIG,
+  MACHINE_STATUS,
+} from "../../../configs/schedule/constants";
+import { createAreaMachines } from "../../../configs/schedule/machineGroups";
 import { useMemo } from "react";
 
 const Idle = ({ disabled, item }) => {

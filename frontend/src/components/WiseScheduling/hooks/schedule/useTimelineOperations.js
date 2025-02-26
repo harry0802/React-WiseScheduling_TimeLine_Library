@@ -1,9 +1,9 @@
 //! =============== 1. 設定與常量 ===============
 import { useCallback, useState } from "react";
 import dayjs from "dayjs";
-import { getTimeWindow } from "../utils/dateUtils";
-import { MACHINE_STATUS } from "../configs/constants";
-import { getStatusClass } from "../configs/constants";
+import { MACHINE_STATUS } from "../../configs/schedule/constants";
+import { getStatusClass } from "../../configs/schedule/constants";
+import { getTimeWindow } from "../../utils/schedule/dateUtils";
 
 //! =============== 2. 類型與介面 ===============
 /**
@@ -129,7 +129,7 @@ export const useTimelineOperations = (
       // 使用提供的時間或當前時間
       const centerTime = startTime ? dayjs(startTime) : dayjs();
       const endTime = centerTime.add(2, "hour");
-      
+
       // 使用提供的機台或默認A1
       const group = machineGroup || "A1";
       const area = group.match(/[A-Z]/)?.[0] || "A";
@@ -164,18 +164,18 @@ export const useTimelineOperations = (
       };
 
       console.log("Creating new item:", newItem);
-      
+
       // 明確設置狀態
       setDialogState({
         selectedItem: newItem,
         mode: "add",
-        isOpen: true
+        isOpen: true,
       });
-      
+
       console.log("Dialog state after setting:", {
         selectedItem: newItem,
         mode: "add",
-        isOpen: true
+        isOpen: true,
       });
     } catch (error) {
       console.error("Add item failed:", error);
