@@ -11,10 +11,9 @@
 # production
 /build
 
-# memory_ban/home/harry/flaskplastic/frontend/docs
+# memory_bank and related files
 /memory_ban
-
-
+/docs/memory_bank.md
 
 
 # misc
