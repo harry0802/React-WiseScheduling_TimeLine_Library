@@ -92,11 +92,67 @@ const MENU_ITEMS = [
   },
 ];
 
+// 排除機台選擇頁面
+const EXCLUDED_PAGES = [
+  "/",
+  "/MachineSelectPage",
+  "/ProductionReportPage",
+  "/LeaderSignPage",
+  "/ProductionDetailPage",
+  "/OperatorSignPage",
+  "/ProductionInspectionPage",
+];
+
 /**
  * @constant DEFAULT_OPEN_KEYS
  * @description 預設展開的選單項目
  */
 const DEFAULT_OPEN_KEYS = ["production", "quality", "sales", "molding"];
+
+/**
+ * @constant PATH_PATTERNS
+ * @description 定義路徑模式的常量
+ */
+const PATH_PATTERNS = {
+  ROOT: "",
+  TRAILING_SLASHES: /\/+$/,
+};
+
+/**
+ * @function normalizePath
+ * @description 標準化路徑格式
+ */
+const normalizePath = (path) =>
+  path.replace(PATH_PATTERNS.TRAILING_SLASHES, "");
+
+/**
+ * @function isRootPath
+ * @description 檢查是否為根路徑
+ */
+const isRootPath = (path) => normalizePath(path) === PATH_PATTERNS.ROOT;
+
+/**
+ * @function isPathMatch
+ * @description 檢查路徑是否匹配（精確匹配或前綴匹配）
+ */
+const isPathMatch = (currentPath, targetPath) => {
+  const normalized = normalizePath(currentPath);
+  return normalized === targetPath || normalized.startsWith(`${targetPath}/`);
+};
+
+/**
+ * @function shouldHideSidebar
+ * @description 決定是否應該隱藏側邊欄
+ */
+const shouldHideSidebar = (pathname) => {
+  // 🧠 優先處理根路徑
+  if (isRootPath(pathname)) {
+    return true;
+  }
+
+  // ✨ 檢查是否在排除列表中
+  return EXCLUDED_PAGES.some((path) => isPathMatch(pathname, path));
+};
 
 //! =============== 2. 類型與介面 ===============
 //* 定義所有資料結構，幫助理解資料流向
@@ -138,8 +194,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 檢查是否為首頁（路徑為 "/"）
-  const isHomePage = location.pathname === "/";
+  const isExcludedPage = shouldHideSidebar(location.pathname);
 
   // 取得當前路徑作為選中項目
   const selectedKey =
@@ -156,7 +211,7 @@ const Sidebar = () => {
   };
 
   // 如果是首頁，則不渲染 Sidebar
-  if (isHomePage) {
+  if (isExcludedPage) {
     return null;
   }
 

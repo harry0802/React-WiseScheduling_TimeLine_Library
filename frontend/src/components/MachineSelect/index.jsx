@@ -315,11 +315,11 @@ const MachineSelect = () => {
               isClickable: true,
             };
           } else if (isNotActive) {
-            // 沒有活動生產任務的機台設為禁用狀態
+            // 修改：沒有活動生產任務的機台也設為可點選狀態
             return {
               ...machine,
-              status: MACHINE_STATUS.DISABLED,
-              isClickable: false,
+              status: MACHINE_STATUS.IDLE,
+              isClickable: true,
             };
           } else {
             return {
@@ -382,12 +382,6 @@ const MachineSelect = () => {
   const handleMachineClick = useCallback(
     (item) => {
       try {
-        // 檢查機台是否可點選
-        if (!item.isClickable) {
-          console.log("機台不可點選:", item.machineSN, "狀態:", item.status);
-          return; // 直接返回，不執行後續操作
-        }
-
         console.log("選擇機台:", item.machineSN, "狀態:", item.status);
 
         // 更新store
@@ -515,8 +509,8 @@ const MachineSelect = () => {
                       }
                       onClick={() => handleMachineClick(item)}
                       style={{
-                        cursor: item.isClickable ? "pointer" : "not-allowed",
-                        opacity: item.isClickable ? 1 : 0.6,
+                        cursor: "pointer",
+                        opacity: 1,
                       }}
                     >
                       <h1>{item.machineSN}</h1>
