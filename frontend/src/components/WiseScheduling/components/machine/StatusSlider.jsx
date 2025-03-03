@@ -2,11 +2,19 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import styled from "@emotion/styled";
 import { Slider, Box } from "@mui/material";
-import { 
-  SLIDER_VALUE_MAP, 
-  SLIDER_MARKS, 
-  convertTimeLineStatus, 
-  getChineseStatus 
+import {
+  SLIDER_VALUE_MAP,
+  SLIDER_MARKS,
+  convertTimeLineStatus,
+  getChineseStatus,
+  STATE_OLD_TESTING,
+  STATE_OLD_OFFLINE,
+  STATE_OLD_TUNING,
+  STATE_OLD_IDLE,
+  STATE_TESTING,
+  STATE_OFFLINE,
+  STATE_TUNING,
+  STATE_IDLE,
 } from "../../utils/statusConverter";
 
 const StyledSlider = styled(Slider)`
@@ -70,9 +78,19 @@ const SliderContainer = styled(Box)`
   }
 `;
 
+/**
+ * 機台狀態選擇器
+ *
+ * 注意：
+ * 1. 狀態定義來自 utils/statusConverter.js
+ * 2. 內部使用英文狀態碼 (TESTING, OFFLINE 等)
+ * 3. 用戶界面顯示中文狀態 (產品試模, 機台停機 等)
+ * 4. 表單需要同時保存 status(英文) 和 statusDisplay(中文) 兩個字段
+ */
 const StatusSlider = () => {
   const { watch, setValue } = useFormContext();
   const status = watch("status");
+  console.log("🚀 ~ StatusSlider ~ status:", status);
 
   const handleChange = (_, value) => {
     const newStatus = SLIDER_MARKS.find((m) => m.value === value)?.label;
@@ -86,10 +104,40 @@ const StatusSlider = () => {
     }
   };
 
+  // 根據狀態碼獲取適用的滑塊值
+  const getSliderValue = (statusCode) => {
+    const chineseStatus = getChineseStatus(statusCode);
+
+    // 加入映射個案處理，確保舊新狀態都能正確映射到滑塊值
+    if (
+      chineseStatus === STATE_OLD_TESTING ||
+      chineseStatus === STATE_TESTING
+    ) {
+      return 0;
+    } else if (
+      chineseStatus === STATE_OLD_OFFLINE ||
+      chineseStatus === STATE_OFFLINE
+    ) {
+      return 33;
+    } else if (
+      chineseStatus === STATE_OLD_TUNING ||
+      chineseStatus === STATE_TUNING
+    ) {
+      return 66;
+    } else if (
+      chineseStatus === STATE_OLD_IDLE ||
+      chineseStatus === STATE_IDLE
+    ) {
+      return 100;
+    }
+
+    return 0; // 默認值
+  };
+
   return (
     <SliderContainer>
       <StyledSlider
-        value={SLIDER_VALUE_MAP[getChineseStatus(status)] ?? 0}
+        value={getSliderValue(status)}
         step={null}
         marks={SLIDER_MARKS}
         onChange={handleChange}

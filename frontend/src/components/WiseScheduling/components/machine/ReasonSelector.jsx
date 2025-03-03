@@ -4,9 +4,14 @@ import {
   FormControlLabel,
   RadioGroup,
   FormHelperText,
+  Box,
 } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import { styled } from "@mui/material/styles";
+
+const SelectorContainer = styled(Box)`
+  padding: 2rem 1.5rem 0 1.5rem;
+`;
 
 const StyledRadio = styled(Radio)`
   padding: 0.5rem;
@@ -16,18 +21,18 @@ const StyledRadio = styled(Radio)`
   }
 
   & .MuiSvgIcon-root {
-    font-size: 1.5rem;
+    font-size: 1.875rem;
   }
 `;
 
 const StyledFormControlLabel = styled(FormControlLabel)`
-  margin: 0.5rem 0;
+  margin: 8px 0;
   width: 100%;
 
   & .MuiFormControlLabel-label {
-    font-size: 1rem;
+    font-size: 1.5rem;
     color: #8f8f8f;
-    margin-left: 0.25rem;
+    margin-left: 4px;
   }
 
   &.Mui-checked .MuiFormControlLabel-label {
@@ -53,12 +58,12 @@ const ReasonSelector = () => {
   } = useFormContext();
 
   return (
-    <div style={{ padding: "1rem 1.5rem" }}>
+    <SelectorContainer>
       <RadioGroup
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "1rem 8rem ",
+          gap: "16px 128px ",
           width: "100%",
         }}
       >
@@ -66,15 +71,15 @@ const ReasonSelector = () => {
           <StyledFormControlLabel
             key={reason}
             value={reason}
-            control={<StyledRadio {...register("status.reason")} />}
+            control={<StyledRadio {...register("reason")} />}
             label={reason}
           />
         ))}
       </RadioGroup>
-      {errors.status?.reason && (
-        <FormHelperText error>{errors.status.reason.message}</FormHelperText>
+      {errors.reason && (
+        <FormHelperText error>{errors.reason.message}</FormHelperText>
       )}
-    </div>
+    </SelectorContainer>
   );
 };
 

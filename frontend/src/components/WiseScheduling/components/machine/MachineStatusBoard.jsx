@@ -7,7 +7,6 @@ import {
   convertTimeLineStatus,
   STATUS_STYLE_MAP,
 } from "../../utils/statusConverter";
-import { mockEvents } from "../../mock/mockData";
 import {
   StyledMenuItem,
   StyledSelect,
@@ -22,10 +21,11 @@ import {
 import { PRODUCTION_AREA } from "../../../../config/config";
 import { useGetMachineStatusQuery } from "../../services";
 
+// 機台卡片
 const MachineCard = ({ machine, onClick }) => {
   const englishStatus = convertTimeLineStatus(machine.status);
   const isRunning = englishStatus === "RUN";
-  
+
   return (
     <MachineBox
       $status={englishStatus}
@@ -40,8 +40,7 @@ const MachineCard = ({ machine, onClick }) => {
 
       <div className="status-container">
         <p>
-          {STATUS_STYLE_MAP[englishStatus]?.text ||
-            STATUS_STYLE_MAP.IDLE.text}
+          {STATUS_STYLE_MAP[englishStatus]?.text || STATUS_STYLE_MAP.IDLE.text}
         </p>
         {!isRunning && <HandymanIcon className="icon" />}
       </div>
@@ -49,28 +48,30 @@ const MachineCard = ({ machine, onClick }) => {
   );
 };
 
+// 機台狀態板
 const MachineStatusBoard = () => {
   const [area, setArea] = useState("A");
   const { data: machineStatus, isLoading } = useGetMachineStatusQuery(area);
-  console.log("🚀 ~ MachineStatusBoard ~ machineStatus:", machineStatus);
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const formRef = useRef(null);
 
   const machines = machineStatus || [];
 
+  // 點擊機台卡片
   const handleMachineClick = (machine) => {
     setSelectedMachine(machine);
     setDrawerVisible(true);
   };
 
+  // 更新機台狀態
   const handleStatusUpdate = async (data) => {
     console.log("更新機台狀態:", data);
-
     // 這裡處理狀態更新邏輯
     setDrawerVisible(false);
   };
 
+  // 提交表單
   const handleSubmit = useCallback(async () => {
     if (!formRef.current) return;
 
@@ -102,6 +103,7 @@ const MachineStatusBoard = () => {
         {/* 標題 */}
         <TitleBox>
           <Title>機台狀態與保養紀錄</Title>
+          {/* 選擇區域 */}
           <FilterSection>
             <StyledSelect
               value={area}
@@ -131,6 +133,7 @@ const MachineStatusBoard = () => {
           )}
         </MachinesGrid>
       </Box>
+      {/* 機台狀態修改 */}
       <BaseDrawer
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}

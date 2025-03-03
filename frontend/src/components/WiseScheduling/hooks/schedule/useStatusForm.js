@@ -17,7 +17,16 @@ const FORM_FIELDS = {
     "orderStatus",
   ],
   time: ["start", "end"],
-  status: ["startTime", "endTime", "reason", "product"],
+  status: [
+    "startTime",
+    "endTime",
+    "reason",
+    "product",
+    "planStartDate",
+    "planEndDate",
+    "actualStartDate",
+    "actualEndDate",
+  ],
 };
 
 export const useStatusForm = (status, item) => {

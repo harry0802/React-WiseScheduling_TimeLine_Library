@@ -78,8 +78,17 @@ export const StatusLabels = styled.div`
 export const ReasonGrid = styled.div`
   display: flex;
   justify-content: center;
+  width: 100%;
   .MuiFormControlLabel-root {
     margin: 0;
-    font-size: 14px;
+    font-size: 20px;
+  }
+`;
+
+export const ProductInputContainer = styled.div`
+  width: 100%;
+  .MuiFormControlLabel-root {
+    margin: 0;
+    font-size: 20px;
   }
 `;

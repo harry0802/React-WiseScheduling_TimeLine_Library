@@ -9,7 +9,10 @@ import {
   StatusHeader,
   SliderContainer,
   ReasonGrid,
+  ProductInputContainer,
 } from "../../assets/machine.styles";
+import ProductInput from "./ProductInput";
+import dayjs from "dayjs";
 
 const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
   const form = useForm({
@@ -19,6 +22,7 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
   });
 
   const status = form.watch("status");
+
   useImperativeHandle(ref, () => ({
     getFormValues: () => form.getValues(),
     validateForm: async () => {
@@ -42,12 +46,17 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
         <StatusHeader>
           <div>
             <h3>
-              {initialData.group} - {initialData.area}
+              {initialData.productionArea} - {initialData.machineSN}
             </h3>
-            <p>製令單號: {initialData.id}</p>
+            <p>
+              {initialData.actualStartDate ??
+                initialData.planStartDate ??
+                dayjs().format("YYYY-MM-DD HH:mm:ss")}
+            </p>
           </div>
         </StatusHeader>
         {/*  機台狀態 */}
+
         <SliderContainer>
           <StatusSlider />
         </SliderContainer>
@@ -57,6 +66,11 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
           <ReasonGrid>
             <ReasonSelector />
           </ReasonGrid>
+        )}
+        {status === "TESTING" && (
+          <ProductInputContainer>
+            <ProductInput />
+          </ProductInputContainer>
         )}
       </div>
     </FormProvider>

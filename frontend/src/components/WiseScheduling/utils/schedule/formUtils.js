@@ -16,18 +16,22 @@ const initializeFormData = (item) => {
   const safeItem = {
     ...item,
     orderInfo: item.orderInfo || {},
-    status: item.status || {}
+    status: item.status || {},
   };
-  
+
   // 預設表單時間
   let defaultStartTime, defaultEndTime;
-  
+
   if (safeItem.timeLineStatus === "製立單") {
     defaultStartTime = safeItem.orderInfo.scheduledStartTime || new Date();
-    defaultEndTime = safeItem.orderInfo.scheduledEndTime || dayjs(defaultStartTime).add(2, "hour").toDate();
+    defaultEndTime =
+      safeItem.orderInfo.scheduledEndTime ||
+      dayjs(defaultStartTime).add(2, "hour").toDate();
   } else {
     defaultStartTime = safeItem.status.startTime || new Date();
-    defaultEndTime = safeItem.status.endTime || dayjs(defaultStartTime).add(2, "hour").toDate();
+    defaultEndTime =
+      safeItem.status.endTime ||
+      dayjs(defaultStartTime).add(2, "hour").toDate();
   }
 
   return {
@@ -43,6 +47,12 @@ const initializeFormData = (item) => {
     completedQty: safeItem.orderInfo?.completedQty || 0,
     process: safeItem.orderInfo?.process || "",
     orderStatus: safeItem.orderInfo?.orderStatus || "",
+    reason: safeItem.status?.reason || "",
+    product: safeItem.status?.product || "",
+    planStartDate: safeItem.planStartDate || null,
+    planEndDate: safeItem.planEndDate || null,
+    actualStartDate: safeItem.actualStartDate || null,
+    actualEndDate: safeItem.actualEndDate || null,
   };
 };
 
@@ -54,10 +64,11 @@ const initializeFormData = (item) => {
  */
 const calculateEndTime = (startTimeStr) => {
   if (!startTimeStr) return dayjs().add(2, "hour").format("YYYY-MM-DDTHH:mm");
-  
+
   const startTime = dayjs(startTimeStr);
-  if (!startTime.isValid()) return dayjs().add(2, "hour").format("YYYY-MM-DDTHH:mm");
-  
+  if (!startTime.isValid())
+    return dayjs().add(2, "hour").format("YYYY-MM-DDTHH:mm");
+
   return startTime.add(2, "hour").format("YYYY-MM-DDTHH:mm");
 };
 
@@ -75,9 +86,9 @@ const createUpdatedItem = (formData, originalItem) => {
   const safeOriginal = {
     ...originalItem,
     orderInfo: originalItem.orderInfo || {},
-    status: originalItem.status || {}
+    status: originalItem.status || {},
   };
-  
+
   // 處理表單日期轉換
   const startDate = dayjs(formData.start).toDate();
   const endDate = dayjs(formData.end).toDate();
@@ -104,7 +115,13 @@ const createUpdatedItem = (formData, originalItem) => {
       ...safeOriginal.status,
       startTime: startDate,
       endTime: endDate,
+      reason: formData.reason,
+      product: formData.product,
     },
+    planStartDate: formData.planStartDate || null,
+    planEndDate: formData.planEndDate || null,
+    actualStartDate: formData.actualStartDate || null,
+    actualEndDate: formData.actualEndDate || null,
   };
 };
 

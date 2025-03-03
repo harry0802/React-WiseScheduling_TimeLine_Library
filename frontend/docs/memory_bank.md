@@ -1,4 +1,120 @@
-### TimelineGantt DOM 結構平面化優化
+### 機台狀態表單驗證優化 (2025-03-03)
+
+完成了機台狀態表單的驗證邏輯優化，實現了基於狀態的條件驗證：
+
+1. **單一真相來源實現**：
+
+   - 創建 `statusConverter.js` 作為狀態定義的單一真相來源 (Single Source of Truth)
+   - 使用常量定義所有狀態字符串，避免硬編碼字符串
+   - 集中管理狀態映射，包括中文、英文和顯示樣式
+   - 導出工具函數用於狀態轉換和判斷
+
+2. **狀態條件驗證**：
+
+   ```js
+   // 完整的表單 schema
+   export const statusSchema = z.object({
+     // 基本信息和通用字段
+     // ...
+     
+     // 狀態相關字段
+     status: z.enum([CODE_TESTING, CODE_OFFLINE, CODE_TUNING, CODE_IDLE, CODE_RUNNING]),
+     statusDisplay: z.string().optional(),
+     
+     // 狀態詳細信息
+     statusDetails: statusDetailsSchema,
+     
+     // ...
+   }).superRefine((data, ctx) => {
+     // 根據當前狀態進行針對性驗證
+     if (data.status === CODE_TESTING) {
+       // 產品試模狀態驗證產品名稱
+       if (!data.statusDetails.product || data.statusDetails.product.trim() === '') {
+         ctx.addIssue({
+           code: z.ZodIssueCode.custom,
+           message: "產品試模狀態下必須填寫產品名稱",
+           path: ["statusDetails", "product"]
+         });
+       }
+     }
+     
+     if (data.status === CODE_OFFLINE) {
+       // 停機狀態驗證停機原因
+       if (!data.statusDetails.reason || data.statusDetails.reason.trim() === '') {
+         ctx.addIssue({
+           code: z.ZodIssueCode.custom,
+           message: "停機狀態下必須選擇停機原因",
+           path: ["statusDetails", "reason"]
+         });
+       }
+     }
+   });
+   ```
+
+3. **狀態更改清理**：
+
+   - 狀態變化時自動清除不相關的字段
+   - 從產品試模切換到其他狀態時，清除產品名稱
+   - 從停機狀態切換到其他狀態時，清除停機原因
+
+   ```js
+   React.useEffect(() => {
+     // 清除不必要的欄位值
+     if (status !== CODE_TESTING) {
+       // 如果不是產品試模狀態，清除產品名稱
+       form.setValue("statusDetails.product", "");
+     }
+     
+     if (status !== CODE_OFFLINE) {
+       // 如果不是停機狀態，清除停機原因
+       form.setValue("statusDetails.reason", "");
+     }
+     
+     // 只針對當前狀態進行驗證
+     if (status === CODE_TESTING) {
+       form.trigger("statusDetails.product");
+     } else if (status === CODE_OFFLINE) {
+       form.trigger("statusDetails.reason");
+     }
+   }, [status, form]);
+   ```
+
+4. **選擇性表單驗證**：
+
+   - 提交表單時只驗證當前狀態相關的字段
+   - 使用字段數組指定需要驗證的欄位
+   - 根據當前狀態添加特定的驗證欄位
+   - 更精準的錯誤消息收集和顯示
+
+   ```js
+   // 只驗證必要的欄位
+   let fieldsToValidate = ["statusDetails.startTime", "statusDetails.endTime"];
+   
+   // 根據當前狀態添加適用的驗證欄位
+   if (status === CODE_TESTING) {
+     fieldsToValidate.push("statusDetails.product");
+   } else if (status === CODE_OFFLINE) {
+     fieldsToValidate.push("statusDetails.reason");
+   }
+   
+   // 一次性驗證所有需要的欄位
+   const isValid = await form.trigger(fieldsToValidate);
+   ```
+
+5. **錯誤消息展示**：
+
+   - 使用 MUI Snackbar 組件顯示錯誤消息
+   - 依據驗證結果收集相關錯誤消息
+   - 友好的錯誤顯示方式和自動消失功能
+
+6. **產品名稱輸入改進**：
+
+   - 針對產品試模狀態，實現了獨立的產品名稱輸入組件 `ProductInput`
+   - 使用 styled-components 實現一致的樣式
+   - 整合 React Hook Form 進行表單控制
+   - 提供即時驗證反饋
+
+這種基於狀態的條件驗證方式更符合業務邏輯，提高了表單的用戶體驗，並減少了不必要的錯誤檢查。實現了只針對當前選擇的狀態進行相應欄位的驗證，避免了驗證不相關欄位的問題。### TimelineGantt DOM 結構平面化優化
 
 完成了 TimelineGantt 組件的 DOM 結構平面化優化，將原本多層嵌套的樣式組件系統簡化：
 
