@@ -2,20 +2,12 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import styled from "@emotion/styled";
 import { Slider, Box } from "@mui/material";
-
-const STATUS_MAP = {
-  產品試模: 0,
-  機台停機: 33,
-  上模與調機: 66,
-  待機中: 100,
-};
-
-const MARKS = [
-  { value: 0, label: "產品試模" },
-  { value: 33, label: "機台停機" },
-  { value: 66, label: "上模與調機" },
-  { value: 100, label: "待機中" },
-];
+import { 
+  SLIDER_VALUE_MAP, 
+  SLIDER_MARKS, 
+  convertTimeLineStatus, 
+  getChineseStatus 
+} from "../../utils/statusConverter";
 
 const StyledSlider = styled(Slider)`
   .MuiSlider-markLabel {
@@ -80,21 +72,26 @@ const SliderContainer = styled(Box)`
 
 const StatusSlider = () => {
   const { watch, setValue } = useFormContext();
-  const status = watch("timeLineStatus");
+  const status = watch("status");
 
   const handleChange = (_, value) => {
-    const newStatus = MARKS.find((m) => m.value === value)?.label;
+    const newStatus = SLIDER_MARKS.find((m) => m.value === value)?.label;
     if (newStatus) {
-      setValue("timeLineStatus", newStatus, { shouldValidate: true });
+      // 設置中文狀態顯示，但在內部存儲英文狀態
+      const englishStatus = convertTimeLineStatus(newStatus);
+      setValue("status", englishStatus, {
+        shouldValidate: true,
+      });
+      setValue("statusDisplay", newStatus, { shouldValidate: false });
     }
   };
 
   return (
     <SliderContainer>
       <StyledSlider
-        value={STATUS_MAP[status] ?? 0}
+        value={SLIDER_VALUE_MAP[getChineseStatus(status)] ?? 0}
         step={null}
-        marks={MARKS}
+        marks={SLIDER_MARKS}
         onChange={handleChange}
       />
     </SliderContainer>

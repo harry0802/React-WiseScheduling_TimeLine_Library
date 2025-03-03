@@ -113,6 +113,89 @@
 
 這種代碼組織和註釋風格提高了代碼的可讀性和可維護性，為團隊協作提供了清晰的文檔。
 
+### WiseScheduling 服務層實現 (2025-02-27)
+
+完成了 WiseScheduling 模組的服務層 (services) 實現，基於 RTK Query 開發了機台狀態相關 API：
+
+1. **API 結構設計**：
+
+   - 創建核心 `apiSlice.js` 文件，設置 API 基礎配置，包括正確的 API 端口 (5000)
+   - 建立 `endpoints` 目錄，包含特定功能的 API 實現
+   - 實現 `machineStatusApi.js` 和 `optionApi.js` 兩個主要 API 端點
+
+2. **主要功能實現**：
+
+   - **機台狀態 API**：
+
+     ```js
+     // 獲取某一區全部機台，以及機台狀態
+     getMachineStatus: builder.query({
+       query: (productionArea) => `machineStatus/?productionArea=${productionArea}`,
+       providesTags: ["MachineStatus"],
+     }),
+
+     // 新增單一機台的狀態
+     createMachineStatus: builder.mutation({
+       query: (statusData) => ({
+         url: "machineStatus/",
+         method: "POST",
+         body: statusData,
+       }),
+       invalidatesTags: ["MachineStatus"],
+     }),
+
+     // 修改單一機台的狀態
+     updateMachineStatus: builder.mutation({
+       query: (statusData) => ({
+         url: "machineStatus/",
+         method: "PUT",
+         body: statusData,
+       }),
+       invalidatesTags: ["MachineStatus"],
+     }),
+
+     // 刪除單一機台的狀態
+     deleteMachineStatus: builder.mutation({
+       query: (id) => ({
+         url: `machineStatus/${id}`,
+         method: "DELETE",
+       }),
+       invalidatesTags: ["MachineStatus"],
+     }),
+     ```
+
+   - **選項 API**：
+     ```js
+     // 獲取機台狀態選項
+     getMachineStatusOptions: builder.query({
+       query: () => "option/machineStatus",
+       providesTags: ["Option"],
+     }),
+     ```
+
+3. **統一導出**：
+
+   - 創建 `index.js` 統一導出所有 API hooks，方便在組件中使用：
+     ```js
+     export {
+       // 機台狀態 API hooks
+       useGetMachineStatusQuery,
+       useCreateMachineStatusMutation,
+       useUpdateMachineStatusMutation,
+       useDeleteMachineStatusMutation,
+
+       // 選項 API hooks
+       useGetMachineStatusOptionsQuery,
+     };
+     ```
+
+4. **數據模型**：
+   - 機台狀態包含 ID、機台 ID、生產區域、機台 SN、計劃時間、實際時間、狀態、原因和產品等屬性
+   - 機台狀態選項包含 ID、名稱和架構標識符
+   - 狀態分類包括生產中(RUN)、待機中(IDLE)、上模與調機(TUNING)、產品試模(TESTING)和機台停機(OFFLINE)
+
+這套 API 設計遵循了專案的 RTK Query 實現模式，確保了與其他模組的一致性，並提供了完整的 CRUD 操作支持。
+
 # 專案記憶庫 - FlaskPlastic Frontend
 
 ## 目錄與檔案結構
@@ -213,6 +296,11 @@ components/WiseScheduling/
 ├── lib/                     # 自定義庫
 ├── mock/                    # 模擬數據
 ├── services/                # 服務
+│   ├── apiSlice.js          # API 基礎配置
+│   ├── endpoints/           # API 端點定義
+│   │   ├── machineStatusApi.js   # 機台狀態 API
+│   │   └── optionApi.js          # 選項 API
+│   └── index.js             # API 導出
 ├── states/                  # 狀態管理
 └── index.jsx                # 主組件入口
 ```
@@ -451,6 +539,24 @@ export const getStatusClass = (status) => {
 4. 使用主題變量確保一致性
 
 ## 最近更新與優化
+
+### 機台狀態 API 服務實現 (2025-02-27)
+
+1. **API 結構創建**:
+
+   - 創建了機台狀態相關 API，包括獲取、新增、修改和刪除功能
+   - 實現了機台狀態選項 API，用於獲取狀態選項列表
+   - 使用 RTK Query 進行數據獲取和緩存管理
+
+2. **服務層組織**:
+
+   - 按照專案標準設計了 services 目錄結構
+   - 創建了正確的 API 端點連接到後端服務（端口 5000）
+   - 使用標籤系統確保數據更新時正確刷新
+
+3. **狀態映射**:
+   - 建立了中英文狀態對應關係
+   - 完整支持所有機台狀態類型：生產中、待機中、上模與調機、產品試模和機台停機
 
 ### TimelineGantt 組件優化 (2024-02-26)
 

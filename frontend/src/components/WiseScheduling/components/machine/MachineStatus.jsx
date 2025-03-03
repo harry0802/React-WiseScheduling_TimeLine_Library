@@ -18,7 +18,7 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
     defaultValues: initialData,
   });
 
-  const timeLineStatus = form.watch("timeLineStatus");
+  const status = form.watch("status");
   useImperativeHandle(ref, () => ({
     getFormValues: () => form.getValues(),
     validateForm: async () => {
@@ -53,7 +53,7 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
         </SliderContainer>
 
         {/* 機台停機或異常 */}
-        {(timeLineStatus === "機台停機" || timeLineStatus === "異常") && (
+        {status === "OFFLINE" && (
           <ReasonGrid>
             <ReasonSelector />
           </ReasonGrid>

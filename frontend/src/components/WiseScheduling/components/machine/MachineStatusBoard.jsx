@@ -3,10 +3,12 @@ import React, { useState, useRef, useCallback } from "react";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import BaseDrawer from "../../../Global/Drawer/BaseDrawer";
 import MachineStatusManager from "./MachineStatus";
-import { convertTimeLineStatus } from "../../utils/statusConverter";
+import {
+  convertTimeLineStatus,
+  STATUS_STYLE_MAP,
+} from "../../utils/statusConverter";
 import { mockEvents } from "../../mock/mockData";
 import {
-  STATUS_MAP,
   StyledMenuItem,
   StyledSelect,
   Container,
@@ -18,41 +20,45 @@ import {
   MachineBox,
 } from "../../assets/machineBoard.styles";
 import { PRODUCTION_AREA } from "../../../../config/config";
+import { useGetMachineStatusQuery } from "../../services";
 
-const MachineCard = ({ machine, onClick }) => (
-  <MachineBox
-    $status={convertTimeLineStatus(machine.timeLineStatus)}
-    onClick={
-      machine.timeLineStatus !== "製立單" ? () => onClick(machine) : undefined
-    }
-    style={{
-      cursor: machine.timeLineStatus === "製立單" ? "not-allowed" : "pointer",
-    }}
-  >
-    <div className="title-container">
-      <h1>{machine.group}</h1>
-    </div>
+const MachineCard = ({ machine, onClick }) => {
+  const englishStatus = convertTimeLineStatus(machine.status);
+  const isRunning = englishStatus === "RUN";
+  
+  return (
+    <MachineBox
+      $status={englishStatus}
+      onClick={!isRunning ? () => onClick(machine) : undefined}
+      style={{
+        cursor: isRunning ? "not-allowed" : "pointer",
+      }}
+    >
+      <div className="title-container">
+        <h1>{machine.machineSN}</h1>
+      </div>
 
-    <div className="status-container">
-      <p>
-        {STATUS_MAP[convertTimeLineStatus(machine.timeLineStatus)]?.text ||
-          STATUS_MAP.waiting.text}
-      </p>
-      {machine.timeLineStatus !== "production" &&
-        machine.timeLineStatus !== "製立單" && (
-          <HandymanIcon className="icon" />
-        )}
-    </div>
-  </MachineBox>
-);
+      <div className="status-container">
+        <p>
+          {STATUS_STYLE_MAP[englishStatus]?.text ||
+            STATUS_STYLE_MAP.IDLE.text}
+        </p>
+        {!isRunning && <HandymanIcon className="icon" />}
+      </div>
+    </MachineBox>
+  );
+};
 
 const MachineStatusBoard = () => {
   const [area, setArea] = useState("A");
+  const { data: machineStatus, isLoading } = useGetMachineStatusQuery(area);
+  console.log("🚀 ~ MachineStatusBoard ~ machineStatus:", machineStatus);
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const formRef = useRef(null);
 
-  const machines = mockEvents[area] || [];
+  const machines = machineStatus || [];
+
   const handleMachineClick = (machine) => {
     setSelectedMachine(machine);
     setDrawerVisible(true);
@@ -86,6 +92,10 @@ const MachineStatusBoard = () => {
     }
   }, []);
 
+  if (isLoading) {
+    return <p>加載中...</p>;
+  }
+
   return (
     <Container>
       <Box>
@@ -108,16 +118,19 @@ const MachineStatusBoard = () => {
         </TitleBox>
         {/* 機台列表 */}
         <MachinesGrid>
-          {machines.map((machine) => (
-            <MachineCard
-              key={machine.id}
-              machine={machine}
-              onClick={handleMachineClick}
-            />
-          ))}
+          {isLoading ? (
+            <p>加載中...</p>
+          ) : (
+            machines?.map((machine) => (
+              <MachineCard
+                key={machine.machineId}
+                machine={machine}
+                onClick={handleMachineClick}
+              />
+            ))
+          )}
         </MachinesGrid>
       </Box>
-
       <BaseDrawer
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}

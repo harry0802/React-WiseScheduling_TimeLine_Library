@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "machineStatus",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

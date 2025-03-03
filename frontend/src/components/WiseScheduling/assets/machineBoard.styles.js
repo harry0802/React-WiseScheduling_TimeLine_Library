@@ -1,34 +1,11 @@
 import styled from "styled-components";
+import { STATUS_STYLE_MAP } from "../utils/statusConverter";
 import { Select, MenuItem } from "@mui/material";
 
 // 定義斷點
 const BREAKPOINTS = {
   md: "48rem", // 768px
   lg: "75rem", // 1200px
-};
-
-// 定義狀態顏色變量
-export const STATUS_MAP = {
-  testing: {
-    color: "rgba(0, 194, 254, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: "試模",
-  },
-  error: {
-    color: "rgba(235, 0, 4, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: "異常",
-  },
-  tuning: {
-    color: "rgba(255, 204, 0, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: "調機",
-  },
-  waiting: {
-    color: "rgba(189, 189, 189, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: "待機",
-  },
-  production: {
-    color: "rgba(131, 191, 69, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: "製立單",
-  },
 };
 
 export const Container = styled.div`
@@ -166,7 +143,8 @@ export const MachineBox = styled.div`
   /* 視覺樣式層 */
   background: linear-gradient(
     180deg,
-    ${(props) => STATUS_MAP[props.$status]?.color || STATUS_MAP.waiting.color}
+    ${(props) =>
+      STATUS_STYLE_MAP[props.$status]?.color || STATUS_STYLE_MAP.IDLE.color}
   );
   border-radius: 4px;
   border: 0.125rem solid transparent;
