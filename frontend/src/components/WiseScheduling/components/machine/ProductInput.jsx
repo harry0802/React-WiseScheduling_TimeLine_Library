@@ -31,8 +31,6 @@ function ProductInput() {
     control,
     formState: { errors },
   } = useFormContext();
-  console.log("🚀 ~ ProductInput ~ errors:", errors);
-
   return (
     <InputContainer>
       <Controller
