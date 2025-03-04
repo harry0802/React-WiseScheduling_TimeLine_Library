@@ -1,8 +1,8 @@
 //! =============== 1. 設定與常量 ===============
 import { useCallback, useState } from "react";
 import dayjs from "dayjs";
-import { MACHINE_STATUS } from "../../configs/schedule/constants";
-import { getStatusClass } from "../../configs/schedule/constants";
+import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
+import { getStatusClass } from "../../configs/validations/schedule/constants";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 
 //! =============== 2. 類型與介面 ===============

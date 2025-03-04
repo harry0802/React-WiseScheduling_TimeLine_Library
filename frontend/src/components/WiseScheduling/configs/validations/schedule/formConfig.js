@@ -42,10 +42,7 @@ export const VALIDATION_RULES = {
       },
       isFuture: (value) => {
         if (!value) return true;
-        return (
-          dayjs(value).isAfter(dayjs()) ||
-          "開始時間必須在當前時間之後"
-        );
+        return dayjs(value).isAfter(dayjs()) || "開始時間必須在當前時間之後";
       },
     },
   },

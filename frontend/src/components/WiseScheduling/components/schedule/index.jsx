@@ -19,18 +19,18 @@ import "vis-timeline/styles/vis-timeline-graph2d.css";
 import { TimelineContainer, TimelineContent } from "../../assets/schedule";
 
 //* Timeline 設定與選項
-import { TIMELINE_STYLES } from "../../configs/schedule/timeline/timelineConfigs";
+import { TIMELINE_STYLES } from "../../configs/validations/schedule/timeline/timelineConfigs";
 import {
   BASE_TIMELINE_OPTIONS,
   TIME_FORMAT_CONFIG,
-} from "../../configs/schedule/timeline/timelineOptions";
+} from "../../configs/validations/schedule/timeline/timelineOptions";
 
 //* 其他配置和常量
-import { momentLocaleConfig } from "../../configs/schedule/timeline/timelineLocale";
+import { momentLocaleConfig } from "../../configs/validations/schedule/timeline/timelineLocale";
 import {
   getStatusName,
   MACHINE_STATUS,
-} from "../../configs/schedule/constants";
+} from "../../configs/validations/schedule/constants";
 
 //* Hooks 與工具函數
 import { useTimelineData } from "../../hooks/schedule/useTimelineData";

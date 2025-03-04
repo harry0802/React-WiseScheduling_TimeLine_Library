@@ -2,9 +2,9 @@ import { Stack, Button, TextField, MenuItem } from "@mui/material";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { TIME_RANGES } from "../../configs/schedule/timeline/timelineConfigs";
-import { MACHINE_CONFIG } from "../../configs/schedule/constants";
-import { createAreaMachines } from "../../configs/schedule/machineGroups";
+import { TIME_RANGES } from "../../configs/validations/schedule/timeline/timelineConfigs";
+import { MACHINE_CONFIG } from "../../configs/validations/schedule/constants";
+import { createAreaMachines } from "../../configs/validations/schedule/machineGroups";
 import { useState } from "react";
 
 const TimelineControls = ({

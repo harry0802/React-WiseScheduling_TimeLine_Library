@@ -13,12 +13,13 @@ import {
   Grid,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+
+import { formUtils } from "../../utils/schedule/formUtils";
 import {
   FORM_CONFIG,
   VALIDATION_RULES,
-} from "../../configs/schedule/formConfig";
-import { useEffect } from "react";
-import { formUtils } from "../../utils/schedule/formUtils";
+} from "../../configs/validations/schedule/formConfig";
 
 // 🧠 主對話框組件
 const ItemDialog = ({
