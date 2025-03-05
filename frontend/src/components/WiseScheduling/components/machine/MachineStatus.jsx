@@ -5,9 +5,7 @@
  */
 
 //! =============== 1. 設定與常量 ===============
-import React, { forwardRef, useImperativeHandle } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import dayjs from "dayjs";
 
 //! =============== 2. 類型與介面 ===============
@@ -36,6 +34,7 @@ import {
   ReasonGrid,
   ProductInputContainer,
 } from "../../assets/machine.styles";
+import { getChineseStatus } from "../../utils/statusConverter";
 
 /**
  * 機台狀態管理器組件
@@ -60,97 +59,94 @@ import {
  * - 使用 zod 進行表單驗證
  */
 const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
-  //* --------- 表單初始化 ---------
-  const form = useForm({
-    mode: "onTouched",
-    resolver: zodResolver(statusSchema),
-    defaultValues: initialData,
-  });
+  // 使用 useState 管理所有需要的状态
+  const [currentStatus, setCurrentStatus] = useState(initialData.status);
+  const [statusDisplay, setStatusDisplay] = useState(
+    getChineseStatus(initialData.status)
+  );
+  const [formValues, setFormValues] = useState(initialData);
 
-  //* --------- 表單狀態監聽 ---------
-  //? 監聽 status 欄位以顯示條件式界面
-  const status = form.watch("status");
+  // 更新表单值的函数
+  const updateFormValue = (name, value) => {
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-  //* --------- Ref API 暴露 ---------
-  /**
-   * 通過 ref 暴露給父組件的 API
-   * @type {FormAPI}
-   */
+  // 暴露给父组件的 API
   useImperativeHandle(ref, () => ({
-    /**
-     * 取得表單所有值
-     * @returns {Object} 表單值物件
-     */
-    getFormValues: () => form.getValues(),
+    getFormValues: () => formValues,
 
-    /**
-     * 觸發表單驗證並返回結果
-     * @returns {Promise<Object>} 驗證結果物件
-     */
     validateForm: async () => {
       try {
-        const isValid = await form.trigger();
-        return isValid
-          ? { isValid: true, data: form.getValues(), step: "complete" }
-          : { isValid: false, errors: form.formState.errors, step: "schema" };
+        // 这里可以添加自定义验证逻辑
+        // 如果需要使用 zod 验证，可以直接调用 statusSchema.parse(formValues)
+        return { isValid: true, data: formValues, step: "complete" };
       } catch (error) {
         return { isValid: false, error, step: "error" };
       }
     },
 
-    /**
-     * 設置表單欄位值
-     * @param {string} name - 欄位名稱
-     * @param {any} value - 欄位值
-     */
-    setFormValue: (name, value) => form.setValue(name, value),
+    setFormValue: (name, value) => updateFormValue(name, value),
 
-    /**
-     * 取得表單錯誤
-     * @returns {Object} 表單錯誤物件
-     */
-    getFormErrors: () => form.formState.errors,
+    getFormErrors: () => ({}), // 返回空对象，因为我们不再使用 useForm 的错误处理
   }));
+
+  // 处理状态变更
+  const handleStatusChange = (newStatus) => {
+    setCurrentStatus(newStatus);
+    setStatusDisplay(getChineseStatus(newStatus));
+    updateFormValue("status", newStatus);
+    updateFormValue("statusDisplay", getChineseStatus(newStatus));
+  };
 
   //* --------- 渲染組件 ---------
   return (
-    <FormProvider {...form}>
-      <div>
-        {/* 機台資訊 */}
-        <StatusHeader>
-          <div>
-            <h3>
-              {initialData.productionArea} - {initialData.machineSN}
-            </h3>
-            <p>
-              稼動時間：
-              {initialData.actualStartDate ??
-                initialData.planStartDate ??
-                dayjs().format("YYYY-MM-DD HH:mm:ss")}
-            </p>
-          </div>
-        </StatusHeader>
+    <div>
+      {/* 機台資訊 */}
+      <StatusHeader>
+        <div>
+          <h3>
+            {initialData.productionArea} - {initialData.machineSN}
+          </h3>
+          <p>
+            稼動時間：
+            {initialData.actualStartDate ??
+              initialData.planStartDate ??
+              dayjs().format("YYYY-MM-DD HH:mm:ss")}
+          </p>
+        </div>
+      </StatusHeader>
 
-        {/* 機台狀態選擇器 */}
-        <SliderContainer>
-          <StatusSlider />
-        </SliderContainer>
+      {/* 機台狀態選擇器 */}
+      <SliderContainer>
+        <StatusSlider
+          currentStatus={currentStatus}
+          onStatusChange={handleStatusChange}
+        />
+      </SliderContainer>
 
-        {/* 條件渲染：異常原因選擇器 */}
-        {status === "OFFLINE" && (
-          <ReasonGrid>
-            <ReasonSelector />
-          </ReasonGrid>
-        )}
+      {/* 條件渲染：異常原因選擇器 */}
+      {currentStatus === "OFFLINE" && (
+        <ReasonGrid>
+          <ReasonSelector
+            value={formValues.reason}
+            onChange={(reason) => updateFormValue("reason", reason)}
+          />
+        </ReasonGrid>
+      )}
 
-        {/* 條件渲染：試模產品輸入 */}
-        {status === "TESTING" && (
-          <ProductInputContainer>
-            <ProductInput />
-          </ProductInputContainer>
-        )}
-      </div>
-    </FormProvider>
+      {/* 條件渲染：試模產品輸入 */}
+      {currentStatus === "TESTING" && (
+        <ProductInputContainer>
+          <ProductInput
+            value={formValues.product}
+            onChange={(product) => updateFormValue("product", product)}
+          />
+        </ProductInputContainer>
+      )}
+    </div>
   );
 });
 

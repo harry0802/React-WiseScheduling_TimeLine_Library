@@ -17,7 +17,7 @@ const MachineStatus = ({
   onStatusChange,
   onSubmit,
 }) => {
-  const [currentStatus, setCurrentStatus] = useState(initialStatus);
+  const [currentStatus, setCurrentStatus] = useState(initialStatus.status);
   const [formData, setFormData] = useState(initialData);
 
   // 狀態切換處理

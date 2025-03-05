@@ -23,7 +23,7 @@ import {
 
 // 共用組件
 import BaseDrawer from "../../../Global/Drawer/BaseDrawer";
-import MachineStatusManager from "./MachineStatus";
+import MachineStatusManager from "./MachineStatusManager";
 
 // 樣式組件
 import {
@@ -143,27 +143,16 @@ const MachineStatusBoard = () => {
    * @returns {Promise<boolean>} 提交是否成功
    */
   const handleSubmit = useCallback(async () => {
-    if (!formRef.current) return false;
-
-    try {
-      //* 獲取表單數據
-      const data = formRef.current.getFormValues();
-      console.log("Form Values:", data);
-
-      //* 驗證表單
-      const validationResult = await formRef.current.validateForm();
-      console.log("Form Validation:", validationResult);
-
-      //* 如果驗證通過，提交數據
-      if (validationResult.isValid) {
+    if (formRef.current) {
+      const isValid = await formRef.current.validateForm();
+      if (isValid) {
+        const data = formRef.current.getFormValues();
+        console.log("提交数据:", data);
         await handleStatusUpdate(data);
         return true;
       }
-      return false;
-    } catch (error) {
-      console.error("Submit Error:", error);
-      return false;
     }
+    return false;
   }, []);
 
   //! --------- 渲染邏輯 ---------
@@ -206,7 +195,7 @@ const MachineStatusBoard = () => {
         </MachinesGrid>
       </Box>
 
-      {/* 機台狀態修改抽屜 */}
+      {/* 機台狀態修改抽屉 */}
       <BaseDrawer
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
