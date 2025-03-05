@@ -16,20 +16,13 @@ import PropTypes from "prop-types";
 import { Box, Typography, TextField, Grid } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import dayjs from "dayjs";
 
 // 導入停機原因選擇器
 import ReasonSelector from "../ReasonSelector";
 
-// 🧠 定義表單驗證模式
-const stoppedFormSchema = z.object({
-  reason: z.string().optional(),
-  planStartDate: z.string().optional(),
-  planEndDate: z.string().optional(),
-  actualStartDate: z.string().optional(),
-  note: z.string().optional(),
-});
+// 導入驗證 schema
+import { offlineSchema } from "../../../configs/validations/machine/machineSchemas";
 
 /**
  * 機台停機狀態表單
@@ -65,7 +58,7 @@ const StoppedForm = forwardRef(({ initialData }, ref) => {
     trigger,
     setValue,
   } = useForm({
-    resolver: zodResolver(stoppedFormSchema),
+    resolver: zodResolver(offlineSchema),
     defaultValues: {
       reason: initialData?.reason || "",
       planStartDate: initialData?.planStartDate || defaultDates.planStartDate,
@@ -73,6 +66,7 @@ const StoppedForm = forwardRef(({ initialData }, ref) => {
       actualStartDate:
         initialData?.actualStartDate || defaultDates.actualStartDate,
       note: initialData?.note || "",
+      status: "OFFLINE",
     },
   });
 
@@ -86,6 +80,7 @@ const StoppedForm = forwardRef(({ initialData }, ref) => {
         actualStartDate:
           initialData.actualStartDate || defaultDates.actualStartDate,
         note: initialData.note || "",
+        status: "OFFLINE",
       });
 
       setFormState({
@@ -126,6 +121,7 @@ const StoppedForm = forwardRef(({ initialData }, ref) => {
       actualStartDate:
         initialData?.actualStartDate || defaultDates.actualStartDate,
       note: initialData?.note || "",
+      status: "OFFLINE",
     });
 
     setFormState({
@@ -218,25 +214,6 @@ const StoppedForm = forwardRef(({ initialData }, ref) => {
             onChange={handleReasonChange}
             error={!!errors.reason}
             helperText={errors.reason?.message}
-          />
-        </Grid>
-
-        {/* 備註 */}
-        <Grid item xs={12}>
-          <Controller
-            name="note"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="備註說明"
-                fullWidth
-                multiline
-                rows={3}
-                error={!!errors.note}
-                helperText={errors.note?.message}
-              />
-            )}
           />
         </Grid>
       </Grid>

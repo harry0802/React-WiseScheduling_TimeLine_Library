@@ -4,26 +4,25 @@
  * @version 2.0.0
  */
 
-import React, { forwardRef, useImperativeHandle, useEffect, useMemo, useCallback } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import PropTypes from "prop-types";
 import { Box, Typography, TextField, Grid } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import dayjs from "dayjs";
 
-// 🧠 定義表單驗證模式
-const setupFormSchema = z.object({
-  planStartDate: z.string().optional(),
-  planEndDate: z.string().optional(),
-  actualStartDate: z.string().optional(),
-  note: z.string().optional(),
-  setupDetails: z.string().optional()
-});
+// 導入驗證 schema
+import { tuningSchema } from "../../../configs/validations/machine/machineSchemas";
 
 /**
  * 上模與調機狀態表單
- * 
+ *
  * @component SetupForm
  * @param {Object} props - 組件屬性
  * @param {Object} props.initialData - 初始數據
@@ -32,43 +31,50 @@ const setupFormSchema = z.object({
  */
 const SetupForm = forwardRef(({ initialData }, ref) => {
   // 預先計算預設日期值，避免重複計算
-  const defaultDates = useMemo(() => ({
-    planStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
-    planEndDate: dayjs().add(3, 'hour').format("YYYY-MM-DDTHH:mm"),
-    actualStartDate: dayjs().format("YYYY-MM-DDTHH:mm")
-  }), []);
-  
+  const defaultDates = useMemo(
+    () => ({
+      planStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
+      planEndDate: dayjs().add(3, "hour").format("YYYY-MM-DDTHH:mm"),
+      actualStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
+    }),
+    []
+  );
+
   // ✨ 使用 React Hook Form 管理表單狀態和驗證
   const {
     control,
     formState: { errors },
     reset,
     getValues,
-    trigger
+    trigger,
   } = useForm({
-    resolver: zodResolver(setupFormSchema),
+    resolver: zodResolver(tuningSchema),
     defaultValues: {
       planStartDate: initialData?.planStartDate || defaultDates.planStartDate,
       planEndDate: initialData?.planEndDate || defaultDates.planEndDate,
-      actualStartDate: initialData?.actualStartDate || defaultDates.actualStartDate,
+      actualStartDate:
+        initialData?.actualStartDate || defaultDates.actualStartDate,
       note: initialData?.note || "",
-      setupDetails: initialData?.setupDetails || ""
-    }
+      setupDetails: initialData?.setupDetails || "",
+      status: "TUNING",
+    },
   });
-  
+
   // 當初始數據更新時重置表單
   useEffect(() => {
     if (initialData) {
       reset({
         planStartDate: initialData.planStartDate || defaultDates.planStartDate,
         planEndDate: initialData.planEndDate || defaultDates.planEndDate,
-        actualStartDate: initialData.actualStartDate || defaultDates.actualStartDate,
+        actualStartDate:
+          initialData.actualStartDate || defaultDates.actualStartDate,
         note: initialData.note || "",
-        setupDetails: initialData.setupDetails || ""
+        setupDetails: initialData.setupDetails || "",
+        status: "TUNING",
       });
     }
   }, [initialData, reset, defaultDates]);
-  
+
   /**
    * 驗證表單並獲取結果
    * @returns {Promise<{isValid: boolean, errors: Object|null}>}
@@ -77,10 +83,10 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
     const isValid = await trigger();
     return {
       isValid,
-      errors: isValid ? null : errors
+      errors: isValid ? null : errors,
     };
   }, [trigger, errors]);
-  
+
   /**
    * 重置表單為初始狀態
    */
@@ -88,19 +94,25 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
     reset({
       planStartDate: initialData?.planStartDate || defaultDates.planStartDate,
       planEndDate: initialData?.planEndDate || defaultDates.planEndDate,
-      actualStartDate: initialData?.actualStartDate || defaultDates.actualStartDate,
+      actualStartDate:
+        initialData?.actualStartDate || defaultDates.actualStartDate,
       note: initialData?.note || "",
-      setupDetails: initialData?.setupDetails || ""
+      setupDetails: initialData?.setupDetails || "",
+      status: "TUNING",
     });
   }, [initialData, reset, defaultDates]);
-  
+
   // 暴露方法給父組件
-  useImperativeHandle(ref, () => ({
-    getValues,
-    validate,
-    reset: resetForm,
-  }), [getValues, validate, resetForm]);
-  
+  useImperativeHandle(
+    ref,
+    () => ({
+      getValues,
+      validate,
+      reset: resetForm,
+    }),
+    [getValues, validate, resetForm]
+  );
+
   return (
     <Box sx={{ mt: 2 }}>
       <Grid container spacing={2}>
@@ -110,7 +122,7 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
             上模與調機設定
           </Typography>
         </Grid>
-        
+
         {/* 開始時間 */}
         <Grid item xs={12} sm={6}>
           <Controller
@@ -129,7 +141,7 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
             )}
           />
         </Grid>
-        
+
         {/* 預計結束時間 */}
         <Grid item xs={12} sm={6}>
           <Controller
@@ -148,7 +160,7 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
             )}
           />
         </Grid>
-        
+
         {/* 實際開始時間 */}
         <Grid item xs={12} sm={6}>
           <Controller
@@ -167,7 +179,7 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
             )}
           />
         </Grid>
-        
+
         {/* 調機詳情 */}
         <Grid item xs={12}>
           <Controller
@@ -186,36 +198,17 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
             )}
           />
         </Grid>
-        
-        {/* 備註 */}
-        <Grid item xs={12}>
-          <Controller
-            name="note"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="備註說明"
-                fullWidth
-                multiline
-                rows={3}
-                error={!!errors.note}
-                helperText={errors.note?.message}
-              />
-            )}
-          />
-        </Grid>
       </Grid>
     </Box>
   );
 });
 
 SetupForm.propTypes = {
-  initialData: PropTypes.object
+  initialData: PropTypes.object,
 };
 
 SetupForm.defaultProps = {
-  initialData: {}
+  initialData: {},
 };
 
 // 設定組件顯示名稱

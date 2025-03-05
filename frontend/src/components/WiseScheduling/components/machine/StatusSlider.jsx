@@ -26,7 +26,10 @@ import {
   STATE_OLD_OFFLINE,
   STATE_OLD_TUNING,
   STATE_OLD_IDLE,
+  SLIDER_VALUE_MAP,
+  getStatusFromSliderValue,
 } from "../../utils/statusConverter";
+import { STATUS_NAME_MAP } from "../../configs/validations/machine/machineSchemas";
 
 //! =============== 2. 類型與介面 ===============
 //* 定義所有資料結構,幫助理解資料流向
@@ -37,12 +40,23 @@ import {
  * @property {(newStatus: string) => void} onStatusChange - 狀態變更處理函數
  */
 
+/**
+ * @typedef {Object} SliderMark
+ * @property {number} value - 滑塊標記值
+ * @property {string} label - 顯示的標記標籤
+ */
+
 //! =============== 3. 核心常量 ===============
 //* 主要業務邏輯區,每個功能都配有詳細說明
 
 /**
  * 狀態值到滑塊值的映射表
+ *
  * @type {Record<string, number>}
+ *
+ * @notes
+ * - 包含新舊中文狀態的映射
+ * - 提供默認值保障安全
  */
 const STATUS_TO_SLIDER_VALUE = {
   // 中文新舊狀態到滑塊值映射
@@ -59,7 +73,9 @@ const STATUS_TO_SLIDER_VALUE = {
 };
 
 /**
- * @type {Object} 狀態對應的顏色配置
+ * 狀態對應的顏色配置
+ *
+ * @type {Record<string, string>}
  */
 const STATUS_COLORS = {
   testing: "#00b0f0", // 試模狀態顏色
@@ -72,8 +88,10 @@ const STATUS_COLORS = {
 //* 所有樣式相關的組件定義
 
 /**
+ * 自定義滑塊樣式
+ *
  * @component StyledSlider
- * @description 自定義滑塊樣式
+ * @description 根據不同狀態顯示不同顏色的滑塊
  */
 const StyledSlider = styled(Slider)`
   .MuiSlider-markLabel {
@@ -130,8 +148,10 @@ const StyledSlider = styled(Slider)`
 `;
 
 /**
+ * 滑塊容器樣式
+ *
  * @component SliderContainer
- * @description 滑塊容器樣式
+ * @description 提供固定邊距的滑塊容器
  */
 const SliderContainer = styled(Box)`
   && {
@@ -145,9 +165,16 @@ const SliderContainer = styled(Box)`
 
 /**
  * 從當前狀態取得滑塊值
+ *
  * @function getSliderValueFromStatus
  * @param {string} status - 當前狀態
  * @returns {number} - 對應的滑塊值
+ *
+ * @notes
+ * - 先嘗試直接匹配
+ * - 如果沒有匹配，嘗試中文狀態匹配
+ * - 最後嘗試標記匹配
+ * - 都沒有則返回默認值
  */
 const getSliderValueFromStatus = (status) => {
   // 直接從映射表中獲取
@@ -173,10 +200,25 @@ const getSliderValueFromStatus = (status) => {
 //* 組件主體實現
 
 /**
+ * 機台狀態選擇滑塊組件
+ *
  * @function StatusSlider
- * @description 機台狀態選擇滑塊組件
  * @param {StatusSliderProps} props - 組件屬性
  * @returns {React.ReactElement} 狀態選擇滑塊
+ *
+ * @example
+ * <StatusSlider
+ *   currentStatus="IDLE"
+ *   onStatusChange={(newStatus) => console.log(newStatus)}
+ * />
+ *
+ * @notes
+ * - 支援在 react-hook-form 表單內或獨立使用
+ * - 自動處理狀態與滑塊值的轉換
+ *
+ * @commonErrors
+ * - 狀態值不在映射表中會使用默認值
+ * - 表單上下文缺失時不會更新表單值
  */
 const StatusSlider = ({ currentStatus, onStatusChange }) => {
   //! ========= 本地狀態與引用 =========
@@ -197,8 +239,10 @@ const StatusSlider = ({ currentStatus, onStatusChange }) => {
 
   //! ========= 副作用 =========
 
-  //* 當 currentStatus 改變時，更新滑塊值
-  //* 避免在用户手動更改時重複更新
+  /**
+   * 當 currentStatus 改變時，更新滑塊值
+   * 避免在用户手動更改時重複更新
+   */
   useEffect(() => {
     if (prevStatusRef.current !== currentStatus && !userChangedRef.current) {
       setSliderValue(getSliderValueFromStatus(currentStatus));
@@ -212,6 +256,7 @@ const StatusSlider = ({ currentStatus, onStatusChange }) => {
 
   /**
    * 設置表單值的輔助函數
+   *
    * @function setValue
    * @param {string} name - 字段名稱
    * @param {any} value - 字段值
@@ -225,11 +270,24 @@ const StatusSlider = ({ currentStatus, onStatusChange }) => {
 
   /**
    * 處理滑塊變更事件
+   *
    * @function handleChange
    * @param {Event} _ - 事件對象（未使用）
    * @param {number} value - 滑塊值
+   *
+   * @notes
+   * - 設置用户變更標記避免副作用循環
+   * - 更新內部滑塊值
+   * - 查找對應狀態並通知父組件
+   * - 如果在表單內，同時更新表單值
    */
   const handleChange = (_, value) => {
+    //* ========= 複雜邏輯解釋 =========
+    // 步驟 1: 標記這是用户手動操作，避免副作用重複更新
+    // 步驟 2: 更新內部滑塊數值
+    // 步驟 3: 查找對應狀態並通知父組件
+    // 步驟 4: 如果在表單中，更新表單數據
+
     // 設置用户變更標記
     userChangedRef.current = true;
 
@@ -238,6 +296,7 @@ const StatusSlider = ({ currentStatus, onStatusChange }) => {
 
     // 根據滑塊值查找對應的狀態標記
     const newStatus = SLIDER_MARKS.find((m) => m.value === value)?.label;
+    const englishStatus = getStatusFromSliderValue(value);
 
     if (newStatus) {
       // 如果在表單上下文中，更新表單值
@@ -258,10 +317,10 @@ const StatusSlider = ({ currentStatus, onStatusChange }) => {
       }
 
       // 更新上一次的狀態
-      prevStatusRef.current = newStatus;
+      prevStatusRef.current = englishStatus;
 
       // 調用父組件的狀態變更函數
-      onStatusChange(newStatus);
+      onStatusChange(englishStatus);
     }
   };
 
@@ -285,5 +344,42 @@ StatusSlider.propTypes = {
   currentStatus: PropTypes.string.isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };
+
+//! =============== 示例區塊 ===============
+/**
+ * @example 常見使用場景
+ * // 場景 1: 基本使用
+ * <StatusSlider
+ *   currentStatus="IDLE"
+ *   onStatusChange={handleStatusChange}
+ * />
+ *
+ * // 場景 2: 在表單中使用
+ * <FormProvider {...methods}>
+ *   <form>
+ *     <StatusSlider
+ *       currentStatus={currentStatus}
+ *       onStatusChange={handleStatusChange}
+ *     />
+ *     <button type="submit">提交</button>
+ *   </form>
+ * </FormProvider>
+ *
+ * // 場景 3: 狀態變化處理
+ * const handleStatusChange = (newStatus) => {
+ *   setCurrentStatus(newStatus);
+ *
+ *   // 根據狀態執行不同操作
+ *   switch (newStatus) {
+ *     case 'IDLE':
+ *       prepareIdleMode();
+ *       break;
+ *     case 'TESTING':
+ *       startTestingProcess();
+ *       break;
+ *     // 其他狀態處理...
+ *   }
+ * };
+ */
 
 export default StatusSlider;

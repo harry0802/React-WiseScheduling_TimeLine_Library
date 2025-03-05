@@ -58,13 +58,18 @@ import {
 //* 主要業務邏輯區，每個功能都配有詳細說明
 
 /**
+ * 機台卡片組件，用於顯示單個機台的狀態
+ *
  * @function MachineCard
- * @description 機台卡片組件，用於顯示單個機台的狀態
  * @param {MachineCardProps} props - 組件屬性
  * @returns {React.ReactElement} 機台卡片界面
  *
  * @example
  * <MachineCard machine={machineData} onClick={handleClick} />
+ *
+ * @notes
+ * - 根據機台狀態顯示不同的顏色和圖標
+ * - 運行中的機台不可點擊修改狀態
  */
 const MachineCard = ({ machine, onClick }) => {
   //* 轉換機台狀態為英文狀態碼
@@ -94,9 +99,22 @@ const MachineCard = ({ machine, onClick }) => {
 };
 
 /**
+ * 機台狀態看板，顯示所有機台並允許修改狀態
+ *
  * @function MachineStatusBoard
- * @description 機台狀態看板，顯示所有機台並允許修改狀態
  * @returns {React.ReactElement} 機台狀態看板界面
+ *
+ * @example
+ * <MachineStatusBoard />
+ *
+ * @notes
+ * - 使用 RTK Query 獲取機台數據
+ * - 支援按生產區域篩選機台
+ * - 點擊機台可打開抽屜修改狀態
+ *
+ * @commonErrors
+ * - 資料加載失敗: 檢查網絡連接或API狀態
+ * - 表單驗證失敗: 檢查必填欄位
  */
 const MachineStatusBoard = () => {
   //! --------- 狀態管理 ---------
@@ -115,10 +133,12 @@ const MachineStatusBoard = () => {
   const { data: machineStatus, isLoading } = useGetMachineStatusQuery(area);
   const machines = machineStatus || [];
 
-  //! --------- 事件處理 ---------
+  //! --------- 事件處理函數 ---------
+
   /**
+   * 處理點擊機台卡片事件
+   *
    * @function handleMachineClick
-   * @description 處理點擊機台卡片事件
    * @param {Machine} machine - 被點擊的機台資料
    */
   const handleMachineClick = (machine) => {
@@ -127,9 +147,12 @@ const MachineStatusBoard = () => {
   };
 
   /**
+   * 處理機台狀態更新
+   *
    * @function handleStatusUpdate
-   * @description 處理機台狀態更新
    * @param {Object} data - 更新的機台狀態資料
+   *
+   * @todoTODO 實現實際的狀態更新API調用
    */
   const handleStatusUpdate = async (data) => {
     console.log("更新機台狀態:", data);
@@ -138,11 +161,21 @@ const MachineStatusBoard = () => {
   };
 
   /**
+   * 處理表單提交
+   *
    * @function handleSubmit
-   * @description 處理表單提交
    * @returns {Promise<boolean>} 提交是否成功
+   *
+   * @notes
+   * - 使用 useCallback 優化性能
+   * - 先驗證表單，再獲取值提交
    */
   const handleSubmit = useCallback(async () => {
+    //* ========= 複雜邏輯解釋 =========
+    // 步驟 1: 檢查表單引用是否存在
+    // 步驟 2: 驗證表單數據
+    // 步驟 3: 獲取表單數據並提交
+
     if (formRef.current) {
       const isValid = await formRef.current.validateForm();
       if (isValid) {
@@ -167,6 +200,7 @@ const MachineStatusBoard = () => {
         {/* 標題與篩選 */}
         <TitleBox>
           <Title>機台狀態與保養紀錄</Title>
+
           {/* 選擇區域 */}
           <FilterSection>
             <StyledSelect
@@ -220,5 +254,32 @@ const MachineStatusBoard = () => {
 //! =============== 4. 工具函數 ===============
 //* 通用功能區，可被多個模組復用
 // 此模組沒有獨立的工具函數
+
+//! =============== 示例區塊 ===============
+/**
+ * @example 常見使用場景
+ * // 場景 1: 基本使用
+ * <MachineStatusBoard />
+ *
+ * // 場景 2: 使用在頁面路由中
+ * const MachineManagementPage = () => {
+ *   return (
+ *     <DashboardLayout>
+ *       <MachineStatusBoard />
+ *     </DashboardLayout>
+ *   );
+ * };
+ *
+ * // 場景 3: 整合到大型儀表板
+ * const Dashboard = () => {
+ *   return (
+ *     <div className="dashboard-container">
+ *       <SummaryPanel />
+ *       <MachineStatusBoard />
+ *       <NotificationPanel />
+ *     </div>
+ *   );
+ * };
+ */
 
 export default MachineStatusBoard;

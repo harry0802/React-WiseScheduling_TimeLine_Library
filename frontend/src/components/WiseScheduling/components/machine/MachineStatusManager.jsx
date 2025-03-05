@@ -1,383 +1,458 @@
 /**
  * @file MachineStatusManager.jsx
- * @description 機台狀態管理器 - 協調不同狀態表單的顯示與資料處理
- * @version 2.0.0
+ * @description 機台狀態管理器 - 協調狀態切換、表單處理與資料提交
+ * @version 3.0.0
  */
+
+//! =============== 1. 設定與常量 ===============
+//* 這個區塊包含所有專案配置,便於統一管理
 
 import React, {
   forwardRef,
   useImperativeHandle,
-  useState,
   useRef,
+  useState,
   useEffect,
-  useCallback,
-  useMemo,
 } from "react";
 import PropTypes from "prop-types";
-import { useForm, FormProvider } from "react-hook-form";
 import { Box } from "@mui/material";
 
-// 導入狀態常量
-import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
+// 導入狀態與常量
+import {
+  MACHINE_STATUS,
+  getStatusDisplay,
+} from "../../configs/validations/machine/machineSchemas";
 
-// 導入狀態轉換工具
-import { getChineseStatus } from "../../utils/statusConverter";
-
-// 導入狀態選擇器
+// 導入組件
+import { StatusHeader, SliderContainer } from "../../assets/machine.styles";
 import StatusSlider from "./StatusSlider";
 
-// 導入各狀態的表單組件
+// 導入表單組件
 import IdleForm from "./forms/IdleForm";
 import SetupForm from "./forms/SetupForm";
 import StoppedForm from "./forms/StoppedForm";
 import TestingForm from "./forms/TestingForm";
 
-// 導入樣式
-import { StatusHeader, SliderContainer } from "../../assets/machine.styles";
+//! =============== 2. 類型與介面 ===============
+//* 定義所有資料結構,幫助理解資料流向
 
 /**
- * 機台狀態管理器
- *
- * @component MachineStatusManager
- * @param {Object} props - 組件屬性
- * @param {Object} props.initialData - 初始數據
- * @param {Function} props.onSubmit - 提交回調
- * @param {string|number} props.machineId - 機台ID (可選)
- * @param {Object} ref - 轉發的ref，用於暴露內部方法
- * @returns {React.ReactElement}
+ * @typedef {Object} MachineStatusManagerProps
+ * @property {Object} initialData - 初始數據 (包含 status, machineId, productionArea 等)
+ * @property {Function} onSubmit - 提交回調函數
+ * @property {string|number} [machineId] - 機台ID
+ * @property {string} [productionArea] - 生產區域
+ * @property {boolean} [autoLoad=false] - 是否自動加載數據
  */
-const MachineStatusManager = forwardRef(
-  ({ initialData, onSubmit, machineId }, ref) => {
-    // 預設值
-    const defaultStatus = useMemo(
-      () => initialData?.status || MACHINE_STATUS.IDLE,
-      [initialData]
-    );
 
-    // 🧠 管理狀態
-    const [currentStatus, setCurrentStatus] = useState(defaultStatus);
-    const [statusDisplay, setStatusDisplay] = useState(
-      getChineseStatus(defaultStatus)
-    );
+/**
+ * @typedef {Object} FormValidationResult
+ * @property {boolean} isValid - 表單是否有效
+ * @property {Object|null} values - 表單值 (若有效)
+ * @property {Object|null} errors - 表單錯誤 (若無效)
+ */
 
-    // 💡 使用refs存儲子表單引用
-    const formRefs = {
-      [MACHINE_STATUS.IDLE]: useRef(null),
-      [MACHINE_STATUS.SETUP]: useRef(null),
-      [MACHINE_STATUS.STOPPED]: useRef(null),
-      [MACHINE_STATUS.TESTING]: useRef(null),
-    };
+//! =============== 3. 核心功能 ===============
+//* 主要業務邏輯區,每個功能都配有詳細說明
 
-    // 表單默認值 - 使用 useMemo 避免重复計算
-    const defaultValues = useMemo(
-      () => ({
-        status: defaultStatus,
-        statusDisplay: getChineseStatus(defaultStatus),
-        ...initialData,
-      }),
-      [defaultStatus, initialData]
-    );
+/**
+ * 機台狀態管理器組件 - 協調狀態切換、表單處理與資料提交
+ *
+ * @function MachineStatusManager
+ * @param {MachineStatusManagerProps} props - 組件屬性
+ * @param {React.Ref} ref - 轉發的ref，用於暴露內部方法
+ * @returns {React.ReactElement} 機台狀態管理器組件
+ *
+ * @example
+ * // 基本用法
+ * <MachineStatusManager
+ *   initialData={machineData}
+ *   onSubmit={handleSubmit}
+ *   machineId="M001"
+ * />
+ *
+ * @notes
+ * - 使用 ref 存取內部方法 (validate, submit, reset 等)
+ * - 狀態變更會自動切換對應的表單組件
+ *
+ * @commonErrors
+ * - 表單驗證失敗: 檢查必填欄位
+ * - 提交錯誤: 檢查網絡連接或伺服器回應
+ */
+const MachineStatusManager = forwardRef((props, ref) => {
+  const {
+    initialData,
+    onSubmit,
+    machineId,
+    productionArea,
+    autoLoad = false,
+  } = props;
 
-    // 建立表單方法
-    const methods = useForm({
-      defaultValues,
-    });
+  //! =============== 狀態管理 ===============
+  //* 集中管理組件內部所有狀態
+  const [currentStatus, setCurrentStatus] = useState(
+    initialData?.status || MACHINE_STATUS.IDLE
+  );
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-    // 當初始數據更新時，更新表單值
-    // 避免重複渲染，使用 isMounted 標記
-    useEffect(() => {
-      let isMounted = true;
-      if (initialData && isMounted) {
-        methods.reset(defaultValues);
-      }
-      return () => {
-        isMounted = false;
-      };
-    }, [initialData, methods, defaultValues]);
-
-  // 處理狀態變更 - 直接定義，不使用 useCallback
-  // newStatus 是中文狀態，如："試模"、"異常"、"調機"、"待機"
-  const handleStatusChange = (chineseStatus) => {
-    console.log(`渲染表單 - 狀態切換前: ${currentStatus}, 切換後中文: ${chineseStatus}`);
-    
-    // 從中文狀態尋找對應的 MACHINE_STATUS 英文狀態
-    const newStatus = Object.values(MACHINE_STATUS).find(status => {
-      return status === chineseStatus || getChineseStatus(status) === chineseStatus;
-    }) || MACHINE_STATUS.IDLE;
-    
-    console.log(`從中文狀態 [${chineseStatus}] 尋找對應的英文狀態: [${newStatus}]`);
-    
-    // 取消任何正在進行的事件
-    setTimeout(() => {
-      // 先更新狀態與顯示文字
-      setCurrentStatus(newStatus);
-      setStatusDisplay(chineseStatus);
-      
-      // 强制重置表單
-      methods.reset({
-        status: newStatus,
-        statusDisplay: chineseStatus,
-        ...initialData
-      });
-      
-      // 確保表單值更新
-      methods.setValue("status", newStatus, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
-      methods.setValue("statusDisplay", chineseStatus, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
-      
-      // 清理所有表單引用
-      Object.keys(formRefs).forEach(key => {
-        const formRef = formRefs[key]?.current;
-        if (formRef && typeof formRef.reset === "function") {
-          formRef.reset();
-        }
-      });
-      
-      console.log(`狀態已更新為: ${newStatus} (${chineseStatus})`);
-    }, 0);
+  //! =============== 引用管理 ===============
+  //* 管理所有表單的 ref，以便於操作表單
+  const formRefs = {
+    [MACHINE_STATUS.IDLE]: useRef(null),
+    [MACHINE_STATUS.TUNING]: useRef(null),
+    [MACHINE_STATUS.TESTING]: useRef(null),
+    [MACHINE_STATUS.OFFLINE]: useRef(null),
   };
 
-    // 獲取當前激活表單的ref
-    const getActiveFormRef = useCallback(() => {
-      return formRefs[currentStatus] || null;
-    }, [currentStatus, formRefs]);
+  /**
+   * 當初始數據更新時設置狀態
+   */
+  useEffect(() => {
+    if (initialData?.status) {
+      setCurrentStatus(initialData.status);
+    }
+  }, [initialData]);
 
-    // 表單驗證和獲取值
-    const validateAndGetValues = useCallback(async () => {
-      const activeForm = getActiveFormRef()?.current;
+  //! =============== 4. 工具函數 ===============
+  //* 通用功能區,可被多個模組復用
 
-      if (!activeForm) {
-        // 如果沒有活動表單，則僅驗證主表單
-        const isMainValid = await methods.trigger();
-        return {
-          isValid: isMainValid,
-          values: isMainValid ? methods.getValues() : null,
-          errors: isMainValid ? null : methods.formState.errors,
-        };
+  /**
+   * 獲取當前狀態的表單引用
+   *
+   * @function getCurrentFormRef
+   * @returns {React.RefObject|null} 當前表單引用
+   */
+  const getCurrentFormRef = () => formRefs[currentStatus] || null;
+
+  /**
+   * 處理狀態變更
+   *
+   * @function handleStatusChange
+   * @param {string} newStatus - 新狀態
+   */
+  const handleStatusChange = (newStatus) => {
+    setCurrentStatus(newStatus);
+  };
+
+  /**
+   * 驗證表單
+   *
+   * @async
+   * @function validateForm
+   * @returns {Promise<FormValidationResult>} 驗證結果
+   */
+  const validateForm = async () => {
+    const formRef = getCurrentFormRef()?.current;
+
+    if (!formRef) {
+      return {
+        isValid: false,
+        values: null,
+        errors: { _form: "無法找到對應的表單" },
+      };
+    }
+
+    try {
+      const { isValid, errors } = await formRef.validate();
+
+      if (!isValid) {
+        return { isValid: false, values: null, errors };
       }
 
-      try {
-        // 如果有活動表單，則同時驗證主表單和子表單
-        const isMainValid = await methods.trigger();
+      const values = formRef.getValues();
+      return { isValid: true, values, errors: null };
+    } catch (error) {
+      console.error("表單驗證錯誤:", error);
+      return {
+        isValid: false,
+        values: null,
+        errors: { _form: error.message },
+      };
+    }
+  };
 
-        // 驗證子表單 (如果有validate方法)
-        if (typeof activeForm.validate === "function") {
-          const childResult = await activeForm.validate();
+  /**
+   * 提交表單
+   *
+   * @async
+   * @function submitForm
+   * @returns {Promise<boolean>} 提交結果
+   *
+   * @notes
+   * - 會先進行表單驗證
+   * - 驗證通過後添加機台ID並提交
+   */
+  const submitForm = async () => {
+    try {
+      setIsSaving(true);
+      setErrorMessage("");
 
-          if (!childResult.isValid) {
-            return {
-              isValid: false,
-              values: null,
-              errors: childResult.errors,
-            };
-          }
-        }
+      //* ========= 複雜邏輯解釋 =========
+      // 步驟 1: 驗證表單數據
+      // 步驟 2: 準備提交數據，加入機台ID
+      // 步驟 3: 調用父組件的 onSubmit 進行提交
 
-        // 如果主表單和子表單都有效，合併值
-        if (isMainValid) {
-          const mainValues = methods.getValues();
-          const childValues =
-            typeof activeForm.getValues === "function"
-              ? activeForm.getValues()
-              : {};
-
-          return {
-            isValid: true,
-            values: { ...mainValues, ...childValues },
-            errors: null,
-          };
-        } else {
-          return {
-            isValid: false,
-            values: null,
-            errors: methods.formState.errors,
-          };
-        }
-      } catch (error) {
-        console.error("表單驗證錯誤:", error);
-        return {
-          isValid: false,
-          values: null,
-          errors: error,
-        };
-      }
-    }, [methods, getActiveFormRef]);
-
-    // 提交表單
-    const handleSubmit = useCallback(async () => {
-      const { isValid, values } = await validateAndGetValues();
+      // 驗證表單
+      const { isValid, values, errors } = await validateForm();
 
       if (!isValid || !values) {
+        setErrorMessage("表單驗證失敗");
+        console.error("表單錯誤:", errors);
         return false;
       }
 
-      try {
-        // 調用外部提交函數
-        await onSubmit({
-          ...values,
-          machineId: machineId || initialData?.machineId,
-        });
-        return true;
-      } catch (error) {
-        console.error("提交失敗:", error);
-        return false;
-      }
-    }, [validateAndGetValues, onSubmit, machineId, initialData]);
+      // 添加機台ID（如果有）
+      const submitData = {
+        ...values,
+        machineId: machineId || initialData?.machineId,
+      };
 
-    // 重置表單
-    const resetForm = useCallback(() => {
-      methods.reset({
-        status: initialData?.status || MACHINE_STATUS.IDLE,
-        statusDisplay: getChineseStatus(
-          initialData?.status || MACHINE_STATUS.IDLE
-        ),
-        ...initialData,
-      });
+      // 提交數據
+      await onSubmit(submitData);
+      return true;
+    } catch (error) {
+      setErrorMessage(error.message || "提交失敗");
+      console.error("提交錯誤:", error);
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-      const activeForm = getActiveFormRef()?.current;
-      if (activeForm && typeof activeForm.reset === "function") {
-        activeForm.reset();
-      }
-    }, [methods, initialData, getActiveFormRef]);
+  /**
+   * 重置表單
+   *
+   * @function resetForm
+   */
+  const resetForm = () => {
+    const formRef = getCurrentFormRef()?.current;
 
-    // 暴露方法給父組件
-    useImperativeHandle(
-      ref,
-      () => ({
-        getFormValues: () => {
-          const mainValues = methods.getValues();
+    if (formRef && typeof formRef.reset === "function") {
+      formRef.reset();
+    }
+  };
 
-          // 獲取子表單值 (如果有)
-          const activeForm = getActiveFormRef()?.current;
-          const childValues =
-            activeForm && typeof activeForm.getValues === "function"
-              ? activeForm.getValues()
-              : {};
+  /**
+   * 獲取表單值
+   *
+   * @function getFormValues
+   * @returns {Object} 表單值
+   */
+  const getFormValues = () => {
+    const formRef = getCurrentFormRef()?.current;
 
-          return { ...mainValues, ...childValues };
-        },
+    if (formRef && typeof formRef.getValues === "function") {
+      return formRef.getValues();
+    }
 
-        validateForm: validateAndGetValues,
+    return {};
+  };
 
-        submit: handleSubmit,
+  /**
+   * 設置表單值
+   *
+   * @function setFormValue
+   * @param {string} name - 欄位名稱
+   * @param {any} value - 欄位值
+   *
+   * @todoTODO 實現具體的欄位設置邏輯
+   */
+  const setFormValue = (name, value) => {
+    console.log(`設置欄位 ${name} = ${value}`);
+    // 這裡需要實現欄位設置邏輯
+  };
 
-        reset: resetForm,
+  // 暴露方法給父組件
+  useImperativeHandle(
+    ref,
+    () => ({
+      // 表單操作
+      getFormValues,
+      validateForm,
+      submit: submitForm,
+      reset: resetForm,
 
-        getCurrentStatus: () => currentStatus,
+      // 狀態操作
+      getCurrentStatus: () => currentStatus,
+      setFormValue,
 
-        setFormValue: (name, value) => {
-          methods.setValue(name, value, { shouldValidate: true });
-        },
-      }),
-      [
-        currentStatus,
-        methods,
-        validateAndGetValues,
-        handleSubmit,
-        resetForm,
-        getActiveFormRef,
-      ]
-    );
+      // 狀態資訊
+      getErrorMessage: () => errorMessage,
+      isLoading: () => isLoading,
+      isSaving: () => isSaving,
+    }),
+    [currentStatus, errorMessage, isLoading, isSaving]
+  );
 
-  // 渲染對應狀態的表單組件
-  // 不使用 useCallback 避免緩存問題
+  /**
+   * 渲染當前狀態的表單
+   *
+   * @function renderStatusForm
+   * @returns {React.ReactElement} 表單組件
+   */
   const renderStatusForm = () => {
-    // 使用直接引用狀態，且確保打印變量的確切種類
-    console.log(`渲染表單，當前狀態(種類: ${typeof currentStatus}): ${currentStatus}`);
-    console.log(`MACHINE_STATUS.IDLE = ${MACHINE_STATUS.IDLE}`);
-    console.log(`MACHINE_STATUS.SETUP = ${MACHINE_STATUS.SETUP}`);
-    console.log(`MACHINE_STATUS.STOPPED = ${MACHINE_STATUS.STOPPED}`);
-    console.log(`MACHINE_STATUS.TESTING = ${MACHINE_STATUS.TESTING}`);
-    
-    // 強制使用当前的狀態作為 key
-    const formKey = `form-${currentStatus}-${Date.now()}`;
-    
-    const commonProps = {
-      initialData,
-      key: formKey, // 使用唯一的 key 確保每次都重新渲染
-    };
-
-    // 使用確切的字符串比較而不是參考比較
-    switch (String(currentStatus)) {
-      case String(MACHINE_STATUS.IDLE):
-        console.log(`渲染 IDLE 表單`);
+    switch (currentStatus) {
+      case MACHINE_STATUS.IDLE:
         return (
-          <IdleForm ref={formRefs[MACHINE_STATUS.IDLE]} {...commonProps} />
-        );
-      case String(MACHINE_STATUS.SETUP):
-        console.log(`渲染 SETUP 表單`);
-        return (
-          <SetupForm ref={formRefs[MACHINE_STATUS.SETUP]} {...commonProps} />
-        );
-      case String(MACHINE_STATUS.STOPPED):
-        console.log(`渲染 STOPPED 表單`);
-        return (
-          <StoppedForm
-            ref={formRefs[MACHINE_STATUS.STOPPED]}
-            {...commonProps}
+          <IdleForm
+            ref={formRefs[MACHINE_STATUS.IDLE]}
+            initialData={initialData}
           />
         );
-      case String(MACHINE_STATUS.TESTING):
-        console.log(`渲染 TESTING 表單`);
+
+      case MACHINE_STATUS.TUNING:
+      case MACHINE_STATUS.SETUP:
+        return (
+          <SetupForm
+            ref={formRefs[MACHINE_STATUS.TUNING]}
+            initialData={initialData}
+          />
+        );
+
+      case MACHINE_STATUS.TESTING:
         return (
           <TestingForm
             ref={formRefs[MACHINE_STATUS.TESTING]}
-            {...commonProps}
+            initialData={initialData}
           />
         );
-      default:
-        console.log(`沒有匹配的表單，默認渲染 IDLE`);
+
+      case MACHINE_STATUS.OFFLINE:
+      case MACHINE_STATUS.STOPPED:
         return (
-          <IdleForm ref={formRefs[MACHINE_STATUS.IDLE]} {...commonProps} />
+          <StoppedForm
+            ref={formRefs[MACHINE_STATUS.OFFLINE]}
+            initialData={initialData}
+          />
+        );
+
+      default:
+        console.log(currentStatus);
+        return (
+          <IdleForm
+            ref={formRefs[MACHINE_STATUS.IDLE]}
+            initialData={initialData}
+          />
         );
     }
   };
 
-    return (
-      <FormProvider {...methods}>
-        <Box>
-          {/* 機台資訊 */}
-          <StatusHeader>
-            <div>
-              <h3>
-                {initialData?.productionArea || ""} -{" "}
-                {initialData?.machineSN || ""}
-              </h3>
-              <p>
-                稼動時間：
-                {initialData?.actualStartDate ??
-                  initialData?.planStartDate ??
-                  new Date().toLocaleString()}
-              </p>
-            </div>
-          </StatusHeader>
+  //! =============== 組件渲染 ===============
+  return (
+    <Box>
+      {/* 機台資訊 */}
+      <StatusHeader>
+        <div>
+          <h3>
+            {initialData?.productionArea || ""} - {initialData?.machineSN || ""}
+          </h3>
+          <p>
+            稼動時間：
+            {initialData?.actualStartDate ??
+              initialData?.planStartDate ??
+              new Date().toLocaleString()}
+          </p>
+        </div>
+      </StatusHeader>
 
-          {/* 機台狀態選擇器 */}
-          <SliderContainer>
-            <StatusSlider
-              currentStatus={currentStatus}
-              onStatusChange={handleStatusChange}
-            />
-          </SliderContainer>
+      {/* 機台狀態選擇器 */}
+      <SliderContainer>
+        <StatusSlider
+          currentStatus={currentStatus}
+          onStatusChange={handleStatusChange}
+        />
+      </SliderContainer>
 
-          {/* 渲染狀態特定的表單 */}
-          {renderStatusForm()}
+      {/* 錯誤提示 */}
+      {errorMessage && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 2,
+            backgroundColor: "rgba(255, 0, 0, 0.1)",
+            color: "red",
+            borderRadius: 1,
+          }}
+        >
+          {errorMessage}
         </Box>
-      </FormProvider>
-    );
-  }
-);
+      )}
 
+      {/* 載入與儲存提示 */}
+      {(isLoading || isSaving) && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 2,
+            backgroundColor: "rgba(0, 0, 255, 0.1)",
+            color: "blue",
+            borderRadius: 1,
+          }}
+        >
+          {isLoading ? "載入中..." : "儲存中..."}
+        </Box>
+      )}
+
+      {/* 渲染當前狀態的表單 */}
+      {renderStatusForm()}
+    </Box>
+  );
+});
+
+//! =============== 5. PropTypes 驗證 ===============
+//* 確保組件接收正確的 props
 MachineStatusManager.propTypes = {
   initialData: PropTypes.object,
   onSubmit: PropTypes.func.isRequired,
   machineId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  productionArea: PropTypes.string,
+  autoLoad: PropTypes.bool,
 };
 
 MachineStatusManager.defaultProps = {
   initialData: {},
+  autoLoad: false,
 };
 
 // 設定組件顯示名稱
 MachineStatusManager.displayName = "MachineStatusManager";
+
+//! =============== 示例區塊 ===============
+/**
+ * @example 常見使用場景
+ * // 場景 1: 基本使用
+ * const machineData = { status: 'IDLE', machineSN: 'M123', productionArea: '區域A' };
+ * <MachineStatusManager
+ *   initialData={machineData}
+ *   onSubmit={handleSubmit}
+ * />
+ *
+ * // 場景 2: 使用 ref 控制
+ * const managerRef = useRef(null);
+ * // 在需要的時候調用表單提交
+ * const handleSave = () => {
+ *   if (managerRef.current) {
+ *     managerRef.current.submit();
+ *   }
+ * };
+ * <MachineStatusManager
+ *   ref={managerRef}
+ *   initialData={machineData}
+ *   onSubmit={handleSubmit}
+ * />
+ *
+ * // 場景 3: 錯誤處理
+ * const handleSubmit = async (data) => {
+ *   try {
+ *     await api.updateMachineStatus(data);
+ *     setSuccess(true);
+ *   } catch (error) {
+ *     console.error('更新失敗', error);
+ *     setError(error.message);
+ *   }
+ * };
+ */
 
 export default MachineStatusManager;

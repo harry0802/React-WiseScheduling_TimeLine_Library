@@ -98,6 +98,7 @@ const MachineStatusManager = forwardRef(({ initialData, onSubmit }, ref) => {
     setCurrentStatus(newStatus);
     setStatusDisplay(getChineseStatus(newStatus));
     updateFormValue("status", newStatus);
+
     updateFormValue("statusDisplay", getChineseStatus(newStatus));
   };
 

@@ -11,25 +11,13 @@ import React, {
   useMemo,
 } from "react";
 import PropTypes from "prop-types";
-import {
-  Box,
-  Typography,
-  TextField,
-  Grid,
-  TextareaAutosize,
-} from "@mui/material";
+import { Box, Typography, TextField, Grid } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import dayjs from "dayjs";
 
-// 🧠 定義表單驗證模式
-const idleFormSchema = z.object({
-  reason: z.string().optional(),
-  planStartDate: z.string().optional(),
-  planEndDate: z.string().optional(),
-  actualStartDate: z.string().optional(),
-});
+// 導入驗證 schema
+import { idleSchema } from "../../../configs/validations/machine/machineSchemas";
 
 // 預設日期計算 - 移動到組件外部確保只計算一次
 const getDefaultDates = () => ({
@@ -57,6 +45,7 @@ const IdleForm = forwardRef(({ initialData }, ref) => {
       planEndDate: initialData?.planEndDate || defaultDates.planEndDate,
       actualStartDate:
         initialData?.actualStartDate || defaultDates.actualStartDate,
+      status: "IDLE",
     };
   }, [initialData]);
 
@@ -68,10 +57,11 @@ const IdleForm = forwardRef(({ initialData }, ref) => {
     getValues,
     trigger,
   } = useForm({
-    resolver: zodResolver(idleFormSchema),
+    resolver: zodResolver(idleSchema),
     defaultValues,
     mode: "onChange",
   });
+  console.log(123);
 
   /**
    * 驗證表單並獲取結果
@@ -169,31 +159,6 @@ const IdleForm = forwardRef(({ initialData }, ref) => {
             )}
           />
         </Grid>
-
-        {/* 待機原因 - 使用普通文本輸入框代替TextareaAutosize */}
-        {/* <Grid item xs={12}>
-          <Controller
-            name="reason"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="待機原因備註"
-                fullWidth
-                multiline
-                rows={3}
-                error={!!errors.reason}
-                helperText={errors.reason?.message}
-                inputProps={{
-                  // 禁用自動調整大小以避免無限渲染循環
-                  style: {
-                    resize: "none", // 禁用調整大小
-                  }
-                }}
-              />
-            )}
-          />
-        </Grid> */}
       </Grid>
     </Box>
   );
