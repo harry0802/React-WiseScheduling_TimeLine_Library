@@ -1,3 +1,17 @@
+import * as z from "zod";
+import dayjs from "dayjs";
+// 在開頭添加調試信息
+// 新增的直接輸出裡面的狀態常量值
+console.log("MACHINE_STATUS 常量值：", {
+  RUN: "RUN",
+  IDLE: "IDLE",
+  TUNING: "TUNING",
+  SETUP: "SETUP",
+  TESTING: "TESTING",
+  OFFLINE: "OFFLINE",
+  STOPPED: "STOPPED",
+});
+
 /**
  * @file machineSchemas.jsx
  * @description 機台狀態相關的資料格式和驗證規則
@@ -6,9 +20,6 @@
 
 //! =============== 1. 設定與常量 ===============
 //* 這個區塊包含所有專案配置,便於統一管理
-
-import * as z from "zod";
-import dayjs from "dayjs";
 
 //! =============== 2. 狀態常量定義 ===============
 //* 主要狀態和對應值
@@ -83,7 +94,6 @@ export const baseSchema = z.object({
   actualEndDate: dateValidation.optional(),
   status: z.string(),
   statusDisplay: z.string().optional(),
-  note: z.string().optional(),
 });
 
 /**
@@ -92,19 +102,35 @@ export const baseSchema = z.object({
  * @type {Object}
  */
 export const idleSchema = baseSchema.extend({
-  // IdleForm.jsx 中使用的欄位
-  reason: z.string().optional(),
+  // 添加必填欄位驗證
+  planStartDate: dateValidation.refine((val) => !!val, {
+    message: "請輸入預計開始時間",
+  }),
+  planEndDate: dateValidation.refine((val) => !!val, {
+    message: "請輸入預計結束時間",
+  }),
+  actualStartDate: dateValidation.refine((val) => !!val, {
+    message: "請輸入實際開始時間",
+  }),
 });
 
 /**
  * @constant tuningSchema
  * @description 上模與調機狀態的表單驗證結構
+ *
  * @type {Object}
  */
 export const tuningSchema = baseSchema.extend({
-  // SetupForm.jsx 中使用的欄位
-  setupDetails: z.string().optional(),
-  note: z.string().optional(),
+  // 添加必填欄位驗證
+  planStartDate: dateValidation.refine((val) => !!val, {
+    message: "請輸入預計開始時間",
+  }),
+  planEndDate: dateValidation.refine((val) => !!val, {
+    message: "請輸入預計結束時間",
+  }),
+  actualStartDate: dateValidation.refine((val) => !!val, {
+    message: "請輸入實際開始時間",
+  }),
 });
 
 /**
@@ -114,8 +140,7 @@ export const tuningSchema = baseSchema.extend({
  */
 export const testingSchema = baseSchema.extend({
   // TestingForm.jsx 中使用的欄位
-  product: z.string().nonempty({ message: "請輸入試模產品名稱" }),
-  note: z.string().optional(),
+  product: z.string().min(1, { message: "請輸入試模產品名稱" }),
 });
 
 /**
@@ -125,8 +150,7 @@ export const testingSchema = baseSchema.extend({
  */
 export const offlineSchema = baseSchema.extend({
   // StoppedForm.jsx 中使用的欄位
-  reason: z.string().nonempty({ message: "請選擇停機原因" }),
-  note: z.string().optional(),
+  reason: z.string().min(1, { message: "請選擇停機原因" }),
 });
 
 //! =============== 5. 匯出輔助函數 ===============

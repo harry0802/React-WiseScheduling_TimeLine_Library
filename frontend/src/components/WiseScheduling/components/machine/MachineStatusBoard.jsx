@@ -177,9 +177,10 @@ const MachineStatusBoard = () => {
     // 步驟 3: 獲取表單數據並提交
 
     if (formRef.current) {
-      const isValid = await formRef.current.validateForm();
+      // 修正：使用 validate 方法而不是 validateForm
+      const { isValid } = await formRef.current.validate();
       if (isValid) {
-        const data = formRef.current.getFormValues();
+        const data = formRef.current.getValues();
         console.log("提交数据:", data);
         await handleStatusUpdate(data);
         return true;

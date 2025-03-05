@@ -209,6 +209,7 @@ const getSliderValueFromStatus = (status) => {
  * @example
  * <StatusSlider
  *   currentStatus="IDLE"
+ *   originalStatus="IDLE"
  *   onStatusChange={(newStatus) => console.log(newStatus)}
  * />
  *
@@ -220,7 +221,7 @@ const getSliderValueFromStatus = (status) => {
  * - 狀態值不在映射表中會使用默認值
  * - 表單上下文缺失時不會更新表單值
  */
-const StatusSlider = ({ currentStatus, onStatusChange }) => {
+const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
   //! ========= 本地狀態與引用 =========
 
   // 用於記錄上一次的狀態，避免不必要的更新
@@ -284,19 +285,46 @@ const StatusSlider = ({ currentStatus, onStatusChange }) => {
   const handleChange = (_, value) => {
     //* ========= 複雜邏輯解釋 =========
     // 步驟 1: 標記這是用户手動操作，避免副作用重複更新
-    // 步驟 2: 更新內部滑塊數值
-    // 步驟 3: 查找對應狀態並通知父組件
-    // 步驟 4: 如果在表單中，更新表單數據
+    // 步驟 2: 檢查狀態轉換限制
+    // 步驟 3: 更新內部滑塊數值
+    // 步驟 4: 查找對應狀態並通知父組件
+    // 步驟 5: 如果在表單中，更新表單數據
 
     // 設置用户變更標記
     userChangedRef.current = true;
+    
+    // 根據滑塊值查找對應的狀態
+    const newStatus = SLIDER_MARKS.find((m) => m.value === value)?.label;
+    const englishStatus = getStatusFromSliderValue(value);
+    
+    // 檢查狀態轉換限制
+    // 更清晰的邏輯判斷:
+    // 1. 若 API 原始資料為待機，則允許切換到任何狀態
+    // 2. 若 API 原始資料不是待機，則只能切換回待機
+    
+    // 將原始中文狀態轉換為英文狀態代碼
+    const originalEnglishStatus = convertTimeLineStatus(originalStatus);
+    
+    // 新增調試信息
+    console.log("滑塊切換偵錯：", {
+      originalStatusType: typeof originalStatus,
+      originalStatusValue: originalStatus,
+      originalEnglishStatus: originalEnglishStatus,
+      newStatusType: typeof englishStatus,
+      newStatusValue: englishStatus,
+      condition: originalEnglishStatus !== "IDLE" && englishStatus !== "IDLE",
+      prevStatus: prevStatusRef.current
+    });
+    
+    if (originalEnglishStatus !== "IDLE" && englishStatus !== "IDLE") {
+      // 這是轉換從非待機到非待機，不允許
+      setSliderValue(getSliderValueFromStatus(prevStatusRef.current));
+      console.warn("非待機狀態只能切換回待機狀態");
+      return;
+    }
 
     // 設置內部滑塊值
     setSliderValue(value);
-
-    // 根據滑塊值查找對應的狀態標記
-    const newStatus = SLIDER_MARKS.find((m) => m.value === value)?.label;
-    const englishStatus = getStatusFromSliderValue(value);
 
     if (newStatus) {
       // 如果在表單上下文中，更新表單值
@@ -342,6 +370,7 @@ const StatusSlider = ({ currentStatus, onStatusChange }) => {
 
 StatusSlider.propTypes = {
   currentStatus: PropTypes.string.isRequired,
+  originalStatus: PropTypes.string.isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };
 

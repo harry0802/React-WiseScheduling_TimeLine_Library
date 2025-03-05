@@ -23,6 +23,9 @@ import {
   getStatusDisplay,
 } from "../../configs/validations/machine/machineSchemas";
 
+// 導入轉換函數
+import { convertTimeLineStatus } from "../../utils/statusConverter";
+
 // 導入組件
 import { StatusHeader, SliderContainer } from "../../assets/machine.styles";
 import StatusSlider from "./StatusSlider";
@@ -133,7 +136,43 @@ const MachineStatusManager = forwardRef((props, ref) => {
    * @param {string} newStatus - 新狀態
    */
   const handleStatusChange = (newStatus) => {
-    setCurrentStatus(newStatus);
+    // 使用 API 原始資料來判斷能否切換
+    // 將中文狀態轉換為英文狀態代碼
+    const originalStatus = initialData?.status || MACHINE_STATUS.IDLE;
+    const originalEnglishStatus = convertTimeLineStatus(originalStatus);
+    
+    // 新增調試信息，清楚地看到当前狀態和值
+    console.log("狀態切換偵錯：", {
+      originalStatusType: typeof originalStatus,
+      originalStatusValue: originalStatus,
+      originalEnglishStatus: originalEnglishStatus,
+      IDLEType: typeof "IDLE",
+      IDLEValue: "IDLE",
+      isEqual: originalEnglishStatus === "IDLE",
+      newStatusType: typeof newStatus,
+      newStatusValue: newStatus,
+      initialData: initialData
+    });
+    
+    // 更清晰的邏輯判斷:
+    // 1. 若 API 原始資料為待機，則允許切換到任何狀態
+    // 2. 若 API 原始資料不是待機，則只能切換回待機
+    if (originalEnglishStatus === "IDLE") {
+      // 待機狀態可切換到任何狀態
+      setErrorMessage("");
+      setCurrentStatus(newStatus);
+      console.log("從待機切換至", newStatus);
+    } else if (newStatus === "IDLE") {
+      // 非待機狀態可切換回待機
+      setErrorMessage("");
+      setCurrentStatus(newStatus);
+      console.log("從非待機切換回待機");
+    } else {
+      // 非待機狀態不能切換到其他非待機狀態
+      setErrorMessage("非待機狀態的機台只能切換回待機狀態");
+      console.log("切換被拒絕：非待機狀態只能回待機");
+      return; // 不進行狀態更新
+    }
   };
 
   /**
@@ -266,13 +305,13 @@ const MachineStatusManager = forwardRef((props, ref) => {
 
   // 暴露方法給父組件
   useImperativeHandle(
-    ref,
-    () => ({
-      // 表單操作
-      getFormValues,
-      validateForm,
-      submit: submitForm,
-      reset: resetForm,
+  ref,
+  () => ({
+  // 表單操作
+  getValues: getFormValues, // 修改名稱以與表單組件一致
+  validate: validateForm,    // 修改名稱以與表單組件一致
+  submit: submitForm,
+  reset: resetForm,
 
       // 狀態操作
       getCurrentStatus: () => currentStatus,
@@ -361,8 +400,26 @@ const MachineStatusManager = forwardRef((props, ref) => {
       <SliderContainer>
         <StatusSlider
           currentStatus={currentStatus}
+          originalStatus={initialData?.status || MACHINE_STATUS.IDLE}
           onStatusChange={handleStatusChange}
         />
+        
+        {/* 狀態切換提示 */}
+        <Box
+          sx={{
+            mt: 1,
+            p: 1,
+            backgroundColor: "rgba(0, 0, 255, 0.05)",
+            color: "#0066cc",
+            borderRadius: 1,
+            fontSize: "0.875rem",
+            fontStyle: "italic"
+          }}
+        >
+          {convertTimeLineStatus(initialData?.status || MACHINE_STATUS.IDLE) === "IDLE" 
+            ? "待機狀態可切換至任何狀態" 
+            : "非待機狀態只能切換至待機狀態"}
+        </Box>
       </SliderContainer>
 
       {/* 錯誤提示 */}

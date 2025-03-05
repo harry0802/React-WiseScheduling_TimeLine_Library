@@ -61,7 +61,6 @@ const IdleForm = forwardRef(({ initialData }, ref) => {
     defaultValues,
     mode: "onChange",
   });
-  console.log(123);
 
   /**
    * 驗證表單並獲取結果

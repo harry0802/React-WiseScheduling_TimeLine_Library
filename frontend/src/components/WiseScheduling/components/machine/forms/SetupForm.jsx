@@ -54,8 +54,6 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
       planEndDate: initialData?.planEndDate || defaultDates.planEndDate,
       actualStartDate:
         initialData?.actualStartDate || defaultDates.actualStartDate,
-      note: initialData?.note || "",
-      setupDetails: initialData?.setupDetails || "",
       status: "TUNING",
     },
   });
@@ -68,8 +66,6 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
         planEndDate: initialData.planEndDate || defaultDates.planEndDate,
         actualStartDate:
           initialData.actualStartDate || defaultDates.actualStartDate,
-        note: initialData.note || "",
-        setupDetails: initialData.setupDetails || "",
         status: "TUNING",
       });
     }
@@ -96,8 +92,6 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
       planEndDate: initialData?.planEndDate || defaultDates.planEndDate,
       actualStartDate:
         initialData?.actualStartDate || defaultDates.actualStartDate,
-      note: initialData?.note || "",
-      setupDetails: initialData?.setupDetails || "",
       status: "TUNING",
     });
   }, [initialData, reset, defaultDates]);
@@ -175,25 +169,6 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
                 InputLabelProps={{ shrink: true }}
                 error={!!errors.actualStartDate}
                 helperText={errors.actualStartDate?.message}
-              />
-            )}
-          />
-        </Grid>
-
-        {/* 調機詳情 */}
-        <Grid item xs={12}>
-          <Controller
-            name="setupDetails"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="調機詳情"
-                fullWidth
-                multiline
-                rows={3}
-                error={!!errors.setupDetails}
-                helperText={errors.setupDetails?.message}
               />
             )}
           />
