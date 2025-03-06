@@ -1,11 +1,11 @@
 /**
  * @file StatusSlider.jsx
  * @description 機台狀態選擇滑塊組件，用於視覺化選擇機台狀態
- * @version 3.0.0
+ * @version 3.0.1
  */
 
-//! =============== 1. 設定與常量 ===============
-//* 這個區塊包含所有專案配置,便於統一管理
+//! =============== 1. 引入與常量 ===============
+//* 這個區塊包含所有引入和常量定義,便於統一管理
 
 import React, { useState, useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
@@ -17,19 +17,12 @@ import {
   SLIDER_MARKS,
   convertTimeLineStatus,
   getChineseStatus,
-  // 狀態常量
-  STATE_TESTING,
-  STATE_OFFLINE,
-  STATE_TUNING,
+  // 只導入實際使用的常量
   STATE_IDLE,
-  STATE_OLD_TESTING,
-  STATE_OLD_OFFLINE,
-  STATE_OLD_TUNING,
-  STATE_OLD_IDLE,
   SLIDER_VALUE_MAP,
   getStatusFromSliderValue,
-} from "../../utils/statusConverter";
-import { STATUS_NAME_MAP } from "../../configs/validations/machine/machineSchemas";
+} from "../../../utils/statusConverter";
+import { STATUS_NAME_MAP } from "../../../configs/validations/machine/machineSchemas";
 
 //! =============== 2. 類型與介面 ===============
 //* 定義所有資料結構,幫助理解資料流向
@@ -37,65 +30,48 @@ import { STATUS_NAME_MAP } from "../../configs/validations/machine/machineSchema
 /**
  * @typedef {Object} StatusSliderProps
  * @property {string} currentStatus - 當前選中的狀態
+ * @property {string} originalStatus - 原始狀態
  * @property {(newStatus: string) => void} onStatusChange - 狀態變更處理函數
- */
-
-/**
- * @typedef {Object} SliderMark
- * @property {number} value - 滑塊標記值
- * @property {string} label - 顯示的標記標籤
  */
 
 //! =============== 3. 核心常量 ===============
 //* 主要業務邏輯區,每個功能都配有詳細說明
 
 /**
- * 狀態值到滑塊值的映射表
+ * 狀態值到滑塊值的映射表 🧠
  *
  * @type {Record<string, number>}
- *
- * @notes
- * - 包含新舊中文狀態的映射
- * - 提供默認值保障安全
  */
 const STATUS_TO_SLIDER_VALUE = {
-  // 中文新舊狀態到滑塊值映射
-  [STATE_TESTING]: 0,
-  [STATE_OLD_TESTING]: 0,
-  [STATE_OFFLINE]: 33,
-  [STATE_OLD_OFFLINE]: 33,
-  [STATE_TUNING]: 66,
-  [STATE_OLD_TUNING]: 66,
-  [STATE_IDLE]: 100,
-  [STATE_OLD_IDLE]: 100,
+  // 简化映射，直接使用滑块对应值
+  TESTING: 0,
+  OFFLINE: 33,
+  TUNING: 66,
+  IDLE: 100,
   // 默認值
   DEFAULT: 100,
 };
 
 /**
- * 狀態對應的顏色配置
- *
- * @type {Record<string, string>}
+ * 狀態對應的顏色配置 💡
  */
 const STATUS_COLORS = {
-  testing: "#00b0f0", // 試模狀態顏色
-  offline: "#ff0000", // 異常狀態顏色
-  tuning: "#ffc000", // 調機狀態顏色
-  idle: "#808080", // 待機狀態顏色
+  testing: "rgba(0% 69% 94.1% / 1)", // #00b0f0
+  offline: "rgba(100% 0% 0% / 1)", // #ff0000
+  tuning: "rgba(100% 75.3% 0% / 1)", // #ffc000
+  idle: "rgba(50.2% 50.2% 50.2% / 1)", // #808080
 };
 
 //! =============== 4. 樣式組件 ===============
 //* 所有樣式相關的組件定義
 
 /**
- * 自定義滑塊樣式
- *
- * @component StyledSlider
- * @description 根據不同狀態顯示不同顏色的滑塊
+ * 自定義滑塊樣式 💡
+ * 根據不同狀態顯示不同顏色
  */
 const StyledSlider = styled(Slider)`
   .MuiSlider-markLabel {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 600;
     font-family: Roboto;
 
@@ -114,49 +90,47 @@ const StyledSlider = styled(Slider)`
   }
 
   .MuiSlider-rail {
-    background: #41596d;
-    border: 1px solid #2b4255;
+    background: rgba(25.5% 35% 42.7% / 1); /* #41596d */
+    border: 1px solid rgba(16.9% 25.9% 33.3% / 1); /* #2b4255 */
     border-radius: 4px;
   }
 
   .MuiSlider-mark {
-    background: #8f8f8f;
+    background: rgba(56.1% 56.1% 56.1% / 1); /* #8f8f8f */
     width: 6px;
     height: 6px;
     border-radius: 4px;
   }
 
   .MuiSlider-track {
-    background: #41596d;
+    background: rgba(25.5% 35% 42.7% / 1); /* #41596d */
     border-radius: 4px;
     border: none;
   }
 
   .MuiSlider-thumb {
-    width: 32px;
-    height: 32px;
-    background: #186c98;
-    border: 3px solid #fff;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(9.4% 42.4% 59.6% / 1); /* #186c98 */
+    border: 3px solid rgba(100% 100% 100% / 1); /* #fff */
     border-radius: 32.5px;
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    box-shadow: 0px 4px 4px 0px rgba(0% 0% 0% / 0.25);
 
     &:hover,
     &.Mui-focusVisible {
-      box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+      box-shadow: 0px 4px 4px 0px rgba(0% 0% 0% / 0.25);
     }
   }
 `;
 
 /**
- * 滑塊容器樣式
- *
- * @component SliderContainer
- * @description 提供固定邊距的滑塊容器
+ * 滑塊容器樣式 ✨
+ * 提供固定邊距的滑塊容器
  */
 const SliderContainer = styled(Box)`
   && {
-    width: calc(100% - 32px);
-    margin: 16px auto;
+    width: calc(100% - 2rem);
+    margin: 1rem auto;
   }
 `;
 
@@ -164,17 +138,11 @@ const SliderContainer = styled(Box)`
 //* 通用功能區,可被多個模組復用
 
 /**
- * 從當前狀態取得滑塊值
+ * 從當前狀態取得滑塊值 ✨
  *
  * @function getSliderValueFromStatus
  * @param {string} status - 當前狀態
  * @returns {number} - 對應的滑塊值
- *
- * @notes
- * - 先嘗試直接匹配
- * - 如果沒有匹配，嘗試中文狀態匹配
- * - 最後嘗試標記匹配
- * - 都沒有則返回默認值
  */
 const getSliderValueFromStatus = (status) => {
   // 直接從映射表中獲取
@@ -205,21 +173,6 @@ const getSliderValueFromStatus = (status) => {
  * @function StatusSlider
  * @param {StatusSliderProps} props - 組件屬性
  * @returns {React.ReactElement} 狀態選擇滑塊
- *
- * @example
- * <StatusSlider
- *   currentStatus="IDLE"
- *   originalStatus="IDLE"
- *   onStatusChange={(newStatus) => console.log(newStatus)}
- * />
- *
- * @notes
- * - 支援在 react-hook-form 表單內或獨立使用
- * - 自動處理狀態與滑塊值的轉換
- *
- * @commonErrors
- * - 狀態值不在映射表中會使用默認值
- * - 表單上下文缺失時不會更新表單值
  */
 const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
   //! ========= 本地狀態與引用 =========
@@ -241,14 +194,16 @@ const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
   //! ========= 副作用 =========
 
   /**
-   * 當 currentStatus 改變時，更新滑塊值
+   * 當 currentStatus 改變時，更新滑塊值 🧠
    * 避免在用户手動更改時重複更新
    */
   useEffect(() => {
+    // 如果非用户操作且狀態確實改變了，才更新滑塊值
     if (prevStatusRef.current !== currentStatus && !userChangedRef.current) {
       setSliderValue(getSliderValueFromStatus(currentStatus));
       prevStatusRef.current = currentStatus;
     }
+
     // 重置用户變更標記
     userChangedRef.current = false;
   }, [currentStatus]);
@@ -256,12 +211,7 @@ const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
   //! ========= 事件處理 =========
 
   /**
-   * 設置表單值的輔助函數
-   *
-   * @function setValue
-   * @param {string} name - 字段名稱
-   * @param {any} value - 字段值
-   * @param {Object} options - 設置選項
+   * 設置表單值的輔助函數 ✨
    */
   const setValue = (name, value, options) => {
     if (isMountedInForm) {
@@ -270,54 +220,43 @@ const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
   };
 
   /**
-   * 處理滑塊變更事件
+   * 處理狀態轉換限制的檢查 💡
+   *
+   * @param {string} originalEnglishStatus - 原始API狀態
+   * @param {string} newStatus - 新選擇的狀態
+   * @returns {boolean} - 是否允許轉換
+   */
+  const isStatusChangeAllowed = (originalEnglishStatus, newStatus) => {
+    // 若原始狀態是待機，可切換到任何狀態
+    if (originalEnglishStatus === "IDLE") {
+      return true;
+    }
+
+    // 若原始狀態不是待機，則只能切換回待機
+    return newStatus === "IDLE";
+  };
+
+  /**
+   * 處理滑塊變更事件 🧠
    *
    * @function handleChange
    * @param {Event} _ - 事件對象（未使用）
    * @param {number} value - 滑塊值
-   *
-   * @notes
-   * - 設置用户變更標記避免副作用循環
-   * - 更新內部滑塊值
-   * - 查找對應狀態並通知父組件
-   * - 如果在表單內，同時更新表單值
    */
   const handleChange = (_, value) => {
-    //* ========= 複雜邏輯解釋 =========
-    // 步驟 1: 標記這是用户手動操作，避免副作用重複更新
-    // 步驟 2: 檢查狀態轉換限制
-    // 步驟 3: 更新內部滑塊數值
-    // 步驟 4: 查找對應狀態並通知父組件
-    // 步驟 5: 如果在表單中，更新表單數據
-
     // 設置用户變更標記
     userChangedRef.current = true;
-    
+
     // 根據滑塊值查找對應的狀態
     const newStatus = SLIDER_MARKS.find((m) => m.value === value)?.label;
     const englishStatus = getStatusFromSliderValue(value);
-    
-    // 檢查狀態轉換限制
-    // 更清晰的邏輯判斷:
-    // 1. 若 API 原始資料為待機，則允許切換到任何狀態
-    // 2. 若 API 原始資料不是待機，則只能切換回待機
-    
+
     // 將原始中文狀態轉換為英文狀態代碼
     const originalEnglishStatus = convertTimeLineStatus(originalStatus);
-    
-    // 新增調試信息
-    console.log("滑塊切換偵錯：", {
-      originalStatusType: typeof originalStatus,
-      originalStatusValue: originalStatus,
-      originalEnglishStatus: originalEnglishStatus,
-      newStatusType: typeof englishStatus,
-      newStatusValue: englishStatus,
-      condition: originalEnglishStatus !== "IDLE" && englishStatus !== "IDLE",
-      prevStatus: prevStatusRef.current
-    });
-    
-    if (originalEnglishStatus !== "IDLE" && englishStatus !== "IDLE") {
-      // 這是轉換從非待機到非待機，不允許
+
+    // 檢查狀態轉換是否允許
+    if (!isStatusChangeAllowed(originalEnglishStatus, englishStatus)) {
+      // 狀態轉換不允許，還原到之前的值
       setSliderValue(getSliderValueFromStatus(prevStatusRef.current));
       console.warn("非待機狀態只能切換回待機狀態");
       return;
@@ -329,19 +268,16 @@ const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
     if (newStatus) {
       // 如果在表單上下文中，更新表單值
       if (isMountedInForm) {
-        // 更新狀態值
-        setValue("status", newStatus, {
+        const formOptions = {
           shouldValidate: true,
           shouldDirty: true,
           shouldTouch: true,
-        });
+        };
 
+        // 更新狀態值
+        setValue("status", newStatus, formOptions);
         // 更新顯示值
-        setValue("statusDisplay", newStatus, {
-          shouldValidate: true,
-          shouldDirty: true,
-          shouldTouch: true,
-        });
+        setValue("statusDisplay", newStatus, formOptions);
       }
 
       // 更新上一次的狀態
@@ -373,42 +309,5 @@ StatusSlider.propTypes = {
   originalStatus: PropTypes.string.isRequired,
   onStatusChange: PropTypes.func.isRequired,
 };
-
-//! =============== 示例區塊 ===============
-/**
- * @example 常見使用場景
- * // 場景 1: 基本使用
- * <StatusSlider
- *   currentStatus="IDLE"
- *   onStatusChange={handleStatusChange}
- * />
- *
- * // 場景 2: 在表單中使用
- * <FormProvider {...methods}>
- *   <form>
- *     <StatusSlider
- *       currentStatus={currentStatus}
- *       onStatusChange={handleStatusChange}
- *     />
- *     <button type="submit">提交</button>
- *   </form>
- * </FormProvider>
- *
- * // 場景 3: 狀態變化處理
- * const handleStatusChange = (newStatus) => {
- *   setCurrentStatus(newStatus);
- *
- *   // 根據狀態執行不同操作
- *   switch (newStatus) {
- *     case 'IDLE':
- *       prepareIdleMode();
- *       break;
- *     case 'TESTING':
- *       startTestingProcess();
- *       break;
- *     // 其他狀態處理...
- *   }
- * };
- */
 
 export default StatusSlider;

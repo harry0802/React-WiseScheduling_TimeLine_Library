@@ -1,7 +1,7 @@
-import MachineStatusBoard from "./components/machine/MachineStatusBoard";
+import MachineBoard from "./components/machine/board/MachineBoard";
 
 function WiseSchedulingIndex() {
-  return <MachineStatusBoard />;
+  return <MachineBoard />;
 }
 
 export default WiseSchedulingIndex;

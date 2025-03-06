@@ -1,7 +1,7 @@
 /**
  * @file MachineStatusBoard.jsx
  * @description 機台狀態看板，用於顯示和管理廠區各機台狀態
- * @version 1.0.0
+ * @version 1.1.0
  */
 
 //! =============== 1. 設定與常量 ===============
@@ -10,20 +10,20 @@ import React, { useState, useRef, useCallback } from "react";
 import HandymanIcon from "@mui/icons-material/Handyman";
 
 // 專案設定
-import { PRODUCTION_AREA } from "../../../../config/config";
+import { PRODUCTION_AREA } from "../../../../../config/config";
 
 // API 服務
-import { useGetMachineStatusQuery } from "../../services";
+import { useGetMachineStatusQuery } from "../../../services";
 
 // 狀態處理
 import {
   convertTimeLineStatus,
   STATUS_STYLE_MAP,
-} from "../../utils/statusConverter";
+} from "../../../utils/statusConverter";
 
 // 共用組件
-import BaseDrawer from "../../../Global/Drawer/BaseDrawer";
-import MachineStatusManager from "./MachineStatusManager";
+import BaseDrawer from "../../../../Global/Drawer/BaseDrawer";
+import StatusManager from "../manager/StatusManager";
 
 // 樣式組件
 import {
@@ -36,7 +36,7 @@ import {
   FilterSection,
   MachinesGrid,
   MachineBox,
-} from "../../assets/machineBoard.styles";
+} from "../../../assets/machineBoard.styles";
 
 //! =============== 2. 類型與介面 ===============
 //* 定義所有資料結構，幫助理解資料流向
@@ -58,6 +58,29 @@ import {
 //* 主要業務邏輯區，每個功能都配有詳細說明
 
 /**
+ * 區域選擇器元件，用於篩選不同生產區域
+ *
+ * @function AreaSelector
+ * @param {Object} props - 元件屬性
+ * @param {string} props.value - 選中的區域值
+ * @param {Function} props.onChange - 區域變更時的回調函數
+ * @returns {React.ReactElement} 區域選擇界面
+ */
+const AreaSelector = ({ value, onChange }) => {
+  return (
+    <FilterSection>
+      <StyledSelect value={value} onChange={(e) => onChange(e.target.value)}>
+        {PRODUCTION_AREA.map(({ value, label }) => (
+          <StyledMenuItem key={value} value={value}>
+            {label}
+          </StyledMenuItem>
+        ))}
+      </StyledSelect>
+    </FilterSection>
+  );
+};
+
+/**
  * 機台卡片組件，用於顯示單個機台的狀態
  *
  * @function MachineCard
@@ -74,14 +97,17 @@ import {
 const MachineCard = ({ machine, onClick }) => {
   //* 轉換機台狀態為英文狀態碼
   const englishStatus = convertTimeLineStatus(machine.status);
-  const isRunning = englishStatus === "RUN";
+
+  //* 從狀態映射中獲取顯示文字，若找不到則使用預設值
+  const statusText =
+    STATUS_STYLE_MAP[englishStatus]?.text || STATUS_STYLE_MAP.IDLE.text;
 
   return (
     <MachineBox
       $status={englishStatus}
-      onClick={!isRunning ? () => onClick(machine) : undefined}
+      onClick={englishStatus === "RUN" ? undefined : () => onClick(machine)}
       style={{
-        cursor: isRunning ? "not-allowed" : "pointer",
+        cursor: englishStatus === "RUN" ? "not-allowed" : "pointer",
       }}
     >
       <div className="title-container">
@@ -89,13 +115,26 @@ const MachineCard = ({ machine, onClick }) => {
       </div>
 
       <div className="status-container">
-        <p>
-          {STATUS_STYLE_MAP[englishStatus]?.text || STATUS_STYLE_MAP.IDLE.text}
-        </p>
-        {!isRunning && <HandymanIcon className="icon" />}
+        <p>{statusText}</p>
+        {englishStatus !== "RUN" && <HandymanIcon className="icon" />}
       </div>
     </MachineBox>
   );
+};
+
+/**
+ * 機台狀態看板，使用自訂 Hook 處理數據邏輯
+ *
+ * @function useMachineData
+ * @param {string} area - 選中的區域
+ * @returns {Object} 機台數據和加載狀態
+ */
+const useMachineData = (area) => {
+  const { data: machineStatus, isLoading } = useGetMachineStatusQuery(area);
+  return {
+    machines: machineStatus || [],
+    isLoading,
+  };
 };
 
 /**
@@ -129,9 +168,8 @@ const MachineStatusBoard = () => {
   const formRef = useRef(null);
 
   //! --------- 資料獲取 ---------
-  //* 獲取對應區域的機台狀態數據
-  const { data: machineStatus, isLoading } = useGetMachineStatusQuery(area);
-  const machines = machineStatus || [];
+  //* 使用自訂 Hook 獲取機台數據
+  const { machines, isLoading } = useMachineData(area);
 
   //! --------- 事件處理函數 ---------
 
@@ -141,53 +179,58 @@ const MachineStatusBoard = () => {
    * @function handleMachineClick
    * @param {Machine} machine - 被點擊的機台資料
    */
-  const handleMachineClick = (machine) => {
+  const handleMachineClick = useCallback((machine) => {
     setSelectedMachine(machine);
     setDrawerVisible(true);
-  };
+  }, []);
 
   /**
    * 處理機台狀態更新
    *
    * @function handleStatusUpdate
    * @param {Object} data - 更新的機台狀態資料
-   *
-   * @todoTODO 實現實際的狀態更新API調用
    */
-  const handleStatusUpdate = async (data) => {
+  const handleStatusUpdate = useCallback(async (data) => {
     console.log("更新機台狀態:", data);
     //TODO 這裡需要實現實際的狀態更新API調用
     setDrawerVisible(false);
-  };
+  }, []);
+
+  /**
+   * 處理抽屜關閉
+   *
+   * @function handleDrawerClose
+   */
+  const handleDrawerClose = useCallback(() => {
+    setDrawerVisible(false);
+  }, []);
 
   /**
    * 處理表單提交
    *
    * @function handleSubmit
    * @returns {Promise<boolean>} 提交是否成功
-   *
-   * @notes
-   * - 使用 useCallback 優化性能
-   * - 先驗證表單，再獲取值提交
    */
   const handleSubmit = useCallback(async () => {
-    //* ========= 複雜邏輯解釋 =========
-    // 步驟 1: 檢查表單引用是否存在
-    // 步驟 2: 驗證表單數據
-    // 步驟 3: 獲取表單數據並提交
-
-    if (formRef.current) {
-      // 修正：使用 validate 方法而不是 validateForm
-      const { isValid } = await formRef.current.validate();
-      if (isValid) {
-        const data = formRef.current.getValues();
-        console.log("提交数据:", data);
-        await handleStatusUpdate(data);
-        return true;
-      }
+    // 🧠 提前檢查並返回，避免深層嵌套
+    if (!formRef.current) {
+      return false;
     }
-    return false;
-  }, []);
+
+    // 驗證表單數據
+    const { isValid } = await formRef.current.validate();
+
+    // 💡 驗證失敗時提前退出
+    if (!isValid) {
+      return false;
+    }
+
+    // 獲取並提交表單數據
+    const data = formRef.current.getValues();
+    console.log("提交數據:", data);
+    await handleStatusUpdate(data);
+    return true;
+  }, [handleStatusUpdate]);
 
   //! --------- 渲染邏輯 ---------
   //* 加載狀態
@@ -202,25 +245,13 @@ const MachineStatusBoard = () => {
         <TitleBox>
           <Title>機台狀態與保養紀錄</Title>
 
-          {/* 選擇區域 */}
-          <FilterSection>
-            <StyledSelect
-              value={area}
-              style={{ width: 180, height: 60 }}
-              onChange={(e) => setArea(e.target.value)}
-            >
-              {PRODUCTION_AREA.map(({ value, label }) => (
-                <StyledMenuItem key={value} value={value}>
-                  {label}
-                </StyledMenuItem>
-              ))}
-            </StyledSelect>
-          </FilterSection>
+          {/* 選擇區域 - 抽離為獨立組件 */}
+          <AreaSelector value={area} onChange={setArea} />
         </TitleBox>
 
         {/* 機台列表 */}
         <MachinesGrid>
-          {machines?.map((machine) => (
+          {machines.map((machine) => (
             <MachineCard
               key={machine.machineId}
               machine={machine}
@@ -233,13 +264,13 @@ const MachineStatusBoard = () => {
       {/* 機台狀態修改抽屉 */}
       <BaseDrawer
         visible={drawerVisible}
-        onClose={() => setDrawerVisible(false)}
+        onClose={handleDrawerClose}
         width={700}
       >
         <BaseDrawer.Header>修改機台狀態</BaseDrawer.Header>
         <BaseDrawer.Body>
           {selectedMachine && (
-            <MachineStatusManager
+            <StatusManager
               ref={formRef}
               initialData={selectedMachine}
               onSubmit={handleStatusUpdate}
@@ -251,36 +282,5 @@ const MachineStatusBoard = () => {
     </Container>
   );
 };
-
-//! =============== 4. 工具函數 ===============
-//* 通用功能區，可被多個模組復用
-// 此模組沒有獨立的工具函數
-
-//! =============== 示例區塊 ===============
-/**
- * @example 常見使用場景
- * // 場景 1: 基本使用
- * <MachineStatusBoard />
- *
- * // 場景 2: 使用在頁面路由中
- * const MachineManagementPage = () => {
- *   return (
- *     <DashboardLayout>
- *       <MachineStatusBoard />
- *     </DashboardLayout>
- *   );
- * };
- *
- * // 場景 3: 整合到大型儀表板
- * const Dashboard = () => {
- *   return (
- *     <div className="dashboard-container">
- *       <SummaryPanel />
- *       <MachineStatusBoard />
- *       <NotificationPanel />
- *     </div>
- *   );
- * };
- */
 
 export default MachineStatusBoard;

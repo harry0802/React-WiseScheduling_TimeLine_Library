@@ -1,15 +1,14 @@
 /**
  * @file statusConverter.js
  * @description 機台狀態定義的單一真相來源 (Single Source of Truth)
- * @version 1.1.0
+ * @version 3.0.0
  */
 
-//! =============== 1. 設定與常量 ===============
+//! =============== 1. 狀態常量定義 ===============
+//* 集中管理所有狀態字符串，確保一致性
+
 /**
- * @constant {Object} STATUS_CONSTANTS
- * @description 狀態字符串常量定義
- * @property {Object} CHINESE - 中文狀態名稱
- * @property {Object} ENGLISH - 英文狀態代碼
+ * @constant {Object} STATUS_CONSTANTS - 狀態常量定義
  */
 const STATUS_CONSTANTS = {
   CHINESE: {
@@ -28,6 +27,7 @@ const STATUS_CONSTANTS = {
   },
 
   ENGLISH: {
+    // 系統內部使用的狀態代碼
     TESTING: "TESTING",
     OFFLINE: "OFFLINE",
     TUNING: "TUNING",
@@ -36,156 +36,8 @@ const STATUS_CONSTANTS = {
   },
 };
 
-//! =============== 2. 類型與介面 ===============
-/**
- * @typedef {Object} StatusStyle
- * @property {string} color - 漸層色字符串
- * @property {string} text - 顯示文字
- */
-
-/**
- * @typedef {Object} SliderMark
- * @property {number} value - 滑塊數值
- * @property {string} label - 顯示文字
- */
-
-//! =============== 3. 核心功能 ===============
-//* 狀態映射物件 - 將所有映射集中管理
-/**
- * @constant {Object} STATUS_MAPPING
- * @description 中文到英文狀態映射
- */
-const STATUS_MAPPING = {
-  // 新狀態映射
-  [STATUS_CONSTANTS.CHINESE.TESTING]: STATUS_CONSTANTS.ENGLISH.TESTING,
-  [STATUS_CONSTANTS.CHINESE.OFFLINE]: STATUS_CONSTANTS.ENGLISH.OFFLINE,
-  [STATUS_CONSTANTS.CHINESE.TUNING]: STATUS_CONSTANTS.ENGLISH.TUNING,
-  [STATUS_CONSTANTS.CHINESE.IDLE]: STATUS_CONSTANTS.ENGLISH.IDLE,
-  [STATUS_CONSTANTS.CHINESE.RUNNING]: STATUS_CONSTANTS.ENGLISH.RUNNING,
-
-  // 兼容舊狀態
-  [STATUS_CONSTANTS.CHINESE.OLD_TESTING]: STATUS_CONSTANTS.ENGLISH.TESTING,
-  [STATUS_CONSTANTS.CHINESE.OLD_OFFLINE]: STATUS_CONSTANTS.ENGLISH.OFFLINE,
-  [STATUS_CONSTANTS.CHINESE.OLD_TUNING]: STATUS_CONSTANTS.ENGLISH.TUNING,
-  [STATUS_CONSTANTS.CHINESE.OLD_IDLE]: STATUS_CONSTANTS.ENGLISH.IDLE,
-};
-
-/**
- * @constant {Object.<string, StatusStyle>} STATUS_STYLE_MAP
- * @description 英文狀態到樣式映射
- */
-const STATUS_STYLE_MAP = {
-  [STATUS_CONSTANTS.ENGLISH.TESTING]: {
-    color: "rgba(0, 194, 254, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: STATUS_CONSTANTS.CHINESE.TESTING,
-  },
-  [STATUS_CONSTANTS.ENGLISH.OFFLINE]: {
-    color: "rgba(235, 0, 4, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: STATUS_CONSTANTS.CHINESE.OFFLINE,
-  },
-  [STATUS_CONSTANTS.ENGLISH.TUNING]: {
-    color: "rgba(255, 204, 0, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: STATUS_CONSTANTS.CHINESE.TUNING,
-  },
-  [STATUS_CONSTANTS.ENGLISH.IDLE]: {
-    color: "rgba(189, 189, 189, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: STATUS_CONSTANTS.CHINESE.IDLE,
-  },
-  [STATUS_CONSTANTS.ENGLISH.RUNNING]: {
-    color: "rgba(131, 191, 69, 1) 0%, rgba(42, 42, 42, 1) 100%",
-    text: STATUS_CONSTANTS.CHINESE.RUNNING,
-  },
-};
-
-/**
- * @constant {Object} SLIDER_VALUE_MAP
- * @description 滑塊映射（中文狀態到數值）
- */
-const SLIDER_VALUE_MAP = {
-  [STATUS_CONSTANTS.CHINESE.OLD_TESTING]: 0,
-  [STATUS_CONSTANTS.CHINESE.OLD_OFFLINE]: 33,
-  [STATUS_CONSTANTS.CHINESE.OLD_TUNING]: 66,
-  [STATUS_CONSTANTS.CHINESE.OLD_IDLE]: 100,
-};
-
-/**
- * @constant {SliderMark[]} SLIDER_MARKS
- * @description 滑塊標記
- */
-const SLIDER_MARKS = [
-  { value: 0, label: STATUS_CONSTANTS.CHINESE.OLD_TESTING },
-  { value: 33, label: STATUS_CONSTANTS.CHINESE.OLD_OFFLINE },
-  { value: 66, label: STATUS_CONSTANTS.CHINESE.OLD_TUNING },
-  { value: 100, label: STATUS_CONSTANTS.CHINESE.OLD_IDLE },
-];
-
-//! =============== 4. 工具函數 ===============
-/**
- * @function convertTimeLineStatus
- * @description 中文狀態到英文狀態轉換
- * @param {string} timeLineStatus - 中文狀態
- * @returns {string} 對應的英文狀態代碼
- * @example
- * // 基礎使用示例
- * const englishStatus = convertTimeLineStatus('待機');
- * // 結果: 'IDLE'
- */
-const convertTimeLineStatus = (timeLineStatus) => {
-  return STATUS_MAPPING[timeLineStatus] || STATUS_CONSTANTS.ENGLISH.IDLE;
-};
-
-/**
- * @function getChineseStatus
- * @description 英文狀態到中文狀態轉換
- * @param {string} englishStatus - 英文狀態代碼
- * @returns {string} 對應的中文狀態名稱（優先返回新狀態）
- *
- * @notes
- * - 優先返回新狀態名稱
- * - 如果沒有找到新狀態名稱，則返回舊狀態名稱
- * - 如果都沒找到，返回默認值'待機'
- */
-const getChineseStatus = (englishStatus) => {
-  // 先建立英文到中文（新狀態）的反向映射
-  const newStatusMap = {
-    [STATUS_CONSTANTS.ENGLISH.TESTING]: STATUS_CONSTANTS.CHINESE.TESTING,
-    [STATUS_CONSTANTS.ENGLISH.OFFLINE]: STATUS_CONSTANTS.CHINESE.OFFLINE,
-    [STATUS_CONSTANTS.ENGLISH.TUNING]: STATUS_CONSTANTS.CHINESE.TUNING,
-    [STATUS_CONSTANTS.ENGLISH.IDLE]: STATUS_CONSTANTS.CHINESE.IDLE,
-    [STATUS_CONSTANTS.ENGLISH.RUNNING]: STATUS_CONSTANTS.CHINESE.RUNNING,
-  };
-
-  // 檢查是否有對應的新狀態
-  if (newStatusMap[englishStatus]) {
-    return newStatusMap[englishStatus];
-  }
-
-  // 遍歷找舊狀態（效率較低，但保持向後兼容）
-  for (const [chinese, english] of Object.entries(STATUS_MAPPING)) {
-    if (english === englishStatus) {
-      return chinese;
-    }
-  }
-
-  // 默認值
-  return STATUS_CONSTANTS.CHINESE.IDLE;
-};
-
-/**
- * @function getStatusFromSliderValue
- * @description 獲取滑塊標記對應的英文狀態
- * @param {number} value - 滑塊數值
- * @returns {string} 對應的英文狀態代碼
- */
-const getStatusFromSliderValue = (value) => {
-  const mark = SLIDER_MARKS.find((m) => m.value === value);
-  if (!mark) return STATUS_CONSTANTS.ENGLISH.IDLE;
-  return STATUS_MAPPING[mark.label] || STATUS_CONSTANTS.ENGLISH.IDLE;
-};
-
-//! =============== 5. 導出 ===============
-// 導出狀態常量
-export const {
+// 解構導出具名常量，方便直接引用
+const {
   CHINESE: {
     TESTING: STATE_TESTING,
     OFFLINE: STATE_OFFLINE,
@@ -206,6 +58,194 @@ export const {
   },
 } = STATUS_CONSTANTS;
 
+//! =============== 2. 基礎映射關係 ===============
+//* 定義各種狀態間的轉換關係
+
+/**
+ * @constant {Object} STATUS_MAPPING - 中文到英文狀態映射
+ */
+const STATUS_MAPPING = {
+  // 新狀態映射
+  [STATE_TESTING]: CODE_TESTING,
+  [STATE_OFFLINE]: CODE_OFFLINE,
+  [STATE_TUNING]: CODE_TUNING,
+  [STATE_IDLE]: CODE_IDLE,
+  [STATE_RUNNING]: CODE_RUNNING,
+
+  // 兼容舊狀態
+  [STATE_OLD_TESTING]: CODE_TESTING,
+  [STATE_OLD_OFFLINE]: CODE_OFFLINE,
+  [STATE_OLD_TUNING]: CODE_TUNING,
+  [STATE_OLD_IDLE]: CODE_IDLE,
+};
+
+/**
+ * @constant {Object} REVERSE_STATUS_MAPPING - 英文到中文（新）狀態映射
+ */
+const REVERSE_STATUS_MAPPING = {
+  [CODE_TESTING]: STATE_TESTING,
+  [CODE_OFFLINE]: STATE_OFFLINE,
+  [CODE_TUNING]: STATE_TUNING,
+  [CODE_IDLE]: STATE_IDLE,
+  [CODE_RUNNING]: STATE_RUNNING,
+};
+
+/**
+ * @constant {Object} NEW_TO_OLD_STATUS - 新中文狀態到舊中文狀態的映射
+ * @description 💡 將相關的映射集中在一起，減少分散的 switch 語句
+ */
+const NEW_TO_OLD_STATUS = {
+  [STATE_TESTING]: STATE_OLD_TESTING,
+  [STATE_OFFLINE]: STATE_OLD_OFFLINE,
+  [STATE_TUNING]: STATE_OLD_TUNING,
+  [STATE_IDLE]: STATE_OLD_IDLE,
+  [STATE_RUNNING]: STATE_OLD_IDLE, // RUNNING 狀態映射到 IDLE
+};
+
+//! =============== 3. 視覺樣式配置 ===============
+//* 狀態對應的顯示樣式定義
+
+/**
+ * @typedef {Object} StatusStyle
+ * @property {string} color - 漸層色字符串
+ * @property {string} text - 顯示文字
+ */
+
+/**
+ * @constant {Object.<string, StatusStyle>} STATUS_STYLE_MAP - 英文狀態到樣式映射
+ */
+const STATUS_STYLE_MAP = {
+  [CODE_TESTING]: {
+    color: "rgba(0, 194, 254, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: STATE_TESTING,
+  },
+  [CODE_OFFLINE]: {
+    color: "rgba(235, 0, 4, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: STATE_OFFLINE,
+  },
+  [CODE_TUNING]: {
+    color: "rgba(255, 204, 0, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: STATE_TUNING,
+  },
+  [CODE_IDLE]: {
+    color: "rgba(189, 189, 189, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: STATE_IDLE,
+  },
+  [CODE_RUNNING]: {
+    color: "rgba(131, 191, 69, 1) 0%, rgba(42, 42, 42, 1) 100%",
+    text: STATE_RUNNING,
+  },
+};
+
+//! =============== 4. 滑塊配置 ===============
+//* 滑塊相關的配置定義
+
+/**
+ * @typedef {Object} SliderMark
+ * @property {number} value - 滑塊數值
+ * @property {string} label - 顯示文字
+ */
+
+/**
+ * @constant {Object} SLIDER_VALUE_MAP - 舊中文狀態到滑塊值的映射
+ */
+const SLIDER_VALUE_MAP = {
+  [STATE_OLD_TESTING]: 0,
+  [STATE_OLD_OFFLINE]: 33,
+  [STATE_OLD_TUNING]: 66,
+  [STATE_OLD_IDLE]: 100,
+};
+
+/**
+ * @constant {SliderMark[]} SLIDER_MARKS - 滑塊標記配置
+ */
+const SLIDER_MARKS = [
+  { value: 0, label: STATE_OLD_TESTING },
+  { value: 33, label: STATE_OLD_OFFLINE },
+  { value: 66, label: STATE_OLD_TUNING },
+  { value: 100, label: STATE_OLD_IDLE },
+];
+
+//! =============== 5. 核心轉換函數 ===============
+//* 提供狀態轉換和查詢的功能
+
+/**
+ * 中文狀態到英文狀態轉換
+ * @function convertTimeLineStatus
+ * @param {string} timeLineStatus - 中文狀態
+ * @returns {string} 對應的英文狀態代碼
+ *
+ * @example
+ * // 返回: 'IDLE'
+ * convertTimeLineStatus('待機');
+ */
+const convertTimeLineStatus = (timeLineStatus) => {
+  return STATUS_MAPPING[timeLineStatus] || CODE_IDLE;
+};
+
+/**
+ * 英文狀態到中文狀態轉換
+ * @function getChineseStatus
+ * @param {string} englishStatus - 英文狀態代碼
+ * @returns {string} 對應的中文狀態名稱
+ */
+const getChineseStatus = (englishStatus) => {
+  return REVERSE_STATUS_MAPPING[englishStatus] || STATE_IDLE;
+};
+
+//! =============== 6. 滑塊相關工具函數 ===============
+//* 專門處理滑塊與狀態間轉換的函數
+
+/**
+ * 獲取滑塊標記對應的英文狀態
+ * @function getStatusFromSliderValue
+ * @param {number} value - 滑塊數值
+ * @returns {string} 對應的英文狀態代碼
+ */
+const getStatusFromSliderValue = (value) => {
+  const mark = SLIDER_MARKS.find((m) => m.value === value);
+  if (!mark) return CODE_IDLE;
+
+  return STATUS_MAPPING[mark.label] || CODE_IDLE;
+};
+
+/**
+ * 從英文狀態獲取對應的滑塊值
+ * @function getSliderValueFromStatus
+ * @param {string} englishStatus - 英文狀態代碼
+ * @returns {number} 對應的滑塊值
+ */
+const getSliderValueFromStatus = (englishStatus) => {
+  // 先獲取對應的中文新狀態
+  const chineseStatus = getChineseStatus(englishStatus);
+
+  // 將新狀態轉換為對應的舊狀態
+  const oldChineseStatus = NEW_TO_OLD_STATUS[chineseStatus] || STATE_OLD_IDLE;
+
+  // 返回對應的滑塊值，默認為 100 (IDLE)
+  return SLIDER_VALUE_MAP[oldChineseStatus] || 100;
+};
+
+//! =============== 7. 導出 ===============
+
+// 導出狀態常量
+export {
+  STATE_TESTING,
+  STATE_OFFLINE,
+  STATE_TUNING,
+  STATE_IDLE,
+  STATE_RUNNING,
+  STATE_OLD_TESTING,
+  STATE_OLD_OFFLINE,
+  STATE_OLD_TUNING,
+  STATE_OLD_IDLE,
+  CODE_TESTING,
+  CODE_OFFLINE,
+  CODE_TUNING,
+  CODE_IDLE,
+  CODE_RUNNING,
+};
+
 // 導出映射和工具函數
 export {
   STATUS_MAPPING,
@@ -215,4 +255,5 @@ export {
   convertTimeLineStatus,
   getChineseStatus,
   getStatusFromSliderValue,
+  getSliderValueFromStatus,
 };
