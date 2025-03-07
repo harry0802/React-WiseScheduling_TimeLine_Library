@@ -4,16 +4,8 @@
  * @version 2.1.0
  */
 
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useCallback,
-  useMemo,
-} from "react";
-import PropTypes from "prop-types";
-import { Box, Typography, TextField, Grid } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { forwardRef } from "react";
+import { Box, Typography, Grid } from "@mui/material";
 import dayjs from "dayjs";
 
 // 導入驗證 schema
@@ -25,6 +17,7 @@ const getDefaultDates = () => ({
   planStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
   planEndDate: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"),
   actualStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
+  status: "IDLE",
 });
 
 /**
@@ -40,16 +33,12 @@ const IdleForm = forwardRef((props, ref) => {
   const { initialData } = props;
 
   // 使用自定義 hook
-  const { defaultValues } = useFormHandler({
+  const { defaultValues, isDirty } = useFormHandler({
     initialData,
     getDefaultValues: getDefaultDates,
     schema: idleSchema,
     ref,
   });
-
-  console.log("initialData", initialData);
-  console.log("defaultValues", defaultValues);
-
   return (
     <Box sx={{ mt: 2 }}>
       <Grid container spacing={2}>

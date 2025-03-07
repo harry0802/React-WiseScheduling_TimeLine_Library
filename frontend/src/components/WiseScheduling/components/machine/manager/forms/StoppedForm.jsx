@@ -39,12 +39,14 @@ const StoppedForm = forwardRef(({ initialData }, ref) => {
   });
 
   // 使用自定義表單 Hook
-  const { control, errors } = useFormHandler({
+  const { control, errors, isDirty } = useFormHandler({
     initialData,
     getDefaultValues,
     schema: offlineSchema,
     ref,
   });
+
+  console.log("🚀 ~ StoppedForm ~ isDirty:", isDirty);
 
   return (
     <Box sx={{ mt: 2 }}>

@@ -64,7 +64,7 @@ const StyledFormControlLabel = styled(FormControlLabel)`
   margin: 0.5rem 0;
   width: 100%;
 
-  & .MuiFormControlLabel-label {
+  && .MuiFormControlLabel-label {
     font-size: 1.5rem;
     color: #8f8f8f;
     margin-left: 4px;
@@ -80,6 +80,11 @@ const StyledRadioGroup = styled(RadioGroup)`
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem 8rem;
   width: 100%;
+  & .MuiFormControlLabel-root {
+    &:nth-child(odd) {
+      justify-content: flex-end;
+    }
+  }
 `;
 
 //! =============== 3. 核心組件 ===============

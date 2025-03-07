@@ -226,6 +226,18 @@ const getSliderValueFromStatus = (englishStatus) => {
   return SLIDER_VALUE_MAP[oldChineseStatus] || 100;
 };
 
+// 無論中文或英文，都返回查詢是否為 IDLE 或是 上模具條機
+const isIdle = (status) => {
+  return (
+    status === STATE_IDLE ||
+    status === CODE_IDLE ||
+    status === STATE_OLD_IDLE ||
+    status === STATE_TUNING ||
+    status === CODE_TUNING ||
+    status === STATE_OLD_TUNING
+  );
+};
+
 //! =============== 7. 導出 ===============
 
 // 導出狀態常量
@@ -256,4 +268,5 @@ export {
   getChineseStatus,
   getStatusFromSliderValue,
   getSliderValueFromStatus,
+  isIdle,
 };

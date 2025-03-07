@@ -1,6 +1,6 @@
 /**
  * @file MachineStatusManager.jsx
- * @description 機台狀態管理器 - 簡化版本
+ * @description 機台狀態管理器 - 使用 Hook 重構版本
  */
 
 import React, {
@@ -19,13 +19,16 @@ import { StatusHeader, SliderContainer } from "../../../assets/machine.styles";
 import StatusSlider from "../controls/StatusSlider";
 import { convertTimeLineStatus } from "../../../utils/statusConverter";
 
+// 導入自定義 Hook
+import useStatusForm from "../../../hooks/machine/form/useStatusForm";
+
 // 導入表單組件
 import IdleForm from "./forms/IdleForm";
 import SetupForm from "./forms/SetupForm";
 import StoppedForm from "./forms/StoppedForm";
 import TestingForm from "./forms/TestingForm";
 
-//! 表單類型映射 - 簡化條件判斷 ✨
+// 表單類型映射
 const FORM_COMPONENTS = {
   [MACHINE_STATUS.IDLE]: IdleForm,
   [MACHINE_STATUS.TUNING]: SetupForm,
@@ -35,22 +38,28 @@ const FORM_COMPONENTS = {
 };
 
 /**
- * 機台狀態管理器 - 協調狀態切換與表單處理
+ * 機台狀態管理器
  */
 const MachineStatusManager = forwardRef((props, ref) => {
   const { initialData = {}, onSubmit, machineId } = props;
 
-  //! 狀態管理 - 只保留核心狀態 🧠
+  // 機台當前狀態
   const [currentStatus, setCurrentStatus] = useState(
     initialData?.status || MACHINE_STATUS.IDLE
   );
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
 
-  //! 單一表單引用 - 減少多餘的 ref 創建 💡
+  // 表單參考
   const formRef = useRef(null);
 
-  // 當初始數據更新時設置狀態
+  // 使用狀態表單處理邏輯
+  const { errorMessage, setErrorMessage, formApi } = useStatusForm({
+    initialData,
+    onSubmit,
+    machineId,
+    formRef,
+  });
+
+  // 當初始數據變更時更新狀態
   useEffect(() => {
     if (initialData?.status) {
       setCurrentStatus(initialData.status);
@@ -58,14 +67,14 @@ const MachineStatusManager = forwardRef((props, ref) => {
   }, [initialData]);
 
   /**
-   * 處理狀態變更 - 簡化判斷邏輯 ✨
+   * 處理機台狀態變更
    */
   const handleStatusChange = (newStatus) => {
     const originalStatus = convertTimeLineStatus(
       initialData?.status || MACHINE_STATUS.IDLE
     );
 
-    // 簡化為兩條規則:
+    // 狀態切換規則:
     if (originalStatus === "IDLE" || newStatus === "IDLE") {
       setErrorMessage("");
       setCurrentStatus(newStatus);
@@ -74,91 +83,11 @@ const MachineStatusManager = forwardRef((props, ref) => {
     }
   };
 
-  /**
-   * 驗證表單 - 直接調用當前表單的驗證方法
-   */
-  const validateForm = async () => {
-    if (!formRef.current) {
-      return {
-        isValid: false,
-        values: null,
-        errors: { _form: "無法找到表單" },
-      };
-    }
-
-    try {
-      const { isValid, errors } = await formRef.current.validate();
-
-      if (!isValid) {
-        return { isValid: false, values: null, errors };
-      }
-
-      const values = formRef.current.getValues();
-      return { isValid: true, values, errors: null };
-    } catch (error) {
-      console.error("表單驗證錯誤:", error);
-      return { isValid: false, values: null, errors: { _form: error.message } };
-    }
-  };
+  // 向父組件暴露表單操作方法
+  useImperativeHandle(ref, () => formApi, [formApi]);
 
   /**
-   * 提交表單 - 整合驗證與提交
-   */
-  const submitForm = async () => {
-    try {
-      setIsSaving(true);
-      setErrorMessage("");
-
-      const { isValid, values, errors } = await validateForm();
-
-      if (!isValid || !values) {
-        setErrorMessage("表單驗證失敗");
-        console.error("表單錯誤:", errors);
-        return false;
-      }
-
-      // 添加機台ID並提交
-      await onSubmit({
-        ...values,
-        machineId: machineId || initialData?.machineId,
-      });
-
-      return true;
-    } catch (error) {
-      setErrorMessage(error.message || "提交失敗");
-      console.error("提交錯誤:", error);
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  /**
-   * 重置表單
-   */
-  const resetForm = () => {
-    if (formRef.current?.reset) {
-      formRef.current.reset();
-    }
-  };
-
-  /**
-   * 暴露必要方法給父組件 - 保留核心接口
-   */
-  useImperativeHandle(
-    ref,
-    () => ({
-      // 只保留父組件實際使用的方法
-      getValues: () => formRef.current?.getValues?.() || {},
-      validate: validateForm,
-      submit: submitForm,
-      reset: resetForm,
-    }),
-    [currentStatus, errorMessage, isSaving]
-  );
-
-  /**
-   * 渲染表單 - 使用映射表簡化代碼 ✨
+   * 渲染當前狀態對應的表單
    */
   const renderForm = () => {
     const FormComponent =
@@ -221,21 +150,6 @@ const MachineStatusManager = forwardRef((props, ref) => {
           }}
         >
           {errorMessage}
-        </Box>
-      )}
-
-      {/* 保存提示 */}
-      {isSaving && (
-        <Box
-          sx={{
-            mt: 2,
-            p: 2,
-            backgroundColor: "rgba(0% 0% 100% / 0.1)",
-            color: "rgba(0% 0% 100% / 1)",
-            borderRadius: 1,
-          }}
-        >
-          儲存中...
         </Box>
       )}
 
