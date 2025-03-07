@@ -1,6 +1,6 @@
 from itertools import groupby
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 import pytz
 from app import db
@@ -171,6 +171,7 @@ class ProductionCostService:
             if dataType != "all":
                 query = query.filter(ProductionScheduleReportView.serialNumber == 0) if dataType == "mother" else query.filter(ProductionScheduleReportView.serialNumber > 0)
             query = query.filter(ProductionScheduleReportView.productionScheduleId == productionScheduleId) if productionScheduleId else query
+            query = query.filter(ProductionScheduleReportView.planOnMachineDate > datetime.now(pytz.utc) - timedelta(weeks=2))
 
             if hasattr(ProductionCost, sort):
                 query = query.order_by(getattr(ProductionCost, sort).desc())
