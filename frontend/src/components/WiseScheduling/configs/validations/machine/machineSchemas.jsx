@@ -1,16 +1,12 @@
 import * as z from "zod";
 import dayjs from "dayjs";
+import {
+  MACHINE_STATUS,
+  STATUS_NAME_MAP,
+  getStatusDisplay,
+} from "../../../configs/constants/fieldNames";
 // 在開頭添加調試信息
 // 新增的直接輸出裡面的狀態常量值
-console.log("MACHINE_STATUS 常量值：", {
-  RUN: "RUN",
-  IDLE: "IDLE",
-  TUNING: "TUNING",
-  SETUP: "SETUP",
-  TESTING: "TESTING",
-  OFFLINE: "OFFLINE",
-  STOPPED: "STOPPED",
-});
 
 /**
  * @file machineSchemas.jsx
@@ -25,41 +21,16 @@ console.log("MACHINE_STATUS 常量值：", {
 //* 主要狀態和對應值
 
 /**
- * @constant MACHINE_STATUS
- * @description 機台狀態常量對應表
+ * @constant MACHINE_STATUS_ALIASES
+ * @description 狀態別名對應表（兼容舊代碼）
  * @type {Object}
  */
-export const MACHINE_STATUS = {
-  RUN: "RUN", // 生產中
-  IDLE: "IDLE", // 待機中
-  TUNING: "TUNING", // 上模與調機
-  SETUP: "SETUP", // 上模與調機 (別名)
-  TESTING: "TESTING", // 產品試模
-  OFFLINE: "OFFLINE", // 機台停機
-  STOPPED: "STOPPED", // 機台停機 (別名)
-
-  // 中文對應
-  生產中: "RUN",
-  待機中: "IDLE",
-  上模與調機: "TUNING",
-  產品試模: "TESTING",
-  機台停機: "OFFLINE",
+export const MACHINE_STATUS_ALIASES = {
+  SETUP: MACHINE_STATUS.TUNING, // 上模與調機 (別名)
+  STOPPED: MACHINE_STATUS.OFFLINE, // 機台停機 (別名)
 };
 
-/**
- * @constant STATUS_NAME_MAP
- * @description 狀態代碼與中文名稱映射
- * @type {Object}
- */
-export const STATUS_NAME_MAP = {
-  [MACHINE_STATUS.RUN]: "生產中",
-  [MACHINE_STATUS.IDLE]: "待機中",
-  [MACHINE_STATUS.TUNING]: "上模與調機",
-  [MACHINE_STATUS.SETUP]: "上模與調機",
-  [MACHINE_STATUS.TESTING]: "產品試模",
-  [MACHINE_STATUS.OFFLINE]: "機台停機",
-  [MACHINE_STATUS.STOPPED]: "機台停機",
-};
+// 註：主要的 MACHINE_STATUS 和 STATUS_NAME_MAP 已從 fieldNames.js 導入
 
 //! =============== 3. 基礎格式驗證 ===============
 //* 通用的格式和欄位驗證規則
@@ -156,14 +127,11 @@ export const offlineSchema = baseSchema.extend({
 //! =============== 5. 匯出輔助函數 ===============
 //* 匯出所有狀態對應的驗證結構
 
-/**
- * @function getStatusDisplay
- * @description 根據狀態代碼取得中文顯示名稱
- * @param {string} statusCode - 狀態代碼
- * @returns {string} - 中文狀態名稱
- */
-export const getStatusDisplay = (statusCode) => {
-  return STATUS_NAME_MAP[statusCode] || statusCode;
+// 註：getStatusDisplay 已從 fieldNames.js 導入
+// 添加調試日誌包裝函數
+const getStatusDisplayWithLog = (statusCode) => {
+  console.log("🚀 ~ getStatusDisplay ~ statusCode:", statusCode);
+  return getStatusDisplay(statusCode);
 };
 
 /**
@@ -174,19 +142,23 @@ export const getStatusDisplay = (statusCode) => {
  */
 export const getStandardizedStatus = (status) => {
   // 處理別名
-  if (status === MACHINE_STATUS.SETUP) return MACHINE_STATUS.TUNING;
-  if (status === MACHINE_STATUS.STOPPED) return MACHINE_STATUS.OFFLINE;
+  if (status === MACHINE_STATUS_ALIASES.SETUP) return MACHINE_STATUS.TUNING;
+  if (status === MACHINE_STATUS_ALIASES.STOPPED) return MACHINE_STATUS.OFFLINE;
   return status;
 };
+
+// 為了向後兼容，再次導出從 fieldNames.js 導入的常量和函數
+export { MACHINE_STATUS, STATUS_NAME_MAP };
 
 export default {
   MACHINE_STATUS,
   STATUS_NAME_MAP,
+  MACHINE_STATUS_ALIASES,
   baseSchema,
   idleSchema,
   tuningSchema,
   testingSchema,
   offlineSchema,
-  getStatusDisplay,
+  getStatusDisplay: getStatusDisplayWithLog,
   getStandardizedStatus,
 };

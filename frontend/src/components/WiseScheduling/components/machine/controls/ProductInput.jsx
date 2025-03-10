@@ -156,18 +156,4 @@ const ProductInput = ({
   );
 };
 
-//! =============== 5. PropTypes 定義 ===============
-ProductInput.propTypes = {
-  /** 輸入框的值 */
-  value: PropTypes.string,
-  /** 值變化時的回調函數 */
-  onChange: PropTypes.func,
-  /** 是否顯示錯誤狀態 */
-  error: PropTypes.bool,
-  /** 輔助文字/錯誤提示 */
-  helperText: PropTypes.string,
-  /** 表單欄位名稱 */
-  name: PropTypes.string,
-};
-
 export default ProductInput;

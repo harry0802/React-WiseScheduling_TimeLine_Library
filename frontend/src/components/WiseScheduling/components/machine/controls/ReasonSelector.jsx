@@ -184,19 +184,4 @@ const ReasonSelector = ({
   );
 };
 
-//! =============== 4. PropTypes 定義 ===============
-//* 明確定義組件屬性類型，幫助開發者理解如何使用
-ReasonSelector.propTypes = {
-  /** 當前選擇的原因值 */
-  value: PropTypes.string,
-  /** 值變更處理函數 */
-  onChange: PropTypes.func,
-  /** 是否顯示錯誤 */
-  error: PropTypes.bool,
-  /** 錯誤提示文字 */
-  helperText: PropTypes.string,
-  /** 表單欄位名稱 */
-  name: PropTypes.string,
-};
-
 export default ReasonSelector;

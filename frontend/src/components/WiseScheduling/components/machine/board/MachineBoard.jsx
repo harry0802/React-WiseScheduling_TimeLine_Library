@@ -12,7 +12,7 @@ import { useGetMachineStatusQuery } from "../../../services";
 import {
   convertTimeLineStatus,
   STATUS_STYLE_MAP,
-} from "../../../utils/statusConverter";
+} from "../../../configs/constants/fieldNames";
 import BaseDrawer from "../../../../Global/Drawer/BaseDrawer";
 import StatusManager from "../manager/StatusManager";
 import {

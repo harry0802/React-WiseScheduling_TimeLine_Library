@@ -21,8 +21,8 @@ import {
   STATE_IDLE,
   SLIDER_VALUE_MAP,
   getStatusFromSliderValue,
-} from "../../../utils/statusConverter";
-import { STATUS_NAME_MAP } from "../../../configs/validations/machine/machineSchemas";
+  STATUS_NAME_MAP
+} from "../../../configs/constants/fieldNames";
 
 //! =============== 2. 類型與介面 ===============
 //* 定義所有資料結構,幫助理解資料流向
@@ -300,14 +300,6 @@ const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
       />
     </SliderContainer>
   );
-};
-
-//! ========= PropTypes 定義 =========
-
-StatusSlider.propTypes = {
-  currentStatus: PropTypes.string.isRequired,
-  originalStatus: PropTypes.string.isRequired,
-  onStatusChange: PropTypes.func.isRequired,
 };
 
 export default StatusSlider;

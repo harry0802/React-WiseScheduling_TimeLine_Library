@@ -54,27 +54,28 @@ function useFormHandler({ initialData, getDefaultValues, schema, ref }) {
   const initialDataRef = useRef(initialData);
 
   //* ========= 初始化邏輯 =========
-  // 步驟 1: 計算表單初始值，結合預設值和傳入的初始資料
-  // 步驟 2: 使用 useMemo 避免不必要的重新計算
-  // 步驟 3: 只有當 initialData 或 getDefaultValues 變更時才重新計算
-  const defaultValues = useMemo(() => {
-    //? 獲取基礎預設值
-    const defaults = getDefaultValues();
+  // // 步驟 1: 計算表單初始值，結合預設值和傳入的初始資料
+  // // 步驟 2: 使用 useMemo 避免不必要的重新計算
+  // // 步驟 3: 只有當 initialData 或 getDefaultValues 變更時才重新計算
+  // const defaultValues = useMemo(() => {
+  //   //? 獲取基礎預設值
+  //   const defaults = getDefaultValues();
 
-    // 合併初始數據和默認值
-    const merged = { ...defaults };
+  //   // 合併初始數據和默認值
+  //   const merged = { ...defaults };
+  //   // 只取初始數據中有效的欄位覆蓋默認值
+  //   if (initialData) {
+  //     Object.keys(defaults).forEach((key) => {
+  //       if (initialData[key] !== undefined && initialData[key] !== null) {
+  //         merged[key] = initialData[key];
+  //       }
+  //     });
+  //   }
 
-    // 只取初始數據中有效的欄位覆蓋默認值
-    if (initialData) {
-      Object.keys(defaults).forEach((key) => {
-        if (initialData[key] !== undefined && initialData[key] !== null) {
-          merged[key] = initialData[key];
-        }
-      });
-    }
+  //   return merged;
+  // }, [initialData, getDefaultValues]);
 
-    return merged;
-  }, [initialData, getDefaultValues]);
+  const defaults = getDefaultValues();
 
   //* 使用 React Hook Form 設置表單
   const {
@@ -87,10 +88,9 @@ function useFormHandler({ initialData, getDefaultValues, schema, ref }) {
     watch,
   } = useForm({
     resolver: zodResolver(schema),
-    defaultValues,
+    defaultValues: defaults,
     mode: "onChange", //! 使用 onChange 模式即時驗證
   });
-
   //* ========= 表單重置邏輯 =========
   // 步驟 1: 監聽 initialData 變更
   // 步驟 2: 使用深度比較判斷是否真的變更
@@ -99,17 +99,14 @@ function useFormHandler({ initialData, getDefaultValues, schema, ref }) {
     let ignore = false;
 
     if (!ignore && !isEqual(initialData, initialDataRef.current)) {
-      reset(defaultValues);
+      reset(defaults);
       initialDataRef.current = initialData;
     }
 
     return () => {
       ignore = true;
     };
-  }, [initialData, defaultValues, reset]);
-
-  //* 監控整個表單的值
-  const formValues = watch();
+  }, [initialData, defaults, reset]);
 
   //! =============== 3. 工具函數 ===============
   //* 直接使用 React Hook Form 提供的 isDirty 狀態來判斷表單是否變更
@@ -133,8 +130,8 @@ function useFormHandler({ initialData, getDefaultValues, schema, ref }) {
    * @description 重置表單到預設值
    */
   const resetForm = useCallback(() => {
-    reset(defaultValues);
-  }, [reset, defaultValues]);
+    reset(defaults);
+  }, [reset, defaults]);
 
   //* ========= 暴露 API 給父組件 =========
   // 使用 useImperativeHandle 提供父組件可控制的方法
@@ -159,7 +156,7 @@ function useFormHandler({ initialData, getDefaultValues, schema, ref }) {
     validate,
     setValue,
     watch,
-    defaultValues,
+    defaults,
     isDirty,
     touchedFields,
     dirtyFields,

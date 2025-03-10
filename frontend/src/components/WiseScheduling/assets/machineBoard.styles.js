@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { STATUS_STYLE_MAP } from "../utils/statusConverter";
+import { STATUS_STYLE_MAP } from "../configs/constants/fieldNames";
 import { Select, MenuItem } from "@mui/material";
 
 // 定義斷點

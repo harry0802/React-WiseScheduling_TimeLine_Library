@@ -1,6 +1,7 @@
 /**
  * @file MachineStatusManager.jsx
  * @description 機台狀態管理器 - 使用 Hook 重構版本
+ * @version 2.0.0
  */
 
 import React, {
@@ -11,16 +12,18 @@ import React, {
   useRef,
 } from "react";
 import PropTypes from "prop-types";
-import { Box } from "@mui/material";
+import { Box, Alert, Typography } from "@mui/material";
 
 // 導入狀態與組件
-import { MACHINE_STATUS } from "../../../configs/validations/machine/machineSchemas";
+import {
+  MACHINE_STATUS,
+  convertTimeLineStatus,
+} from "../../../configs/constants/fieldNames";
 import { StatusHeader, SliderContainer } from "../../../assets/machine.styles";
 import StatusSlider from "../controls/StatusSlider";
-import { convertTimeLineStatus } from "../../../utils/statusConverter";
 
 // 導入自定義 Hook
-import useStatusForm from "../../../hooks/machine/form/useStatusForm";
+import useStatusForm from "../../../hooks/machine/useStatusManager";
 
 // 導入表單組件
 import IdleForm from "./forms/IdleForm";
@@ -52,7 +55,13 @@ const MachineStatusManager = forwardRef((props, ref) => {
   const formRef = useRef(null);
 
   // 使用狀態表單處理邏輯
-  const { errorMessage, setErrorMessage, formApi } = useStatusForm({
+  const {
+    errorMessage,
+    setErrorMessage,
+    successMessage,
+    setSuccessMessage,
+    formApi,
+  } = useStatusForm({
     initialData,
     onSubmit,
     machineId,
@@ -70,17 +79,13 @@ const MachineStatusManager = forwardRef((props, ref) => {
    * 處理機台狀態變更
    */
   const handleStatusChange = (newStatus) => {
-    const originalStatus = convertTimeLineStatus(
-      initialData?.status || MACHINE_STATUS.IDLE
-    );
+    // 清除先前的訊息
+    setErrorMessage("");
+    setSuccessMessage("");
 
-    // 狀態切換規則:
-    if (originalStatus === "IDLE" || newStatus === "IDLE") {
-      setErrorMessage("");
-      setCurrentStatus(newStatus);
-    } else {
-      setErrorMessage("非待機狀態的機台只能切換回待機狀態");
-    }
+    // 狀態變更時，避免與表單驗證重複
+    // 讓表單提交時再驗證狀態轉換
+    setCurrentStatus(newStatus);
   };
 
   // 向父組件暴露表單操作方法
@@ -93,6 +98,25 @@ const MachineStatusManager = forwardRef((props, ref) => {
     const FormComponent =
       FORM_COMPONENTS[currentStatus] || FORM_COMPONENTS[MACHINE_STATUS.IDLE];
     return <FormComponent ref={formRef} initialData={initialData} />;
+  };
+
+  /**
+   * 渲染狀態規則提示
+   */
+  const renderStatusRuleHint = () => {
+    const currentNormalizedStatus = convertTimeLineStatus(
+      initialData?.status || MACHINE_STATUS.IDLE
+    );
+
+    if (currentNormalizedStatus === "IDLE") {
+      return "待機狀態可切換至任何狀態";
+    } else if (
+      ["TUNING", "TESTING", "OFFLINE"].includes(currentNormalizedStatus)
+    ) {
+      return "非待機狀態只能切換至待機狀態";
+    }
+
+    return "";
   };
 
   return (
@@ -131,26 +155,30 @@ const MachineStatusManager = forwardRef((props, ref) => {
             fontSize: "0.875rem",
           }}
         >
-          {convertTimeLineStatus(initialData?.status || MACHINE_STATUS.IDLE) ===
-          "IDLE"
-            ? "待機狀態可切換至任何狀態"
-            : "非待機狀態只能切換至待機狀態"}
+          <Typography variant="body2">{renderStatusRuleHint()}</Typography>
         </Box>
       </SliderContainer>
 
+      {/* 成功提示 */}
+      {successMessage && (
+        <Alert
+          severity="success"
+          sx={{ mt: 2, mb: 2 }}
+          onClose={() => setSuccessMessage("")}
+        >
+          {successMessage}
+        </Alert>
+      )}
+
       {/* 錯誤提示 */}
       {errorMessage && (
-        <Box
-          sx={{
-            mt: 2,
-            p: 2,
-            backgroundColor: "rgba(100% 0% 0% / 0.1)",
-            color: "rgba(100% 0% 0% / 1)",
-            borderRadius: 1,
-          }}
+        <Alert
+          severity="error"
+          sx={{ mt: 2, mb: 2 }}
+          onClose={() => setErrorMessage("")}
         >
           {errorMessage}
-        </Box>
+        </Alert>
       )}
 
       {/* 表單 */}
