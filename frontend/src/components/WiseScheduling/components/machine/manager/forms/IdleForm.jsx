@@ -12,14 +12,6 @@ import dayjs from "dayjs";
 import { idleSchema } from "../../../../configs/validations/machine/machineSchemas";
 import { useFormHandler } from "../../../../hooks/machine/useFormHandler";
 
-// 預設日期計算 - 移動到組件外部確保只計算一次
-const getDefaultDates = () => ({
-  planStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
-  planEndDate: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"),
-  actualStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
-  status: "IDLE",
-});
-
 /**
  * 待機狀態表單
  *
@@ -31,6 +23,16 @@ const getDefaultDates = () => ({
  */
 const IdleForm = forwardRef((props, ref) => {
   const { initialData } = props;
+  // 預設日期計算 - 移動到組件外部確保只計算一次
+  const getDefaultDates = () => ({
+    planStartDate: initialData?.planStartDate,
+    planEndDate: initialData?.planEndDate,
+    actualStartDate: initialData?.actualStartDate,
+    actualEndDate: initialData?.actualEndDate,
+    status: "IDLE",
+    id: initialData?.id,
+    machineId: initialData?.machineId,
+  });
 
   // 使用自定義 hook
   const { defaultValues, isDirty } = useFormHandler({

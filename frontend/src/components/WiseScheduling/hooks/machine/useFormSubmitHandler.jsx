@@ -138,6 +138,7 @@ function useFormSubmitHandler({
         return createErrorResponse(message);
       }
 
+      console.log("🚀 ~ handleSubmit ~ timeInfo:", timeInfo);
       // 步驟4: 利用狀態驗證器返回的時間信息更新表單數據
       // 這是時間記錄功能的自動化實現
       const updatedValues = { ...values };

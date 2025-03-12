@@ -8,9 +8,14 @@ import HandymanIcon from "@mui/icons-material/Handyman";
 
 // 導入
 import { PRODUCTION_AREA } from "../../../../../config/config";
-import { useGetMachineStatusQuery } from "../../../services";
+import {
+  useCreateMachineStatusMutation,
+  useGetMachineStatusQuery,
+  useUpdateMachineStatusMutation,
+} from "../../../services";
 import {
   convertTimeLineStatus,
+  getChineseStatus,
   STATUS_STYLE_MAP,
 } from "../../../configs/constants/fieldNames";
 import BaseDrawer from "../../../../Global/Drawer/BaseDrawer";
@@ -26,7 +31,7 @@ import {
   MachinesGrid,
   MachineBox,
 } from "../../../assets/machineBoard.styles";
-
+import { v4 as uuidv4 } from "uuid";
 /**
  * 區域選擇器元件
  */
@@ -86,6 +91,28 @@ const useMachineData = (area) => {
 };
 
 /**
+ * 新增機台狀態的自訂 Hook
+ */
+const useCreateMachineStatus = () => {
+  const [createMachineStatus, { isLoading }] = useCreateMachineStatusMutation();
+  return {
+    createMachineStatus,
+    isLoading,
+  };
+};
+
+/**
+ * 修改機台狀態的自訂 Hook
+ */
+const useUpdateMachineStatus = () => {
+  const [updateMachineStatus, { isLoading }] = useUpdateMachineStatusMutation();
+  return {
+    updateMachineStatus,
+    isLoading,
+  };
+};
+
+/**
  * 機台狀態看板主元件
  */
 const MachineStatusBoard = () => {
@@ -104,9 +131,28 @@ const MachineStatusBoard = () => {
     setDrawerVisible(true);
   }, []);
 
+  const { createMachineStatus, isLoading: isCreateLoading } =
+    useCreateMachineStatus();
+  const { updateMachineStatus, isLoading: isUpdateLoading } =
+    useUpdateMachineStatus();
+
   const handleStatusUpdate = useCallback(async (data) => {
     console.log("更新機台狀態:", data);
     //TODO 這裡需要實現實際的狀態更新API調用
+    if (data.id) {
+      await updateMachineStatus({
+        ...data,
+        status: getChineseStatus(data.status),
+      });
+    } else {
+      await createMachineStatus({
+        ...data,
+        status: getChineseStatus(data.status),
+        planStartDate: data.planStartDate ?? data.actualStartDate,
+        planEndDate: data.planEndDate ?? data.actualStartDate,
+      });
+    }
+
     setDrawerVisible(false);
     return data; // 返回提交結果
   }, []);
@@ -152,7 +198,8 @@ const MachineStatusBoard = () => {
         <MachinesGrid>
           {machines.map((machine) => (
             <MachineCard
-              key={machine.machineId}
+              // 時間戳記避免重複渲染
+              key={uuidv4()}
               machine={machine}
               onClick={handleMachineClick}
             />

@@ -37,12 +37,15 @@ export const MACHINE_STATUS_ALIASES = {
 
 /**
  * @constant dateValidation
- * @description 日期格式驗證規則
+ * @description 日期格式驗證規則，完全兼容 null 值
  * @type {Object}
  */
 const dateValidation = z
-  .string()
-  .refine((val) => !val || dayjs(val).isValid(), {
+  .string({
+    required_error: "請輸入有效的日期格式",
+  })
+  .nullable()
+  .refine((val) => val === null || dayjs(val).isValid(), {
     message: "請輸入有效的日期格式",
   });
 
@@ -55,15 +58,19 @@ const dateValidation = z
  * @type {Object}
  */
 export const baseSchema = z.object({
+  id: z.number().nullable().optional(),
   machineId: z
-    .number()
-    .or(z.string().transform((val) => parseInt(val, 10)))
-    .optional(),
+    .number({
+      required_error: "請輸入機台ID",
+    })
+    .or(z.string().transform((val) => parseInt(val, 10))),
   planStartDate: dateValidation,
   planEndDate: dateValidation,
   actualStartDate: dateValidation,
-  actualEndDate: dateValidation.optional(),
-  status: z.string(),
+  actualEndDate: dateValidation,
+  status: z.string({
+    required_error: "請輸入機台狀態",
+  }),
   statusDisplay: z.string().optional(),
 });
 
@@ -73,16 +80,8 @@ export const baseSchema = z.object({
  * @type {Object}
  */
 export const idleSchema = baseSchema.extend({
-  // 添加必填欄位驗證
-  planStartDate: dateValidation.refine((val) => !!val, {
-    message: "請輸入預計開始時間",
-  }),
-  planEndDate: dateValidation.refine((val) => !!val, {
-    message: "請輸入預計結束時間",
-  }),
-  actualStartDate: dateValidation.refine((val) => !!val, {
-    message: "請輸入實際開始時間",
-  }),
+  // 使用基本的 dateValidation，它已支援 null 值
+  // 不額外加入 optional()，確保欄位必須存在
 });
 
 /**
@@ -92,16 +91,8 @@ export const idleSchema = baseSchema.extend({
  * @type {Object}
  */
 export const tuningSchema = baseSchema.extend({
-  // 添加必填欄位驗證
-  planStartDate: dateValidation.refine((val) => !!val, {
-    message: "請輸入預計開始時間",
-  }),
-  planEndDate: dateValidation.refine((val) => !!val, {
-    message: "請輸入預計結束時間",
-  }),
-  actualStartDate: dateValidation.refine((val) => !!val, {
-    message: "請輸入實際開始時間",
-  }),
+  // 使用基本的 dateValidation，它已支援 null 值
+  // 不額外加入 optional()，確保欄位必須存在
 });
 
 /**
@@ -130,7 +121,6 @@ export const offlineSchema = baseSchema.extend({
 // 註：getStatusDisplay 已從 fieldNames.js 導入
 // 添加調試日誌包裝函數
 const getStatusDisplayWithLog = (statusCode) => {
-  console.log("🚀 ~ getStatusDisplay ~ statusCode:", statusCode);
   return getStatusDisplay(statusCode);
 };
 

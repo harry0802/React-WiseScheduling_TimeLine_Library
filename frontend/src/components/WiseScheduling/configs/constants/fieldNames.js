@@ -192,13 +192,8 @@ export const convertTimeLineStatus = (timeLineStatus) => {
  * @returns {string} 對應的中文狀態名稱
  */
 export const getChineseStatus = (englishStatus) => {
-  // 先嘗試使用中央定義的轉換
-  const centralName = getStatusDisplay(englishStatus);
-  if (centralName !== englishStatus) {
-    return REVERSE_STATUS_MAPPING[englishStatus] || centralName;
-  }
-  // 如果中央定義中找不到，則使用本地映射
-  return REVERSE_STATUS_MAPPING[englishStatus] || STATE_IDLE;
+  // 直接使用 STATUS_NAME_MAP 進行轉換
+  return STATUS_NAME_MAP[englishStatus] || englishStatus;
 };
 
 /**

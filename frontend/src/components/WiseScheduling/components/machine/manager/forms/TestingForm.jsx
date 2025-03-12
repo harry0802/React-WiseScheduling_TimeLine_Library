@@ -32,10 +32,13 @@ const TestingForm = forwardRef(({ initialData }, ref) => {
   // 獲取默認日期的函數
   const getDefaultValues = () => ({
     product: "",
-    planStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
-    planEndDate: dayjs().add(4, "hour").format("YYYY-MM-DDTHH:mm"),
-    actualStartDate: dayjs().format("YYYY-MM-DDTHH:mm"),
+    planStartDate: initialData?.planStartDate,
+    planEndDate: initialData?.planEndDate,
+    actualStartDate: initialData?.actualStartDate,
+    actualEndDate: initialData?.actualEndDate,
     status: "TESTING",
+    id: initialData?.id,
+    machineId: initialData?.machineId,
   });
 
   // 使用自定義表單 Hook
