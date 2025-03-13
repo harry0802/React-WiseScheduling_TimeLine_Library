@@ -2,9 +2,9 @@
 import { memo } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getValidationSchema } from "../../../configs/schedule/validationSchema";
-import { STATUS_FORM_CONFIG } from "../../../configs/schedule/formConfig";
-import { MACHINE_STATUS } from "../../../configs/schedule/constants";
+import { getValidationSchema } from "../../../configs/validations/schedule/validationSchema";
+import { STATUS_FORM_CONFIG } from "../../../configs/validations/schedule/formConfig";
+import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
 import OrderCreated from "./OrderCreated";
 import Idle from "./Idle";
 import Setup from "./Setup";

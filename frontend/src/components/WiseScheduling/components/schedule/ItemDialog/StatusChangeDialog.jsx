@@ -9,7 +9,7 @@ import {
 import {
   MACHINE_STATUS,
   STATUS_CONFIG,
-} from "../../../configs/schedule/constants";
+} from "../../../configs/validations/schedule/constants";
 
 const StatusChangeDialog = ({
   open,

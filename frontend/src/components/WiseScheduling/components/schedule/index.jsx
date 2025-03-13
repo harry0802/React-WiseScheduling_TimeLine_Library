@@ -39,7 +39,7 @@ import { useTimelineOperations } from "../../hooks/schedule/useTimelineOperation
 //* 自定義組件
 import TimelineControls from "./TimelineControls";
 import OperationDialog from "./OperationDialog";
-import ItemDialog from "./ItemDialog";
+import ItemDialog from "./ItemDialog/index";
 import { createItemTemplate } from "./TimelineContent";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 
@@ -93,6 +93,7 @@ const DynamicTimeline = () => {
     openDeleteDialog,
     closeDeleteDialog,
   } = useTimelineOperations(timelineRef, itemsDataRef, timeRange, groups);
+  console.log("🚀 ~ DynamicTimeline ~ dialogState:", dialogState);
 
   const getTimelineOptions = useCallback(() => {
     const timeWindow = getTimeWindow(timeRange);
@@ -212,17 +213,17 @@ const DynamicTimeline = () => {
           }}
         />
       </TimelineContainer>
-
-      <ItemDialog
-        open={Boolean(dialogState.isOpen && dialogState.selectedItem)}
-        onClose={closeDialog}
-        item={dialogState.selectedItem || {}}
-        mode={dialogState.mode}
-        onSave={handleSaveItem}
-        onDelete={openDeleteDialog}
-        groups={groups}
-      />
-
+      {dialogState.selectedItem && (
+        <ItemDialog
+          open={dialogState.isOpen}
+          onClose={closeDialog}
+          item={dialogState.selectedItem}
+          mode={dialogState.mode}
+          onSave={handleSaveItem}
+          onDelete={openDeleteDialog}
+          groups={groups}
+        />
+      )}
       <OperationDialog
         open={isDeleteDialogOpen}
         title="刪除確認"

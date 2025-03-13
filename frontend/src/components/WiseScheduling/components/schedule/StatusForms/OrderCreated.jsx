@@ -10,12 +10,12 @@ import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
 import {
   FORM_CONFIG,
   VALIDATION_RULES,
-} from "../../../configs/schedule/formConfig";
+} from "../../../configs/validations/schedule/formConfig";
 import {
   MACHINE_CONFIG,
   MACHINE_STATUS,
-} from "../../../configs/schedule/constants";
-import { createAreaMachines } from "../../../configs/schedule/machineGroups";
+} from "../../../configs/validations/schedule/constants";
+import { createAreaMachines } from "../../../configs/validations/schedule/machineGroups";
 import { Controller, useFormContext } from "react-hook-form";
 
 const OrderCreated = ({ item, disabled }) => {

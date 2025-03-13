@@ -1,9 +1,9 @@
 // components/StatusForms/Testing.jsx
 import { Grid, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
-import { FORM_CONFIG } from "../../../configs/schedule/formConfig";
+import { FORM_CONFIG } from "../../../configs/validations/schedule/formConfig";
 import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
-import { MACHINE_STATUS } from "../../../configs/schedule/constants";
+import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
 
 const Testing = ({ disabled, item }) => {
   const { register, errors, watch, control, initialized } = useStatusForm(

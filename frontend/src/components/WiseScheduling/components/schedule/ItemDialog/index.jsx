@@ -20,13 +20,13 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import {
   canTransitTo,
   MACHINE_STATUS,
-} from "../../../configs/schedule/constants";
+} from "../../../configs/validations/schedule/constants";
 import StatusController from "../StatusForms/StatusForms";
 import StatusChangeDialog from "./StatusChangeDialog";
 import {
   handleFormError,
   StatusError,
-} from "../../timelineGantt/utils/errorHandler";
+} from "../../../utils/schedule/errorHandler";
 import dayjs from "dayjs";
 
 //! =============== 2. 類型與介面 ===============

@@ -1,9 +1,9 @@
 // components/StatusForms/Setup.jsx
 import { CircularProgress, Grid, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
-import { FORM_CONFIG } from "../../../configs/schedule/formConfig";
+import { FORM_CONFIG } from "../../../configs/validations/schedule/formConfig";
 import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
-import { MACHINE_STATUS } from "../../../configs/schedule/constants";
+import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
 
 const Setup = ({ disabled, item }) => {
   console.log("🚀 ~ Setup ~ item:", item);

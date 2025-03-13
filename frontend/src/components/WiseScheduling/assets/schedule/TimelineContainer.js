@@ -23,7 +23,7 @@ export const TimelineContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  
+
   /* BaseTimelineContainer 樣式 */
   .vis-timeline {
     border: none;
@@ -42,18 +42,18 @@ export const TimelineContainer = styled.div`
     padding: 3px 5px;
     font-size: 13px;
   }
-  
+
   /* 主要刻度樣式 */
   .vis-time-axis .vis-text.vis-major {
     font-weight: bold;
     font-size: 18px;
   }
-  
+
   /* 次要刻度樣式 */
   .vis-time-axis .vis-text.vis-minor {
     color: rgba(255, 255, 255, 0.8);
   }
-  
+
   /* 週末樣式 */
   .vis-time-axis .vis-text.vis-saturday,
   .vis-time-axis .vis-text.vis-sunday {
@@ -87,7 +87,7 @@ export const TimelineContainer = styled.div`
   .vis-grid.vis-major {
     border-left: 2px solid ${timelineTheme.colors.gridMajor};
   }
-  
+
   /* 滾動條樣式 */
   .vis-panel.vis-center {
     &::-webkit-scrollbar {
@@ -105,7 +105,7 @@ export const TimelineContainer = styled.div`
       border-radius: 3px;
     }
   }
-  
+
   /* 行樣式 */
   .vis-panel.vis-center .vis-content .vis-itemset .vis-foreground .vis-group {
     transition: background-color 0.2s ease;
@@ -118,13 +118,13 @@ export const TimelineContainer = styled.div`
       background-color: ${timelineTheme.colors.hover};
     }
   }
-  
+
   /* 週末特殊樣式 */
   .vis-time-axis .vis-grid.vis-saturday,
   .vis-time-axis .vis-grid.vis-sunday {
     background-color: ${timelineTheme.colors.weekend};
   }
-  
+
   /* 標籤樣式 */
   .vis-labelset .vis-label {
     padding: ${timelineTheme.spacing.label};
@@ -133,7 +133,7 @@ export const TimelineContainer = styled.div`
       background-color: var(--row-color);
     }
   }
-  
+
   /* 項目樣式 (BaseItem) */
   .vis-item {
     height: 40px;
@@ -152,7 +152,7 @@ export const TimelineContainer = styled.div`
       box-shadow: 0 0 0 2px #1976d2;
       z-index: 2;
     }
-    
+
     /* 項目內容結構 */
     .timeline-item-content {
       padding: 4px 8px;
@@ -161,7 +161,7 @@ export const TimelineContainer = styled.div`
       flex-direction: column;
       justify-content: flex-start;
       position: relative;
-      
+
       .content {
         font-weight: bold;
         font-size: 14px;
@@ -171,7 +171,7 @@ export const TimelineContainer = styled.div`
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       .status {
         font-weight: bold;
         line-height: 1.2;
@@ -207,7 +207,7 @@ export const TimelineContainer = styled.div`
       }
     }
   }
-  
+
   /* 狀態樣式 (StatusStyles) */
   .vis-item.status-producing {
     background-color: #4caf50;
@@ -239,7 +239,7 @@ export const TimelineContainer = styled.div`
     color: white;
     font-weight: bold;
   }
-  
+
   /* 進度顯示樣式 (StatusProgress) */
   .vis-item::after {
     content: "";
