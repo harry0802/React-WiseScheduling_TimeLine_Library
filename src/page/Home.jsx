@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { PageContainer, Title, Paragraph, CardGrid } from '../styles/SharedStyles';
 import styled from 'styled-components';
+import { useQuery } from '@tanstack/react-query';
 
 const FeatureCard = styled.div`
   padding: 1.5rem;
@@ -40,11 +41,34 @@ const FeatureLink = styled(Link)`
   }
 `;
 
+// 模擬一個假的 API 調用，用於激活 React Query
+const fetchAppInfo = async () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        name: "時間軸專案",
+        version: "1.0.0",
+        features: ["時間軸視覺化", "數據滑動器", "查詢功能"]
+      });
+    }, 500);
+  });
+};
+
 const Home = () => {
+  // 使用 React Query 發起查詢，這將使 DevTools 顯示
+  const { data: appInfo, isLoading } = useQuery({
+    queryKey: ['appInfo'],
+    queryFn: fetchAppInfo
+  });
+
+  if (isLoading) {
+    return <PageContainer><p>載入中...</p></PageContainer>;
+  }
+
   return (
     <PageContainer>
       <Title>時間軸專案首頁</Title>
-      <Paragraph>歡迎來到時間軸專案，這是一個用於展示和管理時間軸數據的應用。</Paragraph>
+      <Paragraph>歡迎來到{appInfo?.name || '時間軸專案'}，這是一個用於展示和管理時間軸數據的應用。</Paragraph>
       
       <CardGrid>
         <FeatureCard>
