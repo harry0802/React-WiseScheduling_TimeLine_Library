@@ -81,11 +81,15 @@ const Navbar = () => {
             時間軸
           </StyledNavLink>
         </NavItem>
+        
+        {/* [等待刪除] 數據滑動器導航連結已移除
         <NavItem>
           <StyledNavLink to="/slider" className={({ isActive }) => isActive ? 'active' : ''}>
             數據滑動器
           </StyledNavLink>
         </NavItem>
+        */}
+
         <NavItem>
           <StyledNavLink to="/about" className={({ isActive }) => isActive ? 'active' : ''}>
             關於

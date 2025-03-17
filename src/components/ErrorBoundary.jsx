@@ -1,19 +1,19 @@
-import React from 'react';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import React from "react";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 const ErrorContainer = styled.div`
   padding: 2rem;
   margin: 2rem auto;
   max-width: 800px;
   text-align: center;
-  background-color: ${props => props.theme.colors.cardBackground};
+  background-color: ${(props) => props.theme.colors.cardBackground};
   border-radius: 8px;
-  box-shadow: ${props => props.theme.shadows.md};
+  box-shadow: ${(props) => props.theme.shadows.md};
 `;
 
 const ErrorTitle = styled.h2`
-  color: ${props => props.theme.colors.error};
+  color: ${(props) => props.theme.colors.error};
   margin-bottom: 1rem;
 `;
 
@@ -23,27 +23,27 @@ const ErrorMessage = styled.p`
 
 const RetryButton = styled.button`
   padding: 0.5rem 1.5rem;
-  background-color: ${props => props.theme.colors.primary};
+  background-color: ${(props) => props.theme.colors.primary};
   color: white;
   border: none;
   border-radius: 4px;
   margin-right: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  
+
   &:hover {
-    background-color: ${props => props.theme.colors.primaryDark};
+    background-color: ${(props) => props.theme.colors.primaryDark};
   }
 `;
 
 const HomeLink = styled(Link)`
   display: inline-block;
   padding: 0.5rem 1.5rem;
-  background-color: ${props => props.theme.colors.secondary};
+  background-color: ${(props) => props.theme.colors.secondary};
   color: white;
   text-decoration: none;
   border-radius: 4px;
-  
+
   &:hover {
     background-color: #2a6265;
     text-decoration: none;
@@ -67,7 +67,7 @@ class ErrorBoundary extends React.Component {
 
   handleRetry = () => {
     this.setState({ hasError: false, error: null });
-  }
+  };
 
   render() {
     if (this.state.hasError) {
@@ -78,9 +78,7 @@ class ErrorBoundary extends React.Component {
             {this.state.error?.message || "頁面載入時發生了問題。"}
           </ErrorMessage>
           <div>
-            <RetryButton onClick={this.handleRetry}>
-              重新嘗試
-            </RetryButton>
+            <RetryButton onClick={this.handleRetry}>重新嘗試</RetryButton>
             <HomeLink to="/">返回首頁</HomeLink>
           </div>
         </ErrorContainer>
