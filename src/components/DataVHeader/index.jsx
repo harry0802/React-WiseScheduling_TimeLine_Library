@@ -2,7 +2,19 @@ import React from "react";
 import styled from "styled-components";
 import { Decoration8, Decoration5 } from "@iimm/data-view-react";
 
-// 頂部標題容器 - 使用flex三分布局
+//! =============== 設定與常量 ===============
+const DEFAULT_DECORATION_COLOR = ["#3f96a5", "#3f96a5"];
+
+//! =============== 樣式組件 ===============
+//* 基礎區塊 - 提取共用樣式減少重複
+const BaseSection = styled.div`
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+`;
+
+//* 頂部標題容器
 const HeaderContainer = styled.div`
   position: relative;
   width: 100%;
@@ -20,36 +32,24 @@ const HeaderContainer = styled.div`
   overflow: hidden;
 `;
 
-// 左側區域
-const LeftSection = styled.div`
+//* 左側區域
+const LeftSection = styled(BaseSection)`
   flex: 1;
-  position: relative;
-  height: 100%;
-  display: flex;
-  align-items: center;
 `;
 
-// 中央區域
-const CenterSection = styled.div`
+//* 中央區域
+const CenterSection = styled(BaseSection)`
   flex: 2;
-  position: relative;
-  height: 100%;
-  display: flex;
   justify-content: center;
-  align-items: center;
 `;
 
-// 右側區域
-const RightSection = styled.div`
+//* 右側區域
+const RightSection = styled(BaseSection)`
   flex: 1;
-  position: relative;
-  height: 100%;
-  display: flex;
-  align-items: center;
   justify-content: flex-end;
 `;
 
-// 標題文字
+//* 標題文字
 const TitleText = styled.div`
   font-size: 28px;
   font-weight: bold;
@@ -63,38 +63,41 @@ const TitleText = styled.div`
 `;
 
 /**
- * DataV風格的頁面頂部標題組件，使用三分布局
- * @param {string} title - 標題文字
- * @param {object} style - 容器樣式
- * @returns {JSX.Element}
+ * @function DataVHeader
+ * @description DataV風格的頁面頂部標題組件
  */
-const DataVHeader = ({ title = "數據可視化標題", style = {} }) => {
-  // 裝飾的顏色
-  const decorationColor = ["#3f96a5", "#3f96a5"];
+const DataVHeader = ({
+  title = "數據可視化標題",
+  style = {},
+  decorationColor = DEFAULT_DECORATION_COLOR,
+}) => {
+  //* 裝飾元素共用樣式
+  const decorationProps = {
+    color: decorationColor,
+  };
+
+  //* 側邊裝飾共用配置
+  const sideDecorProps = {
+    ...decorationProps,
+    style: { width: "481px", height: "60px" },
+  };
 
   return (
     <HeaderContainer style={style} id="top-header">
       <LeftSection>
-        <Decoration8
-          color={decorationColor}
-          style={{ width: "481px", height: "60px" }}
-        />
+        <Decoration8 {...sideDecorProps} />
       </LeftSection>
 
       <CenterSection>
         <Decoration5
-          color={decorationColor}
+          {...decorationProps}
           style={{ width: "770px", height: "60px", marginTop: "35px" }}
         />
         <TitleText className="center-title">{title}</TitleText>
       </CenterSection>
 
       <RightSection>
-        <Decoration8
-          reverse={true}
-          color={decorationColor}
-          style={{ width: "481px", height: "60px" }}
-        />
+        <Decoration8 {...sideDecorProps} reverse={true} />
       </RightSection>
     </HeaderContainer>
   );
