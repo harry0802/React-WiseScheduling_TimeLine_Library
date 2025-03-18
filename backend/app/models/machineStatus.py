@@ -16,7 +16,8 @@ class MachineStatus(Model):
     status = Column(db.String(255), nullable=True, comment='機台狀態')
     reason = Column(db.String(255), nullable=True, comment='停機原因')
     product = Column(db.String(255), nullable=True, comment='試模產品')
-    machine = db.relationship('Machine', backref='machineStatus', lazy=True)
+    # Fix the relationship: specify it’s a single object (many-to-one)
+    machine = db.relationship('Machine', backref='machineStatus', lazy=True, uselist=False)
 
     def __init__(self, **kwargs):
         super(MachineStatus, self).__init__(**kwargs)

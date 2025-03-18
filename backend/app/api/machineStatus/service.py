@@ -45,16 +45,19 @@ class MachineStatusService:
             productionSchedule_query = productionSchedule_query.filter_by(status=WorkOrderStatusEnum.ON_GOING.value)
             productionSchedule_query = productionSchedule_query.filter_by(productionArea=productionArea) if productionArea is not None else productionSchedule_query
             productionSchedule_db_list = productionSchedule_query.all()
+            # 從productionSchedule_db_list列出所有machineSN
+            machineSN_list = [productionSchedule_db.machineSN for productionSchedule_db in productionSchedule_db_list]
 
-            # 3. 機台已開始某個狀態，從machineStatus找出當日，有actualStartDate，且無actualFinishDate的 (machineStatusId)
+            # 3. 機台已開始某個狀態，從machineStatus找出當日，有actualStartDate，且無actualFinishDate的 (machineStatusId)，並排除productionSchedule中的machineSN
             machineStatus_query = MachineStatus.query
             machineStatus_query = machineStatus_query.join(Machine, Machine.id == MachineStatus.machineId)
             machineStatus_query = machineStatus_query.filter(Machine.productionArea == productionArea) if productionArea is not None else machineStatus_query
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate <= datetime.now())
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualEndDate == None)
+            machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(machineSN_list))
             machineStatus_db_list = machineStatus_query.all()
 
-            # 4. 機台待機中(生管有預排，但現場師傅還沒開始)，找出planStartDate <= Now() <= planEndDate，沒有actualStartDate，也沒有actualFinishDate的
+            # 4. 機台待機中(生管有預排，但現場師傅還沒開始)，找出planStartDate <= Now() <= planEndDate，沒有actualStartDate，也沒有actualFinishDate的，並排除productionSchedule中的machineSN
             machineStatus_query = MachineStatus.query
             machineStatus_query = machineStatus_query.join(Machine, Machine.id == MachineStatus.machineId)
             machineStatus_query = machineStatus_query.filter(Machine.productionArea == productionArea) if productionArea is not None else machineStatus_query
@@ -62,6 +65,7 @@ class MachineStatusService:
             machineStatus_query = machineStatus_query.filter(MachineStatus.planEndDate >= datetime.now())
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate == None)
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualEndDate == None)
+            machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(machineSN_list))
             results = machineStatus_query.all()
             for item in results:
                 # 覆蓋原有的 status 值
