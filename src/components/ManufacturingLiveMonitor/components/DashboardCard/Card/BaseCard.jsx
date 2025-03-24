@@ -42,6 +42,7 @@ const StyledCard = styled(MuiCard)`
     flex-direction: column;
 
     /* 盒模型 */
+    /* 暫時註解 */
     /* border-radius: 8px; */
     /* border: 1px solid
       ${(props) =>
@@ -72,7 +73,7 @@ const StyledCardHeader = styled.div`
   justify-content: space-between;
 
   /* 盒模型 */
-  padding: 16px 20px;
+  padding: 16px 20px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   /* 視覺樣式 */

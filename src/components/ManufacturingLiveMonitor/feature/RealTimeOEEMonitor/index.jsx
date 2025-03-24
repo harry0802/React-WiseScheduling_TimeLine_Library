@@ -7,9 +7,12 @@ import styled from "styled-components";
 
 import Grid from "@mui/material/Grid2";
 import { Stack } from "@mui/material";
-import { Decoration10 } from "@iimm/data-view-react";
+import { Decoration10, Decoration4 } from "@iimm/data-view-react";
 import { BorderBox13 } from "@iimm/data-view-react";
 import DailyProductionDashboard from "./Dashboard/DailyProductionDashboard";
+import DashBordrdMark from "../../components/Marks/DashBordrdMark";
+import { STATUS_COLORS } from "../../configs/Color";
+
 //! =============== 2. 樣式定義 ===============
 const StatusContent = styled.div`
   /* 布局定位 */
@@ -19,6 +22,11 @@ const StatusContent = styled.div`
   /* 盒模型 */
   width: 100%;
   margin-bottom: 20px;
+`;
+
+const BorderBox = styled(BorderBox13)`
+  position: relative;
+  padding: 0.5rem 0;
 `;
 
 /**
@@ -35,7 +43,7 @@ function RealTimeOEEMonitor() {
     { status: "PAUSED", count: "00", hours: "000.0" },
     { status: "ABNORMAL", count: "00", hours: "2510.0" },
   ];
-  // (87 / 2) / 8 = 5.4375
+
   return (
     <section>
       <StatusContent>
@@ -62,25 +70,45 @@ function RealTimeOEEMonitor() {
           <Grid size={8}>
             <Stack spacing={2.5}>
               {/* border-box-content */}
-              <BorderBox13>
+              <BorderBox>
                 <BaseCard style={{ backgroundColor: "transparent" }}>
                   <BaseCard.Header>
                     <BaseCard.Title>本日生產進度</BaseCard.Title>
+                    <DashBordrdMark
+                      data={[
+                        {
+                          status: "NORMAL",
+                          color: STATUS_COLORS.NORMAL,
+                        },
+                        {
+                          status: "TESTING",
+                          color: STATUS_COLORS.TESTING,
+                        },
+                        {
+                          status: "SWITCHING",
+                          color: STATUS_COLORS.SWITCHING,
+                        },
+                        {
+                          status: "PAUSED",
+                          color: STATUS_COLORS.PAUSED,
+                        },
+                      ]}
+                    />
                   </BaseCard.Header>
                   <BaseCard.Content>
                     <DailyProductionDashboard />
                   </BaseCard.Content>
                 </BaseCard>
-              </BorderBox13>
+              </BorderBox>
 
-              <BorderBox13>
+              <BorderBox>
                 <BaseCard style={{ backgroundColor: "transparent" }}>
                   <BaseCard.Header>
-                    <BaseCard.Title>生產進度</BaseCard.Title>
+                    <BaseCard.Title>生產逾期任務</BaseCard.Title>
                   </BaseCard.Header>
                   <BaseCard.Content>進度數據顯示區域</BaseCard.Content>
                 </BaseCard>
-              </BorderBox13>
+              </BorderBox>
             </Stack>
           </Grid>
           <Grid size={4}>

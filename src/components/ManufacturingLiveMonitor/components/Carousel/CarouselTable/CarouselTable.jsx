@@ -12,20 +12,19 @@ import {
 import { transformApiData } from "./transformers";
 import { createScrollBoardConfig } from "./utils";
 import styled from "styled-components";
+import { Decoration4 } from "@iimm/data-view-react";
 
 const TheScrollBoard = styled(ScrollBoard)`
   width: 100%;
   height: 100%;
-  .row-item {
-    /* height: ; */
-  }
+  position: relative;
 `;
 
 // 主元件
 const ProductionTable = (props) => {
   const {
     width = "100%",
-    height = "220px",
+    height = "152px",
     initialData = [],
     header = DEFAULT_HEADER,
     fieldMapping,
@@ -119,11 +118,13 @@ const ProductionTable = (props) => {
 
   // 渲染
   return (
-    <TheScrollBoard
-      config={tableConfig}
-      style={combinedStyle}
-      onClick={onRowClick}
-    />
+    <>
+      <TheScrollBoard
+        config={tableConfig}
+        style={combinedStyle}
+        onClick={onRowClick}
+      />
+    </>
   );
 };
 
