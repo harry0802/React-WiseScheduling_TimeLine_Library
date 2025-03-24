@@ -97,7 +97,7 @@ const Home = () => {
         <FeatureCard>
           <h2>製造現場即時監控</h2>
           <p>查看製造現場的即時監控數據</p>
-          <FeatureLink to="/isolated/manufacturing-live-monitor">
+          <FeatureLink to="/ManufacturingLiveMonitor">
             前往製造現場即時監控
           </FeatureLink>
         </FeatureCard>

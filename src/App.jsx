@@ -56,11 +56,12 @@ const router = createBrowserRouter([
   },
   {
     // 全屏頁面使用隔離布局
-    path: "/isolated",
+    path: "/ManufacturingLiveMonitor",
     element: <FullScreenLayout />,
     children: [
       {
-        path: "manufacturing-live-monitor",
+        // 預設路由
+        index: true,
         element: (
           //  使用 await 加上 setTimeout 來模擬載入時間
           <Suspense fallback={<Loading>載入製造現場即時監控中...</Loading>}>
