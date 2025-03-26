@@ -12,7 +12,6 @@ import {
 import { transformApiData } from "./transformers";
 import { createScrollBoardConfig } from "./utils";
 import styled from "styled-components";
-import { Decoration4 } from "@iimm/data-view-react";
 
 const TheScrollBoard = styled(ScrollBoard)`
   width: 100%;

@@ -1,6 +1,12 @@
 import styled from "styled-components";
-import { STATUS_COLORS, STATUS_NAMES } from "../../configs/Color";
+
 const MarkBox = styled.div`
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
+`;
+
+const ItemBox = styled.div`
   display: flex;
   align-items: center;
   gap: 5px;
@@ -17,14 +23,15 @@ const MarkText = styled.span`
   font-weight: 600;
 `;
 
-function DashBordrdMark({ status, color }) {
-  const statusName = STATUS_NAMES[status];
-  const statusColor = STATUS_COLORS[color];
-
+function DashBordrdMark({ data }) {
   return (
     <MarkBox>
-      <MarkSign color={statusColor} />
-      <MarkText>{statusName}</MarkText>
+      {data.map((item) => (
+        <ItemBox key={item.color}>
+          <MarkSign color={item.color} />
+          <MarkText>{item.status}</MarkText>
+        </ItemBox>
+      ))}
     </MarkBox>
   );
 }

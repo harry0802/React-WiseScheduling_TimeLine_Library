@@ -1,10 +1,10 @@
 import React from "react";
-import ProductionTable from "../../../components/Carousel/CarouselTable/CarouselTable";
+import ProductionTable from "../../../../components/Carousel/CarouselTable/CarouselTable";
 import {
   createColorCondition,
   createDateCondition,
-} from "../../../components/Carousel/CarouselTable/utils";
-import { STATUS_COLORS } from "../../../configs/Color";
+} from "../../../../components/Carousel/CarouselTable/utils";
+import { STATUS_COLORS } from "../../../../configs/Color";
 
 function DailyProductionDashboard() {
   return (
