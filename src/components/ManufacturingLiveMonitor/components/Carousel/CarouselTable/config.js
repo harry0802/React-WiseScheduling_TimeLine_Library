@@ -3,8 +3,11 @@
 // 表格默認配置
 export const DEFAULT_TABLE_CONFIG = {
   headerBGC: "#0C2E49",
+  // headerBGC: "oklch(50.51% 0.1026 237.81)",
   oddRowBGC: "#103362",
+  // oddRowBGC: "oklch(94.61% 0 0)",
   evenRowBGC: "#0A2138",
+  // evenRowBGC: "oklch(90.37% 0 0)",
   waitTime: 3000,
   carousel: "single",
   headerHeight: 45,
@@ -20,7 +23,7 @@ export const DEFAULT_STYLE = {
 };
 
 // 其他默認值
-export const DEFAULT_COLUMN_WIDTHS = [50, 150, 80, 120, 180, 80, 60];
+export const DEFAULT_COLUMN_WIDTHS = [50];
 export const DEFAULT_COLUMN_ALIGNS = [
   "center",
   "center",

@@ -42,6 +42,7 @@ const StyledCard = styled(MuiCard)`
     flex-direction: column;
 
     /* 盒模型 */
+    /* 暫時註解 */
     /* border-radius: 8px; */
     /* border: 1px solid
       ${(props) =>
@@ -72,7 +73,7 @@ const StyledCardHeader = styled.div`
   justify-content: space-between;
 
   /* 盒模型 */
-  padding: 16px 20px;
+  padding: 16px 20px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   /* 視覺樣式 */
@@ -84,10 +85,8 @@ const StyledCardHeader = styled.div`
 const StyledCardContent = styled(MuiCardContent)`
   /* 布局定位 */
   flex: 1;
-
   /* 盒模型 */
   padding: 16px 20px;
-
   /* 視覺樣式 */
   color: rgba(255, 255, 255, 0.85);
 `;
@@ -159,7 +158,7 @@ const CardHeader = React.forwardRef(
 
     return (
       <StyledCardHeader className={className} ref={ref} {...props}>
-        <div>{children}</div>
+        <div style={{ width: "100%" }}>{children}</div>
         {collapsible && (
           <button
             onClick={toggleExpand}
