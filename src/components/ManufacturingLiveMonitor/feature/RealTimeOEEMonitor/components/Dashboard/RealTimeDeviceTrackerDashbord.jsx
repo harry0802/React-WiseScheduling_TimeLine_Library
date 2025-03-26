@@ -449,6 +449,7 @@ function RealTimeDeviceTrackerDashbord() {
             color: DEVICE_STATUS_COLORS.ADJUSTMENT_MODE,
             columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
           },
+
           ERROR_STATE: {
             condition(data) {
               return data?.status === "OFFLINE";
@@ -456,6 +457,7 @@ function RealTimeDeviceTrackerDashbord() {
             color: DEVICE_STATUS_COLORS.ERROR_STATE,
             columns: [1, 2, 3, 4, 5, 6, 7, 8],
           },
+
           SHUTDOWN_STATE: {
             condition(data) {
               return data?.status === "IDLE";
