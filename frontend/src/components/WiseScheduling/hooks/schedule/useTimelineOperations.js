@@ -120,6 +120,42 @@ export const useTimelineOperations = (
           ),
         };
 
+        // 除了 OrderCreated 以外的其他狀態，檢查時間重疊
+        if (updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED) {
+          // 查找同一組別的其他項目，不包含自己和 OrderCreated 狀態
+          const existingItems = itemsDataRef.current.get({
+            filter: function (item) {
+              return (
+                item.id !== updatedItem.id &&
+                item.group === updatedItem.group &&
+                item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+              );
+            },
+          });
+
+          // 檢查時間重疊
+          const itemStart = dayjs(processedItem.start);
+          const itemEnd = dayjs(processedItem.end);
+
+          const hasOverlap = existingItems.some((existingItem) => {
+            const existingStart = dayjs(existingItem.start);
+            const existingEnd = dayjs(existingItem.end);
+
+            return (
+              (itemStart.isBefore(existingEnd) &&
+                itemEnd.isAfter(existingStart)) ||
+              itemStart.isSame(existingStart) ||
+              itemEnd.isSame(existingEnd)
+            );
+          });
+
+          if (hasOverlap) {
+            throw new Error(
+              "時間重疊：除了「製立單」外的其他狀態都不允許時間重疊"
+            );
+          }
+        }
+
         const action = dialogState.mode === "add" ? "add" : "update";
         itemsDataRef.current[action](processedItem);
         setDialogState((prev) => ({
@@ -129,6 +165,7 @@ export const useTimelineOperations = (
         }));
       } catch (error) {
         console.error("Save item failed:", error);
+        alert(error.message); // 顯示錯誤消息
       }
     },
     [dialogState.mode]

@@ -185,7 +185,7 @@ function ProductionSchedule() {
         // 發送 API 請求
         const convertedRow = convertDatesToCustomFormat(
           [row],
-          "YYYY-MM-DDTHH:mm:ss"
+          "YYYY-MM-DDTHH:mm:ssZ"
         )[0];
         const response = await UpdateProductionSchedule({
           id: row.id,

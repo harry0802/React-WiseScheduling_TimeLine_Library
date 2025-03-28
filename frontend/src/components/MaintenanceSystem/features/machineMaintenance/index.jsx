@@ -61,13 +61,53 @@ function MachineMaintenance() {
       isOpen: false,
     });
   };
+
+  // 處理表單提交
   const handleUpdateMaintenance = async (formData) => {
-    const data = transformToMaintenanceApiFormat(
-      formData,
-      drawerState.type,
-      maintenance
-    );
-    updateMaintenance(data);
+    if (!formData) {
+      console.error("formData 為 null 或 undefined");
+      return;
+    }
+
+    try {
+      // 獲取表單數據，確保傳遞有效的 maintenance 數據
+      const data = transformToMaintenanceApiFormat(formData, drawerState.type, {
+        machineId: maintenance.machineId || "default-machine-id",
+        year: maintenance.year || new Date().getFullYear(),
+        week: maintenance.week || 1,
+        ...maintenance,
+      });
+      console.log("🚀 ~ handleUpdateMaintenance ~ data:", data);
+
+      // 如果轉換成功，則調用更新
+      if (data) {
+        await updateMaintenance(data).unwrap();
+      }
+    } catch (error) {
+      console.error("更新維護數據時發生錯誤:", error);
+      // 可以在這裡添加錯誤處理，如顯示錯誤消息
+    }
+  };
+
+  // 確保有有效的初始數據
+  const getFormInitialData = () => {
+    if (!maintenanceData?.forms) {
+      return {
+        machineId: maintenance.machineId || "default-machine-id",
+        year: maintenance.year || new Date().getFullYear(),
+        week: maintenance.week || 1,
+        checkItems: {},
+        personnel: "",
+        date: new Date().toISOString(),
+      };
+    }
+
+    return {
+      machineId: maintenance.machineId || "default-machine-id",
+      year: maintenance.year || new Date().getFullYear(),
+      week: maintenance.week || 1,
+      ...maintenanceData.forms[drawerState.type],
+    };
   };
 
   return (
@@ -91,7 +131,7 @@ function MachineMaintenance() {
           onClose={handleCloseDrawer}
           visible={drawerState.isOpen}
           config={FORM_CONFIGS[drawerState.type]}
-          initialData={maintenanceData?.forms[drawerState.type]}
+          initialData={getFormInitialData()}
           onSubmit={handleUpdateMaintenance}
         />
       )}

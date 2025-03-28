@@ -54,8 +54,183 @@ const createDemoOrder = (start = getWorkStartTime()) => {
 
 // 生成初始訂單資料
 export const generateInitialOrders = () => {
+  // 創建一個基本時間作為參考點
+  const now = new Date();
+  const baseTime = getWorkStartTime(now);
+  
+  // 創建測試資料陣列
+  const testData = [
+    // 原始示範訂單
+    createDemoOrder(baseTime),
+    
+    // 測試案例 1：兩個重疊的訂單（一個 OrderCreated，一個 Idle）
+    {
+      id: "ORDER-CREATED-TEST-01",
+      group: "A1",  // 相同機台
+      area: "A",
+      timeLineStatus: "製立單",  // OrderCreated 狀態
+      status: {
+        startTime: dayjs(baseTime).add(1, "hour").toDate(),
+        endTime: dayjs(baseTime).add(6, "hour").toDate(),  // 時間重疊部分
+        reason: "",
+        product: "塑膠管件A型",
+      },
+      orderInfo: {
+        scheduledStartTime: dayjs(baseTime).add(1, "hour").toDate(),
+        scheduledEndTime: dayjs(baseTime).add(6, "hour").toDate(),
+        actualStartTime: null,
+        actualEndTime: null,
+        productId: "PROD-A001",
+        productName: "塑膠管件A型",
+        quantity: 500,
+        completedQty: 0,
+        process: "廠內-成型-IJ01",
+        orderStatus: "尚未上機",
+      },
+      className: "status-producing",
+      content: "塑膠管件A型"
+    },
+    
+    {
+      id: "IDLE-TEST-01",
+      group: "A1",  // 相同機台
+      area: "A",
+      timeLineStatus: "待機中",  // Idle 狀態
+      status: {
+        startTime: dayjs(baseTime).add(3, "hour").toDate(),  // 與 OrderCreated 重疊
+        endTime: dayjs(baseTime).add(8, "hour").toDate(),
+        reason: "待排程",
+        product: "",
+      },
+      orderInfo: {
+        scheduledStartTime: dayjs(baseTime).add(3, "hour").toDate(),
+        scheduledEndTime: dayjs(baseTime).add(8, "hour").toDate(),
+        actualStartTime: null,
+        actualEndTime: null,
+        productId: "",
+        productName: "",
+        quantity: 0,
+        completedQty: 0,
+        process: "",
+        orderStatus: "待機",
+      },
+      className: "status-idle",
+      content: "待機中"
+    },
+    
+    // 測試案例 2：兩個不重疊的 Setup 狀態
+    {
+      id: "SETUP-TEST-01",
+      group: "B1",
+      area: "B",
+      timeLineStatus: "上模與調機",
+      status: {
+        startTime: dayjs(baseTime).add(1, "hour").toDate(),
+        endTime: dayjs(baseTime).add(3, "hour").toDate(),
+        reason: "準備生產",
+        product: "",
+      },
+      orderInfo: {
+        scheduledStartTime: dayjs(baseTime).add(1, "hour").toDate(),
+        scheduledEndTime: dayjs(baseTime).add(3, "hour").toDate(),
+        actualStartTime: null,
+        actualEndTime: null,
+        productId: "",
+        productName: "",
+        quantity: 0,
+        completedQty: 0,
+        process: "",
+        orderStatus: "準備中",
+      },
+      className: "status-setup",
+      content: "上模與調機"
+    },
+    
+    {
+      id: "SETUP-TEST-02",
+      group: "B1",
+      area: "B",
+      timeLineStatus: "上模與調機",
+      status: {
+        startTime: dayjs(baseTime).add(4, "hour").toDate(), // 不重疊
+        endTime: dayjs(baseTime).add(6, "hour").toDate(),
+        reason: "更換模具",
+        product: "",
+      },
+      orderInfo: {
+        scheduledStartTime: dayjs(baseTime).add(4, "hour").toDate(),
+        scheduledEndTime: dayjs(baseTime).add(6, "hour").toDate(),
+        actualStartTime: null,
+        actualEndTime: null,
+        productId: "",
+        productName: "",
+        quantity: 0,
+        completedQty: 0,
+        process: "",
+        orderStatus: "準備中",
+      },
+      className: "status-setup",
+      content: "上模與調機"
+    },
+    
+    // 測試案例 3：一個 OrderCreated 和一個 Testing 在不同機台
+    {
+      id: "ORDER-CREATED-TEST-02",
+      group: "D1",
+      area: "D",
+      timeLineStatus: "製立單",
+      status: {
+        startTime: dayjs(baseTime).add(1, "hour").toDate(),
+        endTime: dayjs(baseTime).add(5, "hour").toDate(),
+        reason: "",
+        product: "金屬配件X系列",
+      },
+      orderInfo: {
+        scheduledStartTime: dayjs(baseTime).add(1, "hour").toDate(),
+        scheduledEndTime: dayjs(baseTime).add(5, "hour").toDate(),
+        actualStartTime: null,
+        actualEndTime: null,
+        productId: "PROD-X002",
+        productName: "金屬配件X系列",
+        quantity: 800,
+        completedQty: 0,
+        process: "廠內-成型-IJ02",
+        orderStatus: "尚未上機",
+      },
+      className: "status-producing",
+      content: "金屬配件X系列"
+    },
+    
+    {
+      id: "TESTING-TEST-01",
+      group: "D2", // 不同機台
+      area: "D",
+      timeLineStatus: "產品試模",
+      status: {
+        startTime: dayjs(baseTime).add(2, "hour").toDate(),
+        endTime: dayjs(baseTime).add(4, "hour").toDate(),
+        reason: "品質測試",
+        product: "",
+      },
+      orderInfo: {
+        scheduledStartTime: dayjs(baseTime).add(2, "hour").toDate(),
+        scheduledEndTime: dayjs(baseTime).add(4, "hour").toDate(),
+        actualStartTime: null,
+        actualEndTime: null,
+        productId: "",
+        productName: "",
+        quantity: 0,
+        completedQty: 0,
+        process: "",
+        orderStatus: "測試中",
+      },
+      className: "status-testing",
+      content: "產品試模"
+    }
+  ];
+  
   return new DataSet(
-    [createDemoOrder()].map((item) => ({
+    testData.map((item) => ({
       ...item,
 
       start: dayjs(
@@ -68,27 +243,39 @@ export const generateInitialOrders = () => {
           ? item.orderInfo.actualEndTime || item.orderInfo.scheduledEndTime
           : item.status.endTime || dayjs(item.status.startTime).add(2, "hour")
       ).toDate(),
-      editable:
-        item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED
-          ? {
-              //  檢查是否為過去的項目
-              updateTime:
-                item.orderInfo.actualStartTime ||
-                item.orderInfo.scheduledStartTime < dayjs()
-                  ? false
-                  : true,
-              updateGroup:
-                item.orderInfo.actualStartTime ||
-                item.orderInfo.scheduledStartTime < dayjs()
-                  ? false
-                  : true,
-              remove: false,
-            }
-          : {
-              updateTime: false,
-              updateGroup: false,
-              remove: true,
-            },
+      editable: (() => {
+        // 檢查是否為過去的項目
+        const isPastItem = (
+          (item.orderInfo.actualStartTime && new Date(item.orderInfo.actualStartTime) < new Date()) ||
+          (item.orderInfo.scheduledStartTime && new Date(item.orderInfo.scheduledStartTime) < new Date()) ||
+          (item.status.startTime && new Date(item.status.startTime) < new Date())
+        );
+        
+        if (isPastItem) {
+          // 過去的項目不允許任何操作
+          return {
+            updateTime: false,
+            updateGroup: false,
+            remove: false
+          };
+        }
+        
+        if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
+          // OrderCreated 狀態的項目
+          return {
+            updateTime: true,   // 允許拖拉調整時間
+            updateGroup: true,  // 允許修改機台
+            remove: false       // 不允許刪除
+          };
+        } else {
+          // 非 OrderCreated 狀態的項目
+          return {
+            updateTime: false,   // 不允許拖拉調整時間
+            updateGroup: true,   // 允許修改機台
+            remove: true         // 允許刪除
+          };
+        }
+      })(),
     }))
   );
 };

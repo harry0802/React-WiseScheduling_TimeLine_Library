@@ -73,7 +73,6 @@ export const transformApiToForm = (apiData, type) => {
 
     return acc;
   }, {});
-
   const firstItem = apiData.data[0];
   const personnel =
     type === "inspector"
@@ -107,7 +106,8 @@ export const transformToMaintenanceApiFormat = (
   type,
   selectedData
 ) => {
-  if (!selectedData?.machineId || !selectedData?.year || !selectedData?.week) {
+  console.log("🚀 ~ formData:", formData);
+  if (!selectedData.machineId || !selectedData.year || !selectedData.week) {
     throw new Error("缺少必要欄位: machineId, year, week");
   }
 
@@ -117,19 +117,23 @@ export const transformToMaintenanceApiFormat = (
     year: selectedData.year,
     week: selectedData.week,
   };
-
   // 轉換檢查項目
-  const checkItems = Object.entries(formData.checkItems).reduce(
-    (acc, [key, value]) => {
-      const apiKey = key;
-      if (apiKey) {
-        acc[apiKey] = value;
-      }
-      return acc;
-    },
-    {}
-  );
-
+  const checkItems = Object.entries(
+    formData?.checkItems || {
+      boxClean: formData.boxClean,
+      fullClean: formData.fullClean,
+      hotWire: formData.hotWire,
+      oilPipe: formData.oilPipe,
+      safetyEquipment: formData.safetyEquipment,
+      wireCheck: formData.wireCheck,
+    }
+  ).reduce((acc, [key, value]) => {
+    const apiKey = key;
+    if (apiKey) {
+      acc[apiKey] = value;
+    }
+    return acc;
+  }, {});
   // 根據類型設置人員和日期
   const personnelData = {
     inspector: null,
@@ -142,16 +146,16 @@ export const transformToMaintenanceApiFormat = (
 
   switch (type) {
     case "inspector":
-      personnelData.inspector = formData.personnel;
-      personnelData.inspectionDate = formData.date;
+      personnelData.inspector = formData.inspector;
+      personnelData.inspectionDate = formData.inspectorDate;
       break;
     case "reinspector":
-      personnelData.reinspector = formData.personnel;
-      personnelData.reinspectionDate = formData.date;
+      personnelData.reinspector = formData.reinspector;
+      personnelData.reinspectionDate = formData.reinspectorDate;
       break;
     case "approver":
-      personnelData.approver = formData.personnel;
-      personnelData.approvalDate = formData.date;
+      personnelData.approver = formData.approver;
+      personnelData.approvalDate = formData.approverDate;
       break;
     default:
       break;
@@ -173,13 +177,10 @@ export const transformToMoldMaintenanceForm = (
   type,
   selectedData
 ) => {
-  if (!selectedData?.moldSN || !selectedData?.year || !selectedData?.week) {
+  console.log("🚀 ~ formData:", formData);
+  if (!selectedData.moldSN || !selectedData.year || !selectedData.week) {
     throw new Error("缺少必要欄位: moldSN, year, week");
   }
-  console.log(
-    "🚀 ~ transformToMoldMaintenanceForm ~ selectedData:",
-    selectedData
-  );
   // 基礎數據
   const baseData = {
     moldSN: selectedData.moldSN,
@@ -188,16 +189,20 @@ export const transformToMoldMaintenanceForm = (
   };
 
   // 轉換檢查項目
-  const checkItems = Object.entries(formData.checkItems).reduce(
-    (acc, [key, value]) => {
-      const apiKey = key;
-      if (apiKey) {
-        acc[apiKey] = value;
-      }
-      return acc;
-    },
-    {}
-  );
+  const checkItems = Object.entries({
+    moldClean: formData.moldClean,
+    moldOil: formData.moldOil,
+    wireCheck: formData.wireCheck,
+    cavityCheck: formData.cavityCheck,
+    partsCheck: formData.partsCheck,
+    screwCheck: formData.screwCheck,
+  }).reduce((acc, [key, value]) => {
+    const apiKey = key;
+    if (apiKey) {
+      acc[apiKey] = value;
+    }
+    return acc;
+  }, {});
 
   // 根據類型設置人員和日期
   const personnelData = {
@@ -211,16 +216,16 @@ export const transformToMoldMaintenanceForm = (
 
   switch (type) {
     case "inspector":
-      personnelData.inspector = formData.personnel;
-      personnelData.inspectionDate = formData.date;
+      personnelData.inspector = formData.inspector;
+      personnelData.inspectionDate = formData.inspectorDate;
       break;
     case "reinspector":
-      personnelData.reinspector = formData.personnel;
-      personnelData.reinspectionDate = formData.date;
+      personnelData.reinspector = formData.reinspector;
+      personnelData.reinspectionDate = formData.reinspectorDate;
       break;
     case "approver":
-      personnelData.approver = formData.personnel;
-      personnelData.approvalDate = formData.date;
+      personnelData.approver = formData.approver;
+      personnelData.approvalDate = formData.approverDate;
       break;
     default:
       break;

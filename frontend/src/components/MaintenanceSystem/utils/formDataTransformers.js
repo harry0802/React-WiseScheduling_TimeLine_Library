@@ -14,13 +14,11 @@ export const transformFormToApi = (formData, type, originalData) => {
     },
     {}
   );
-
   // 根據不同類型加入不同的人員和日期資訊
   const personnelData = {
     [type]: formData.personnel,
     [`${type}Date`]: formData.date,
   };
-
   return {
     ...baseData,
     ...checkItemsData,

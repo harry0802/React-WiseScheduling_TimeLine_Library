@@ -6,6 +6,7 @@ export const convertToPercentage = (value) => {
   return parseFloat((numValue / 100).toFixed(3));
 };
 
+// 轉換百分比
 export const convertToDisplayPercentage = (value) => {
   if (!value && value !== 0) return 0;
   const numValue = +value;
