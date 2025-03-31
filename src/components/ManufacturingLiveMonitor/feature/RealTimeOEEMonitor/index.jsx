@@ -13,6 +13,7 @@ import OEEMonitor from "./feature/OEEMonitor";
 import RealTimeDeviceTracker from "./feature/RealTimeDeviceTracker";
 import MachineStateTimeRatio from "./feature/MachineStateTimeRatio";
 import EquipmentRiskModule from "./feature/EquipmentRiskModule";
+import { useEffect } from "react";
 
 //! =============== 2. 樣式定義 ===============
 
@@ -20,8 +21,11 @@ import EquipmentRiskModule from "./feature/EquipmentRiskModule";
  * @function RealTimeOEEMonitor
  * @description 實時OEE監控元件，展示生產狀態和進度
  */
-function RealTimeOEEMonitor() {
+function RealTimeOEEMonitor({ onChangeSectTitle }) {
   // 靜態生產數據 (實際項目中應從API或狀態管理獲取)
+  useEffect(() => {
+    onChangeSectTitle("施工養護綜合數據");
+  }, []);
 
   return (
     <section>

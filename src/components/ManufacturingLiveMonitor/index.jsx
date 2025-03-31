@@ -83,7 +83,7 @@ function setupFullScreenMode() {
  * @description 製造監控儀表板主組件，顯示各種生產數據
  */
 function ManufacturingLiveMonitor() {
-  const [sectionTitle, setSectionTitle] = useState("施工養護綜合數據");
+  const [sectionTitle, setSectionTitle] = useState("");
 
   // 使用 useLayoutEffect 確保在 DOM 渲染前設置全屏模式
   React.useLayoutEffect(() => {
@@ -95,7 +95,7 @@ function ManufacturingLiveMonitor() {
       <Container>
         <DataVHeader title={sectionTitle} />
         <Main>
-          <RealTimeOEEMonitor />
+          <RealTimeOEEMonitor onChangeSectTitle={setSectionTitle} />
         </Main>
       </Container>
     </FullScreenContainer>
