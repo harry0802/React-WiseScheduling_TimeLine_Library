@@ -75,7 +75,7 @@ const router = createBrowserRouter(
     },
   ],
   {
-    basename: process.env.NODE_ENV === 'production' ? "/React-WiseScheduling_TimeLine_Library/" : "/", // 在生產環境中使用倉庫路徑
+    basename: "/React-WiseScheduling_TimeLine_Library/",
   }
 );
 
