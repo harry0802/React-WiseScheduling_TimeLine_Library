@@ -9,7 +9,7 @@ const StatusContent = styled.div`
   padding: 12px 82px 0px 95px;
   /* 盒模型 */
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 `;
 const productionData = [
   { status: "NORMAL", count: "120", hours: "9000.0" },

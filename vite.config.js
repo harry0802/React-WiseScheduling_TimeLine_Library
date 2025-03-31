@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   //  首頁
-  base: "./", // 修改為相對路徑
+  base: "/", // 添加這行
   plugins: [react()],
   optimizeDeps: {
     include: [

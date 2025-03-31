@@ -36,7 +36,7 @@ const ContentArea = styled.div`
   flex: 1;
 
   /* 盒模型 */
-  padding: 1.25rem;
+  padding: 0 1.25rem;
   gap: 1.25rem;
 
   /* 視覺樣式 */

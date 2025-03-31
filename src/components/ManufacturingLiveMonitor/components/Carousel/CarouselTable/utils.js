@@ -100,7 +100,7 @@ export const createScrollBoardConfig = (header, data, options = {}) => ({
   header,
   data,
   // 設置行數，顯示3行
-  rowNum: 3,
+  rowNum: options?.rowNum || 3,
   // 設置列寬
   columnWidth: options.columnWidths,
   // 設置對齊方式

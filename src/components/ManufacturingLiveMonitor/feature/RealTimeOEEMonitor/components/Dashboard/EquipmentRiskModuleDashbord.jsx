@@ -405,22 +405,14 @@ const MockData = [
   },
 ];
 
-function RealTimeDeviceTrackerDashbord() {
+function EquipmentRiskModuleDashbord() {
   return (
     <>
       <ProductionTable
-        height={270}
         rowNum={6}
+        height={270}
         initialData={MockData}
-        header={[
-          "NO.",
-          "機台",
-          "生產時間",
-          "調機時間",
-          "停機時間",
-          "試模時間",
-          "待機時間",
-        ]}
+        header={["NO.", "發生時間", "機台", "原因"]}
         fieldMapping={{
           machine: 1,
           productionTime: 2,
@@ -473,4 +465,4 @@ function RealTimeDeviceTrackerDashbord() {
   );
 }
 
-export default RealTimeDeviceTrackerDashbord;
+export default EquipmentRiskModuleDashbord;

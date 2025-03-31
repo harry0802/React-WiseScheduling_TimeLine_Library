@@ -37,6 +37,7 @@ const ProductionTable = (props) => {
     columnAligns = DEFAULT_COLUMN_ALIGNS,
     dataProcessor,
     onRowClick,
+    rowNum,
   } = props;
 
   const [tableConfig, setTableConfig] = useState(null);
@@ -76,6 +77,7 @@ const ProductionTable = (props) => {
           columnWidths,
           columnAligns,
           scrollBoardConfig,
+          rowNum,
         });
         setTableConfig(config);
       } catch (error) {
