@@ -22,8 +22,8 @@ const JokeContainer = styled.div`
   transition: transform ${ANIMATION_DURATION} ease,
     opacity ${ANIMATION_DURATION} ease;
   transform: ${(props) =>
-    props.isVisible ? "translateY(0)" : "translateY(120%)"};
-  opacity: ${(props) => (props.isVisible ? 1 : 0)};
+    props.$isVisible ? "translateY(0)" : "translateY(120%)"};
+  opacity: ${(props) => (props.$isVisible ? 1 : 0)};
   max-height: 80vh;
   overflow-y: auto;
 `;
@@ -265,7 +265,7 @@ const JokeWidget = () => {
       </ToggleButton>
 
       {/* 笑話內容容器 */}
-      <JokeContainer isVisible={isVisible}>
+      <JokeContainer $isVisible={isVisible}>
         <JokeHeader>
           <h3>每日笑話</h3>
           <CloseButton onClick={toggleVisibility} aria-label="關閉">

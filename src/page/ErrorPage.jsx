@@ -42,7 +42,8 @@ const HomeLink = styled(Link)`
 
 function ErrorPage() {
   const error = useRouteError();
-  console.error(error);
+  // 安全地記錄錯誤，避免因null/undefined引起的stack讀取錯誤
+  console.error("路由錯誤:", error ? (typeof error === 'object' ? error : { message: String(error) }) : "未知錯誤");
   
   return (
     <ErrorContainer>
