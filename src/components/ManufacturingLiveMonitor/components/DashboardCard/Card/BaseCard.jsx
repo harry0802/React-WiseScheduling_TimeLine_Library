@@ -58,7 +58,7 @@ const StyledCard = styled(MuiCard)`
 
     /* CSS3特效 */
     transition: all 0.2s ease-in-out;
-
+    overflow: hidden;
     &:hover {
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
     }
@@ -73,7 +73,7 @@ const StyledCardHeader = styled.div`
   justify-content: space-between;
 
   /* 盒模型 */
-  padding: 16px 20px 8px;
+  padding: 0.5rem 1.25rem 0.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   /* 視覺樣式 */
@@ -83,12 +83,15 @@ const StyledCardHeader = styled.div`
 
 //* 卡片內容
 const StyledCardContent = styled(MuiCardContent)`
-  /* 布局定位 */
-  flex: 1;
-  /* 盒模型 */
-  padding: 16px 20px;
-  /* 視覺樣式 */
-  color: rgba(255, 255, 255, 0.85);
+  && {
+    /* 布局定位 */
+    flex: 1;
+    /* 盒模型 */
+    padding: 8px !important;
+
+    /* 視覺樣式 */
+    color: rgba(255, 255, 255, 0.85);
+  }
 `;
 
 //* 卡片底部
