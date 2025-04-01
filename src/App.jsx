@@ -75,7 +75,7 @@ const router = createBrowserRouter(
     },
   ],
   {
-    basename: "/React-WiseScheduling_TimeLine_Library/",
+    // basename: "",
   }
 );
 

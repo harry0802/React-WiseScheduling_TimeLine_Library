@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
     //  首頁
-    base: "/React-WiseScheduling_TimeLine_Library/", // 設置為GitHub Pages倉庫路徑
+    base: "/", // 設置為GitHub Pages倉庫路徑
     plugins: [react()],
     optimizeDeps: {
         include: [
