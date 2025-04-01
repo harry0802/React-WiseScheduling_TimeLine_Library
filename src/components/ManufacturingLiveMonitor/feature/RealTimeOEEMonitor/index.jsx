@@ -23,6 +23,7 @@ import { useEffect } from "react";
  */
 function RealTimeOEEMonitor({ onChangeSectTitle }) {
   // 靜態生產數據 (實際項目中應從API或狀態管理獲取)
+
   useEffect(() => {
     onChangeSectTitle("施工養護綜合數據");
   }, []);
