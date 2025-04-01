@@ -1,25 +1,30 @@
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import AppLayout from "./layouts/AppLayout";
-import FullScreenLayout from "./layouts/FullScreenLayout";
+
 import Home from "./page/Home";
 import Timeline from "./page/Timeline";
 import About from "./page/About";
 import Contact from "./page/Contact";
 import ErrorPage from "./page/ErrorPage";
 import LoadingSpinner from "./components/LoadingSpinner";
+import ManufacturingLiveMonitor from "./components/ManufacturingLiveMonitor/index.jsx";
 import { Loading } from "@iimm/data-view-react";
+import LoadingWrapper from "./components/ManufacturingLiveMonitor/components/Loading/index.jsx";
+
 const DynamicTimeline = lazy(() => import("./components/timelineGantt"));
 const QueryExample = lazy(() => import("./components/examples/QueryExample"));
-
-const ManufacturingLiveMonitor = lazy(
+const RealTimeOEEMonitor = lazy(
   () =>
-    new Promise((resolve) =>
-      setTimeout(
-        () => resolve(import("./components/ManufacturingLiveMonitor")),
-        1500
-      )
-    )
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(
+          import(
+            "./components/ManufacturingLiveMonitor/feature/RealTimeOEEMonitor/index.jsx"
+          )
+        );
+      }, 500); // 延遲 3 秒
+    })
 );
 
 // 使用 HashRouter 代替 BrowserRouter
@@ -56,15 +61,19 @@ const router = createHashRouter([
   {
     // 全屏頁面使用隔離布局
     path: "/ManufacturingLiveMonitor",
-    element: <FullScreenLayout />,
+    element: <ManufacturingLiveMonitor />,
     children: [
       {
         // 預設路由
         index: true,
         element: (
           //  使用 await 加上 setTimeout 來模擬載入時間
-          <Suspense fallback={<Loading>載入製造現場即時監控中...</Loading>}>
-            <ManufacturingLiveMonitor />
+          <Suspense
+            fallback={
+              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+            }
+          >
+            <RealTimeOEEMonitor />
           </Suspense>
         ),
       },

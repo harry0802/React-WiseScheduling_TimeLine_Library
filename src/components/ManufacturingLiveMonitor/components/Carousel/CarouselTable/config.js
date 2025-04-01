@@ -23,7 +23,7 @@ export const DEFAULT_STYLE = {
 };
 
 // 其他默認值
-export const DEFAULT_COLUMN_WIDTHS = [50];
+export const DEFAULT_COLUMN_WIDTHS = [60];
 export const DEFAULT_COLUMN_ALIGNS = [
   "center",
   "center",

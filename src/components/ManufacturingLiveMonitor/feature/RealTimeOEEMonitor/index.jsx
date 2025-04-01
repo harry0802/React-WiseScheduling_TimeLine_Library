@@ -14,6 +14,7 @@ import RealTimeDeviceTracker from "./feature/RealTimeDeviceTracker";
 import MachineStateTimeRatio from "./feature/MachineStateTimeRatio";
 import EquipmentRiskModule from "./feature/EquipmentRiskModule";
 import { useEffect } from "react";
+import { useHeaderNameStore } from "../../slice/LayoutSlice";
 
 //! =============== 2. 樣式定義 ===============
 
@@ -22,10 +23,12 @@ import { useEffect } from "react";
  * @description 實時OEE監控元件，展示生產狀態和進度
  */
 function RealTimeOEEMonitor({ onChangeSectTitle }) {
+  const { setHeaderName } = useHeaderNameStore();
   // 靜態生產數據 (實際項目中應從API或狀態管理獲取)
 
   useEffect(() => {
-    onChangeSectTitle("施工養護綜合數據");
+    if (!setHeaderName) return;
+    setHeaderName("施工養護綜合數據");
   }, []);
 
   return (
@@ -34,10 +37,10 @@ function RealTimeOEEMonitor({ onChangeSectTitle }) {
       <Decoration10
         style={{ width: "100%", height: "5px", marginBottom: "10px" }}
       />
-      <Stack spacing={2.5}>
-        <Grid container spacing={2.5}>
+      <Stack spacing={1.25}>
+        <Grid container spacing={1.25}>
           <Grid size={8}>
-            <Stack spacing={2.5}>
+            <Stack spacing={1.25}>
               <DailyProduction />
               <OverdueTasks />
             </Stack>
@@ -47,7 +50,7 @@ function RealTimeOEEMonitor({ onChangeSectTitle }) {
           </Grid>
         </Grid>
 
-        <Grid container spacing={2.5}>
+        <Grid container spacing={1.25}>
           <Grid size={5}>
             <RealTimeDeviceTracker />
           </Grid>

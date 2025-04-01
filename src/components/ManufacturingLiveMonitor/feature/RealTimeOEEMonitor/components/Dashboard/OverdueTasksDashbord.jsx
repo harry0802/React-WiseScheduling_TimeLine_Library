@@ -81,6 +81,7 @@ function OverdueTasksDashbord() {
       <ProductionTable
         initialData={MockData}
         header={["NO.", "製令單號", "產品編號", "未完成數量", "機台"]}
+        columnWidths={[70]}
         fieldMapping={{
           orderNumber: 1,
           productId: 2,

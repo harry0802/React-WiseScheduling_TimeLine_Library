@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 //! =============== 1. 設定與常量 ===============
@@ -11,8 +11,8 @@ const STYLES = {
     borderRadius: "5px",
     margin: "10px",
   },
-  details: { 
-    whiteSpace: "pre-wrap" 
+  details: {
+    whiteSpace: "pre-wrap",
   },
   button: {
     marginTop: "10px",
@@ -22,7 +22,7 @@ const STYLES = {
     border: "none",
     borderRadius: "4px",
     cursor: "pointer",
-  }
+  },
 };
 
 /**
@@ -48,7 +48,11 @@ function ErrorFallback({ error, resetErrorBoundary }) {
         </button>
         <button
           onClick={() => (window.location.href = "/")}
-          style={{...STYLES.button, marginLeft: "10px", backgroundColor: "#2196F3"}}
+          style={{
+            ...STYLES.button,
+            marginLeft: "10px",
+            backgroundColor: "#2196F3",
+          }}
         >
           返回首頁
         </button>
@@ -66,31 +70,46 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 const logError = (error, info) => {
   console.error("錯誤捕獲:", error);
   console.error("元件堆疊:", info.componentStack);
-  
+
   //TODO 將錯誤信息發送到日誌服務或監控平台
 };
 
 /**
  * @function CustomErrorBoundary
- * @description 使用 react-error-boundary 包裝的錯誤邊界組件
+ * @description 使用 react-error-boundary 包裝的錯誤邊界組件，支援外部控制重置
  * @param {Object} props - 組件屬性
+ * @param {boolean} props.resetKey - 控制錯誤邊界重置的鍵值，變更時會觸發重置
+ * @param {Function} props.onReset - 重置時的回調函數
  * @returns {React.ReactNode} - 錯誤邊界組件
- * 
+ *
  * @example
  * // 基本使用方式
- * <CustomErrorBoundary>
+ * const [reset, setReset] = useState(false);
+ * <CustomErrorBoundary resetKey={reset} onReset={() => console.log('已重置')}>
  *   <YourComponent />
  * </CustomErrorBoundary>
  */
-const CustomErrorBoundary = ({ children }) => {
+const CustomErrorBoundary = ({ children, resetKey = false, onReset }) => {
+  // 🧠 使用內部狀態跟蹤重置次數，與外部resetKey結合形成完整重置鍵
+  const [resetCount, setResetCount] = useState(0);
+  
+  // ✨ 封裝重置邏輯，便於維護
+  const handleReset = useCallback(() => {
+    // 增加重置計數
+    setResetCount(prev => prev + 1);
+    // 調用外部傳入的重置處理函數
+    if (typeof onReset === 'function') {
+      onReset();
+    }
+  }, [onReset]);
+
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onError={logError}
-      onReset={() => {
-        // 重置應用狀態，避免錯誤再次發生
-        // 如果有全局狀態管理，可以在這裡重置相關狀態
-      }}
+      // 💡 將內部resetCount和外部resetKey結合，任何一個變化都會觸發重置
+      resetKeys={[resetCount, resetKey]}
+      onReset={handleReset}
     >
       {children}
     </ErrorBoundary>

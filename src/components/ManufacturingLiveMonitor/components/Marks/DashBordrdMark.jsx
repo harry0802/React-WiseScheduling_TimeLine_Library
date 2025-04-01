@@ -13,14 +13,15 @@ const ItemBox = styled.div`
 `;
 
 const MarkSign = styled.span`
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   background-color: ${({ color }) => color};
 `;
 
 const MarkText = styled.span`
   font-size: 14px;
   font-weight: 600;
+  letter-spacing: 1.2px;
 `;
 
 function DashBordrdMark({ data }) {

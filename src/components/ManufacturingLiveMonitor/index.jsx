@@ -3,7 +3,9 @@ import styled from "styled-components";
 import React, { useState } from "react";
 import DataVHeader from "./components/DataVHeader";
 
-import RealTimeOEEMonitor from "./feature/RealTimeOEEMonitor";
+import { Outlet } from "react-router-dom";
+import FullScreenLayout from "../../layouts/FullScreenLayout";
+import { useHeaderNameStore } from "./slice/LayoutSlice";
 
 //! =============== 1. 樣式定義 ===============
 //* 主容器：負責整體布局和背景
@@ -16,10 +18,8 @@ const Container = styled.div`
 
   /* 盒模型 */
   box-sizing: border-box;
-
   /* 視覺樣式 */
   background-color: #061639;
-
   /* 全局重置，避免外部樣式影響 */
   /* * {
     margin: 0;
@@ -46,7 +46,7 @@ const ContentArea = styled.div`
 const Main = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 1.25rem;
+  padding: 0 1.25rem;
 `;
 
 //! =============== 2. 核心功能 ===============
@@ -83,22 +83,23 @@ function setupFullScreenMode() {
  * @description 製造監控儀表板主組件，顯示各種生產數據
  */
 function ManufacturingLiveMonitor() {
-  const [sectionTitle, setSectionTitle] = useState("");
-
+  const { headerName } = useHeaderNameStore();
   // 使用 useLayoutEffect 確保在 DOM 渲染前設置全屏模式
   React.useLayoutEffect(() => {
     return setupFullScreenMode();
   }, []);
 
   return (
-    <FullScreenContainer>
-      <Container>
-        <DataVHeader title={sectionTitle} />
-        <Main>
-          <RealTimeOEEMonitor onChangeSectTitle={setSectionTitle} />
-        </Main>
-      </Container>
-    </FullScreenContainer>
+    <FullScreenLayout>
+      <FullScreenContainer>
+        <Container>
+          <DataVHeader title={headerName} />
+          <Main>
+            <Outlet />
+          </Main>
+        </Container>
+      </FullScreenContainer>
+    </FullScreenLayout>
   );
 }
 

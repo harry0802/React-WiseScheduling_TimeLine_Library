@@ -36,7 +36,7 @@ const StatusPanelContainer = styled.div`
 
 const StatusTitle = styled.div`
   color: ${(props) => props.color};
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
 `;

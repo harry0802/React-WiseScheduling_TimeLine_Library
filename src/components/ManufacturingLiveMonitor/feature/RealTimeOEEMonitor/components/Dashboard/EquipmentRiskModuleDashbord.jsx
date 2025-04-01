@@ -409,6 +409,7 @@ function EquipmentRiskModuleDashbord() {
   return (
     <>
       <ProductionTable
+        columnWidths={[70]}
         rowNum={6}
         height={270}
         initialData={MockData}
@@ -417,9 +418,6 @@ function EquipmentRiskModuleDashbord() {
           machine: 1,
           productionTime: 2,
           adjustmentTime: 3,
-          downtime: 4,
-          testingTime: 5,
-          waitingTime: 6,
         }}
         statusRules={{
           NORMAL_PRODUCTION: {
