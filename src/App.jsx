@@ -57,7 +57,7 @@ const router = createBrowserRouter(
     },
     {
       // 全屏頁面使用隔離布局
-      path: "/ManufacturingLiveMonitor",
+      path: "ManufacturingLiveMonitor",
       element: <FullScreenLayout />,
       children: [
         {
