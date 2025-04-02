@@ -24,8 +24,8 @@ import { useHeaderNameStore } from "../../slice/LayoutSlice";
  */
 function RealTimeOEEMonitor({ onChangeSectTitle }) {
   const { setHeaderName } = useHeaderNameStore();
+  
   // 靜態生產數據 (實際項目中應從API或狀態管理獲取)
-
   useEffect(() => {
     if (!setHeaderName) return;
     setHeaderName("施工養護綜合數據");

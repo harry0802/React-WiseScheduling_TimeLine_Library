@@ -10,17 +10,14 @@ import {
 import { BaseCard } from "../../../components/DashboardCard";
 import EquipmentRiskModuleDashbord from "../components/Dashboard/EquipmentRiskModuleDashbord";
 const MockData = [
-  {
-    status: DEVICE_STATUS_NAMES.NORMAL_PRODUCTION,
-    color: DEVICE_STATUS_COLORS.NORMAL_PRODUCTION,
-  },
-  {
-    status: DEVICE_STATUS_NAMES.TRIAL_MODE,
-    color: DEVICE_STATUS_COLORS.TRIAL_MODE,
-  },
+
   {
     status: DEVICE_STATUS_NAMES.ADJUSTMENT_MODE,
     color: DEVICE_STATUS_COLORS.ADJUSTMENT_MODE,
+  },
+  {
+    status: DEVICE_STATUS_NAMES.ERROR_STATE,
+    color: DEVICE_STATUS_COLORS.ERROR_STATE,
   },
 ];
 
@@ -32,7 +29,7 @@ function EquipmentRiskModule() {
           <BaseCard.Title>
             <FlexFlow>
               <BaseCard.Title>設備即時狀態</BaseCard.Title>
-              <DashBordrdMark data={MockData} />
+              {/* <DashBordrdMark data={MockData} /> */}
             </FlexFlow>
           </BaseCard.Title>
         </BaseCard.Header>
