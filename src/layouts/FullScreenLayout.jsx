@@ -1,5 +1,5 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
+import React, { useState, useCallback } from "react";
+
 import styled from "styled-components";
 import ErrorBoundary from "../components/ErrorBoundary";
 
@@ -23,12 +23,42 @@ const IsolatedContainer = styled.div`
   isolation: isolate;
 `;
 
-function FullScreenLayout() {
+/**
+ * @function FullScreenLayout
+ * @description 全屏佈局組件，包含錯誤邊界和重置功能
+ * @param {Object} props - 組件屬性
+ * @returns {React.ReactNode} - 佈局組件
+ */
+function FullScreenLayout({ children }) {
+  // 🧠 管理錯誤邊界重置狀態
+  const [resetErrorBoundary, setResetErrorBoundary] = useState(false);
+
+  // ✨ 提供重置錯誤邊界的方法
+  const handleResetError = useCallback(() => {
+    // 透過修改狀態值觸發ErrorBoundary的重置
+    setResetErrorBoundary((prev) => !prev);
+    console.log("錯誤邊界已重置");
+  }, []);
+
+  // 💡 重置後的回調處理
+  const handleAfterReset = useCallback(({ children }) => {
+    // 這裡可以放置重置後的額外邏輯，如重新獲取數據等
+    console.log("錯誤邊界重置完成，執行後續處理");
+  }, []);
+
   return (
     <IsolatedContainer>
-      <ErrorBoundary>
-        <Outlet />
+      <ErrorBoundary resetKey={resetErrorBoundary} onReset={handleAfterReset}>
+        {children}
       </ErrorBoundary>
+
+      {/* 💡 全局錯誤重置方法綁定到Window對象，便於在任何地方訪問 */}
+      {React.useEffect(() => {
+        window.__resetErrorBoundary = handleResetError;
+        return () => {
+          delete window.__resetErrorBoundary;
+        };
+      }, [handleResetError])}
     </IsolatedContainer>
   );
 }

@@ -168,6 +168,7 @@ function DailyProductionDashboard() {
             expiryDate: "2025-03-10",
           },
         ]}
+        columnWidths={[80, 200, 150, 150, 380]}
         fieldMapping={{
           modelCode: 1,
           modelName: 2,

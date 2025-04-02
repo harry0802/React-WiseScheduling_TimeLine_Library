@@ -186,7 +186,7 @@ const CardTitle = React.forwardRef(({ className, children, ...props }, ref) => (
   <h3
     className={className}
     ref={ref}
-    style={{ margin: 0, fontSize: "18px", fontWeight: 600 }}
+    style={{ margin: 0, fontSize: "24px", fontWeight: 600 }}
     {...props}
   >
     {children}

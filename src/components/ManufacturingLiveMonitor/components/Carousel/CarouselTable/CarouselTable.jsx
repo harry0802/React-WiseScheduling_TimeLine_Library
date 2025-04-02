@@ -14,9 +14,20 @@ import { createScrollBoardConfig } from "./utils";
 import styled from "styled-components";
 
 const TheScrollBoard = styled(ScrollBoard)`
-  width: 100%;
-  height: 100%;
-  position: relative;
+  && {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .ceil {
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
+    .header-item {
+      font-weight: 600;
+      letter-spacing: 2px;
+      font-size: 20px;
+    }
+  }
 `;
 
 // 主元件

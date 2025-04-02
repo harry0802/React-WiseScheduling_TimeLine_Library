@@ -22,14 +22,6 @@ const MockData = [
     status: DEVICE_STATUS_NAMES.ADJUSTMENT_MODE,
     color: DEVICE_STATUS_COLORS.ADJUSTMENT_MODE,
   },
-  {
-    status: DEVICE_STATUS_NAMES.SHUTDOWN_STATE,
-    color: DEVICE_STATUS_COLORS.SHUTDOWN_STATE,
-  },
-  {
-    status: DEVICE_STATUS_NAMES.ERROR_STATE,
-    color: DEVICE_STATUS_COLORS.ERROR_STATE,
-  },
 ];
 
 function EquipmentRiskModule() {
