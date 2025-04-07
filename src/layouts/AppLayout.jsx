@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import Navbar from "../components/Navbar";
 import ErrorBoundary from "../components/ErrorBoundary";
@@ -24,11 +24,15 @@ const Footer = styled.footer`
 `;
 
 function AppLayout() {
+  const location = useLocation();
+  // 用於當路由變更時重置錯誤邊界
+  const resetKey = location.pathname;
+
   return (
     <AppContainer>
       <Navbar />
       <Content>
-        <ErrorBoundary>
+        <ErrorBoundary resetKey={resetKey}>
           <Outlet />
         </ErrorBoundary>
       </Content>

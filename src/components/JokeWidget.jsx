@@ -238,6 +238,11 @@ const JokeWidget = () => {
     queryFn: fetchRandomJoke,
     enabled: isVisible, // 🧠 只有當小工具可見時才獲取數據
     refetchOnWindowFocus: false,
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 分鐘
+    onError: (error) => {
+      console.error("獲取笑話時出錯:", error);
+    }
   });
 
   // 事件處理

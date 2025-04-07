@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouteError, Link } from 'react-router-dom';
+import { useRouteError, Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 const ErrorContainer = styled.div`
@@ -42,8 +42,11 @@ const HomeLink = styled(Link)`
 
 function ErrorPage() {
   const error = useRouteError();
+  const location = useLocation();
+  
   // 安全地記錄錯誤，避免因null/undefined引起的stack讀取錯誤
-  console.error("路由錯誤:", error ? (typeof error === 'object' ? error : { message: String(error) }) : "未知錯誤");
+  console.error("路由錯誤:", error ? (typeof error === 'object' && error !== null ? JSON.stringify(error, Object.getOwnPropertyNames(error)) : String(error)) : "未知錯誤");
+  console.error("發生錯誤的路徑:", location);
   
   return (
     <ErrorContainer>
