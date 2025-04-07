@@ -1,24 +1,21 @@
-import { Loading } from "@iimm/data-view-react";
-import styled from "styled-components";
+import { Loading } from '@iimm/data-view-react'
+import styled from 'styled-components'
 
 //! =============== 1. 設定與常量 ===============
 //* 容器樣式設定
 const FullScreenContainer = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
   /* 透明黑色背景 */
-  background-color: rgba(0, 0, 0, 0.3);
-`;
+  background-color: rgba(0, 0, 0, 0.1);
+`
 const LoadingState = styled(Loading)`
   color: #fff;
-`;
+`
 
 /**
  * @function LoadingWrapper
@@ -34,7 +31,8 @@ function LoadingWrapper({ children }) {
     <FullScreenContainer>
       <LoadingState>{children}</LoadingState>
     </FullScreenContainer>
-  );
+  )
 }
 
-export default LoadingWrapper;
+export default LoadingWrapper
+

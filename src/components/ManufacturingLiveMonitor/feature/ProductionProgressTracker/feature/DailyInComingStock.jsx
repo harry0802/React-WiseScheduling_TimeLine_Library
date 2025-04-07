@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid2'
 import ProcessText from '../components/ProcessText'
 import ProgressBarChart from '../components/Dashboard/ProgressBarChart'
 
-function DailyProductionTasks() {
+function DailyIncomingStock() {
   return (
     <BorderBox>
       <BaseCard style={{ backgroundColor: 'transparent' }}>
@@ -24,7 +24,7 @@ function DailyProductionTasks() {
               <ProgressBarChart
                 inStockPercentage={30}
                 inStockGradient={{
-                  startColor: '#0491B4', // 起始顏色
+                  startColor: '#04B30A ', // 起始顏色
                   endColor: '#37FFF2 ' // 結束顏色
                 }}
               />
@@ -44,5 +44,5 @@ function DailyProductionTasks() {
   )
 }
 
-export default DailyProductionTasks
+export default DailyIncomingStock
 

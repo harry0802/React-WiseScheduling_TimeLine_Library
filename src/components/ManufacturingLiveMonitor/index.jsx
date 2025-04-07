@@ -9,7 +9,7 @@ import { useHeaderNameStore } from "./slice/LayoutSlice";
 
 //! =============== 1. 樣式定義 ===============
 //* 主容器：負責整體布局和背景
-const Container = styled.div`
+const Container = styled.div` 
   /* 布局定位 */
   display: flex;
   flex-direction: column;
@@ -58,6 +58,13 @@ const Main = styled.div`
 function setupFullScreenMode() {
   // 創建臨時樣式標籤
   const style = document.createElement("style");
+
+
+
+
+
+
+  
   style.textContent = `
     /* 🧠 只在組件渲染時應用，不影響全局 */
     body.temp-fullscreen-mode {
@@ -96,7 +103,7 @@ function ManufacturingLiveMonitor() {
           <DataVHeader title={headerName} />
           <Main>
             <Outlet />
-          </Main>
+          </Main> 
         </Container>
       </FullScreenContainer>
     </FullScreenLayout>
