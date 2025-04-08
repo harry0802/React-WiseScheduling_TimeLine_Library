@@ -1,5 +1,5 @@
 // src/components/ProductionTable/utils.js
-import { DEFAULT_TABLE_CONFIG } from "./config";
+import { DEFAULT_TABLE_CONFIG } from './config'
 
 /**
  * 創建狀態規則集，合併默認規則與客製化規則
@@ -20,14 +20,14 @@ export const createStatusRules = (customRules = {}) => {
   const defaultRules = {
     normal: {
       condition: () => true,
-      color: "#1DE9B6",
-      columns: [1],
-    },
-  };
+      color: '#1DE9B6',
+      columns: [1]
+    }
+  }
 
   // 合併默認規則與客製化規則，後者會覆蓋前者
-  return { ...defaultRules, ...customRules };
-};
+  return { ...defaultRules, ...customRules }
+}
 
 /**
  * 創建基於數值範圍的條件函數
@@ -45,10 +45,10 @@ export const createColorCondition =
   // 返回一個接受item參數的函數
   (item) => {
     // 將字段值轉換為數值
-    const value = Number(item[field]);
+    const value = Number(item[field])
     // 檢查值是否在指定範圍內
-    return value >= minValue && value <= maxValue;
-  };
+    return value >= minValue && value <= maxValue
+  }
 
 /**
  * 創建基於日期比較的條件函數
@@ -62,24 +62,25 @@ export const createColorCondition =
  * // 會檢查item.dueDate是否在未來7天內
  */
 export const createDateCondition =
-  (dateField, daysThreshold, compareType = "before") =>
+  (dateField, daysThreshold, compareType = 'before') =>
   // 返回一個接受item參數的函數
   (item) => {
     // 今天的日期
-    const today = new Date();
+    const today = new Date()
     // 項目的日期
-    const itemDate = new Date(item[dateField]);
+    const itemDate = new Date(item[dateField])
+
     // 計算日期差異（天數）
-    const diffTime = Math.abs(itemDate - today);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffTime = Math.abs(itemDate - today)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
     // 根據比較類型返回不同的條件結果
-    return compareType === "before"
+    return compareType === 'before'
       ? // 在未來的daysThreshold天內
         diffDays <= daysThreshold && itemDate > today
       : // 在過去的daysThreshold天內
-        diffDays <= daysThreshold && itemDate < today;
-  };
+        diffDays <= daysThreshold || itemDate < today
+  }
 
 /**
  * 創建滾動展示板配置
@@ -107,5 +108,6 @@ export const createScrollBoardConfig = (header, data, options = {}) => ({
   align: options.columnAligns,
 
   // 展開其他滾動板配置
-  ...(options.scrollBoardConfig || {}),
-});
+  ...(options.scrollBoardConfig || {})
+})
+

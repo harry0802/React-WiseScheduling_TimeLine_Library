@@ -2,9 +2,8 @@ import { useEffect } from 'react'
 import { Stack } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useHeaderNameStore } from '../../slice/LayoutSlice'
-import { useParams } from 'react-router-dom'
 import DailyIncomingStock from './feature/DailyInComingStock'
-import ProgressBarChart from './components/Dashboard/ProgressBarChart'
+import NextThreeDaysIncomingStock from './feature/NextThreeDaysIncomingStock'
 import DailyProductionTasks from './feature/DailyProductionTasks'
 
 function ProductionProgressTracker() {
@@ -15,7 +14,10 @@ function ProductionProgressTracker() {
 
   return (
     <section>
-      <Stack spacing={2.5}>
+      <Stack
+        marginTop={1.25}
+        spacing={2.5}
+      >
         <Grid
           container
           spacing={2.5}
@@ -31,7 +33,7 @@ function ProductionProgressTracker() {
             size={6}
             spacing={2.5}
           >
-            <DailyProductionTasks />
+            <NextThreeDaysIncomingStock />
           </Grid>
         </Grid>
         <Grid
@@ -40,15 +42,9 @@ function ProductionProgressTracker() {
         >
           <Grid
             size={12}
-            height={100}
+            height={'100%'}
           >
-            <ProgressBarChart
-              inStockPercentage={40}
-              inStockGradient={{
-                startColor: '#48dbfb', // 起始顏色
-                endColor: '#0abde3' // 結束顏色
-              }}
-            />
+            <DailyProductionTasks />
           </Grid>
         </Grid>
       </Stack>

@@ -10,7 +10,6 @@ import Contact from './page/Contact'
 import ErrorPage from './page/ErrorPage'
 import LoadingSpinner from './components/LoadingSpinner'
 import ManufacturingLiveMonitor from './components/ManufacturingLiveMonitor/index.jsx'
-import { Loading } from '@iimm/data-view-react'
 import LoadingWrapper from './components/ManufacturingLiveMonitor/components/Loading/index.jsx'
 
 const DynamicTimeline = lazy(() => import('./components/timelineGantt'))

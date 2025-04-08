@@ -4,14 +4,14 @@
  * 使用複合元件模式，允許 Card.Header、Card.Title 等方式調用子元件
  */
 
-import CardComponent from "./Card";
-import { Card as BaseCardComponent } from "./Card/BaseCard";
+import CardComponent from './Card'
+import { Card as BaseCardComponent } from './Card/BaseCard'
 
 // 主要元件直接導出
-export const Card = CardComponent;
+export const Card = CardComponent
 
 // 從 BaseCard.jsx 中導出的實際上是 Card 元件，我們將其重命名為 BaseCard 導出
-export const BaseCard = BaseCardComponent;
+export const BaseCard = BaseCardComponent
 
 /**
  * @example
@@ -38,5 +38,6 @@ export const BaseCard = BaseCardComponent;
 // 向下兼容的默認導出
 export default {
   Card,
-  BaseCard,
-};
+  BaseCard
+}
+
