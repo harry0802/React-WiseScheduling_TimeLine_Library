@@ -4,8 +4,9 @@ import styled from 'styled-components'
 //! =============== 1. 設定與常量 ===============
 //* 容器樣式設定
 const FullScreenContainer = styled.div`
-  position: fixed;
+  position: fixed;  
   inset: 0;
+  width: 100%;
   z-index: 1000;
   display: flex;
   justify-content: center;

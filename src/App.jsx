@@ -25,6 +25,13 @@ const ProductionProgressTracker = lazy(() =>
   )
 )
 
+const DeliveryTrendAnalyzer = lazy(() =>
+  import(
+    './components/ManufacturingLiveMonitor/feature/DeliveryTrendAnalyzer/index.jsx'
+  )
+)
+// import { useHeaderNameStore } from './components/ManufacturingLiveMonitor/slice/LayoutSlice'
+
 // 使用 HashRouter 代替 BrowserRouter
 const router = createHashRouter([
   {
@@ -90,7 +97,22 @@ const router = createHashRouter([
             </Suspense>
           </ErrorBoundary>
         )
+      },
+      {
+        path: 'DeliveryTrendAnalyzer',
+        element: (
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+              }
+            >
+              <DeliveryTrendAnalyzer />
+            </Suspense>
+          </ErrorBoundary>
+        )
       }
+
       // 未來可能的其他全屏頁面可在此添加
     ]
   }
