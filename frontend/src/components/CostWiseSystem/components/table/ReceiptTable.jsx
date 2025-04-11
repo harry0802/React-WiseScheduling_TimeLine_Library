@@ -104,8 +104,35 @@ const ReceiptTable = ({
         paginationModel={{ page, pageSize }}
         onPaginationModelChange={onPaginationModelChange}
         pageSizeOptions={[10, 25, 50, 100]}
+        disableVirtualization={true}
         sx={{
           [`& .${gridClasses.cell}`]: { py: 1 },
+          // 修正標題與資料不對齊的問題
+          "& .MuiDataGrid-columnHeaders": {
+            position: "sticky",
+            left: 0,
+            zIndex: 1,
+          },
+          "& .MuiDataGrid-virtualScroller": {
+            "& .MuiDataGrid-virtualScrollerContent": {
+              "& .MuiDataGrid-virtualScrollerRenderZone": {
+                "& .MuiDataGrid-row": {
+                  width: "100% !important",
+                },
+              },
+            },
+          },
+          "& .MuiDataGrid-main": {
+            overflow: "hidden",
+            "& .MuiDataGrid-columnHeadersInner": {
+              width: "100% !important",
+            },
+          },
+          scrollbarWidth: "thin",
+          "&::-webkit-scrollbar": {
+            width: "8px",
+            height: "8px",
+          },
         }}
         localeText={localeTextSetup}
       />
