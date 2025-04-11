@@ -171,7 +171,6 @@ class ProductionCostService:
             if dataType != "all":
                 query = query.filter(ProductionScheduleReportView.serialNumber == 0) if dataType == "mother" else query.filter(ProductionScheduleReportView.serialNumber > 0)
             query = query.filter(ProductionScheduleReportView.productionScheduleId == productionScheduleId) if productionScheduleId else query
-            query = query.filter(ProductionScheduleReportView.planOnMachineDate > datetime.now(pytz.utc) - timedelta(weeks=6))
 
             if hasattr(ProductionCost, sort):
                 query = query.order_by(getattr(ProductionCost, sort).desc())

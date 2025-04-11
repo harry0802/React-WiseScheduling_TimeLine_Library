@@ -32,6 +32,8 @@ def upgrade():
 
     # add index to productionCost
     op.create_index('idx_productionCost_type_logTime', 'productionCost', ['type', 'logTime'])
+    op.create_index('idx_productionCost_ReportId', 'productionCost', ['productionReportId'])
+    
 
     # add index to productionReport
     op.create_index('idx_productionReport_serialNumber_pschedule_id', 'productionReport', ['serialNumber', 'pschedule_id'])
@@ -48,6 +50,7 @@ def downgrade():
     op.drop_index('idx_productionSchedule_query_conditions', table_name='productionSchedule')
     op.drop_index('idx_productionReport_serialNumber_pschedule_id', table_name='productionReport')
     op.drop_index('idx_productionCost_type_logTime', table_name='productionCost')
+    op.drop_index('idx_productionCost_ReportId', table_name='productionCost')
     op.drop_index('idx_ly0000AO_detail_SD_NO_SKNO_NAME', table_name='ly0000AO_detail')
     op.drop_index('idx_ly0000AO_detail_SD_SKNO_NAME_DATE', table_name='ly0000AO_detail')
     op.drop_index('idx_ly0000AB_MP_NO', table_name='ly0000AB')
