@@ -126,12 +126,16 @@ export const StyledDataGrid = styled(DataGrid)`
           }
         }
       }
-
+      .MuiDataGrid-overlay {
+        background-color: ${theme.colors.background.main};
+        color: ${theme.colors.text.primary};
+      }
       // 自定義滾動條
       .MuiDataGrid-virtualScroller {
+        cursor: pointer;
         &::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
+          width: 16px;
+          height: 16px;
         }
 
         &::-webkit-scrollbar-track {
@@ -140,7 +144,7 @@ export const StyledDataGrid = styled(DataGrid)`
 
         &::-webkit-scrollbar-thumb {
           background-color: ${theme.colors.primary.light};
-          border-radius: 4px;
+          border-radius: 12px;
         }
       }
 
