@@ -45,7 +45,7 @@ function RealTimeOEEMonitor({ onChangeSectTitle }) {
           <Grid size={8}>
             <Stack spacing={1.25}>
               <DailyProduction />
-              <OverdueTasks />
+              <RealTimeDeviceTracker />
             </Stack>
           </Grid>
           <Grid size={4}>
@@ -58,7 +58,7 @@ function RealTimeOEEMonitor({ onChangeSectTitle }) {
           spacing={1.25}
         >
           <Grid size={5}>
-            <RealTimeDeviceTracker />
+            <OverdueTasks />
           </Grid>
           <Grid size={3}>
             <MachineStateTimeRatio />

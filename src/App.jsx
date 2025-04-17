@@ -30,7 +30,12 @@ const DeliveryTrendAnalyzer = lazy(() =>
     './components/ManufacturingLiveMonitor/feature/DeliveryTrendAnalyzer/index.jsx'
   )
 )
-// import { useHeaderNameStore } from './components/ManufacturingLiveMonitor/slice/LayoutSlice'
+
+const OEEInsightSystem = lazy(() =>
+  import(
+    './components/ManufacturingLiveMonitor/feature/OEEInsightSystem/index.jsx'
+  )
+)
 
 // 使用 HashRouter 代替 BrowserRouter
 const router = createHashRouter([
@@ -111,8 +116,21 @@ const router = createHashRouter([
             </Suspense>
           </ErrorBoundary>
         )
+      },
+      {
+        path: 'OEEInsightSystem',
+        element: (
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+              }
+            >
+              <OEEInsightSystem />
+            </Suspense>
+          </ErrorBoundary>
+        )
       }
-
       // 未來可能的其他全屏頁面可在此添加
     ]
   }

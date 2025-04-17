@@ -1,6 +1,5 @@
 import { Charts } from '@iimm/data-view-react'
 import { DEVICE_STATUS_COLORS, oklchToHex } from '../../../../configs/Color'
-import { colors } from '@mui/material'
 
 const option1 = {
   color: [
@@ -13,7 +12,6 @@ const option1 = {
   series: [
     {
       type: 'pie',
-      radius: '75%',
       data: [
         { name: '可口可乐', value: 93 },
         { name: '百事可乐', value: 32 },
@@ -21,35 +19,48 @@ const option1 = {
         { name: '康师傅', value: 44 },
         { name: '统一', value: 52 }
       ],
-      insideLabel: {
-        show: true,
-        formatter: '{percent}%',
-        style: {
-          fontSize: 17, // 放大內部標籤，預設是 10
-          fill: '#fff',
-          textAlign: 'center',
-          textBaseline: 'middle'
-        }
-      },
+      sortData: true,
+      radius: ['50%', '70%'],
       outsideLabel: {
         show: true,
-        formatter: '{name}',
+        formatter: '{name} : \n   {percent}%', // 使用 \n 實現換行
+        labelLineEndLength: 20, // 引導線長度
+        labelLineBendGap: 20, // 引導線彎曲程度
         style: {
-          fontSize: 14, // 放大外部標籤，預設是 11
-          fill: '#fff'
+          fontSize: 16,
+          fill: '#fff',
+          fontWeight: 'bold'
+        }
+      },
+      insideLabel: {
+        // show: true,
+        style: {
+          fontSize: 14,
+          fill: '#fff',
+          fontWeight: 'normal'
         }
       }
     }
   ]
 }
-
-function MachineStateTimeRatioPieChart() {
+function MachineOperationRateDashboard() {
   return (
-    <div style={{ width: '100%', height: '270px' }}>
-      <Charts option={option1} />
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignContent: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      <Charts
+        option={option1}
+        style={{ height: '300px', width: '100%', margin: 'auto' }}
+      />
     </div>
   )
 }
 
-export default MachineStateTimeRatioPieChart
+export default MachineOperationRateDashboard
 

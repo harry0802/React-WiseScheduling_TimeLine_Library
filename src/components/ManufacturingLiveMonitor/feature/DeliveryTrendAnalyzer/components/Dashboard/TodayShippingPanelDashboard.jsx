@@ -1,11 +1,5 @@
 import { Charts } from '@iimm/data-view-react'
-
-// 顏色常量定義
-const COLORS = {
-  primary: '#fff',
-  secondary: '#008DCE',
-  barColor: '#04B30A'
-}
+import { DELIVERY_COLORS as COLORS } from '../../config/colors'
 
 // 月份數據
 const MONTHS = [
@@ -37,7 +31,7 @@ const CHART_DATA = {
 const createAxisLabelStyle = (formatter) => ({
   formatter,
   style: {
-    fill: COLORS.primary,
+    fill: COLORS.textLabel,
     fontSize: 16
   }
 })
@@ -47,7 +41,7 @@ const createAxisLabelStyle = (formatter) => ({
  * @returns {Object} 軸名稱樣式配置
  */
 const createNameTextStyle = () => ({
-  fill: COLORS.primary,
+  fill: COLORS.textLabel,
   fontSize: 18
 })
 
@@ -84,7 +78,7 @@ const createYAxis = ({
   axis.splitLine = {
     show: showSplitLine,
     ...(showSplitLine && {
-      style: { lineDash: [3, 3] }
+      style: { lineDash: [0] }
     })
   }
 
@@ -107,7 +101,10 @@ const createChartOption = () => ({
     bottom: 60, // 底部需要空間給X軸標籤
     left: 80, // 左側留出足夠空間給Y軸標籤
     right: 80, // 右側留出足夠空間給第二個Y軸
-    containLabel: true // 確保標籤包含在圖表區域內
+    containLabel: true, // 確保標籤包含在圖表區域內
+    // 添加網格背景樣式
+    backgroundColor: COLORS.chartBackground,
+    borderColor: COLORS.gridLines
   },
 
   // X軸配置 - 確保底部標籤正確顯示
@@ -119,11 +116,24 @@ const createChartOption = () => ({
         // rotate: 20,
         textAlign: 'center',
         textBaseline: 'top',
-        fill: COLORS.primary,
+
+        fill: COLORS.textLabel,
         fontSize: 14 // 適當大小的文字
       }
     },
-    axisTick: { show: false }
+    axisTick: { show: false },
+    // 添加更科技感的軸線樣式
+    axisLine: {
+      style: {
+        stroke: COLORS.gridLines
+      }
+    },
+    // 添加分割線
+    splitLine: {
+      style: {
+        stroke: COLORS.gridLines
+      }
+    }
   },
 
   // Y軸配置 (雙Y軸)
@@ -155,7 +165,13 @@ const createChartOption = () => ({
       data: CHART_DATA.percentages,
       type: 'bar',
       barWidth: '30%', // 調整柱寬比例
-      gradient: { color: [COLORS.barColor] },
+      // 使用漸變色增強科技感
+      gradient: {
+        color: [COLORS.barColumn, COLORS.barColumnGradient]
+      },
+      // 添加柱狀圖樣式，包含圓角
+      barStyle: {},
+
       animationCurve: 'easeOutBounce'
     },
 
@@ -169,15 +185,22 @@ const createChartOption = () => ({
       smooth: true,
       linePoint: {
         radius: 5,
-        style: { fill: COLORS.secondary }
+        style: {
+          fill: COLORS.chartLine,
+          stroke: 'rgba(255, 255, 255, 0.4)',
+          lineWidth: 2
+        }
       },
       lineStyle: {
-        lineWidth: 5,
-        stroke: COLORS.secondary
+        lineWidth: 4,
+        stroke: COLORS.chartLine
       },
       lineArea: {
         show: true,
-        style: { fill: COLORS.secondary }
+        style: {
+          fill: COLORS.areaFillColor,
+          gradient: ['rgba(0, 168, 255, 0.4)', 'rgba(0, 168, 255, 0.05)']
+        }
       }
     }
   ]

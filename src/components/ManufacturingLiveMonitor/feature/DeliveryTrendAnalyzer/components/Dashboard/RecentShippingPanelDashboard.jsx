@@ -82,7 +82,6 @@ const COLUMN_ALIGNS = [
  * @returns {JSX.Element} 每日生產任務儀表板渲染結果
  */
 function TodayShippingPanel({ data }) {
-  console.log('🚀 ~ TodayShippingPanel ~ data:', data)
   if (!data || data.length === 0) {
     return <div className='empty-data'>暫無資料</div>
   }

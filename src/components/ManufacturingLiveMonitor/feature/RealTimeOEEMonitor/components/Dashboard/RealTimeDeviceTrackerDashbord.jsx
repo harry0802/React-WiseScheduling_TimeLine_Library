@@ -409,8 +409,8 @@ function RealTimeDeviceTrackerDashbord() {
   return (
     <>
       <ProductionTable
-        height={270}
-        rowNum={6}
+        // height={270}
+        rowNum={3}
         initialData={MockData}
         header={[
           'NO.',
@@ -421,6 +421,7 @@ function RealTimeDeviceTrackerDashbord() {
           '試模時間',
           '待機時間'
         ]}
+        columnWidths={[70]}
         fieldMapping={{
           machine: 1,
           productionTime: 2,
