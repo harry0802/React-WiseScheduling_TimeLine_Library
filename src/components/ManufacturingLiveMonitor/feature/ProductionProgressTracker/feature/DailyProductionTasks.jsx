@@ -9,7 +9,7 @@ import DailyProductionTasksDashboard from '../components/Dashboard/DailyProducti
 
 //! =============== 1. 設定與常量 ===============
 //* 資料來源路徑 - 使用絕對路徑
-const DATA_SOURCE = '/mock/DailyProductionTasksMock.json'
+const DATA_SOURCE = 'public/mock/DailyProductionTasksMock.json'
 
 //TODO 需要時可使用絕對路徑
 // const DATA_SOURCE = `${window.location.origin}/mock/DailyProductionTasksMock.json`

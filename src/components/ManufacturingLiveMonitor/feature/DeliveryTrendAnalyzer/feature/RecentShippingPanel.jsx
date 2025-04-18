@@ -8,8 +8,7 @@ import { BaseCard } from '../../../components/DashboardCard'
 import RecentShippingPanelDashboard from '../components/Dashboard/RecentShippingPanelDashboard'
 
 //* 資料來源路徑
-const DATA_SOURCE =
-  'src/components/ManufacturingLiveMonitor/feature/DeliveryTrendAnalyzer/mock/RecentShippingPanelMock.json'
+const DATA_SOURCE = 'public/mock/RecentShippingPanelMock.json'
 
 const MockData = [
   {

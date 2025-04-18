@@ -8,11 +8,11 @@ import { COLORS } from '../config/colors'
 const MockData = [
   {
     status: '已交貨量',
-    color: COLORS.barColor
+    color: COLORS.barColumnGradient
   },
   {
     status: '已交貨率',
-    color: COLORS.secondary
+    color: COLORS.chartLine
   }
 ]
 function TodayShippingPanel() {
