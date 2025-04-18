@@ -1,9 +1,9 @@
-import React from "react";
-import styled from "styled-components";
-import { Decoration8, Decoration5 } from "@iimm/data-view-react";
+import React from 'react'
+import styled from 'styled-components'
+import { Decoration8, Decoration5 } from '@iimm/data-view-react'
 
 //! =============== 設定與常量 ===============
-const DEFAULT_DECORATION_COLOR = ["#3f96a5", "#3f96a5"];
+const DEFAULT_DECORATION_COLOR = ['#3f96a5', '#3f96a5']
 
 //! =============== 樣式組件 ===============
 //* 基礎區塊 - 提取共用樣式減少重複
@@ -13,7 +13,7 @@ const BaseSection = styled.div`
   position: relative;
   height: 100%;
   align-items: center;
-`;
+`
 
 //* 頂部標題容器
 const HeaderContainer = styled.div`
@@ -34,27 +34,27 @@ const HeaderContainer = styled.div`
     rgba(0, 10, 50, 0.9),
     rgba(0, 20, 80, 0.8)
   );
-`;
+`
 
 //* 左側區域
 const LeftSection = styled(BaseSection)`
   /* 布局定位 */
   flex: 1;
-`;
+`
 
 //* 中央區域
 const CenterSection = styled(BaseSection)`
   /* 布局定位 */
   flex: 2;
   justify-content: center;
-`;
+`
 
 //* 右側區域
 const RightSection = styled(BaseSection)`
   /* 布局定位 */
   flex: 1;
   justify-content: flex-end;
-`;
+`
 
 //* 標題文字
 const TitleText = styled.div`
@@ -70,30 +70,33 @@ const TitleText = styled.div`
   font-weight: bold;
   color: #fff;
   text-shadow: 0 0 0.625rem rgba(0, 255, 255, 0.5);
-`;
+`
 
 /**
  * @function DataVHeader
  * @description DataV風格的頁面頂部標題組件
  */
 const DataVHeader = ({
-  title = "數據可視化標題",
+  title = '數據可視化標題',
   style = {},
-  decorationColor = DEFAULT_DECORATION_COLOR,
+  decorationColor = DEFAULT_DECORATION_COLOR
 }) => {
   //* 裝飾元素共用樣式
   const decorationProps = {
-    color: decorationColor,
-  };
+    color: decorationColor
+  }
 
   //* 側邊裝飾共用配置
   const sideDecorProps = {
     ...decorationProps,
-    style: { width: "30.0625rem", height: "3.75rem" },
-  };
+    style: { width: '30.0625rem', height: '3.75rem' }
+  }
 
   return (
-    <HeaderContainer style={style} id="top-header">
+    <HeaderContainer
+      style={style}
+      id='top-header'
+    >
       <LeftSection>
         <Decoration8 {...sideDecorProps} />
       </LeftSection>
@@ -102,19 +105,23 @@ const DataVHeader = ({
         <Decoration5
           {...decorationProps}
           style={{
-            width: "48.125rem",
-            height: "3.75rem",
-            marginTop: "2.1875rem",
+            width: '48.125rem',
+            height: '3.75rem',
+            marginTop: '2.1875rem'
           }}
         />
-        <TitleText className="center-title">{title}</TitleText>
+        <TitleText className='center-title'>{title}</TitleText>
       </CenterSection>
 
       <RightSection>
-        <Decoration8 {...sideDecorProps} reverse={true} />
+        <Decoration8
+          {...sideDecorProps}
+          reverse={true}
+        />
       </RightSection>
     </HeaderContainer>
-  );
-};
+  )
+}
 
-export default DataVHeader;
+export default DataVHeader
+

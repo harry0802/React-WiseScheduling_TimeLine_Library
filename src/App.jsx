@@ -11,27 +11,53 @@ import ErrorPage from './page/ErrorPage'
 import LoadingSpinner from './components/LoadingSpinner'
 import ManufacturingLiveMonitor from './components/ManufacturingLiveMonitor/index.jsx'
 import LoadingWrapper from './components/ManufacturingLiveMonitor/components/Loading/index.jsx'
-
-const DynamicTimeline = lazy(() => import('./components/timelineGantt'))
-const QueryExample = lazy(() => import('./components/examples/QueryExample'))
-const RealTimeOEEMonitor = lazy(() =>
+import DashboardEntry from './components/ManufacturingLiveMonitor/components/DashboardEntry/index.jsx'
+/**
+ * @function lazyLoad
+ * @description 簡單的延遲載入輔助函數，帶有可選的回調機制和延遲時間
+ * @param {Function} importFn - 組件的動態導入函數
+ * @param {Function} callback - 載入完成後的回調函數 (可選)
+ * @param {number} delay - 延遲時間(毫秒) (可選)
+ * @returns {React.LazyExoticComponent} 延遲載入的組件
+ */
+const lazyLoad = (importFn, callback, delay = 1200) => {
+  return lazy(() => {
+    return new Promise((resolve) => {
+      // 先延遲指定時間
+      setTimeout(() => {
+        // 然後執行實際的導入函數
+        importFn().then((module) => {
+          if (callback && typeof callback === 'function') {
+            callback(module)
+          }
+          resolve(module)
+        })
+      }, delay)
+    })
+  })
+}
+const DynamicTimeline = lazyLoad(() => import('./components/timelineGantt'))
+const QueryExample = lazyLoad(() =>
+  import('./components/examples/QueryExample')
+)
+const RealTimeOEEMonitor = lazyLoad(() =>
   import(
     './components/ManufacturingLiveMonitor/feature/RealTimeOEEMonitor/index.jsx'
   )
 )
-const ProductionProgressTracker = lazy(() =>
+const ProductionProgressTracker = lazyLoad(() =>
   import(
     './components/ManufacturingLiveMonitor/feature/ProductionProgressTracker/index.jsx'
   )
 )
 
-const DeliveryTrendAnalyzer = lazy(() =>
+const DeliveryTrendAnalyzer = lazyLoad(() =>
   import(
     './components/ManufacturingLiveMonitor/feature/DeliveryTrendAnalyzer/index.jsx'
   )
 )
 
-const OEEInsightSystem = lazy(() =>
+const OEEInsightSystem = lazyLoad(() =>
   import(
     './components/ManufacturingLiveMonitor/feature/OEEInsightSystem/index.jsx'
   )
@@ -73,6 +99,10 @@ const router = createHashRouter([
     element: <ManufacturingLiveMonitor />,
     errorElement: <ErrorPage />,
     children: [
+      {
+        index: true,
+        element: <DashboardEntry />
+      },
       {
         // 預設路由
         path: 'RealTimeOEEMonitor',
