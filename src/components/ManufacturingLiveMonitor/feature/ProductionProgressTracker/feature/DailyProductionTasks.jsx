@@ -7,9 +7,12 @@ import { STATUS_COLORS, STATUS_NAMES } from '../../../configs/Color'
 import { BaseCard } from '../../../components/DashboardCard'
 import DailyProductionTasksDashboard from '../components/Dashboard/DailyProductionTasksDashboard'
 
-//* 資料來源路徑
-const DATA_SOURCE =
-  'src/components/ManufacturingLiveMonitor/feature/ProductionProgressTracker/mock/DailyProductionTasksMock.json'
+//! =============== 1. 設定與常量 ===============
+//* 資料來源路徑 - 使用絕對路徑
+const DATA_SOURCE = '/mock/DailyProductionTasksMock.json'
+
+//TODO 需要時可使用絕對路徑
+// const DATA_SOURCE = `${window.location.origin}/mock/DailyProductionTasksMock.json`
 
 const MockData = [
   {
@@ -82,21 +85,19 @@ function DailyProductionTasks() {
 
   return (
     <>
-      {productionTasks && (
-        <BorderBox>
-          <BaseCard style={{ backgroundColor: 'transparent' }}>
-            <BaseCard.Header>
-              <BaseCard.Title>
-                <FlexFlow>
-                  <BaseCard.Title>本日生產任務</BaseCard.Title>
-                  <DashBordrdMark data={MockData} />
-                </FlexFlow>
-              </BaseCard.Title>
-            </BaseCard.Header>
-            <BaseCard.Content>{renderContent()}</BaseCard.Content>
-          </BaseCard>
-        </BorderBox>
-      )}
+      <BorderBox>
+        <BaseCard style={{ backgroundColor: 'transparent' }}>
+          <BaseCard.Header>
+            <BaseCard.Title>
+              <FlexFlow>
+                <BaseCard.Title>本日生產任務</BaseCard.Title>
+                <DashBordrdMark data={MockData} />
+              </FlexFlow>
+            </BaseCard.Title>
+          </BaseCard.Header>
+          <BaseCard.Content>{renderContent()}</BaseCard.Content>
+        </BaseCard>
+      </BorderBox>
     </>
   )
 }
