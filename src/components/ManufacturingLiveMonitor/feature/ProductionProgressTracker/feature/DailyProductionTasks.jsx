@@ -8,11 +8,15 @@ import { BaseCard } from '../../../components/DashboardCard'
 import DailyProductionTasksDashboard from '../components/Dashboard/DailyProductionTasksDashboard'
 
 //! =============== 1. 設定與常量 ===============
-//* 資料來源路徑 - 使用絕對路徑
-const DATA_SOURCE = 'public/mock/DailyProductionTasksMock.json'
+//* 自動偵測基礎路徑
+const BASE_PATH = window.location.pathname.includes(
+  'React-WiseScheduling_TimeLine_Library'
+)
+  ? '/React-WiseScheduling_TimeLine_Library'
+  : ''
 
-//TODO 需要時可使用絕對路徑
-// const DATA_SOURCE = `${window.location.origin}/mock/DailyProductionTasksMock.json`
+//* 資料來源路徑 - 包含適用於 GitHub Pages 以及本機的路徑
+const DATA_SOURCE = `${BASE_PATH}/mock/DailyProductionTasksMock.json`
 
 const MockData = [
   {

@@ -7,8 +7,16 @@ import { STATUS_COLORS, STATUS_NAMES } from '../../../configs/Color'
 import { BaseCard } from '../../../components/DashboardCard'
 import RecentShippingPanelDashboard from '../components/Dashboard/RecentShippingPanelDashboard'
 
-//* 資料來源路徑
-const DATA_SOURCE = 'public/mock/RecentShippingPanelMock.json'
+//! =============== 1. 設定與常量 ===============
+//* 自動偵測基礎路徑
+const BASE_PATH = window.location.pathname.includes(
+  'React-WiseScheduling_TimeLine_Library'
+)
+  ? '/React-WiseScheduling_TimeLine_Library'
+  : ''
+
+//* 資料來源路徑 - 包含適用於 GitHub Pages 以及本機的路徑
+const DATA_SOURCE = `${BASE_PATH}/mock/RecentShippingPanelMock.json`
 
 const MockData = [
   {
