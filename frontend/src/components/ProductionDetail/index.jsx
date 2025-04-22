@@ -265,22 +265,21 @@ const ProductionDetail = (props) => {
             {t("productionReport.detail.title")}
             <RefreshButton />
           </div>
-          <div>
+          <div className={styles.btnBox}>
             <div>
               <Tooltip title="完成">
                 <Button
+                  className={styles.btnDone}
                   type="primary"
-                  shape="circle"
-                  icon={<CheckOutlined />}
                   onClick={handleComplete}
-                />
+                >
+                  <CheckOutlined /> 完成
+                </Button>
               </Tooltip>
               <Tooltip title="暫停">
                 <Button
                   className={styles.btnPause}
                   type="default"
-                  shape="circle"
-                  icon={<PauseOutlined />}
                   onClick={() =>
                     navigate("/LeaderSignPage", {
                       state: {
@@ -289,7 +288,9 @@ const ProductionDetail = (props) => {
                       },
                     })
                   }
-                />
+                >
+                  <PauseOutlined /> 暫停
+                </Button>
               </Tooltip>
             </div>
           </div>
