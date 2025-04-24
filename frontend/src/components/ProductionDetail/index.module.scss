@@ -14,7 +14,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-height: 1.875rem;
+    // max-height: 1.875rem;
 
     .title {
       display: flex;
@@ -36,23 +36,13 @@
   .btnBox {
     div {
       display: inline-flex;
-      gap: 6rem;
+      gap: 2rem;
+      width: 100%;
     }
   }
 
   .btnDone {
     background: #83bf45;
-    border-radius: 3rem;
-    display: inline-flex;
-    padding: 23px 15px 19px 16px;
-    justify-content: center;
-    align-items: center;
-    width: 6.8125rem;
-    height: 2.375rem;
-    box-shadow: 0.25rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.25);
-    border: none;
-    color: #fff;
-    font-weight: 500;
 
     &:hover {
       background: #95d957;
@@ -67,65 +57,70 @@
 
   .btnPause {
     background: #186c98;
-    border-radius: 3rem;
-    display: inline-flex;
-    padding: 1.4375rem 1rem 1.1875rem 1rem;
-    justify-content: center;
-    align-items: center;
-    width: 6.8125rem;
-    height: 2.375rem;
-    box-shadow: 0.25rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.25);
-
-    color: #fff;
-    font-weight: 500;
-    border: none;
 
     &:hover {
       background: #1a7fb2;
       border-color: #1a7fb2;
+      color: #1a7fb2;
     }
 
     &:focus {
       background: #186c98;
       border-color: #186c98;
+      color: #1a7fb2;
     }
   }
 
-  // 按鈕內的圖標和文字樣式
-  .btnDone,
-  .btnPause {
-    .anticon {
-      font-size: 19.2px;
-      margin-right: 0.375rem;
+  /* 使用全局選擇器來讓圖標和文字間距生效 */
+  :global(.ant-btn) {
+    svg + span,
+    span + svg {
+      margin-left: 8px;
     }
-    font-size: 1rem;
-    letter-spacing: 0.0313rem;
   }
-
-  // 強化SVG圖標
-  :global(.ant-btn) svg {
-    stroke-width: 10%;
-    stroke: #fff;
-  }
-
   .btnStart {
-    width: 2.8125rem;
-    height: 2.8125rem;
     position: fixed;
     bottom: 3.75rem;
     right: 3.75rem;
+    background: #186c98; /* 使用原本的藍色背景 */
+    padding: 8px 12px 8px 24px;
+    border-radius: 100px; /* 圓角效果 */
+    border: none;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25);
+    gap: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    color: white;
+    min-width: 140px;
 
-    @media (min-width: $screen-lg) {
-      width: 3.75rem;
-      height: 3.75rem;
+    .iconCircle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: #83bf45; /* 使用完成按鈕的綠色 */
+      border-radius: 50%;
+      color: white;
     }
-  }
+    
+    &:hover {
+      background: #1a7fb2; /* 使用原本的藍色hover效果 */
+      .iconCircle {
+        background: #95d957; /* 使用完成按鈕的綠色hover效果 */
+      }
+    }
 
-  .btnStart:global(.ant-btn):global(.ant-btn-icon-only) :global(.anticon) {
-    font-size: 24px;
-
-    @media (min-width: $screen-lg) {
-      font-size: 32px;
+    // 強化SVG圖標
+    svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 0;
+      fill: currentColor;
     }
   }
 
@@ -233,4 +228,33 @@
   background-color: #186c98;
   border-color: #186c98;
   color: #fff;
+}
+
+/* 設定所有操作按鈕的共用樣式 */
+.btnPause,
+.btnDone {
+  min-width: 160px; /* 確保足夠寬度顯示文字和圖示 */
+  padding: 0 24px; /* 左右留出足夠空間 */
+  height: 44px; /* 符合觸摸區域最小高度 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3rem;
+  box-shadow: 0.25rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.25);
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: 0.0313rem;
+
+  .anticon {
+    font-size: 19.2px;
+    margin-right: 0.375rem;
+  }
+
+  // 強化按鈕的SVG圖標
+  svg {
+    stroke-width: 10%;
+    stroke: currentColor;
+  }
 }

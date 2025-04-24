@@ -65,7 +65,10 @@
     "detail": {
       "title": "H.thống đ.phối d.chuyền sx",
       "completePopMsg": "Còn SL chưa h.thành. Sau khi đóng đơn, đơn hàng k thể tiếp tục và cần được mở lại. Chắc chắn muốn h.thành g.đoạn sx này ?",
-      "forbidden": "K qlại được, tdừng hoặc hthành gđoạn sx"
+      "forbidden": "K qlại được, tdừng hoặc hthành gđoạn sx",
+      "completeBtn": "Hoàn thành",
+      "pauseBtn": "Tạm dừng",
+      "startBtn": "Sản xuất"
     },
     "operatorSign": {
       "operator1Title": "Nhập tk n.viên d.chuyền sx 1 (bắt buộc)",
