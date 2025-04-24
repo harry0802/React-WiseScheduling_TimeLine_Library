@@ -69,7 +69,10 @@
     "detail": {
       "title": "機台製令單生產明細",
       "completePopMsg": "仍有製令單未符合製令數量，一旦結單無法再執行此單，需重開製令單，您確定要完成此生產階段?",
-      "forbidden": "您無法回到上一頁，請\"暫停\"或\"完成\"此生產階段"
+      "forbidden": "您無法回到上一頁，請\"暫停\"或\"完成\"此生產階段",
+      "completeBtn": "完成",
+      "pauseBtn": "暫停",
+      "startBtn": "生產"
     },
     "operatorSign": {
       "operator1Title": "請輸入產線工作人員1帳號(必填)",

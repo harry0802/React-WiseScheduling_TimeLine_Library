@@ -14,7 +14,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-height: 1.875rem;
+    // max-height: 1.875rem;
 
     .title {
       display: flex;
@@ -36,7 +36,8 @@
   .btnBox {
     div {
       display: inline-flex;
-      gap: 6rem;
+      gap: 2rem;
+      width: 100%;
     }
   }
 
@@ -44,11 +45,11 @@
     background: #83bf45;
     border-radius: 3rem;
     display: inline-flex;
-    padding: 23px 15px 19px 16px;
+    // padding: 23px 15px 19px 16px;
     justify-content: center;
     align-items: center;
-    width: 6.8125rem;
-    height: 2.375rem;
+
+    // height: 2.375rem;
     box-shadow: 0.25rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.25);
     border: none;
     color: #fff;
@@ -69,11 +70,11 @@
     background: #186c98;
     border-radius: 3rem;
     display: inline-flex;
-    padding: 1.4375rem 1rem 1.1875rem 1rem;
+    // padding: 1.4375rem 1rem 1.1875rem 1rem;
     justify-content: center;
     align-items: center;
-    width: 6.8125rem;
-    height: 2.375rem;
+    width: auto;
+    // height: 2.375rem;
     box-shadow: 0.25rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.25);
 
     color: #fff;
@@ -83,11 +84,13 @@
     &:hover {
       background: #1a7fb2;
       border-color: #1a7fb2;
+      color: #1a7fb2;
     }
 
     &:focus {
       background: #186c98;
       border-color: #186c98;
+      color: #1a7fb2;
     }
   }
 
@@ -102,12 +105,13 @@
     letter-spacing: 0.0313rem;
   }
 
-  // 強化SVG圖標
-  :global(.ant-btn) svg {
-    stroke-width: 10%;
-    stroke: #fff;
+  /* 使用全局選擇器來讓圖標和文字間距生效 */
+  :global(.ant-btn) {
+    svg + span,
+    span + svg {
+      margin-left: 8px;
+    }
   }
-
   .btnStart {
     width: 2.8125rem;
     height: 2.8125rem;
@@ -233,4 +237,28 @@
   background-color: #186c98;
   border-color: #186c98;
   color: #fff;
+}
+
+/* 設定按鈕永遠使用固定寬度適合觸控 */
+.btnPause,
+.btnDone {
+  min-width: 160px; /* 確保足夠寬度顯示文字和圖示 */
+  padding: 0 24px; /* 左右留出足夠空間 */
+  height: 44px; /* 符合觸摸區域最小高度 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  // 強化暂停和完成按鈕的SVG圖標
+  svg {
+    stroke-width: 10%;
+    stroke: currentColor;
+  }
+}
+
+// 強化SVG圖標
+.btnPause svg,
+.btnDone svg {
+  stroke-width: 10%;
+  stroke: currentColor;
 }
