@@ -494,19 +494,20 @@ const ProductionDetail = () => {
           />
         )}
       </div>
-      <Tooltip title={t("productionReport.detail.startBtn")}>
-        <Button
-          className={styles.btnStart}
-          type="default"
-          shape="circle"
-          icon={<CaretRightOutlined />}
-          onClick={() =>
-            navigate("/OperatorSignPage", {
-              state: { action: "startChildLot" },
-            })
-          }
-        />
-      </Tooltip>
+      <Button
+        className={styles.btnStart}
+        type="default"
+        onClick={() =>
+          navigate("/OperatorSignPage", {
+            state: { action: "startChildLot" },
+          })
+        }
+      >
+        <span>{t("productionReport.detail.startBtn")}</span>
+        <span className={styles.iconCircle}>
+          <CaretRightOutlined />
+        </span>
+      </Button>
     </div>
   );
 };
