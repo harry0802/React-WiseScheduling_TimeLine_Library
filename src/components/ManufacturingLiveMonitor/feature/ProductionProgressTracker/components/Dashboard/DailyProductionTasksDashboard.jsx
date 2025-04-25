@@ -92,15 +92,5 @@ function DailyProductionTasksDashboard({ data }) {
   )
 }
 
-// 組件屬性類型定義
-DailyProductionTasksDashboard.propTypes = {
-  data: PropTypes.array
-}
-
-// 默認屬性
-DailyProductionTasksDashboard.defaultProps = {
-  data: []
-}
-
 export default DailyProductionTasksDashboard
 

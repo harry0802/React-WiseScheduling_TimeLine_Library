@@ -39,10 +39,7 @@ function ProductionProgressTracker() {
           container
           spacing={2.5}
         >
-          <Grid
-            size={12}
-            height={'100%'}
-          >
+          <Grid size={12}>
             <DailyProductionTasks />
           </Grid>
         </Grid>

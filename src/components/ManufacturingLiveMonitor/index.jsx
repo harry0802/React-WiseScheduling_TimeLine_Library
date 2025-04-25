@@ -65,7 +65,20 @@ function setupFullScreenMode() {
     document.head.removeChild(style)
   }
 }
-
+/**
+ * @function isEntryPath
+ * @description 檢查當前路徑是否為入口頁面或其子路徑
+ * @param {string} pathname - 當前路徑
+ * @returns {boolean} 如果是入口頁面或其子路徑返回 true，否則返回 false
+ */
+const isEntryPath = (pathname) => {
+  const entryPaths = [
+    '/ManufacturingLiveMonitor',
+    '/FactoryPerformanceDashboard'
+  ]
+  // 檢查路徑是否以任一入口路徑開頭
+  return entryPaths.some((path) => pathname.startsWith(path))
+}
 /**
  * @function ManufacturingLiveMonitor
  * @description 製造監控儀表板主組件，顯示各種生產數據
@@ -73,7 +86,6 @@ function setupFullScreenMode() {
 function ManufacturingLiveMonitor() {
   const { headerName } = useHeaderNameStore()
   const location = useLocation()
-
   // 使用 useLayoutEffect 確保在 DOM 渲染前設置全屏模式
   React.useLayoutEffect(() => {
     return setupFullScreenMode()
@@ -83,10 +95,10 @@ function ManufacturingLiveMonitor() {
     <FullScreenLayout>
       <FullScreenContainer>
         <Container>
-          {location.pathname !== '/ManufacturingLiveMonitor' && (
+          {!isEntryPath(location.pathname) && (
             <DataVHeader title={headerName} />
           )}
-          <Main isEntry={location.pathname === '/ManufacturingLiveMonitor'}>
+          <Main isEntry={!isEntryPath(location.pathname)}>
             <Outlet />
           </Main>
         </Container>

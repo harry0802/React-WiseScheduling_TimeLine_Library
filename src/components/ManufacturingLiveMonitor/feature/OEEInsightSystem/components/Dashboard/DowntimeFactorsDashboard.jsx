@@ -1,5 +1,4 @@
-import { Charts, co } from '@iimm/data-view-react'
-import { colors } from '@mui/material'
+import { Charts } from '@iimm/data-view-react'
 
 const shutdownFactorsOption = {
   // 基本配置

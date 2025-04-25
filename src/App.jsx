@@ -12,6 +12,7 @@ import LoadingSpinner from './components/LoadingSpinner'
 import ManufacturingLiveMonitor from './components/ManufacturingLiveMonitor/index.jsx'
 import LoadingWrapper from './components/ManufacturingLiveMonitor/components/Loading/index.jsx'
 import DashboardEntry from './components/ManufacturingLiveMonitor/components/DashboardEntry/index.jsx'
+// import FactoryPerformanceDashboard from './components/ManufacturingLiveMonitor/feature/FactoryPerformanceDashboard/Index.jsx'
 /**
  * @function lazyLoad
  * @description 簡單的延遲載入輔助函數，帶有可選的回調機制和延遲時間
@@ -62,6 +63,11 @@ const OEEInsightSystem = lazyLoad(() =>
     './components/ManufacturingLiveMonitor/feature/OEEInsightSystem/index.jsx'
   )
 )
+const FactoryPerformanceDashboard = lazyLoad(() =>
+  import(
+    './components/ManufacturingLiveMonitor/feature/FactoryPerformanceDashboard/Index.jsx'
+  )
+)
 
 // 使用 HashRouter 代替 BrowserRouter
 const router = createHashRouter([
@@ -95,13 +101,27 @@ const router = createHashRouter([
     ]
   },
   {
-    path: 'ManufacturingLiveMonitor',
     element: <ManufacturingLiveMonitor />,
     errorElement: <ErrorPage />,
     children: [
       {
         index: true,
+        path: 'ManufacturingLiveMonitor',
         element: <DashboardEntry />
+      },
+      {
+        path: 'FactoryPerformanceDashboard',
+        element: (
+          <ErrorBoundary>
+            <Suspense
+              fallback={
+                <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+              }
+            >
+              <FactoryPerformanceDashboard />
+            </Suspense>
+          </ErrorBoundary>
+        )
       },
       {
         // 預設路由

@@ -1,32 +1,32 @@
-import React from "react";
-import { Outlet, useLocation } from "react-router-dom";
-import styled from "styled-components";
-import Navbar from "../components/Navbar";
-import ErrorBoundary from "../components/ErrorBoundary";
-import JokeWidget from "../components/JokeWidget";
+import React from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
+import styled from 'styled-components'
+import Navbar from '../components/Navbar'
+import ErrorBoundary from '../components/ErrorBoundary'
+import JokeWidget from '../components/JokeWidget'
 
 // 使用 styled-components 定義應用程式容器樣式
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-`;
+`
 
 const Content = styled.div`
   flex: 1;
-`;
+`
 
 const Footer = styled.footer`
   background-color: ${(props) => props.theme.colors.secondary};
   color: white;
   padding: ${(props) => props.theme.spacing.md};
   text-align: center;
-`;
+`
 
 function AppLayout() {
-  const location = useLocation();
+  const location = useLocation()
   // 用於當路由變更時重置錯誤邊界
-  const resetKey = location.pathname;
+  const resetKey = location.pathname
 
   return (
     <AppContainer>
@@ -43,7 +43,8 @@ function AppLayout() {
       {/* 笑話小工具 */}
       <JokeWidget />
     </AppContainer>
-  );
+  )
 }
 
-export default AppLayout;
+export default AppLayout
+

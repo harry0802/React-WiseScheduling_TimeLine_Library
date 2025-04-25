@@ -11,7 +11,7 @@ const SYSTEM_MODULES = [
     title: 'OEE 即時監控',
     description: '即時監控生產線效率，包含設備運作狀態、產能以及良率指標',
     icon: 'dashboard',
-    path: '/ManufacturingLiveMonitor/RealTimeOEEMonitor',
+    path: '/RealTimeOEEMonitor',
     color: 'rgba(0, 123, 255, 0.85)',
     stats: { value: '87.2%', trend: 'up', change: '2.4%' }
   },
@@ -20,7 +20,7 @@ const SYSTEM_MODULES = [
     title: '生產進度追蹤',
     description: '監控各產線生產進度，提供工單達成率、實際生產數量與計劃比較',
     icon: 'trending_up',
-    path: '/ManufacturingLiveMonitor/ProductionProgressTracker',
+    path: '/ProductionProgressTracker',
     color: 'rgba(40, 167, 69, 0.85)',
     stats: { value: '94.5%', trend: 'up', change: '3.7%' }
   },
@@ -29,7 +29,7 @@ const SYSTEM_MODULES = [
     title: '交貨趨勢分析',
     description: '分析出貨數據趨勢，預測未來產能需求及規劃',
     icon: 'assessment',
-    path: '/ManufacturingLiveMonitor/DeliveryTrendAnalyzer',
+    path: '/DeliveryTrendAnalyzer',
     color: 'rgba(255, 193, 7, 0.85)',
     stats: { value: '98.3%', trend: 'stable', change: '0.2%' }
   },
@@ -38,7 +38,7 @@ const SYSTEM_MODULES = [
     title: 'OEE 深度分析',
     description: '深入分析設備OEE指標，找出瓶頸及改善方向',
     icon: 'insights',
-    path: '/ManufacturingLiveMonitor/OEEInsightSystem',
+    path: '/OEEInsightSystem',
     color: 'rgba(220, 53, 69, 0.85)',
     stats: { value: '76.8%', trend: 'down', change: '1.5%' }
   }

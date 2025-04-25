@@ -101,15 +101,5 @@ function TodayShippingPanel({ data }) {
   )
 }
 
-// 組件屬性類型定義
-TodayShippingPanel.propTypes = {
-  data: PropTypes.array
-}
-
-// 默認屬性
-TodayShippingPanel.defaultProps = {
-  data: []
-}
-
 export default TodayShippingPanel
 

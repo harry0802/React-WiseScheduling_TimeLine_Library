@@ -5,6 +5,7 @@ import { useHeaderNameStore } from '../../slice/LayoutSlice'
 import MachineOperationRate from './feature/MachineOperationRate'
 import MachineOperationSummary from './feature/MachineOperationSummary'
 import DowntimeFactors from './feature/DowntimeFactors'
+import MachineStatusDuration from './feature/MachineStatusDuration'
 
 function OEEInsightSystem() {
   const { setHeaderName } = useHeaderNameStore()
@@ -39,7 +40,10 @@ function OEEInsightSystem() {
           container
           spacing={1.25}
           size={12}
-        ></Grid>
+          height={'510px'}
+        >
+          <MachineStatusDuration />
+        </Grid>
       </Stack>
     </section>
   )

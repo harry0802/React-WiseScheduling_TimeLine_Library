@@ -12,7 +12,7 @@ const StatusContent = styled.div`
   margin-bottom: 10px;
 `
 const productionData = [
-  { status: 'NORMAL', count: '120', hours: '9000.0' },
+  { status: 'NORMAL', count: '135', hours: '9070.0' },
   { status: 'TESTING', count: '00', hours: '040.0' },
   { status: 'SWITCHING', count: '300', hours: '2510.0' },
   { status: 'PAUSED', count: '', hours: '020.0' },
