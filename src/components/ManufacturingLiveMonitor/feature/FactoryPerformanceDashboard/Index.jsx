@@ -1,11 +1,7 @@
 import ProductionZoneA from './feature/ProductionZoneA'
 
 function FactoryPerformanceDashboard() {
-  return (
-    <div>
-      <ProductionZoneA />
-    </div>
-  )
+  return <ProductionZoneA />
 }
 
 export default FactoryPerformanceDashboard

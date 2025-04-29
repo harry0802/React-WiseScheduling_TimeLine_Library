@@ -6,48 +6,46 @@ import styled, { css } from 'styled-components'
 //* 🧠 狀態配置常量 - 集中管理所有視覺相關屬性
 const STATUS_CONFIG = {
   success: {
-    bgColor: '#57cc99',
-    statusDot: '#00fc2a',
+    bgColor: 'rgba(19, 70, 58, 0.85)', // 深綠色 + 透明度
+    statusDot: '#4ade80', // 鮮明的綠色指示燈
     statusText: '正常運行',
-    textShadow: '1px 1px 2px #38a3a5',
-    lightColor: '#FFFF8D',
-    darkColor: '#80DEEA'
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+    lightColor: '#6ee7b7', // 淺綠色
+    darkColor: '#a7f3d0' // 明亮的淺綠色
   },
   warning: {
-    bgColor: '#4895ef',
-    statusDot: '#4895ef',
+    bgColor: 'rgba(49, 78, 117, 0.85)', // 深藍色 + 透明度
+    statusDot: '#60a5fa', // 鮮明的藍色指示燈
     statusText: '需注意',
-    textShadow: '1px 1px 2px #3f8efc',
-    lightColor: '#FFFF8D',
-    darkColor: '#80DEEA'
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+    lightColor: '#fcd34d', // 金黃色
+    darkColor: '#93c5fd' // 淺藍色
   },
   danger: {
-    bgColor: '#f5a091',
-    statusDot: '#ff3b30',
+    bgColor: 'rgba(120, 37, 46, 0.85)', // 深紅色 + 透明度
+    statusDot: '#f87171', // 鮮明的紅色指示燈
     statusText: '異常',
-    textShadow: '1px 1px 2px #d0887b',
-    lightColor: '#FFFF8D',
-    darkColor: '#80DEEA'
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+    lightColor: '#fca5a5', // 淺紅色
+    darkColor: '#fee2e2' // 明亮的淺紅色
   },
   inactive: {
-    bgColor: '#d3d3d3',
-    statusDot: '#8e8e93',
+    bgColor: 'rgba(55, 65, 81, 0.75)', // 深灰色 + 透明度
+    statusDot: '#9ca3af', // 淺灰色指示燈
     statusText: '未啟用',
-    textShadow: '1px 1px 2px #b3b3b3',
-    lightColor: '#eee',
-    darkColor: '#D1D1D1'
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+    lightColor: '#d1d5db', // 中灰色
+    darkColor: '#e5e7eb' // 淺灰色
   }
 }
 
 //* 💡 通用陰影效果 - 抽象重複的樣式定義
 const SHADOWS = {
-  main: '14px 14px 20px rgba(0, 0, 0, 0.2), -10px -10px 20px #fff',
-
-  hover:
-    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+  main: '0 10px 20px rgba(0, 0, 0, 0.4), 0 6px 6px rgba(0, 0, 0, 0.3)',
+  hover: '0 15px 25px rgba(0, 0, 0, 0.4), 0 10px 10px rgba(0, 0, 0, 0.2)',
   inner:
-    '4px 4px 8px rgba(0, 0, 0, 0.15), -4px -4px 8px rgba(255, 255, 255, 0.2)',
-  text: '1px 1px 3px rgba(0, 0, 0, 0.2)'
+    'inset 0 4px 8px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.2)',
+  text: '1px 1px 2px rgba(0, 0, 0, 0.6)'
 }
 
 //! =============== 2. 工具函數 ===============
@@ -78,18 +76,21 @@ const CardContext = createContext()
 //! =============== 4. Styled Components ===============
 //* 基礎卡片容器
 const CardContainer = styled.div`
-  border-radius: 50px;
+  border-radius: 20px;
   background: ${(props) =>
-    STATUS_CONFIG[props.status]?.bgColor || STATUS_CONFIG.inactive.bgColor};
+    STATUS_CONFIG[props.$status]?.bgColor || STATUS_CONFIG.inactive.bgColor};
   box-shadow: ${SHADOWS.main};
   transition: all 0.3s ease;
   padding: 1.5rem;
   width: 100%;
   max-width: 300px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 
-  /* &:hover {
+  &:hover {
     box-shadow: ${SHADOWS.hover};
-  } */
+    transform: translateY(-5px);
+  }
 `
 
 //* 頂部區域排版
@@ -108,12 +109,13 @@ const IdStatusContainer = styled.div`
 
 //* 設備 ID 樣式
 const EquipmentId = styled.span`
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: white;
   text-shadow: ${(props) =>
-    STATUS_CONFIG[props.status]?.textShadow ||
+    STATUS_CONFIG[props.$status]?.textShadow ||
     STATUS_CONFIG.inactive.textShadow};
+  letter-spacing: -0.02em;
 `
 
 //* 狀態指示器容器
@@ -125,66 +127,77 @@ const StatusContainer = styled.div`
 
 //* 狀態指示點
 const StatusDot = styled.span`
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
   background-color: ${(props) =>
-    STATUS_CONFIG[props.status]?.statusDot || STATUS_CONFIG.inactive.statusDot};
+    STATUS_CONFIG[props.$status]?.statusDot ||
+    STATUS_CONFIG.inactive.statusDot};
   margin-right: 0.5rem;
-  box-shadow: ${(props) => {
-    const color =
-      STATUS_CONFIG[props.status]?.bgColor || STATUS_CONFIG.inactive.bgColor
-    const darken = adjustColor(color, -25)
-    const lighten = adjustColor(color, 25)
-    return `4px 4px 8px #${darken}, -4px -4px 8px #${lighten}`
-  }};
+  box-shadow: 0 0 5px
+    ${(props) =>
+      STATUS_CONFIG[props.$status]?.statusDot ||
+      STATUS_CONFIG.inactive.statusDot};
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.4;
+    filter: blur(4px);
+    z-index: -1;
+  }
 `
 
 //* 狀態文字
 const StatusText = styled.span`
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 500;
-  color: white;
+  color: rgba(255, 255, 255, 0.85);
   text-shadow: ${(props) =>
-    STATUS_CONFIG[props.status]?.textShadow ||
+    STATUS_CONFIG[props.$status]?.textShadow ||
     STATUS_CONFIG.inactive.textShadow};
+  letter-spacing: 0.02em;
 `
 
 //* 型號標籤
 const ModelBadge = styled.div`
-  font-size: 1.125rem;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
+  font-size: 1rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 8px;
   font-weight: 500;
-  color: white;
-  background: ${(props) =>
-    STATUS_CONFIG[props.status]?.bgColor || STATUS_CONFIG.inactive.bgColor};
-  box-shadow: ${(props) => {
-    const color =
-      STATUS_CONFIG[props.status]?.bgColor || STATUS_CONFIG.inactive.bgColor
-    const darken = adjustColor(color, -25)
-    const lighten = adjustColor(color, 25)
-    return `4px 4px 8px #${darken}, -4px -4px 8px #${lighten}`
-  }};
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  letter-spacing: 0.05em;
 `
 
 //* 數據區域
 const StatsContainer = styled.div`
-  border-radius: 1.5rem;
+  border-radius: 10px;
   padding: 1rem;
-  background: ${(props) =>
-    STATUS_CONFIG[props.status]?.bgColor || STATUS_CONFIG.inactive.bgColor};
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(2px);
   box-shadow: ${SHADOWS.inner};
   display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 `
 
 //* 共用的統計項目樣式
 const StatItem = styled.div`
   width: 50%;
   text-align: center;
-  padding: ${(props) => (props.isLeft ? '0 0.75rem 0 0' : '0 0 0 0.75rem')};
+  padding: ${(props) => (props.$isLeft ? '0 0.75rem 0 0' : '0 0 0 0.75rem')};
   ${(props) =>
-    !props.isLeft &&
+    !props.$isLeft &&
     css`
       border-left: 1px solid rgba(255, 255, 255, 0.2);
     `}
@@ -192,14 +205,14 @@ const StatItem = styled.div`
 
 //* 統計標題
 const StatLabel = styled.span`
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: white;
-  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
   display: block;
   margin-bottom: 0.25rem;
-  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.2);
+  text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.3);
 `
 
 //* 統計數值容器
@@ -211,28 +224,56 @@ const StatValueContainer = styled.div`
 
 //* 統計數值
 const StatValue = styled.span`
-  font-size: 2.25rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: ${(props) => {
-    if (!props.isActive) return STATUS_CONFIG.inactive.lightColor
-    return props.type === 'goodRate'
-      ? STATUS_CONFIG[props.status]?.lightColor
-      : STATUS_CONFIG[props.status]?.darkColor
+    if (!props.$isActive) return STATUS_CONFIG.inactive.lightColor
+    return props.$type === 'goodRate'
+      ? STATUS_CONFIG[props.$status]?.lightColor
+      : STATUS_CONFIG[props.$status]?.darkColor
   }};
   text-shadow: ${SHADOWS.text};
+  position: relative;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: ${(props) => {
+      if (!props.$isActive) return 'transparent'
+      const color =
+        props.$type === 'goodRate'
+          ? STATUS_CONFIG[props.$status]?.lightColor
+          : STATUS_CONFIG[props.$status]?.darkColor
+      return color ? `${color}22` : 'transparent' // 22 is alpha in hex (13%)
+    }};
+    filter: blur(8px);
+    opacity: 0.6;
+    z-index: -1;
+    border-radius: 8px;
+  }
 `
 
 //* 統計單位
 const StatUnit = styled.span`
   margin-left: 0.25rem;
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: ${(props) => {
-    if (!props.isActive) return STATUS_CONFIG.inactive.lightColor
-    return props.type === 'goodRate'
-      ? STATUS_CONFIG[props.status]?.lightColor
-      : STATUS_CONFIG[props.status]?.darkColor
+    if (!props.$isActive) return STATUS_CONFIG.inactive.lightColor
+    return props.$type === 'goodRate'
+      ? STATUS_CONFIG[props.$status]?.lightColor
+      : STATUS_CONFIG[props.$status]?.darkColor
   }};
   text-shadow: ${SHADOWS.text};
+  opacity: 0.8;
+  font-weight: 500;
+  align-self: flex-start;
+  margin-top: 0.5rem;
 `
 
 //! =============== 5. Compound Component 實現 ===============
@@ -262,7 +303,7 @@ function DashboardCard({ status = 'inactive', children }) {
 
   return (
     <CardContext.Provider value={contextValue}>
-      <CardContainer status={validStatus}>{children}</CardContainer>
+      <CardContainer $status={validStatus}>{children}</CardContainer>
     </CardContext.Provider>
   )
 }
@@ -280,17 +321,17 @@ function Header({ id, model }) {
   return (
     <HeaderContainer>
       <IdStatusContainer>
-        <EquipmentId status={status}>{id}</EquipmentId>
+        <EquipmentId $status={status}>{id}</EquipmentId>
         <StatusContainer>
-          <StatusDot status={status} />
-          <StatusText status={status}>
+          <StatusDot $status={status} />
+          <StatusText $status={status}>
             {STATUS_CONFIG[status]?.statusText ||
               STATUS_CONFIG.inactive.statusText}
           </StatusText>
         </StatusContainer>
       </IdStatusContainer>
 
-      <ModelBadge status={status}>
+      <ModelBadge $status={status}>
         {model !== '--' ? model : '無數據'}
       </ModelBadge>
     </HeaderContainer>
@@ -308,41 +349,41 @@ function Stats({ goodRate = 0, completionRate = 0 }) {
   const { status, isActive } = useContext(CardContext)
 
   return (
-    <StatsContainer status={status}>
-      <StatItem isLeft>
+    <StatsContainer $status={status}>
+      <StatItem $isLeft={true}>
         <StatLabel>良率</StatLabel>
         <StatValueContainer>
           <StatValue
-            isActive={isActive}
-            status={status}
-            type='goodRate'
+            $isActive={isActive}
+            $status={status}
+            $type='goodRate'
           >
             {goodRate}
           </StatValue>
           <StatUnit
-            isActive={isActive}
-            status={status}
-            type='goodRate'
+            $isActive={isActive}
+            $status={status}
+            $type='goodRate'
           >
             %
           </StatUnit>
         </StatValueContainer>
       </StatItem>
 
-      <StatItem>
+      <StatItem $isLeft={false}>
         <StatLabel>完成率</StatLabel>
         <StatValueContainer>
           <StatValue
-            isActive={isActive}
-            status={status}
-            type='completionRate'
+            $isActive={isActive}
+            $status={status}
+            $type='completionRate'
           >
             {completionRate}
           </StatValue>
           <StatUnit
-            isActive={isActive}
-            status={status}
-            type='completionRate'
+            $isActive={isActive}
+            $status={status}
+            $type='completionRate'
           >
             %
           </StatUnit>

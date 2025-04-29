@@ -47,16 +47,15 @@ const typeText = keyframes`
 const LoadingContainer = styled.div`
   /* 布局定位 */
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
 
   /* 盒模型 */
-  width: 100vw;
-  height: 100vh;
+  /* width: 100vw; */
+  /* height: 100vh; */
   margin: 0;
   padding: 0;
   min-height: 400px;
@@ -181,7 +180,7 @@ const InfoText = styled.div`
  * @param {Node} props.children - 載入文字或內容
  * @returns {JSX.Element} 渲染的載入組件
  */
-function LoadingWrapper({ children }) {
+function LoadingWrapper({ children = '載入中...' }) {
   return (
     <LoadingContainer>
       <LoadingContent>
@@ -196,14 +195,6 @@ function LoadingWrapper({ children }) {
       </LoadingContent>
     </LoadingContainer>
   )
-}
-
-LoadingWrapper.propTypes = {
-  children: PropTypes.node
-}
-
-LoadingWrapper.defaultProps = {
-  children: '載入中...'
 }
 
 export default LoadingWrapper
