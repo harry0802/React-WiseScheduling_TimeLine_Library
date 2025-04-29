@@ -33,7 +33,7 @@ const Container = styled.div`
 const Main = styled.div`
   display: flex;
   flex-direction: column;
-  padding: ${(props) => (props.$isEntry ? '0' : '0 1.25rem')};
+  padding: ${(props) => (props.isEntry ? '0' : '0 1.25rem')};
 `
 
 //! =============== 2. 核心功能 ===============

@@ -1,4 +1,3 @@
-import { max } from 'date-fns'
 import BaseSection from '../components/BaseSection'
 import DashboardCard from '../components/DashboardCard'
 import styled from 'styled-components'
