@@ -4,6 +4,8 @@ import styled, { css } from 'styled-components'
 
 //! =============== 1. 設定與常量 ===============
 //* 🧠 狀態配置常量 - 集中管理所有視覺相關屬性
+// 修改 DashboardCard.jsx 中的 STATUS_CONFIG
+//* 🧠 狀態配置常量 - 集中管理所有視覺相關屬性
 const STATUS_CONFIG = {
   success: {
     bgColor: 'rgba(19, 70, 58, 0.85)', // 深綠色 + 透明度
@@ -13,18 +15,34 @@ const STATUS_CONFIG = {
     lightColor: '#6ee7b7', // 淺綠色
     darkColor: '#a7f3d0' // 明亮的淺綠色
   },
+  testing: {
+    bgColor: 'rgba(22, 78, 99, 0.85)', // 深藍色 + 透明度
+    statusDot: '#38bdf8', // 鮮明的藍色指示燈
+    statusText: '試模中',
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+    lightColor: '#7dd3fc', // 淺藍色
+    darkColor: '#bae6fd' // 明亮的淺藍色
+  },
+  adjusting: {
+    bgColor: 'rgba(99, 84, 0, 0.85)', // 深浅色黃 + 透明度
+    statusDot: '#eab308', // 鮮明的黃色指示燈
+    statusText: '調機中',
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
+    lightColor: '#facc15', // 金黃色
+    darkColor: '#fef08a' // 淺黃色
+  },
   warning: {
-    bgColor: 'rgba(49, 78, 117, 0.85)', // 深藍色 + 透明度
-    statusDot: '#60a5fa', // 鮮明的藍色指示燈
+    bgColor: 'rgba(78, 53, 22, 0.85)', // 深橙色 + 透明度
+    statusDot: '#f97316', // 鮮明的橙色指示燈
     statusText: '需注意',
     textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-    lightColor: '#fcd34d', // 金黃色
-    darkColor: '#93c5fd' // 淺藍色
+    lightColor: '#fdba74', // 淺橙色
+    darkColor: '#fed7aa' // 明亮的淺橙色
   },
   danger: {
     bgColor: 'rgba(120, 37, 46, 0.85)', // 深紅色 + 透明度
     statusDot: '#f87171', // 鮮明的紅色指示燈
-    statusText: '異常',
+    statusText: '異常狀態',
     textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
     lightColor: '#fca5a5', // 淺紅色
     darkColor: '#fee2e2' // 明亮的淺紅色
@@ -38,7 +56,6 @@ const STATUS_CONFIG = {
     darkColor: '#e5e7eb' // 淺灰色
   }
 }
-
 //* 💡 通用陰影效果 - 抽象重複的樣式定義
 const SHADOWS = {
   main: '0 10px 20px rgba(0, 0, 0, 0.4), 0 6px 6px rgba(0, 0, 0, 0.3)',
@@ -315,7 +332,7 @@ function DashboardCard({ status = 'inactive', children }) {
  * @param {string} props.id - 設備 ID
  * @param {string} props.model - 設備型號
  */
-function Header({ id, model }) {
+function Header({ id, model, statusText }) {
   const { status } = useContext(CardContext)
 
   return (
@@ -325,7 +342,7 @@ function Header({ id, model }) {
         <StatusContainer>
           <StatusDot $status={status} />
           <StatusText $status={status}>
-            {STATUS_CONFIG[status]?.statusText ||
+            {statusText || STATUS_CONFIG[status]?.statusText ||
               STATUS_CONFIG.inactive.statusText}
           </StatusText>
         </StatusContainer>
