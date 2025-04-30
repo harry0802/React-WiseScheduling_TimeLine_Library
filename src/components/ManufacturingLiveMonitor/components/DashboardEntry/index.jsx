@@ -41,6 +41,15 @@ const SYSTEM_MODULES = [
     path: '/OEEInsightSystem',
     color: 'rgba(220, 53, 69, 0.85)',
     stats: { value: '76.8%', trend: 'down', change: '1.5%' }
+  },
+  {
+    id: 'factory-performance',
+    title: '工廠績效儀表板',
+    description: '全廠生產線即時狀態監控，包含設備狀態、良率及完成率指標',
+    icon: 'factory',
+    path: '/FactoryPerformanceDashboard',
+    color: 'rgba(111, 66, 193, 0.85)',
+    stats: { value: '82.5%', trend: 'up', change: '1.8%' }
   }
 ]
 
@@ -177,4 +186,3 @@ function DashboardEntry() {
 }
 
 export default DashboardEntry
-
