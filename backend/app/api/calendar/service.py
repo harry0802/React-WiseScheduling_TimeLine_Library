@@ -90,7 +90,8 @@ class CalendarService:
         新北API: https://data.ntpc.gov.tw/api/datasets/308dcd75-6434-45bc-a95f-584da4fed251/json
         新北API response:[{
             "date": "2013/10/19",
-            "chinese": "",
+            "year": "2013",
+            "name": "",
             "isholiday": "是",
             "holidaycategory": "星期六、星期日",
             "description": ""
@@ -104,47 +105,13 @@ class CalendarService:
             response.raise_for_status() # Raise exception if invalid response
             calendar = response.json() # Convert response to json
 
-            # Write to database
-            # Delete all existing records
-            # Calendar.query.delete()
-            # db.session.commit()
-
-            # Insert new records
-            
-            # #call PUT /api/calendar/{date}
-            # for record in calendar:
-            #     payload = {
-            #        "date": record["date"],
-            #        "isHoliday": True if record["isholiday"] == "是" else False,
-            #        "chinese": record["chinese"],
-            #        "holidayCategory": record["holidaycategory"],
-            #        "description": record["description"],
-            #     }
-            #     CalendarService.upsert_calendar(datetime.strptime(record["date"], '%Y/%m/%d'), payload)
-
-            # #session.add
-            # for record in calendar:
-            #     calendar_db = Calendar(
-            #         id=None,
-            #         date=record["date"],
-            #         isHoliday=True if record["isholiday"] == "是" else False,
-            #         chinese=record["chinese"],
-            #         holidayCategory=record["holidaycategory"],
-            #         description=record["description"],
-            #     )
-            #     try:
-            #         db.session.add(calendar_db)
-            #         db.session.commit()
-            #     except Exception as error:
-            #         skip = True
-
             #insert ignore
             entries = []
             for record in calendar:
                 calendar_db = {
                     "date":record["date"],
                     "isHoliday":True if record["isholiday"] == "是" else False,
-                    "chinese":record["chinese"],
+                    "chinese":record["name"],
                     "holidayCategory":record["holidaycategory"],
                     "description":record["description"],
                 }

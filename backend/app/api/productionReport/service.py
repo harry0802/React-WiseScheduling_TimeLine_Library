@@ -18,6 +18,7 @@ from .schemas import productionReportSchema, productionScheduleReportSchema
 from sqlalchemy import or_
 from app.models.productionSchedule import ProductionSchedule
 from app.api.productionCost.service import ProductionCostService
+from app.api.productionSchedule.productionScheduleOngoingService import ProductionScheduleOngoingService
 productionReport_schema = productionReportSchema()
 productionScheduleReport_schema = productionScheduleReportSchema()
 
@@ -513,15 +514,34 @@ class productionReportService:
                 else:
                     productionReport_db = complete_productionReport(mode, productionReport_db, data)
                 productionReport_db_list.append(productionReport_db)
+
+                if data.get("endTime", None):
+                    # 用於智慧成本分析，子批或母批結束時，將製令單的最終資料寫入productionCost資料表
+                    ProductionCostService.create_productionCost_final(data["id"])
+                    # 用於智慧排程，子批結束時，更新ProductionScheduleOngoing資料表的postpone time
+                    if mode == "childLot":
+                        # 根據子批的pschedule_id，查詢productionSchedule資料表，取得製令單的hourlyCapacity
+                        productionSchedule_db = ProductionSchedule.query.filter(
+                            ProductionSchedule.id == productionReport_db.pschedule_id
+                        ).first()
+                        production_dict = {
+                            "unfinishedQuantity": productionReport_db.unfinishedQuantity,
+                            "hourlyCapacity": productionSchedule_db.hourlyCapacity if productionSchedule_db else 1,
+                            "planFinishDate": productionSchedule_db.planFinishDate,
+                        }
+                        # 根據子批的pschedule_id，查詢相對應的productionScheduleOngoing資料表
+                        productionScheduleOngoing_db = ProductionScheduleOngoingService.get_productionScheduleOngoing_by_productionScheduleId(
+                            productionReport_db.pschedule_id
+                        )
+                        productionScheduleOngoing_dict = {
+                            "id": productionScheduleOngoing_db.id,
+                            "productionScheduleId": productionReport_db.pschedule_id,
+                        }
+                        ProductionScheduleOngoingService.update_productionScheduleOngoing_postponetime(production_dict, productionScheduleOngoing_dict)
             db.session.add_all(productionReport_db_list)
             db.session.flush()
             db.session.commit()
             
-            # 用於智慧成本分析，子批或母批結束時，將製令單的最終資料寫入productionCost資料表
-            for data in payload:
-                if data.get("endTime", None):
-                    ProductionCostService.create_productionCost_final(data["id"])
-                    
             productionReport_dto = productionReport_schema.dump(productionReport_db_list, many=True)
             resp = message(True, "productionReports have been updated..")
             resp["data"] = productionReport_dto

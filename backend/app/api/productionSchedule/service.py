@@ -1,5 +1,7 @@
 from datetime import datetime, date, timedelta
 import math
+import pytz
+import os
 import sys
 from flask import current_app
 from sqlalchemy import func
@@ -13,70 +15,15 @@ from app.models.process import Process
 from app.models.processOption import ProcessOption
 from app.models.processMold import ProcessMold
 from app.api.option.optionEnum import WorkOrderStatusEnum
+from app.api.productionSchedule.productionScheduleOngoingService import ProductionScheduleOngoingService
+from app.service.utils_iot import shift_by_holiday
 from .schemas import productionScheduleSchema
-from app.api.calendar.service import CalendarService
+from app.api.smartSchedule.service import SmartScheduleService
+from dotenv import load_dotenv
+load_dotenv()
+
+TZ = os.getenv("TIMEZONE","Asia/Taipei")
 productionSchedule_schema = productionScheduleSchema()
-
-
-def isHoliday(obj, start, end, api_version = "api.calendar_calendar_controller"):
-    if api_version == "api.calendar_calendar_controller":
-        if type(obj['date']) == str:
-            event_date = datetime.fromisoformat(obj['date'])
-        else:
-            event_date = obj['date']
-        # date = date.fromisoformat(obj['date'], '%Y-%m-%d')
-        # date = obj['date']
-        return event_date >= start and event_date <= end and obj['isHoliday'] == True
-    else:
-        return False
-
-"""shift_by_holiday
-
-Keyword arguments:
-argument -- start_date, end_date, workdays
-Return: return end_date
-
-this function should able to shift the end_date by holidays
-the workdays + holidays should be the same as the end_date - start_date
-"""
-
-def shift_by_holiday(start_date, end_date=datetime(1,1,1), workdays=1):
-    # get the holiday list (twice of workdays)
-    # to avoid the holiday list is not enough in final check
-    # the calendar_api
-    end_date = end_date.replace(tzinfo=start_date.tzinfo)
-    deltaDays = max(workdays, (end_date - start_date).days)
-
-    # calendar_api = url_for("api.calendar_calendar_controller",
-    #                         _scheme="http",
-    #                         year=start_date.year,
-    #                         month=start_date.month,
-    #                         day=start_date.day,
-    #                         len=deltaDays*2)
-    # holiday_list = requests.get(calendar_api).json()
-    holiday_list, code = CalendarService.get_calendar(start_date.date(), deltaDays*2)
-    if holiday_list["status"] != True:
-        return internal_err_resp()
-    holiday_list = holiday_list["data"]
-
-    #get the holiday list between start_date and end_date
-    holiday_list_1st_count = sum( 1 for holiday in holiday_list if isHoliday(holiday, start_date, end_date, "api.calendar_calendar_controller"))
-    #1st shift the end_date by workdays + holidays
-    new_end_date = start_date + timedelta(days=workdays+holiday_list_1st_count)
-    #final check if the workdays + holiday is the same as the end_date
-    holiday_list_2nd_count = sum( 1 for holiday in holiday_list if isHoliday(holiday, start_date, new_end_date, "api.calendar_calendar_controller"))
-
-    # check is any new holiday created in the 1st shift
-    if workdays+holiday_list_1st_count < workdays + holiday_list_2nd_count:
-        return shift_by_holiday(start_date, new_end_date, workdays)
-    else:
-        final_end_date = new_end_date
-    deltaDays = (final_end_date - start_date).days
-    
-    current_app.logger.debug(f"shift_by_holiday: ")
-    current_app.logger.debug(f"start: {start_date}, workdays: {workdays},")
-    current_app.logger.debug(f"final_end: {final_end_date}, deltaDays: {deltaDays}, holiday_count: {holiday_list_2nd_count}")
-    return final_end_date
 
 
 def complete_productionSchedule(db_obj, payload):
@@ -98,6 +45,13 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("workOrderDate") is not None else db_obj.workOrderDate
     db_obj.moldingSecond = int(payload["moldingSecond"]) \
         if payload.get("moldingSecond") is not None else db_obj.moldingSecond
+    # 確認預計上機日是否有變更，有的話，就更新相關的排程
+    # 若需要更新相關的排程，必須在更新db_obj之前，否則在update_work_order_schedule時查到的ProductionSchedule會是更新後的資料(Session快取)
+    if payload.get("planOnMachineDate") is not None and db_obj.planOnMachineDate != payload.get("planOnMachineDate"):
+        SmartScheduleService.update_work_order_schedule({
+            "productionScheduleId": db_obj.id,
+            "newStartDate": payload.get("planOnMachineDate"),
+        })
     db_obj.planOnMachineDate = datetime.fromisoformat(payload["planOnMachineDate"]) \
         if payload.get("planOnMachineDate") is not None else db_obj.planOnMachineDate
     db_obj.actualOnMachineDate = datetime.fromisoformat(payload["actualOnMachineDate"]) \
@@ -119,6 +73,7 @@ def complete_productionSchedule(db_obj, payload):
         if payload.get("singleOrDoubleColor") is not None else db_obj.singleOrDoubleColor
     db_obj.conversionRate = float(payload["conversionRate"]) \
         if payload.get("conversionRate") is not None else db_obj.conversionRate
+    prev_status = db_obj.status
     db_obj.status = payload["status"] \
         if payload.get("status") is not None else db_obj.status
     #datetime type transform
@@ -167,6 +122,7 @@ def complete_productionSchedule(db_obj, payload):
         db_obj.week = db_obj.planOnMachineDate.isocalendar()[1] if db_obj.planOnMachineDate is not None else db_obj.week
         #by 預計完成日
         # db_obj.week = db_obj.planFinishDate.isocalendar()[1] if db_obj.planFinishDate is not None else db_obj.week
+    
     #排程狀態
     today = datetime.date(datetime.now())
     status = payload.get("status", None)
@@ -178,6 +134,37 @@ def complete_productionSchedule(db_obj, payload):
         db_obj.status = status
     if db_obj.actualFinishDate is not None:
         db_obj.status = WorkOrderStatusEnum.DONE.value
+    
+    # 如果狀態有變化，就更新ProductionScheduleOngoing資料表
+    if db_obj.status != prev_status:
+        # 找出ProductionScheduleOngoing資料表中，對應的生產排程ID
+        productionScheduleOngoing_db = ProductionScheduleOngoingService.get_productionScheduleOngoing_by_productionScheduleId(db_obj.id)
+        
+        # 變成On-going，ProductionScheduleOngoing資料表會自動新增一筆，並更新開始時間
+        if db_obj.status == WorkOrderStatusEnum.ON_GOING.value:
+            ProductionScheduleOngoingService.create_productionScheduleOngoing({
+                "productionScheduleId": db_obj.id,
+                "startTime": db_obj.actualOnMachineDate.isoformat()
+            })
+        # 變成Pause，ProductionScheduleOngoing資料表更新結束時間
+        if db_obj.status == WorkOrderStatusEnum.PAUSE.value:
+            # 如果有對應的ProductionScheduleOngoing資料，就更新結束時間
+            if productionScheduleOngoing_db is not None:
+                ProductionScheduleOngoingService.update_productionScheduleOngoing_endtime({
+                    "id": productionScheduleOngoing_db.id,
+                    "productionScheduleId": db_obj.id,
+                    "endTime": datetime.now(pytz.timezone(TZ)).isoformat()
+                })
+        # 變成Done，ProductionScheduleOngoing資料表更新結束時間
+        if db_obj.status == WorkOrderStatusEnum.DONE.value:
+            # 如果有對應的ProductionScheduleOngoing資料，就更新結束時間
+            if productionScheduleOngoing_db is not None:
+                ProductionScheduleOngoingService.update_productionScheduleOngoing_endtime({
+                    "id": productionScheduleOngoing_db.id,
+                    "productionScheduleId": db_obj.id,
+                    "endTime": db_obj.actualFinishDate.isoformat()
+                })
+
     return db_obj
 
 class productionScheduleService:

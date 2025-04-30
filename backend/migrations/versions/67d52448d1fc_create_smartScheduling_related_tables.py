@@ -33,6 +33,209 @@ def upgrade():
     comment='機台狀態紀錄'
     )
 
+    op.create_table('productionScheduleOngoing',
+    sa.Column('id', sa.Integer(), nullable=False, comment='製令單生產時段紀錄ID'),
+    sa.Column('productionScheduleId', sa.Integer(), nullable=True, comment='ProductionSchedule ID'),
+    sa.Column('startTime', sa.DateTime(), nullable=True, comment='生產開始日期'),
+    sa.Column('endTime', sa.DateTime(), nullable=True, comment='生產結束日期'),
+    sa.Column('postponeTime', sa.DateTime(), nullable=True, comment='延遲完成日期。公式：(製令數量 - 已完成數量) / 每小時產能 + 當天日期'),
+    sa.PrimaryKeyConstraint('id'),
+    comment='製令單生產時段紀錄'
+    )
+
+    # ALTER productionScheduleReportView view
+    op.execute("""
+    ALTER VIEW `productionScheduleReportView` AS
+        SELECT 
+            `ps`.`id` AS `productionScheduleId`,
+            `ps`.`productionArea` AS `productionArea`,
+            `ps`.`machineSN` AS `machineSN`,
+            `ps`.`workOrderSN` AS `workOrderSN`,
+            `ps`.`workOrderQuantity` AS `workOrderQuantity`,
+            `ps`.`planOnMachineDate` AS `planOnMachineDate`,
+            `ps`.`planFinishDate` AS `planFinishDate`,
+            `ps`.`actualOnMachineDate` AS `actualOnMachineDate`,
+            `ps`.`actualFinishDate` AS `actualFinishDate`,
+            `ps`.`status` AS `status`,
+            `pr`.`id` AS `productionReportId`,
+            `pr`.`serialNumber` AS `serialNumber`,
+            `pr`.`lotName` AS `lotName`,
+            `pr`.`material` AS `material`,
+            `pr`.`productionQuantity` AS `productionQuantity`,
+            `pr`.`defectiveQuantity` AS `defectiveQuantity`,
+            `pr`.`productionDefectiveRate` AS `productionDefectiveRate`,
+            `pr`.`unfinishedQuantity` AS `unfinishedQuantity`,
+            `pr`.`colorDifference` AS `colorDifference`,
+            `pr`.`deformation` AS `deformation`,
+            `pr`.`shrinkage` AS `shrinkage`,
+            `pr`.`shortage` AS `shortage`,
+            `pr`.`hole` AS `hole`,
+            `pr`.`bubble` AS `bubble`,
+            `pr`.`impurity` AS `impurity`,
+            `pr`.`pressure` AS `pressure`,
+            `pr`.`overflow` AS `overflow`,
+            `pr`.`flowMark` AS `flowMark`,
+            `pr`.`oilStain` AS `oilStain`,
+            `pr`.`burr` AS `burr`,
+            `pr`.`blackSpot` AS `blackSpot`,
+            `pr`.`scratch` AS `scratch`,
+            `pr`.`encapsulation` AS `encapsulation`,
+            `pr`.`other` AS `other`,
+            `pr`.`moldCavity` AS `moldCavity`,
+            `pr`.`moldingSecond` AS `moldingSecond`,
+            `pr`.`moldModulePerHour` AS `moldModulePerHour`,
+            `pr`.`workingHours` AS `workingHours`,
+            `pr`.`planProductionQuantity` AS `planProductionQuantity`,
+            `pr`.`productionQuantityDifference` AS `productionQuantityDifference`,
+            `pr`.`productionYield` AS `productionYield`,
+            `pr`.`machineMode` AS `machineMode`,
+            `pr`.`machineProductionModule` AS `machineProductionModule`,
+            `pr`.`machineProductionQuantity` AS `machineProductionQuantity`,
+            `pr`.`machineDefectiveRate` AS `machineDefectiveRate`,
+            `pr`.`utilizationRate` AS `utilizationRate`,
+            `pr`.`productionEfficiency` AS `productionEfficiency`,
+            `pr`.`OEE` AS `OEE`,
+            `pr`.`leader` AS `leader`,
+            `pr`.`operator1` AS `operator1`,
+            `pr`.`operator2` AS `operator2`,
+            `pr`.`startTime` AS `startTime`,
+            `pr`.`endTime` AS `endTime`,
+            `pr`.`comment` AS `comment`,
+            `p`.`productSN` AS `productSN`,
+            `p`.`productName` AS `productName`,
+            `po`.`id` AS `processOptionId`,
+            `po`.`processName` AS `processName`,
+            `pm`.`processId` AS `processId`,
+            GROUP_CONCAT(`lmm`.`moldno` separator ',') AS `moldNos` 
+        FROM 
+            `productionSchedule` `ps` LEFT JOIN `productionReport` `pr` ON (`ps`.`id` = `pr`.`pschedule_id`)
+            LEFT JOIN `product` `p` ON (`ps`.`productId` = `p`.`id`) 
+            LEFT JOIN `process` `proc` ON (`ps`.`processId` = `proc`.`id`) 
+            LEFT JOIN `processOption` `po` ON (`proc`.`processOptionId` = `po`.`id`)
+            LEFT JOIN `processMold` `pm` ON (`proc`.`id` = `pm`.`processId`) 
+            LEFT JOIN `ltmoldmap` `lmm` ON (`pm`.`ltmoldmapId` = `lmm`.`no`) 
+        WHERE 
+            `ps`.`status` <> '取消生產' 
+            AND `ps`.`planOnMachineDate` > current_timestamp() - interval 6 month 
+        GROUP BY 
+            `pr`.`id` 
+        ORDER BY 
+            `ps`.`id` DESC,
+            `pr`.`id`
+    """)
+
+    # Create smartSchedulingView view
+    op.execute("""
+    CREATE VIEW smartSchedulingView AS
+        -- 從 machineStatus 獲取資料
+        SELECT
+			CONCAT('ms', ROW_NUMBER() OVER ()) AS fakeId, -- 第一分區：ms + ROW_NUMBER()
+            ms.status AS timeLineStatus,
+            ms.id AS machineStatusId,
+            m.productionArea AS productionArea,
+            m.machineSN AS machineSN,
+            ms.planStartDate AS machineStatusPlanStartTime,
+            ms.planEndDate AS machineStatusPlanEndTime,
+            ms.actualStartDate AS machineStatusActualStartTime,
+            ms.actualEndDate AS machineStatusActualEndTime,
+            ms.reason AS machineStatusReason,
+            ms.product AS machineStatusProduct,
+            NULL AS productionScheduleId,
+            NULL AS planOnMachineDate,
+            NULL AS planFinishDate,
+            NULL AS actualOnMachineDate,
+            NULL AS actualFinishDate,
+            NULL AS postponeTime,
+            NULL AS productSN,
+            NULL AS productName,
+            NULL AS workOrderQuantity,
+            NULL AS productionQuantity,
+            NULL AS processName,
+            NULL AS productionScheduleStatus
+        FROM 
+            machineStatus ms
+        INNER JOIN 
+            machine m
+        ON 
+            ms.machineId = m.id
+        WHERE 
+            ms.planStartDate > current_timestamp() - interval 6 month
+
+        UNION ALL
+
+        -- 從 productionScheduleOngoing 獲取資料On-going的製令單
+        SELECT 
+			CONCAT('pso', ROW_NUMBER() OVER ()) AS fakeId, -- 第二分區：pso + ROW_NUMBER()
+            '製令單' AS timeLineStatus,
+            NULL AS machineStatusId,
+            psrv.productionArea AS productionArea,
+            psrv.machineSN AS machineSN,
+            NULL AS machineStatusPlanStartTime,
+            NULL AS machineStatusPlanEndTime,
+            NULL AS machineStatusActualStartTime,
+            NULL AS machineStatusActualEndTime,
+            NULL AS machineStatusReason,
+            NULL AS machineStatusProduct,
+            pso.ProductionScheduleId AS productionScheduleId,
+            psrv.planOnMachineDate AS planOnMachineDate,
+            psrv.planFinishDate AS planFinishDate,
+            psrv.actualOnMachineDate AS actualOnMachineDate,
+            psrv.actualFinishDate AS actualFinishDate,
+            pso.postponeTime AS postponeTime,
+            psrv.productSN AS productSN,
+            psrv.productName AS productName,
+            psrv.workOrderQuantity AS workOrderQuantity,
+            psrv.productionQuantity AS productionQuantity,
+            psrv.processName AS processName,
+            psrv.status AS productionScheduleStatus
+        FROM 
+            productionScheduleOngoing pso
+        INNER JOIN 
+            (SELECT * FROM productionScheduleReportView WHERE serialNumber = 0) psrv
+        ON 
+            pso.ProductionScheduleId = psrv.ProductionScheduleId
+		WHERE
+			pso.startTime > current_timestamp() - interval 6 month
+
+        UNION ALL
+
+        -- 從 productionScheduleReportView 獲取尚未上機的製令單
+        SELECT 
+			CONCAT('ps', ROW_NUMBER() OVER ()) AS fakeId, -- 第三分區：ps + ROW_NUMBER()
+            '製令單' AS timeLineStatus,
+            NULL AS machineStatusId,
+            ps.productionArea AS productionArea,
+            ps.machineSN AS machineSN,
+            NULL AS machineStatusPlanStartTime,
+            NULL AS machineStatusPlanEndTime,
+            NULL AS machineStatusActualStartTime,
+            NULL AS machineStatusActualEndTime,
+            NULL AS machineStatusReason,
+            NULL AS machineStatusProduct,
+            ps.id AS productionScheduleId,
+            ps.planOnMachineDate AS planOnMachineDate,
+            ps.planFinishDate AS planFinishDate,
+            ps.actualOnMachineDate AS actualOnMachineDate,
+            ps.actualFinishDate AS actualFinishDate,
+            NULL AS postponeTime,
+            p.productSN AS productSN,
+            p.productName AS productName,
+            ps.workOrderQuantity AS workOrderQuantity,
+            NULL AS productionQuantity,
+            po.processName AS processName,
+            ps.status AS productionScheduleStatus
+        FROM 
+            productionSchedule ps
+		LEFT JOIN
+			product p ON ps.productId = p.id 
+        LEFT JOIN
+			process proc ON ps.processId = proc.id
+        LEFT JOIN
+			processOption po ON proc.processOptionId = po.id
+        WHERE 
+            ps.status = '尚未上機';
+    """)
+
     # Insert Option Data
     connection = op.get_bind()
     metadata = MetaData()
@@ -54,5 +257,7 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('machineStatus')
+    op.drop_table('productionScheduleOngoing')
     op.execute("DELETE FROM option WHERE name='machineStatus'")
+    op.execute("DROP VIEW smartSchedulingView")
     # ### end Alembic commands ###

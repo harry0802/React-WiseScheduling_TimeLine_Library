@@ -18,20 +18,16 @@ class MachineStatusDto:
     }
     #GET model
     get_obj = copy.deepcopy(base_obj)
-    for key in get_obj:
-        get_obj[key].description = f"GET {key}"
     machineStatus_object = api.model(
         "machineStatus object", base_obj
     )
     #POST model
     post_obj = copy.deepcopy(base_obj)
-    pop_list = ["id", "actualStartDate", "actualEndDate"]
+    pop_list = ["id", "actualEndDate"]
     required_list = ["machineId"]
     not_required_list = []
     for attr in [item for item in pop_list]:
         post_obj.pop(attr)
-    for key in post_obj:
-        post_obj[key].description = f"POST {key}"
     for key in [item for item in required_list]:
         post_obj[key].required = True
     for key in [item for item in not_required_list]:
@@ -45,8 +41,6 @@ class MachineStatusDto:
     not_required_list = [] # default all not required
     for attr in [item for item in pop_list]:
         put_obj.pop(attr)
-    for key in put_obj:
-        put_obj[key].description = f"PUT {key}"
     for key in [item for item in required_list]:
         put_obj[key].required = True
     for key in [item for item in not_required_list]:

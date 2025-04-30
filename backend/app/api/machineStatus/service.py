@@ -7,6 +7,7 @@ from app.models.machineStatus import MachineStatus
 from app.models.machine import Machine
 from app.models.productionSchedule import ProductionSchedule
 from app.api.option.optionEnum import WorkOrderStatusEnum, MachineStatusEnum
+from app.api.smartSchedule.service import SmartScheduleService
 from .schemas import MachineStatusSchema
 machineStatus_schema = MachineStatusSchema()
 
@@ -135,50 +136,85 @@ class MachineStatusService:
     # create MachineStatusStatus
     @staticmethod
     def create_machineStatus(payload):
+        """新增機台狀態並觸發排程調整"""
         try:
+            # 1. 創建新的機台狀態
             machineStatus_db = complete_machineStatus(MachineStatus(), payload)
             db.session.add(machineStatus_db)
-            db.session.commit()
+            db.session.flush()  # 確保 id 可用
+
+            # 2. 觸發排程調整，只傳遞必要的資訊
+            resp, status = SmartScheduleService.update_machine_status_schedule(
+                machineStatusId=machineStatus_db.id, is_create=True
+            )
+            if status != 200:
+                db.session.rollback()
+                return resp, status
 
             machineStatus_dump = machineStatus_schema.dump(machineStatus_db)
-            resp = message(True, "materialOptions have been created..")
+            resp = message(True, "machineStatus have been created and schedules updated.")
             resp["data"] = machineStatus_dump
+            return resp, 201
 
-            return resp, 200
-        # exception without handling should raise to the caller
         except Exception as error:
+            db.session.rollback()
             raise error
-        
-    
-    # update MachineStatusStatus
+
     @staticmethod
     def update_machineStatus(payload):
+        """更新機台狀態並觸發排程調整"""
         try:
+            # 1. 查詢並更新機台狀態
             machineStatus_db = MachineStatus.query.filter_by(id=payload["id"]).first()
             if machineStatus_db is None:
                 return err_resp("machineStatus not found.", "machineStatus_404", 404)
+            old_start_date = machineStatus_db.planStartDate
+            old_end_date = machineStatus_db.planEndDate
             machineStatus_db = complete_machineStatus(machineStatus_db, payload)
+            db.session.flush()
+
+            # 2. 觸發排程調整，只傳遞必要的資訊
+            resp, status = SmartScheduleService.update_machine_status_schedule(
+                machineStatusId=machineStatus_db.id, old_start_param=old_start_date, old_end_param=old_end_date
+            )
+            if status != 200:
+                db.session.rollback()
+                return resp, status
+
+            # 3. 資料庫更新
             db.session.commit()
 
             machineStatus_dump = machineStatus_schema.dump(machineStatus_db)
-            resp = message(True, "machineStatus have been updated.")
+            resp = message(True, "machineStatus have been updated and schedules adjusted.")
             resp["data"] = machineStatus_dump
-
             return resp, 200
-        except Exception as error:
-            raise error
-    
 
-    # delete MachineStatusStatus
+        except Exception as error:
+            db.session.rollback()
+            raise error
+
     @staticmethod
     def delete_machineStatus(id):
+        """刪除機台狀態並觸發排程調整"""
         try:
+            # 1. 查詢要刪除的機台狀態
             machineStatus_db = MachineStatus.query.filter_by(id=id).first()
             if machineStatus_db is None:
                 return err_resp("machineStatus not found.", "machineStatus_404", 404)
-            db.session.delete(machineStatus_db)
-            db.session.commit()
+            
+            # 2. 如果此機台狀態有實際開始或結束時間，則無法刪除
+            if machineStatus_db.actualStartDate is not None or machineStatus_db.actualEndDate is not None:
+                return err_resp("machineStatus cannot be deleted because it has actual start or end date.", "machineStatus_400", 400)
 
-            return message(True, "machineStatus have been deleted."), 200
+            # 3. 觸發排程調整，只傳遞必要的資訊
+            resp, status = SmartScheduleService.update_machine_status_schedule(machineStatusId=id, is_delete=True)
+            if status != 200:
+                db.session.rollback()
+                return resp, status
+
+            resp = message(True, "machineStatus have been deleted and schedules adjusted.")
+            return resp, 200
+
         except Exception as error:
+            db.session.rollback()
             raise error
