@@ -138,7 +138,7 @@ class SmartScheduleService:
             if not schedule:
                 return err_resp("productionSchedule not found.", "productionSchedule_404", 404)
 
-            if new_start < datetime.now(new_start.tzinfo):
+            if new_start < datetime.now(new_start.tzinfo) - timedelta(seconds=30):
                 return err_resp("New start date is earlier than now.", "Invalid_input", 400)
 
             old_start, old_end = schedule.planOnMachineDate, schedule.planFinishDate
@@ -230,8 +230,8 @@ class SmartScheduleService:
             machine_sn = schedule.machine.machineSN
 
             # 時間檢查
-            if (new_start and new_start < datetime.now(new_start.tzinfo)) or \
-               (new_end and new_end < datetime.now(new_end.tzinfo)):
+            if (new_start and new_start < datetime.now(new_start.tzinfo) - timedelta(seconds=30)) or \
+               (new_end and new_end < datetime.now(new_end.tzinfo) - timedelta(seconds=30)):
                 return err_resp("New date is earlier than now.", "Invalid_input", 400)
             if is_create is False and is_delete is False:
                 if new_start == old_start and new_end == old_end:

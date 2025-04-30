@@ -48,5 +48,5 @@ class SmartScheduleController(Resource):
     @api.expect(SmartScheduleDto.smartSchedule_workorder_put, validate=True)
     @controller_entrance_log(description="Update WorkOrder smartSchedule")
     def put(self):
-        return SmartScheduleService.update_smartSchedule_workOrder(api.payload)
+        return SmartScheduleService.update_work_order_schedule(api.payload)
     
