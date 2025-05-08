@@ -103,63 +103,70 @@ const ItemDialog = ({
           actualEndTime: formData.end || null,
         },
       };
-      
+
       // 檢查時間重疊（除了 OrderCreated 狀態外的其他狀態）
       if (updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED) {
         try {
           let hasOverlap = false;
           const itemStart = dayjs(updatedItem.start);
           const itemEnd = dayjs(updatedItem.end);
-          
+
           // 首先，如果有全局數據存取方式，則使用它
           if (window.timeline && window.app && window.app.timelineData) {
             // 偵測程式可以先檢查數據存取方式
-            console.log('Using global timeline data to check overlap');
-            
+            console.log("Using global timeline data to check overlap");
+
             // 使用 DataSet API 取得符合條件的項目
             const existingItems = window.app.timelineData.get({
-              filter: function(item) {
-                return item.id !== updatedItem.id && 
-                       item.group === updatedItem.group && 
-                       item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED;
-              }
+              filter: function (item) {
+                return (
+                  item.id !== updatedItem.id &&
+                  item.group === updatedItem.group &&
+                  item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+                );
+              },
             });
-            
-            hasOverlap = existingItems.some(existingItem => {
+
+            hasOverlap = existingItems.some((existingItem) => {
               const existingStart = dayjs(existingItem.start);
               const existingEnd = dayjs(existingItem.end);
-              
+
               return (
-                (itemStart.isBefore(existingEnd) && itemEnd.isAfter(existingStart)) ||
-                itemStart.isSame(existingStart) || 
+                (itemStart.isBefore(existingEnd) &&
+                  itemEnd.isAfter(existingStart)) ||
+                itemStart.isSame(existingStart) ||
                 itemEnd.isSame(existingEnd)
               );
             });
           } else {
-            console.log('Checking overlap using groups data');
-            
+            console.log("Checking overlap using groups data");
+
             // 如果沒有全局數據，則使用傳入的 groups 參數
             const groupItems = [];
-            
+
             if (groups && Array.isArray(groups)) {
-              const currentGroup = groups.find(g => g.id === updatedItem.group);
-              
+              const currentGroup = groups.find(
+                (g) => g.id === updatedItem.group
+              );
+
               if (currentGroup && currentGroup.items) {
                 currentGroup.items
-                  .filter(item => 
-                    item.id !== updatedItem.id && 
-                    item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+                  .filter(
+                    (item) =>
+                      item.id !== updatedItem.id &&
+                      item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
                   )
-                  .forEach(item => groupItems.push(item));
+                  .forEach((item) => groupItems.push(item));
               }
-              
-              hasOverlap = groupItems.some(existingItem => {
+
+              hasOverlap = groupItems.some((existingItem) => {
                 const existingStart = dayjs(existingItem.start);
                 const existingEnd = dayjs(existingItem.end);
-                
+
                 return (
-                  (itemStart.isBefore(existingEnd) && itemEnd.isAfter(existingStart)) ||
-                  itemStart.isSame(existingStart) || 
+                  (itemStart.isBefore(existingEnd) &&
+                    itemEnd.isAfter(existingStart)) ||
+                  itemStart.isSame(existingStart) ||
                   itemEnd.isSame(existingEnd)
                 );
               });
@@ -167,13 +174,15 @@ const ItemDialog = ({
           }
 
           if (hasOverlap) {
-            throw new Error('時間重疊：除了「製立單」外的其他狀態都不允許時間重疊');
+            throw new Error(
+              "時間重疊：除了「製立單」外的其他狀態都不允許時間重疊"
+            );
           }
         } catch (err) {
-          if (err.message.includes('時間重疊')) {
-            throw err;  // 重新拋出重疊錯誤
+          if (err.message.includes("時間重疊")) {
+            throw err; // 重新拋出重疊錯誤
           }
-          console.error('檢查時間重疊時發生錯誤，繼續執行:', err);
+          console.error("檢查時間重疊時發生錯誤，繼續執行:", err);
           // 如果檢查失敗，然後允許操作繼續
         }
       }

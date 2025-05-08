@@ -1,6 +1,8 @@
 /*
 services/
 ├── apiSlice.js - API 基礎配置
+├── machine/
+│   ├── machineStatusApi.js - 機台狀態相關 API
 └── endpoints/ - 各類端點 API
     ├── machineStatusApi.js - 機台狀態相關 API
     └── optionApi.js - 選項相關 API
@@ -14,7 +16,7 @@ const wiseSchedulingApiSlice = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: API_BASE,
   }),
-  tagTypes: ["MachineStatus", "Option"],
+  tagTypes: ["MachineStatus", "Option", "schedule"],
   endpoints: () => ({}),
 });
 
