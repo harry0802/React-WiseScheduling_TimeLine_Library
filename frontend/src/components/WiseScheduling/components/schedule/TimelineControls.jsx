@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+/**
+ * @file TimelineControls.jsx
+ * @description 時間線控制組件，提供時間範圍切換、地區選擇和基本操作按鈕
+ * @version 3.0.0
+ */
+
+import React from "react";
 import styled from "styled-components";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AddIcon from "@mui/icons-material/Add";
@@ -211,67 +217,73 @@ const SelectArrow = styled.div`
 `;
 
 /**
- * 時間線控制組件，提供時間範圍切換、地區選擇和基本操作按鈕
+ * @component TimelineControls
+ * @description 時間線控制組件，提供時間範圍切換、地區選擇和基本操作按鈕
  */
-const TimelineControls = ({
-  timeRange,
-  onTimeRangeChange,
-  onAddItem,
-  onMoveToNow,
-  areaOptions,
-  onAreaChange,
-}) => {
-  // 處理地區變更
-  const handleAreaChange = (event) => {
-    const area = event.target.value;
-    onAreaChange(area);
-  };
+const TimelineControls = React.memo(
+  ({
+    timeRange,
+    selectedArea,
+    onTimeRangeChange,
+    onAreaChange,
+    onAddItem,
+    onMoveToNow,
+  }) => {
+    // 處理地區變更
+    const handleAreaSelect = (event) => {
+      const area = event.target.value;
+      onAreaChange(area);
+    };
 
-  return (
-    <ControlsContainer>
-      {/* 時間範圍選擇按鈕組 */}
-      <ButtonGroup>
-        {Object.entries(TIME_RANGES).map(([key, { label }]) => (
-          <TimeRangeButton
-            key={key}
-            active={timeRange === key}
-            onClick={() => onTimeRangeChange(key)}
-          >
-            <CalendarMonthIcon />
-            {label}
-          </TimeRangeButton>
-        ))}
-      </ButtonGroup>
+    return (
+      <ControlsContainer>
+        {/* 時間範圍選擇按鈕組 */}
+        <ButtonGroup>
+          {Object.entries(TIME_RANGES).map(([key, { label }]) => (
+            <TimeRangeButton
+              key={key}
+              active={timeRange === key}
+              onClick={() => onTimeRangeChange(key)}
+            >
+              <CalendarMonthIcon />
+              {label}
+            </TimeRangeButton>
+          ))}
+        </ButtonGroup>
 
-      {/* 操作控制區 */}
-      <ButtonGroup>
-        {/* 地區選擇 */}
-        <SelectContainer>
-          <Select value={areaOptions} onChange={handleAreaChange}>
-            <option value="" disabled>
-              區域
-            </option>
-            {MACHINE_CONFIG.AREAS.map((area) => (
-              <option key={area} value={area}>
-                {area}
+        {/* 操作控制區 */}
+        <ButtonGroup>
+          {/* 地區選擇 */}
+          <SelectContainer>
+            <Select value={selectedArea} onChange={handleAreaSelect}>
+              <option value="" disabled>
+                區域
               </option>
-            ))}
-          </Select>
-          <SelectArrow />
-        </SelectContainer>
+              {MACHINE_CONFIG.AREAS.map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
+              ))}
+            </Select>
+            <SelectArrow />
+          </SelectContainer>
 
-        {/* 操作按鈕 */}
-        <AddButton onClick={() => onAddItem(areaOptions || null)}>
-          <AddIcon />
-          新增
-        </AddButton>
-        <NowButton onClick={onMoveToNow}>
-          <AccessTimeIcon />
-          現在
-        </NowButton>
-      </ButtonGroup>
-    </ControlsContainer>
-  );
-};
+          {/* 操作按鈕 */}
+          <AddButton onClick={() => onAddItem(null, selectedArea)}>
+            <AddIcon />
+            新增
+          </AddButton>
+          <NowButton onClick={onMoveToNow}>
+            <AccessTimeIcon />
+            現在
+          </NowButton>
+        </ButtonGroup>
+      </ControlsContainer>
+    );
+  }
+);
+
+// 添加 displayName 以便於調試
+TimelineControls.displayName = "TimelineControls";
 
 export default TimelineControls;

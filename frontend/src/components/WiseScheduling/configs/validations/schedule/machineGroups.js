@@ -1,7 +1,6 @@
 // machineGroups.js
 import { DataSet } from "vis-data";
 import { MACHINE_CONFIG } from "./constants";
-import { original } from "@reduxjs/toolkit";
 
 // 🧠 生成單個機台資料
 const createMachine = (area, number) => ({
@@ -34,10 +33,10 @@ export function transformData(dataArray) {
 
     // 返回新格式
     return {
-      id: machineSN, // 保持原有ID
+      id: machineSN,
       content: machineSN, // 將機器序號作為內容
       area: productionArea, // 將生產區域代碼作為區域
-      originalId: id,
+      originalId: id, // 保留原始 ID 為參考
     };
   });
 }
@@ -50,5 +49,6 @@ export const generateMachineGroups = (group) => {
 };
 // export const generateMachineGroups = () => {
 //   const machines = MACHINE_CONFIG.AREAS.flatMap(createAreaMachines);
+//   console.log("🚀 ~ generateMachineGroups ~ machines:", machines);
 //   return new DataSet(machines);
 // };

@@ -1,6 +1,11 @@
-// orderItems.js
+/**
+ * @file orderItems.js
+ * @description 處理訂單和排程數據的函數
+ * @version 2.0.0
+ */
+
 import { DataSet } from "vis-data";
-import { MACHINE_CONFIG, MACHINE_STATUS } from "./constants";
+import { MACHINE_CONFIG, MACHINE_STATUS, getStatusClass } from "./constants";
 import dayjs from "dayjs";
 
 // 🧠 建立工作開始時間
@@ -52,7 +57,12 @@ const createDemoOrder = (start = getWorkStartTime()) => {
   };
 };
 
-// 🛠️ 將項目映射到 vis-data 格式的工具函數
+/**
+ * @function mapItemToVisDataFormat
+ * @description 將項目映射到 vis-data 格式
+ * @param {Object} item - 原始項目數據
+ * @returns {Object} vis-data 格式的項目
+ */
 export const mapItemToVisDataFormat = (item) => {
   // 檢查是否為過去的項目
   const isPastItem =
@@ -102,7 +112,89 @@ export const mapItemToVisDataFormat = (item) => {
   };
 };
 
-// 生成初始訂單資料
+/**
+ * @function transformScheduleData
+ * @description 將 API 獲取的排程數據轉換為時間線項目格式
+ * @param {Array} scheduleList - API 獲取的排程數據
+ * @returns {Array} 轉換後的時間線項目格式數據
+ */
+export const transformScheduleData = (scheduleList) => {
+  if (!Array.isArray(scheduleList)) return [];
+
+  try {
+    const transformedItems = scheduleList.map((schedule) => {
+      // 這裡需要根據 API 返回的數據結構進行調整
+      const startTime = dayjs(
+        schedule.startDate || schedule.scheduledStartTime || new Date()
+      );
+      const endTime = dayjs(
+        schedule.endDate ||
+          schedule.scheduledEndTime ||
+          startTime.add(2, "hour")
+      );
+
+      // 預設使用機台的第一個機器，如果有指定則使用指定的
+      const machineGroup = schedule.machineId || schedule.machine || "A1";
+      const area = machineGroup.match(/[A-Z]/)?.[0] || "A";
+
+      // 使用適當的狀態，如果沒有則使用待機中
+      const timeLineStatus = schedule.status || MACHINE_STATUS.IDLE;
+
+      // 創建標準格式的項目
+      const item = {
+        id:
+          schedule.id ||
+          `API-SCHEDULE-${Date.now()}-${Math.random()
+            .toString(36)
+            .substr(2, 9)}`,
+        group: machineGroup,
+        area,
+        timeLineStatus,
+
+        status: {
+          startTime: startTime.toDate(),
+          endTime: endTime.toDate(),
+          reason: schedule.reason || "",
+          product: schedule.product || schedule.productName || "",
+        },
+
+        orderInfo: {
+          scheduledStartTime: startTime.toDate(),
+          scheduledEndTime: endTime.toDate(),
+          actualStartTime: schedule.actualStartTime
+            ? dayjs(schedule.actualStartTime).toDate()
+            : null,
+          actualEndTime: schedule.actualEndTime
+            ? dayjs(schedule.actualEndTime).toDate()
+            : null,
+          productId: schedule.productId || "",
+          productName: schedule.productName || schedule.product || "未命名產品",
+          quantity: schedule.quantity || 0,
+          completedQty: schedule.completedQty || 0,
+          process: schedule.process || "未知工序",
+          orderStatus: schedule.orderStatus || "未知狀態",
+        },
+
+        className: getStatusClass(timeLineStatus),
+        content: schedule.productName || schedule.product || timeLineStatus,
+      };
+
+      // 映射到 vis-data 格式
+      return mapItemToVisDataFormat(item);
+    });
+
+    return transformedItems;
+  } catch (error) {
+    console.error("轉換排程數據時出錯:", error);
+    return [];
+  }
+};
+
+/**
+ * @function generateInitialOrders
+ * @description 生成初始訂單數據
+ * @returns {DataSet} 訂單數據集
+ */
 export const generateInitialOrders = () => {
   // 創建一個基本時間作為參考點
   const now = new Date();
@@ -279,6 +371,6 @@ export const generateInitialOrders = () => {
     },
   ];
 
-  // 使用新的工具函數來映射資料
+  // 使用工具函數來映射資料
   return new DataSet(testData.map(mapItemToVisDataFormat));
 };
