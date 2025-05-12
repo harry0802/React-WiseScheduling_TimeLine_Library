@@ -78,8 +78,6 @@ const OperatorSign = (props) => {
     console.log("childLots after mapping:", childLots);
     console.log("newLots after mapping:", newLots);
 
-    // TODO: API 回傳時候沒問題 但與 productionReport 不同步
-
     await addChildLots(childLots)
       .unwrap()
       .then((payload) => {
@@ -104,6 +102,9 @@ const OperatorSign = (props) => {
       });
 
     // 更新製令單狀態為On-going
+    // 註解掉此部分，現在改由 LeaderSign 組件中的 actionContinue 函數處理
+    // 但未來可能會再次需要此功能，所以保留註解
+    /*
     const updatedProductionSchedules = new Set();
     lotStore.forEach((workOrder) => {
       updatedProductionSchedules.add(workOrder.id);
@@ -141,6 +142,10 @@ const OperatorSign = (props) => {
           duration: 5,
         });
       });
+    */
+
+    // 不需要更新製令單狀態，直接導航到檢驗頁面
+    navigate("/ProductionInspectionPage");
   };
 
   // 結束子批生產

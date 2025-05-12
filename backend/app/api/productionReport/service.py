@@ -450,7 +450,15 @@ class productionReportService:
                     if productionSchedule_db:
                         data["moldingSecond"] = productionSchedule_db.moldingSecond
                         data["moldCavity"] = productionSchedule_db.moldCavity
-                        
+                # 避免重複母批的偶發事件，新增前先判斷是否有相同的母批(workOrderSN, serialNumber = 0, pschedule_id)
+                if mode == "motherLot":
+                    productionReport_db = ProductionReport.query.filter(
+                        ProductionReport.workOrderSN == data.get("workOrderSN"),
+                        ProductionReport.serialNumber == 0,
+                        ProductionReport.pschedule_id == data.get("pschedule_id")
+                    ).first()
+                    if productionReport_db :
+                        continue
                 productionReport_db_list.append(complete_productionReport(mode, ProductionReport(), data))
             db.session.add_all(productionReport_db_list)
             db.session.flush()

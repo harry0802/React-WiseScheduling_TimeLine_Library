@@ -9,6 +9,7 @@ import { notification } from "antd";
 import checkImage from "../../assets/check.png";
 import pauseImage from "../../assets/pause.png";
 import {
+  useLotStore,
   useMachineSNStore,
   useProductionScheduleIdsStore,
 } from "../../store/zustand/store";
@@ -20,6 +21,7 @@ import {
 import {
   useDoneStausMutation,
   usePauseStausMutation,
+  useUpdateProductionSchedulesMutation,
 } from "../../store/api/productionScheduleApi";
 import { WORKORDER_STATUS, LEADER_ACTION } from "../../config/enum";
 import { useTranslation } from "react-i18next";
@@ -55,6 +57,8 @@ const LeaderSign = (props) => {
     useUpdateMotherLotsMutation(); // 更新母批
   const [doneStaus] = useDoneStausMutation(); // 更新製令單狀態
   const [pauseStaus] = usePauseStausMutation(); // 更新製令單狀態
+  const [updateProductionSchedules] = useUpdateProductionSchedulesMutation(); // 更新製令單狀態與資訊
+  const lotStore = useLotStore((state) => state.lots);
 
   // 取得該機台正在生產的製令單資料
   const {
@@ -160,7 +164,63 @@ const LeaderSign = (props) => {
       })
     );
     updateProductionScheduleIdsStore(productionSchedule_ids);
-    navigate("/ProductionDetailPage");
+
+    // 更新製令單狀態為On-going
+    // 檢查是否有需要更新狀態的工單
+    const workOrdersToUpdate = newWorkOrders.filter(
+      (workOrder) => workOrder.status !== WORKORDER_STATUS.ON_GOING
+    );
+
+    // 如果沒有需要更新的工單，直接導航到詳情頁面
+    if (workOrdersToUpdate.length === 0) {
+      console.log("所有工單已經是 On-going 狀態，不需要更新");
+      navigate("/ProductionDetailPage");
+      return;
+    }
+
+    // 只收集需要更新的工單ID
+    const updatedProductionSchedules = new Set();
+    workOrdersToUpdate.forEach((workOrder) => {
+      updatedProductionSchedules.add(workOrder.id);
+    });
+
+    // 如果沒有要更新的工單，直接返回
+    if (updatedProductionSchedules.size === 0) {
+      navigate("/ProductionDetailPage");
+      return;
+    }
+
+    const updatedIds = JSON.stringify(Array.from(updatedProductionSchedules));
+
+    // 準備更新數據
+    const updateData = {
+      status: WORKORDER_STATUS.ON_GOING,
+    };
+
+    // 如果沒有實際上機日，添加實際上機日
+    if (
+      workOrdersToUpdate.length > 0 &&
+      !workOrdersToUpdate[0]?.actualStartDate
+    ) {
+      updateData.actualOnMachineDate = dayjs.tz(new Date(), TZ).format();
+    }
+
+    try {
+      await updateProductionSchedules({
+        ids: updatedIds,
+        data: updateData,
+      }).unwrap();
+      navigate("/ProductionDetailPage");
+    } catch (error) {
+      console.error("更新製令單狀態失敗:", error);
+      notification.error({
+        description: `${t("common.updatingError")}`,
+        placement: "bottomRight",
+        duration: 5,
+      });
+      // 即使更新失敗，仍然導航到詳情頁面
+      navigate("/ProductionDetailPage");
+    }
   };
 
   const actionContinue = async (data) => {
