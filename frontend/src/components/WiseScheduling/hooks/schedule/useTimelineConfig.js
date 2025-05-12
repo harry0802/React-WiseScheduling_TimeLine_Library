@@ -107,6 +107,7 @@ function useTimelineConfig(itemsDataRef, timeRange) {
       snap: null,
       margin: {
         item: { vertical: 8 },
+        axis: 5, // 加入此行設定軸間距，控制行高一致性
       },
       zoomMax: TEN_YEARS_MS,
     };

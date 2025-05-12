@@ -90,7 +90,7 @@ function DynamicTimeline() {
   const { isSuccess, isLoading, filteredMachines, allArea } =
     useMachineGroups(selectedArea);
   // 使用自定義 hook 獲取時間線數據
-  const { itemsDataRef, groups } = useTimelineData(allArea?.data);
+  const { itemsDataRef, groups } = useTimelineData(filteredMachines);
   // 使用自定義 hook 處理操作
   const {
     dialogState,
