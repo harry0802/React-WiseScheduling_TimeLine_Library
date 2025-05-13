@@ -228,11 +228,8 @@ class SmartScheduleService:
             old_start = old_start_param or schedule.planStartDate
             old_end = old_end_param or schedule.planEndDate
             machine_sn = schedule.machine.machineSN
-
+            
             # 時間檢查
-            if (new_start and new_start < datetime.now(new_start.tzinfo) - timedelta(seconds=30)) or \
-               (new_end and new_end < datetime.now(new_end.tzinfo) - timedelta(seconds=30)):
-                return err_resp("New date is earlier than now.", "Invalid_input", 400)
             if is_create is False and is_delete is False:
                 if new_start == old_start and new_end == old_end:
                     return message(True, "New date same as original."), 200
