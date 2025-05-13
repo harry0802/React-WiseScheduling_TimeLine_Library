@@ -1,7 +1,6 @@
 // configs/timelineOptions.js
 import moment from "moment";
 import { zhTWLocale } from "./timelineLocale";
-import { width } from "@mui/system";
 
 export const BASE_TIMELINE_OPTIONS = {
   width: "100%",
@@ -22,7 +21,7 @@ export const BASE_TIMELINE_OPTIONS = {
   locales: {
     "zh-TW": zhTWLocale,
   },
-  moment: (date) => {
+  moment: function (date) {
     return moment(date).locale("zh-tw").utcOffset("+08:00"); // 使用引入的 moment
   },
 };

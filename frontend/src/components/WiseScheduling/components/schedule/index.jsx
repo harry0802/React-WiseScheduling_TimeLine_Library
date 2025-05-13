@@ -1,7 +1,7 @@
 /**
  * @file index.jsx
  * @description 動態時間線組件，實現生產排程管理功能
- * @version 7.2.0
+ * @version 7.3.0
  */
 
 //! =============== 1. 設定與常量 ===============
@@ -17,6 +17,7 @@ import React, {
 //* UI 元件
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Timeline } from "vis-timeline/standalone";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 
@@ -61,7 +62,7 @@ if (moment) {
  * @param {string} area - 區域代碼，例如 "A"、"B" 等
  * @returns {Object} 排程數據和加載狀態
  */
-const useAreaScheduleData = (area = "A") => {
+function useAreaScheduleData(area = "A") {
   // 🧠 API 查詢，獲取智能排程數據
   const {
     isSuccess,
@@ -140,14 +141,15 @@ const useAreaScheduleData = (area = "A") => {
     isLoading,
     scheduleList,
   };
-};
+}
+
 /**
  * @function useAreaMachines
  * @description 獲取特定區域的機台數據
  * @param {string} area - 區域代碼
  * @returns {Object} 機台數據和加載狀態
  */
-const useAreaMachines = (area = "A") => {
+function useAreaMachines(area = "A") {
   // 🧠 獲取所有機台數據
   const { isSuccess, isLoading, data: allArea } = useGetMachinesQuery();
 
@@ -163,13 +165,13 @@ const useAreaMachines = (area = "A") => {
     allArea,
     filteredMachines,
   };
-};
+}
 
 /**
  * @component TimelinePaper
  * @description 時間線容器組件，使用 memo 避免不必要的重新渲染
  */
-const TimelinePaper = React.memo(({ containerRef }) => {
+function TimelinePaperInner({ containerRef }) {
   return (
     <Paper
       ref={containerRef}
@@ -184,7 +186,8 @@ const TimelinePaper = React.memo(({ containerRef }) => {
       }}
     />
   );
-});
+}
+const TimelinePaper = React.memo(TimelinePaperInner);
 
 // 確保顯示名稱，方便調試
 TimelinePaper.displayName = "TimelinePaper";
@@ -219,8 +222,8 @@ function DynamicTimeline() {
 
   // 使用自定義 hook 獲取時間線數據
   const { itemsDataRef, groups } = useTimelineData(
-    filteredMachines
-    // scheduleList
+    filteredMachines,
+    scheduleList // 修正：取消註釋，確保排程資料能被載入
   );
 
   // 使用自定義 hook 獲取時間線配置選項
@@ -238,18 +241,38 @@ function DynamicTimeline() {
     timeRange,
   });
 
-  // 確保 DialogManager 有最新的 groups 數據
-  useEffect(() => {
-    if (groups) {
-      DialogManager.setGroups(groups);
-    }
-  }, [groups]);
-
   //! =============== 5. 時間線初始化與事件處理 ===============
   /**
-   * 創建時間線
+   * 移動到當前時間
    */
-  const createTimeline = useCallback(() => {
+  const handleMoveToNow = useCallback(() => {
+    // 優先使用 dialogMoveToNow
+    if (dialogMoveToNow) {
+      dialogMoveToNow();
+      return;
+    }
+
+    // 備用實現
+    if (!timelineRef.current) return;
+
+    try {
+      const timeWindow = getTimeWindow(timeRange, dayjs());
+      timelineRef.current.setWindow(
+        timeWindow.start.toDate(),
+        timeWindow.end.toDate(),
+        { animation: true }
+      );
+    } catch (error) {
+      console.error("Move to current time failed:", error);
+    }
+  }, [timeRange, dialogMoveToNow]);
+
+  /**
+   * 初始化和更新時間線
+   * 這個 Effect 整合了時間線的初始化、事件綁定和清理操作
+   */
+  useEffect(() => {
+    // 初始化條件檢查
     if (!containerRef.current || !itemsDataRef.current || !groups) return;
 
     // 清空容器
@@ -279,72 +302,53 @@ function DynamicTimeline() {
     window.timeline = timelineRef.current;
     if (!window.app) window.app = {};
     window.app.timelineData = itemsDataRef.current;
+
+    // 確保 DialogManager 有最新的 groups 數據
+    if (groups) {
+      DialogManager.setGroups(groups);
+    }
+
+    // 清理函數
+    return () => {
+      if (timelineRef.current) {
+        timelineRef.current.destroy();
+        timelineRef.current = null;
+      }
+    };
   }, [containerRef, itemsDataRef, groups, getTimelineOptions, handleEditItem]);
 
-  /**
-   * 清理時間線
-   */
-  const cleanupTimeline = useCallback(() => {
-    if (timelineRef.current) {
-      timelineRef.current.destroy();
-      timelineRef.current = null;
-    }
-  }, []);
+  //! =============== 6. 加載狀態處理 ===============
+  // 判斷整體載入狀態
+  const isLoading = isScheduleLoading || isMachinesLoading;
+  const isDataReady = !!filteredMachines && !!scheduleList;
 
-  /**
-   * 移動到當前時間
-   * 優先使用來自 useTimelineDialogs 的實現，備用使用本地實現
-   */
-  const handleMoveToNow = useCallback(() => {
-    // 嘗試使用 useTimelineDialogs 中的實現
-    if (dialogMoveToNow) {
-      dialogMoveToNow();
-      return;
-    }
-
-    // 備用實現
-    if (!timelineRef.current) return;
-
-    try {
-      const timeWindow = getTimeWindow(timeRange, dayjs());
-      timelineRef.current.setWindow(
-        timeWindow.start.toDate(),
-        timeWindow.end.toDate(),
-        { animation: true }
-      );
-    } catch (error) {
-      console.error("Move to current time failed:", error);
-    }
-  }, [timeRange, dialogMoveToNow]);
-
-  /**
-   * 初始化時間線
-   */
-  useEffect(() => {
-    createTimeline();
-
-    return () => {
-      cleanupTimeline();
-    };
-  }, [createTimeline, cleanupTimeline]);
-
-  //! =============== 6. 渲染 ===============
+  //! =============== 7. 渲染 ===============
   return (
     <Box sx={{ width: "100%", p: 4 }}>
-      <TimelineContainer>
-        {/* 控制面板 */}
-        <TimelineControls
-          timeRange={timeRange}
-          selectedArea={selectedArea}
-          onTimeRangeChange={setTimeRange}
-          onAreaChange={setSelectedArea}
-          onAddItem={handleAddItem}
-          onMoveToNow={handleMoveToNow}
-        />
+      {/* 載入狀態顯示 */}
+      {isLoading && (
+        <Box display="flex" justifyContent="center" alignItems="center" p={4}>
+          <CircularProgress />
+        </Box>
+      )}
 
-        {/* 時間線容器 */}
-        <TimelinePaper containerRef={containerRef} />
-      </TimelineContainer>
+      {/* 時間線顯示 */}
+      {!isLoading && isDataReady && (
+        <TimelineContainer>
+          {/* 控制面板 */}
+          <TimelineControls
+            timeRange={timeRange}
+            selectedArea={selectedArea}
+            onTimeRangeChange={setTimeRange}
+            onAreaChange={setSelectedArea}
+            onAddItem={handleAddItem}
+            onMoveToNow={handleMoveToNow}
+          />
+
+          {/* 時間線容器 */}
+          <TimelinePaper containerRef={containerRef} />
+        </TimelineContainer>
+      )}
 
       {/* 使用 Portal 渲染對話框 */}
       <DialogPortals />
