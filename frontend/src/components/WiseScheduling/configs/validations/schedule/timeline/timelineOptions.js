@@ -1,8 +1,14 @@
 // configs/timelineOptions.js
 import moment from "moment";
 import { zhTWLocale } from "./timelineLocale";
+import { width } from "@mui/system";
 
 export const BASE_TIMELINE_OPTIONS = {
+  width: "100%",
+  height: "600px",
+  margin: {
+    item: 1,
+  },
   orientation: "top",
   zoomable: false,
   moveable: true,

@@ -57,11 +57,12 @@ if (moment) {
 
 /**
  * @function useAreaScheduleData
- * @description 獲取特定區域的排程數據
- * @param {string} area - 區域代碼
+ * @description 獲取特定區域的排程數據，分別提取最新的製令單和機台狀態
+ * @param {string} area - 區域代碼，例如 "A"、"B" 等
  * @returns {Object} 排程數據和加載狀態
  */
 const useAreaScheduleData = (area = "A") => {
+  // 🧠 API 查詢，獲取智能排程數據
   const {
     isSuccess,
     isLoading,
@@ -70,26 +71,68 @@ const useAreaScheduleData = (area = "A") => {
     productionArea: area,
   });
 
-  // 過濾並處理指定區域的數據
+  // ✨ 使用 useMemo 處理數據，避免重複計算
   const scheduleList = useMemo(() => {
-    if (!scheduleData || !scheduleData.data) return [];
+    if (!scheduleData?.data) return [];
 
-    // 如果數據已經按區域過濾，則直接使用
-    if (scheduleData.productionArea === area) {
-      return scheduleData.data;
-    }
+    // 過濾出指定區域的數據
+    const areaData = scheduleData.data.filter(
+      (item) => item.productionArea === area
+    );
 
-    // 否則手動過濾
-    return scheduleData.data.filter((item) => {
-      // 根據數據結構選擇過濾方式
-      const itemArea =
-        item.productionArea ||
-        item.area ||
-        (item.machine && item.machine.match(/[A-Z]/)?.[0]) ||
-        (item.machineId && item.machineId.match(/[A-Z]/)?.[0]);
+    // 將數據分為製令單和機台狀態兩類
+    const orderRecords = [];
+    const statusRecords = [];
 
-      return itemArea === area;
+    areaData.forEach((item) => {
+      if (item.timeLineStatus === "製令單") {
+        orderRecords.push(item);
+      } else {
+        statusRecords.push(item);
+      }
     });
+
+    // 處理製令單：按機台分組，每台機器只保留最新的計劃時間
+    const latestOrders = {};
+    orderRecords.forEach((order) => {
+      const machineSN = order.machineSN;
+      const planDate = order.planOnMachineDate
+        ? new Date(order.planOnMachineDate)
+        : null;
+
+      if (!machineSN || !planDate) return;
+
+      if (
+        !latestOrders[machineSN] ||
+        !latestOrders[machineSN].planOnMachineDate ||
+        planDate > new Date(latestOrders[machineSN].planOnMachineDate)
+      ) {
+        latestOrders[machineSN] = order;
+      }
+    });
+
+    // 處理機台狀態：按機台分組，只保留最新的狀態
+    const latestStatus = {};
+    statusRecords.forEach((status) => {
+      const machineSN = status.machineSN;
+      const startTime = status.machineStatusActualStartTime
+        ? new Date(status.machineStatusActualStartTime)
+        : null;
+
+      if (!machineSN || !startTime) return;
+
+      if (
+        !latestStatus[machineSN] ||
+        !latestStatus[machineSN].machineStatusActualStartTime ||
+        startTime >
+          new Date(latestStatus[machineSN].machineStatusActualStartTime)
+      ) {
+        latestStatus[machineSN] = status;
+      }
+    });
+
+    // 合併最新的製令單和機台狀態，保持原始數據結構
+    return [...Object.values(latestOrders), ...Object.values(latestStatus)];
   }, [scheduleData, area]);
 
   return {
@@ -98,7 +141,6 @@ const useAreaScheduleData = (area = "A") => {
     scheduleList,
   };
 };
-
 /**
  * @function useAreaMachines
  * @description 獲取特定區域的機台數據
@@ -165,6 +207,7 @@ function DynamicTimeline() {
     isLoading: isScheduleLoading,
     scheduleList,
   } = useAreaScheduleData(selectedArea);
+  console.log("🚀 ~ DynamicTimeline ~ scheduleList:", scheduleList);
 
   // 獲取機台數據
   const {
@@ -184,7 +227,11 @@ function DynamicTimeline() {
   const { getTimelineOptions } = useTimelineConfig(itemsDataRef, timeRange);
 
   // 使用自定義 hook 處理對話框
-  const { handleAddItem, handleEditItem, handleMoveToNow: dialogMoveToNow } = useTimelineDialogs({
+  const {
+    handleAddItem,
+    handleEditItem,
+    handleMoveToNow: dialogMoveToNow,
+  } = useTimelineDialogs({
     itemsDataRef,
     groups,
     timelineRef,
@@ -254,7 +301,7 @@ function DynamicTimeline() {
       dialogMoveToNow();
       return;
     }
-    
+
     // 備用實現
     if (!timelineRef.current) return;
 

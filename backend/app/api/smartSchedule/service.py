@@ -106,14 +106,14 @@ class SmartScheduleService:
             
             query = SmartSchedulingView.query
             query = query.filter(SmartSchedulingView.productionArea == productionArea)
-            query = query.filter(
-                (SmartSchedulingView.planOnMachineDate >= startTime) |
-                (SmartSchedulingView.machineStatusPlanStartTime >= startTime)
-            )
-            query = query.filter(
-                (SmartSchedulingView.planFinishDate <= endTime) |
-                (SmartSchedulingView.machineStatusPlanEndTime <= endTime)
-            )
+                # query = query.filter(
+                #     (SmartSchedulingView.planOnMachineDate >= startTime) |
+                #     (SmartSchedulingView.machineStatusPlanStartTime >= startTime)
+                # )
+                # query = query.filter(
+                #     (SmartSchedulingView.planFinishDate <= endTime) |
+                #     (SmartSchedulingView.machineStatusPlanEndTime <= endTime)
+                # )
             query = query.order_by(SmartSchedulingView.machineSN, SmartSchedulingView.planOnMachineDate)
             smartSchedule_db_list = query.all()
 
