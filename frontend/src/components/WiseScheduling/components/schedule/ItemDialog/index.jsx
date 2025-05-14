@@ -287,9 +287,14 @@ const ItemDialog = ({
             disabled={
               mode === "view" ||
               isSubmitting ||
-              (mode !== "add" &&
-                (item.start < dayjs() ||
-                  item.orderInfo.scheduledStartTime < dayjs()))
+              (mode !== "add" && (
+                // 有實際結束時間就禁用
+                (item.machineStatusActualEndTime !== null && 
+                 item.machineStatusActualEndTime !== undefined) ||
+                // 訂單狀態是 "On-going" 也禁用
+                (item.productionScheduleStatus === "On-going" || 
+                 (item.orderInfo && item.orderInfo.orderStatus === "On-going"))
+              ))
             }
           />
         </DialogContent>
