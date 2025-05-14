@@ -17,7 +17,6 @@ import React, {
 //* UI 元件
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import CircularProgress from "@mui/material/CircularProgress";
 import { Timeline } from "vis-timeline/standalone";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 

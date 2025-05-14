@@ -106,9 +106,10 @@ const ItemDialog = ({
       };
 
       // 檢查時間重疊（除了 OrderCreated 狀態外的其他狀態）
-      const isWorkOrder = updatedInternalItem.timeLineStatus === "製立單" || 
-                         updatedInternalItem.timeLineStatus === "製令單";
-                         
+      const isWorkOrder =
+        updatedInternalItem.timeLineStatus === "製立單" ||
+        updatedInternalItem.timeLineStatus === "製令單";
+
       if (!isWorkOrder) {
         try {
           let hasOverlap = false;
@@ -159,8 +160,8 @@ const ItemDialog = ({
                   .filter(
                     (item) =>
                       item.id !== updatedInternalItem.id &&
-                      (item.timeLineStatus !== "製立單" && 
-                       item.timeLineStatus !== "製令單")
+                      item.timeLineStatus !== "製立單" &&
+                      item.timeLineStatus !== "製令單"
                   )
                   .forEach((item) => groupItems.push(item));
               }
@@ -195,18 +196,20 @@ const ItemDialog = ({
 
       // 使用前面引入的 apiTransformers 函數轉換為 API 格式
       // 引入 formUtils
-      const { transformInternalToApiFormat } = await import('../../../utils/schedule/transformers/apiTransformers');
-      
+      const { transformInternalToApiFormat } = await import(
+        "../../../utils/schedule/transformers/apiTransformers"
+      );
+
       // 生成 API 格式數據
       const updatedApiItem = transformInternalToApiFormat(updatedInternalItem);
-      
+
       console.log("Updated internal item:", updatedInternalItem);
       console.log("Updated API item:", updatedApiItem);
-      
+
       // 返回包含兩種格式的對象
       await onSave({
         internal: updatedInternalItem,
-        api: updatedApiItem
+        api: updatedApiItem,
       });
       onClose();
     } catch (err) {

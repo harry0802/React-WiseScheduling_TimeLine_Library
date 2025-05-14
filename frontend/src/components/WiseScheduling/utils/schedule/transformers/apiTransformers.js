@@ -49,7 +49,7 @@ export const transformApiToInternalFormat = (apiData) => {
     startTime = dayjs(apiData.machineStatusActualStartTime);
     endTime = apiData.machineStatusActualEndTime
       ? dayjs(apiData.machineStatusActualEndTime)
-      : startTime.add(2, "hour");
+      : dayjs(apiData.machineStatusPlanEndTime) || startTime.add(2, "hour");
   }
 
   return {

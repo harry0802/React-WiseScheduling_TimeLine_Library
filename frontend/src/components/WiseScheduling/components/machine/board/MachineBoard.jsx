@@ -139,6 +139,20 @@ const MachineStatusBoard = () => {
   const handleStatusUpdate = useCallback(async (data) => {
     console.log("更新機台狀態:", data);
     //TODO 這裡需要實現實際的狀態更新API調用
+
+    // 如果沒有 planStartDate，則使用 actualStartDate 加一小時
+    const calculatePlanStartDate = () => {
+      if (data.planStartDate) return data.planStartDate;
+
+      if (data.actualStartDate) {
+        const date = new Date(data.actualStartDate);
+        date.setHours(date.getHours() + 1);
+        return date.toISOString();
+      }
+
+      return null;
+    };
+
     if (data.id) {
       await updateMachineStatus({
         ...data,
@@ -149,7 +163,7 @@ const MachineStatusBoard = () => {
         ...data,
         status: getChineseStatus(data.status),
         planStartDate: data.planStartDate ?? data.actualStartDate,
-        planEndDate: data.planEndDate ?? data.actualStartDate,
+        planEndDate: calculatePlanStartDate(),
       });
     }
 

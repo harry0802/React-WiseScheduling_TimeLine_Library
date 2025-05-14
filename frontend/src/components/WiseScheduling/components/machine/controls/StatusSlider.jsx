@@ -1,27 +1,22 @@
 /**
  * @file StatusSlider.jsx
  * @description 機台狀態選擇滑塊組件，用於視覺化選擇機台狀態
- * @version 3.0.1
+ * @version 3.0.2
  */
 
 //! =============== 1. 引入與常量 ===============
 //* 這個區塊包含所有引入和常量定義,便於統一管理
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useFormContext } from "react-hook-form";
 import styled from "@emotion/styled";
 import { Slider, Box } from "@mui/material";
-import PropTypes from "prop-types";
 
 import {
   SLIDER_MARKS,
   convertTimeLineStatus,
   getChineseStatus,
-  // 只導入實際使用的常量
-  STATE_IDLE,
-  SLIDER_VALUE_MAP,
   getStatusFromSliderValue,
-  STATUS_NAME_MAP
 } from "../../../configs/constants/fieldNames";
 
 //! =============== 2. 類型與介面 ===============
@@ -146,14 +141,16 @@ const SliderContainer = styled(Box)`
  */
 const getSliderValueFromStatus = (status) => {
   // 直接從映射表中獲取
-  if (STATUS_TO_SLIDER_VALUE[status] !== undefined) {
-    return STATUS_TO_SLIDER_VALUE[status];
+  const directValue = STATUS_TO_SLIDER_VALUE[status];
+  if (directValue !== undefined) {
+    return directValue;
   }
 
   // 尋找中文狀態的映射
   const chineseStatus = getChineseStatus(status);
-  if (STATUS_TO_SLIDER_VALUE[chineseStatus] !== undefined) {
-    return STATUS_TO_SLIDER_VALUE[chineseStatus];
+  const chineseValue = STATUS_TO_SLIDER_VALUE[chineseStatus];
+  if (chineseValue !== undefined) {
+    return chineseValue;
   }
 
   // 查找標記中的匹配
@@ -191,6 +188,40 @@ const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
     getSliderValueFromStatus(currentStatus)
   );
 
+  //! ========= 輔助函數 =========
+
+  /**
+   * 設置表單值的輔助函數 ✨
+   */
+  const setValue = useCallback(
+    (name, value, options) => {
+      if (isMountedInForm) {
+        formContext.setValue(name, value, options);
+      }
+    },
+    [formContext, isMountedInForm]
+  );
+
+  /**
+   * 處理狀態轉換限制的檢查 💡
+   *
+   * @param {string} originalEnglishStatus - 原始API狀態
+   * @param {string} newStatus - 新選擇的狀態
+   * @returns {boolean} - 是否允許轉換
+   */
+  const isStatusChangeAllowed = useCallback(
+    (originalEnglishStatus, newStatus) => {
+      // 若原始狀態是待機，可切換到任何狀態
+      if (originalEnglishStatus === "IDLE") {
+        return true;
+      }
+
+      // 若原始狀態不是待機，則只能切換回待機
+      return newStatus === "IDLE";
+    },
+    []
+  );
+
   //! ========= 副作用 =========
 
   /**
@@ -211,82 +242,65 @@ const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
   //! ========= 事件處理 =========
 
   /**
-   * 設置表單值的輔助函數 ✨
-   */
-  const setValue = (name, value, options) => {
-    if (isMountedInForm) {
-      formContext.setValue(name, value, options);
-    }
-  };
-
-  /**
-   * 處理狀態轉換限制的檢查 💡
-   *
-   * @param {string} originalEnglishStatus - 原始API狀態
-   * @param {string} newStatus - 新選擇的狀態
-   * @returns {boolean} - 是否允許轉換
-   */
-  const isStatusChangeAllowed = (originalEnglishStatus, newStatus) => {
-    // 若原始狀態是待機，可切換到任何狀態
-    if (originalEnglishStatus === "IDLE") {
-      return true;
-    }
-
-    // 若原始狀態不是待機，則只能切換回待機
-    return newStatus === "IDLE";
-  };
-
-  /**
    * 處理滑塊變更事件 🧠
    *
    * @function handleChange
    * @param {Event} _ - 事件對象（未使用）
    * @param {number} value - 滑塊值
    */
-  const handleChange = (_, value) => {
-    // 設置用户變更標記
-    userChangedRef.current = true;
+  const handleChange = useCallback(
+    (_, value) => {
+      // 設置用户變更標記
+      userChangedRef.current = true;
 
-    // 根據滑塊值查找對應的狀態
-    const newStatus = SLIDER_MARKS.find((m) => m.value === value)?.label;
-    const englishStatus = getStatusFromSliderValue(value);
+      // 根據滑塊值查找對應的狀態
+      const newStatus = SLIDER_MARKS.find((m) => m.value === value)?.label;
+      const englishStatus = getStatusFromSliderValue(value);
 
-    // 將原始中文狀態轉換為英文狀態代碼
-    const originalEnglishStatus = convertTimeLineStatus(originalStatus);
+      // 將原始中文狀態轉換為英文狀態代碼
+      const originalEnglishStatus = convertTimeLineStatus(originalStatus);
 
-    // 檢查狀態轉換是否允許
-    if (!isStatusChangeAllowed(originalEnglishStatus, englishStatus)) {
-      // 狀態轉換不允許，還原到之前的值
-      setSliderValue(getSliderValueFromStatus(prevStatusRef.current));
-      console.warn("非待機狀態只能切換回待機狀態");
-      return;
-    }
-
-    // 設置內部滑塊值
-    setSliderValue(value);
-
-    if (newStatus) {
-      // 如果在表單上下文中，更新表單值
-      if (isMountedInForm) {
-        const formOptions = {
-          shouldValidate: true,
-          shouldDirty: true,
-          shouldTouch: true,
-        };
-
-        // 更新狀態值
-        setValue("status", newStatus, formOptions);
-        // 更新顯示值
-        setValue("statusDisplay", newStatus, formOptions);
+      // 檢查狀態轉換是否允許
+      if (!isStatusChangeAllowed(originalEnglishStatus, englishStatus)) {
+        // 狀態轉換不允許，還原到之前的值
+        setSliderValue(getSliderValueFromStatus(prevStatusRef.current));
+        console.warn("非待機狀態只能切換回待機狀態");
+        return;
       }
 
-      // 更新上一次的狀態
-      prevStatusRef.current = englishStatus;
+      // 設置內部滑塊值
+      setSliderValue(value);
 
-      // 調用父組件的狀態變更函數
-      onStatusChange(englishStatus);
-    }
-  };
+      if (newStatus) {
+        // 如果在表單上下文中，更新表單值
+        if (isMountedInForm) {
+          const formOptions = {
+            shouldValidate: true,
+            shouldDirty: true,
+            shouldTouch: true,
+          };
+
+          // 更新狀態值
+          setValue("status", newStatus, formOptions);
+          // 更新顯示值
+          setValue("statusDisplay", newStatus, formOptions);
+        }
+
+        // 更新上一次的狀態
+        prevStatusRef.current = englishStatus;
+
+        // 調用父組件的狀態變更函數
+        onStatusChange(englishStatus);
+      }
+    },
+    [
+      originalStatus,
+      setValue,
+      isMountedInForm,
+      onStatusChange,
+      isStatusChangeAllowed,
+    ]
+  );
 
   //! ========= 渲染 =========
 
@@ -302,4 +316,5 @@ const StatusSlider = ({ currentStatus, originalStatus, onStatusChange }) => {
   );
 };
 
-export default StatusSlider;
+// 使用 memo 避免不必要的重渲染
+export default memo(StatusSlider);
