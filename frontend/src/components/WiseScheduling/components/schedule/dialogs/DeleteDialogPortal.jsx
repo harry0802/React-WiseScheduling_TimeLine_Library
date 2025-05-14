@@ -1,13 +1,17 @@
 /**
  * @file DeleteDialogPortal.jsx
  * @description 使用 Portal 渲染的刪除確認對話框，完全獨立的渲染樹
- * @version 1.0.0
+ * @version 2.0.0 - 函數化重構
  */
 
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import OperationDialog from "../OperationDialog";
-import { DialogManager } from "../DialogManager";
+import { 
+  onDeleteDialogChange, 
+  confirmDelete, 
+  closeDeleteDialog 
+} from "../DialogManager";
 
 /**
  * @component DeleteDialogPortal
@@ -23,7 +27,7 @@ function DeleteDialogPortal() {
   // 監聽對話框狀態變化
   useEffect(() => {
     // 當對話框狀態變化時更新本地狀態
-    const unsubscribe = DialogManager.onDeleteDialogChange(setDialogState);
+    const unsubscribe = onDeleteDialogChange(setDialogState);
 
     // 清理函數
     return unsubscribe;
@@ -40,8 +44,8 @@ function DeleteDialogPortal() {
       open={dialogState.isOpen}
       title="刪除確認"
       content="確定要刪除這個訂單嗎？"
-      onConfirm={() => DialogManager.confirmDelete()}
-      onCancel={() => DialogManager.closeDeleteDialog()}
+      onConfirm={() => confirmDelete()}
+      onCancel={() => closeDeleteDialog()}
       confirmText="刪除"
       cancelText="取消"
     />,

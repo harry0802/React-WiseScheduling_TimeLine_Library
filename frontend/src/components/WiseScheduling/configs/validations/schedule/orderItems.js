@@ -1,12 +1,13 @@
 /**
  * @file orderItems.js
  * @description 處理訂單和排程數據的函數
- * @version 2.0.0
+ * @version 3.0.0 - 2025-05-13 更新以支援新的 API 結構
  */
 
 import { DataSet } from "vis-data";
 import { MACHINE_CONFIG, MACHINE_STATUS, getStatusClass } from "./constants";
 import dayjs from "dayjs";
+import { transformApiToInternalFormat } from "../../../utils/schedule/transformers/apiTransformers";
 
 // 🧠 建立工作開始時間
 const getWorkStartTime = (date = new Date()) => {
@@ -64,6 +65,10 @@ const createDemoOrder = (start = getWorkStartTime()) => {
  * @returns {Object} vis-data 格式的項目
  */
 export const mapItemToVisDataFormat = (item) => {
+  // 處理製令單/製立單統一問題
+  const isWorkOrder =
+    item.timeLineStatus === "製令單" || item.timeLineStatus === "製立單";
+
   // 檢查是否為過去的項目
   const isPastItem =
     (item.orderInfo.actualStartTime &&
@@ -80,7 +85,7 @@ export const mapItemToVisDataFormat = (item) => {
       updateGroup: false,
       remove: false,
     };
-  } else if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
+  } else if (isWorkOrder) {
     // OrderCreated 狀態的項目
     editableOptions = {
       updateTime: true, // 允許拖拉調整時間
@@ -99,12 +104,12 @@ export const mapItemToVisDataFormat = (item) => {
   return {
     ...item,
     start: dayjs(
-      item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED
+      isWorkOrder
         ? item.orderInfo.actualStartTime || item.orderInfo.scheduledStartTime
         : item.status.startTime
     ).toDate(),
     end: dayjs(
-      item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED
+      isWorkOrder
         ? item.orderInfo.actualEndTime || item.orderInfo.scheduledEndTime
         : item.status.endTime || dayjs(item.status.startTime).add(2, "hour") // 預設結束時間為開始後 2 小時
     ).toDate(),
@@ -123,61 +128,8 @@ export const transformScheduleData = (scheduleList) => {
 
   try {
     const transformedItems = scheduleList.map((schedule) => {
-      // 這裡需要根據 API 返回的數據結構進行調整
-      const startTime = dayjs(
-        schedule.startDate || schedule.scheduledStartTime || new Date()
-      );
-      const endTime = dayjs(
-        schedule.endDate ||
-          schedule.scheduledEndTime ||
-          startTime.add(2, "hour")
-      );
-
-      // 預設使用機台的第一個機器，如果有指定則使用指定的
-      const machineGroup = schedule.machineId || schedule.machine || "A1";
-      const area = machineGroup.match(/[A-Z]/)?.[0] || "A";
-
-      // 使用適當的狀態，如果沒有則使用待機中
-      const timeLineStatus = schedule.status || MACHINE_STATUS.IDLE;
-
-      // 創建標準格式的項目
-      const item = {
-        id:
-          schedule.id ||
-          `API-SCHEDULE-${Date.now()}-${Math.random()
-            .toString(36)
-            .substr(2, 9)}`,
-        group: machineGroup,
-        area,
-        timeLineStatus,
-
-        status: {
-          startTime: startTime.toDate(),
-          endTime: endTime.toDate(),
-          reason: schedule.reason || "",
-          product: schedule.product || schedule.productName || "",
-        },
-
-        orderInfo: {
-          scheduledStartTime: startTime.toDate(),
-          scheduledEndTime: endTime.toDate(),
-          actualStartTime: schedule.actualStartTime
-            ? dayjs(schedule.actualStartTime).toDate()
-            : null,
-          actualEndTime: schedule.actualEndTime
-            ? dayjs(schedule.actualEndTime).toDate()
-            : null,
-          productId: schedule.productId || "",
-          productName: schedule.productName || schedule.product || "未命名產品",
-          quantity: schedule.quantity || 0,
-          completedQty: schedule.completedQty || 0,
-          process: schedule.process || "未知工序",
-          orderStatus: schedule.orderStatus || "未知狀態",
-        },
-
-        className: getStatusClass(timeLineStatus),
-        content: schedule.productName || schedule.product || timeLineStatus,
-      };
+      // 使用新的轉換函數將 API 資料轉為內部格式
+      const item = transformApiToInternalFormat(schedule);
 
       // 映射到 vis-data 格式
       return mapItemToVisDataFormat(item);

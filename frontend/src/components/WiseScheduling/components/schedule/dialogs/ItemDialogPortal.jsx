@@ -1,13 +1,18 @@
 /**
  * @file ItemDialogPortal.jsx
  * @description 使用 Portal 渲染的項目對話框，完全獨立的渲染樹
- * @version 1.1.0
+ * @version 2.0.0 - 函數式重構
  */
 
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import ItemDialog from "../ItemDialog/index";
-import { DialogManager } from "../DialogManager";
+import { 
+  onItemDialogChange, 
+  saveItem, 
+  closeItemDialog, 
+  openDeleteDialog 
+} from "../DialogManager";
 
 /**
  * @component ItemDialogPortal
@@ -25,7 +30,7 @@ function ItemDialogPortal() {
   // 監聽對話框狀態變化
   useEffect(() => {
     // 當對話框狀態變化時更新本地狀態
-    const unsubscribe = DialogManager.onItemDialogChange(setDialogState);
+    const unsubscribe = onItemDialogChange(setDialogState);
 
     // 清理函數
     return unsubscribe;
@@ -33,14 +38,14 @@ function ItemDialogPortal() {
 
   // 處理保存
   const handleSave = (item) => {
-    DialogManager.saveItem(item);
-    DialogManager.closeItemDialog();
+    saveItem(item);
+    closeItemDialog();
   };
 
   // 處理打開刪除對話框
   const handleOpenDelete = () => {
     if (dialogState.item?.id) {
-      DialogManager.openDeleteDialog(dialogState.item.id);
+      openDeleteDialog(dialogState.item.id);
     }
   };
 
@@ -53,7 +58,7 @@ function ItemDialogPortal() {
   return ReactDOM.createPortal(
     <ItemDialog
       open={dialogState.isOpen}
-      onClose={() => DialogManager.closeItemDialog()}
+      onClose={() => closeItemDialog()}
       item={dialogState.item}
       mode={dialogState.mode}
       onSave={handleSave}

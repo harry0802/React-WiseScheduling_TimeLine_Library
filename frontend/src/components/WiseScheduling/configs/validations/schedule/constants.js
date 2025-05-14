@@ -9,7 +9,7 @@ export const MACHINE_CONFIG = {
 
 // 💡 狀態定義
 export const MACHINE_STATUS = {
-  ORDER_CREATED: "製立單",
+  ORDER_CREATED: "製立單", // 注意這裡是「製立單」
   IDLE: "待機中",
   SETUP: "上模與調機",
   TESTING: "產品試模",
@@ -18,8 +18,20 @@ export const MACHINE_STATUS = {
 
 // ✨ 狀態配置與轉換規則整合
 export const STATUS_CONFIG = {
+  // 製立單配置
   [MACHINE_STATUS.ORDER_CREATED]: {
     name: MACHINE_STATUS.ORDER_CREATED,
+    description: "製立單模式",
+    color: "#4caf50",
+    className: "status-producing",
+    canSwitch: false,
+    canDelete: false,
+    allowedTransitions: [],
+  },
+  
+  // 為了兼容 API 中的「製令單」，添加一個相同配置
+  "製令單": {
+    name: MACHINE_STATUS.ORDER_CREATED, // 顯示為「製立單」
     description: "製立單模式",
     color: "#4caf50",
     className: "status-producing",
@@ -75,7 +87,9 @@ export const STATUS_CONFIG = {
 
 // 🧠 狀態操作函數
 export const canTransitTo = (currentStatus) => {
-  const config = STATUS_CONFIG[currentStatus];
+  // 處理製令單/製立單統一問題
+  const normalizedStatus = currentStatus === "製令單" ? "製立單" : currentStatus;
+  const config = STATUS_CONFIG[normalizedStatus];
 
   // 如果狀態不能切換或配置不存在，返回 false
   if (!config || !config.canSwitch) {
@@ -86,21 +100,31 @@ export const canTransitTo = (currentStatus) => {
 
 // ✨ 新增的輔助函數
 export const canDeleteStatus = (status) => {
-  return STATUS_CONFIG[status]?.canDelete ?? false;
+  // 處理製令單/製立單統一問題
+  const normalizedStatus = status === "製令單" ? "製立單" : status;
+  return STATUS_CONFIG[normalizedStatus]?.canDelete ?? false;
 };
 
 export const getStatusName = (status) => {
-  return STATUS_CONFIG[status]?.name ?? status;
+  // 處理製令單/製立單統一問題
+  const normalizedStatus = status === "製令單" ? "製立單" : status;
+  return STATUS_CONFIG[normalizedStatus]?.name ?? status;
 };
 
 export const getStatusColor = (status) => {
-  return STATUS_CONFIG[status]?.color ?? "#000000";
+  // 處理製令單/製立單統一問題
+  const normalizedStatus = status === "製令單" ? "製立單" : status;
+  return STATUS_CONFIG[normalizedStatus]?.color ?? "#000000";
 };
 
 export const getStatusClass = (status) => {
-  return STATUS_CONFIG[status]?.className ?? "";
+  // 處理製令單/製立單統一問題
+  const normalizedStatus = status === "製令單" ? "製立單" : status;
+  return STATUS_CONFIG[normalizedStatus]?.className ?? "";
 };
 
 export const getAvailableTransitions = (status) => {
-  return STATUS_CONFIG[status]?.allowedTransitions ?? [];
+  // 處理製令單/製立單統一問題
+  const normalizedStatus = status === "製令單" ? "製立單" : status;
+  return STATUS_CONFIG[normalizedStatus]?.allowedTransitions ?? [];
 };

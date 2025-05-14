@@ -1,14 +1,23 @@
 /**
  * @file useTimelineDialogs.js
  * @description 與對話框管理器集成的 hook
- * @version 1.2.0
+ * @version 2.0.0 - 2025-05-13 函數化重構
  */
 
 import { useEffect, useCallback } from "react";
-import { DialogManager } from "../../components/schedule/DialogManager";
+import {
+  setGroups,
+  openItemDialog,
+  onSaveItem,
+  onConfirmDelete,
+} from "../../components/schedule/DialogManager";
 import dayjs from "dayjs";
-import { MACHINE_STATUS, getStatusClass } from "../../configs/validations/schedule/constants";
+import {
+  MACHINE_STATUS,
+  getStatusClass,
+} from "../../configs/validations/schedule/constants";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
+import { useChangeWorkOrderMutation } from "../../services/schedule/smartSchedule";
 
 /**
  * @function useTimelineDialogs
@@ -20,11 +29,19 @@ import { getTimeWindow } from "../../utils/schedule/dateUtils";
  * @param {string} [options.timeRange] - 時間範圍（可選）
  * @returns {Object} 對話框操作方法
  */
-export function useTimelineDialogs({ itemsDataRef, groups, timelineRef, timeRange }) {
+export function useTimelineDialogs({
+  itemsDataRef,
+  groups,
+  timelineRef,
+  timeRange,
+}) {
+  // 獲取資料修改API
+  const [changeWorkOrder] = useChangeWorkOrderMutation();
+
   // 設置 groups 數據
   useEffect(() => {
     if (groups) {
-      DialogManager.setGroups(groups);
+      setGroups(groups);
     }
   }, [groups]);
 
@@ -35,7 +52,11 @@ export function useTimelineDialogs({ itemsDataRef, groups, timelineRef, timeRang
    * @returns {Object} 開始和結束時間
    */
   const getItemTiming = useCallback((item) => {
-    if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
+    // 處理製令單/製立單統一問題
+    const isWorkOrder =
+      item.timeLineStatus === "製令單" || item.timeLineStatus === "製立單";
+
+    if (isWorkOrder) {
       return {
         start: dayjs(item.orderInfo.scheduledStartTime).toDate(),
         end: dayjs(item.orderInfo.scheduledEndTime).toDate(),
@@ -58,7 +79,11 @@ export function useTimelineDialogs({ itemsDataRef, groups, timelineRef, timeRang
    * @returns {Object} 可編輯配置
    */
   const getEditableConfig = useCallback((timeLineStatus, orderStatus) => {
-    if (timeLineStatus === "製立單") {
+    // 處理製令單/製立單統一問題
+    const isWorkOrder =
+      timeLineStatus === "製令單" || timeLineStatus === "製立單";
+
+    if (isWorkOrder) {
       return orderStatus === "尚未上機"
         ? { updateTime: true, updateGroup: true, remove: false }
         : { updateTime: false, updateGroup: false, remove: true };
@@ -72,30 +97,43 @@ export function useTimelineDialogs({ itemsDataRef, groups, timelineRef, timeRang
       if (!itemsDataRef.current) return;
 
       try {
-        console.log("🚀 ~ useTimelineDialogs ~ itemsDataRef:", itemsDataRef);
-        
-        const areaMatch = updatedItem.group?.match(/[A-Z]/);
+        console.log("🚀 ~ useTimelineDialogs ~ updatedItem:", updatedItem);
+
+        // 檢查 updatedItem 是否有正確的結構
+        if (!updatedItem || !updatedItem.internal) {
+          console.error("Invalid item format:", updatedItem);
+          throw new Error("項目格式不正確，請檢查資料結構");
+        }
+
+        // 處理更新後的內部格式項目
         const processedItem = {
-          ...updatedItem,
-          className: getStatusClass(updatedItem.timeLineStatus),
-          ...getItemTiming(updatedItem),
-          area: areaMatch?.[0] || "",
+          ...updatedItem.internal,
+          className: getStatusClass(updatedItem.internal.timeLineStatus),
+          ...getItemTiming(updatedItem.internal),
+          area:
+            updatedItem.internal.area ||
+            updatedItem.internal.group?.match(/[A-Z]/)?.[0] ||
+            "",
           updateTime: false,
           editable: getEditableConfig(
-            updatedItem.timeLineStatus,
-            updatedItem.orderInfo?.orderStatus
+            updatedItem.internal.timeLineStatus,
+            updatedItem.internal.orderInfo?.orderStatus
           ),
         };
 
         // 除了 OrderCreated 以外的其他狀態，檢查時間重疊
-        if (updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED) {
+        if (
+          updatedItem.internal.timeLineStatus !== "製立單" &&
+          updatedItem.internal.timeLineStatus !== "製令單"
+        ) {
           // 查找同一組別的其他項目，不包含自己和 OrderCreated 狀態
           const existingItems = itemsDataRef.current.get({
             filter: function (item) {
               return (
-                item.id !== updatedItem.id &&
-                item.group === updatedItem.group &&
-                item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+                item.id !== updatedItem.internal.id &&
+                item.group === updatedItem.internal.group &&
+                item.timeLineStatus !== "製立單" &&
+                item.timeLineStatus !== "製令單"
               );
             },
           });
@@ -118,19 +156,40 @@ export function useTimelineDialogs({ itemsDataRef, groups, timelineRef, timeRang
 
           if (hasOverlap) {
             throw new Error(
-              "時間重疊：除了「製立單」外的其他狀態都不允許時間重疊"
+              "時間重疊：除了「製令單」/「製立單」外的其他狀態都不允許時間重疊"
             );
           }
         }
 
-        const action = updatedItem.id ? "update" : "add";
+        // 更新時間線顯示
+        const action = updatedItem.internal.id ? "update" : "add";
         itemsDataRef.current[action](processedItem);
+
+        // 使用 API 格式提交到後端
+        console.log("🚀 ~ 提交到API的資料:", updatedItem.api);
+
+        // 如果有工單號，使用 changeWorkOrder API 更新資料
+        if (updatedItem.api) {
+          try {
+            changeWorkOrder(updatedItem.api)
+              .unwrap()
+              .then((response) => {
+                console.log("API 更新成功:", response);
+              })
+              .catch((error) => {
+                console.error("API 更新失敗:", error);
+                // 不向用戶顯示此錯誤，因為本地界面已更新
+              });
+          } catch (apiError) {
+            console.error("API 調用異常:", apiError);
+          }
+        }
       } catch (error) {
         console.error("Save item failed:", error);
         alert(error.message);
       }
     },
-    [itemsDataRef, getItemTiming, getEditableConfig]
+    [itemsDataRef, getItemTiming, getEditableConfig, changeWorkOrder]
   );
 
   // 處理刪除項目
@@ -189,7 +248,7 @@ export function useTimelineDialogs({ itemsDataRef, groups, timelineRef, timeRang
         };
 
         // 使用對話框管理器打開項目對話框，確保傳遞 groups
-        DialogManager.openItemDialog(newItem, "add", groups);
+        openItemDialog(newItem, "add", groups);
       } catch (error) {
         console.error("Add item failed:", error);
       }
@@ -203,7 +262,7 @@ export function useTimelineDialogs({ itemsDataRef, groups, timelineRef, timeRang
       if (!item) return;
 
       // 使用對話框管理器打開項目對話框，確保傳遞 groups
-      DialogManager.openItemDialog(item, "edit", groups);
+      openItemDialog(item, "edit", groups);
     },
     [groups]
   );
@@ -227,10 +286,10 @@ export function useTimelineDialogs({ itemsDataRef, groups, timelineRef, timeRang
   // 設置事件監聽
   useEffect(() => {
     // 監聽保存事件
-    const saveUnsubscribe = DialogManager.onSaveItem(handleSaveItem);
+    const saveUnsubscribe = onSaveItem(handleSaveItem);
 
     // 監聽刪除確認事件
-    const deleteUnsubscribe = DialogManager.onConfirmDelete(handleDeleteItem);
+    const deleteUnsubscribe = onConfirmDelete(handleDeleteItem);
 
     // 返回清理函數
     return () => {

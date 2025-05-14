@@ -33,6 +33,7 @@ import DialogPortals from "./dialogs/DialogPortals";
 //* 服務與資料
 import { useGetSmartScheduleQuery } from "../../services/schedule/smartSchedule";
 import { useGetMachinesQuery } from "../../../QuotationManagementSystem/services/salesServices/endpoints/machineApi";
+import { testTransformer } from "../../utils/schedule/transformers/apiTransformers";
 
 //* 樣式
 import { TimelineContainer } from "../../assets/schedule";
@@ -44,7 +45,7 @@ import { momentLocaleConfig } from "../../configs/validations/schedule/timeline/
 import { useTimelineData } from "../../hooks/schedule/useTimelineData";
 import { useTimelineConfig } from "../../hooks/schedule/useTimelineConfig";
 import { useTimelineDialogs } from "../../hooks/schedule/useTimelineDialogs";
-import { DialogManager } from "./DialogManager";
+import { setGroups } from "./DialogManager";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 
 //! =============== 2. 全局初始化設定 ===============
@@ -210,7 +211,7 @@ function DynamicTimeline() {
     isLoading: isScheduleLoading,
     scheduleList,
   } = useAreaScheduleData(selectedArea);
-  console.log("🚀 ~ DynamicTimeline ~ scheduleList:", scheduleList);
+  console.log("🚀 ~ DynamicTimeline ~ API返回的排程資料:", scheduleList);
 
   // 獲取機台數據
   const {
@@ -305,7 +306,7 @@ function DynamicTimeline() {
 
     // 確保 DialogManager 有最新的 groups 數據
     if (groups) {
-      DialogManager.setGroups(groups);
+      setGroups(groups);
     }
 
     // 清理函數
@@ -317,6 +318,29 @@ function DynamicTimeline() {
     };
   }, [containerRef, itemsDataRef, groups, getTimelineOptions, handleEditItem]);
 
+  // 測試 API 數據轉換
+  useEffect(() => {
+    if (scheduleList && scheduleList.length > 0) {
+      // 選擇第一個製令單和第一個非製令單項目進行測試
+      const workOrder = scheduleList.find(
+        (item) => item.timeLineStatus === "製令單"
+      );
+      const machineStatus = scheduleList.find(
+        (item) => item.timeLineStatus !== "製令單"
+      );
+
+      if (workOrder) {
+        console.log("===== 製令單轉換測試 =====");
+        testTransformer(workOrder);
+      }
+
+      if (machineStatus) {
+        console.log("===== 機台狀態轉換測試 =====");
+        testTransformer(machineStatus);
+      }
+    }
+  }, [scheduleList]);
+
   //! =============== 6. 加載狀態處理 ===============
   // 判斷整體載入狀態
   const isLoading = isScheduleLoading || isMachinesLoading;
@@ -325,30 +349,21 @@ function DynamicTimeline() {
   //! =============== 7. 渲染 ===============
   return (
     <Box sx={{ width: "100%", p: 4 }}>
-      {/* 載入狀態顯示 */}
-      {isLoading && (
-        <Box display="flex" justifyContent="center" alignItems="center" p={4}>
-          <CircularProgress />
-        </Box>
-      )}
-
       {/* 時間線顯示 */}
-      {!isLoading && isDataReady && (
-        <TimelineContainer>
-          {/* 控制面板 */}
-          <TimelineControls
-            timeRange={timeRange}
-            selectedArea={selectedArea}
-            onTimeRangeChange={setTimeRange}
-            onAreaChange={setSelectedArea}
-            onAddItem={handleAddItem}
-            onMoveToNow={handleMoveToNow}
-          />
+      <TimelineContainer>
+        {/* 控制面板 */}
+        <TimelineControls
+          timeRange={timeRange}
+          selectedArea={selectedArea}
+          onTimeRangeChange={setTimeRange}
+          onAreaChange={setSelectedArea}
+          onAddItem={handleAddItem}
+          onMoveToNow={handleMoveToNow}
+        />
 
-          {/* 時間線容器 */}
-          <TimelinePaper containerRef={containerRef} />
-        </TimelineContainer>
-      )}
+        {/* 時間線容器 */}
+        <TimelinePaper containerRef={containerRef} />
+      </TimelineContainer>
 
       {/* 使用 Portal 渲染對話框 */}
       <DialogPortals />

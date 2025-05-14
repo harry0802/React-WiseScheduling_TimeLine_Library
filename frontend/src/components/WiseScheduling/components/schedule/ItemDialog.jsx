@@ -67,6 +67,7 @@ const ItemDialog = ({
 
   // 處理表單提交
   const onSubmit = (data) => {
+    // 使用 formUtils 創建更新的項目對象，包含 internal 和 api 格式
     const updatedItem = formUtils.createUpdatedItem(data, item);
     onSave(updatedItem);
     onClose();

@@ -79,7 +79,8 @@ const ItemDialog = ({
       setIsSubmitting(true);
       console.log("Submitting form data:", formData);
 
-      const updatedItem = {
+      // 構建內部格式的更新項目
+      const updatedInternalItem = {
         ...item,
         group: formData.group || "",
         area: formData.area || "",
@@ -105,11 +106,14 @@ const ItemDialog = ({
       };
 
       // 檢查時間重疊（除了 OrderCreated 狀態外的其他狀態）
-      if (updatedItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED) {
+      const isWorkOrder = updatedInternalItem.timeLineStatus === "製立單" || 
+                         updatedInternalItem.timeLineStatus === "製令單";
+                         
+      if (!isWorkOrder) {
         try {
           let hasOverlap = false;
-          const itemStart = dayjs(updatedItem.start);
-          const itemEnd = dayjs(updatedItem.end);
+          const itemStart = dayjs(updatedInternalItem.start);
+          const itemEnd = dayjs(updatedInternalItem.end);
 
           // 首先，如果有全局數據存取方式，則使用它
           if (window.timeline && window.app && window.app.timelineData) {
@@ -120,9 +124,10 @@ const ItemDialog = ({
             const existingItems = window.app.timelineData.get({
               filter: function (item) {
                 return (
-                  item.id !== updatedItem.id &&
-                  item.group === updatedItem.group &&
-                  item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+                  item.id !== updatedInternalItem.id &&
+                  item.group === updatedInternalItem.group &&
+                  item.timeLineStatus !== "製立單" &&
+                  item.timeLineStatus !== "製令單"
                 );
               },
             });
@@ -146,15 +151,16 @@ const ItemDialog = ({
 
             if (groups && Array.isArray(groups)) {
               const currentGroup = groups.find(
-                (g) => g.id === updatedItem.group
+                (g) => g.id === updatedInternalItem.group
               );
 
               if (currentGroup && currentGroup.items) {
                 currentGroup.items
                   .filter(
                     (item) =>
-                      item.id !== updatedItem.id &&
-                      item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+                      item.id !== updatedInternalItem.id &&
+                      (item.timeLineStatus !== "製立單" && 
+                       item.timeLineStatus !== "製令單")
                   )
                   .forEach((item) => groupItems.push(item));
               }
@@ -175,7 +181,7 @@ const ItemDialog = ({
 
           if (hasOverlap) {
             throw new Error(
-              "時間重疊：除了「製立單」外的其他狀態都不允許時間重疊"
+              "時間重疊：除了「製令單」/「製立單」外的其他狀態都不允許時間重疊"
             );
           }
         } catch (err) {
@@ -187,8 +193,21 @@ const ItemDialog = ({
         }
       }
 
-      console.log("Updated item:", updatedItem);
-      await onSave(updatedItem);
+      // 使用前面引入的 apiTransformers 函數轉換為 API 格式
+      // 引入 formUtils
+      const { transformInternalToApiFormat } = await import('../../../utils/schedule/transformers/apiTransformers');
+      
+      // 生成 API 格式數據
+      const updatedApiItem = transformInternalToApiFormat(updatedInternalItem);
+      
+      console.log("Updated internal item:", updatedInternalItem);
+      console.log("Updated API item:", updatedApiItem);
+      
+      // 返回包含兩種格式的對象
+      await onSave({
+        internal: updatedInternalItem,
+        api: updatedApiItem
+      });
       onClose();
     } catch (err) {
       console.error("Submit error:", err);

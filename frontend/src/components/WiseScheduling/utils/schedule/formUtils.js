@@ -1,6 +1,7 @@
 //! =============== 1. 設定與常量 ===============
 import dayjs from "dayjs";
 import { formatToFormDateTime, formatToVisDateTime } from "./dateUtils";
+import { transformInternalToApiFormat } from "./transformers/apiTransformers";
 
 //! =============== 2. 工具函數 ===============
 /**
@@ -77,7 +78,7 @@ const calculateEndTime = (startTimeStr) => {
  * @description 根據表單數據創建更新的項目數據
  * @param {Object} formData - 表單數據
  * @param {Object} originalItem - 原始項目數據
- * @returns {Object} 更新的項目數據
+ * @returns {Object} 更新的項目數據，同時包含內部格式和 API 格式
  */
 const createUpdatedItem = (formData, originalItem) => {
   if (!originalItem) return null;
@@ -93,10 +94,12 @@ const createUpdatedItem = (formData, originalItem) => {
   const startDate = dayjs(formData.start).toDate();
   const endDate = dayjs(formData.end).toDate();
 
-  // 根據表單類型構建物件
+  // 根據表單類型構建內部格式物件
+  let updatedInternalItem;
+  
   if (safeOriginal.timeLineStatus === "製立單") {
     // 更新製令單
-    return {
+    updatedInternalItem = {
       ...safeOriginal,
       group: formData.group,
       orderInfo: {
@@ -105,23 +108,32 @@ const createUpdatedItem = (formData, originalItem) => {
         scheduledEndTime: endDate,
       },
     };
+  } else {
+    // 更新機台狀態項目
+    updatedInternalItem = {
+      ...safeOriginal,
+      group: formData.group,
+      status: {
+        ...safeOriginal.status,
+        startTime: startDate,
+        endTime: endDate,
+        reason: formData.reason,
+        product: formData.product,
+      },
+      planStartDate: formData.planStartDate || null,
+      planEndDate: formData.planEndDate || null,
+      actualStartDate: formData.actualStartDate || null,
+      actualEndDate: formData.actualEndDate || null,
+    };
   }
 
-  // 更新機台狀態項目
+  // 轉換為 API 格式供提交使用
+  const apiFormat = transformInternalToApiFormat(updatedInternalItem);
+
+  // 返回包含內部格式和 API 格式的對象
   return {
-    ...safeOriginal,
-    group: formData.group,
-    status: {
-      ...safeOriginal.status,
-      startTime: startDate,
-      endTime: endDate,
-      reason: formData.reason,
-      product: formData.product,
-    },
-    planStartDate: formData.planStartDate || null,
-    planEndDate: formData.planEndDate || null,
-    actualStartDate: formData.actualStartDate || null,
-    actualEndDate: formData.actualEndDate || null,
+    internal: updatedInternalItem,
+    api: apiFormat
   };
 };
 
