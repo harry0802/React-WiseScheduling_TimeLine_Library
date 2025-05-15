@@ -28,6 +28,7 @@ import moment from "moment";
 //* 自定義元件
 import TimelineControls from "./TimelineControls";
 import DialogPortals from "./dialogs/DialogPortals";
+import "./styles/industrialTheme"; // 引入工業風格主題
 
 //* 服務與資料
 import { useGetSmartScheduleQuery } from "../../services/schedule/smartSchedule";

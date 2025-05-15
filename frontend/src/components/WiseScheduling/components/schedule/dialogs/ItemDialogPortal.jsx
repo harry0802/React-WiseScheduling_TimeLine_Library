@@ -1,12 +1,12 @@
 /**
  * @file ItemDialogPortal.jsx
  * @description 使用 Portal 渲染的項目對話框，完全獨立的渲染樹
- * @version 2.0.0 - 函數式重構
+ * @version 3.0.0 - 增強型對話框
  */
 
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import ItemDialog from "../ItemDialog/index";
+import EnhancedDialog from "../ItemDialog/EnhancedDialog";
 import { 
   onItemDialogChange, 
   saveItem, 
@@ -56,7 +56,7 @@ function ItemDialogPortal() {
 
   // 使用 Portal 將對話框渲染到 DOM 的不同位置
   return ReactDOM.createPortal(
-    <ItemDialog
+    <EnhancedDialog
       open={dialogState.isOpen}
       onClose={() => closeItemDialog()}
       item={dialogState.item}

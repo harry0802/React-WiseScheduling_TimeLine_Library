@@ -86,7 +86,13 @@ export const STATUS_CONFIG = {
 };
 
 // 🧠 狀態操作函數
-export const canTransitTo = (currentStatus) => {
+/**
+ * 檢查當前狀態是否可以切換到指定狀態
+ * @param {string} currentStatus - 當前狀態
+ * @param {string} targetStatus - 目標狀態
+ * @returns {boolean} 是否允許切換
+ */
+export const canTransitTo = (currentStatus, targetStatus) => {
   // 處理製令單/製立單統一問題
   const normalizedStatus = currentStatus === "製令單" ? "製立單" : currentStatus;
   const config = STATUS_CONFIG[normalizedStatus];
@@ -95,7 +101,9 @@ export const canTransitTo = (currentStatus) => {
   if (!config || !config.canSwitch) {
     return false;
   }
-  return true;
+  
+  // 檢查目標狀態是否在允許的轉換列表中
+  return config.allowedTransitions.includes(targetStatus);
 };
 
 // ✨ 新增的輔助函數

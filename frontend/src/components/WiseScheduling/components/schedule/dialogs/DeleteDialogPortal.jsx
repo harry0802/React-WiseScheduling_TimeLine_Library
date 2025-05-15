@@ -1,12 +1,12 @@
 /**
  * @file DeleteDialogPortal.jsx
  * @description 使用 Portal 渲染的刪除確認對話框，完全獨立的渲染樹
- * @version 2.0.0 - 函數化重構
+ * @version 3.0.0 - 增強型對話框
  */
 
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import OperationDialog from "../OperationDialog";
+import EnhancedDeleteDialog from "./EnhancedDeleteDialog";
 import { 
   onDeleteDialogChange, 
   confirmDelete, 
@@ -40,10 +40,10 @@ function DeleteDialogPortal() {
 
   // 使用 Portal 將對話框渲染到 DOM 的不同位置
   return ReactDOM.createPortal(
-    <OperationDialog
+    <EnhancedDeleteDialog
       open={dialogState.isOpen}
       title="刪除確認"
-      content="確定要刪除這個訂單嗎？"
+      content="確定要刪除這個生產項目嗎？此操作將會移除所有相關的排程資訊。"
       onConfirm={() => confirmDelete()}
       onCancel={() => closeDeleteDialog()}
       confirmText="刪除"
