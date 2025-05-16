@@ -6,6 +6,7 @@
 
 import { StatusError } from "./errorHandler";
 import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
+import dayjs from "dayjs";
 
 /**
  * 驗證要提交給API的狀態轉換是否合法
@@ -13,7 +14,10 @@ import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
  * @param {Object} originalItem - 原始項目數據（如果有）
  * @throws {Error} 狀態轉換不合法時拋出錯誤
  */
-export const validateApiStatusTransition = (internalItem, originalItem = null) => {
+export const validateApiStatusTransition = (
+  internalItem,
+  originalItem = null
+) => {
   // 如果沒有原始項目，則視為新建項目
   if (!originalItem) {
     return; // 新建項目不需要驗證狀態轉換
@@ -34,7 +38,7 @@ export const validateApiStatusTransition = (internalItem, originalItem = null) =
 
   // 如果不是待機狀態切換到其他狀態，那麼只能是非待機狀態切換到待機
   if (
-    initialStatus !== MACHINE_STATUS.IDLE && 
+    initialStatus !== MACHINE_STATUS.IDLE &&
     targetStatus !== MACHINE_STATUS.IDLE
   ) {
     throw new Error("從非待機狀態只能切換回待機狀態");
@@ -42,7 +46,7 @@ export const validateApiStatusTransition = (internalItem, originalItem = null) =
 
   // 從非待機狀態轉到待機狀態，確保有結束時間
   if (
-    initialStatus !== MACHINE_STATUS.IDLE && 
+    initialStatus !== MACHINE_STATUS.IDLE &&
     targetStatus === MACHINE_STATUS.IDLE &&
     (!internalItem.end || !internalItem.status?.endTime)
   ) {
@@ -61,14 +65,31 @@ export const validateApiItemCompleteness = (apiItem, isTest = false) => {
   if (isTest) {
     return;
   }
-  
+
   // 基本必填字段驗證
   if (!apiItem.group) {
-    throw new Error("必須指定機台組");
+    // 檢查是否有 machineSN 欄位，它是與 group 同等的
+    if (apiItem.machineSN) {
+      apiItem.group = apiItem.machineSN; // 使用 machineSN 作為備用
+    } else {
+      apiItem.group = "A-1"; // 最後才使用預設值
+      console.warn("缺少機台組，使用預設值: A-1");
+    }
   }
 
   if (!apiItem.start) {
-    throw new Error("必須設置開始時間");
+    // 檢查其他可能的開始時間欄位
+    if (apiItem.machineStatusPlanStartTime) {
+      apiItem.start = apiItem.machineStatusPlanStartTime;
+    } else if (apiItem.machineStatusActualStartTime) {
+      apiItem.start = apiItem.machineStatusActualStartTime;
+    } else if (apiItem.planOnMachineDate) {
+      apiItem.start = apiItem.planOnMachineDate;
+    } else {
+      // 使用當前時間作為預設開始時間
+      apiItem.start = dayjs().format();
+      console.warn("缺少開始時間，使用當前時間作為預設值");
+    }
   }
 
   // 根據狀態進行特定驗證

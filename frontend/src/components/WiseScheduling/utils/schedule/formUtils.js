@@ -110,6 +110,8 @@ const createUpdatedItem = (formData, originalItem) => {
     };
   } else {
     // 更新機台狀態項目
+    // TODO: 在這裡可以添加其他機台狀態項目的更新
+    // !但目前有個問題是區分 預計與實際的開始與結束時間
     updatedInternalItem = {
       ...safeOriginal,
       group: formData.group,

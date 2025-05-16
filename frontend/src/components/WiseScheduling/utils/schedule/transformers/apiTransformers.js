@@ -7,7 +7,10 @@
 
 import dayjs from "dayjs";
 import { getStatusClass } from "../../../configs/validations/schedule/constants";
-import { validateApiStatusTransition, validateApiItemCompleteness } from "../apiValidators";
+import {
+  validateApiStatusTransition,
+  validateApiItemCompleteness,
+} from "../apiValidators";
 
 /**
  * @function transformApiToInternalFormat
@@ -107,10 +110,10 @@ export const transformApiToInternalFormat = (apiData) => {
  */
 export const transformNewStatusToApi = (internalData, isTest = false) => {
   const apiData = transformInternalToApiFormat(internalData, null, isTest);
-  
+
   // 驗證 API 資料的完整性
   validateApiItemCompleteness(apiData, isTest);
-  
+
   return apiData;
 };
 
@@ -122,17 +125,25 @@ export const transformNewStatusToApi = (internalData, isTest = false) => {
  * @param {boolean} isTest - 是否為測試模式，測試模式下跳過某些驗證
  * @returns {Object} API 格式的資料
  */
-export const transformUpdateStatusToApi = (internalData, originalData, isTest = false) => {
+export const transformUpdateStatusToApi = (
+  internalData,
+  originalData,
+  isTest = false
+) => {
   // 驗證狀態轉換是否合法
   if (!isTest) {
     validateApiStatusTransition(internalData, originalData);
   }
-  
-  const apiData = transformInternalToApiFormat(internalData, originalData, isTest);
-  
+
+  const apiData = transformInternalToApiFormat(
+    internalData,
+    originalData,
+    isTest
+  );
+
   // 驗證 API 資料的完整性
   validateApiItemCompleteness(apiData, isTest);
-  
+
   return apiData;
 };
 
@@ -144,8 +155,35 @@ export const transformUpdateStatusToApi = (internalData, originalData, isTest = 
  * @param {boolean} isTest - 是否為測試模式，測試模式下跳過某些驗證
  * @returns {Object} API 格式的資料
  */
-export const transformInternalToApiFormat = (internalData, originalData = null, isTest = false) => {
+export const transformInternalToApiFormat = (
+  internalData,
+  originalData = null,
+  isTest = false
+) => {
+  console.log(
+    "🚀 ~ transformInternalToApiFormat ~ internalData:",
+    internalData
+  );
   if (!internalData) return null;
+
+  // 前置式檢查，確保關鍵欄位存在
+  if (!internalData.start || !internalData.group) {
+    console.warn("transformInternalToApiFormat: 缺少關鍵信息，嘗試修復");
+
+    // 修復缺失的開始時間
+    if (!internalData.start) {
+      // 嘗試從所有可能的位置加載開始時間
+      internalData.start =
+        internalData.status?.startTime ||
+        internalData.orderInfo?.scheduledStartTime ||
+        new Date(); // 最後才使用當前時間
+    }
+
+    // 修復缺失的機台組
+    if (!internalData.group) {
+      internalData.group = originalData?.group || "A-1"; // 預設使用 A-1
+    }
+  }
 
   // 檢查資料中是否包含 timeLineStatus，若沒有則嘗試判斷
   let timeLineStatus = internalData.timeLineStatus;
@@ -181,6 +219,8 @@ export const transformInternalToApiFormat = (internalData, originalData = null, 
     timeLineStatus: isWorkOrder ? "製令單" : timeLineStatus, // 確保使用「製令單」而非「製令單」
     productionArea: internalData.area,
     machineSN: internalData.group,
+    group: internalData.group, // 確保 group 和 machineSN 都設置為相同的值
+    start: internalData.start ? dayjs(internalData.start).format() : null, // 增加直接的 start 欄位
   };
 
   if (isWorkOrder) {
@@ -198,13 +238,13 @@ export const transformInternalToApiFormat = (internalData, originalData = null, 
       productionScheduleId: internalData.id,
       planOnMachineDate: internalData.orderInfo.scheduledStartTime
         ? dayjs(internalData.orderInfo.scheduledStartTime).format()
-        : null,
+        : dayjs().format(), // 確保有值
       planFinishDate: internalData.orderInfo.scheduledEndTime
         ? dayjs(internalData.orderInfo.scheduledEndTime).format()
         : null,
       actualOnMachineDate: internalData.orderInfo.actualStartTime
         ? dayjs(internalData.orderInfo.actualStartTime).format()
-        : null,
+        : dayjs().format(), // 確保有值
       actualFinishDate: internalData.orderInfo.actualEndTime
         ? dayjs(internalData.orderInfo.actualEndTime).format()
         : null,
@@ -225,13 +265,13 @@ export const transformInternalToApiFormat = (internalData, originalData = null, 
       machineStatusId: internalData.id,
       machineStatusPlanStartTime: internalData.status.startTime
         ? dayjs(internalData.status.startTime).format()
-        : null,
+        : dayjs().format(), // 確保有值
       machineStatusPlanEndTime: internalData.status.endTime
         ? dayjs(internalData.status.endTime).format()
         : null,
       machineStatusActualStartTime: internalData.status.startTime
         ? dayjs(internalData.status.startTime).format()
-        : null,
+        : dayjs().format(), // 確保有值
       machineStatusActualEndTime: internalData.status.endTime
         ? dayjs(internalData.status.endTime).format()
         : null,
@@ -261,13 +301,25 @@ export const transformInternalToApiFormat = (internalData, originalData = null, 
 
 // 測試轉換功能
 export const testTransformer = (apiData) => {
-  const internalFormat = transformApiToInternalFormat(apiData);
-  // 測試模式，跳過某些驗證
-  const backToApi = transformInternalToApiFormat(internalFormat, null, true);
+  try {
+    if (!apiData) {
+      console.warn("測試轉換: 沒有提供有效的 API 數據");
+      return null;
+    }
 
-  console.log("原始 API 資料:", apiData);
-  console.log("轉換為內部格式:", internalFormat);
-  console.log("轉回 API 格式:", backToApi);
+    const internalFormat = transformApiToInternalFormat(apiData);
 
-  return { internalFormat, backToApi };
+    // 測試模式，跳過某些驗證
+    const backToApi = transformInternalToApiFormat(internalFormat, null, true);
+
+    // 測試更詳細的日誌
+    // console.log("原始 API 資料:", apiData);
+    // console.log("轉換為內部格式:", internalFormat);
+    // console.log("轉回 API 格式:", backToApi);
+
+    return { internalFormat, backToApi };
+  } catch (error) {
+    console.error("測試轉換出錯:", error);
+    return null;
+  }
 };

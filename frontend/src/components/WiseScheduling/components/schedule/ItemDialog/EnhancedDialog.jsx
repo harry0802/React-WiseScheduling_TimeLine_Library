@@ -13,6 +13,10 @@ import WarningIcon from "@mui/icons-material/Warning";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { 
+  formatToFormDateTime, 
+  ensureFormDateTime 
+} from "../../../utils/schedule/dateUtils";
 import {
   Grid,
   CircularProgress,
@@ -123,34 +127,40 @@ const EnhancedDialog = ({
 
   // 表單提交處理
   const handleSubmit = async (formData) => {
-    if (isSubmitting) return;
+  if (isSubmitting) return;
 
-    try {
-      setIsSubmitting(true);
+  try {
+    setIsSubmitting(true);
+    
+    // 確保表單數據中至少有提供開始時間
+    if (!formData.start) {
+      console.warn('表單沒有提供開始時間，使用預設值');
+      formData.start = ensureFormDateTime(new Date());
+    }
 
-      // 構建內部格式的更新項目
-      const updatedInternalItem = {
-        ...item,
-        group: formData.group || "",
-        area: formData.area || "",
-        start: formData.start || null,
-        end: formData.end || null,
+    // 構建內部格式的更新項目
+    const updatedInternalItem = {
+    ...item,
+    group: formData.group || item?.group || "", // 確保保留原始 group 值
+    area: formData.area || item?.area || "", // 確保保留原始 area 值
+    start: formData.start, // 直接使用表單值，已格式化
+        end: formData.end,
         timeLineStatus: formData.timeLineStatus || currentStatus,
         status: {
           ...item.status,
           product: formData.product || "",
           reason: formData.reason || "",
-          startTime: formData.start || null,
-          endTime: formData.end || null,
+          startTime: formData.start, // 直接使用表單值
+          endTime: formData.end,
         },
         orderInfo: {
           ...item.orderInfo,
           productName: formData.productName || "",
           process: formData.process || "",
-          scheduledStartTime: formData.start || null,
-          scheduledEndTime: formData.end || null,
-          actualStartTime: formData.start || null,
-          actualEndTime: formData.end || null,
+          scheduledStartTime: formData.start, // 直接使用表單值
+          scheduledEndTime: formData.end,
+          actualStartTime: formData.start,
+          actualEndTime: formData.end,
         },
       };
 
@@ -179,8 +189,9 @@ const EnhancedDialog = ({
         !updatedInternalItem.end
       ) {
         // 自動設置結束時間為當前時間
-        updatedInternalItem.end = new Date();
-        updatedInternalItem.status.endTime = new Date();
+        const now = new Date();
+        updatedInternalItem.end = ensureFormDateTime(now);
+        updatedInternalItem.status.endTime = ensureFormDateTime(now);
       }
 
       // 使用前面引入的 apiTransformers 函數轉換為 API 格式

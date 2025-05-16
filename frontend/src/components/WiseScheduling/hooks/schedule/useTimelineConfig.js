@@ -13,7 +13,40 @@ import {
 import { TIMELINE_STYLES } from "../../configs/validations/schedule/timeline/timelineConfigs";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
-import { createItemTemplate } from "../../components/schedule/TimelineContent";
+/**
+ * 創建時間頁item的模板函數
+ * @param {Object} item - 時間線項目數據
+ * @returns {string} HTML模板字符串
+ */
+const createItemTemplate = (item) => {
+  // 得到項目內容
+  const content = item.content || '';
+  const status = item.timeLineStatus || '';
+  
+  // 根據狀態指定樣式類
+  const getStatusClass = () => {
+    const statusClasses = {
+      'IDLE': 'status-idle',
+      'TUNING': 'status-tuning',
+      'TESTING': 'status-testing',
+      'OFFLINE': 'status-offline',
+      'ORDER_CREATED': 'status-order',
+    };
+    
+    return statusClasses[status] || '';
+  };
+  
+  // 設置項目標題
+  const title = content || status;
+  
+  // 返回 HTML 模板
+  return `
+    <div class="timeline-item ${getStatusClass()}" title="${title}">
+      <div class="timeline-item-content">${content}</div>
+      ${status ? `<div class="timeline-item-status">${status}</div>` : ''}
+    </div>
+  `;
+};
 
 //! =============== 1. 設定與常量 ===============
 //* 時間線最大縮放範圍（10年的毫秒數）

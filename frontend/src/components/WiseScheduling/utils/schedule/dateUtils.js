@@ -15,6 +15,7 @@ const DATE_FORMATS = {
   dateTime: "YYYY-MM-DD HH:mm",
   date: "YYYY-MM-DD",
   time: "HH:mm",
+  isoDateTime: "YYYY-MM-DDTHH:mm", // HTML datetime-local 輸入格式
 };
 
 //! =============== 2. 初始化設定 ===============
@@ -89,10 +90,32 @@ export const isValidDate = (date) => dayjs(date).isValid();
 
 /**
  * @function formatToFormDateTime
- * @description 轉換日期為表單所需格式
+ * @description 轉換日期為表單所需的 datetime-local 格式
+ * @param {Date|string|null} date - 要格式化的日期
+ * @param {string} [defaultValue=""] - 當日期無效時返回的默認值
+ * @returns {string} 格式化的日期字符串，格式爲 YYYY-MM-DDTHH:mm
  */
-export const formatToFormDateTime = (date) =>
-  date ? dayjs(date).format("YYYY-MM-DDTHH:mm") : "";
+export const formatToFormDateTime = (date, defaultValue = "") => {
+  // 如果沒有日期，返回默認值
+  if (!date) return defaultValue;
+
+  try {
+    // 包裝為 dayjs 物件
+    const dayjsObj = dayjs(date);
+
+    // 檢查是否為有效日期
+    if (!dayjsObj.isValid()) {
+      console.warn("[formatToFormDateTime] Invalid date:", date);
+      return defaultValue;
+    }
+
+    // 返回 HTML datetime-local 格式
+    return dayjsObj.format(DATE_FORMATS.isoDateTime);
+  } catch (error) {
+    console.error("[formatToFormDateTime] Error:", error, { date });
+    return defaultValue;
+  }
+};
 
 /**
  * @function formatToVisDateTime
@@ -101,4 +124,52 @@ export const formatToFormDateTime = (date) =>
 export const formatToVisDateTime = (date) =>
   date ? dayjs(date).toDate() : null;
 
-export { DATE_FORMATS as dateFormats };
+/**
+ * @function safeParseDate
+ * @description 安全解析日期字符串為 Dayjs 對象
+ * @param {string|Date} date - 要解析的日期
+ * @returns {object|null} dayjs 對象或空
+ */
+export const safeParseDate = (date) => {
+  if (!date) return null;
+
+  try {
+    const dayjsObj = dayjs(date);
+    return dayjsObj.isValid() ? dayjsObj : null;
+  } catch (error) {
+    console.error("[safeParseDate] Error:", error, { date });
+    return null;
+  }
+};
+
+/**
+ * @function ensureFormDateTime
+ * @description 確保日期為表單可用的格式，如果無效則使用所提供的默認值
+ * @param {string|Date} date - 要格式化的日期
+ * @param {string|Date} defaultDate - 當日期無效時使用的默認值
+ * @returns {string} 格式化的日期字符串
+ */
+export const ensureFormDateTime = (date, defaultDate = new Date()) => {
+  // 嘗試格式化提供的日期
+  const formatted = formatToFormDateTime(date);
+
+  // 如果成功格式化，返回結果
+  if (formatted) return formatted;
+
+  // 否則格式化默認日期
+  return formatToFormDateTime(defaultDate, "");
+};
+
+/**
+ * @function prepareFormDateValues
+ * @description 為表單準備所有日期相關欄位的預設值
+ * @param {Object} item - 項目數據
+ * @returns {Object} 所有日期欄位格式化並更新的對象
+ */
+export const prepareFormDateValues = (item = {}) => {
+  // 滿足 React Hook Form 的日期欄位
+  return {
+    start: formatToFormDateTime(item?.start || item?.status?.startTime),
+    end: formatToFormDateTime(item?.end || item?.status?.endTime),
+  };
+};

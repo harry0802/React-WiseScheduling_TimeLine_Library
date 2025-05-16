@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { getValidationSchema } from "../../../configs/validations/schedule/validationSchema";
 import { STATUS_FORM_CONFIG } from "../../../configs/validations/schedule/formConfig";
 import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
+import { prepareFormDateValues } from "../../../utils/schedule/dateUtils";
 import OrderCreated from "./OrderCreated";
 import Idle from "./Idle";
 import Setup from "./Setup";
@@ -67,6 +68,11 @@ const StatusController = ({
     defaultValues: {
       ...(formConfig?.defaultValues || {}),
       ...item?.status,
+      // 確保將可能收到的機台資訊加入默認值
+      group: item?.group || "",
+      area: item?.area || "",
+      // 使用統一的日期準備函數
+      ...prepareFormDateValues(item),
     },
     resolver: zodResolver(getValidationSchema(effectiveStatus)),
   });

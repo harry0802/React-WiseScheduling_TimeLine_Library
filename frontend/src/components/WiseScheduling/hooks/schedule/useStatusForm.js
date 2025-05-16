@@ -71,7 +71,13 @@ export const useStatusForm = (status, item) => {
       ...FORM_FIELDS.time.reduce(
         (acc, field) => ({
           ...acc,
-          [field]: formatToFormDateTime(item[field]),
+          // 確保時間欄位確實有值
+          [field]: formatToFormDateTime(
+            item[field] || 
+            item.status?.[field + "Time"] || 
+            (field === "start" && new Date()) ||
+            null
+          ),
         }),
         {}
       ),
