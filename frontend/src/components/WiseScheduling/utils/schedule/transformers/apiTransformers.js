@@ -1,12 +1,13 @@
 /**
  * @file apiTransformers.js
  * @description API 資料與內部資料格式互相轉換的工具函數
- * @version 1.0.0 - 創建於 2025-05-13
+ * @version 1.1.0 - 更新於 2025-05-16，添加狀態驗證
  * @author Claude / Harry
  */
 
 import dayjs from "dayjs";
 import { getStatusClass } from "../../../configs/validations/schedule/constants";
+import { validateApiStatusTransition, validateApiItemCompleteness } from "../apiValidators";
 
 /**
  * @function transformApiToInternalFormat
@@ -98,12 +99,52 @@ export const transformApiToInternalFormat = (apiData) => {
 };
 
 /**
+ * @function transformNewStatusToApi
+ * @description 將內部格式的新狀態轉換為 API 格式
+ * @param {Object} internalData - 內部結構的新狀態資料
+ * @param {boolean} isTest - 是否為測試模式，測試模式下跳過某些驗證
+ * @returns {Object} API 格式的資料
+ */
+export const transformNewStatusToApi = (internalData, isTest = false) => {
+  const apiData = transformInternalToApiFormat(internalData, null, isTest);
+  
+  // 驗證 API 資料的完整性
+  validateApiItemCompleteness(apiData, isTest);
+  
+  return apiData;
+};
+
+/**
+ * @function transformUpdateStatusToApi
+ * @description 將內部格式的更新狀態轉換為 API 格式，並驗證狀態轉換是否合法
+ * @param {Object} internalData - 內部結構的更新資料
+ * @param {Object} originalData - 原始內部結構資料
+ * @param {boolean} isTest - 是否為測試模式，測試模式下跳過某些驗證
+ * @returns {Object} API 格式的資料
+ */
+export const transformUpdateStatusToApi = (internalData, originalData, isTest = false) => {
+  // 驗證狀態轉換是否合法
+  if (!isTest) {
+    validateApiStatusTransition(internalData, originalData);
+  }
+  
+  const apiData = transformInternalToApiFormat(internalData, originalData, isTest);
+  
+  // 驗證 API 資料的完整性
+  validateApiItemCompleteness(apiData, isTest);
+  
+  return apiData;
+};
+
+/**
  * @function transformInternalToApiFormat
  * @description 將內部格式的資料轉換為 API 格式，用於送出表單或修改
  * @param {Object} internalData - 內部結構的資料
+ * @param {Object} originalData - 原始內部結構資料，用於狀態轉換驗證
+ * @param {boolean} isTest - 是否為測試模式，測試模式下跳過某些驗證
  * @returns {Object} API 格式的資料
  */
-export const transformInternalToApiFormat = (internalData) => {
+export const transformInternalToApiFormat = (internalData, originalData = null, isTest = false) => {
   if (!internalData) return null;
 
   // 檢查資料中是否包含 timeLineStatus，若沒有則嘗試判斷
@@ -129,6 +170,11 @@ export const transformInternalToApiFormat = (internalData) => {
 
   const isWorkOrder =
     timeLineStatus === "製令單" || timeLineStatus === "製令單";
+
+  // 如果有原始資料，驗證狀態轉換是否合法
+  if (originalData && !isTest) {
+    validateApiStatusTransition(internalData, originalData);
+  }
 
   // 創建基本 API 結構
   const apiData = {
@@ -207,13 +253,17 @@ export const transformInternalToApiFormat = (internalData) => {
     });
   }
 
+  // 驗證 API 資料的完整性
+  validateApiItemCompleteness(apiData, isTest);
+
   return apiData;
 };
 
 // 測試轉換功能
 export const testTransformer = (apiData) => {
   const internalFormat = transformApiToInternalFormat(apiData);
-  const backToApi = transformInternalToApiFormat(internalFormat);
+  // 測試模式，跳過某些驗證
+  const backToApi = transformInternalToApiFormat(internalFormat, null, true);
 
   console.log("原始 API 資料:", apiData);
   console.log("轉換為內部格式:", internalFormat);

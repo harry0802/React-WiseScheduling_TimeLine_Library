@@ -45,7 +45,12 @@ export const isOrderOnGoing = (item) => {
  * @param {string} mode - 當前模式 (view, edit, add)
  * @throws {StatusError} 狀態轉換不合法時拋出錯誤
  */
-export const validateStatusTransition = (currentStatus, newStatus, item, mode = "edit") => {
+export const validateStatusTransition = (currentStatus, newStatus, item, mode = "edit", isDataOnlyEdit = false) => {
+  // 如果只是數據編輯而沒有狀態變更，跳過驗證
+  if (isDataOnlyEdit && currentStatus === newStatus) {
+    return; // 允許純數據編輯，不進行狀態轉換驗證
+  }
+
   // 如果是同樣的狀態而且不是add模式，不允許切換
   if (currentStatus === newStatus && mode !== "add") {
     throw new StatusError(`已經是「${currentStatus}」狀態，無需切換`);
@@ -63,13 +68,14 @@ export const validateStatusTransition = (currentStatus, newStatus, item, mode = 
   if (
     mode !== "add" && 
     actualStatus !== MACHINE_STATUS.IDLE &&
-    newStatus !== MACHINE_STATUS.IDLE
+    newStatus !== MACHINE_STATUS.IDLE &&
+    !isDataOnlyEdit // 如果是純數據編輯，不進行這項檢查
   ) {
     throw new StatusError("從非待機狀態只能切換回待機狀態");
   }
 
-  // 使用已有的canTransitTo函數再次確認，但在add模式中不做這個檢查
-  if (mode !== "add" && !canTransitTo(actualStatus, newStatus)) {
+  // 使用已有的canTransitTo函數再次確認，但在add模式或純數據編輯中不做這個檢查
+  if (mode !== "add" && !isDataOnlyEdit && !canTransitTo(actualStatus, newStatus)) {
     throw new StatusError(
       `無法從「${actualStatus}」切換到「${newStatus}」狀態`
     );

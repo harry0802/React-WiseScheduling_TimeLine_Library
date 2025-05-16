@@ -112,7 +112,7 @@ const EnhancedDialog = ({
         setShowStatusDialog(false);
         return;
       }
-      
+
       validateStatusTransition(currentStatus, newStatus, item, mode);
       setCurrentStatus(newStatus);
       setShowStatusDialog(false);
@@ -127,7 +127,7 @@ const EnhancedDialog = ({
 
     try {
       setIsSubmitting(true);
-      
+
       // 構建內部格式的更新項目
       const updatedInternalItem = {
         ...item,
@@ -154,26 +154,55 @@ const EnhancedDialog = ({
         },
       };
 
-      // 如果不是add模式，再次檢查狀態轉換是否合法
+      // 前端強化驗證 1: 狀態轉換驗證
       if (mode !== "add") {
+        // 檢查是否只是數據編輯而非狀態變更
+        const isDataOnlyEdit =
+          item?.timeLineStatus === updatedInternalItem.timeLineStatus;
         validateStatusTransition(
           item?.timeLineStatus || MACHINE_STATUS.IDLE,
           updatedInternalItem.timeLineStatus,
           item,
-          mode
+          mode,
+          isDataOnlyEdit // 添加這個參數標記是否僅編輯數據
         );
       }
 
-      // 檢查時間重疊
+      // 前端強化驗證 2: 時間重疊檢查
       checkTimeOverlap(updatedInternalItem, groups);
 
+      // 前端強化驗證 3: 如果從非待機狀態切換到待機狀態，確保有結束時間
+      if (
+        mode !== "add" &&
+        item?.timeLineStatus !== MACHINE_STATUS.IDLE &&
+        updatedInternalItem.timeLineStatus === MACHINE_STATUS.IDLE &&
+        !updatedInternalItem.end
+      ) {
+        // 自動設置結束時間為當前時間
+        updatedInternalItem.end = new Date();
+        updatedInternalItem.status.endTime = new Date();
+      }
+
       // 使用前面引入的 apiTransformers 函數轉換為 API 格式
-      const { transformInternalToApiFormat } = await import(
-        "../../../utils/schedule/transformers/apiTransformers"
-      );
+      const {
+        transformInternalToApiFormat,
+        transformUpdateStatusToApi,
+        transformNewStatusToApi,
+      } = await import("../../../utils/schedule/transformers/apiTransformers");
 
       // 生成 API 格式數據
-      const updatedApiItem = transformInternalToApiFormat(updatedInternalItem);
+      let updatedApiItem;
+      if (mode === "add") {
+        // 使用新增狀態轉換函數，包含完整性驗證
+        updatedApiItem = transformNewStatusToApi(updatedInternalItem, false);
+      } else {
+        // 使用更新狀態轉換函數，包含狀態轉換和完整性驗證
+        updatedApiItem = transformUpdateStatusToApi(
+          updatedInternalItem,
+          item,
+          false
+        );
+      }
 
       // 返回包含兩種格式的對象
       await onSave({
@@ -212,7 +241,7 @@ const EnhancedDialog = ({
 
   // 根據狀態獲取顏色
   const statusColor = getStatusColor(currentStatus);
-  
+
   // 渲染表單禁用狀態
   const formDisabled = isFormDisabled(mode, isSubmitting, item);
 
@@ -427,7 +456,7 @@ const EnhancedDialog = ({
                 >
                   當前狀態: {currentStatus}
                 </Typography>
-                
+
                 {/* 顯示狀態轉換規則提示 */}
                 {currentStatus !== MACHINE_STATUS.IDLE && (
                   <Typography
