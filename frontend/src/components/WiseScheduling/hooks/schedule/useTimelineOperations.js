@@ -93,7 +93,7 @@
 //    * @returns {Object} 可編輯配置
 //    */
 //   const getEditableConfig = (timeLineStatus, orderStatus) => {
-//     if (timeLineStatus === "製立單") {
+//     if (timeLineStatus === "製令單") {
 //       return orderStatus === "尚未上機"
 //         ? { updateTime: true, updateGroup: true, remove: false }
 //         : { updateTime: false, updateGroup: false, remove: true };
@@ -151,7 +151,7 @@
 
 //           if (hasOverlap) {
 //             throw new Error(
-//               "時間重疊：除了「製立單」外的其他狀態都不允許時間重疊"
+//               "時間重疊：除了「製令單」外的其他狀態都不允許時間重疊"
 //             );
 //           }
 //         }

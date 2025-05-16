@@ -23,7 +23,7 @@ const initializeFormData = (item) => {
   // 預設表單時間
   let defaultStartTime, defaultEndTime;
 
-  if (safeItem.timeLineStatus === "製立單") {
+  if (safeItem.timeLineStatus === "製令單") {
     defaultStartTime = safeItem.orderInfo.scheduledStartTime || new Date();
     defaultEndTime =
       safeItem.orderInfo.scheduledEndTime ||
@@ -96,8 +96,8 @@ const createUpdatedItem = (formData, originalItem) => {
 
   // 根據表單類型構建內部格式物件
   let updatedInternalItem;
-  
-  if (safeOriginal.timeLineStatus === "製立單") {
+
+  if (safeOriginal.timeLineStatus === "製令單") {
     // 更新製令單
     updatedInternalItem = {
       ...safeOriginal,
@@ -133,7 +133,7 @@ const createUpdatedItem = (formData, originalItem) => {
   // 返回包含內部格式和 API 格式的對象
   return {
     internal: updatedInternalItem,
-    api: apiFormat
+    api: apiFormat,
   };
 };
 

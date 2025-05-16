@@ -52,9 +52,8 @@ export function useTimelineDialogs({
    * @returns {Object} 開始和結束時間
    */
   const getItemTiming = useCallback((item) => {
-    // 處理製令單/製立單統一問題
-    const isWorkOrder =
-      item.timeLineStatus === "製令單" || item.timeLineStatus === "製立單";
+    // 檢查是否為製令單
+    const isWorkOrder = item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
 
     if (isWorkOrder) {
       return {
@@ -79,9 +78,8 @@ export function useTimelineDialogs({
    * @returns {Object} 可編輯配置
    */
   const getEditableConfig = useCallback((timeLineStatus, orderStatus) => {
-    // 處理製令單/製立單統一問題
-    const isWorkOrder =
-      timeLineStatus === "製令單" || timeLineStatus === "製立單";
+    // 檢查是否為製令單
+    const isWorkOrder = timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
 
     if (isWorkOrder) {
       return orderStatus === "尚未上機"
@@ -121,19 +119,15 @@ export function useTimelineDialogs({
           ),
         };
 
-        // 除了 OrderCreated 以外的其他狀態，檢查時間重疊
-        if (
-          updatedItem.internal.timeLineStatus !== "製立單" &&
-          updatedItem.internal.timeLineStatus !== "製令單"
-        ) {
-          // 查找同一組別的其他項目，不包含自己和 OrderCreated 狀態
+        // 除了製令單以外的其他狀態，檢查時間重疊
+        if (updatedItem.internal.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED) {
+          // 查找同一組別的其他項目，不包含自己和製令單狀態
           const existingItems = itemsDataRef.current.get({
             filter: function (item) {
               return (
                 item.id !== updatedItem.internal.id &&
                 item.group === updatedItem.internal.group &&
-                item.timeLineStatus !== "製立單" &&
-                item.timeLineStatus !== "製令單"
+                item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
               );
             },
           });
@@ -156,7 +150,7 @@ export function useTimelineDialogs({
 
           if (hasOverlap) {
             throw new Error(
-              "時間重疊：除了「製令單」/「製立單」外的其他狀態都不允許時間重疊"
+              "時間重疊：除了「製令單」外的其他狀態都不允許時間重疊"
             );
           }
         }

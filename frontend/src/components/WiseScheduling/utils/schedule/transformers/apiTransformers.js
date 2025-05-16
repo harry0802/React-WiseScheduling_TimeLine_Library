@@ -17,13 +17,13 @@ import { getStatusClass } from "../../../configs/validations/schedule/constants"
 export const transformApiToInternalFormat = (apiData) => {
   if (!apiData) return null;
 
-  // 處理 timeLineStatus，確保在系統內部使用「製立單」
+  // 處理 timeLineStatus，確保在系統內部使用「製令單」
   let timeLineStatus = apiData.timeLineStatus;
   const isWorkOrder = timeLineStatus === "製令單";
 
-  // 如果是製令單，內部使用「製立單」
+  // 如果是製令單，內部使用「製令單」
   if (isWorkOrder) {
-    timeLineStatus = "製立單";
+    timeLineStatus = "製令單";
   }
 
   // 設置ID
@@ -114,7 +114,7 @@ export const transformInternalToApiFormat = (internalData) => {
       internalData.orderInfo?.productName &&
       internalData.orderInfo?.process
     ) {
-      timeLineStatus = "製立單";
+      timeLineStatus = "製令單";
     } else if (internalData.status?.reason === "機台故障") {
       timeLineStatus = "機台停機";
     } else if (internalData.status?.product) {
@@ -128,11 +128,11 @@ export const transformInternalToApiFormat = (internalData) => {
   }
 
   const isWorkOrder =
-    timeLineStatus === "製令單" || timeLineStatus === "製立單";
+    timeLineStatus === "製令單" || timeLineStatus === "製令單";
 
   // 創建基本 API 結構
   const apiData = {
-    timeLineStatus: isWorkOrder ? "製令單" : timeLineStatus, // 確保使用「製令單」而非「製立單」
+    timeLineStatus: isWorkOrder ? "製令單" : timeLineStatus, // 確保使用「製令單」而非「製令單」
     productionArea: internalData.area,
     machineSN: internalData.group,
   };

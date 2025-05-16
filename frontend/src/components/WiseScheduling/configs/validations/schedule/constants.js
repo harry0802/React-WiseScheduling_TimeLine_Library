@@ -9,8 +9,9 @@ export const MACHINE_CONFIG = {
 
 // 💡 狀態定義
 export const MACHINE_STATUS = {
-  ORDER_CREATED: "製立單", // 注意這裡是「製立單」
+  ORDER_CREATED: "製令單", // 由「製令單」修改為「製令單」
   IDLE: "待機中",
+  // 其他狀態暫時保留但不使用
   SETUP: "上模與調機",
   TESTING: "產品試模",
   STOPPED: "機台停機",
@@ -18,27 +19,18 @@ export const MACHINE_STATUS = {
 
 // ✨ 狀態配置與轉換規則整合
 export const STATUS_CONFIG = {
-  // 製立單配置
+  // 製令單配置
   [MACHINE_STATUS.ORDER_CREATED]: {
     name: MACHINE_STATUS.ORDER_CREATED,
-    description: "製立單模式",
+    description: "製令單模式",
     color: "#4caf50",
     className: "status-producing",
     canSwitch: false,
     canDelete: false,
     allowedTransitions: [],
   },
-  
-  // 為了兼容 API 中的「製令單」，添加一個相同配置
-  "製令單": {
-    name: MACHINE_STATUS.ORDER_CREATED, // 顯示為「製立單」
-    description: "製立單模式",
-    color: "#4caf50",
-    className: "status-producing",
-    canSwitch: false,
-    canDelete: false,
-    allowedTransitions: [],
-  },
+
+  // 不需要額外的「製令單」配置，因為 ORDER_CREATED 已經定義為「製令單」
 
   [MACHINE_STATUS.IDLE]: {
     name: MACHINE_STATUS.IDLE,
@@ -61,7 +53,7 @@ export const STATUS_CONFIG = {
     className: "status-setup",
     canSwitch: true,
     canDelete: true,
-    allowedTransitions: [MACHINE_STATUS.IDLE],
+    allowedTransitions: [MACHINE_STATUS.IDLE], // 只能切換到待機狀態
   },
 
   [MACHINE_STATUS.TESTING]: {
@@ -71,7 +63,7 @@ export const STATUS_CONFIG = {
     className: "status-testing",
     canSwitch: true,
     canDelete: true,
-    allowedTransitions: [MACHINE_STATUS.IDLE],
+    allowedTransitions: [MACHINE_STATUS.IDLE], // 只能切換到待機狀態
   },
 
   [MACHINE_STATUS.STOPPED]: {
@@ -81,7 +73,7 @@ export const STATUS_CONFIG = {
     className: "status-stopped",
     canSwitch: true,
     canDelete: true,
-    allowedTransitions: [MACHINE_STATUS.IDLE],
+    allowedTransitions: [MACHINE_STATUS.IDLE], // 只能切換到待機狀態
   },
 };
 
@@ -93,46 +85,39 @@ export const STATUS_CONFIG = {
  * @returns {boolean} 是否允許切換
  */
 export const canTransitTo = (currentStatus, targetStatus) => {
-  // 處理製令單/製立單統一問題
-  const normalizedStatus = currentStatus === "製令單" ? "製立單" : currentStatus;
-  const config = STATUS_CONFIG[normalizedStatus];
+  // 如果當前狀態是製令單，不允許切換
+  if (currentStatus === MACHINE_STATUS.ORDER_CREATED) {
+    return false;
+  }
+
+  const config = STATUS_CONFIG[currentStatus];
 
   // 如果狀態不能切換或配置不存在，返回 false
   if (!config || !config.canSwitch) {
     return false;
   }
-  
+
   // 檢查目標狀態是否在允許的轉換列表中
   return config.allowedTransitions.includes(targetStatus);
 };
 
 // ✨ 新增的輔助函數
 export const canDeleteStatus = (status) => {
-  // 處理製令單/製立單統一問題
-  const normalizedStatus = status === "製令單" ? "製立單" : status;
-  return STATUS_CONFIG[normalizedStatus]?.canDelete ?? false;
+  return STATUS_CONFIG[status]?.canDelete ?? false;
 };
 
 export const getStatusName = (status) => {
-  // 處理製令單/製立單統一問題
-  const normalizedStatus = status === "製令單" ? "製立單" : status;
-  return STATUS_CONFIG[normalizedStatus]?.name ?? status;
+  return STATUS_CONFIG[status]?.name ?? status;
 };
 
 export const getStatusColor = (status) => {
-  // 處理製令單/製立單統一問題
-  const normalizedStatus = status === "製令單" ? "製立單" : status;
-  return STATUS_CONFIG[normalizedStatus]?.color ?? "#000000";
+  return STATUS_CONFIG[status]?.color ?? "#000000";
 };
 
 export const getStatusClass = (status) => {
-  // 處理製令單/製立單統一問題
-  const normalizedStatus = status === "製令單" ? "製立單" : status;
-  return STATUS_CONFIG[normalizedStatus]?.className ?? "";
+  return STATUS_CONFIG[status]?.className ?? "";
 };
 
 export const getAvailableTransitions = (status) => {
-  // 處理製令單/製立單統一問題
-  const normalizedStatus = status === "製令單" ? "製立單" : status;
-  return STATUS_CONFIG[normalizedStatus]?.allowedTransitions ?? [];
+  return STATUS_CONFIG[status]?.allowedTransitions ?? [];
 };

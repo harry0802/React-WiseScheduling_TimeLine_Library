@@ -35,6 +35,7 @@ import {
   MACHINE_STATUS,
   canTransitTo,
 } from "../../../configs/validations/schedule/constants";
+import { validateStatusTransition } from "../../../utils/schedule/statusHelpers";
 
 // 狀態卡片樣式 - 簡化並增加邊框粗細
 const StatusCard = styled(Box)(({ active, disabled, statusColor }) => ({
@@ -81,7 +82,7 @@ const StatusIcon = styled(Box)(({ statusColor }) => ({
 const STATUS_OPTIONS = [
   {
     value: MACHINE_STATUS.IDLE,
-    label: "閒置中",
+    label: "待機中",
     description: "機台待命狀態",
     icon: <TimerIcon />,
     color: "#757575", // 灰色
@@ -123,19 +124,18 @@ const StatusChangeDialog = ({
 }) => {
   // 檢查狀態是否可用
   const canChangeStatus = (targetStatus) => {
-    // 檢查當前狀態是否為製令單，如果是則不允許切換
-    if (
-      currentStatus === MACHINE_STATUS.ORDER_CREATED ||
-      currentStatus === "製令單"
-    ) {
+    try {
+      // 如果當前狀態等於目標狀態，那麼始終允許選擇（稍後會在handleStatusChange進行進一步驗證）
+      if (currentStatus === targetStatus) {
+        return true;
+      }
+
+      // 使用輔助函數進行狀態轉換驗證
+      validateStatusTransition(currentStatus, targetStatus, null, mode);
+      return true;
+    } catch (error) {
       return false;
     }
-
-    // 如果是新增模式，所有狀態都可以選擇
-    if (mode === "add") return true;
-
-    // 檢查狀態轉換邏輯
-    return canTransitTo(currentStatus, targetStatus);
   };
 
   return (
@@ -168,10 +168,10 @@ const StatusChangeDialog = ({
 
       {/* 對話框內容 */}
       <DialogBody>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            mb: 3, 
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 3,
             fontWeight: 500,
             color: "#212121", // 增加對比度
             fontSize: "18px", // 增加字體大小
@@ -179,84 +179,86 @@ const StatusChangeDialog = ({
         >
           請選擇要切換的狀態：
         </Typography>
-        
+
         <Divider sx={{ mb: 3, borderWidth: "1px" }} />
 
         <Grid container spacing={3}>
-          {STATUS_OPTIONS.map((status) => {
-            const isActive = currentStatus === status.value;
-            const isDisabled = disabled || !canChangeStatus(status.value);
+          {STATUS_OPTIONS
+            // 移除過濾條件，顯示所有狀態選項
+            .map((status) => {
+              const isActive = currentStatus === status.value;
+              const isDisabled = disabled || !canChangeStatus(status.value);
 
-            return (
-              <Grid item xs={12} sm={6} key={status.value}>
-                <Box sx={{ position: "relative" }}>
-                  <StatusCard
-                    active={isActive}
-                    disabled={isDisabled}
-                    statusColor={status.color}
-                    onClick={() => {
-                      if (!isDisabled && !isActive) {
-                        onStatusChange(status.value);
-                      }
-                    }}
-                  >
-                    <StatusIcon statusColor={status.color}>
-                      {status.icon}
-                    </StatusIcon>
-                    <Typography
-                      variant="h6"
-                      fontWeight={600} // 增加字體粗細
-                      color={isActive ? status.color : "#212121"} // 增加對比度
-                      fontSize="18px" // 增加字體大小
-                      sx={{ mb: 1 }} // 增加下間距
+              return (
+                <Grid item xs={12} sm={6} key={status.value}>
+                  <Box sx={{ position: "relative" }}>
+                    <StatusCard
+                      active={isActive}
+                      disabled={isDisabled}
+                      statusColor={status.color}
+                      onClick={() => {
+                        if (!isDisabled && !isActive) {
+                          onStatusChange(status.value);
+                        }
+                      }}
                     >
-                      {status.label}
-                    </Typography>
-                    <Typography
-                      variant="body1" // 使用更大的文字變體
-                      color="#616161" // 增加對比度
-                      fontSize="16px" // 增加字體大小
-                    >
-                      {status.description}
-                    </Typography>
-                    
-                    {/* 禁用狀態指示 */}
-                    {isDisabled && !isActive && (
-                      <Box 
-                        sx={{ 
-                          position: "absolute", 
-                          top: 0, 
-                          left: 0, 
-                          right: 0, 
-                          bottom: 0, 
-                          display: "flex", 
-                          alignItems: "center", 
-                          justifyContent: "center", 
-                          backgroundColor: "rgba(255,255,255,0.7)", 
-                          borderRadius: "6px",
-                          border: "2px solid #E0E0E0",
-                        }}
+                      <StatusIcon statusColor={status.color}>
+                        {status.icon}
+                      </StatusIcon>
+                      <Typography
+                        variant="h6"
+                        fontWeight={600} // 增加字體粗細
+                        color={isActive ? status.color : "#212121"} // 增加對比度
+                        fontSize="18px" // 增加字體大小
+                        sx={{ mb: 1 }} // 增加下間距
                       >
-                        <Typography 
-                          color="#616161" 
-                          fontSize="16px" 
-                          fontWeight={500}
+                        {status.label}
+                      </Typography>
+                      <Typography
+                        variant="body1" // 使用更大的文字變體
+                        color="#616161" // 增加對比度
+                        fontSize="16px" // 增加字體大小
+                      >
+                        {status.description}
+                      </Typography>
+
+                      {/* 禁用狀態指示 */}
+                      {isDisabled && !isActive && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "rgba(255,255,255,0.7)",
+                            borderRadius: "6px",
+                            border: "2px solid #E0E0E0",
+                          }}
                         >
-                          無法切換到此狀態
-                        </Typography>
-                      </Box>
-                    )}
-                  </StatusCard>
-                </Box>
-              </Grid>
-            );
-          })}
+                          <Typography
+                            color="#616161"
+                            fontSize="16px"
+                            fontWeight={500}
+                          >
+                            無法切換到此狀態
+                          </Typography>
+                        </Box>
+                      )}
+                    </StatusCard>
+                  </Box>
+                </Grid>
+              );
+            })}
         </Grid>
       </DialogBody>
 
       {/* 對話框操作按鈕 */}
       <DialogFooter>
-        <SecondaryButton 
+        <SecondaryButton
           onClick={onClose}
           sx={{ fontSize: "16px" }} // 增加字體大小
         >

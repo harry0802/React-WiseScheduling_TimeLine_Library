@@ -28,7 +28,7 @@ const createDemoOrder = (start = getWorkStartTime()) => {
     id: "202408160004",
     group: "C1",
     area: "C",
-    timeLineStatus: "製立單",
+    timeLineStatus: "製令單",
 
     // 狀態資訊
     status: {
@@ -65,9 +65,9 @@ const createDemoOrder = (start = getWorkStartTime()) => {
  * @returns {Object} vis-data 格式的項目
  */
 export const mapItemToVisDataFormat = (item) => {
-  // 處理製令單/製立單統一問題
+  // 處理製令單/製令單統一問題
   const isWorkOrder =
-    item.timeLineStatus === "製令單" || item.timeLineStatus === "製立單";
+    item.timeLineStatus === "製令單" || item.timeLineStatus === "製令單";
 
   // 檢查是否為過去的項目
   const isPastItem =
@@ -162,7 +162,7 @@ export const generateInitialOrders = () => {
       id: "ORDER-CREATED-TEST-01",
       group: "A1", // 相同機台
       area: "A",
-      timeLineStatus: "製立單", // OrderCreated 狀態
+      timeLineStatus: "製令單", // OrderCreated 狀態
       status: {
         startTime: dayjs(baseTime).add(1, "hour").toDate(),
         endTime: dayjs(baseTime).add(6, "hour").toDate(), // 時間重疊部分
@@ -272,7 +272,7 @@ export const generateInitialOrders = () => {
       id: "ORDER-CREATED-TEST-02",
       group: "D1",
       area: "D",
-      timeLineStatus: "製立單",
+      timeLineStatus: "製令單",
       status: {
         startTime: dayjs(baseTime).add(1, "hour").toDate(),
         endTime: dayjs(baseTime).add(5, "hour").toDate(),

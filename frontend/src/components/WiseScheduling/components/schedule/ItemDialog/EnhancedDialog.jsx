@@ -52,15 +52,18 @@ import {
 import { getStatusColor } from "../styles/industrialTheme";
 import StatusController from "../StatusForms/StatusForms";
 import StatusChangeDialog from "./StatusChangeDialog";
+import { handleFormError } from "../../../utils/schedule/errorHandler";
+import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
+
+// 導入輔助函數
 import {
-  handleFormError,
-  StatusError,
-} from "../../../utils/schedule/errorHandler";
-import {
-  MACHINE_STATUS,
-  canTransitTo,
-} from "../../../configs/validations/schedule/constants";
-import dayjs from "dayjs";
+  isOrderType,
+  isOrderOnGoing,
+  validateStatusTransition,
+  checkTimeOverlap,
+  isFormDisabled,
+  getDialogTitle,
+} from "../../../utils/schedule/statusHelpers";
 
 /**
  * @component EnhancedDialog
@@ -104,21 +107,13 @@ const EnhancedDialog = ({
   // 狀態切換處理
   const handleStatusChange = (newStatus) => {
     try {
-      // 如果當前狀態是製令單，不允許切換
-      if (
-        currentStatus === MACHINE_STATUS.ORDER_CREATED ||
-        currentStatus === "製令單"
-      ) {
-        throw new StatusError("製令單狀態不能被切換");
+      // 在add模式下，不要檢查相同狀態轉換的限制
+      if (mode === "add" && currentStatus === newStatus) {
+        setShowStatusDialog(false);
+        return;
       }
-
-      // 新增模式時不需要檢查狀態轉換限制
-      if (mode !== "add" && !canTransitTo(currentStatus, newStatus)) {
-        throw new StatusError(
-          `無法從「${currentStatus}」切換到「${newStatus}」狀態`
-        );
-      }
-
+      
+      validateStatusTransition(currentStatus, newStatus, item, mode);
       setCurrentStatus(newStatus);
       setShowStatusDialog(false);
     } catch (err) {
@@ -132,8 +127,7 @@ const EnhancedDialog = ({
 
     try {
       setIsSubmitting(true);
-      console.log("Submitting form data:", formData);
-
+      
       // 構建內部格式的更新項目
       const updatedInternalItem = {
         ...item,
@@ -160,106 +154,26 @@ const EnhancedDialog = ({
         },
       };
 
-      // 檢查時間重疊（除了 OrderCreated 狀態外的其他狀態）
-      const isWorkOrder =
-        updatedInternalItem.timeLineStatus === "製立單" ||
-        updatedInternalItem.timeLineStatus === "製令單";
-
-      if (!isWorkOrder) {
-        try {
-          let hasOverlap = false;
-          const itemStart = dayjs(updatedInternalItem.start);
-          const itemEnd = dayjs(updatedInternalItem.end);
-
-          // 首先，如果有全局數據存取方式，則使用它
-          if (window.timeline && window.app && window.app.timelineData) {
-            // 偵測程式可以先檢查數據存取方式
-            console.log("Using global timeline data to check overlap");
-
-            // 使用 DataSet API 取得符合條件的項目
-            const existingItems = window.app.timelineData.get({
-              filter: function (item) {
-                return (
-                  item.id !== updatedInternalItem.id &&
-                  item.group === updatedInternalItem.group &&
-                  item.timeLineStatus !== "製立單" &&
-                  item.timeLineStatus !== "製令單"
-                );
-              },
-            });
-
-            hasOverlap = existingItems.some((existingItem) => {
-              const existingStart = dayjs(existingItem.start);
-              const existingEnd = dayjs(existingItem.end);
-
-              return (
-                (itemStart.isBefore(existingEnd) &&
-                  itemEnd.isAfter(existingStart)) ||
-                itemStart.isSame(existingStart) ||
-                itemEnd.isSame(existingEnd)
-              );
-            });
-          } else {
-            console.log("Checking overlap using groups data");
-
-            // 如果沒有全局數據，則使用傳入的 groups 參數
-            const groupItems = [];
-
-            if (groups && Array.isArray(groups)) {
-              const currentGroup = groups.find(
-                (g) => g.id === updatedInternalItem.group
-              );
-
-              if (currentGroup && currentGroup.items) {
-                currentGroup.items
-                  .filter(
-                    (item) =>
-                      item.id !== updatedInternalItem.id &&
-                      item.timeLineStatus !== "製立單" &&
-                      item.timeLineStatus !== "製令單"
-                  )
-                  .forEach((item) => groupItems.push(item));
-              }
-
-              hasOverlap = groupItems.some((existingItem) => {
-                const existingStart = dayjs(existingItem.start);
-                const existingEnd = dayjs(existingItem.end);
-
-                return (
-                  (itemStart.isBefore(existingEnd) &&
-                    itemEnd.isAfter(existingStart)) ||
-                  itemStart.isSame(existingStart) ||
-                  itemEnd.isSame(existingEnd)
-                );
-              });
-            }
-          }
-
-          if (hasOverlap) {
-            throw new Error(
-              "時間重疊：除了「製令單」/「製立單」外的其他狀態都不允許時間重疊"
-            );
-          }
-        } catch (err) {
-          if (err.message.includes("時間重疊")) {
-            throw err; // 重新拋出重疊錯誤
-          }
-          console.error("檢查時間重疊時發生錯誤，繼續執行:", err);
-          // 如果檢查失敗，然後允許操作繼續
-        }
+      // 如果不是add模式，再次檢查狀態轉換是否合法
+      if (mode !== "add") {
+        validateStatusTransition(
+          item?.timeLineStatus || MACHINE_STATUS.IDLE,
+          updatedInternalItem.timeLineStatus,
+          item,
+          mode
+        );
       }
 
+      // 檢查時間重疊
+      checkTimeOverlap(updatedInternalItem, groups);
+
       // 使用前面引入的 apiTransformers 函數轉換為 API 格式
-      // 引入 formUtils
       const { transformInternalToApiFormat } = await import(
         "../../../utils/schedule/transformers/apiTransformers"
       );
 
       // 生成 API 格式數據
       const updatedApiItem = transformInternalToApiFormat(updatedInternalItem);
-
-      console.log("Updated internal item:", updatedInternalItem);
-      console.log("Updated API item:", updatedApiItem);
 
       // 返回包含兩種格式的對象
       await onSave({
@@ -280,19 +194,6 @@ const EnhancedDialog = ({
     setTabValue(newValue);
   };
 
-  // 獲取對話框標題和狀態顏色
-  const getDialogTitle = () => {
-    if (isSubmitting) return "處理中...";
-    switch (mode) {
-      case "add":
-        return "新增狀態";
-      case "edit":
-        return "編輯狀態";
-      default:
-        return "檢視狀態";
-    }
-  };
-
   // 顯示狀態切換對話框
   const handleShowStatusDialog = () => {
     setShowStatusDialog(true);
@@ -311,13 +212,20 @@ const EnhancedDialog = ({
 
   // 根據狀態獲取顏色
   const statusColor = getStatusColor(currentStatus);
+  
+  // 渲染表單禁用狀態
+  const formDisabled = isFormDisabled(mode, isSubmitting, item);
 
   // 渲染操作菜單
   const renderMenu = () => {
     // 檢查當前狀態是否可以切換
-    const isStatusSwitchable =
-      currentStatus !== MACHINE_STATUS.ORDER_CREATED &&
-      currentStatus !== "製令單";
+    const isStatusSwitchable = currentStatus !== MACHINE_STATUS.ORDER_CREATED;
+
+    // 是否為製令單類型
+    const isOrder = isOrderType(item);
+
+    // 是否為on-going狀態
+    const isOnGoing = isOrderOnGoing(item);
 
     return (
       <Menu
@@ -327,7 +235,8 @@ const EnhancedDialog = ({
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {mode !== "view" && isStatusSwitchable && (
+        {/* 只在編輯模式下顯示狀態切換選項 */}
+        {mode === "edit" && isStatusSwitchable && (
           <MenuItem onClick={handleShowStatusDialog}>
             <ListItemIcon>
               <SwapHorizIcon fontSize="small" />
@@ -342,12 +251,20 @@ const EnhancedDialog = ({
           </MenuItem>
         )}
 
-        {isStatusSwitchable && <Divider sx={{ my: 1 }} />}
+        {isStatusSwitchable && mode === "edit" && <Divider sx={{ my: 1 }} />}
 
-        {mode === "edit" && (
-          <MenuItem onClick={handleDeleteClick} sx={{ color: "error.main" }}>
+        {/* 只有非製令單類型的項目才顯示刪除選項，on-going狀態的項目禁用刪除 */}
+        {mode === "edit" && !isOrder && (
+          <MenuItem
+            onClick={handleDeleteClick}
+            sx={{ color: "error.main" }}
+            disabled={isOnGoing}
+          >
             <ListItemIcon>
-              <DeleteIcon fontSize="small" color="error" />
+              <DeleteIcon
+                fontSize="small"
+                color={isOnGoing ? "disabled" : "error"}
+              />
             </ListItemIcon>
             <ListItemText
               primary="刪除項目"
@@ -365,25 +282,25 @@ const EnhancedDialog = ({
   // 根據狀態渲染適當的圖標
   const renderStatusIcon = () => {
     switch (currentStatus) {
-      case "製令單":
+      case MACHINE_STATUS.ORDER_CREATED:
         return (
           <Badge color="primary" variant="dot">
             <AccessTimeIcon fontSize="medium" />
           </Badge>
         );
-      case "閒置":
+      case MACHINE_STATUS.IDLE:
         return (
           <Badge color="default" variant="dot">
             <AccessTimeIcon fontSize="medium" />
           </Badge>
         );
-      case "設置中":
+      case MACHINE_STATUS.SETUP:
         return (
           <Badge color="warning" variant="dot">
             <BuildIcon fontSize="medium" />
           </Badge>
         );
-      case "停機":
+      case MACHINE_STATUS.STOPPED:
         return (
           <Badge color="error" variant="dot">
             <WarningIcon fontSize="medium" />
@@ -397,19 +314,6 @@ const EnhancedDialog = ({
         );
     }
   };
-
-  // 判斷是否禁用表單
-  const isFormDisabled =
-    mode === "view" ||
-    isSubmitting ||
-    (mode !== "add" &&
-      // 有實際結束時間就禁用
-      ((item.machineStatusActualEndTime !== null &&
-        item.machineStatusActualEndTime !== undefined) ||
-        // 訂單狀態是 "On-going" 也禁用
-        item.productionScheduleStatus === "On-going" ||
-        (item.orderInfo &&
-          item.orderInfo.orderStatus.toLowerCase() === "on-going")));
 
   return (
     <>
@@ -430,7 +334,7 @@ const EnhancedDialog = ({
               component="span"
               sx={{ fontWeight: 600, fontSize: "18px" }}
             >
-              {getDialogTitle()}
+              {getDialogTitle(isSubmitting, mode)}
             </Typography>
             {isSubmitting && (
               <CircularProgress size={24} sx={{ ml: 2 }} color="inherit" />
@@ -480,20 +384,18 @@ const EnhancedDialog = ({
             variant="scrollable"
             scrollButtons="auto"
           >
-            <StatusTab label={MACHINE_STATUS.ORDER_CREATED} value={0} />
-            <StatusTab label={MACHINE_STATUS.IDLE} value={1} />
-            <StatusTab label={MACHINE_STATUS.SETUP} value={2} />
+            <StatusTab label={MACHINE_STATUS.IDLE} value={0} />
+            {/* <StatusTab label={MACHINE_STATUS.SETUP} value={2} />
             <StatusTab label={MACHINE_STATUS.TESTING} value={3} />
-            <StatusTab label={MACHINE_STATUS.STOPPED} value={4} />
+            <StatusTab label={MACHINE_STATUS.STOPPED} value={4} /> */}
           </StatusTabs>
         )}
 
         {/* 對話框內容 */}
         <DialogBody dividers>
-          {/* 如果不是製令單且模式不是查看模式，則顯示狀態切換按鈕 */}
+          {/* 如果不是製令單且模式是編輯模式，則顯示狀態切換按鈕 (不在add模式顯示) */}
           {currentStatus !== MACHINE_STATUS.ORDER_CREATED &&
-            currentStatus !== "製令單" &&
-            mode !== "view" && (
+            mode === "edit" && (
               <Paper
                 elevation={0}
                 sx={{
@@ -525,13 +427,24 @@ const EnhancedDialog = ({
                 >
                   當前狀態: {currentStatus}
                 </Typography>
+                
+                {/* 顯示狀態轉換規則提示 */}
+                {currentStatus !== MACHINE_STATUS.IDLE && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ ml: 2 }}
+                  >
+                    注意：當前狀態只能切換回待機狀態
+                  </Typography>
+                )}
               </Paper>
             )}
 
           <StatusController
             status={currentStatus}
             item={item}
-            disabled={isFormDisabled}
+            disabled={formDisabled}
             onSubmit={handleSubmit}
             mode={mode}
             isSubmitting={isSubmitting}
@@ -542,13 +455,14 @@ const EnhancedDialog = ({
 
         {/* 對話框操作按鈕 */}
         <DialogFooter>
-          {mode === "edit" && (
+          {/* 製令單不顯示刪除按鈕，on-going狀態禁用刪除按鈕 */}
+          {mode === "edit" && !isOrderType(item) && (
             <DeleteButton
               onClick={handleDeleteClick}
               startIcon={<DeleteIcon />}
               variant="outlined"
               sx={{ mr: "auto" }}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isOrderOnGoing(item)}
             >
               刪除
             </DeleteButton>

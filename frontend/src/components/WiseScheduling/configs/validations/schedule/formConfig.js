@@ -68,7 +68,7 @@ export const VALIDATION_RULES = {
 // 🧠 表單配置
 export const STATUS_FORM_CONFIG = {
   [MACHINE_STATUS.ORDER_CREATED]: {
-    name: "製立單表單",
+    name: "製令單表單",
     schema: getValidationSchema(MACHINE_STATUS.ORDER_CREATED),
     defaultValues: {
       group: "",

@@ -4,7 +4,7 @@
  * @version 2.0.0
  */
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getValidationSchema } from "../../../configs/validations/schedule/validationSchema";
@@ -18,10 +18,24 @@ import Stopped from "./Stopped";
 import { CircularProgress, Box } from "@mui/material";
 
 // 導入自定義樣式組件
-import { 
-  FormSection,
-  SectionTitle,
-} from "../styles/DialogStyles";
+import { FormSection, SectionTitle } from "../styles/DialogStyles";
+
+/**
+ * 獲取狀態表單標題
+ * @param {string} status - 狀態代碼
+ * @returns {string} 表單標題
+ */
+function getFormTitle(status) {
+  const titleMap = {
+    [MACHINE_STATUS.ORDER_CREATED]: "製令單詳細資訊",
+    [MACHINE_STATUS.IDLE]: "待機狀態設定",
+    [MACHINE_STATUS.SETUP]: "設置狀態設定",
+    [MACHINE_STATUS.TESTING]: "測試狀態設定",
+    [MACHINE_STATUS.STOPPED]: "停機狀態設定",
+  };
+
+  return titleMap[status] || "狀態設定";
+}
 
 /**
  * @component StatusController
@@ -37,16 +51,24 @@ const StatusController = ({
   onClose,
   groups,
 }) => {
-  // 獲取狀態對應的表單配置
-  const formConfig = STATUS_FORM_CONFIG[status];
-  
-  // 初始化表單
+  // 添加狀態名稱轉換，確保使用正確的狀態名稱
+  const normalizedStatus =
+    status === "製令單" ? MACHINE_STATUS.ORDER_CREATED : status;
+
+  // 檢查是否有表單配置存在
+  const hasConfig = !!STATUS_FORM_CONFIG[normalizedStatus];
+
+  // 如果沒有配置，則使用待機狀態作為默認
+  const effectiveStatus = hasConfig ? normalizedStatus : MACHINE_STATUS.IDLE;
+  const formConfig = STATUS_FORM_CONFIG[effectiveStatus];
+
+  // 只有一個 useForm 調用，符合 React Hooks 規則
   const { handleSubmit, ...methods } = useForm({
     defaultValues: {
-      ...formConfig.defaultValues,
+      ...(formConfig?.defaultValues || {}),
       ...item?.status,
     },
-    resolver: zodResolver(getValidationSchema(status)),
+    resolver: zodResolver(getValidationSchema(effectiveStatus)),
   });
 
   // 根據狀態選擇表單組件
@@ -56,7 +78,7 @@ const StatusController = ({
     [MACHINE_STATUS.SETUP]: Setup,
     [MACHINE_STATUS.TESTING]: Testing,
     [MACHINE_STATUS.STOPPED]: Stopped,
-  }[status];
+  }[effectiveStatus];
 
   // 處理表單提交
   const handleFormSubmit = (data) => {
@@ -64,32 +86,37 @@ const StatusController = ({
     onSubmit(data);
   };
 
-  // 如果沒有對應組件則不渲染
-  if (!FormComponent) return null;
+  // 如果沒有找到對應組件則使用 Idle 作為默認組件
+  const Component = FormComponent || Idle;
+
+  // 如果配置不存在，則記錄錯誤但繼續使用默認配置
+  if (!hasConfig) {
+    console.error(`狀態 "${status}" 沒有找到表單配置，使用默認配置`);
+  }
 
   return (
     <FormProvider {...methods}>
       <form id="status-form" onSubmit={handleSubmit(handleFormSubmit)}>
         <Box sx={{ mb: 3 }}>
           <SectionTitle>
-            {getFormTitle(status)}
+            {hasConfig
+              ? getFormTitle(effectiveStatus)
+              : `${status} 狀態設定 (使用默認表單)`}
           </SectionTitle>
           <FormSection>
             {isSubmitting ? (
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                height: '200px' 
-              }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "200px",
+                }}
+              >
                 <CircularProgress size={40} />
               </Box>
             ) : (
-              <FormComponent 
-                disabled={disabled} 
-                item={item} 
-                groups={groups} 
-              />
+              <Component disabled={disabled} item={item} groups={groups} />
             )}
           </FormSection>
         </Box>
@@ -97,22 +124,5 @@ const StatusController = ({
     </FormProvider>
   );
 };
-
-/**
- * 根據狀態獲取表單標題
- * @param {string} status - 狀態代碼
- * @returns {string} 表單標題
- */
-function getFormTitle(status) {
-  const titleMap = {
-    [MACHINE_STATUS.ORDER_CREATED]: "製令單詳細資訊",
-    [MACHINE_STATUS.IDLE]: "閒置狀態設定",
-    [MACHINE_STATUS.SETUP]: "設置狀態設定",
-    [MACHINE_STATUS.TESTING]: "測試狀態設定",
-    [MACHINE_STATUS.STOPPED]: "停機狀態設定",
-  };
-
-  return titleMap[status] || "狀態設定";
-}
 
 export default memo(StatusController);

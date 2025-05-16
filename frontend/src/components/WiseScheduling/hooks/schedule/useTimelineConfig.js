@@ -55,13 +55,13 @@ function getTimeAxisOptions(currentTimeRange) {
  * @param {Object} itemsDataRef - 項目資料的引用
  */
 function handleItemMove(item, callback, itemsDataRef) {
-  // 製立單狀態的項目允許時間重疊
+  // 製令單狀態的項目允許時間重疊
   if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
     callback(item);
     return;
   }
 
-  // 獲取同一機台的所有非製立單狀態項目
+  // 獲取同一機台的所有非製令單狀態項目
   const groupItems = itemsDataRef.current.get({
     filter: (groupItem) =>
       groupItem.group === item.group &&
