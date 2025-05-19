@@ -171,5 +171,11 @@ export const prepareFormDateValues = (item = {}) => {
   return {
     start: formatToFormDateTime(item?.start || item?.status?.startTime),
     end: formatToFormDateTime(item?.end || item?.status?.endTime),
+    // 保留其他表單欄位的值
+    product: item?.status?.product || "",
+    reason: item?.status?.reason || "", 
+    // 製令單相關欄位
+    productName: item?.orderInfo?.productName || "",
+    process: item?.orderInfo?.process || "",
   };
 };

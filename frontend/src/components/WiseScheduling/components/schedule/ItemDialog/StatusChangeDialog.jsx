@@ -18,8 +18,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TimerIcon from "@mui/icons-material/Timer";
 import BuildIcon from "@mui/icons-material/Build";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
-import ErrorIcon from "@mui/icons-material/Error";
-import DescriptionIcon from "@mui/icons-material/Description";
 
 // 導入樣式組件
 import {
@@ -30,11 +28,7 @@ import {
   SecondaryButton,
 } from "../styles/DialogStyles";
 import { styled } from "@mui/material/styles";
-import { industrialTheme } from "../styles/industrialTheme";
-import {
-  MACHINE_STATUS,
-  canTransitTo,
-} from "../../../configs/validations/schedule/constants";
+import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
 import { validateStatusTransition } from "../../../utils/schedule/statusHelpers";
 
 // 狀態卡片樣式 - 簡化並增加邊框粗細
