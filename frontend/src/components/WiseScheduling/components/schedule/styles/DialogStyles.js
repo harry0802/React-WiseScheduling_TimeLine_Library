@@ -208,22 +208,3 @@ export const InfoValue = styled(Typography)(({ theme }) => ({
   fontSize: "16px", // 增加字體大小
   color: "#212121", // 近黑色以增加對比度
 }));
-
-export default {
-  IndustrialDialog,
-  DialogHeader,
-  StatusChip,
-  DialogBody,
-  DialogFooter,
-  PrimaryButton,
-  SecondaryButton,
-  DeleteButton,
-  SectionTitle,
-  FormSection,
-  StatusTabs,
-  StatusTab,
-  InfoCard,
-  InfoItem,
-  InfoLabel,
-  InfoValue,
-};

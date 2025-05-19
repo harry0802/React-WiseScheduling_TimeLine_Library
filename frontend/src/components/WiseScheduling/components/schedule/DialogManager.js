@@ -65,22 +65,22 @@ const createDialogManager = () => {
 
   // 🧠 初始化對話框狀態 - 使用可變狀態而非 useState，因為這是一個服務而非組件
   let itemDialogState = {
-    isOpen: false,   // 對話框是否開啟
-    mode: "view",    // 對話框模式：view/edit/add
-    item: null,      // 當前操作的項目數據
-    groups: [],      // 組數據（用於下拉選擇）
+    isOpen: false, // 對話框是否開啟
+    mode: "view", // 對話框模式：view/edit/add
+    item: null, // 當前操作的項目數據
+    groups: [], // 組數據（用於下拉選擇）
   };
 
   let deleteDialogState = {
-    isOpen: false,   // 刪除確認對話框是否開啟
-    itemId: null,    // 要刪除的項目ID
+    isOpen: false, // 刪除確認對話框是否開啟
+    itemId: null, // 要刪除的項目ID
   };
 
   // 存儲全局 groups 數據，用於所有對話框共享
   let groups = [];
 
   //*** 公共方法 ***//
-  
+
   /**
    * 設置 groups 數據
    * @param {Array} newGroups - 組數據
@@ -91,7 +91,7 @@ const createDialogManager = () => {
   };
 
   //*** 項目對話框方法 ***//
-  
+
   /**
    * 打開項目對話框
    * @param {Object} item - 項目資料
@@ -109,7 +109,7 @@ const createDialogManager = () => {
       item,
       groups: groupsToUse,
     };
-    
+
     // ✨ 通知所有訂閱者狀態已更新
     eventSystem.emit("itemDialog:update", itemDialogState);
   };
@@ -156,7 +156,7 @@ const createDialogManager = () => {
   };
 
   //*** 刪除對話框方法 ***//
-  
+
   /**
    * 打開刪除對話框
    * @param {string} itemId - 項目ID
@@ -213,14 +213,14 @@ const createDialogManager = () => {
   return {
     // 公共方法
     setGroups,
-    
+
     // 項目對話框方法
     openItemDialog,
     closeItemDialog,
     onItemDialogChange,
     saveItem,
     onSaveItem,
-    
+
     // 刪除對話框方法
     openDeleteDialog,
     closeDeleteDialog,
@@ -239,7 +239,7 @@ const createDialogManager = () => {
 export const DialogManager = (() => {
   // 🧠 使用閉包保持單例引用，確保私有性
   let instance;
-  
+
   /**
    * 獲取或創建單例 - 延遲初始化模式
    * @returns {Object} 對話框管理器實例
@@ -251,7 +251,7 @@ export const DialogManager = (() => {
     }
     return instance;
   };
-  
+
   // 初始化並返回單例
   return getInstance();
 })();
@@ -275,22 +275,22 @@ export const {
 /**
  * 說明：本模組使用函數式編程風格實現了對話框管理系統，
  * 功能邏輯分為三個主要部分：
- * 
+ *
  * 1. 事件系統（EventSystem）：
  *    - 實現發布-訂閱模式
  *    - 提供事件註冊和觸發機制
  *    - 支持取消訂閱功能，避免內存洩漏
- * 
+ *
  * 2. 對話框管理器（DialogManager）：
  *    - 使用閉包封裝狀態
  *    - 提供統一的對話框操作API
  *    - 將界面組件與業務邏輯分離
- * 
+ *
  * 3. 單例模式：
  *    - 確保整個應用中只有一個管理器實例
  *    - 使用IIFE（立即執行函數表達式）實現
  *    - 支持延遲初始化，節省資源
- * 
+ *
  * 這種設計模式優勢：
  * - 降低模組間耦合度，實現關注點分離
  * - 統一管理對話框狀態，避免多點管理的混亂

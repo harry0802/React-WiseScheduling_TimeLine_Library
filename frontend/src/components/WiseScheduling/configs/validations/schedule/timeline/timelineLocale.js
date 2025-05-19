@@ -44,8 +44,3 @@ export const momentLocaleConfig = {
     return adjustedHour;
   },
 };
-
-export default {
-  zhTWLocale,
-  momentLocaleConfig,
-};

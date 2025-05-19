@@ -5,7 +5,7 @@
  */
 
 import { DataSet } from "vis-data";
-import { MACHINE_CONFIG, MACHINE_STATUS, getStatusClass } from "./constants";
+import { MACHINE_CONFIG } from "./constants";
 import dayjs from "dayjs";
 import { transformApiToInternalFormat } from "../../../utils/schedule/transformers/apiTransformers";
 

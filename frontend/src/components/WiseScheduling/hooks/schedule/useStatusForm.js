@@ -4,7 +4,11 @@ import { useEffect, useRef, useMemo } from "react";
 import dayjs from "dayjs";
 import { formatToFormDateTime } from "../../utils/schedule/dateUtils";
 import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
-import { ValidationError, FormError, logError } from "../../utils/schedule/errorHandler";
+import {
+  ValidationError,
+  FormError,
+  logError,
+} from "../../utils/schedule/errorHandler";
 
 //! =============== 1. 表單欄位配置 ===============
 //* 集中管理表單欄位配置，便於統一管理
@@ -45,18 +49,18 @@ export const FIELD_MAPPING = {
   group: "group",
   area: "area",
   timeLineStatus: "timeLineStatus",
-  
+
   // 時間欄位映射
   start: ["start", "status.startTime", "orderInfo.scheduledStartTime"],
   end: ["end", "status.endTime", "orderInfo.scheduledEndTime"],
-  
+
   // 訂單欄位映射
   productName: "orderInfo.productName",
   process: "orderInfo.process",
   quantity: "orderInfo.quantity",
   completedQty: "orderInfo.completedQty",
   orderStatus: "orderInfo.orderStatus",
-  
+
   // 狀態欄位映射
   reason: "status.reason",
   product: "status.product",
@@ -91,7 +95,7 @@ export const useStatusForm = (status, item) => {
   const fieldHelpers = useMemo(() => {
     // 建立當前狀態所需的欄位列表
     const requiredFields = [...FORM_FIELDS.basic, ...FORM_FIELDS.time];
-    
+
     // 根據狀態類型添加特定欄位
     switch (status) {
       case MACHINE_STATUS.ORDER_CREATED:
@@ -110,31 +114,31 @@ export const useStatusForm = (status, item) => {
         // 待機狀態或其他狀態不需添加額外欄位
         break;
     }
-    
+
     return {
       // 狀態所需的欄位列表（已去重）
       fields: [...new Set(requiredFields)],
-      
+
       // 檢查欄位是否為當前狀態所需
       isFieldRequired: (field) => requiredFields.includes(field),
-      
+
       // 獲取欄位在表單中的預設值
       getDefaultValue: (field) => {
         // 時間欄位特殊處理
         if (field === "start") return formatToFormDateTime(new Date());
         if (field === "end") return "";
-        
+
         // 其他欄位返回空值
         return "";
       },
-      
+
       // 從項目中提取欄位值
       getFieldValue: (field, itemData) => {
         if (!itemData) return null;
-        
+
         // 處理嵌套欄位路徑
         const mapping = FIELD_MAPPING[field];
-        
+
         if (Array.isArray(mapping)) {
           // 多個可能的路徑，按優先順序尋找
           for (const path of mapping) {
@@ -148,7 +152,7 @@ export const useStatusForm = (status, item) => {
           // 單一映射路徑
           return getNestedValue(itemData, mapping);
         }
-        
+
         // 直接欄位
         return itemData[field];
       },
@@ -162,11 +166,11 @@ export const useStatusForm = (status, item) => {
     try {
       // 準備要設定的欄位數據
       const updateFields = {};
-      
+
       // 遍歷所有需要的欄位
-      fieldHelpers.fields.forEach(field => {
+      fieldHelpers.fields.forEach((field) => {
         let value;
-        
+
         // 時間欄位特殊處理
         if (field === "start" || field === "end") {
           const rawValue = fieldHelpers.getFieldValue(field, item);
@@ -176,22 +180,22 @@ export const useStatusForm = (status, item) => {
         } else {
           // 其他欄位直接取值
           value = fieldHelpers.getFieldValue(field, item);
-          
+
           // 確保狀態欄位正確設置
           if (field === "timeLineStatus") {
             value = value || status;
           }
         }
-        
+
         // 只有當值存在時才更新
         if (value !== undefined) {
           updateFields[field] = value;
         }
       });
-      
+
       // 保存初始欄位值，用於比較變更
       initialFields.current = { ...updateFields };
-      
+
       // 批次設置所有欄位值
       Object.entries(updateFields).forEach(([field, value]) => {
         setValue(field, value, {
@@ -199,7 +203,7 @@ export const useStatusForm = (status, item) => {
           shouldDirty: false,
         });
       });
-      
+
       isInitialized.current = true;
     } catch (error) {
       // 記錄錯誤但不中斷
@@ -207,7 +211,7 @@ export const useStatusForm = (status, item) => {
         new FormError("表單初始化失敗", {
           status,
           itemId: item?.id,
-          error: error.message
+          error: error.message,
         })
       );
       console.error("表單初始化錯誤:", error);
@@ -217,20 +221,20 @@ export const useStatusForm = (status, item) => {
   // 追踪已變更的欄位
   const changedFields = useMemo(() => {
     if (!isInitialized.current || !isDirty) return {};
-    
+
     // 篩選出已變更的欄位
     return Object.keys(dirtyFields).reduce((result, field) => {
       const currentValue = watch(field);
       const initialValue = initialFields.current[field];
-      
+
       // 僅當值真正變更時才標記
       if (currentValue !== initialValue) {
         result[field] = {
           from: initialValue,
-          to: currentValue
+          to: currentValue,
         };
       }
-      
+
       return result;
     }, {});
   }, [isDirty, dirtyFields, watch]);
@@ -241,30 +245,30 @@ export const useStatusForm = (status, item) => {
     watch,
     control,
     setValue,
-    
+
     // 錯誤處理
     errors,
     isFieldError: (fieldName) => !!errors[fieldName],
-    
+
     // 狀態跟踪
     initialized: isInitialized.current,
     isDirty,
     changedFields,
-    
+
     // 欄位相關工具
     fields: fieldHelpers.fields,
     isFieldRequired: fieldHelpers.isFieldRequired,
     getFieldValue: watch,
-    
+
     // 輔助方法
     resetField: (field, options = {}) => {
       setValue(
-        field, 
+        field,
         initialFields.current[field] || fieldHelpers.getDefaultValue(field),
         {
           shouldValidate: true,
           shouldDirty: false,
-          ...options
+          ...options,
         }
       );
     },
@@ -283,10 +287,10 @@ export const useStatusForm = (status, item) => {
  */
 export const getNestedValue = (obj, path) => {
   if (!obj || !path) return undefined;
-  
+
   // 處理點符號路徑
   const parts = path.split(".");
-  
+
   // 遞迴獲取嵌套值
   return parts.reduce((current, part) => {
     return current && current[part] !== undefined ? current[part] : undefined;
@@ -301,10 +305,10 @@ export const getNestedValue = (obj, path) => {
  */
 export const flattenFormErrors = (errors) => {
   if (!errors) return {};
-  
+
   // 攤平嵌套錯誤
   const flatErrors = {};
-  
+
   Object.entries(errors).forEach(([key, value]) => {
     if (value && typeof value === "object" && "message" in value) {
       // 基本錯誤
@@ -312,12 +316,12 @@ export const flattenFormErrors = (errors) => {
     } else if (value && typeof value === "object") {
       // 嵌套錯誤
       const nestedErrors = flattenFormErrors(value);
-      
+
       Object.entries(nestedErrors).forEach(([nestedKey, nestedValue]) => {
         flatErrors[`${key}.${nestedKey}`] = nestedValue;
       });
     }
   });
-  
+
   return flatErrors;
 };

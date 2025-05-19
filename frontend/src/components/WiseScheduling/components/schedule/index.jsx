@@ -82,59 +82,8 @@ function useAreaScheduleData(area = "A") {
       (item) => item.productionArea === area
     );
 
-    // 將數據分為製令單和機台狀態兩類
-    const orderRecords = [];
-    const statusRecords = [];
-
-    areaData.forEach((item) => {
-      if (item.timeLineStatus === "製令單") {
-        orderRecords.push(item);
-      } else {
-        statusRecords.push(item);
-      }
-    });
-
-    // 處理製令單：按機台分組，每台機器只保留最新的計劃時間
-    const latestOrders = {};
-    orderRecords.forEach((order) => {
-      const machineSN = order.machineSN;
-      const planDate = order.planOnMachineDate
-        ? new Date(order.planOnMachineDate)
-        : null;
-
-      if (!machineSN || !planDate) return;
-
-      if (
-        !latestOrders[machineSN] ||
-        !latestOrders[machineSN].planOnMachineDate ||
-        planDate > new Date(latestOrders[machineSN].planOnMachineDate)
-      ) {
-        latestOrders[machineSN] = order;
-      }
-    });
-
-    // 處理機台狀態：按機台分組，只保留最新的狀態
-    const latestStatus = {};
-    statusRecords.forEach((status) => {
-      const machineSN = status.machineSN;
-      const startTime = status.machineStatusActualStartTime
-        ? new Date(status.machineStatusActualStartTime)
-        : null;
-
-      if (!machineSN || !startTime) return;
-
-      if (
-        !latestStatus[machineSN] ||
-        !latestStatus[machineSN].machineStatusActualStartTime ||
-        startTime >
-          new Date(latestStatus[machineSN].machineStatusActualStartTime)
-      ) {
-        latestStatus[machineSN] = status;
-      }
-    });
-
-    // 合併最新的製令單和機台狀態，保持原始數據結構
-    return [...Object.values(latestOrders), ...Object.values(latestStatus)];
+    // 只過濾 area，不進行進一步處理
+    return areaData;
   }, [scheduleData, area]);
 
   return {
@@ -206,20 +155,11 @@ function DynamicTimeline() {
 
   //! =============== 4. 數據獲取 ===============
   // 獲取特定區域的排程數據
-  const {
-    isSuccess: isScheduleSuccess,
-    isLoading: isScheduleLoading,
-    scheduleList,
-  } = useAreaScheduleData(selectedArea);
+  const { scheduleList } = useAreaScheduleData(selectedArea);
   console.log("🚀 ~ DynamicTimeline ~ API返回的排程資料:", scheduleList);
 
   // 獲取機台數據
-  const {
-    isSuccess: isMachinesSuccess,
-    isLoading: isMachinesLoading,
-    allArea,
-    filteredMachines,
-  } = useAreaMachines(selectedArea);
+  const { filteredMachines } = useAreaMachines(selectedArea);
 
   // 使用自定義 hook 獲取時間線數據
   const { itemsDataRef, groups } = useTimelineData(
@@ -343,8 +283,6 @@ function DynamicTimeline() {
 
   //! =============== 6. 加載狀態處理 ===============
   // 判斷整體載入狀態
-  const isLoading = isScheduleLoading || isMachinesLoading;
-  const isDataReady = !!filteredMachines && !!scheduleList;
 
   //! =============== 7. 渲染 ===============
   return (

@@ -30,9 +30,10 @@ const ReadOnlyField = styled(Box)(({ theme }) => ({
   backgroundColor: "#F5F5F5",
   border: "2px solid #9E9E9E", // 中等灰色粗邊框
   borderRadius: theme.shape.borderRadius,
-  minHeight: "56px", // 與TextField高度一致
+  height: "56px", // 固定高度與TextField一致
   display: "flex",
   flexDirection: "column",
+  justifyContent: "center", // 垂直居中內容
   width: "100%",
 }));
 
@@ -115,6 +116,7 @@ const OrderCreated = ({ item, disabled }) => {
   if (!item?.id || !item?.orderInfo || !item?.status) {
     return null;
   }
+  console.log("🚀 ~ OrderCreated ~ item:", item);
 
   // 計算完成率
   const completedPercentage = item.orderInfo.quantity
@@ -176,7 +178,7 @@ const OrderCreated = ({ item, disabled }) => {
           <Grid item xs={12} sm={4}>
             <FieldLabel>製令單號</FieldLabel>
             <ReadOnlyField>
-              <FieldValue>{item.id}</FieldValue>
+              <FieldValue>{item.orderInfo.productId}</FieldValue>
             </ReadOnlyField>
           </Grid>
 
@@ -303,6 +305,7 @@ const OrderCreated = ({ item, disabled }) => {
         <Grid container spacing={3}>
           {/* 可編輯欄位：預計上機日 */}
           <Grid item xs={12} sm={6}>
+            <FieldLabel>預計上機日</FieldLabel>
             <Controller
               name="start"
               control={control}
@@ -310,14 +313,12 @@ const OrderCreated = ({ item, disabled }) => {
                 <TextField
                   {...field}
                   fullWidth
-                  label="預計上機日"
                   type="datetime-local"
                   error={!!error}
                   helperText={error?.message || ""}
                   disabled={disabled}
                   InputLabelProps={{ shrink: true }}
                   sx={{
-                    mt: 1, // 與唯讀欄位對齊
                     "& .MuiOutlinedInput-root": {
                       "& fieldset": {
                         borderWidth: "2px",
@@ -326,6 +327,9 @@ const OrderCreated = ({ item, disabled }) => {
                       "&:hover fieldset": {
                         borderColor: "#1976D2",
                       },
+                    },
+                    "& .MuiInputBase-root": {
+                      height: "56px", // 確保與ReadOnlyField高度一致
                     },
                   }}
                 />
@@ -333,36 +337,22 @@ const OrderCreated = ({ item, disabled }) => {
             />
           </Grid>
 
-          {/* 可編輯欄位：預計完成日 */}
+          {/* 唯讀欄位：預計完成日 */}
           <Grid item xs={12} sm={6}>
-            <Controller
-              name="end"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  label="預計完成日"
-                  type="datetime-local"
-                  error={!!error}
-                  helperText={error?.message || ""}
-                  disabled={disabled}
-                  InputLabelProps={{ shrink: true }}
-                  sx={{
-                    mt: 1, // 與唯讀欄位對齊
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderWidth: "2px",
-                        borderColor: "#1976D2", // 藍色邊框
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#1976D2",
-                      },
-                    },
-                  }}
-                />
-              )}
-            />
+            <FieldLabel>預計完成日</FieldLabel>
+            <ReadOnlyField>
+              <FieldValue>
+                {item.end
+                  ? new Date(item.end).toLocaleString("zh-TW", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "-"}
+              </FieldValue>
+            </ReadOnlyField>
           </Grid>
         </Grid>
       </Grid>

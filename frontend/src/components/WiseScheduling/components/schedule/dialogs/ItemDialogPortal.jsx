@@ -7,11 +7,11 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import EnhancedDialog from "../ItemDialog/EnhancedDialog";
-import { 
-  onItemDialogChange, 
-  saveItem, 
-  closeItemDialog, 
-  openDeleteDialog 
+import {
+  onItemDialogChange,
+  saveItem,
+  closeItemDialog,
+  openDeleteDialog,
 } from "../DialogManager";
 
 /**

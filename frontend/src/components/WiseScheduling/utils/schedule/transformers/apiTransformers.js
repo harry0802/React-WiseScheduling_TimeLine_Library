@@ -1,7 +1,7 @@
 /**
  * @file apiTransformers.js
  * @description API 資料與內部資料格式互相轉換的工具函數
- * @version 1.1.0 - 更新於 2025-05-16，添加狀態驗證
+ * @version 2.0.0 - 更新於 2025-05-19，適配扁平化API結構
  * @author Claude / Harry
  */
 
@@ -11,6 +11,7 @@ import {
   validateApiStatusTransition,
   validateApiItemCompleteness,
 } from "../apiValidators";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * @function transformApiToInternalFormat
@@ -31,9 +32,13 @@ export const transformApiToInternalFormat = (apiData) => {
   }
 
   // 設置ID
+  // 根據不同類型使用不同 ID，製令單使用 productionScheduleId，其他狀態使用 machineStatusId
   const itemId = isWorkOrder
     ? apiData.productionScheduleId
     : apiData.machineStatusId;
+
+  // 如果沒有 id，則生成一個
+  const generatedId = uuidv4();
 
   // 設置機台和區域
   const machineGroup = apiData.machineSN;
@@ -47,23 +52,26 @@ export const transformApiToInternalFormat = (apiData) => {
     startTime = dayjs(apiData.planOnMachineDate);
     endTime = apiData.planFinishDate
       ? dayjs(apiData.planFinishDate)
-      : startTime.add(2, "hour");
+      : startTime.add(1, "hour");
   } else {
     // 機台狀態時間處理
-    startTime = dayjs(apiData.machineStatusActualStartTime);
+    startTime = dayjs(
+      apiData.machineStatusActualStartTime || apiData.machineStatusPlanStartTime
+    );
     endTime = apiData.machineStatusActualEndTime
       ? dayjs(apiData.machineStatusActualEndTime)
-      : dayjs(apiData.machineStatusPlanEndTime) || startTime.add(2, "hour");
+      : apiData.machineStatusPlanEndTime
+      ? dayjs(apiData.machineStatusPlanEndTime)
+      : startTime.add(1, "hour");
   }
 
   return {
-    id:
-      itemId ||
-      `API-SCHEDULE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    id: generatedId,
     group: machineGroup,
     area,
-    timeLineStatus: timeLineStatus, // 使用更新後的狀態名稱
+    timeLineStatus: timeLineStatus,
 
+    // 狀態信息，對應新的扁平化結構
     status: {
       startTime: startTime.toDate(),
       endTime: endTime.toDate(),
@@ -71,6 +79,7 @@ export const transformApiToInternalFormat = (apiData) => {
       product: apiData.machineStatusProduct || apiData.productName || "",
     },
 
+    // 訂單信息，對應新的扁平化結構
     orderInfo: {
       scheduledStartTime: dayjs(
         apiData.planOnMachineDate || startTime
@@ -167,22 +176,18 @@ export const transformInternalToApiFormat = (
   if (!internalData) return null;
 
   // 前置式檢查，確保關鍵欄位存在
-  if (!internalData.start || !internalData.group) {
-    console.warn("transformInternalToApiFormat: 缺少關鍵信息，嘗試修復");
+  if (
+    !internalData.start &&
+    !internalData.status?.startTime &&
+    !internalData.orderInfo?.scheduledStartTime
+  ) {
+    console.warn("transformInternalToApiFormat: 缺少開始時間信息，嘗試修復");
+    internalData.start = new Date();
+  }
 
-    // 修復缺失的開始時間
-    if (!internalData.start) {
-      // 嘗試從所有可能的位置加載開始時間
-      internalData.start =
-        internalData.status?.startTime ||
-        internalData.orderInfo?.scheduledStartTime ||
-        new Date(); // 最後才使用當前時間
-    }
-
-    // 修復缺失的機台組
-    if (!internalData.group) {
-      internalData.group = originalData?.group || "A-1"; // 預設使用 A-1
-    }
+  if (!internalData.group) {
+    console.warn("transformInternalToApiFormat: 缺少機台信息，嘗試修復");
+    internalData.group = originalData?.group || "A-1"; // 預設使用 A-1
   }
 
   // 檢查資料中是否包含 timeLineStatus，若沒有則嘗試判斷
@@ -214,83 +219,87 @@ export const transformInternalToApiFormat = (
     validateApiStatusTransition(internalData, originalData);
   }
 
-  // 創建基本 API 結構
+  // 處理時間字段
+  const startTime =
+    internalData.start ||
+    internalData.status?.startTime ||
+    internalData.orderInfo?.scheduledStartTime;
+  const endTime =
+    internalData.end ||
+    internalData.status?.endTime ||
+    internalData.orderInfo?.scheduledEndTime;
+
+  // 創建基本 API 結構 - 對應新的扁平化結構
   const apiData = {
-    timeLineStatus: isWorkOrder ? "製令單" : timeLineStatus, // 確保使用「製令單」而非「製令單」
+    timeLineStatus: isWorkOrder ? "製令單" : timeLineStatus,
     productionArea: internalData.area,
     machineSN: internalData.group,
-    group: internalData.group, // 確保 group 和 machineSN 都設置為相同的值
-    start: internalData.start ? dayjs(internalData.start).format() : null, // 增加直接的 start 欄位
+
+    // 初始化所有字段為null
+    machineStatusId: null,
+    machineStatusPlanStartTime: null,
+    machineStatusPlanEndTime: null,
+    machineStatusActualStartTime: null,
+    machineStatusActualEndTime: null,
+    machineStatusReason: null,
+    machineStatusProduct: null,
+    productionScheduleId: null,
+    planOnMachineDate: null,
+    planFinishDate: null,
+    actualOnMachineDate: null,
+    actualFinishDate: null,
+    postponeTime: null,
+    productSN: null,
+    productName: null,
+    workOrderQuantity: null,
+    productionQuantity: null,
+    processName: null,
+    productionScheduleStatus: null,
   };
 
   if (isWorkOrder) {
     // 製令單資料
-    Object.assign(apiData, {
-      machineStatusId: null,
-      machineStatusPlanStartTime: null,
-      machineStatusPlanEndTime: null,
-      machineStatusActualStartTime: null,
-      machineStatusActualEndTime: null,
-      machineStatusReason: null,
-      machineStatusProduct: null,
-
-      // 特定製令單欄位
-      productionScheduleId: internalData.id,
-      planOnMachineDate: internalData.orderInfo.scheduledStartTime
-        ? dayjs(internalData.orderInfo.scheduledStartTime).format()
-        : dayjs().format(), // 確保有值
-      planFinishDate: internalData.orderInfo.scheduledEndTime
-        ? dayjs(internalData.orderInfo.scheduledEndTime).format()
-        : null,
-      actualOnMachineDate: internalData.orderInfo.actualStartTime
-        ? dayjs(internalData.orderInfo.actualStartTime).format()
-        : dayjs().format(), // 確保有值
-      actualFinishDate: internalData.orderInfo.actualEndTime
-        ? dayjs(internalData.orderInfo.actualEndTime).format()
-        : null,
-      productSN: internalData.orderInfo.productId || "",
-      productName: internalData.orderInfo.productName || "",
-      workOrderQuantity: internalData.orderInfo.quantity
-        ? internalData.orderInfo.quantity.toString()
-        : "0",
-      productionQuantity: internalData.orderInfo.completedQty
-        ? internalData.orderInfo.completedQty.toString()
-        : null,
-      processName: internalData.orderInfo.process || "",
-      productionScheduleStatus: internalData.orderInfo.orderStatus || "",
-    });
+    apiData.productionScheduleId = internalData.id;
+    apiData.planOnMachineDate = internalData.orderInfo?.scheduledStartTime
+      ? dayjs(internalData.orderInfo.scheduledStartTime).format()
+      : dayjs(startTime).format();
+    apiData.planFinishDate = internalData.orderInfo?.scheduledEndTime
+      ? dayjs(internalData.orderInfo.scheduledEndTime).format()
+      : dayjs(endTime).format();
+    apiData.actualOnMachineDate = internalData.orderInfo?.actualStartTime
+      ? dayjs(internalData.orderInfo.actualStartTime).format()
+      : null;
+    apiData.actualFinishDate = internalData.orderInfo?.actualEndTime
+      ? dayjs(internalData.orderInfo.actualEndTime).format()
+      : null;
+    apiData.productSN = internalData.orderInfo?.productId || "";
+    apiData.productName = internalData.orderInfo?.productName || "";
+    apiData.workOrderQuantity = internalData.orderInfo?.quantity
+      ? internalData.orderInfo.quantity.toString()
+      : "0";
+    apiData.productionQuantity = internalData.orderInfo?.completedQty
+      ? internalData.orderInfo.completedQty.toString()
+      : "0";
+    apiData.processName = internalData.orderInfo?.process || "";
+    apiData.productionScheduleStatus =
+      internalData.orderInfo?.orderStatus || "";
   } else {
     // 機台狀態資料
-    Object.assign(apiData, {
-      machineStatusId: internalData.id,
-      machineStatusPlanStartTime: internalData.status.startTime
-        ? dayjs(internalData.status.startTime).format()
-        : dayjs().format(), // 確保有值
-      machineStatusPlanEndTime: internalData.status.endTime
-        ? dayjs(internalData.status.endTime).format()
-        : null,
-      machineStatusActualStartTime: internalData.status.startTime
-        ? dayjs(internalData.status.startTime).format()
-        : dayjs().format(), // 確保有值
-      machineStatusActualEndTime: internalData.status.endTime
-        ? dayjs(internalData.status.endTime).format()
-        : null,
-      machineStatusReason: internalData.status.reason || null,
-      machineStatusProduct: internalData.status.product || null,
-
-      // 清空製令單相關欄位
-      productionScheduleId: null,
-      planOnMachineDate: null,
-      planFinishDate: null,
-      actualOnMachineDate: null,
-      actualFinishDate: null,
-      productSN: null,
-      productName: null,
-      workOrderQuantity: null,
-      productionQuantity: null,
-      processName: null,
-      productionScheduleStatus: null,
-    });
+    apiData.machineStatusId = internalData.id;
+    apiData.machineStatusPlanStartTime = internalData.status?.startTime
+      ? dayjs(internalData.status.startTime).format()
+      : dayjs(startTime).format();
+    apiData.machineStatusPlanEndTime = internalData.status?.endTime
+      ? dayjs(internalData.status.endTime).format()
+      : dayjs(endTime).format();
+    apiData.machineStatusActualStartTime = internalData.status?.startTime
+      ? dayjs(internalData.status.startTime).format()
+      : dayjs(startTime).format();
+    apiData.machineStatusActualEndTime = internalData.status?.endTime
+      ? dayjs(internalData.status.endTime).format()
+      : dayjs(endTime).format();
+    apiData.machineStatusReason = internalData.status?.reason || null;
+    apiData.machineStatusProduct = internalData.status?.product || null;
   }
 
   // 驗證 API 資料的完整性
