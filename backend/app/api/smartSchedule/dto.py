@@ -28,6 +28,7 @@ class SmartScheduleDto:
     put_obj_workorder = {
         "productionScheduleId": NullableInteger(required=False, description="productionSchedule ID，調整製令單的時間要傳這個參數", example=1),
         "newStartDate": NullableDateTime(required=True, description="修改後的開始日期", example="2025-03-25T00:00:00.000+08:00"),
+        "machineSN": NullableString(required=True, description="機台編號", example="A1")
     }
     for key in put_obj_workorder:
         put_obj_workorder[key].description = f"PUT {key}"

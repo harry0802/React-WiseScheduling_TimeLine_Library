@@ -1,7 +1,7 @@
 from datetime import datetime
 import sys
 from app import db
-from sqlalchemy import literal
+from sqlalchemy import and_, or_
 from app.utils_log import message, err_resp, internal_err_resp
 from app.models.machineStatus import MachineStatus
 from app.models.machine import Machine
@@ -138,6 +138,25 @@ class MachineStatusService:
     def create_machineStatus(payload):
         """新增機台狀態並觸發排程調整"""
         try:
+            # 0. 確認新的機台狀態區間(planStartDate, planEndDate)不會與現有的機台狀態區間重疊
+            machineStatus_query = MachineStatus.query
+            machineStatus_query = machineStatus_query.filter(MachineStatus.machineId == payload["machineId"])
+            machineStatus_query = machineStatus_query.filter(
+                or_(
+                    and_(
+                        MachineStatus.planStartDate >= payload["planStartDate"],
+                        MachineStatus.planEndDate <= payload["planEndDate"]
+                    ),
+                    and_(
+                        MachineStatus.actualStartDate >= payload["planStartDate"],
+                        MachineStatus.actualEndDate <= payload["planEndDate"]
+                    )
+                )
+            )
+            machineStatus_query = machineStatus_query.all() 
+            if machineStatus_query:
+                return err_resp("machineStatus already exists in this time range.", "machineStatus_400", 400)
+            
             # 1. 創建新的機台狀態
             machineStatus_db = complete_machineStatus(MachineStatus(), payload)
             db.session.add(machineStatus_db)

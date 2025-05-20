@@ -17,15 +17,16 @@ from .schemas import SmartScheduleSchema
 smartSchedule_schema = SmartScheduleSchema()
 TZ = os.getenv("TIMEZONE","Asia/Taipei")
 
-def _get_holidays(start_date: datetime) -> List[str]:
+def _get_holidays(start_date: datetime) -> List[datetime.date]:
     """獲取從指定日期開始的假期列表"""
     calendar_query = Calendar.query.filter(Calendar.date >= start_date).order_by(Calendar.date)
     return [calendar_db.date for calendar_db in calendar_query.all()]
 
-def _adjust_for_holidays(date: datetime, holidays: List[datetime.date]) -> datetime:
+def _adjust_for_holidays(date: datetime, holidays: List[datetime.date], is_postpone) -> datetime:
     """調整日期以避開假期"""
-    while date.date() in holidays:
-        date += timedelta(days=1)
+    while date.astimezone(pytz.timezone(TZ)).date() in holidays:
+        shift = timedelta(days=1) if is_postpone else timedelta(days=-1)
+        date += shift
     return date
 
 def _calculate_holidays_between(start_date: datetime, end_date: datetime, holidays: List[datetime.date]) -> int:
@@ -38,8 +39,8 @@ def _calculate_holidays_between(start_date: datetime, end_date: datetime, holida
     return count_holidays
 
 def _fetch_related_schedules(machine_sn: str, start_time: datetime, end_time: datetime, 
-                             except_productionScheduleId: int = None, 
-                             expect_machineStatusId: int = None) -> List[Union[ProductionSchedule, MachineStatus]]:
+                           except_productionScheduleId: int = None, 
+                           expect_machineStatusId: int = None) -> List[Union[ProductionSchedule, MachineStatus]]:
     """獲取相關的製令單和機台狀態"""
     prod_query = (ProductionSchedule.query
                     .filter_by(machineSN=machine_sn)
@@ -64,10 +65,10 @@ def _calculate_shift(is_postpone: bool, diff_seconds: float) -> timedelta:
     return timedelta(seconds=diff_seconds if is_postpone else -diff_seconds)
 
 def _update_schedule_times(item: Union[ProductionSchedule, MachineStatus], 
-                            prev_end: datetime, 
-                            shift: timedelta, 
-                            holidays: List[str], 
-                            is_postpone: bool) -> None:
+                          prev_end: datetime, 
+                          shift: timedelta, 
+                          holidays: List[datetime.date], 
+                          is_postpone: bool) -> None:
     """更新單個排程的時間"""
     start_field = "planOnMachineDate" if isinstance(item, ProductionSchedule) else "planStartDate"
     end_field = "planFinishDate" if isinstance(item, ProductionSchedule) else "planEndDate"
@@ -88,13 +89,12 @@ def _update_schedule_times(item: Union[ProductionSchedule, MachineStatus],
     else:
         new_start = current_start + shift
         new_end = current_end + shift
-    new_start = _adjust_for_holidays(new_start, holidays)
-    print(f"item:{item.id}, new_end: {new_end}, holidays: {holidays}", file=sys.stderr)
-    new_end = _adjust_for_holidays(new_end, holidays)
-    print(f"item:{item.id}, new_end: {new_end}", file=sys.stderr)
+    
+    new_start = _adjust_for_holidays(new_start, holidays, is_postpone)
+    new_end = _adjust_for_holidays(new_end, holidays, is_postpone)
+    
     setattr(item, start_field, new_start)
     setattr(item, end_field, new_end)
-
 
 class SmartScheduleService:
     @staticmethod
@@ -125,11 +125,11 @@ class SmartScheduleService:
         # exception without handling should raise to the caller
         except Exception as error:
             raise error
-
+        
 
     @staticmethod
     def update_work_order_schedule(payload: dict) -> Tuple[dict, int]:
-        """更新製令單排程（根據開始時間）"""
+        """更新製令單排程（根據開始時間或機台變更）"""
         try:
             schedule_id = payload.get("productionScheduleId")
             new_start = datetime.fromisoformat(payload["newStartDate"]) if isinstance(payload["newStartDate"], str) else payload["newStartDate"]
@@ -140,33 +140,74 @@ class SmartScheduleService:
 
             if new_start < datetime.now(new_start.tzinfo) - timedelta(seconds=30):
                 return err_resp("New start date is earlier than now.", "Invalid_input", 400)
+            
+            # 如果new_start在假日期間，則返回錯誤
+            holidays = _get_holidays(new_start)
+            if new_start.date() in holidays:
+                return err_resp("New start date can't be in holiday.", "Invalid_input", 400)
 
             old_start, old_end = schedule.planOnMachineDate, schedule.planFinishDate
-            if new_start == old_start:
-                return err_resp("New start date same as original.", "Invalid_input", 400)
-            
-            machine_sn = schedule.machineSN
-            holidays = _get_holidays(new_start)
-            new_start = _adjust_for_holidays(new_start, holidays)
+            old_machine_sn = schedule.machineSN
+            new_machine_sn = payload.get("machineSN", old_machine_sn)
             new_end = shift_by_holiday(start_date=new_start, workdays=schedule.workDays + schedule.moldWorkDays)
 
-            # 計算時間差異
-            is_postpone = new_start > old_start
-            count_holidays = _calculate_holidays_between(old_start, new_start, holidays) if is_postpone else _calculate_holidays_between(new_start, old_start, holidays)
-            diff = abs((new_start - old_start).total_seconds()) - (count_holidays * 24 * 60 * 60)  # 減去假日的時間
-
+            # Update the schedule's machine and times
+            schedule.machineSN = new_machine_sn
             schedule.planOnMachineDate = new_start
             schedule.planFinishDate = new_end
 
-            all_schedules = _fetch_related_schedules(machine_sn, old_start, old_end, except_productionScheduleId=schedule_id)
-            print(f"all_schedules: {all_schedules}", file=sys.stderr)
-            shift = _calculate_shift(is_postpone, diff)
+            to_commit = [schedule]
 
-            for i, item in enumerate(all_schedules):
-                prev_end = new_end if i == 0 else (getattr(all_schedules[i-1], "planFinishDate" if isinstance(all_schedules[i-1], ProductionSchedule) else "planEndDate"))
-                _update_schedule_times(item, prev_end, shift, holidays, is_postpone)
+            if old_machine_sn == new_machine_sn:
+                # Same machine case: handle time shift only
+                if new_start == old_start:
+                    return err_resp("New start date same as original.", "Invalid_input", 400)
+                
+                is_postpone = new_start > old_start
+                count_holidays = _calculate_holidays_between(old_start, new_start, holidays) if is_postpone else _calculate_holidays_between(new_start, old_start, holidays)
+                diff = abs((new_start - old_start).total_seconds()) - (count_holidays * 24 * 60 * 60)
+                shift = _calculate_shift(is_postpone, diff)
+                
+                all_schedules = _fetch_related_schedules(old_machine_sn, old_start, old_end, 
+                                                      except_productionScheduleId=schedule_id)
+                for i, item in enumerate(all_schedules):
+                    prev_end = new_end if i == 0 else (getattr(all_schedules[i-1], 
+                                                             "planFinishDate" if isinstance(all_schedules[i-1], ProductionSchedule) 
+                                                             else "planEndDate"))
+                    _update_schedule_times(item, prev_end, shift, holidays, is_postpone)
+                    to_commit.append(item)
+            else:
+                # Different machine case
+                # 1. Old machine: pull schedules forward to fill gap
+                old_schedules = _fetch_related_schedules(old_machine_sn, old_start, old_end, 
+                                                       except_productionScheduleId=schedule_id)
+                if old_schedules:
+                    is_postpone = False
+                    count_holidays = _calculate_holidays_between(old_start, old_end, holidays)
+                    diff = abs((old_end - old_start).total_seconds()) - (count_holidays * 24 * 60 * 60)
+                    shift = _calculate_shift(is_postpone, diff)
+                    for i, item in enumerate(old_schedules):
+                        prev_end = (old_schedules[i-1].planFinishDate if i > 0 else 
+                                  old_schedules[0].planOnMachineDate + shift)
+                        _update_schedule_times(item, prev_end, shift, holidays, is_postpone)
+                        to_commit.append(item)
 
-            db.session.add_all(all_schedules + [schedule])
+                # 2. New machine: push schedules back to accommodate new schedule
+                new_schedules = _fetch_related_schedules(new_machine_sn, new_start, new_end, 
+                                                       except_productionScheduleId=schedule_id)
+                if new_schedules:
+                    is_postpone = True
+                    count_holidays = _calculate_holidays_between(new_start, new_end, holidays)
+                    diff = abs((new_end - new_start).total_seconds()) - (count_holidays * 24 * 60 * 60)
+                    shift = _calculate_shift(is_postpone, diff)
+                    for i, item in enumerate(new_schedules):
+                        prev_end = new_end if i == 0 else (getattr(new_schedules[i-1], 
+                                                                 "planFinishDate" if isinstance(new_schedules[i-1], ProductionSchedule) 
+                                                                 else "planEndDate"))
+                        _update_schedule_times(item, prev_end, shift, holidays, is_postpone=True)
+                        to_commit.append(item)
+
+            db.session.add_all(to_commit)
             db.session.commit()
             return message(True, "smartSchedule have been updated."), 200
 
@@ -174,7 +215,7 @@ class SmartScheduleService:
             db.session.rollback()
             raise error
 
-
+    
     @staticmethod
     def update_work_order_schedule_by_endtime(productionScheduleId: int, newEndDate: str) -> Tuple[dict, int]:
         """更新製令單排程的實際結束時間、延遲完成日，並調整其他排程的預計開始/結束時間"""
@@ -187,7 +228,7 @@ class SmartScheduleService:
             old_start, old_end = schedule.planOnMachineDate, schedule.planFinishDate
             machine_sn = schedule.machineSN
             holidays = _get_holidays(old_start)
-            new_end = _adjust_for_holidays(new_end, holidays)
+            new_end = _adjust_for_holidays(new_end, holidays, is_postpone)
 
             # 計算時間差異
             is_postpone = new_end > old_end
@@ -251,9 +292,9 @@ class SmartScheduleService:
 
             # 調整假期
             if new_start:
-                new_start = _adjust_for_holidays(new_start, holidays)
+                new_start = _adjust_for_holidays(new_start, holidays, is_postpone)
             if new_end:
-                new_end = _adjust_for_holidays(new_end, holidays)
+                new_end = _adjust_for_holidays(new_end, holidays, is_postpone)
 
             # 獲取並調整後續排程
             all_schedules = _fetch_related_schedules(machine_sn, old_start or new_start, old_end or new_end, expect_machineStatusId=machineStatusId)
