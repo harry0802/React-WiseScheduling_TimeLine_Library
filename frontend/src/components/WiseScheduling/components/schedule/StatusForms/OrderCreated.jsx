@@ -80,12 +80,12 @@ const LegendBox = styled(Box)(({ type }) => ({
 }));
 
 // 簡化的進度條
-const SimpleProgressBar = styled(Box)(({ value, theme }) => ({
+const SimpleProgressBar = styled(Box)(({ value, color, theme }) => ({
   width: "100%",
   height: "10px", // 較粗，更易看見
   backgroundColor: "#E0E0E0",
   borderRadius: "5px",
-  marginTop: theme.spacing(1),
+  marginTop: theme.spacing(0.5),
   overflow: "hidden",
   position: "relative",
   "&:after": {
@@ -95,7 +95,7 @@ const SimpleProgressBar = styled(Box)(({ value, theme }) => ({
     top: 0,
     height: "100%",
     width: `${value || 0}%`,
-    backgroundColor: "#1976D2", // 統一使用藍色
+    backgroundColor: color || "#1976D2", // 支援自定義顏色
     transition: "width 0.5s ease-in-out",
   },
 }));
@@ -118,9 +118,9 @@ const OrderCreated = ({ item, disabled }) => {
   }
   console.log("🚀 ~ OrderCreated ~ item:", item);
 
-  // 計算完成率
-  const completedPercentage = item.orderInfo.quantity
-    ? Math.round((item.orderInfo.completedQty / item.orderInfo.quantity) * 100)
+  // 計算完成率，確保數值有效並處理邊緣情況
+  const completedPercentage = item.orderInfo.quantity && item.orderInfo.quantity > 0
+    ? Math.min(100, Math.round((item.orderInfo.completedQty / item.orderInfo.quantity) * 100))
     : 0;
 
   return (
@@ -287,12 +287,24 @@ const OrderCreated = ({ item, disabled }) => {
 
           {/* 唯讀欄位：完成率 (帶進度指示器) */}
           <Grid item xs={12} sm={4}>
-            <FieldLabel>完成率 ({completedPercentage}%)</FieldLabel>
+            <FieldLabel>完成率</FieldLabel>
             <ReadOnlyField>
-              <FieldValue>
-                {item.orderInfo.completedQty} / {item.orderInfo.quantity}
-              </FieldValue>
-              <SimpleProgressBar value={completedPercentage} />
+              <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
+                <FieldValue sx={{ 
+                  fontSize: "1.1rem", 
+                  fontWeight: 500,
+                  color: completedPercentage >= 100 ? "#4CAF50" : (completedPercentage > 0 ? "#1976D2" : "#757575")
+                }}>
+                  {completedPercentage}%
+                </FieldValue>
+                <FieldValue sx={{ ml: 1 }}>
+                  ({item.orderInfo.completedQty} / {item.orderInfo.quantity})
+                </FieldValue>
+              </Box>
+              <SimpleProgressBar 
+                value={completedPercentage} 
+                color={completedPercentage >= 100 ? "#4CAF50" : "#1976D2"}
+              />
             </ReadOnlyField>
           </Grid>
         </Grid>

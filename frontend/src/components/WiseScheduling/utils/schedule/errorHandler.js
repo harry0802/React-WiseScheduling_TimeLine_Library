@@ -5,7 +5,6 @@
  */
 
 import dayjs from "dayjs";
-import { z } from "zod";
 
 //! =============== 1. 錯誤類型定義 ===============
 //* 定義應用中可能出現的各種錯誤類型，便於分類處理
@@ -178,10 +177,12 @@ export const createApiError = (message, details = {}) => {
  * @returns {boolean} 是否為應用錯誤
  */
 export const isAppError = (error) => {
-  return error && 
-    typeof error === 'object' && 
-    typeof error.toUserMessage === 'function' && 
-    typeof error.type === 'string';
+  return (
+    error &&
+    typeof error === "object" &&
+    typeof error.toUserMessage === "function" &&
+    typeof error.type === "string"
+  );
 };
 
 /**
@@ -215,7 +216,7 @@ export const handleFormError = (error) => {
   if (isAppError(error)) {
     return error.toUserMessage();
   }
-  
+
   // Zod 驗證錯誤
   if (error.name === "ZodError") {
     // 提取第一個驗證錯誤（最常見的情況）
@@ -223,21 +224,21 @@ export const handleFormError = (error) => {
     if (firstError) {
       // 格式化路徑，如 "data.user.name" 變成 "使用者名稱"
       const path = firstError.path
-        .map(segment => {
+        .map((segment) => {
           // 這裡可以添加欄位名稱映射
           const fieldNameMap = {
-            'start': '開始時間',
-            'end': '結束時間',
-            'group': '機台編號',
-            'area': '區域',
-            'reason': '原因',
-            'product': '產品',
+            start: "開始時間",
+            end: "結束時間",
+            group: "機台編號",
+            area: "區域",
+            reason: "原因",
+            product: "產品",
             // 可擴展更多欄位映射
           };
           return fieldNameMap[segment] || segment;
         })
-        .join(' > ');
-      
+        .join(" > ");
+
       // 如果有路徑，加入到訊息中
       if (path) {
         return `${path}: ${firstError.message}`;
@@ -246,7 +247,7 @@ export const handleFormError = (error) => {
     }
     return "表單驗證失敗";
   }
-  
+
   // 非預期的錯誤，登記到日誌
   console.error("未處理的錯誤類型:", error);
   return "操作失敗，請稍後再試";
@@ -266,29 +267,29 @@ export const createErrorLogger = (options = {}) => {
     shouldLogToServer: false,
     serverEndpoint: "/api/logs",
   };
-  
+
   const config = { ...defaultOptions, ...options };
-  
+
   /**
    * 記錄錯誤到控制台和/或伺服器
-   * @param {Error|Object} error - 錯誤對象 
+   * @param {Error|Object} error - 錯誤對象
    * @param {Object} context - 錯誤上下文
    */
   return (error, context = {}) => {
     // 標準化錯誤對象
     const standardError = isAppError(error)
-      ? error 
+      ? error
       : createError(error?.message || "未知錯誤", {
           type: ErrorType.UNKNOWN,
           severity: ErrorSeverity.ERROR,
           details: { originalError: error },
-          cause: error
+          cause: error,
         });
-    
+
     // 記錄到控制台
     if (config.shouldLogToConsole) {
       const logData = standardError.toLogFormat();
-      
+
       // 添加上下文
       const logEntry = {
         ...logData,
@@ -296,9 +297,9 @@ export const createErrorLogger = (options = {}) => {
           ...context,
           timestamp: new Date().toISOString(),
           appVersion: process.env.REACT_APP_VERSION || "未知",
-        }
+        },
       };
-      
+
       // 根據不同的嚴重程度使用不同的日誌函數
       switch (standardError.severity) {
         case ErrorSeverity.CRITICAL:
@@ -314,13 +315,13 @@ export const createErrorLogger = (options = {}) => {
           break;
       }
     }
-    
+
     // 記錄到伺服器 (可擴展實現)
     if (config.shouldLogToServer) {
       // 實作伺服器日誌記錄邏輯
       // 例如使用 fetch 發送到後端 API
     }
-    
+
     // 返回標準化的錯誤，以便調用者可以進一步處理
     return standardError;
   };
@@ -337,18 +338,18 @@ export const logError = createErrorLogger();
  */
 export const formatZodErrors = (error) => {
   if (error.name !== "ZodError") return { _errors: [error.message] };
-  
+
   // 將 Zod 錯誤轉換為易於消費的格式
   const formattedErrors = {};
-  
-  error.errors.forEach(err => {
-    const path = err.path.join('.');
+
+  error.errors.forEach((err) => {
+    const path = err.path.join(".");
     if (!formattedErrors[path]) {
       formattedErrors[path] = [];
     }
     formattedErrors[path].push(err.message);
   });
-  
+
   return formattedErrors;
 };
 
