@@ -30,13 +30,8 @@ const createDemoOrder = (start = getWorkStartTime()) => {
     area: "C",
     timeLineStatus: "製令單",
 
-    // 狀態資訊
-    status: {
-      startTime: startTime.toDate(),
-      endTime: null,
-      reason: "",
-      product: "",
-    },
+    // 訂單狀態只使用 orderInfo，不使用 status
+    status: null,
 
     // 訂單資訊
     orderInfo: {
@@ -55,6 +50,10 @@ const createDemoOrder = (start = getWorkStartTime()) => {
     // 視覺相關
     className: "status-producing",
     content: "SP-01048-AR1-01 封蓋外(R)灌包 黑VW326",
+    
+    // 時間線顯示用
+    start: startTime.toDate(),
+    end: startTime.add(4, "hour").toDate(),
   };
 };
 
@@ -65,18 +64,26 @@ const createDemoOrder = (start = getWorkStartTime()) => {
  * @returns {Object} vis-data 格式的項目
  */
 export const mapItemToVisDataFormat = (item) => {
-  // 處理製令單/製令單統一問題
-  const isWorkOrder =
-    item.timeLineStatus === "製令單" || item.timeLineStatus === "製令單";
+  // 檢查項目類型
+  const isWorkOrder = item.timeLineStatus === "製令單";
 
-  // 檢查是否為過去的項目
-  const isPastItem =
-    (item.orderInfo.actualStartTime &&
-      new Date(item.orderInfo.actualStartTime) < new Date()) ||
-    (item.orderInfo.scheduledStartTime &&
-      new Date(item.orderInfo.scheduledStartTime) < new Date()) ||
-    (item.status.startTime && new Date(item.status.startTime) < new Date());
+  // 根據類型決定是否為過去的項目
+  let isPastItem;
+  if (isWorkOrder) {
+    // 製令單使用 orderInfo
+    isPastItem = item.orderInfo && (
+      (item.orderInfo.actualStartTime && 
+       new Date(item.orderInfo.actualStartTime) < new Date()) ||
+      (item.orderInfo.scheduledStartTime && 
+       new Date(item.orderInfo.scheduledStartTime) < new Date())
+    );
+  } else {
+    // 機台狀態使用 status
+    isPastItem = item.status && item.status.startTime && 
+      new Date(item.status.startTime) < new Date();
+  }
 
+  // 設定可編輯性
   let editableOptions;
   if (isPastItem) {
     // 過去的項目不允許任何操作
@@ -86,14 +93,14 @@ export const mapItemToVisDataFormat = (item) => {
       remove: false,
     };
   } else if (isWorkOrder) {
-    // OrderCreated 狀態的項目
+    // 製令單狀態的項目
     editableOptions = {
       updateTime: true, // 允許拖拉調整時間
       updateGroup: true, // 允許修改機台
       remove: false, // 不允許刪除
     };
   } else {
-    // 非 OrderCreated 狀態的項目
+    // 機台狀態的項目
     editableOptions = {
       updateTime: false, // 不允許拖拉調整時間
       updateGroup: true, // 允許修改機台
@@ -101,18 +108,26 @@ export const mapItemToVisDataFormat = (item) => {
     };
   }
 
+  // 取得開始和結束時間
+  let startDate, endDate;
+  if (isWorkOrder && item.orderInfo) {
+    // 製令單使用 orderInfo 中的時間
+    startDate = item.orderInfo.actualStartTime || item.orderInfo.scheduledStartTime || item.start;
+    endDate = item.orderInfo.actualEndTime || item.orderInfo.scheduledEndTime || item.end;
+  } else if (!isWorkOrder && item.status) {
+    // 機台狀態使用 status 中的時間
+    startDate = item.status.startTime || item.start;
+    endDate = item.status.endTime || (item.status.startTime && dayjs(item.status.startTime).add(2, "hour").toDate()) || item.end;
+  } else {
+    // 使用項目自身的時間作為備用
+    startDate = item.start;
+    endDate = item.end || dayjs(item.start).add(2, "hour").toDate();
+  }
+
   return {
     ...item,
-    start: dayjs(
-      isWorkOrder
-        ? item.orderInfo.actualStartTime || item.orderInfo.scheduledStartTime
-        : item.status.startTime
-    ).toDate(),
-    end: dayjs(
-      isWorkOrder
-        ? item.orderInfo.actualEndTime || item.orderInfo.scheduledEndTime
-        : item.status.endTime || dayjs(item.status.startTime).add(2, "hour") // 預設結束時間為開始後 2 小時
-    ).toDate(),
+    start: dayjs(startDate).toDate(),
+    end: dayjs(endDate).toDate(),
     editable: editableOptions,
   };
 };
@@ -157,18 +172,13 @@ export const generateInitialOrders = () => {
     // 原始示範訂單
     createDemoOrder(baseTime),
 
-    // 測試案例 1：兩個重疊的訂單（一個 OrderCreated，一個 Idle）
+    // 測試案例 1：兩個重疊的訂單（一個製令單，一個待機中）
     {
       id: "ORDER-CREATED-TEST-01",
       group: "A1", // 相同機台
       area: "A",
-      timeLineStatus: "製令單", // OrderCreated 狀態
-      status: {
-        startTime: dayjs(baseTime).add(1, "hour").toDate(),
-        endTime: dayjs(baseTime).add(6, "hour").toDate(), // 時間重疊部分
-        reason: "",
-        product: "塑膠管件A型",
-      },
+      timeLineStatus: "製令單", // 製令單狀態
+      status: null, // 製令單不使用 status
       orderInfo: {
         scheduledStartTime: dayjs(baseTime).add(1, "hour").toDate(),
         scheduledEndTime: dayjs(baseTime).add(6, "hour").toDate(),
@@ -183,6 +193,8 @@ export const generateInitialOrders = () => {
       },
       className: "status-producing",
       content: "塑膠管件A型",
+      start: dayjs(baseTime).add(1, "hour").toDate(),
+      end: dayjs(baseTime).add(6, "hour").toDate(),
     },
 
     {
@@ -196,20 +208,11 @@ export const generateInitialOrders = () => {
         reason: "待排程",
         product: "",
       },
-      orderInfo: {
-        scheduledStartTime: dayjs(baseTime).add(3, "hour").toDate(),
-        scheduledEndTime: dayjs(baseTime).add(8, "hour").toDate(),
-        actualStartTime: null,
-        actualEndTime: null,
-        productId: "",
-        productName: "",
-        quantity: 0,
-        completedQty: 0,
-        process: "",
-        orderStatus: "待機",
-      },
+      orderInfo: null, // 機台狀態不使用 orderInfo
       className: "status-idle",
       content: "待機中",
+      start: dayjs(baseTime).add(3, "hour").toDate(),
+      end: dayjs(baseTime).add(8, "hour").toDate(),
     },
 
     // 測試案例 2：兩個不重疊的 Setup 狀態
@@ -224,20 +227,11 @@ export const generateInitialOrders = () => {
         reason: "準備生產",
         product: "",
       },
-      orderInfo: {
-        scheduledStartTime: dayjs(baseTime).add(1, "hour").toDate(),
-        scheduledEndTime: dayjs(baseTime).add(3, "hour").toDate(),
-        actualStartTime: null,
-        actualEndTime: null,
-        productId: "",
-        productName: "",
-        quantity: 0,
-        completedQty: 0,
-        process: "",
-        orderStatus: "準備中",
-      },
+      orderInfo: null, // 機台狀態不使用 orderInfo
       className: "status-setup",
       content: "上模與調機",
+      start: dayjs(baseTime).add(1, "hour").toDate(),
+      end: dayjs(baseTime).add(3, "hour").toDate(),
     },
 
     {
@@ -251,34 +245,20 @@ export const generateInitialOrders = () => {
         reason: "更換模具",
         product: "",
       },
-      orderInfo: {
-        scheduledStartTime: dayjs(baseTime).add(4, "hour").toDate(),
-        scheduledEndTime: dayjs(baseTime).add(6, "hour").toDate(),
-        actualStartTime: null,
-        actualEndTime: null,
-        productId: "",
-        productName: "",
-        quantity: 0,
-        completedQty: 0,
-        process: "",
-        orderStatus: "準備中",
-      },
+      orderInfo: null, // 機台狀態不使用 orderInfo
       className: "status-setup",
       content: "上模與調機",
+      start: dayjs(baseTime).add(4, "hour").toDate(),
+      end: dayjs(baseTime).add(6, "hour").toDate(),
     },
 
-    // 測試案例 3：一個 OrderCreated 和一個 Testing 在不同機台
+    // 測試案例 3：一個製令單和一個產品試模在不同機台
     {
       id: "ORDER-CREATED-TEST-02",
       group: "D1",
       area: "D",
       timeLineStatus: "製令單",
-      status: {
-        startTime: dayjs(baseTime).add(1, "hour").toDate(),
-        endTime: dayjs(baseTime).add(5, "hour").toDate(),
-        reason: "",
-        product: "金屬配件X系列",
-      },
+      status: null, // 製令單不使用 status
       orderInfo: {
         scheduledStartTime: dayjs(baseTime).add(1, "hour").toDate(),
         scheduledEndTime: dayjs(baseTime).add(5, "hour").toDate(),
@@ -293,6 +273,8 @@ export const generateInitialOrders = () => {
       },
       className: "status-producing",
       content: "金屬配件X系列",
+      start: dayjs(baseTime).add(1, "hour").toDate(),
+      end: dayjs(baseTime).add(5, "hour").toDate(),
     },
 
     {
@@ -304,25 +286,17 @@ export const generateInitialOrders = () => {
         startTime: dayjs(baseTime).add(2, "hour").toDate(),
         endTime: dayjs(baseTime).add(4, "hour").toDate(),
         reason: "品質測試",
-        product: "",
+        product: "測試產品",
       },
-      orderInfo: {
-        scheduledStartTime: dayjs(baseTime).add(2, "hour").toDate(),
-        scheduledEndTime: dayjs(baseTime).add(4, "hour").toDate(),
-        actualStartTime: null,
-        actualEndTime: null,
-        productId: "",
-        productName: "",
-        quantity: 0,
-        completedQty: 0,
-        process: "",
-        orderStatus: "測試中",
-      },
+      orderInfo: null, // 機台狀態不使用 orderInfo
       className: "status-testing",
       content: "產品試模",
+      start: dayjs(baseTime).add(2, "hour").toDate(),
+      end: dayjs(baseTime).add(4, "hour").toDate(),
     },
   ];
 
   // 使用工具函數來映射資料
   return new DataSet(testData.map(mapItemToVisDataFormat));
 };
+        

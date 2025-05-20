@@ -280,41 +280,38 @@ export const transformApiToInternalFormat = (apiData) => {
   const orderInfo = extractOrderInfoFromApi(apiData, times);
   const status = extractStatusInfoFromApi(apiData, times);
 
-  console.log({
-    id: generatedId,
-    group: apiData.machineSN,
-    area: apiData.productionArea,
-    timeLineStatus,
-    status: apiData.timeLineStatus !== "製令單" ? status : null,
-    orderInfo: apiData.timeLineStatus === "製令單" ? orderInfo : null,
-    className: getStatusClass(apiData.timeLineStatus),
-    content:
-      apiData.productName ||
-      apiData.machineStatusProduct ||
-      apiData.timeLineStatus,
-    _originalApiData: apiData, // 保存原始API資料供除錯
-  });
-
   // 組裝內部格式資料
-
-  // TODO: 有個大問題  orderInfo 不應該使用到 status
-  return {
+  const internalData = {
     id: generatedId,
     group: apiData.machineSN,
     area: apiData.productionArea,
     timeLineStatus,
-    status,
-    orderInfo,
     className: getStatusClass(apiData.timeLineStatus),
     content:
       apiData.timeLineStatus === "製令單"
         ? apiData.productName
         : apiData.timeLineStatus,
-    // apiData.productName ||
-    // apiData.machineStatusProduct ||
-    // apiData.timeLineStatus,
     _originalApiData: apiData, // 保存原始API資料供除錯
   };
+
+  // 根據項目類型添加適當的屬性
+  if (isWorkOrder) {
+    // 製令單只使用 orderInfo
+    internalData.orderInfo = orderInfo;
+    internalData.status = null; // 確保不使用 status
+    internalData.start = orderInfo.scheduledStartTime; // 添加開始時間
+    internalData.end = orderInfo.scheduledEndTime; // 添加結束時間
+  } else {
+    // 機台狀態只使用 status
+    internalData.status = status;
+    internalData.orderInfo = null; // 確保不使用 orderInfo
+    internalData.start = status.startTime; // 添加開始時間
+    internalData.end = status.endTime; // 添加結束時間
+  }
+
+  console.log("轉換後的內部格式數據:", internalData);
+  
+  return internalData;
 };
 //! =============== 5. 內部格式轉API - 工作訂單 ===============
 

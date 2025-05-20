@@ -138,10 +138,17 @@ export const useStatusForm = (status, item) => {
 
         // 處理嵌套欄位路徑
         const mapping = FIELD_MAPPING[field];
+        const isOrderStatus = status === MACHINE_STATUS.ORDER_CREATED;
 
         if (Array.isArray(mapping)) {
-          // 多個可能的路徑，按優先順序尋找
+          // 多個可能的路徑，按優先順序尋找，但考慮狀態類型
           for (const path of mapping) {
+            // 製令單不使用 status 路徑，其他狀態不使用 orderInfo 路徑
+            if ((isOrderStatus && path.startsWith('status.')) || 
+                (!isOrderStatus && path.startsWith('orderInfo.'))) {
+              continue; // 跳過不適用的路徑
+            }
+            
             const value = getNestedValue(itemData, path);
             if (value !== undefined && value !== null) {
               return value;
@@ -149,6 +156,12 @@ export const useStatusForm = (status, item) => {
           }
           return null;
         } else if (mapping) {
+          // 檢查是否使用了不適用的路徑
+          if ((isOrderStatus && mapping.startsWith('status.')) || 
+              (!isOrderStatus && mapping.startsWith('orderInfo.'))) {
+            return null; // 不適用的路徑返回空值
+          }
+          
           // 單一映射路徑
           return getNestedValue(itemData, mapping);
         }
@@ -166,6 +179,9 @@ export const useStatusForm = (status, item) => {
     try {
       // 準備要設定的欄位數據
       const updateFields = {};
+      
+      // 檢查是否為製令單狀態
+      const isOrderStatus = status === MACHINE_STATUS.ORDER_CREATED;
 
       // 遍歷所有需要的欄位
       fieldHelpers.fields.forEach((field) => {
@@ -280,7 +296,7 @@ export const useStatusForm = (status, item) => {
 
 /**
  * @function getNestedValue
- * @description 從嵌套對象中獲取值
+ * @description 從嵌套對象中獲取值，同時確保不會混用訂單和狀態資料
  * @param {Object} obj - 源對象
  * @param {string} path - 屬性路徑，例如 "orderInfo.productName"
  * @returns {*} 找到的值或 undefined
@@ -290,6 +306,17 @@ export const getNestedValue = (obj, path) => {
 
   // 處理點符號路徑
   const parts = path.split(".");
+  
+  // 安全檢查，確保不會混用數據
+  // 如果是從 orderInfo 獲取數據，但對象的 orderInfo 為空，則返回 undefined
+  if (parts[0] === 'orderInfo' && (!obj.orderInfo || obj.orderInfo === null)) {
+    return undefined;
+  }
+  
+  // 如果是從 status 獲取數據，但對象的 status 為空，則返回 undefined
+  if (parts[0] === 'status' && (!obj.status || obj.status === null)) {
+    return undefined;
+  }
 
   // 遞迴獲取嵌套值
   return parts.reduce((current, part) => {

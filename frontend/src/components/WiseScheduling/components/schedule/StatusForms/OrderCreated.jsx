@@ -113,15 +113,21 @@ const OrderCreated = ({ item, disabled }) => {
     return <CircularProgress />;
   }
   // 添加完整的防護檢查
-  if (!item?.id || !item?.orderInfo || !item?.status) {
+  if (!item?.id || !item?.orderInfo) {
     return null;
   }
   console.log("🚀 ~ OrderCreated ~ item:", item);
 
   // 計算完成率，確保數值有效並處理邊緣情況
-  const completedPercentage = item.orderInfo.quantity && item.orderInfo.quantity > 0
-    ? Math.min(100, Math.round((item.orderInfo.completedQty / item.orderInfo.quantity) * 100))
-    : 0;
+  const completedPercentage =
+    item.orderInfo.quantity && item.orderInfo.quantity > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (item.orderInfo.completedQty / item.orderInfo.quantity) * 100
+          )
+        )
+      : 0;
 
   return (
     <Grid container spacing={3}>
@@ -290,19 +296,26 @@ const OrderCreated = ({ item, disabled }) => {
             <FieldLabel>完成率</FieldLabel>
             <ReadOnlyField>
               <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
-                <FieldValue sx={{ 
-                  fontSize: "1.1rem", 
-                  fontWeight: 500,
-                  color: completedPercentage >= 100 ? "#4CAF50" : (completedPercentage > 0 ? "#1976D2" : "#757575")
-                }}>
+                <FieldValue
+                  sx={{
+                    fontSize: "1.1rem",
+                    fontWeight: 500,
+                    color:
+                      completedPercentage >= 100
+                        ? "#4CAF50"
+                        : completedPercentage > 0
+                        ? "#1976D2"
+                        : "#757575",
+                  }}
+                >
                   {completedPercentage}%
                 </FieldValue>
                 <FieldValue sx={{ ml: 1 }}>
                   ({item.orderInfo.completedQty} / {item.orderInfo.quantity})
                 </FieldValue>
               </Box>
-              <SimpleProgressBar 
-                value={completedPercentage} 
+              <SimpleProgressBar
+                value={completedPercentage}
                 color={completedPercentage >= 100 ? "#4CAF50" : "#1976D2"}
               />
             </ReadOnlyField>
@@ -374,13 +387,15 @@ const OrderCreated = ({ item, disabled }) => {
         <SectionTitle>生產狀態</SectionTitle>
         <Divider sx={{ mb: 2, borderWidth: "1px" }} />
         <Grid container spacing={3}>
-          {/* 唯讀欄位：實際上機日 */}
+          {/* 唯讀欄位：實際上機日 - 修改為使用 orderInfo */}
           <Grid item xs={12} sm={6}>
             <FieldLabel>實際上機日</FieldLabel>
             <ReadOnlyField>
               <FieldValue>
-                {item.status.startTime
-                  ? new Date(item.status.startTime).toLocaleDateString()
+                {item.orderInfo.actualStartTime
+                  ? new Date(
+                      item.orderInfo.actualStartTime
+                    ).toLocaleDateString()
                   : "尚未開始"}
               </FieldValue>
             </ReadOnlyField>

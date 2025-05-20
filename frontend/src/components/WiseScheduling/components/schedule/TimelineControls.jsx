@@ -140,7 +140,19 @@ const TimeRangeButton = styled(BaseButton)`
   }
 `;
 
-// 新增按鈕
+// 新增按鈕 - 綠色版本，用於製令單
+const OrderAddButton = styled(BaseButton)`
+  background-color: ${theme.colors.accent.green};
+  border-color: ${theme.colors.accent.green};
+
+  &:hover {
+    opacity: 0.9;
+    background-color: ${theme.colors.accent.green};
+    border-color: ${theme.colors.accent.green};
+  }
+`;
+
+// 新增按鈕 - 藍色版本，用於一般狀態
 const AddButton = styled(BaseButton)`
   background-color: ${theme.colors.accent.blue};
   border-color: ${theme.colors.accent.blue};
@@ -219,6 +231,13 @@ const SelectArrow = styled.div`
 /**
  * @component TimelineControls
  * @description 時間線控制組件，提供時間範圍切換、地區選擇和基本操作按鈕
+ * @param {Object} props - 組件屬性
+ * @param {string} props.timeRange - 當前選中的時間範圍
+ * @param {string} props.selectedArea - 當前選中的區域
+ * @param {Function} props.onTimeRangeChange - 時間範圍變更處理函數
+ * @param {Function} props.onAreaChange - 區域變更處理函數
+ * @param {Function} props.onAddItem - 添加狀態項目處理函數
+ * @param {Function} props.onMoveToNow - 移至當前時間處理函數
  */
 const TimelineControls = React.memo(
   ({
@@ -271,8 +290,9 @@ const TimelineControls = React.memo(
           {/* 操作按鈕 */}
           <AddButton onClick={() => onAddItem(null, selectedArea)}>
             <AddIcon />
-            新增
+            新增狀態
           </AddButton>
+          {/* 製令單不允許手動增加，因此移除此按鈕 */}
           <NowButton onClick={onMoveToNow}>
             <AccessTimeIcon />
             現在

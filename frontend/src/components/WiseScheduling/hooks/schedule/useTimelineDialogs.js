@@ -47,7 +47,7 @@ export function useTimelineDialogs({
 
   /**
    * @function getItemTiming
-   * @description 獲取項目的時間信息
+   * @description 獲取項目的時間信息，確保按照項目類型正確獲取時間
    * @param {Object} item - 項目數據
    * @returns {Object} 開始和結束時間
    */
@@ -55,19 +55,37 @@ export function useTimelineDialogs({
     // 檢查是否為製令單
     const isWorkOrder = item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
 
-    if (isWorkOrder) {
+    // 製令單使用 orderInfo 的時間
+    if (isWorkOrder && item.orderInfo) {
       return {
-        start: dayjs(item.orderInfo.scheduledStartTime).toDate(),
-        end: dayjs(item.orderInfo.scheduledEndTime).toDate(),
+        start: dayjs(item.orderInfo.scheduledStartTime || item.start).toDate(),
+        end: dayjs(
+          item.orderInfo.scheduledEndTime ||
+            item.end ||
+            dayjs(item.orderInfo.scheduledStartTime).add(1, "hour")
+        ).toDate(),
       };
     }
 
-    const start = dayjs(item.status.startTime).toDate();
-    const end = item.status.endTime
-      ? dayjs(item.status.endTime).toDate()
-      : dayjs(item.status.startTime).add(2, "hour").toDate();
+    // 機台狀態使用 status 的時間
+    if (!isWorkOrder && item.status) {
+      const start = dayjs(item.status.startTime || item.start).toDate();
+      const end = item.status.endTime
+        ? dayjs(item.status.endTime).toDate()
+        : item.end
+        ? dayjs(item.end).toDate()
+        : dayjs(item.status.startTime || item.start)
+            .add(2, "hour")
+            .toDate();
 
-    return { start, end };
+      return { start, end };
+    }
+
+    // 備用方案：使用項目本身的時間
+    return {
+      start: dayjs(item.start || new Date()).toDate(),
+      end: dayjs(item.end || dayjs(item.start).add(1, "hour")).toDate(),
+    };
   }, []);
 
   /**
@@ -103,24 +121,64 @@ export function useTimelineDialogs({
           throw new Error("項目格式不正確，請檢查資料結構");
         }
 
-        // 處理更新後的內部格式項目
-        const processedItem = {
-          ...updatedItem.internal,
-          className: getStatusClass(updatedItem.internal.timeLineStatus),
-          ...getItemTiming(updatedItem.internal),
-          area:
-            updatedItem.internal.area ||
-            updatedItem.internal.group?.match(/[A-Z]/)?.[0] ||
-            "",
-          updateTime: false,
-          editable: getEditableConfig(
-            updatedItem.internal.timeLineStatus,
-            updatedItem.internal.orderInfo?.orderStatus
-          ),
-        };
+        // 判斷是製令單還是機台狀態
+        const isOrderItem =
+          updatedItem.internal.timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
 
-        // 除了製令單以外的其他狀態，檢查時間重疊
-        if (updatedItem.internal.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED) {
+        // 根據項目類型準備不同的數據
+        let processedItem;
+
+        if (isOrderItem) {
+          // 製令單項目處理 - 只使用 orderInfo，不使用 status
+          processedItem = {
+            ...updatedItem.internal,
+            className: getStatusClass(updatedItem.internal.timeLineStatus),
+            start: dayjs(
+              updatedItem.internal.orderInfo?.scheduledStartTime ||
+                updatedItem.internal.start
+            ).toDate(),
+            end: dayjs(
+              updatedItem.internal.orderInfo?.scheduledEndTime ||
+                updatedItem.internal.end
+            ).toDate(),
+            area:
+              updatedItem.internal.area ||
+              updatedItem.internal.group?.match(/[A-Z]/)?.[0] ||
+              "",
+            updateTime: false,
+            editable: getEditableConfig(
+              updatedItem.internal.timeLineStatus,
+              updatedItem.internal.orderInfo?.orderStatus
+            ),
+            // 確保 status 為 null，避免混用
+            status: null,
+          };
+        } else {
+          // 機台狀態項目處理 - 只使用 status，不使用 orderInfo
+          processedItem = {
+            ...updatedItem.internal,
+            className: getStatusClass(updatedItem.internal.timeLineStatus),
+            start: dayjs(
+              updatedItem.internal.status?.startTime ||
+                updatedItem.internal.start
+            ).toDate(),
+            end: dayjs(
+              updatedItem.internal.status?.endTime || updatedItem.internal.end
+            ).toDate(),
+            area:
+              updatedItem.internal.area ||
+              updatedItem.internal.group?.match(/[A-Z]/)?.[0] ||
+              "",
+            updateTime: false,
+            editable: getEditableConfig(
+              updatedItem.internal.timeLineStatus,
+              null
+            ),
+            // 確保 orderInfo 為 null，避免混用
+            orderInfo: null,
+          };
+
+          // 除了製令單以外的其他狀態，檢查時間重疊
           // 查找同一組別的其他項目，不包含自己和製令單狀態
           const existingItems = itemsDataRef.current.get({
             filter: function (item) {
@@ -212,33 +270,24 @@ export function useTimelineDialogs({
         const group = machineGroup || "A1";
         const area = group.match(/[A-Z]/)?.[0] || "A";
 
+        // 創建機台狀態項目 - 只使用 status
         const newItem = {
-          id: `ORDER-${Date.now()}`,
+          id: `ITEM-${Date.now()}`,
           group: group,
           area: area,
-          timeLineStatus: MACHINE_STATUS.IDLE,
+          timeLineStatus: MACHINE_STATUS.IDLE, // 默認為待機狀態
+          // 機台狀態使用 status，不使用 orderInfo
           status: {
             startTime: centerTime.toDate(),
             endTime: endTime.toDate(),
             reason: "",
             product: "",
           },
-          orderInfo: {
-            scheduledStartTime: centerTime.toDate(),
-            scheduledEndTime: endTime.toDate(),
-            actualStartTime: null,
-            actualEndTime: null,
-            productId: "",
-            productName: "新製令單",
-            quantity: 0,
-            completedQty: 0,
-            process: "廠內-成型-IJ01",
-            orderStatus: "尚未上機",
-          },
+          orderInfo: null, // 確保不混用
           start: centerTime.toDate(),
           end: endTime.toDate(),
           className: "status-idle",
-          content: "新製令單",
+          content: "新狀態",
         };
 
         // 使用對話框管理器打開項目對話框，確保傳遞 groups
