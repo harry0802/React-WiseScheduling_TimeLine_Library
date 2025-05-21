@@ -8,7 +8,12 @@ import { FORM_CONFIG } from "../../../configs/validations/schedule/formConfig";
  * @description 時間選擇器區塊 - 這是一個有限的抽象，用於處理所有表單都需要的時間選擇功能
  * AHA 原則：這是唯一一個明確重複出現在所有表單中的部分，所以進行抽象化
  */
-const TimePickerSection = ({ register, errors, disabled, title = "時程安排" }) => (
+const TimePickerSection = ({
+  register,
+  errors,
+  disabled,
+  title = "時程安排",
+}) => (
   <Grid item xs={12}>
     <Typography variant="subtitle1" color="primary" gutterBottom>
       {title}

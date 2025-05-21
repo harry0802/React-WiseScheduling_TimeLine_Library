@@ -279,8 +279,8 @@ export function useTimelineDialogs({
         const endTime = centerTime.add(2, "hour");
 
         // 使用提供的機台或默認A1
-        const group = machineGroup || "A1";
-        const area = group.match(/[A-Z]/)?.[0] || "A";
+        const group = "";
+        const area = "";
 
         // 創建機台狀態項目 - 只使用 status
         const newItem = {
