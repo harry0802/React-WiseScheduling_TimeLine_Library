@@ -328,7 +328,16 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
   const formattedStartTime = formatDate(startTime);
   const formattedEndTime = formatDate(endTime);
 
-  apiData.productionScheduleId = internalData.id;
+  // 修正: 使用 orderInfo.id 作為 productionScheduleId，而不是 internalData.id
+  apiData.productionScheduleId = internalData.orderInfo?.id || 
+                                internalData._originalApiData?.productionScheduleId || 
+                                "";
+  
+  console.log("🔍 [API轉換] 設置 productionScheduleId:", {
+    orderInfoId: internalData.orderInfo?.id,
+    originalApiDataId: internalData._originalApiData?.productionScheduleId,
+    finalValue: apiData.productionScheduleId
+  });
 
   // 計劃時間處理 - 使用邏輯短路簡化判斷
   apiData.planOnMachineDate = internalData.orderInfo?.scheduledStartTime

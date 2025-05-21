@@ -18,8 +18,12 @@ const timeFieldValidation = {
     .refine((date) => dayjs(date).isValid(), "時間格式錯誤"),
   
   // 結束時間 - 可選但若提供必須是有效日期時間
+  // 接受字符串或日期類型，解決 "Expected string, received date" 錯誤
   end: z
-    .string()
+    .union([
+      z.string().optional(),
+      z.date().optional()
+    ])
     .optional()
     .transform((val) => (val ? dayjs(val).toDate() : undefined))
     .refine((date) => !date || dayjs(date).isValid(), "時間格式錯誤")
@@ -44,25 +48,44 @@ const machineFieldValidation = {
  * @function createBaseSchema
  * @description 創建基礎表單架構
  * @param {Object} additionalFields - 額外的欄位驗證
+ * @param {string} statusType - 狀態類型，用於特殊處理
  * @returns {z.ZodObject} Zod 驗證對象
  */
-const createBaseSchema = (additionalFields = {}) => {
-  return z.object({
-    ...timeFieldValidation,
+const createBaseSchema = (additionalFields = {}, statusType = '') => {
+  // 創建基礎機台欄位驗證
+  const baseFields = {
     ...machineFieldValidation,
     ...additionalFields,
-  });
+  };
+  
+  // 修改時間欄位處理方式
+  if (statusType === MACHINE_STATUS.ORDER_CREATED) {
+    // 製令單狀態：只需要 start 欄位驗證，end 欄位為唯讀
+    return z.object({
+      ...baseFields,
+      // 開始時間 - 必填且必須是有效日期時間
+      start: timeFieldValidation.start,
+      // 結束時間 - 完全接受任何值，因為是唯讀欄位
+      end: z.any().optional(),
+    });
+  } else {
+    // 其他狀態：使用標準時間欄位驗證
+    return z.object({
+      ...baseFields,
+      ...timeFieldValidation,
+    });
+  }
 };
 
 /**
  * 製令單狀態表單驗證
  */
 const orderSchema = createBaseSchema({
-  // 產品名稱 - 必填
-  productName: z.string().min(1, "產品名稱為必填"),
+  // 產品名稱 - 改為選填，因為是唯讀欄位
+  productName: z.string().optional(),
   
-  // 製程 - 必填
-  process: z.string().min(1, "製程為必填"),
+  // 製程 - 改為選填，因為是唯讀欄位
+  process: z.string().optional(),
   
   // 數量 - 選填但必須是數字
   quantity: z
@@ -79,34 +102,9 @@ const orderSchema = createBaseSchema({
       z.number()
     ])
     .optional(),
-})
-.refine(
-  (data) => {
-    // 結束時間必須晚於現在
-    const now = dayjs();
-    const end = dayjs(data.end);
-    return end.isAfter(now);
-  },
-  { message: "結束時間不能早於現在", path: ["end"] }
-)
-.refine(
-  (data) => {
-    // 結束時間必須晚於開始時間
-    const start = dayjs(data.start);
-    const end = dayjs(data.end);
-    return end.isAfter(start);
-  },
-  { message: "結束時間必須晚於開始時間", path: ["end"] }
-)
-.refine(
-  (data) => {
-    // 排程時間至少需要 4 小時
-    const start = dayjs(data.start);
-    const end = dayjs(data.end);
-    return end.diff(start, "hour") >= 4;
-  },
-  { message: "排程時間至少需要 4 小時", path: ["end"] }
-);
+  
+  // 完全移除 end 欄位，改為在 createBaseSchema 函數中處理
+}, MACHINE_STATUS.ORDER_CREATED);
 
 /**
  * 待機狀態表單驗證
@@ -162,6 +160,9 @@ export const statusSchemas = {
   [MACHINE_STATUS.STOPPED]: stoppedSchema,
 };
 
+// 輸出製令單驗證模式，用於調試
+console.log(`🔍 [ZOD] 製令單 (ORDER_CREATED) 驗證模式:`, orderSchema);
+
 /**
  * @function getValidationSchema
  * @description 根據狀態類型獲取對應的驗證模式
@@ -169,18 +170,21 @@ export const statusSchemas = {
  * @returns {z.ZodObject} Zod 驗證對象
  */
 export const getValidationSchema = (status) => {
+  console.log(`🔍 [ZOD] 獲取驗證模式: ${status}`);
+  
   if (!status) {
-    console.warn('缺少狀態類型參數，使用空對象驗證');
+    console.warn('❌ [ZOD] 缺少狀態類型參數，使用空對象驗證');
     return z.object({});
   }
   
   const schema = statusSchemas[status];
   
   if (!schema) {
-    console.warn(`未找到狀態 "${status}" 的驗證模式，使用空對象驗證`);
+    console.warn(`❌ [ZOD] 未找到狀態 "${status}" 的驗證模式，使用空對象驗證`);
     return z.object({});
   }
   
+  console.log(`✅ [ZOD] 找到 "${status}" 狀態的驗證模式`);
   return schema;
 };
 
@@ -241,11 +245,16 @@ export const createDynamicSchema = (status, additionalConstraints = {}) => {
  * @returns {Object} 包含驗證結果、錯誤和處理後數據的對象
  */
 export const validateFormData = (status, data) => {
+  console.log(`🔍 [ZOD] 開始驗證狀態: ${status}`, data);
+  
   const schema = getValidationSchema(status);
+  console.log(`🔍 [ZOD] 使用驗證模式: ${status}`, schema);
   
   try {
     // 執行驗證，轉換數據類型
+    console.log(`🔍 [ZOD] 驗證前數據:`, data);
     const validatedData = schema.parse(data);
+    console.log(`✅ [ZOD] 驗證成功:`, validatedData);
     
     return {
       success: true,
@@ -253,6 +262,8 @@ export const validateFormData = (status, data) => {
       errors: null,
     };
   } catch (error) {
+    console.error(`❌ [ZOD] 驗證失敗:`, error);
+    
     if (error.name === "ZodError") {
       // 格式化 Zod 錯誤
       const formattedErrors = {};
@@ -260,6 +271,7 @@ export const validateFormData = (status, data) => {
       error.errors.forEach(err => {
         const path = err.path.join(".");
         formattedErrors[path] = err.message;
+        console.error(`❌ [ZOD] 欄位錯誤: ${path} - ${err.message}`);
       });
       
       return {

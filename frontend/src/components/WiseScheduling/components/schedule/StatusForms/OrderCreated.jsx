@@ -108,11 +108,27 @@ const OrderCreated = ({ item, disabled }) => {
   const selectedArea = watch("area");
   // 直接使用 createAreaMachines 生成當前區域的機台
   const filteredGroups = selectedArea ? createAreaMachines(selectedArea) : [];
+  
+  // 查看表單欄位的值，特別是預計完成日 (end) 欄位
+  console.log(`🔍 [製令單表單] 監聽欄位值 watch("start"):`, watch("start"));
+  console.log(`🔍 [製令單表單] 監聽欄位值 watch("end"):`, watch("end"));
+  console.log(`🔍 [製令單表單] 監聽欄位值 watch("area"):`, watch("area"));
+  console.log(`🔍 [製令單表單] 監聽欄位值 watch("group"):`, watch("group"));
 
+  // 監聽表單錯誤
+  console.log(`🔍 [製令單表單] 表單錯誤:`, errors);
+  
+  // 輸出原始項目數據，用於調試
+  console.log(`🔍 [製令單表單] 原始項目數據 (item):`, item);
+  
   if (!initialized) {
     return <CircularProgress />;
   }
   // 添加完整的防護檢查
+  if (!initialized) {
+    return <CircularProgress />;
+  }
+  
   if (!item?.id || !item?.orderInfo) {
     return null;
   }
@@ -173,6 +189,13 @@ const OrderCreated = ({ item, disabled }) => {
             </Box>
           </Box>
         </Alert>
+
+        {/* 顯示關於製令單狀態的說明 */}
+        {item?.orderInfo?.orderStatus !== "尚未上機" && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            此製令單已開始執行，無法編輯。您只能查看製令單的詳細資訊。
+          </Alert>
+        )}
       </Grid>
 
       {/* 基本資訊區 */}
@@ -361,8 +384,7 @@ const OrderCreated = ({ item, disabled }) => {
               )}
             />
           </Grid>
-
-          {/* 唯讀欄位：預計完成日 */}
+          {/* 唯讀欄位：預計完成日 - 使用唯讀框而非 Controller，避免表單驗證 */}
           <Grid item xs={12} sm={6}>
             <FieldLabel>預計完成日</FieldLabel>
             <ReadOnlyField>

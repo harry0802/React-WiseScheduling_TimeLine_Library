@@ -4,7 +4,7 @@
  * @version 3.0.0
  */
 
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getValidationSchema } from "../../../configs/validations/schedule/validationSchema";
@@ -112,12 +112,31 @@ const StatusController = ({
     reValidateMode: "onChange", // 在更改時重新驗證
   });
 
+  // 輸出表單初始值，方便调試
+  console.log(`🔍 [表單] ${effectiveStatus} 表單初始值:`, methods.getValues());
+
+  // 打印 resolver 輸入
+  console.log(`🔍 [ZOD] resolver 輸入數據:`, effectiveStatus);
+
+  // 調試 hook form resolver 選項
+  const resolverFn = zodResolver(getValidationSchema(effectiveStatus));
+  console.log(`🔍 [ZOD] resolver 函數:`, resolverFn);
+
+  // 監聽表單錯誤狀態變化
+  const formStateErrors = methods.formState.errors;
+  useEffect(() => {
+    if (Object.keys(formStateErrors).length > 0) {
+      console.error(`❌ [表單] ${effectiveStatus} 表單驗證錯誤:`, formStateErrors);
+    }
+  }, [formStateErrors, effectiveStatus]);
+
   // 選擇適當的表單組件
   const FormComponent = FORM_COMPONENTS[effectiveStatus] || Idle;
 
   // 處理表單提交
   const handleFormSubmit = useCallback(
     (data) => {
+      console.log(`🔍 [表單] ${normalizedStatus} 開始處理提交數據:`, data);
       setFormError(null);
       
       try {
@@ -135,11 +154,14 @@ const StatusController = ({
           timeLineStatus: normalizedStatus,
         };
         
+        console.log(`🔍 [表單] ${normalizedStatus} 處理後的數據:`, processedData);
+        
         // 產品試模狀態必須指定產品
         if (
           effectiveStatus === MACHINE_STATUS.TESTING && 
           !processedData.product
         ) {
+          console.error(`❌ [表單] 產品試模狀態缺少產品字段`);
           throw new ValidationError("產品試模狀態必須指定產品", {
             field: "product",
             status: MACHINE_STATUS.TESTING
@@ -151,17 +173,21 @@ const StatusController = ({
           effectiveStatus === MACHINE_STATUS.STOPPED && 
           !processedData.reason
         ) {
+          console.error(`❌ [表單] 停機狀態缺少原因字段`);
           throw new ValidationError("停機狀態必須指定原因", {
             field: "reason",
             status: MACHINE_STATUS.STOPPED
           });
         }
         
+        console.log(`✅ [表單] ${normalizedStatus} 提交前的最終數據:`, processedData);
+        
         // 提交表單數據
         onSubmit(processedData);
       } catch (error) {
         // 使用統一錯誤處理
         const errorMessage = handleFormError(error);
+        console.error(`❌ [表單] ${normalizedStatus} 提交錯誤:`, error, errorMessage);
         setFormError(errorMessage);
         
         // 記錄錯誤
@@ -175,7 +201,7 @@ const StatusController = ({
         throw error;
       }
     },
-    [normalizedStatus, onSubmit]
+    [normalizedStatus, effectiveStatus, onSubmit]
   );
 
   return (

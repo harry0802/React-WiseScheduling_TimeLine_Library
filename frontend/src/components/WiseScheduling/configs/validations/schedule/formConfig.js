@@ -49,22 +49,7 @@ export const VALIDATION_RULES = {
       },
     },
   },
-  end: {
-    required: "請選擇結束時間",
-    validate: {
-      isValid: (value) => {
-        if (!value) return true;
-        return dayjs(value).isValid() || "無效的日期格式";
-      },
-      isAfterStart: (value, formValues) => {
-        if (!value || !formValues.start) return true;
-        return (
-          dayjs(value).isAfter(dayjs(formValues.start)) ||
-          "結束時間必須在開始時間之後"
-        );
-      },
-    },
-  },
+  // 完全移除對 end 欄位的驗證規則，因為製令單對話框中是唯讀欄位
 };
 // 🧠 表單配置
 export const STATUS_FORM_CONFIG = {
@@ -74,7 +59,7 @@ export const STATUS_FORM_CONFIG = {
     defaultValues: {
       group: "",
       start: "",
-      end: "",
+      // end 欄位對於製令單是唯讀的，不需要預設值
     },
   },
 

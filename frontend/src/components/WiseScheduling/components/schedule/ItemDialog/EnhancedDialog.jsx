@@ -387,23 +387,23 @@ const EnhancedDialog = ({
           group: formData.group || item?.group || "", // 確保保留原始 group 值
           area: formData.area || item?.area || "", // 確保保留原始 area 值
           start: formData.start, // 直接使用表單值，已格式化
-          end: formData.end,
+          end: currentStatus === MACHINE_STATUS.ORDER_CREATED ? item?.end : formData.end, // 製令單狀態保留原始 end 值
           timeLineStatus: formData.timeLineStatus || currentStatus,
           status: {
             ...item?.status, // 保留所有原始狀態屬性
             product: formData.product || "",
             reason: formData.reason || "",
             startTime: formData.start, // 直接使用表單值
-            endTime: formData.end,
+            endTime: currentStatus === MACHINE_STATUS.ORDER_CREATED ? item?.status?.endTime : formData.end, // 製令單狀態保留原始 endTime 值
           },
           orderInfo: {
             ...item?.orderInfo, // 保留所有原始訂單屬性
             productName: formData.productName || "",
             process: formData.process || "",
             scheduledStartTime: formData.start, // 直接使用表單值
-            scheduledEndTime: formData.end,
+            scheduledEndTime: currentStatus === MACHINE_STATUS.ORDER_CREATED ? item?.orderInfo?.scheduledEndTime : formData.end, // 製令單狀態保留原始 scheduledEndTime 值
             actualStartTime: formData.start,
-            actualEndTime: formData.end,
+            actualEndTime: currentStatus === MACHINE_STATUS.ORDER_CREATED ? item?.orderInfo?.actualEndTime : formData.end, // 製令單狀態保留原始 actualEndTime 值
           },
         };
 

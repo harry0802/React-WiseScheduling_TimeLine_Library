@@ -110,6 +110,7 @@ export function useTimelineDialogs({
   // 處理保存項目
   const handleSaveItem = useCallback(
     (updatedItem) => {
+      console.log("🚀 ~ updatedItem:", updatedItem);
       if (!itemsDataRef.current) return;
 
       try {
@@ -250,9 +251,20 @@ export function useTimelineDialogs({
       if (!itemId || !itemsDataRef.current) return;
 
       try {
+        // 獲取項目數據
+        const item = itemsDataRef.current.get(itemId);
+
+        // 檢查是否為製令單項目
+        if (item && item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
+          // 製令單不允許刪除
+          throw new Error("無法刪除製令單，製令單不允許被刪除");
+        }
+
+        // 刪除非製令單項目
         itemsDataRef.current.remove(itemId);
       } catch (error) {
         console.error("Delete item failed:", error);
+        alert(error.message || "刪除項目失敗");
       }
     },
     [itemsDataRef]

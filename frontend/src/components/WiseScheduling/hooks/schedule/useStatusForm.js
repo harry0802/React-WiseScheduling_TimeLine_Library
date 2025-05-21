@@ -189,10 +189,20 @@ export const useStatusForm = (status, item) => {
 
         // 時間欄位特殊處理
         if (field === "start" || field === "end") {
-          const rawValue = fieldHelpers.getFieldValue(field, item);
-          value = formatToFormDateTime(
-            rawValue || (field === "start" && new Date()) || null
-          );
+          // 製令單狀態下的結束時間是唯讀的，不需要處理
+          if (field === "end" && status === MACHINE_STATUS.ORDER_CREATED) {
+            // 直接傳遞原始值，不進行格式化
+            // 這樣就可以保留原始的 Date 對象，避免類型問題
+            value = fieldHelpers.getFieldValue(field, item);
+            console.log(`🔍 [useStatusForm] 唯讀的 end 欄位原始值:`, value);
+            console.log(`🔍 [useStatusForm] 唯讀的 end 欄位類型:`, value ? typeof value : "undefined");
+          } else {
+            // 其它時間欄位正常處理
+            const rawValue = fieldHelpers.getFieldValue(field, item);
+            value = formatToFormDateTime(
+              rawValue || (field === "start" && new Date()) || null
+            );
+          }
         } else {
           // 其他欄位直接取值
           value = fieldHelpers.getFieldValue(field, item);
