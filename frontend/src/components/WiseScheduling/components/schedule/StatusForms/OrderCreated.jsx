@@ -100,6 +100,13 @@ const SimpleProgressBar = styled(Box)(({ value, color, theme }) => ({
   },
 }));
 
+/**
+ * @function OrderCreated
+ * @description 製令單狀態的表單組件 - 因其複雜性保持獨立實現，不強行套用抽象
+ * @param {boolean} disabled - 是否禁用表單
+ * @param {Object} item - 表單項目數據
+ * @returns {JSX.Element} 渲染的表單組件
+ */
 const OrderCreated = ({ item, disabled }) => {
   const { register, errors, watch, control, initialized } = useStatusForm(
     MACHINE_STATUS.ORDER_CREATED,
@@ -121,10 +128,6 @@ const OrderCreated = ({ item, disabled }) => {
   // 輸出原始項目數據，用於調試
   console.log(`🔍 [製令單表單] 原始項目數據 (item):`, item);
   
-  if (!initialized) {
-    return <CircularProgress />;
-  }
-  // 添加完整的防護檢查
   if (!initialized) {
     return <CircularProgress />;
   }

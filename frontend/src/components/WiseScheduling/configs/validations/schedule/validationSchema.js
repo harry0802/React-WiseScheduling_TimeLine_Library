@@ -128,8 +128,8 @@ const setupSchema = createBaseSchema({
  * 產品試模狀態表單驗證
  */
 const testingSchema = createBaseSchema({
-  // 產品 - 必填
-  product: z.string().min(1, "產品為必填"),
+  // 產品 - 改為選填，不是必填
+  product: z.string().optional(),
 });
 
 /**
@@ -139,11 +139,10 @@ const stoppedSchema = createBaseSchema({
   // 產品 - 選填
   product: z.string().optional(),
   
-  // 停機原因 - 必填且有長度限制
+  // 停機原因 - 必填且有效值
   reason: z
     .string()
-    .min(2, "停機原因至少需要2個字")
-    .max(50, "停機原因不能超過50個字"),
+    .min(1, "請選擇停機原因"),
 });
 
 //! =============== 3. 驗證模式導出 ===============

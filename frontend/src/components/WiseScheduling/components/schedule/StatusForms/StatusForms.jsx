@@ -1,7 +1,7 @@
 /**
  * @file StatusForms.jsx
  * @description 狀態表單控制器，根據狀態選擇合適的表單組件
- * @version 3.0.0
+ * @version 3.9.0
  */
 
 import { memo, useState, useCallback, useEffect } from "react";
@@ -18,7 +18,7 @@ import {
   logError,
 } from "../../../utils/schedule/errorHandler";
 
-// 導入各種狀態表單組件
+// 直接導入各種狀態表單組件 - AHA原則：避免過早抽象，保持直接引用
 import OrderCreated from "./OrderCreated";
 import Idle from "./Idle";
 import Setup from "./Setup";
@@ -29,8 +29,8 @@ import Stopped from "./Stopped";
 import { FormSection, SectionTitle } from "../styles/DialogStyles";
 import { CircularProgress, Box, Alert } from "@mui/material";
 
-//! =============== 1. 表單標題與組件映射 ===============
-//* 集中管理表單配置，便於統一更新
+//! =============== 1. 表單標題映射 ===============
+//* 集中管理表單配置，這是明確的常量映射，保留為直接配置
 
 /**
  * 狀態表單標題映射
@@ -44,7 +44,7 @@ const FORM_TITLES = {
 };
 
 /**
- * 狀態表單組件映射
+ * 狀態表單組件映射 - 直接保留在控制器內，不急於創建單獨的映射文件
  */
 const FORM_COMPONENTS = {
   [MACHINE_STATUS.ORDER_CREATED]: OrderCreated,
@@ -66,7 +66,7 @@ function getFormTitle(status, hasConfig = true) {
 }
 
 //! =============== 2. 表單控制器 ===============
-//* 統一管理表單狀態和提交邏輯
+//* 狀態控制器本身保持完整，不急於提取小函數
 
 /**
  * @component StatusController
@@ -77,7 +77,7 @@ const StatusController = ({
   item,
   disabled,
   onSubmit,
-  mode,
+  mode = 'create', // 默認為創建模式
   isSubmitting,
   onClose,
   groups,
@@ -96,7 +96,7 @@ const StatusController = ({
   const effectiveStatus = hasConfig ? normalizedStatus : MACHINE_STATUS.IDLE;
   const formConfig = STATUS_FORM_CONFIG[effectiveStatus];
 
-  // 使用 useForm hook 設置表單
+  // 使用 useForm hook 設置表單，使用普通模式
   const methods = useForm({
     defaultValues: {
       ...(formConfig?.defaultValues || {}),
@@ -108,19 +108,12 @@ const StatusController = ({
       ...prepareFormDateValues(item),
     },
     resolver: zodResolver(getValidationSchema(effectiveStatus)),
-    mode: "onBlur", // 在失去焦點時觸發驗證
-    reValidateMode: "onChange", // 在更改時重新驗證
+    mode: "all", // 使用普通模式，在所有可能的時機都進行驗證
   });
 
   // 輸出表單初始值，方便调試
   console.log(`🔍 [表單] ${effectiveStatus} 表單初始值:`, methods.getValues());
-
-  // 打印 resolver 輸入
-  console.log(`🔍 [ZOD] resolver 輸入數據:`, effectiveStatus);
-
-  // 調試 hook form resolver 選項
-  const resolverFn = zodResolver(getValidationSchema(effectiveStatus));
-  console.log(`🔍 [ZOD] resolver 函數:`, resolverFn);
+  console.log(`🔍 [表單] 模式:`, mode, "項目ID:", item?.id);
 
   // 監聽表單錯誤狀態變化
   const formStateErrors = methods.formState.errors;
@@ -131,9 +124,9 @@ const StatusController = ({
   }, [formStateErrors, effectiveStatus]);
 
   // 選擇適當的表單組件
-  const FormComponent = FORM_COMPONENTS[effectiveStatus] || Idle;
+  const FormComponent = FORM_COMPONENTS[effectiveStatus] || FORM_COMPONENTS[MACHINE_STATUS.IDLE];
 
-  // 處理表單提交
+  // 處理表單提交 - 驗證邏輯主要由各表單內部處理
   const handleFormSubmit = useCallback(
     (data) => {
       console.log(`🔍 [表單] ${normalizedStatus} 開始處理提交數據:`, data);
@@ -156,29 +149,7 @@ const StatusController = ({
         
         console.log(`🔍 [表單] ${normalizedStatus} 處理後的數據:`, processedData);
         
-        // 產品試模狀態必須指定產品
-        if (
-          effectiveStatus === MACHINE_STATUS.TESTING && 
-          !processedData.product
-        ) {
-          console.error(`❌ [表單] 產品試模狀態缺少產品字段`);
-          throw new ValidationError("產品試模狀態必須指定產品", {
-            field: "product",
-            status: MACHINE_STATUS.TESTING
-          });
-        }
-        
-        // 停機狀態必須指定原因
-        if (
-          effectiveStatus === MACHINE_STATUS.STOPPED && 
-          !processedData.reason
-        ) {
-          console.error(`❌ [表單] 停機狀態缺少原因字段`);
-          throw new ValidationError("停機狀態必須指定原因", {
-            field: "reason",
-            status: MACHINE_STATUS.STOPPED
-          });
-        }
+        // 處理"其他原因"的邏輯暫時移除
         
         console.log(`✅ [表單] ${normalizedStatus} 提交前的最終數據:`, processedData);
         
@@ -239,7 +210,8 @@ const StatusController = ({
               <FormComponent 
                 disabled={disabled} 
                 item={item} 
-                groups={groups} 
+                groups={groups}
+                mode={mode} // 傳遞模式參數到表單組件
               />
             )}
           </FormSection>

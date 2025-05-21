@@ -1,59 +1,42 @@
 // components/StatusForms/Setup.jsx
-import { CircularProgress, Grid, TextField, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
-import { FORM_CONFIG } from "../../../configs/validations/schedule/formConfig";
+import React from "react";
+import { CircularProgress, Grid, TextField } from "@mui/material";
 import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
 import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
+import TimePickerSection from "./TimePickerSection";
 
+/**
+ * @function Setup
+ * @description 設置狀態的設備表單
+ * @param {boolean} disabled - 是否禁用表單
+ * @param {Object} item - 表單項目數據
+ * @returns {JSX.Element} 渲染的表單組件
+ */
 const Setup = ({ disabled, item }) => {
   console.log("🚀 ~ Setup ~ item:", item);
-  const { register, errors, watch, control, initialized } = useStatusForm(
+  
+  // 使用狀態表單鉤子
+  const { register, errors, initialized } = useStatusForm(
     MACHINE_STATUS.SETUP,
     item
   );
 
+  // 處理載入狀態
   if (!item || !initialized) {
-    return <CircularProgress />; // 或其他 loading 狀態
+    return <CircularProgress />; 
   }
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Typography variant="subtitle1" color="primary" gutterBottom>
-          時程安排
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              {...register("start")}
-              {...FORM_CONFIG.timePickerProps}
-              label="開始時間"
-              error={!!errors.start}
-              helperText={errors.start?.message}
-              disabled={disabled}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              {...register("end")}
-              {...FORM_CONFIG.timePickerProps}
-              label="結束時間"
-              error={!!errors.end}
-              helperText={errors.end?.message}
-              disabled={disabled}
-            />
-          </Grid>
-        </Grid>
-      </Grid>
+      {/* 使用抽象的時間選擇器部分 */}
+      <TimePickerSection 
+        register={register} 
+        errors={errors} 
+        disabled={disabled}
+      />
 
+      {/* 調機說明 - 特定於此表單，保持獨立 */}
       <Grid item xs={12} sm={6}>
-        <Typography
-          variant="subtitle1"
-          color="primary"
-          gutterBottom
-        ></Typography>
         <TextField
           fullWidth
           {...register("reason")}
