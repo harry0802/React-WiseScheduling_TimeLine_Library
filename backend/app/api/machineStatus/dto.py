@@ -36,7 +36,7 @@ class MachineStatusDto:
     
     #PUT model
     put_obj = copy.deepcopy(base_obj)
-    pop_list = ["machineId"]
+    pop_list = []
     required_list = ["id"]
     not_required_list = [] # default all not required
     for attr in [item for item in pop_list]:

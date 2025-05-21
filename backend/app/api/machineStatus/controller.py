@@ -12,7 +12,7 @@ class MachineStatusController(Resource):
     machineStatus_resp = MachineStatusDto.machineStatus_resp
 
     # GET
-    @api.doc(description="""取得某一區全部機台，以及機台狀態。
+    @api.doc(description="""取得某一區全部機台，以及當日的機台狀態。
             有id，表示生管有預排，師傅改變機台狀態時，修改預排的actualStartDate或actualFinishDate；
             沒有id，表示生管沒有預排，師傅改變機台狀態時，要新增，新增planStartDate, planEndDate, actualStartDate。
             """)

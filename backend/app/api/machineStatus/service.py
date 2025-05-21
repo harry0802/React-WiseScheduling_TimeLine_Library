@@ -189,12 +189,15 @@ class MachineStatusService:
                 return err_resp("machineStatus not found.", "machineStatus_404", 404)
             old_start_date = machineStatus_db.planStartDate
             old_end_date = machineStatus_db.planEndDate
+            old_machine_sn = machineStatus_db.machine.machineSN
+            new_machine_sn = Machine.query.filter_by(id=payload["machineId"]).first().machineSN if payload.get("machineId") is not None else None
             machineStatus_db = complete_machineStatus(machineStatus_db, payload)
             db.session.flush()
 
             # 2. 觸發排程調整，只傳遞必要的資訊
             resp, status = SmartScheduleService.update_machine_status_schedule(
-                machineStatusId=machineStatus_db.id, old_start_param=old_start_date, old_end_param=old_end_date
+                machineStatusId=machineStatus_db.id, old_start_param=old_start_date, old_end_param=old_end_date, 
+                new_machine_sn_param=new_machine_sn, old_machine_sn_param=old_machine_sn
             )
             if status != 200:
                 db.session.rollback()
