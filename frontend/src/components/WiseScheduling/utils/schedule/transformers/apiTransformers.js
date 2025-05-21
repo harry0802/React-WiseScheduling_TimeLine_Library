@@ -310,7 +310,7 @@ export const transformApiToInternalFormat = (apiData) => {
   }
 
   console.log("轉換後的內部格式數據:", internalData);
-  
+
   return internalData;
 };
 //! =============== 5. 內部格式轉API - 工作訂單 ===============
@@ -329,14 +329,15 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
   const formattedEndTime = formatDate(endTime);
 
   // 修正: 使用 orderInfo.id 作為 productionScheduleId，而不是 internalData.id
-  apiData.productionScheduleId = internalData.orderInfo?.id || 
-                                internalData._originalApiData?.productionScheduleId || 
-                                "";
-  
+  apiData.productionScheduleId =
+    internalData.orderInfo?.id ||
+    internalData._originalApiData?.productionScheduleId ||
+    "";
+
   console.log("🔍 [API轉換] 設置 productionScheduleId:", {
     orderInfoId: internalData.orderInfo?.id,
     originalApiDataId: internalData._originalApiData?.productionScheduleId,
-    finalValue: apiData.productionScheduleId
+    finalValue: apiData.productionScheduleId,
   });
 
   // 計劃時間處理 - 使用邏輯短路簡化判斷
@@ -393,7 +394,7 @@ function fillMachineStatusData(internalData, apiData, startTime, endTime) {
   const formattedStartTime = formatDate(startTime);
   const formattedEndTime = formatDate(endTime);
 
-  apiData.machineStatusId = internalData.id;
+  apiData.machineStatusId = internalData.status?.id || "";
 
   // 計劃時間處理 (重要！可能需要修改邏輯)
   apiData.machineStatusPlanStartTime = internalData.status?.startTime

@@ -26,9 +26,7 @@ export const FORM_CONFIG = {
     InputLabelProps: {
       shrink: true,
     },
-    inputProps: {
-      step: 300, // 5分鐘間隔
-    },
+    inputProps: {},
   },
 };
 
