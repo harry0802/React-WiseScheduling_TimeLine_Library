@@ -1,7 +1,7 @@
 /**
  * @file useTimelineDialogs.js
- * @description 與對話框管理器集成的 hook
- * @version 2.0.0 - 2025-05-13 函數化重構
+ * @description 與對話框管理器集成的 hook - 重構版本
+ * @version 3.0.0 - 2025-05-22 應用 Push Ifs Up & Push Fors Down 原則重構
  */
 
 import { useEffect, useCallback } from "react";
@@ -19,9 +19,222 @@ import {
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 import { useChangeWorkOrderMutation } from "../../services/schedule/smartSchedule";
 
+//! =============== 1. 設定與常量 ===============
+//* 這個區塊包含所有項目處理的核心配置
+
+const DEFAULT_DURATION_HOURS = 2;
+const ORDER_DURATION_HOURS = 1;
+
+//! =============== 2. 類型與介面判斷 ===============
+//* 統一的項目類型判斷邏輯
+
+/**
+ * @function isOrderItem
+ * @description 判斷是否為製令單項目
+ * @param {Object} item - 項目數據
+ * @returns {boolean} 是否為製令單
+ */
+function isOrderItem(item) {
+  return item?.timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
+}
+
+/**
+ * @function validateItemStructure
+ * @description 驗證項目數據結構
+ * @param {Object} updatedItem - 更新的項目數據
+ * @throws {Error} 當數據格式不正確時拋出錯誤
+ */
+function validateItemStructure(updatedItem) {
+  if (!updatedItem?.internal) {
+    throw new Error("項目格式不正確，請檢查資料結構");
+  }
+}
+
+//! =============== 3. 核心功能 - 項目處理器 ===============
+//* 主要業務邏輯區，每個功能都配有詳細說明
+
+/**
+ * @function getItemTiming
+ * @description 根據項目類型獲取正確的時間信息
+ * @param {Object} item - 項目數據
+ * @returns {Object} { start: Date, end: Date }
+ */
+function getItemTiming(item) {
+  if (isOrderItem(item) && item.orderInfo) {
+    return {
+      start: dayjs(item.orderInfo.scheduledStartTime || item.start).toDate(),
+      end: dayjs(
+        item.orderInfo.scheduledEndTime ||
+          item.end ||
+          dayjs(item.orderInfo.scheduledStartTime).add(
+            ORDER_DURATION_HOURS,
+            "hour"
+          )
+      ).toDate(),
+    };
+  }
+
+  if (!isOrderItem(item) && item.status) {
+    const start = dayjs(item.status.startTime || item.start).toDate();
+    const end = item.status.endTime
+      ? dayjs(item.status.endTime).toDate()
+      : item.end
+      ? dayjs(item.end).toDate()
+      : dayjs(item.status.startTime || item.start)
+          .add(DEFAULT_DURATION_HOURS, "hour")
+          .toDate();
+
+    return { start, end };
+  }
+
+  // 備用方案
+  return {
+    start: dayjs(item.start || new Date()).toDate(),
+    end: dayjs(
+      item.end || dayjs(item.start).add(ORDER_DURATION_HOURS, "hour")
+    ).toDate(),
+  };
+}
+
+/**
+ * @function getEditableConfig
+ * @description 根據項目狀態決定可編輯性配置
+ * @param {string} timeLineStatus - 時間軸狀態
+ * @param {string} orderStatus - 訂單狀態
+ * @returns {Object} 可編輯配置
+ */
+function getEditableConfig(timeLineStatus, orderStatus) {
+  if (timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
+    return orderStatus === "尚未上機"
+      ? { updateTime: true, updateGroup: true, remove: false }
+      : { updateTime: false, updateGroup: false, remove: true };
+  }
+  return { updateTime: false, updateGroup: false, remove: true };
+}
+
+/**
+ * @function processOrderItem
+ * @description 處理製令單項目的數據轉換
+ * @param {Object} item - 原始項目數據
+ * @returns {Object} 處理後的項目數據
+ */
+function processOrderItem(item) {
+  const timing = getItemTiming(item);
+
+  return {
+    ...item,
+    className: getStatusClass(item.timeLineStatus),
+    start: timing.start,
+    end: timing.end,
+    area: item.area || item.group?.match(/[A-Z]/)?.[0] || "",
+    updateTime: false,
+    editable: getEditableConfig(
+      item.timeLineStatus,
+      item.orderInfo?.orderStatus
+    ),
+    status: null, // 🧠 確保不混用機台狀態數據
+  };
+}
+
+/**
+ * @function processMachineStatus
+ * @description 處理機台狀態項目的數據轉換
+ * @param {Object} item - 原始項目數據
+ * @returns {Object} 處理後的項目數據
+ */
+function processMachineStatus(item) {
+  const timing = getItemTiming(item);
+
+  return {
+    ...item,
+    className: getStatusClass(item.timeLineStatus),
+    start: timing.start,
+    end: timing.end,
+    area: item.area || item.group?.match(/[A-Z]/)?.[0] || "",
+    updateTime: false,
+    editable: getEditableConfig(item.timeLineStatus, null),
+    orderInfo: null, // 🧠 確保不混用製令單數據
+  };
+}
+
+//! =============== 4. 工具函數 - 驗證與檢查 ===============
+//* 通用功能區，可被多個模組復用
+
+/**
+ * @function hasTimeOverlap
+ * @description 檢查兩個時間段是否重疊
+ * @param {Object} item1 - 第一個項目
+ * @param {Object} item2 - 第二個項目
+ * @returns {boolean} 是否重疊
+ */
+function hasTimeOverlap(item1, item2) {
+  const start1 = dayjs(item1.start);
+  const end1 = dayjs(item1.end);
+  const start2 = dayjs(item2.start);
+  const end2 = dayjs(item2.end);
+
+  return (
+    (start1.isBefore(end2) && end1.isAfter(start2)) ||
+    start1.isSame(start2) ||
+    end1.isSame(end2)
+  );
+}
+
+/**
+ * @function validateNoOverlap
+ * @description 批次驗證時間重疊問題 (Push Fors Down 原則)
+ * @param {Object} item - 要檢查的項目
+ * @param {Object} dataSet - 數據集
+ * @throws {Error} 當發現時間重疊時拋出錯誤
+ */
+function validateNoOverlap(item, dataSet) {
+  // ✨ Push Fors Down - 批次獲取所有潛在衝突項目
+  const conflictCandidates = dataSet.get({
+    filter: function (existingItem) {
+      return (
+        existingItem.id !== item.id &&
+        existingItem.group === item.group &&
+        existingItem.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+      );
+    },
+  });
+
+  // ✨ 批次檢查重疊，避免多次迴圈
+  const hasAnyOverlap = conflictCandidates.some((existingItem) =>
+    hasTimeOverlap(item, existingItem)
+  );
+
+  if (hasAnyOverlap) {
+    throw new Error("時間重疊：除了「製令單」外的其他狀態都不允許時間重疊");
+  }
+}
+
+/**
+ * @function submitToAPI
+ * @description 提交數據到後端API
+ * @param {Object} apiData - API格式的數據
+ * @param {Function} changeWorkOrder - API調用函數
+ */
+function submitToAPI(apiData, changeWorkOrder) {
+  if (!apiData) return;
+
+  changeWorkOrder(apiData)
+    .unwrap()
+    .then((response) => {
+      console.log("API 更新成功:", response);
+    })
+    .catch((error) => {
+      console.error("API 更新失敗:", error);
+      // 💡 不向用戶顯示此錯誤，因為本地界面已更新
+    });
+}
+
+//! =============== 5. 主要 Hook 實現 ===============
+//* Hook 的核心實現，應用 Push Ifs Up 原則
+
 /**
  * @function useTimelineDialogs
- * @description 處理與對話框管理器的集成
+ * @description 處理與對話框管理器的集成 - 重構版本
  * @param {Object} options - 配置選項
  * @param {React.RefObject} options.itemsDataRef - 項目數據引用
  * @param {Array} options.groups - 分組數據
@@ -35,7 +248,6 @@ export function useTimelineDialogs({
   timelineRef,
   timeRange,
 }) {
-  // 獲取資料修改API
   const [changeWorkOrder] = useChangeWorkOrderMutation();
 
   // 設置 groups 數據
@@ -46,221 +258,91 @@ export function useTimelineDialogs({
   }, [groups]);
 
   /**
-   * @function getItemTiming
-   * @description 獲取項目的時間信息，確保按照項目類型正確獲取時間
-   * @param {Object} item - 項目數據
-   * @returns {Object} 開始和結束時間
+   * @function saveOrderItem
+   * @description 專門處理製令單項目保存 (Push Ifs Up 原則)
+   * @param {Object} updatedItem - 更新的項目數據
    */
-  const getItemTiming = useCallback((item) => {
-    // 檢查是否為製令單
-    const isWorkOrder = item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
+  const saveOrderItem = useCallback(
+    (updatedItem) => {
+      const processedItem = processOrderItem(updatedItem.internal);
+      const action = updatedItem.internal.id ? "update" : "add";
 
-    // 製令單使用 orderInfo 的時間
-    if (isWorkOrder && item.orderInfo) {
-      return {
-        start: dayjs(item.orderInfo.scheduledStartTime || item.start).toDate(),
-        end: dayjs(
-          item.orderInfo.scheduledEndTime ||
-            item.end ||
-            dayjs(item.orderInfo.scheduledStartTime).add(1, "hour")
-        ).toDate(),
-      };
-    }
+      itemsDataRef.current[action](processedItem);
+      submitToAPI(updatedItem.api, changeWorkOrder);
 
-    // 機台狀態使用 status 的時間
-    if (!isWorkOrder && item.status) {
-      const start = dayjs(item.status.startTime || item.start).toDate();
-      const end = item.status.endTime
-        ? dayjs(item.status.endTime).toDate()
-        : item.end
-        ? dayjs(item.end).toDate()
-        : dayjs(item.status.startTime || item.start)
-            .add(2, "hour")
-            .toDate();
-
-      return { start, end };
-    }
-
-    // 備用方案：使用項目本身的時間
-    return {
-      start: dayjs(item.start || new Date()).toDate(),
-      end: dayjs(item.end || dayjs(item.start).add(1, "hour")).toDate(),
-    };
-  }, []);
+      console.log("🚀 製令單保存成功:", processedItem);
+    },
+    [itemsDataRef, changeWorkOrder]
+  );
 
   /**
-   * @function getEditableConfig
-   * @description 判斷項目的可編輯性
-   * @param {string} timeLineStatus - 時間軸狀態
-   * @param {string} orderStatus - 訂單狀態
-   * @returns {Object} 可編輯配置
+   * @function saveMachineStatus
+   * @description 專門處理機台狀態項目保存 (Push Ifs Up 原則)
+   * @param {Object} updatedItem - 更新的項目數據
    */
-  const getEditableConfig = useCallback((timeLineStatus, orderStatus) => {
-    // 檢查是否為製令單
-    const isWorkOrder = timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
+  const saveMachineStatus = useCallback(
+    (updatedItem) => {
+      const processedItem = processMachineStatus(updatedItem.internal);
 
-    if (isWorkOrder) {
-      return orderStatus === "尚未上機"
-        ? { updateTime: true, updateGroup: true, remove: false }
-        : { updateTime: false, updateGroup: false, remove: true };
-    }
-    return { updateTime: false, updateGroup: false, remove: true };
-  }, []);
+      // ⚠️ 機台狀態需要檢查時間重疊
+      validateNoOverlap(processedItem, itemsDataRef.current);
 
-  // 處理保存項目
+      const action = updatedItem.internal.id ? "update" : "add";
+      itemsDataRef.current[action](processedItem);
+      submitToAPI(updatedItem.api, changeWorkOrder);
+
+      console.log("🚀 機台狀態保存成功:", processedItem);
+    },
+    [itemsDataRef, changeWorkOrder]
+  );
+
+  /**
+   * @function handleSaveItem
+   * @description 統一的項目保存處理 - 應用 Push Ifs Up 原則
+   * @param {Object} updatedItem - 更新的項目數據
+   */
   const handleSaveItem = useCallback(
     (updatedItem) => {
-      console.log("🚀 ~ updatedItem:", updatedItem);
-      if (!itemsDataRef.current) return;
-
       try {
+        // 🧠 在最頂層進行結構驗證和類型判斷
+        validateItemStructure(updatedItem);
+
         console.log("🚀 ~ useTimelineDialogs ~ updatedItem:", updatedItem);
 
-        // 檢查 updatedItem 是否有正確的結構
-        if (!updatedItem || !updatedItem.internal) {
-          console.error("Invalid item format:", updatedItem);
-          throw new Error("項目格式不正確，請檢查資料結構");
-        }
-
-        // 判斷是製令單還是機台狀態
-        const isOrderItem =
-          updatedItem.internal.timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
-
-        // 根據項目類型準備不同的數據
-        let processedItem;
-
-        if (isOrderItem) {
-          // 製令單項目處理 - 只使用 orderInfo，不使用 status
-          processedItem = {
-            ...updatedItem.internal,
-            className: getStatusClass(updatedItem.internal.timeLineStatus),
-            start: dayjs(
-              updatedItem.internal.orderInfo?.scheduledStartTime ||
-                updatedItem.internal.start
-            ).toDate(),
-            end: dayjs(
-              updatedItem.internal.orderInfo?.scheduledEndTime ||
-                updatedItem.internal.end
-            ).toDate(),
-            area:
-              updatedItem.internal.area ||
-              updatedItem.internal.group?.match(/[A-Z]/)?.[0] ||
-              "",
-            updateTime: false,
-            editable: getEditableConfig(
-              updatedItem.internal.timeLineStatus,
-              updatedItem.internal.orderInfo?.orderStatus
-            ),
-            // 確保 status 為 null，避免混用
-            status: null,
-          };
+        // ✨ Push Ifs Up - 在頂層決定處理路徑
+        if (isOrderItem(updatedItem.internal)) {
+          saveOrderItem(updatedItem);
         } else {
-          // 機台狀態項目處理 - 只使用 status，不使用 orderInfo
-          processedItem = {
-            ...updatedItem.internal,
-            className: getStatusClass(updatedItem.internal.timeLineStatus),
-            start: dayjs(
-              updatedItem.internal.status?.startTime ||
-                updatedItem.internal.start
-            ).toDate(),
-            end: dayjs(
-              updatedItem.internal.status?.endTime || updatedItem.internal.end
-            ).toDate(),
-            area:
-              updatedItem.internal.area ||
-              updatedItem.internal.group?.match(/[A-Z]/)?.[0] ||
-              "",
-            updateTime: false,
-            editable: getEditableConfig(
-              updatedItem.internal.timeLineStatus,
-              null
-            ),
-            // 確保 orderInfo 為 null，避免混用
-            orderInfo: null,
-          };
-
-          // 除了製令單以外的其他狀態，檢查時間重疊
-          // 查找同一組別的其他項目，不包含自己和製令單狀態
-          const existingItems = itemsDataRef.current.get({
-            filter: function (item) {
-              return (
-                item.id !== updatedItem.internal.id &&
-                item.group === updatedItem.internal.group &&
-                item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
-              );
-            },
-          });
-
-          // 檢查時間重疊
-          const itemStart = dayjs(processedItem.start);
-          const itemEnd = dayjs(processedItem.end);
-
-          const hasOverlap = existingItems.some((existingItem) => {
-            const existingStart = dayjs(existingItem.start);
-            const existingEnd = dayjs(existingItem.end);
-
-            return (
-              (itemStart.isBefore(existingEnd) &&
-                itemEnd.isAfter(existingStart)) ||
-              itemStart.isSame(existingStart) ||
-              itemEnd.isSame(existingEnd)
-            );
-          });
-
-          if (hasOverlap) {
-            throw new Error(
-              "時間重疊：除了「製令單」外的其他狀態都不允許時間重疊"
-            );
-          }
-        }
-
-        // 更新時間線顯示
-        const action = updatedItem.internal.id ? "update" : "add";
-        itemsDataRef.current[action](processedItem);
-
-        // 使用 API 格式提交到後端
-        console.log("🚀 ~ 提交到API的資料:", updatedItem.api);
-
-        // 如果有工單號，使用 changeWorkOrder API 更新資料
-        if (updatedItem.api) {
-          try {
-            changeWorkOrder(updatedItem.api)
-              .unwrap()
-              .then((response) => {
-                console.log("API 更新成功:", response);
-              })
-              .catch((error) => {
-                console.error("API 更新失敗:", error);
-                // 不向用戶顯示此錯誤，因為本地界面已更新
-              });
-          } catch (apiError) {
-            console.error("API 調用異常:", apiError);
-          }
+          saveMachineStatus(updatedItem);
         }
       } catch (error) {
         console.error("Save item failed:", error);
         alert(error.message);
       }
     },
-    [itemsDataRef, getItemTiming, getEditableConfig, changeWorkOrder]
+    [saveOrderItem, saveMachineStatus]
   );
 
-  // 處理刪除項目
+  /**
+   * @function handleDeleteItem
+   * @description 處理項目刪除 - 應用 Push Ifs Up 原則
+   * @param {string} itemId - 項目ID
+   */
   const handleDeleteItem = useCallback(
     (itemId) => {
-      if (!itemId || !itemsDataRef.current) return;
+      if (!itemId?.length || !itemsDataRef.current) {
+        return;
+      }
 
       try {
-        // 獲取項目數據
         const item = itemsDataRef.current.get(itemId);
 
-        // 檢查是否為製令單項目
-        if (item && item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
-          // 製令單不允許刪除
+        // ✨ Push Ifs Up - 在頂層進行類型判斷
+        if (isOrderItem(item)) {
           throw new Error("無法刪除製令單，製令單不允許被刪除");
         }
 
-        // 刪除非製令單項目
+        // 🧠 非製令單項目直接刪除
         itemsDataRef.current.remove(itemId);
       } catch (error) {
         console.error("Delete item failed:", error);
@@ -270,39 +352,37 @@ export function useTimelineDialogs({
     [itemsDataRef]
   );
 
-  // 添加項目
+  /**
+   * @function handleAddItem
+   * @description 添加新的機台狀態項目
+   * @param {Date} startTime - 開始時間
+   * @param {string} machineGroup - 機台群組
+   */
   const handleAddItem = useCallback(
     (startTime, machineGroup) => {
       try {
-        // 使用提供的時間或當前時間
         const centerTime = startTime ? dayjs(startTime) : dayjs();
-        const endTime = centerTime.add(2, "hour");
+        const endTime = centerTime.add(DEFAULT_DURATION_HOURS, "hour");
 
-        // 使用提供的機台或默認A1
-        const group = "";
-        const area = "";
-
-        // 創建機台狀態項目 - 只使用 status
+        // 🧠 只創建機台狀態項目，不創建製令單
         const newItem = {
           id: `ITEM-${Date.now()}`,
-          group: group,
-          area: area,
-          timeLineStatus: MACHINE_STATUS.IDLE, // 默認為待機狀態
-          // 機台狀態使用 status，不使用 orderInfo
+          group: "",
+          area: "",
+          timeLineStatus: MACHINE_STATUS.IDLE,
           status: {
             startTime: centerTime.toDate(),
             endTime: endTime.toDate(),
             reason: "",
             product: "",
           },
-          orderInfo: null, // 確保不混用
+          orderInfo: null, // ✨ 確保不混用
           start: centerTime.toDate(),
           end: endTime.toDate(),
           className: "status-idle",
           content: "新狀態",
         };
 
-        // 使用對話框管理器打開項目對話框，確保傳遞 groups
         openItemDialog(newItem, "add", groups);
       } catch (error) {
         console.error("Add item failed:", error);
@@ -311,20 +391,25 @@ export function useTimelineDialogs({
     [groups]
   );
 
-  // 編輯項目
+  /**
+   * @function handleEditItem
+   * @description 編輯現有項目
+   * @param {Object} item - 要編輯的項目
+   */
   const handleEditItem = useCallback(
     (item) => {
       if (!item) return;
-
-      // 使用對話框管理器打開項目對話框，確保傳遞 groups
       openItemDialog(item, "edit", groups);
     },
     [groups]
   );
 
-  // 移動到當前時間（如果提供了 timelineRef 和 timeRange）
+  /**
+   * @function handleMoveToNow
+   * @description 移動時間軸到當前時間
+   */
   const handleMoveToNow = useCallback(() => {
-    if (!timelineRef || !timelineRef.current) return;
+    if (!timelineRef?.current) return;
 
     try {
       const timeWindow = getTimeWindow(timeRange, dayjs());
@@ -340,26 +425,23 @@ export function useTimelineDialogs({
 
   // 設置事件監聽
   useEffect(() => {
-    // 監聽保存事件
     const saveUnsubscribe = onSaveItem(handleSaveItem);
-
-    // 監聽刪除確認事件
     const deleteUnsubscribe = onConfirmDelete(handleDeleteItem);
 
-    // 返回清理函數
     return () => {
       saveUnsubscribe();
       deleteUnsubscribe();
     };
   }, [handleSaveItem, handleDeleteItem]);
 
+  // 🧠 返回的介面保持簡潔
   return {
     handleAddItem,
     handleEditItem,
     handleSaveItem,
     handleDeleteItem,
-    handleMoveToNow, // 新增移動到當前時間功能
-    // 額外提供工具函數可供外部使用
+    handleMoveToNow,
+    // 💡 工具函數可供外部使用
     getItemTiming,
     getEditableConfig,
   };

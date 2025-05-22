@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json .
 COPY package-lock.json .
 # prodcution -訂正->  production
-RUN npm install --production  
+RUN npm install
 # Copy app files
 COPY . .
 # Build the app
