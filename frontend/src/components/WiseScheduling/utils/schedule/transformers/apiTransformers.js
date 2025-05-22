@@ -389,12 +389,14 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
  * @param {Date} startTime - 開始時間
  * @param {Date} endTime - 結束時間
  */
+
 function fillMachineStatusData(internalData, apiData, startTime, endTime) {
   // MACHINE_STATUS_TIME - 將多次使用的時間格式提前處理
   const formattedStartTime = formatDate(startTime);
   const formattedEndTime = formatDate(endTime);
 
   apiData.machineStatusId = internalData.status?.id || "";
+  console.log("🚀 ~ fillMachineStatusData ~ internalData:", internalData);
 
   // 計劃時間處理 (重要！可能需要修改邏輯)
   apiData.machineStatusPlanStartTime = internalData.status?.startTime
@@ -405,7 +407,7 @@ function fillMachineStatusData(internalData, apiData, startTime, endTime) {
     ? formatDate(internalData.status.endTime)
     : formattedEndTime;
 
-  // 實際時間處理 (重要！可能需要修改邏輯)
+  //TODO 實際時間處理 (重要！可能需要修改邏輯)    如果api原本沒有就不應該預設
   apiData.machineStatusActualStartTime = internalData.status?.startTime
     ? formatDate(internalData.status.startTime)
     : formattedStartTime;

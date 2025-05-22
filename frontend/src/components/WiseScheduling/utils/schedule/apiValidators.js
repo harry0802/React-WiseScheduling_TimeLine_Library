@@ -1,327 +1,494 @@
 /**
  * @file apiValidators.js
- * @description API請求層的驗證函數，確保數據符合業務規則
- * @version 2.0.0
+ * @description API請求層的驗證函數 - 重構版本，遵循單一職責原則
+ * @version 3.0.0
  */
 
 import {
-  StateTransitionError,
-  ValidationError,
-  ApiError,
+  createStateTransitionError,
+  createValidationError,
+  createApiError,
 } from "./errorHandler";
 import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
+import {
+  DEFAULT_VALUE_CONFIG,
+  STATUS_VALIDATION_RULES,
+  TRANSITION_RULES,
+} from "../../configs/validations/schedule/validation-rules";
 import dayjs from "dayjs";
 import { z } from "zod";
 
-//! =============== 1. API 基礎驗證 ===============
-//* 定義 API 請求必填字段和資料格式驗證
+//! =============== 2. 數據預處理函數 ===============
+//* 處理預設值填充和數據修復
 
 /**
- * @function validateApiStatusTransition
- * @description 驗證要提交給API的狀態轉換是否合法
- * @param {Object} internalItem - 內部格式的項目數據
- * @param {Object} originalItem - 原始項目數據（如果有）
- * @throws {StateTransitionError} 狀態轉換不合法時拋出錯誤
+ * @function fillDefaultValues
+ * @description 填充 API 項目的預設值
+ * @param {Object} apiItem - API 項目數據（會被修改）
  */
-export const validateApiStatusTransition = (
-  internalItem,
-  originalItem = null
-) => {
-  // 如果沒有原始項目，則視為新建項目
-  if (!originalItem) {
-    return; // 新建項目不需要驗證狀態轉換
+function fillDefaultValues(apiItem) {
+  // 防護檢查：確保 apiItem 存在
+  if (!apiItem || typeof apiItem !== 'object') {
+    console.warn('fillDefaultValues: apiItem 為空或非對象類型');
+    return;
   }
 
-  const initialStatus = originalItem.timeLineStatus;
-  const targetStatus = internalItem.timeLineStatus;
+  Object.entries(DEFAULT_VALUE_CONFIG).forEach(([field, config]) => {
+    if (!apiItem[field]) {
+      // 嘗試從備用欄位獲取值
+      const backupValue = config.backups?.find((backup) => apiItem[backup]);
+      
+      if (backupValue) {
+        apiItem[field] = apiItem[backupValue];
+      } else {
+        // 使用預設值（可能是函數）
+        const defaultValue = typeof config.defaultValue === 'function' 
+          ? config.defaultValue() 
+          : config.defaultValue;
+        apiItem[field] = defaultValue;
+        console.warn(config.warningMessage);
+      }
+    }
+  });
+}
 
-  // 如果沒有狀態變化，則直接通過
+/**
+ * @function validateRequiredFields
+ * @description 驗證 API 項目的必填欄位
+ * @param {Object} apiItem - API 項目數據
+ */
+function validateRequiredFields(apiItem) {
+  // 防護檢查：確保 apiItem 存在
+  if (!apiItem || typeof apiItem !== 'object') {
+    throw createValidationError('API 項目數據為空或格式錯誤', { 
+      apiItem: typeof apiItem 
+    });
+  }
+
+  const basicRequiredFields = ['group', 'start'];
+  
+  basicRequiredFields.forEach(field => {
+    if (!apiItem[field]) {
+      throw createValidationError(`${field} 為必填欄位`, { 
+        field, 
+        value: apiItem[field] 
+      });
+    }
+  });
+}
+
+/**
+ * @function validateStatusSpecificRules
+ * @description 驗證狀態特定的必填欄位
+ * @param {Object} apiItem - API 項目數據
+ */
+function validateStatusSpecificRules(apiItem) {
+  // 防護檢查：確保 apiItem 存在
+  if (!apiItem || typeof apiItem !== 'object') {
+    throw createValidationError('API 項目數據為空或格式錯誤', { 
+      apiItem: typeof apiItem 
+    });
+  }
+
+  const statusRule = STATUS_VALIDATION_RULES[apiItem.timeLineStatus];
+  
+  if (!statusRule) {
+    // 檢查是否為有效狀態
+    if (!Object.values(MACHINE_STATUS).includes(apiItem.timeLineStatus)) {
+      throw createValidationError(`未知的狀態類型: ${apiItem.timeLineStatus}`, {
+        providedStatus: apiItem.timeLineStatus,
+        validStatuses: Object.values(MACHINE_STATUS),
+      });
+    }
+    return;
+  }
+
+  statusRule.requiredFields.forEach((field) => {
+    if (!apiItem[field]) {
+      throw createValidationError(statusRule.errorMessages[field], {
+        field,
+        status: apiItem.timeLineStatus,
+      });
+    }
+  });
+}
+
+//! =============== 3. 狀態轉換驗證 ===============
+//* 統一的狀態轉換邏輯，避免重複
+
+/**
+ * @function validateStatusTransition
+ * @description 驗證狀態轉換是否合法
+ * @param {string} initialStatus - 初始狀態
+ * @param {string} targetStatus - 目標狀態
+ * @param {Object} item - 項目數據
+ */
+function validateStatusTransition(initialStatus, targetStatus, item) {
+  // 防護檢查：確保必要參數存在
+  if (!initialStatus || !targetStatus) {
+    throw createStateTransitionError('狀態轉換驗證缺少必要參數', {
+      initialStatus,
+      targetStatus,
+      itemId: item?.id
+    });
+  }
+
+  // 沒有狀態變化時直接通過
   if (initialStatus === targetStatus) {
     return;
   }
 
-  // 如果原始狀態是製令單，不允許切換
+  // 檢查製令單狀態轉換限制
   if (initialStatus === MACHINE_STATUS.ORDER_CREATED) {
-    throw new StateTransitionError("製令單狀態不能被切換", {
-      initialStatus,
-      targetStatus,
-      itemId: internalItem.id,
-    });
+    throw createStateTransitionError(
+      TRANSITION_RULES[MACHINE_STATUS.ORDER_CREATED].errorMessage,
+      { initialStatus, targetStatus, itemId: item?.id }
+    );
   }
 
-  // 如果不是待機狀態切換到其他狀態，那麼只能是非待機狀態切換到待機
-  if (
-    initialStatus !== MACHINE_STATUS.IDLE &&
-    targetStatus !== MACHINE_STATUS.IDLE
-  ) {
-    throw new StateTransitionError("從非待機狀態只能切換回待機狀態", {
-      initialStatus,
-      targetStatus,
-      itemId: internalItem.id,
-    });
+  // 檢查非待機狀態轉換限制
+  if (shouldCheckNonIdleTransition(initialStatus, targetStatus)) {
+    throw createStateTransitionError(
+      TRANSITION_RULES.nonIdleTransitions.errorMessage,
+      { initialStatus, targetStatus, itemId: item?.id }
+    );
   }
 
-  // 從非待機狀態轉到待機狀態，確保有結束時間
-  if (
-    initialStatus !== MACHINE_STATUS.IDLE &&
-    targetStatus === MACHINE_STATUS.IDLE &&
-    (!internalItem.end || !internalItem.status?.endTime)
-  ) {
-    throw new StateTransitionError(
-      "從非待機狀態切換回待機狀態時，必須設置結束時間",
+  // 檢查切換到待機狀態的特殊要求
+  if (shouldValidateIdleTransition(initialStatus, targetStatus, item)) {
+    throw createStateTransitionError(
+      TRANSITION_RULES.toIdleRequirements.errorMessage,
       {
         initialStatus,
         targetStatus,
-        itemId: internalItem.id,
-        endTime: internalItem.end || internalItem.status?.endTime,
+        itemId: item?.id,
+        endTime: item?.end || item?.status?.endTime,
       }
     );
   }
-};
+}
 
 /**
- * @function validateApiItemCompleteness1
- * @description 驗證API項目的數據完整性
- * @param {Object} apiItem - 要發送到API的項目數據
- * @param {boolean} isTest - 是否為測試模式，測試模式下跳過某些驗證
- * @throws {ValidationError} 數據不完整時拋出錯誤
+ * @function shouldCheckNonIdleTransition
+ * @description 判斷是否需要檢查非待機狀態轉換
+ * @param {string} initialStatus - 初始狀態
+ * @param {string} targetStatus - 目標狀態
+ * @returns {boolean}
  */
-export const validateApiItemCompleteness = (apiItem, isTest = false) => {
-  // 如果是測試模式，跳過驗證
-  if (isTest) {
+function shouldCheckNonIdleTransition(initialStatus, targetStatus) {
+  return initialStatus !== MACHINE_STATUS.IDLE && 
+         targetStatus !== MACHINE_STATUS.IDLE;
+}
+
+/**
+ * @function shouldValidateIdleTransition
+ * @description 判斷是否需要驗證切換到待機狀態的要求
+ * @param {string} initialStatus - 初始狀態
+ * @param {string} targetStatus - 目標狀態  
+ * @param {Object} item - 項目數據
+ * @returns {boolean}
+ */
+function shouldValidateIdleTransition(initialStatus, targetStatus, item) {
+  return initialStatus !== MACHINE_STATUS.IDLE &&
+         targetStatus === MACHINE_STATUS.IDLE &&
+         (!item.end && !item.status?.endTime);
+}
+
+//! =============== 4. 時間重疊驗證 ===============
+//* 檢查除了製令單外的所有狀態都不允許時間重疊
+
+/**
+ * @function validateTimeOverlap
+ * @description 驗證時間重疊 - 除了製令單外都不允許重疊
+ * @param {Object} apiItem - API 項目數據
+ * @param {Array|Object} existingItems - 現有項目或群組數據
+ */
+function validateTimeOverlap(apiItem, existingItems = null) {
+  // 製令單允許時間重疊
+  if (apiItem.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
     return;
   }
 
-  // 定義必填字段及其可能的備用欄位
-  const requiredFields = {
-    group: {
-      backups: ["machineSN"],
-      defaultValue: "A-1",
-      defaultValueWarning: "缺少機台組，使用預設值: A-1",
-    },
-    start: {
-      backups: [
-        "machineStatusPlanStartTime",
-        "machineStatusActualStartTime",
-        "planOnMachineDate",
-      ],
-      defaultValue: dayjs().format(),
-      defaultValueWarning: "缺少開始時間，使用當前時間作為預設值",
-    },
-  };
+  // 防護檢查
+  if (!apiItem || !apiItem.start || !apiItem.group) {
+    console.warn('validateTimeOverlap: 缺少必要的時間或群組資訊');
+    return;
+  }
 
-  // 檢查並修復必填字段
-  Object.entries(requiredFields).forEach(([field, config]) => {
-    if (!apiItem[field]) {
-      // 嘗試從備用欄位獲取值
-      const backupValue = config.backups.find((backup) => apiItem[backup]);
+  try {
+    const itemStart = dayjs(apiItem.start);
+    const itemEnd = dayjs(apiItem.end);
+    
+    // 如果沒有結束時間，視為現在時間 + 2小時
+    const effectiveEnd = itemEnd.isValid() ? 
+      itemEnd : 
+      dayjs().add(2, 'hour');
 
-      if (backupValue) {
-        apiItem[field] = apiItem[backupValue];
-      } else {
-        // 使用預設值
-        apiItem[field] = config.defaultValue;
-        console.warn(config.defaultValueWarning);
+    let items = [];
+
+    // 嘗試從全局數據獲取
+    if (window.timeline && window.app && window.app.timelineData) {
+      items = window.app.timelineData.get({
+        filter: function (item) {
+          return (
+            item.id !== apiItem.id &&
+            item.group === apiItem.group &&
+            item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+          );
+        },
+      });
+    } else if (existingItems) {
+      // 從傳入的參數獲取
+      if (Array.isArray(existingItems)) {
+        // 如果是群組數據
+        const currentGroup = existingItems.find((g) => g.id === apiItem.group);
+        if (currentGroup && currentGroup.items) {
+          items = currentGroup.items.filter(
+            (item) =>
+              item.id !== apiItem.id &&
+              item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+          );
+        }
+      } else if (existingItems.filter) {
+        // 如果是項目數組
+        items = existingItems.filter(
+          (item) =>
+            item.id !== apiItem.id &&
+            item.group === apiItem.group &&
+            item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
+        );
       }
     }
-  });
 
-  // 狀態特定驗證規則
-  const statusValidationRules = {
-    [MACHINE_STATUS.TESTING]: {
-      requiredFields: ["machineStatusProduct"],
-      errorMessages: {
-        machineStatusProduct: "產品試模狀態必須指定產品",
-      },
-    },
-    [MACHINE_STATUS.STOPPED]: {
-      requiredFields: ["machineStatusReason"],
-      errorMessages: {
-        machineStatusReason: "機台停機狀態必須指定原因",
-      },
-    },
-    [MACHINE_STATUS.ORDER_CREATED]: {
-      requiredFields: ["productName"],
-      errorMessages: {
-        productName: "製令單必須指定產品名稱",
-      },
-    },
-  };
+    // 檢查時間重疊
+    const hasOverlap = items.some((existingItem) => {
+      const existingStart = dayjs(existingItem.start);
+      const existingEnd = dayjs(existingItem.end);
+      const existingEffectiveEnd = existingEnd.isValid() ? 
+        existingEnd : 
+        existingStart.add(2, 'hour');
 
-  // 根據狀態進行特定驗證
-  const statusRule = statusValidationRules[apiItem.timeLineStatus];
-  if (statusRule) {
-    statusRule.requiredFields.forEach((field) => {
-      if (!apiItem[field]) {
-        throw new ValidationError(statusRule.errorMessages[field], {
-          field,
+      return (
+        (itemStart.isBefore(existingEffectiveEnd) && effectiveEnd.isAfter(existingStart)) ||
+        itemStart.isSame(existingStart) ||
+        effectiveEnd.isSame(existingEffectiveEnd)
+      );
+    });
+
+    if (hasOverlap) {
+      throw createValidationError(
+        "時間重疊：除了「製令單」外的其他狀態都不允許時間重疊",
+        {
+          itemId: apiItem.id,
+          group: apiItem.group,
+          start: apiItem.start,
+          end: apiItem.end,
           status: apiItem.timeLineStatus,
-        });
-      }
-    });
-  } else if (!Object.values(MACHINE_STATUS).includes(apiItem.timeLineStatus)) {
-    // 未知狀態
-    throw new ValidationError(`未知的狀態類型: ${apiItem.timeLineStatus}`, {
-      providedStatus: apiItem.timeLineStatus,
-      validStatuses: Object.values(MACHINE_STATUS),
-    });
+        }
+      );
+    }
+  } catch (error) {
+    // 如果是驗證錯誤，直接拋出
+    if (error.type === 'VALIDATION_ERROR') {
+      throw error;
+    }
+    
+    // 其他錯誤記錄日誌但不阻止流程
+    console.error("檢查時間重疊時發生錯誤，繼續執行:", error);
   }
-};
+}
 
-//! =============== 2. API 請求模式驗證 ===============
-//* 使用 Zod 定義 API 請求數據的模式
+//! =============== 5. Zod 模式驗證 ===============
+//* 使用 Zod 進行模式驗證，保持原有邏輯但簡化結構
 
-// 基礎時間欄位驗證模式
 const timeFieldsSchema = z.object({
   start: z
     .string()
     .min(1, "開始時間為必填")
     .refine((v) => dayjs(v).isValid(), "開始時間格式無效"),
-
-  // 結束時間可選，但如果有值必須是有效日期時間
   machineStatusPlanEndTime: z
     .string()
     .optional()
     .refine((v) => !v || dayjs(v).isValid(), "計劃結束時間格式無效"),
-
   machineStatusActualEndTime: z
     .string()
     .optional()
     .refine((v) => !v || dayjs(v).isValid(), "實際結束時間格式無效"),
 });
 
-// 機台狀態共用的基礎欄位
 const machineStatusBaseSchema = timeFieldsSchema.extend({
   machineSN: z.string().min(1, "機台編號為必填"),
   productionArea: z.string().min(1, "生產區域為必填"),
   timeLineStatus: z.string().min(1, "狀態類型為必填"),
 });
 
-// 待機狀態模式
-const idleStatusSchema = machineStatusBaseSchema;
-
-// 上模與調機狀態模式
-const setupStatusSchema = machineStatusBaseSchema.extend({
-  // 可以添加特定於該狀態的字段
-});
-
-// 產品試模狀態模式
-const testingStatusSchema = machineStatusBaseSchema.extend({
-  machineStatusProduct: z.string().min(1, "產品試模狀態必須指定產品"),
-});
-
-// 機台停機狀態模式
-const stoppedStatusSchema = machineStatusBaseSchema.extend({
-  machineStatusReason: z.string().min(1, "機台停機狀態必須指定原因"),
-});
-
-// 製令單狀態模式
-const orderStatusSchema = timeFieldsSchema.extend({
-  machineSN: z.string().min(1, "機台編號為必填"),
-  productionArea: z.string().min(1, "生產區域為必填"),
-  timeLineStatus: z.literal(MACHINE_STATUS.ORDER_CREATED),
-  productName: z.string().min(1, "產品名稱為必填"),
-  productSN: z.string().optional(),
-  processName: z.string().optional(),
-  workOrderQuantity: z.string().optional(),
-  productionQuantity: z.string().optional(),
-  planOnMachineDate: z
-    .string()
-    .min(1, "計劃上機時間為必填")
-    .refine((v) => dayjs(v).isValid(), "計劃上機時間格式無效"),
-});
-
-// 合併所有模式，使用 discriminated union
 const apiItemSchema = z.discriminatedUnion("timeLineStatus", [
-  orderStatusSchema.extend({
+  // 製令單模式
+  timeFieldsSchema.extend({
+    machineSN: z.string().min(1, "機台編號為必填"),
+    productionArea: z.string().min(1, "生產區域為必填"),
     timeLineStatus: z.literal(MACHINE_STATUS.ORDER_CREATED),
+    productName: z.string().min(1, "產品名稱為必填"),
+    productSN: z.string().optional(),
+    processName: z.string().optional(),
+    workOrderQuantity: z.string().optional(),
+    productionQuantity: z.string().optional(),
+    planOnMachineDate: z
+      .string()
+      .min(1, "計劃上機時間為必填")
+      .refine((v) => dayjs(v).isValid(), "計劃上機時間格式無效"),
   }),
-  idleStatusSchema.extend({ timeLineStatus: z.literal(MACHINE_STATUS.IDLE) }),
-  setupStatusSchema.extend({ timeLineStatus: z.literal(MACHINE_STATUS.SETUP) }),
-  testingStatusSchema.extend({
+  
+  // 其他狀態模式
+  machineStatusBaseSchema.extend({ timeLineStatus: z.literal(MACHINE_STATUS.IDLE) }),
+  machineStatusBaseSchema.extend({ timeLineStatus: z.literal(MACHINE_STATUS.SETUP) }),
+  machineStatusBaseSchema.extend({
     timeLineStatus: z.literal(MACHINE_STATUS.TESTING),
+    machineStatusProduct: z.string().min(1, "產品試模狀態必須指定產品"),
   }),
-  stoppedStatusSchema.extend({
+  machineStatusBaseSchema.extend({
     timeLineStatus: z.literal(MACHINE_STATUS.STOPPED),
+    machineStatusReason: z.string().min(1, "機台停機狀態必須指定原因"),
   }),
 ]);
 
 /**
- * @function validateApiSchema
- * @description 使用 Zod 模式驗證 API 請求數據
- * @param {Object} apiItem - 要驗證的 API 數據
- * @param {boolean} isTest - 是否為測試模式
- * @throws {ValidationError} 驗證失敗時拋出
+ * @function validateSchema
+ * @description 使用 Zod 模式驗證 API 數據
+ * @param {Object} apiItem - 要驗證的數據
  */
-export const validateApiSchema = (apiItem, isTest = false) => {
-  if (isTest) return;
+function validateSchema(apiItem) {
+  // 防護檢查：確保 apiItem 存在
+  if (!apiItem || typeof apiItem !== 'object') {
+    throw createValidationError('API 項目數據為空或格式錯誤', { 
+      apiItem: typeof apiItem 
+    });
+  }
 
   try {
-    // 基於狀態類型選擇適當的模式進行驗證
     apiItemSchema.parse(apiItem);
   } catch (error) {
     if (error.name === "ZodError") {
-      // 將 Zod 錯誤轉換為應用錯誤
       const validationDetails = {};
       error.errors.forEach((err) => {
         const path = err.path.join(".");
         validationDetails[path] = err.message;
       });
 
-      throw new ValidationError("API 數據格式驗證失敗", {
+      throw createValidationError("API 數據格式驗證失敗", {
         zodErrors: error.errors,
         formattedErrors: validationDetails,
       });
     }
-
-    throw error; // 重新拋出非 Zod 錯誤
+    throw error;
   }
-};
+}
+
+//! =============== 5. 主要驗證函數 ===============
+//* 統一的驗證入口，遵循 "Push Ifs Up" 原則
+
+/**
+ * @function validateApiItemCompleteness
+ * @description 驗證 API 項目完整性的統一入口
+ * @param {Object} apiItem - API 項目數據
+ * @param {boolean} isTest - 是否為測試模式
+ */
+function validateApiItemCompleteness(apiItem, isTest = false) {
+  if (isTest) return;
+  
+  fillDefaultValues(apiItem);
+  validateRequiredFields(apiItem);
+  validateStatusSpecificRules(apiItem);
+}
+
+/**
+ * @function validateApiStatusTransition
+ * @description 驗證 API 狀態轉換的統一入口
+ * @param {Object} internalItem - 內部格式項目
+ * @param {Object} originalItem - 原始項目
+ * @param {boolean} isTest - 是否為測試模式
+ */
+function validateApiStatusTransition(internalItem, originalItem, isTest = false) {
+  if (isTest) return;
+  if (!originalItem) return; // 新建項目不驗證轉換
+  
+  const initialStatus = originalItem.timeLineStatus;
+  const targetStatus = internalItem.timeLineStatus;
+  
+  validateStatusTransition(initialStatus, targetStatus, internalItem);
+}
+
+/**
+ * @function validateApiSchema
+ * @description 驗證 API 模式的統一入口
+ * @param {Object} apiItem - API 數據
+ * @param {boolean} isTest - 是否為測試模式
+ */
+function validateApiSchema(apiItem, isTest = false) {
+  if (isTest) return;
+  
+  validateSchema(apiItem);
+}
 
 /**
  * @function validateApiRequest
- * @description 統一的 API 請求驗證函數
+ * @description 統一的 API 請求驗證函數 - 頂層控制流
  * @param {Object} apiItem - API 請求數據
- * @param {Object} originalItem - 原始項目數據（如果有）
+ * @param {Object} originalItem - 原始項目數據
  * @param {boolean} isTest - 是否為測試模式
+ * @param {Array|Object} existingItems - 現有項目數據（用於時間重疊檢查）
  */
-export const validateApiRequest = (
-  apiItem,
-  originalItem = null,
-  isTest = false
-) => {
-  // 跳過測試模式驗證
+function validateApiRequest(apiItem, originalItem = null, isTest = false, existingItems = null) {
   if (isTest) return;
 
   try {
-    // 1. 基礎數據完整性驗證
+    // 1. 數據完整性驗證和修復
     validateApiItemCompleteness(apiItem, isTest);
 
     // 2. 模式驗證
     validateApiSchema(apiItem, isTest);
 
-    // 3. 狀態轉換驗證（僅對更新操作）
+    // 3. 時間重疊驗證（重要！）
+    validateTimeOverlap(apiItem, existingItems);
+
+    // 4. 狀態轉換驗證（僅對更新操作）
     if (originalItem) {
-      validateApiStatusTransition(apiItem, originalItem);
+      validateApiStatusTransition(apiItem, originalItem, isTest);
     }
   } catch (error) {
-    // 確保所有錯誤都被轉換為應用錯誤類型
-    if (error instanceof Error && !(error instanceof ApiError)) {
-      throw new ApiError(error.message, {
+    // 統一錯誤處理
+    if (!(error.type)) {
+      throw createApiError(error.message, {
         originalError: error,
         apiItem: {
-          id:
-            apiItem.id ||
-            apiItem.machineStatusId ||
-            apiItem.productionScheduleId,
-          status: apiItem.timeLineStatus,
-          // 截斷長數據但保留可讀性
-          request:
-            JSON.stringify(apiItem, null, 2).substring(0, 300) +
+          id: apiItem?.id || apiItem?.machineStatusId || apiItem?.productionScheduleId,
+          status: apiItem?.timeLineStatus,
+          request: JSON.stringify(apiItem, null, 2).substring(0, 300) +
             (JSON.stringify(apiItem).length > 300 ? "..." : ""),
         },
       });
     }
     throw error;
   }
+}
+
+//! =============== 6. 導出函數 ===============
+
+// 主要驗證函數
+export { validateApiRequest };
+
+// 單獨的驗證函數（用於單元測試或特殊用途）
+export { 
+  validateApiItemCompleteness,
+  validateApiStatusTransition, 
+  validateApiSchema,
+  validateStatusTransition, // 給 statusHelpers.js 使用
+};
+
+// 輔助函數
+export {
+  fillDefaultValues,
+  validateRequiredFields,
+  validateStatusSpecificRules,
+  validateTimeOverlap,
 };

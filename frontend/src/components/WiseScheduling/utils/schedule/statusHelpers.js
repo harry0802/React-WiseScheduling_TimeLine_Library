@@ -11,6 +11,7 @@ import {
 import {
   createStateTransitionError
 } from "./errorHandler";
+import { validateStatusTransition as coreValidateStatusTransition, validateTimeOverlap } from "./apiValidators";
 import dayjs from "dayjs";
 
 //! =============== 1. 狀態識別輔助函數 ===============
@@ -99,7 +100,7 @@ export const getItemState = (item) => {
 
 /**
  * @function validateStatusTransition
- * @description 狀態轉換驗證
+ * @description 狀態轉換驗證 - UI 層面的包裝
  * @param {string} currentStatus - 當前狀態
  * @param {string} newStatus - 新狀態
  * @param {Object} item - 原始項目資料
@@ -116,7 +117,7 @@ export const validateStatusTransition = (
 ) => {
   // 如果只是數據編輯而沒有狀態變更，跳過驗證
   if (isDataOnlyEdit && currentStatus === newStatus) {
-    return; // 允許純數據編輯，不進行狀態轉換驗證
+    return;
   }
 
   // 如果是同樣的狀態而且不是add模式，不允許切換
@@ -129,36 +130,29 @@ export const validateStatusTransition = (
     });
   }
 
-  // 如果當前狀態是製令單，不允許切換
-  if (currentStatus === MACHINE_STATUS.ORDER_CREATED) {
-    throw createStateTransitionError("製令單狀態不能被切換", {
-      currentStatus,
+  // 新建模式或純數據編輯時，跳過核心轉換驗證
+  if (mode === "add" || isDataOnlyEdit) {
+    return;
+  }
+
+  // 使用核心狀態轉換驗證邏輯
+  try {
+    const actualStatus = item?.timeLineStatus || currentStatus;
+    coreValidateStatusTransition(actualStatus, newStatus, item);
+  } catch (error) {
+    // 重新包裝錯誤以符合 UI 層的需求
+    throw createStateTransitionError(error.message, {
+      currentStatus: item?.timeLineStatus || currentStatus,
       newStatus,
       mode,
-      itemId: item?.id
+      itemId: item?.id,
+      originalError: error
     });
   }
 
-  // 檢查實際的item狀態，而不僅僅是前端狀態
+  // 額外的 canTransitTo 檢查（保留原有邏輯以確保兼容性）
   const actualStatus = item?.timeLineStatus || currentStatus;
-
-  // 如果不是add模式且實際狀態是非待機，只能切換到待機
-  if (
-    mode !== "add" && 
-    actualStatus !== MACHINE_STATUS.IDLE &&
-    newStatus !== MACHINE_STATUS.IDLE &&
-    !isDataOnlyEdit // 如果是純數據編輯，不進行這項檢查
-  ) {
-    throw createStateTransitionError("從非待機狀態只能切換回待機狀態", {
-      currentStatus: actualStatus,
-      newStatus,
-      mode,
-      itemId: item?.id
-    });
-  }
-
-  // 使用已有的canTransitTo函數再次確認，但在add模式或純數據編輯中不做這個檢查
-  if (mode !== "add" && !isDataOnlyEdit && !canTransitTo(actualStatus, newStatus)) {
+  if (!canTransitTo(actualStatus, newStatus)) {
     throw createStateTransitionError(
       `無法從「${actualStatus}」切換到「${newStatus}」狀態`, 
       {
@@ -171,97 +165,29 @@ export const validateStatusTransition = (
   }
 };
 
+
+
 /**
  * @function checkTimeOverlap
- * @description 檢查表單項目的時間重疊
+ * @description 檢查表單項目的時間重疊 - 向後兼容性包裝
  * @param {Object} updatedItem - 更新後的項目
  * @param {Array|Object} groups - 時間軸組別數據
  * @returns {boolean} 是否有時間重疊
  * @throws {Error} 當發現時間重疊時拋出錯誤
  */
 export const checkTimeOverlap = (updatedItem, groups) => {
-  const isWorkOrder =
-    updatedItem.timeLineStatus === MACHINE_STATUS.ORDER_CREATED;
-
-  // 如果是製令單類型，不檢查時間重疊
-  if (isWorkOrder) {
-    return false;
-  }
-
   try {
-    let hasOverlap = false;
-    const itemStart = dayjs(updatedItem.start);
-    const itemEnd = dayjs(updatedItem.end);
-    
-    // 如果沒有結束時間，視為現在時間 + 2小時
-    const effectiveEnd = itemEnd.isValid() ? 
-      itemEnd : 
-      dayjs().add(2, 'hour');
-
-    // 首先，如果有全局數據存取方式，則使用它
-    if (window.timeline && window.app && window.app.timelineData) {
-      // 使用 DataSet API 取得符合條件的項目
-      const existingItems = window.app.timelineData.get({
-        filter: function (item) {
-          return (
-            item.id !== updatedItem.id &&
-            item.group === updatedItem.group &&
-            item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
-          );
-        },
-      });
-
-      hasOverlap = existingItems.some((existingItem) => {
-        const existingStart = dayjs(existingItem.start);
-        const existingEnd = dayjs(existingItem.end) || existingStart.add(2, 'hour');
-
-        return (
-          (itemStart.isBefore(existingEnd) && effectiveEnd.isAfter(existingStart)) ||
-          itemStart.isSame(existingStart) ||
-          effectiveEnd.isSame(existingEnd)
-        );
-      });
-    } else {
-      // 如果沒有全局數據，則使用傳入的 groups 參數
-      const groupItems = [];
-
-      if (groups && Array.isArray(groups)) {
-        const currentGroup = groups.find((g) => g.id === updatedItem.group);
-
-        if (currentGroup && currentGroup.items) {
-          currentGroup.items
-            .filter(
-              (item) =>
-                item.id !== updatedItem.id &&
-                item.timeLineStatus !== MACHINE_STATUS.ORDER_CREATED
-            )
-            .forEach((item) => groupItems.push(item));
-        }
-
-        hasOverlap = groupItems.some((existingItem) => {
-          const existingStart = dayjs(existingItem.start);
-          const existingEnd = dayjs(existingItem.end) || existingStart.add(2, 'hour');
-
-          return (
-            (itemStart.isBefore(existingEnd) &&
-              effectiveEnd.isAfter(existingStart)) ||
-            itemStart.isSame(existingStart) ||
-            effectiveEnd.isSame(existingEnd)
-          );
-        });
-      }
-    }
-
-    if (hasOverlap) {
-      throw new Error("時間重疊：除了「製令單」外的其他狀態都不允許時間重疊");
-    }
-
+    // 使用統一的時間重疊驗證邏輯
+    validateTimeOverlap(updatedItem, groups);
     return false;
-  } catch (err) {
-    if (err.message.includes("時間重疊")) {
-      throw err; // 重新拋出重疊錯誤
+  } catch (error) {
+    if (error.type === 'VALIDATION_ERROR' && error.message.includes('時間重疊')) {
+      // 將驗證錯誤轉換為原有的錯誤格式以保持兼容性
+      throw new Error(error.message);
     }
-    console.error("檢查時間重疊時發生錯誤，繼續執行:", err);
+    
+    // 其他錯誤保持原有處理方式
+    console.error("檢查時間重疊時發生錯誤，繼續執行:", error);
     return false;
   }
 };
