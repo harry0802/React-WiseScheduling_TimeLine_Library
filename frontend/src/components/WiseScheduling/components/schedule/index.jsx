@@ -33,7 +33,6 @@ import "./styles/industrialTheme"; // 引入工業風格主題
 //* 服務與資料
 import { useGetSmartScheduleQuery } from "../../services/schedule/smartSchedule";
 import { useGetMachinesQuery } from "../../../QuotationManagementSystem/services/salesServices/endpoints/machineApi";
-import { testTransformer } from "../../utils/schedule/transformers/apiTransformers";
 
 //* 樣式
 import { TimelineContainer } from "../../assets/schedule";
@@ -257,29 +256,6 @@ function DynamicTimeline() {
       }
     };
   }, [containerRef, itemsDataRef, groups, getTimelineOptions, handleEditItem]);
-
-  // 測試 API 數據轉換
-  // useEffect(() => {
-  //   if (scheduleList && scheduleList.length > 0) {
-  //     // 選擇第一個製令單和第一個非製令單項目進行測試
-  //     const workOrder = scheduleList.find(
-  //       (item) => item.timeLineStatus === "製令單"
-  //     );
-  //     const machineStatus = scheduleList.find(
-  //       (item) => item.timeLineStatus !== "製令單"
-  //     );
-
-  //     if (workOrder) {
-  //       console.log("===== 製令單轉換測試 =====");
-  //       testTransformer(workOrder);
-  //     }
-
-  //     if (machineStatus) {
-  //       console.log("===== 機台狀態轉換測試 =====");
-  //       testTransformer(machineStatus);
-  //     }
-  //   }
-  // }, [scheduleList]);
 
   //! =============== 6. 加載狀態處理 ===============
   // 判斷整體載入狀態

@@ -1,7 +1,7 @@
 /**
  * @file apiTransformers.js
  * @description API 資料與內部資料格式互相轉換的工具函數
- * @version 2.4.0 - 更新於 2025-05-20，優化判斷邏輯，減少判斷層次
+ * @version 2.5.0 - 移除測試程式碼，專注於核心轉換邏輯
  * @author Claude / Harry
  *
  * 重要注意點：
@@ -90,18 +90,6 @@ function determineItemType(data) {
     (data.status && "待機中") ||
     DEFAULT_STATUS
   );
-}
-
-/**
- * @function extractArea
- * @description 從機台編號提取區域
- * @param {string} group - 機台編號
- * @returns {string} 區域代碼
- */
-function extractArea(group) {
-  if (!group) return DEFAULT_AREA;
-  const match = group.match(/[A-Z]/);
-  return match ? match[0] : DEFAULT_AREA;
 }
 
 /**
@@ -222,10 +210,19 @@ function extractOrderInfoFromApi(apiData, { startTime, endTime }) {
  */
 function extractStatusInfoFromApi(apiData, { startTime, endTime }) {
   // TIME_HANDLING - 狀態信息 - 從API轉換到內部格式
+  // 優先使用實際時間，其次是計劃時間
   return {
     id: apiData.machineStatusId || "",
-    startTime: startTime.toDate(),
-    endTime: endTime.toDate(),
+    startTime: dayjs(
+      apiData.machineStatusActualStartTime || 
+      apiData.machineStatusPlanStartTime || 
+      startTime
+    ).toDate(),
+    endTime: dayjs(
+      apiData.machineStatusActualEndTime || 
+      apiData.machineStatusPlanEndTime || 
+      endTime
+    ).toDate(),
     reason: apiData.machineStatusReason || "",
     product: apiData.machineStatusProduct || apiData.productName || "",
   };
@@ -246,18 +243,19 @@ export const transformApiToInternalFormat = (apiData) => {
   const isWorkOrder = timeLineStatus === ORDER_STATUS;
 
   // 設置ID - 使用邏輯短路簡化
-  const itemId = isWorkOrder
-    ? apiData.productionScheduleId
-    : apiData.machineStatusId;
   const generatedId = uuidv4();
 
   // WORK_ORDER_TIME - 提取時間資訊
   let startTime, endTime;
 
   if (isWorkOrder) {
-    // 製令單時間處理
-    startTime = dayjs(apiData.planOnMachineDate);
-    endTime = apiData.planFinishDate
+    // 製令單時間處理 - 優先使用實際時間，其次是計劃時間
+    startTime = dayjs(
+      apiData.actualOnMachineDate || apiData.planOnMachineDate
+    );
+    endTime = apiData.actualFinishDate
+      ? dayjs(apiData.actualFinishDate)
+      : apiData.planFinishDate
       ? dayjs(apiData.planFinishDate)
       : startTime.add(1, "hour");
   } else {
@@ -309,10 +307,9 @@ export const transformApiToInternalFormat = (apiData) => {
     internalData.end = status.endTime; // 添加結束時間
   }
 
-  console.log("轉換後的內部格式數據:", internalData);
-
   return internalData;
 };
+
 //! =============== 5. 內部格式轉API - 工作訂單 ===============
 
 /**
@@ -333,12 +330,6 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
     internalData.orderInfo?.id ||
     internalData._originalApiData?.productionScheduleId ||
     "";
-
-  console.log("🔍 [API轉換] 設置 productionScheduleId:", {
-    orderInfoId: internalData.orderInfo?.id,
-    originalApiDataId: internalData._originalApiData?.productionScheduleId,
-    finalValue: apiData.productionScheduleId,
-  });
 
   // 計劃時間處理 - 使用邏輯短路簡化判斷
   apiData.planOnMachineDate = internalData.orderInfo?.scheduledStartTime
@@ -389,16 +380,14 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
  * @param {Date} startTime - 開始時間
  * @param {Date} endTime - 結束時間
  */
-
 function fillMachineStatusData(internalData, apiData, startTime, endTime) {
   // MACHINE_STATUS_TIME - 將多次使用的時間格式提前處理
   const formattedStartTime = formatDate(startTime);
   const formattedEndTime = formatDate(endTime);
 
   apiData.machineStatusId = internalData.status?.id || "";
-  console.log("🚀 ~ fillMachineStatusData ~ internalData:", internalData);
 
-  // 計劃時間處理 (重要！可能需要修改邏輯)
+  // 計劃時間處理
   apiData.machineStatusPlanStartTime = internalData.status?.startTime
     ? formatDate(internalData.status.startTime)
     : formattedStartTime;
@@ -407,14 +396,12 @@ function fillMachineStatusData(internalData, apiData, startTime, endTime) {
     ? formatDate(internalData.status.endTime)
     : formattedEndTime;
 
-  //TODO 實際時間處理 (重要！可能需要修改邏輯)    如果api原本沒有就不應該預設
-  apiData.machineStatusActualStartTime = internalData.status?.startTime
-    ? formatDate(internalData.status.startTime)
-    : formattedStartTime;
+  // 實際時間處理 - 只有當原始 API 資料中有實際時間才設置
+  apiData.machineStatusActualStartTime =
+    internalData._originalApiData?.machineStatusActualStartTime || null;
 
-  apiData.machineStatusActualEndTime = internalData.status?.endTime
-    ? formatDate(internalData.status.endTime)
-    : formattedEndTime;
+  apiData.machineStatusActualEndTime =
+    internalData._originalApiData?.machineStatusActualEndTime || null;
 
   // 狀態詳情 - 使用邏輯短路簡化
   apiData.machineStatusReason = internalData.status?.reason || null;
@@ -451,7 +438,7 @@ export const transformInternalToApiFormat = (
   const apiData = {
     ...API_DATA_DEFAULTS,
     timeLineStatus: isWorkOrder ? "製令單" : timeLineStatus,
-    productionArea: internalData.area || extractArea(group),
+    productionArea: internalData.area || DEFAULT_AREA,
     machineSN: group,
   };
 
@@ -461,6 +448,7 @@ export const transformInternalToApiFormat = (
   } else {
     fillMachineStatusData(internalData, apiData, startTime, endTime);
   }
+
   return apiData;
 };
 
@@ -513,82 +501,3 @@ export const transformUpdateStatusToApi = (
 
   return apiData;
 };
-
-//! =============== 8. 測試與除錯 ===============
-
-/**
- * @function testTransformer
- * @description 測試轉換功能，將API資料轉換為內部格式後再轉回API格式
- * @param {Object} apiData - API資料
- * @returns {Object} 包含兩種格式的測試結果
- */
-export const testTransformer = (apiData) => {
-  try {
-    if (!apiData) {
-      console.warn("測試轉換: 沒有提供有效的 API 數據");
-      return null;
-    }
-
-    const internalFormat = transformApiToInternalFormat(apiData);
-
-    // 測試模式，跳過某些驗證
-    const backToApi = transformInternalToApiFormat(internalFormat, null, true);
-
-    // 比較轉換前後的差異，顯示可能的問題
-    const comparisonResult = compareTransformationResults(apiData, backToApi);
-
-    return {
-      internalFormat,
-      backToApi,
-      comparisonResult,
-    };
-  } catch (error) {
-    console.error("測試轉換出錯:", error);
-    return null;
-  }
-};
-
-/**
- * @function compareTransformationResults
- * @description 比較原始API資料和轉換回來的API資料
- * @param {Object} original - 原始API資料
- * @param {Object} transformed - 轉換後的API資料
- * @returns {Object} 比較結果
- */
-function compareTransformationResults(original, transformed) {
-  if (!original || !transformed) {
-    return { success: false, reason: "資料為空" };
-  }
-
-  const differences = findDifferences(original, transformed);
-
-  return {
-    success: differences.length === 0,
-    differences: differences.length > 0 ? differences : null,
-  };
-}
-
-/**
- * @function findDifferences
- * @description 找出兩個物件間的差異
- * @param {Object} original - 原始物件
- * @param {Object} transformed - 轉換後物件
- * @returns {Array} 差異列表
- */
-function findDifferences(original, transformed) {
-  const differences = [];
-  const criticalFields = ["timeLineStatus", "machineSN", "productionArea"];
-
-  // 檢查關鍵欄位是否保持一致
-  criticalFields.forEach((field) => {
-    if (original[field] !== transformed[field]) {
-      differences.push({
-        field,
-        original: original[field],
-        transformed: transformed[field],
-      });
-    }
-  });
-
-  return differences;
-}
