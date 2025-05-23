@@ -6,10 +6,12 @@ import {
   TextField,
   Typography,
   CircularProgress,
+  Alert,
 } from "@mui/material";
+import LockIcon from "@mui/icons-material/Lock";
 import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
 import { VALIDATION_RULES } from "../../../configs/validations/schedule/formConfig";
-import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
+import { MACHINE_STATUS, isHistoricalRecord } from "../../../configs/validations/schedule/constants";
 import { useGetMachinesQuery } from "../../../../QuotationManagementSystem/services/salesServices/endpoints/machineApi";
 import TimePickerSection from "./TimePickerSection";
 
@@ -28,6 +30,11 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
   const selectedGroup = watch("group");
   console.log("🚀 ~ Idle ~ selectedGroup:", selectedGroup);
   const isEditMode = mode === "edit";
+
+  // 檢查是否為歷史紀錄
+  const isHistorical = useMemo(() => {
+    return isHistoricalRecord(MACHINE_STATUS.IDLE, item);
+  }, [item]);
 
   // 從 API 數據中提取所有唯一的區域
   const availableAreas = useMemo(() => {
@@ -57,26 +64,42 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
   }
 
   // 設置表單禁用狀態
-  const isAreaDisabled = disabled || isEditMode;
-  const isGroupDisabled = disabled || !selectedArea || isEditMode;
+  const isFormDisabled = disabled || isHistorical;
+  const isAreaDisabled = isFormDisabled || isEditMode;
+  const isGroupDisabled = isFormDisabled || !selectedArea || isEditMode;
 
   // 幫助文本函數
   const getMachineHelperText = () => {
+    if (isHistorical) return "此狀態已開始執行，無法修改";
     if (isEditMode) return "編輯現有事件時不可變更機台";
     if (!selectedArea) return "請先選擇區域";
     return errors.group?.message || "";
   };
 
   const getAreaHelperText = () => {
+    if (isHistorical) return "此狀態已開始執行，無法修改";
     if (isEditMode) return "編輯現有事件時不可變更區域";
     return errors.area?.message || "";
   };
 
   return (
     <Grid container spacing={3}>
+      {/* 歷史狀態警告 */}
+      {isHistorical && (
+        <Grid item xs={12}>
+          <Alert 
+            severity="info" 
+            icon={<LockIcon />}
+            sx={{ mb: 2 }}
+          >
+            此狀態已開始執行，成為歷史紀錄，無法修改
+          </Alert>
+        </Grid>
+      )}
+
       <Grid item xs={12}>
         <Typography variant="subtitle1" color="primary" gutterBottom>
-          機台選擇{isEditMode ? " (編輯模式下不可變更)" : ""}
+          機台選擇{isEditMode ? " (編輯模式下不可變更)" : ""}{isHistorical ? " - 歷史紀錄" : ""}
         </Typography>
 
         <Grid container spacing={2}>
@@ -142,7 +165,7 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
       <TimePickerSection
         register={register}
         errors={errors}
-        disabled={disabled}
+        disabled={isFormDisabled}
       />
     </Grid>
   );

@@ -210,19 +210,20 @@ function extractOrderInfoFromApi(apiData, { startTime, endTime }) {
  */
 function extractStatusInfoFromApi(apiData, { startTime, endTime }) {
   // TIME_HANDLING - 狀態信息 - 從API轉換到內部格式
-  // 優先使用實際時間，其次是計劃時間
+  // 分別處理計劃時間和實際時間
+  const planStartTime = apiData.machineStatusPlanStartTime || startTime;
+  const planEndTime = apiData.machineStatusPlanEndTime || endTime;
+  const actualStartTime = apiData.machineStatusActualStartTime;
+  const actualEndTime = apiData.machineStatusActualEndTime;
+  
   return {
     id: apiData.machineStatusId || "",
-    startTime: dayjs(
-      apiData.machineStatusActualStartTime || 
-      apiData.machineStatusPlanStartTime || 
-      startTime
-    ).toDate(),
-    endTime: dayjs(
-      apiData.machineStatusActualEndTime || 
-      apiData.machineStatusPlanEndTime || 
-      endTime
-    ).toDate(),
+    // 計劃時間
+    startTime: dayjs(planStartTime).toDate(),
+    endTime: dayjs(planEndTime).toDate(),
+    // 實際時間 (只有當實際執行時才會有值)
+    actualStartTime: actualStartTime ? dayjs(actualStartTime).toDate() : null,
+    actualEndTime: actualEndTime ? dayjs(actualEndTime).toDate() : null,
     reason: apiData.machineStatusReason || "",
     product: apiData.machineStatusProduct || apiData.productName || "",
   };
@@ -299,12 +300,18 @@ export const transformApiToInternalFormat = (apiData) => {
     internalData.status = null; // 確保不使用 status
     internalData.start = orderInfo.scheduledStartTime; // 添加開始時間
     internalData.end = orderInfo.scheduledEndTime; // 添加結束時間
+    // 添加實際時間到頂層，方便歷史紀錄檢查
+    internalData.actualStartTime = orderInfo.actualStartTime;
+    internalData.actualEndTime = orderInfo.actualEndTime;
   } else {
     // 機台狀態只使用 status
     internalData.status = status;
     internalData.orderInfo = null; // 確保不使用 orderInfo
     internalData.start = status.startTime; // 添加開始時間
     internalData.end = status.endTime; // 添加結束時間
+    // 添加實際時間到頂層，方便歷史紀錄檢查
+    internalData.actualStartTime = status.actualStartTime;
+    internalData.actualEndTime = status.actualEndTime;
   }
 
   return internalData;

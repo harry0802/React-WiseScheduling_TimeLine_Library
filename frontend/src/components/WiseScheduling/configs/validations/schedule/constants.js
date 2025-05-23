@@ -44,6 +44,14 @@ export const STATUS_CONFIG = {
       MACHINE_STATUS.TESTING,
       MACHINE_STATUS.STOPPED,
     ],
+    // 新增：檢查是否為歷史紀錄的函數
+    checkHistorical: (item) => {
+      // 只有當有實際開始時間時才算歷史紀錄
+      return !!(
+        item?.actualStartTime || 
+        item?.status?.actualStartTime
+      );
+    }
   },
 
   [MACHINE_STATUS.SETUP]: {
@@ -101,9 +109,30 @@ export const canTransitTo = (currentStatus, targetStatus) => {
   return config.allowedTransitions.includes(targetStatus);
 };
 
+// 新增檢查函數
+export const isHistoricalRecord = (status, item) => {
+  const config = STATUS_CONFIG[status];
+  if (config?.checkHistorical) {
+    return config.checkHistorical(item);
+  }
+  return false;
+};
+
 // ✨ 新增的輔助函數
-export const canDeleteStatus = (status) => {
+export const canDeleteStatus = (status, item = null) => {
+  // 如果是歷史紀錄，不能刪除
+  if (item && isHistoricalRecord(status, item)) {
+    return false;
+  }
   return STATUS_CONFIG[status]?.canDelete ?? false;
+};
+
+export const canEditStatus = (status, item = null) => {
+  // 如果是歷史紀錄，不能編輯
+  if (item && isHistoricalRecord(status, item)) {
+    return false;
+  }
+  return STATUS_CONFIG[status]?.canSwitch ?? false;
 };
 
 export const getStatusName = (status) => {

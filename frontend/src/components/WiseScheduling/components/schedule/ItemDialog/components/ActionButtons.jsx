@@ -7,7 +7,9 @@
 import React from "react";
 import { PrimaryButton, SecondaryButton, DeleteButton } from "../../styles/DialogStyles";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LockIcon from "@mui/icons-material/Lock";
 import { isOrderType, isOrderOnGoing } from "../../../../utils/schedule/statusHelpers";
+import { canDeleteStatus, canEditStatus, isHistoricalRecord } from "../../../../configs/validations/schedule/constants";
 
 //! =============== 底部操作按鈕組件 ===============
 //* 專職處理對話框底部的操作按鈕
@@ -23,26 +25,30 @@ import { isOrderType, isOrderOnGoing } from "../../../../utils/schedule/statusHe
  */
 function ActionButtons({ mode, isSubmitting, onClose, onDelete, item }) {
   // 🧠 Push Ifs Up - 在頂層決定按鈕顯示邏輯
+  const canDelete = canDeleteStatus(item?.timeLineStatus, item);
+  const canEdit = canEditStatus(item?.timeLineStatus, item);
+  const isHistorical = isHistoricalRecord(item?.timeLineStatus, item);
+  
   const shouldShowDeleteButton = 
     mode === "edit" && 
     !isOrderType(item) && 
     !isOrderOnGoing(item);
 
-  const isViewMode = mode === "view";
-  const submitButtonText = isSubmitting ? "處理中..." : "確認";
+  const isViewMode = mode === "view" || isHistorical;
+  const submitButtonText = isSubmitting ? "處理中..." : (canEdit ? "確認" : "查看");
 
   return (
     <>
-      {/* 🔧 刪除按鈕 - 只在符合條件時顯示 */}
+      {/* 🔧 刪除按鈕 - 根據歷史狀態調整 */}
       {shouldShowDeleteButton && (
         <DeleteButton
-          onClick={onDelete}
-          startIcon={<DeleteIcon />}
+          onClick={canDelete ? onDelete : undefined}
+          startIcon={canDelete ? <DeleteIcon /> : <LockIcon />}
           variant="outlined"
           sx={{ mr: "auto" }}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !canDelete}
         >
-          刪除
+          {canDelete ? "刪除" : "已封存"}
         </DeleteButton>
       )}
       
@@ -56,7 +62,7 @@ function ActionButtons({ mode, isSubmitting, onClose, onDelete, item }) {
         type="submit"
         form="status-form"
         variant="contained"
-        disabled={isSubmitting || isViewMode}
+        disabled={isSubmitting || (isHistorical && mode === "edit")}
       >
         {submitButtonText}
       </PrimaryButton>

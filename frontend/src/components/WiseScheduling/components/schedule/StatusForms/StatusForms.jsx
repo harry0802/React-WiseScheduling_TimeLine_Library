@@ -9,7 +9,10 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getValidationSchema } from "../../../configs/validations/schedule/validationSchema";
 import { STATUS_FORM_CONFIG } from "../../../configs/validations/schedule/formConfig";
-import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
+import {
+  MACHINE_STATUS,
+  isHistoricalRecord,
+} from "../../../configs/validations/schedule/constants";
 import { prepareFormDateValues } from "../../../utils/schedule/dateUtils";
 import {
   handleFormError,
@@ -77,14 +80,17 @@ const StatusController = ({
   item,
   disabled,
   onSubmit,
-  mode = 'create', // 默認為創建模式
+  mode = "create", // 默認為創建模式
   isSubmitting,
   onClose,
   groups,
 }) => {
   // 本地錯誤狀態管理
   const [formError, setFormError] = useState(null);
-  
+
+  // 檢查是否為歷史紀錄
+  const isHistorical = isHistoricalRecord(status, item);
+
   // 添加狀態名稱標準化處理
   const normalizedStatus =
     status === "製令單" ? MACHINE_STATUS.ORDER_CREATED : status;
@@ -119,55 +125,69 @@ const StatusController = ({
   const formStateErrors = methods.formState.errors;
   useEffect(() => {
     if (Object.keys(formStateErrors).length > 0) {
-      console.error(`❌ [表單] ${effectiveStatus} 表單驗證錯誤:`, formStateErrors);
+      console.error(
+        `❌ [表單] ${effectiveStatus} 表單驗證錯誤:`,
+        formStateErrors
+      );
     }
   }, [formStateErrors, effectiveStatus]);
 
   // 選擇適當的表單組件
-  const FormComponent = FORM_COMPONENTS[effectiveStatus] || FORM_COMPONENTS[MACHINE_STATUS.IDLE];
+  const FormComponent =
+    FORM_COMPONENTS[effectiveStatus] || FORM_COMPONENTS[MACHINE_STATUS.IDLE];
 
   // 處理表單提交 - 驗證邏輯主要由各表單內部處理
   const handleFormSubmit = useCallback(
     (data) => {
       console.log(`🔍 [表單] ${normalizedStatus} 開始處理提交數據:`, data);
       setFormError(null);
-      
+
       try {
         // 確保數據類型一致性
         const processedData = {
           ...data,
           // 手動處理數值型字段
           ...(data.quantity !== undefined && {
-            quantity: Number(data.quantity)
+            quantity: Number(data.quantity),
           }),
           ...(data.completedQty !== undefined && {
-            completedQty: Number(data.completedQty)
+            completedQty: Number(data.completedQty),
           }),
           // 確保添加狀態標識
           timeLineStatus: normalizedStatus,
         };
-        
-        console.log(`🔍 [表單] ${normalizedStatus} 處理後的數據:`, processedData);
-        
+
+        console.log(
+          `🔍 [表單] ${normalizedStatus} 處理後的數據:`,
+          processedData
+        );
+
         // 處理"其他原因"的邏輯暫時移除
-        
-        console.log(`✅ [表單] ${normalizedStatus} 提交前的最終數據:`, processedData);
-        
+
+        console.log(
+          `✅ [表單] ${normalizedStatus} 提交前的最終數據:`,
+          processedData
+        );
+
         // 提交表單數據
         onSubmit(processedData);
       } catch (error) {
         // 使用統一錯誤處理
         const errorMessage = handleFormError(error);
-        console.error(`❌ [表單] ${normalizedStatus} 提交錯誤:`, error, errorMessage);
+        console.error(
+          `❌ [表單] ${normalizedStatus} 提交錯誤:`,
+          error,
+          errorMessage
+        );
         setFormError(errorMessage);
-        
+
         // 記錄錯誤
         logError(error, {
           component: "StatusController",
           status: normalizedStatus,
           formData: JSON.stringify(data).substring(0, 200),
         });
-        
+
         // 避免繼續提交
         throw error;
       }
@@ -180,20 +200,20 @@ const StatusController = ({
       <form id="status-form" onSubmit={methods.handleSubmit(handleFormSubmit)}>
         {/* 表單錯誤提示 */}
         {formError && (
-          <Alert 
-            severity="error" 
+          <Alert
+            severity="error"
             sx={{ mb: 2 }}
             onClose={() => setFormError(null)}
           >
             {formError}
           </Alert>
         )}
-        
+
         <Box sx={{ mb: 3 }}>
           <SectionTitle>
             {getFormTitle(effectiveStatus, hasConfig)}
           </SectionTitle>
-          
+
           <FormSection>
             {isSubmitting ? (
               <Box
@@ -207,9 +227,9 @@ const StatusController = ({
                 <CircularProgress size={40} />
               </Box>
             ) : (
-              <FormComponent 
-                disabled={disabled} 
-                item={item} 
+              <FormComponent
+                disabled={disabled || isHistorical}
+                item={item}
                 groups={groups}
                 mode={mode} // 傳遞模式參數到表單組件
               />
