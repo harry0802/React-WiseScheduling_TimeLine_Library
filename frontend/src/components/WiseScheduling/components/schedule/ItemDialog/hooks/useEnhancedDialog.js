@@ -133,6 +133,7 @@ function useEnhancedDialog(item, mode, options = {}) {
         ...item,
         group: formData.group || item?.group || "",
         area: formData.area || item?.area || "",
+        machineId: formData.machineId || item?.machineId || null, // 添加 machineId
         start: formData.start,
         end:
           currentStatus === MACHINE_STATUS.ORDER_CREATED

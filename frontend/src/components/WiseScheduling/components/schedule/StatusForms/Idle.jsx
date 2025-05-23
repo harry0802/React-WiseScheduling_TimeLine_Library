@@ -11,16 +11,27 @@ import {
 import LockIcon from "@mui/icons-material/Lock";
 import { useStatusForm } from "../../../hooks/schedule/useStatusForm";
 import { VALIDATION_RULES } from "../../../configs/validations/schedule/formConfig";
-import { MACHINE_STATUS, isHistoricalRecord } from "../../../configs/validations/schedule/constants";
+import {
+  MACHINE_STATUS,
+  isHistoricalRecord,
+} from "../../../configs/validations/schedule/constants";
 import { useGetMachinesQuery } from "../../../../QuotationManagementSystem/services/salesServices/endpoints/machineApi";
 import TimePickerSection from "./TimePickerSection";
+import { set } from "js-cookie";
+import { Controller } from "react-hook-form"; // 引入 Controller
 
 const Idle = ({ disabled, item, status, mode = "create" }) => {
   // 使用表單 hook
-  const { register, errors, watch, isFieldError, initialized } = useStatusForm(
-    MACHINE_STATUS.IDLE,
-    item
-  );
+  const {
+    register,
+    errors,
+    watch,
+    setValue,
+    isFieldError,
+    initialized,
+    control,
+  } = // 這裡需要加上 control
+    useStatusForm(MACHINE_STATUS.IDLE, item);
 
   // 直接從 API 獲取所有機台數據
   const { isSuccess, isLoading, data: machinesData } = useGetMachinesQuery();
@@ -28,7 +39,6 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
   // 獲取表單控制值
   const selectedArea = watch("area");
   const selectedGroup = watch("group");
-  console.log("🚀 ~ Idle ~ selectedGroup:", selectedGroup);
   const isEditMode = mode === "edit";
 
   // 檢查是否為歷史紀錄
@@ -87,11 +97,7 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
       {/* 歷史狀態警告 */}
       {isHistorical && (
         <Grid item xs={12}>
-          <Alert 
-            severity="info" 
-            icon={<LockIcon />}
-            sx={{ mb: 2 }}
-          >
+          <Alert severity="info" icon={<LockIcon />} sx={{ mb: 2 }}>
             此狀態已開始執行，成為歷史紀錄，無法修改
           </Alert>
         </Grid>
@@ -99,7 +105,8 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
 
       <Grid item xs={12}>
         <Typography variant="subtitle1" color="primary" gutterBottom>
-          機台選擇{isEditMode ? " (編輯模式下不可變更)" : ""}{isHistorical ? " - 歷史紀錄" : ""}
+          機台選擇{isEditMode ? " (編輯模式下不可變更)" : ""}
+          {isHistorical ? " - 歷史紀錄" : ""}
         </Typography>
 
         <Grid container spacing={2}>
@@ -130,38 +137,59 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
 
           {/* 機台編號選擇 - 使用 API 數據生成選項 */}
           <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              {...register("group", VALIDATION_RULES.group)}
-              select
-              label="機台編號"
-              error={isFieldError("group")}
-              helperText={getMachineHelperText()}
-              disabled={isGroupDisabled}
-              value={selectedGroup || ""}
-            >
-              {filteredMachines.length > 0 ? (
-                [
-                  <MenuItem key="placeholder" disabled>
-                    請選擇機台
-                  </MenuItem>,
+            <Controller
+              name="group" // Controller 的 name 屬性
+              control={control} // 從 useForm 獲取 control
+              rules={VALIDATION_RULES.group} // 驗證規則
+              render={({ field }) => (
+                <TextField
+                  {...field} // 包含 name, value, onChange, onBlur
+                  fullWidth
+                  select
+                  label="機台編號"
+                  error={isFieldError("group")}
+                  helperText={getMachineHelperText()}
+                  disabled={isGroupDisabled}
+                  value={field.value || ""} // 使用 field.value
+                  onChange={(e) => {
+                    // 先執行原有的邏輯
+                    const selectedMachine = machinesData.data.find(
+                      (m) => m.machineSN === e.target.value
+                    );
+                    if (selectedMachine) {
+                      setValue("machineId", selectedMachine.id);
+                    }
+                    // 然後呼叫 react-hook-form 提供的 onChange
+                    field.onChange(e.target.value);
+                  }}
+                >
+                  {filteredMachines.length > 0 ? (
+                    [
+                      <MenuItem key="placeholder" value="" disabled>
+                        請選擇機台
+                      </MenuItem>,
 
-                  ...filteredMachines.map((machine) => (
-                    <MenuItem key={machine.id} value={machine.machineSN}>
-                      {machine.machineSN}
+                      ...filteredMachines.map((machine) => {
+                        return (
+                          <MenuItem key={machine.id} value={machine.machineSN}>
+                            {machine.machineSN}
+                          </MenuItem>
+                        );
+                      }),
+                    ]
+                  ) : (
+                    <MenuItem value="" disabled>
+                      {selectedArea ? "此區域無可用機台" : "請先選擇區域"}
                     </MenuItem>
-                  )),
-                ]
-              ) : (
-                <MenuItem value="" disabled>
-                  {selectedArea ? "此區域無可用機台" : "請先選擇區域"}
-                </MenuItem>
+                  )}
+                </TextField>
               )}
-            </TextField>
+            />
           </Grid>
         </Grid>
       </Grid>
 
+      <input type="hidden" {...register("machineId")} />
       <TimePickerSection
         register={register}
         errors={errors}

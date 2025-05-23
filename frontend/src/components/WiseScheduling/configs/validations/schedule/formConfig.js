@@ -69,6 +69,7 @@ export const STATUS_FORM_CONFIG = {
       endTime: dayjs().add(2, "hour").toDate(),
       group: "",
       area: "",
+      machineId: "",
     },
   },
 

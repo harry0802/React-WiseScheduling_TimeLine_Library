@@ -28,8 +28,8 @@ import { z } from "zod";
  */
 function fillDefaultValues(apiItem) {
   // 防護檢查：確保 apiItem 存在
-  if (!apiItem || typeof apiItem !== 'object') {
-    console.warn('fillDefaultValues: apiItem 為空或非對象類型');
+  if (!apiItem || typeof apiItem !== "object") {
+    console.warn("fillDefaultValues: apiItem 為空或非對象類型");
     return;
   }
 
@@ -37,14 +37,15 @@ function fillDefaultValues(apiItem) {
     if (!apiItem[field]) {
       // 嘗試從備用欄位獲取值
       const backupValue = config.backups?.find((backup) => apiItem[backup]);
-      
+
       if (backupValue) {
         apiItem[field] = apiItem[backupValue];
       } else {
         // 使用預設值（可能是函數）
-        const defaultValue = typeof config.defaultValue === 'function' 
-          ? config.defaultValue() 
-          : config.defaultValue;
+        const defaultValue =
+          typeof config.defaultValue === "function"
+            ? config.defaultValue()
+            : config.defaultValue;
         apiItem[field] = defaultValue;
         console.warn(config.warningMessage);
       }
@@ -59,19 +60,19 @@ function fillDefaultValues(apiItem) {
  */
 function validateRequiredFields(apiItem) {
   // 防護檢查：確保 apiItem 存在
-  if (!apiItem || typeof apiItem !== 'object') {
-    throw createValidationError('API 項目數據為空或格式錯誤', { 
-      apiItem: typeof apiItem 
+  if (!apiItem || typeof apiItem !== "object") {
+    throw createValidationError("API 項目數據為空或格式錯誤", {
+      apiItem: typeof apiItem,
     });
   }
 
-  const basicRequiredFields = ['group', 'start'];
-  
-  basicRequiredFields.forEach(field => {
+  const basicRequiredFields = ["group", "start"];
+
+  basicRequiredFields.forEach((field) => {
     if (!apiItem[field]) {
-      throw createValidationError(`${field} 為必填欄位`, { 
-        field, 
-        value: apiItem[field] 
+      throw createValidationError(`${field} 為必填欄位`, {
+        field,
+        value: apiItem[field],
       });
     }
   });
@@ -84,14 +85,14 @@ function validateRequiredFields(apiItem) {
  */
 function validateStatusSpecificRules(apiItem) {
   // 防護檢查：確保 apiItem 存在
-  if (!apiItem || typeof apiItem !== 'object') {
-    throw createValidationError('API 項目數據為空或格式錯誤', { 
-      apiItem: typeof apiItem 
+  if (!apiItem || typeof apiItem !== "object") {
+    throw createValidationError("API 項目數據為空或格式錯誤", {
+      apiItem: typeof apiItem,
     });
   }
 
   const statusRule = STATUS_VALIDATION_RULES[apiItem.timeLineStatus];
-  
+
   if (!statusRule) {
     // 檢查是否為有效狀態
     if (!Object.values(MACHINE_STATUS).includes(apiItem.timeLineStatus)) {
@@ -126,10 +127,10 @@ function validateStatusSpecificRules(apiItem) {
 function validateStatusTransition(initialStatus, targetStatus, item) {
   // 防護檢查：確保必要參數存在
   if (!initialStatus || !targetStatus) {
-    throw createStateTransitionError('狀態轉換驗證缺少必要參數', {
+    throw createStateTransitionError("狀態轉換驗證缺少必要參數", {
       initialStatus,
       targetStatus,
-      itemId: item?.id
+      itemId: item?.id,
     });
   }
 
@@ -176,22 +177,27 @@ function validateStatusTransition(initialStatus, targetStatus, item) {
  * @returns {boolean}
  */
 function shouldCheckNonIdleTransition(initialStatus, targetStatus) {
-  return initialStatus !== MACHINE_STATUS.IDLE && 
-         targetStatus !== MACHINE_STATUS.IDLE;
+  return (
+    initialStatus !== MACHINE_STATUS.IDLE &&
+    targetStatus !== MACHINE_STATUS.IDLE
+  );
 }
 
 /**
  * @function shouldValidateIdleTransition
  * @description 判斷是否需要驗證切換到待機狀態的要求
  * @param {string} initialStatus - 初始狀態
- * @param {string} targetStatus - 目標狀態  
+ * @param {string} targetStatus - 目標狀態
  * @param {Object} item - 項目數據
  * @returns {boolean}
  */
 function shouldValidateIdleTransition(initialStatus, targetStatus, item) {
-  return initialStatus !== MACHINE_STATUS.IDLE &&
-         targetStatus === MACHINE_STATUS.IDLE &&
-         (!item.end && !item.status?.endTime);
+  return (
+    initialStatus !== MACHINE_STATUS.IDLE &&
+    targetStatus === MACHINE_STATUS.IDLE &&
+    !item.end &&
+    !item.status?.endTime
+  );
 }
 
 //! =============== 4. 時間重疊驗證 ===============
@@ -211,18 +217,16 @@ function validateTimeOverlap(apiItem, existingItems = null) {
 
   // 防護檢查
   if (!apiItem || !apiItem.start || !apiItem.group) {
-    console.warn('validateTimeOverlap: 缺少必要的時間或群組資訊');
+    console.warn("validateTimeOverlap: 缺少必要的時間或群組資訊");
     return;
   }
 
   try {
     const itemStart = dayjs(apiItem.start);
     const itemEnd = dayjs(apiItem.end);
-    
+
     // 如果沒有結束時間，視為現在時間 + 2小時
-    const effectiveEnd = itemEnd.isValid() ? 
-      itemEnd : 
-      dayjs().add(2, 'hour');
+    const effectiveEnd = itemEnd.isValid() ? itemEnd : dayjs().add(2, "hour");
 
     let items = [];
 
@@ -264,12 +268,13 @@ function validateTimeOverlap(apiItem, existingItems = null) {
     const hasOverlap = items.some((existingItem) => {
       const existingStart = dayjs(existingItem.start);
       const existingEnd = dayjs(existingItem.end);
-      const existingEffectiveEnd = existingEnd.isValid() ? 
-        existingEnd : 
-        existingStart.add(2, 'hour');
+      const existingEffectiveEnd = existingEnd.isValid()
+        ? existingEnd
+        : existingStart.add(2, "hour");
 
       return (
-        (itemStart.isBefore(existingEffectiveEnd) && effectiveEnd.isAfter(existingStart)) ||
+        (itemStart.isBefore(existingEffectiveEnd) &&
+          effectiveEnd.isAfter(existingStart)) ||
         itemStart.isSame(existingStart) ||
         effectiveEnd.isSame(existingEffectiveEnd)
       );
@@ -289,12 +294,18 @@ function validateTimeOverlap(apiItem, existingItems = null) {
     }
   } catch (error) {
     // 如果是驗證錯誤，直接拋出
-    if (error.type === 'VALIDATION_ERROR') {
+    if (error.type === "VALIDATION_ERROR") {
       throw error;
     }
-    
+
     // 其他錯誤記錄日誌但不阻止流程
-    console.error("檢查時間重疊時發生錯誤，繼續執行:", error);
+    /* eslint-disable */ console.error(
+      ...oo_tx(
+        `4056104611_302_4_302_45_11`,
+        "檢查時間重疊時發生錯誤，繼續執行:",
+        error
+      )
+    );
   }
 }
 
@@ -320,6 +331,7 @@ const machineStatusBaseSchema = timeFieldsSchema.extend({
   machineSN: z.string().min(1, "機台編號為必填"),
   productionArea: z.string().min(1, "生產區域為必填"),
   timeLineStatus: z.string().min(1, "狀態類型為必填"),
+  machineId: z.string().optional(), // 添加 machineId
 });
 
 const apiItemSchema = z.discriminatedUnion("timeLineStatus", [
@@ -338,10 +350,14 @@ const apiItemSchema = z.discriminatedUnion("timeLineStatus", [
       .min(1, "計劃上機時間為必填")
       .refine((v) => dayjs(v).isValid(), "計劃上機時間格式無效"),
   }),
-  
+
   // 其他狀態模式
-  machineStatusBaseSchema.extend({ timeLineStatus: z.literal(MACHINE_STATUS.IDLE) }),
-  machineStatusBaseSchema.extend({ timeLineStatus: z.literal(MACHINE_STATUS.SETUP) }),
+  machineStatusBaseSchema.extend({
+    timeLineStatus: z.literal(MACHINE_STATUS.IDLE),
+  }),
+  machineStatusBaseSchema.extend({
+    timeLineStatus: z.literal(MACHINE_STATUS.SETUP),
+  }),
   machineStatusBaseSchema.extend({
     timeLineStatus: z.literal(MACHINE_STATUS.TESTING),
     machineStatusProduct: z.string().min(1, "產品試模狀態必須指定產品"),
@@ -359,9 +375,9 @@ const apiItemSchema = z.discriminatedUnion("timeLineStatus", [
  */
 function validateSchema(apiItem) {
   // 防護檢查：確保 apiItem 存在
-  if (!apiItem || typeof apiItem !== 'object') {
-    throw createValidationError('API 項目數據為空或格式錯誤', { 
-      apiItem: typeof apiItem 
+  if (!apiItem || typeof apiItem !== "object") {
+    throw createValidationError("API 項目數據為空或格式錯誤", {
+      apiItem: typeof apiItem,
     });
   }
 
@@ -395,7 +411,7 @@ function validateSchema(apiItem) {
  */
 function validateApiItemCompleteness(apiItem, isTest = false) {
   if (isTest) return;
-  
+
   fillDefaultValues(apiItem);
   validateRequiredFields(apiItem);
   validateStatusSpecificRules(apiItem);
@@ -408,13 +424,17 @@ function validateApiItemCompleteness(apiItem, isTest = false) {
  * @param {Object} originalItem - 原始項目
  * @param {boolean} isTest - 是否為測試模式
  */
-function validateApiStatusTransition(internalItem, originalItem, isTest = false) {
+function validateApiStatusTransition(
+  internalItem,
+  originalItem,
+  isTest = false
+) {
   if (isTest) return;
   if (!originalItem) return; // 新建項目不驗證轉換
-  
+
   const initialStatus = originalItem.timeLineStatus;
   const targetStatus = internalItem.timeLineStatus;
-  
+
   validateStatusTransition(initialStatus, targetStatus, internalItem);
 }
 
@@ -426,7 +446,7 @@ function validateApiStatusTransition(internalItem, originalItem, isTest = false)
  */
 function validateApiSchema(apiItem, isTest = false) {
   if (isTest) return;
-  
+
   validateSchema(apiItem);
 }
 
@@ -438,7 +458,12 @@ function validateApiSchema(apiItem, isTest = false) {
  * @param {boolean} isTest - 是否為測試模式
  * @param {Array|Object} existingItems - 現有項目數據（用於時間重疊檢查）
  */
-function validateApiRequest(apiItem, originalItem = null, isTest = false, existingItems = null) {
+function validateApiRequest(
+  apiItem,
+  originalItem = null,
+  isTest = false,
+  existingItems = null
+) {
   if (isTest) return;
 
   try {
@@ -457,13 +482,17 @@ function validateApiRequest(apiItem, originalItem = null, isTest = false, existi
     }
   } catch (error) {
     // 統一錯誤處理
-    if (!(error.type)) {
+    if (!error.type) {
       throw createApiError(error.message, {
         originalError: error,
         apiItem: {
-          id: apiItem?.id || apiItem?.machineStatusId || apiItem?.productionScheduleId,
+          id:
+            apiItem?.id ||
+            apiItem?.machineStatusId ||
+            apiItem?.productionScheduleId,
           status: apiItem?.timeLineStatus,
-          request: JSON.stringify(apiItem, null, 2).substring(0, 300) +
+          request:
+            JSON.stringify(apiItem, null, 2).substring(0, 300) +
             (JSON.stringify(apiItem).length > 300 ? "..." : ""),
         },
       });
@@ -478,9 +507,9 @@ function validateApiRequest(apiItem, originalItem = null, isTest = false, existi
 export { validateApiRequest };
 
 // 單獨的驗證函數（用於單元測試或特殊用途）
-export { 
+export {
   validateApiItemCompleteness,
-  validateApiStatusTransition, 
+  validateApiStatusTransition,
   validateApiSchema,
   validateStatusTransition, // 給 statusHelpers.js 使用
 };

@@ -92,6 +92,7 @@ const orderSchema = createOrderSchema({
  */
 const idleSchema = createRegularSchema({
   // 待機狀態不需要額外的驗證字段
+  machineId: z.number().optional(),
 });
 
 /**

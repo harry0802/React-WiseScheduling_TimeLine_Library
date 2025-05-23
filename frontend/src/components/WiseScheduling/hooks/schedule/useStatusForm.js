@@ -22,7 +22,7 @@ import {
  * - 便於維護和擴展新的欄位組合
  */
 export const FORM_FIELDS = {
-  basic: ["status", "id", "group", "area", "timeLineStatus"], // 基礎欄位 - 所有狀態都需要
+  basic: ["status", "id", "group", "area", "timeLineStatus", "machineId"], // 基礎欄位 - 所有狀態都需要
   order: [
     // 訂單相關欄位 - 僅訂單狀態使用
     "productName",
@@ -66,6 +66,7 @@ export const FIELD_MAPPING = {
   group: "group",
   area: "area",
   timeLineStatus: "timeLineStatus",
+  machineId: "machineId", // 添加 machineId
 
   // 多路徑映射欄位（按優先順序嘗試）
   start: ["start", "status.startTime", "orderInfo.scheduledStartTime"],

@@ -215,7 +215,7 @@ function extractStatusInfoFromApi(apiData, { startTime, endTime }) {
   const planEndTime = apiData.machineStatusPlanEndTime || endTime;
   const actualStartTime = apiData.machineStatusActualStartTime;
   const actualEndTime = apiData.machineStatusActualEndTime;
-  
+
   return {
     id: apiData.machineStatusId || "",
     // 計劃時間
@@ -251,9 +251,7 @@ export const transformApiToInternalFormat = (apiData) => {
 
   if (isWorkOrder) {
     // 製令單時間處理 - 優先使用實際時間，其次是計劃時間
-    startTime = dayjs(
-      apiData.actualOnMachineDate || apiData.planOnMachineDate
-    );
+    startTime = dayjs(apiData.actualOnMachineDate || apiData.planOnMachineDate);
     endTime = apiData.actualFinishDate
       ? dayjs(apiData.actualFinishDate)
       : apiData.planFinishDate
@@ -447,6 +445,7 @@ export const transformInternalToApiFormat = (
     timeLineStatus: isWorkOrder ? "製令單" : timeLineStatus,
     productionArea: internalData.area || DEFAULT_AREA,
     machineSN: group,
+    machineId: internalData.machineId || null, // 添加 machineId
   };
 
   // 根據類型填充特定欄位 - 使用簡單的條件判斷
