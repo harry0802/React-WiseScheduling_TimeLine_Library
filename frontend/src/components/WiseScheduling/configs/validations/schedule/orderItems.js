@@ -30,11 +30,12 @@ function isWorkOrder(item) {
  */
 function isPastWorkOrder(orderInfo) {
   if (!orderInfo) return false;
-  
+
   const now = new Date();
   return (
     (orderInfo.actualStartTime && new Date(orderInfo.actualStartTime) < now) ||
-    (orderInfo.scheduledStartTime && new Date(orderInfo.scheduledStartTime) < now)
+    (orderInfo.scheduledStartTime &&
+      new Date(orderInfo.scheduledStartTime) < now)
   );
 }
 
@@ -56,16 +57,12 @@ function isPastMachineStatus(status) {
  * @returns {Object} { startDate, endDate }
  */
 function getWorkOrderTimes(orderInfo, fallback) {
-  const startDate = 
-    orderInfo.actualStartTime || 
-    orderInfo.scheduledStartTime || 
-    fallback.start;
-    
-  const endDate = 
-    orderInfo.actualEndTime || 
-    orderInfo.scheduledEndTime || 
-    fallback.end;
-    
+  const startDate =
+    orderInfo.actualStartTime || orderInfo.scheduledStartTime || fallback.start;
+
+  const endDate =
+    orderInfo.actualEndTime || orderInfo.scheduledEndTime || fallback.end;
+
   return { startDate, endDate };
 }
 
@@ -78,11 +75,12 @@ function getWorkOrderTimes(orderInfo, fallback) {
  */
 function getMachineStatusTimes(status, fallback) {
   const startDate = status.startTime || fallback.start;
-  const endDate = 
-    status.endTime || 
-    (status.startTime && dayjs(status.startTime).add(DEFAULT_DURATION_HOURS, "hour").toDate()) ||
+  const endDate =
+    status.endTime ||
+    (status.startTime &&
+      dayjs(status.startTime).add(DEFAULT_DURATION_HOURS, "hour").toDate()) ||
     fallback.end;
-    
+
   return { startDate, endDate };
 }
 
@@ -94,7 +92,8 @@ function getMachineStatusTimes(status, fallback) {
  */
 function getFallbackTimes(item) {
   const startDate = item.start;
-  const endDate = item.end || dayjs(item.start).add(DEFAULT_DURATION_HOURS, "hour").toDate();
+  const endDate =
+    item.end || dayjs(item.start).add(DEFAULT_DURATION_HOURS, "hour").toDate();
   return { startDate, endDate };
 }
 
@@ -109,7 +108,7 @@ function getFallbackTimes(item) {
 function processWorkOrderItem(item) {
   const isPast = isPastWorkOrder(item.orderInfo);
   const fallback = getFallbackTimes(item);
-  const { startDate, endDate } = item.orderInfo 
+  const { startDate, endDate } = item.orderInfo
     ? getWorkOrderTimes(item.orderInfo, fallback)
     : fallback;
 
@@ -119,7 +118,7 @@ function processWorkOrderItem(item) {
     end: dayjs(endDate).toDate(),
     editable: isPast
       ? { updateTime: false, updateGroup: false, remove: false }
-      : { updateTime: true, updateGroup: true, remove: false }
+      : { updateTime: true, updateGroup: true, remove: false },
   };
 }
 
@@ -142,7 +141,7 @@ function processMachineStatusItem(item) {
     end: dayjs(endDate).toDate(),
     editable: isPast
       ? { updateTime: false, updateGroup: false, remove: false }
-      : { updateTime: false, updateGroup: true, remove: true }
+      : { updateTime: false, updateGroup: true, remove: true },
   };
 }
 

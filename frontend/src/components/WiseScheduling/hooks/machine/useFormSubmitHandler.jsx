@@ -113,12 +113,8 @@ function useFormSubmitHandler({
       // 步驟2: 準備狀態驗證所需參數
       const currentStatus = initialData?.status || "IDLE";
       const targetStatus = values.status;
-      console.log("🚀 ~ handleSubmit ~ targetStatus:", targetStatus);
-
       // 獲取 react-hook-form 的表單狀態，用於檢測變更
       const formState = formRef.current?.formState || {};
-      console.log("🚀 ~ handleSubmit ~ currentStatus:", currentStatus);
-
       // 步驟3: 調用狀態驗證器驗證狀態轉換
       // 這裡是與 StatusValidator 集成的關鍵部分
       const { valid, message, timeInfo } = validateStatusTransition({
@@ -137,8 +133,6 @@ function useFormSubmitHandler({
         }
         return createErrorResponse(message);
       }
-
-      console.log("🚀 ~ handleSubmit ~ timeInfo:", timeInfo);
       // 步驟4: 利用狀態驗證器返回的時間信息更新表單數據
       // 這是時間記錄功能的自動化實現
       const updatedValues = { ...values };

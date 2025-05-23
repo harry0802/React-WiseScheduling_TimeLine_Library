@@ -10,7 +10,31 @@ export const machineStatusApi = apiSlice.injectEndpoints({
       transformResponse: (response) => response.data,
     }),
 
-    // 新增單一機台的狀態
+    /**
+     * @function createMachineStatus
+     * @description 新增單一機台的狀態。
+     * @param {object} statusData - 包含機台狀態資訊的物件。
+     * @param {number} statusData.machineId - 機台ID。
+     * @param {string} statusData.planStartDate - 計劃開始日期 (ISO 8601 格式)。
+     * @param {string} statusData.planEndDate - 計劃結束日期 (ISO 8601 格式)。
+     * @param {string} statusData.actualStartDate - 實際開始日期 (ISO 8601 格式)。
+     * @param {string} statusData.status - 機台狀態。
+     * @param {string} statusData.reason - 停機原因。
+     * @param {string} statusData.product - 產品名稱。
+     * @returns {object} - 包含新增狀態的 API 回應。
+     * @example
+     * // 基礎使用示例
+     * const [createMachineStatus] = useCreateMachineStatusMutation();
+     * createMachineStatus({
+     *   machineId: 1,
+     *   planStartDate: "2025-02-25T00:00:00.000+08:00",
+     *   planEndDate: "2025-02-25T00:00:00.000+08:00",
+     *   actualStartDate: "2025-02-25T00:00:00.000+08:00",
+     *   status: "運行中",
+     *   reason: "",
+     *   product: "產品A"
+     * });
+     */
     createMachineStatus: builder.mutation({
       query: (statusData) => ({
         url: "machineStatus/",

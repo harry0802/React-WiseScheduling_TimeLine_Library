@@ -155,8 +155,6 @@ function DynamicTimeline() {
   //! =============== 4. 數據獲取 ===============
   // 獲取特定區域的排程數據
   const { scheduleList } = useAreaScheduleData(selectedArea);
-  console.log("🚀 ~ DynamicTimeline ~ API返回的排程資料:", scheduleList);
-
   // 獲取機台數據
   const { filteredMachines } = useAreaMachines(selectedArea);
 

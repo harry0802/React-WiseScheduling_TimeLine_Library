@@ -77,7 +77,6 @@ function useEnhancedDialog(item, mode, options = {}) {
 
   const validateFormData = useCallback((formData) => {
     if (!formData.start) {
-      console.warn("表單沒有提供開始時間，使用預設值");
       formData.start = ensureFormDateTime(new Date());
     }
   }, []);
@@ -129,43 +128,51 @@ function useEnhancedDialog(item, mode, options = {}) {
 
   const transformFormData = useCallback(
     (formData) => {
-      return {
+      // 檢查當前狀態是否為製令單
+      const isWorkOrder = currentStatus === MACHINE_STATUS.ORDER_CREATED;
+
+      // 基礎物件結構
+      const transformedData = {
         ...item,
+        id: item?.id || "", // 保留原始ID
         group: formData.group || item?.group || "",
         area: formData.area || item?.area || "",
-        machineId: formData.machineId || item?.machineId || null, // 添加 machineId
+        machineId: formData.machineId || item?.machineId || null,
         start: formData.start,
-        end:
-          currentStatus === MACHINE_STATUS.ORDER_CREATED
-            ? item?.end
-            : formData.end,
+        end: isWorkOrder ? item?.end : formData.end,
         timeLineStatus: formData.timeLineStatus || currentStatus,
-        status: {
-          ...item?.status,
-          product: formData.product || "",
-          reason: formData.reason || "",
-          startTime: formData.start,
-          endTime:
-            currentStatus === MACHINE_STATUS.ORDER_CREATED
-              ? item?.status?.endTime
-              : formData.end,
-        },
-        orderInfo: {
+        content: formData.content || item?.content || currentStatus,
+      };
+
+      if (isWorkOrder) {
+        // 製令單 - 更新orderInfo
+        transformedData.orderInfo = {
           ...item?.orderInfo,
           productName: formData.productName || "",
           process: formData.process || "",
           scheduledStartTime: formData.start,
-          scheduledEndTime:
-            currentStatus === MACHINE_STATUS.ORDER_CREATED
-              ? item?.orderInfo?.scheduledEndTime
-              : formData.end,
+          scheduledEndTime: item?.orderInfo?.scheduledEndTime || formData.end,
           actualStartTime: formData.start,
-          actualEndTime:
-            currentStatus === MACHINE_STATUS.ORDER_CREATED
-              ? item?.orderInfo?.actualEndTime
-              : formData.end,
-        },
-      };
+          actualEndTime: item?.orderInfo?.actualEndTime || formData.end,
+        };
+
+        // 機台狀態數據清空
+        transformedData.status = {};
+      } else {
+        // 機台狀態 - 更新status
+        transformedData.status = {
+          ...item?.status,
+          product: formData.product || "",
+          reason: formData.reason || "",
+          startTime: formData.start,
+          endTime: formData.end,
+        };
+
+        // 製令單數據清空
+        transformedData.orderInfo = {};
+      }
+
+      return transformedData;
     },
     [item, currentStatus]
   );

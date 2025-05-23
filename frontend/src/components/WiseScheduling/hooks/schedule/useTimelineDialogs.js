@@ -161,6 +161,26 @@ function processMachineStatus(item) {
 //* 通用功能區，可被多個模組復用
 
 /**
+ * @function isTemporaryId
+ * @description 判斷ID是否為臨時ID (以"ITEM-"開頭)
+ * @param {string|any} id - 需要檢查的ID
+ * @returns {boolean} 是否為臨時ID
+ */
+function isTemporaryId(id) {
+  return id && typeof id === "string" && id.startsWith("ITEM-");
+}
+
+/**
+ * @function determineAction
+ * @description 根據ID特徵判斷操作類型 (add 或 update)
+ * @param {string|any} id - 項目ID
+ * @returns {string} 操作類型 ("add" 或 "update")
+ */
+function determineAction(id) {
+  return isTemporaryId(id) ? "add" : "update";
+}
+
+/**
  * @function hasTimeOverlap
  * @description 檢查兩個時間段是否重疊
  * @param {Object} item1 - 第一個項目
@@ -265,12 +285,10 @@ export function useTimelineDialogs({
   const saveOrderItem = useCallback(
     (updatedItem) => {
       const processedItem = processOrderItem(updatedItem.internal);
-      const action = updatedItem.internal.id ? "update" : "add";
-
+      // 使用輔助函數判斷操作類型
+      const action = determineAction(processedItem.id);
       itemsDataRef.current[action](processedItem);
       submitToAPI(updatedItem.api, changeWorkOrder);
-
-      console.log("🚀 製令單保存成功:", processedItem);
     },
     [itemsDataRef, changeWorkOrder]
   );
@@ -287,11 +305,11 @@ export function useTimelineDialogs({
       // ⚠️ 機台狀態需要檢查時間重疊
       validateNoOverlap(processedItem, itemsDataRef.current);
 
-      const action = updatedItem.internal.id ? "update" : "add";
+      // 使用輔助函數判斷操作類型
+      const action = determineAction(processedItem.id);
+
       itemsDataRef.current[action](processedItem);
       submitToAPI(updatedItem.api, changeWorkOrder);
-
-      console.log("🚀 機台狀態保存成功:", processedItem);
     },
     [itemsDataRef, changeWorkOrder]
   );
@@ -306,8 +324,6 @@ export function useTimelineDialogs({
       try {
         // 🧠 在最頂層進行結構驗證和類型判斷
         validateItemStructure(updatedItem);
-
-        console.log("🚀 ~ useTimelineDialogs ~ updatedItem:", updatedItem);
 
         // ✨ Push Ifs Up - 在頂層決定處理路徑
         if (isOrderItem(updatedItem.internal)) {
