@@ -61,8 +61,7 @@ class ProductionScheduleOngoingService:
             productionScheduleOngoing_db = complete_productionScheduleOngoing(ProductionScheduleOngoing(), payload)
             db.session.add(productionScheduleOngoing_db)
             db.session.commit()
-            resp = message(True, "ProductionScheduleOngoing have been created..")
-            return resp, 200
+            return productionScheduleOngoing_db
         # exception without handling should raise to the caller
         except Exception as error:
             raise error
@@ -100,7 +99,7 @@ class ProductionScheduleOngoingService:
 
     @staticmethod
     def update_productionScheduleOngoing_postponetime(productionDict:dict, payload):
-        """在派工系統完成子單時，更新延遲完成日
+        """在派工系統完成子單時，或者暫停的製令單繼續開始時，更新延遲完成日
 
         Args:
             payload (_type_): _description_
@@ -126,7 +125,12 @@ class ProductionScheduleOngoingService:
             if postponeTime > productionDict["planFinishDate"]:
                 SmartScheduleService.update_work_order_schedule_by_endtime(payload["productionScheduleId"], payload["postponeTime"])
             
+            # 如果是暫停的製令單繼續開始，則更新其他排程系統的時間
+            if productionDict["isResume"]:
+                    SmartScheduleService.update_work_order_schedule_by_resumption(payload["productionScheduleId"], payload["startTime"], payload["postponeTime"])
+            
             resp = message(True, "ProductionScheduleOngoing have been updated.")
             return resp, 200
         except Exception as error:
             raise error
+        

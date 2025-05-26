@@ -4,9 +4,10 @@ import pytz
 import os
 import sys
 from flask import current_app
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from app import db
 from app.utils_log import message, err_resp, internal_err_resp
+from app.models.productionReport import ProductionReport
 from app.models.productionSchedule import ProductionSchedule
 from app.models.ly0000AB import LY0000AB
 from app.models.ltmoldmap import LtMoldMap
@@ -144,10 +145,29 @@ def complete_productionSchedule(db_obj, payload):
         
         # 變成On-going，ProductionScheduleOngoing資料表會自動新增一筆，並更新開始時間
         if db_obj.status == WorkOrderStatusEnum.ON_GOING.value:
-            ProductionScheduleOngoingService.create_productionScheduleOngoing({
+            new_productionScheduleOngoing_db = ProductionScheduleOngoingService.create_productionScheduleOngoing({
                 "productionScheduleId": db_obj.id,
                 "startTime": db_obj.actualOnMachineDate.isoformat()
             })
+            # 如果狀態從pause變成on-going，則更新postponeTime
+            if prev_status == WorkOrderStatusEnum.PAUSE.value and new_productionScheduleOngoing_db is not None:
+                # 根據productionSchedule id，查詢productionReport資料表，取得製令單的unfinishedQuantity
+                productionReport_db = ProductionReport.query.filter(
+                    and_(ProductionReport.pschedule_id == db_obj.id, ProductionReport.serialNumber == 0)
+                ).first()
+                production_dict = {
+                    "unfinishedQuantity": productionReport_db.unfinishedQuantity,
+                    "hourlyCapacity": db_obj.hourlyCapacity,
+                    "planFinishDate": db_obj.planFinishDate,
+                    "isResume": True # 是否為已暫停的製令單恢復生產
+                }
+                productionScheduleOngoing_dict = {
+                    "id": new_productionScheduleOngoing_db.id,
+                    "productionScheduleId": db_obj.id,
+                    "startTime": db_obj.actualOnMachineDate.isoformat()
+                }
+                ProductionScheduleOngoingService.update_productionScheduleOngoing_postponetime(production_dict, productionScheduleOngoing_dict)
+
         # 變成Pause，ProductionScheduleOngoing資料表更新結束時間
         if db_obj.status == WorkOrderStatusEnum.PAUSE.value:
             # 如果有對應的ProductionScheduleOngoing資料，就更新結束時間
@@ -157,6 +177,7 @@ def complete_productionSchedule(db_obj, payload):
                     "productionScheduleId": db_obj.id,
                     "endTime": datetime.now(pytz.timezone(TZ)).isoformat()
                 })
+
         # 變成Done，ProductionScheduleOngoing資料表更新結束時間
         if db_obj.status == WorkOrderStatusEnum.DONE.value:
             # 如果有對應的ProductionScheduleOngoing資料，就更新結束時間

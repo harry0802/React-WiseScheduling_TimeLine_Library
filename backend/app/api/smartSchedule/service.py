@@ -52,7 +52,8 @@ def _fetch_related_schedules(machine_sn: str, start_time: datetime, end_time: da
     machine_query = (MachineStatus.query
                     .join(Machine, Machine.id == MachineStatus.machineId)
                     .filter(Machine.machineSN == machine_sn)
-                    .filter(MachineStatus.planStartDate >= start_time))
+                    .filter(MachineStatus.planStartDate >= start_time)
+                    .filter(MachineStatus.actualStartDate == None))
     machine_query = machine_query.filter(MachineStatus.id != expect_machineStatusId) if expect_machineStatusId else machine_query
     machine_list = machine_query.all()
 
@@ -228,7 +229,7 @@ class SmartScheduleService:
             old_start, old_end = schedule.planOnMachineDate, schedule.planFinishDate
             machine_sn = schedule.machineSN
             holidays = _get_holidays(old_start)
-            new_end = _adjust_for_holidays(new_end, holidays, is_postpone)
+            # new_end = _adjust_for_holidays(new_end, holidays, is_postpone)
 
             # 計算時間差異
             is_postpone = new_end > old_end
@@ -236,6 +237,40 @@ class SmartScheduleService:
             diff = abs((new_end - old_end).total_seconds()) - (count_holidays * 24 * 60 * 60)  # 減去假日的時間
 
             all_schedules = _fetch_related_schedules(machine_sn, old_start, old_end, except_productionScheduleId=productionScheduleId)
+            shift = _calculate_shift(is_postpone, diff)
+            for i, item in enumerate(all_schedules):
+                prev_end = new_end if i == 0 else (getattr(all_schedules[i-1], "planFinishDate" if isinstance(all_schedules[i-1], ProductionSchedule) else "planEndDate"))
+                _update_schedule_times(item, prev_end, shift, holidays, is_postpone)
+
+            db.session.add_all(all_schedules)
+            db.session.commit()
+            return message(True, "smartSchedule have been updated."), 200
+
+        except Exception as error:
+            db.session.rollback()
+            raise error
+    
+
+    @staticmethod
+    def update_work_order_schedule_by_resumption(productionScheduleId: int, newStartDate: str, newEndDate: str) -> Tuple[dict, int]:
+        """已暫停的製令單繼續開始，根據改變狀態的時間(開始時間)以及延遲完成時間(結束時間)，調整其他排程的預計開始/結束時間"""
+        try:
+            new_start = datetime.fromisoformat(newStartDate) if isinstance(newStartDate, str) else newStartDate
+            new_end = datetime.fromisoformat(newEndDate) if isinstance(newEndDate, str) else newEndDate
+            schedule = ProductionSchedule.query.filter_by(id=productionScheduleId).first()
+            if not schedule:
+                return err_resp("productionSchedule not found.", "productionSchedule_404", 404)
+
+            machine_sn = schedule.machineSN
+            holidays = _get_holidays(new_start)
+            # new_end = _adjust_for_holidays(new_end, holidays, is_postpone)
+
+            # 計算時間差異
+            is_postpone = True
+            count_holidays = _calculate_holidays_between(new_start, new_end, holidays)
+            diff = abs((new_end - new_start).total_seconds()) - (count_holidays * 24 * 60 * 60)  # 減去假日的時間
+
+            all_schedules = _fetch_related_schedules(machine_sn, new_start, new_end, except_productionScheduleId=productionScheduleId)
             shift = _calculate_shift(is_postpone, diff)
 
             for i, item in enumerate(all_schedules):

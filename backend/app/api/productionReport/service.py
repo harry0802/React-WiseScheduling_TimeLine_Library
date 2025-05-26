@@ -528,6 +528,7 @@ class productionReportService:
                             "unfinishedQuantity": productionReport_db.unfinishedQuantity,
                             "hourlyCapacity": productionSchedule_db.hourlyCapacity if productionSchedule_db else 1,
                             "planFinishDate": productionSchedule_db.planFinishDate,
+                            "isResume": False # 是否為已暫停的製令單恢復生產
                         }
                         # 根據子批的pschedule_id，查詢相對應的productionScheduleOngoing資料表
                         productionScheduleOngoing_db = ProductionScheduleOngoingService.get_productionScheduleOngoing_by_productionScheduleId(
@@ -536,6 +537,7 @@ class productionReportService:
                         productionScheduleOngoing_dict = {
                             "id": productionScheduleOngoing_db.id,
                             "productionScheduleId": productionReport_db.pschedule_id,
+                            "startTime": None
                         }
                         ProductionScheduleOngoingService.update_productionScheduleOngoing_postponetime(production_dict, productionScheduleOngoing_dict)
             db.session.add_all(productionReport_db_list)
