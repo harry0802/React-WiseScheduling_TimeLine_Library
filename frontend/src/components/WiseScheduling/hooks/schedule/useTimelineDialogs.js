@@ -1,7 +1,7 @@
 /**
  * @file useTimelineDialogs.js
  * @description 與對話框管理器集成的 hook - 重構版本
- * @version 3.0.0 - 2025-05-22 應用 Push Ifs Up & Push Fors Down 原則重構
+ * @version 3.1.0 - 2025-05-23 整合專用機台狀態 API
  */
 
 import { useEffect, useCallback } from "react";
@@ -18,6 +18,15 @@ import {
 } from "../../configs/validations/schedule/constants";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 import { useChangeWorkOrderMutation } from "../../services/schedule/smartSchedule";
+import {
+  useCreateMachineStatusMutation,
+  useUpdateMachineStatusMutation,
+  useDeleteMachineStatusMutation,
+} from "../../services/machine/machineStatusApi";
+import {
+  transformNewStatusToApi,
+  transformUpdateStatusToApi,
+} from "../../utils/schedule/transformers/apiTransformers";
 
 //! =============== 1. 設定與常量 ===============
 //* 這個區塊包含所有項目處理的核心配置
@@ -157,27 +166,52 @@ function processMachineStatus(item) {
   };
 }
 
-//! =============== 4. 工具函數 - 驗證與檢查 ===============
-//* 通用功能區，可被多個模組復用
-
 /**
- * @function isTemporaryId
- * @description 判斷ID是否為臨時ID (以"ITEM-"開頭)
- * @param {string|any} id - 需要檢查的ID
- * @returns {boolean} 是否為臨時ID
+ * @function submitToOrderAPI
+ * @description 提交製令單數據到後端API
+ * @param {Object} apiData - API格式的數據
+ * @param {Function} changeWorkOrder - API調用函數
  */
-function isTemporaryId(id) {
-  return id && typeof id === "string" && id.startsWith("ITEM-");
+function submitToOrderAPI(apiData, changeWorkOrder) {
+  if (!apiData) return;
+
+  changeWorkOrder(apiData)
+    .unwrap()
+    .then((response) => {
+      console.log("製令單 API 更新成功:", response);
+    })
+    .catch((error) => {
+      console.error("製令單 API 更新失敗:", error);
+    });
 }
 
 /**
- * @function determineAction
- * @description 根據ID特徵判斷操作類型 (add 或 update)
- * @param {string|any} id - 項目ID
- * @returns {string} 操作類型 ("add" 或 "update")
+ * @function submitToMachineStatusAPI
+ * @description 提交機台狀態數據到後端API
+ * @param {Object} apiData - API格式的數據
+ * @param {Function} createStatus - 創建API調用函數
+ * @param {Function} updateStatus - 更新API調用函數
+ * @param {boolean} isUpdate - 是否為更新操作
  */
-function determineAction(id) {
-  return isTemporaryId(id) ? "add" : "update";
+function submitToMachineStatusAPI(
+  apiData,
+  createStatus,
+  updateStatus,
+  isUpdate
+) {
+  console.log("🚀 ~ submitToMachineStatusAPI ~ apiData:", apiData);
+  if (!apiData) return;
+
+  const apiFunction = isUpdate ? updateStatus : createStatus;
+
+  apiFunction(apiData)
+    .unwrap()
+    .then((response) => {
+      console.log(`機台狀態 API ${isUpdate ? "更新" : "創建"}成功:`, response);
+    })
+    .catch((error) => {
+      console.error(`機台狀態 API ${isUpdate ? "更新" : "創建"}失敗:`, error);
+    });
 }
 
 /**
@@ -198,6 +232,26 @@ function hasTimeOverlap(item1, item2) {
     start1.isSame(start2) ||
     end1.isSame(end2)
   );
+}
+
+/**
+ * @function isTemporaryId
+ * @description 判斷ID是否為臨時ID (以"ITEM-"開頭)
+ * @param {string|any} id - 需要檢查的ID
+ * @returns {boolean} 是否為臨時ID
+ */
+function isTemporaryId(id) {
+  return id && typeof id === "string" && id.startsWith("ITEM-");
+}
+
+/**
+ * @function determineAction
+ * @description 根據ID特徵判斷操作類型 (add 或 update)
+ * @param {string|any} id - 項目ID
+ * @returns {string} 操作類型 ("add" 或 "update")
+ */
+function determineAction(id) {
+  return isTemporaryId(id) ? "add" : "update";
 }
 
 /**
@@ -229,26 +283,6 @@ function validateNoOverlap(item, dataSet) {
   }
 }
 
-/**
- * @function submitToAPI
- * @description 提交數據到後端API
- * @param {Object} apiData - API格式的數據
- * @param {Function} changeWorkOrder - API調用函數
- */
-function submitToAPI(apiData, changeWorkOrder) {
-  if (!apiData) return;
-
-  changeWorkOrder(apiData)
-    .unwrap()
-    .then((response) => {
-      console.log("API 更新成功:", response);
-    })
-    .catch((error) => {
-      console.error("API 更新失敗:", error);
-      // 💡 不向用戶顯示此錯誤，因為本地界面已更新
-    });
-}
-
 //! =============== 5. 主要 Hook 實現 ===============
 //* Hook 的核心實現，應用 Push Ifs Up 原則
 
@@ -268,7 +302,13 @@ export function useTimelineDialogs({
   timelineRef,
   timeRange,
 }) {
+  // 製令單 API
   const [changeWorkOrder] = useChangeWorkOrderMutation();
+
+  // 機台狀態 API
+  const [createMachineStatus] = useCreateMachineStatusMutation();
+  const [updateMachineStatus] = useUpdateMachineStatusMutation();
+  const [deleteMachineStatus] = useDeleteMachineStatusMutation();
 
   // 設置 groups 數據
   useEffect(() => {
@@ -284,11 +324,23 @@ export function useTimelineDialogs({
    */
   const saveOrderItem = useCallback(
     (updatedItem) => {
-      const processedItem = processOrderItem(updatedItem.internal);
-      // 使用輔助函數判斷操作類型
-      const action = determineAction(processedItem.id);
-      itemsDataRef.current[action](processedItem);
-      submitToAPI(updatedItem.api, changeWorkOrder);
+      try {
+        const processedItem = processOrderItem(updatedItem.internal);
+
+        // 使用輔助函數判斷操作類型
+        const action = determineAction(processedItem.id);
+
+        // 更新本地數據
+        itemsDataRef.current[action](processedItem);
+
+        // 提交到製令單 API
+        if (updatedItem.api) {
+          submitToOrderAPI(updatedItem.api, changeWorkOrder);
+        }
+      } catch (error) {
+        console.error("保存製令單失敗:", error);
+        alert(error.message || "保存製令單失敗");
+      }
     },
     [itemsDataRef, changeWorkOrder]
   );
@@ -300,18 +352,49 @@ export function useTimelineDialogs({
    */
   const saveMachineStatus = useCallback(
     (updatedItem) => {
-      const processedItem = processMachineStatus(updatedItem.internal);
+      try {
+        const processedItem = processMachineStatus(updatedItem.internal);
 
-      // ⚠️ 機台狀態需要檢查時間重疊
-      validateNoOverlap(processedItem, itemsDataRef.current);
+        // ⚠️ 機台狀態需要檢查時間重疊
+        validateNoOverlap(processedItem, itemsDataRef.current);
 
-      // 使用輔助函數判斷操作類型
-      const action = determineAction(processedItem.id);
+        // 使用輔助函數判斷操作類型
+        const action = determineAction(processedItem.id);
+        const isUpdate = action === "update";
 
-      itemsDataRef.current[action](processedItem);
-      submitToAPI(updatedItem.api, changeWorkOrder);
+        // 將時間線項目轉換為 API 格式
+        let apiData;
+        if (updatedItem.api) {
+          // 如果已經提供了 API 數據，直接使用
+          apiData = updatedItem.api;
+        } else {
+          // 否則，根據是否為更新操作，使用不同的轉換函數
+          if (isUpdate) {
+            // 更新操作：需要提供原始數據進行比較
+            const originalItem = itemsDataRef.current.get(processedItem.id);
+            apiData = transformUpdateStatusToApi(processedItem, originalItem);
+          } else {
+            // 新增操作：使用新狀態轉換函數
+            apiData = transformNewStatusToApi(processedItem);
+          }
+        }
+
+        // 更新本地數據
+        itemsDataRef.current[action](processedItem);
+
+        // 提交到 API
+        submitToMachineStatusAPI(
+          apiData,
+          createMachineStatus,
+          updateMachineStatus,
+          isUpdate
+        );
+      } catch (error) {
+        console.error("保存機台狀態失敗:", error);
+        alert(error.message || "保存機台狀態失敗");
+      }
     },
-    [itemsDataRef, changeWorkOrder]
+    [itemsDataRef, createMachineStatus, updateMachineStatus]
   );
 
   /**
@@ -358,34 +441,50 @@ export function useTimelineDialogs({
           throw new Error("無法刪除製令單，製令單不允許被刪除");
         }
 
-        // 🧠 非製令單項目直接刪除
+        // 🧠 從本地狀態移除項目
         itemsDataRef.current.remove(itemId);
+
+        // 如果有狀態 ID，則調用 API 刪除
+        if (item.statusId) {
+          deleteMachineStatus(item.statusId)
+            .unwrap()
+            .then(() => {
+              console.log("機台狀態刪除成功");
+            })
+            .catch((error) => {
+              console.error("機台狀態刪除 API 失敗:", error);
+              // 不顯示錯誤，因為本地已刪除
+            });
+        }
       } catch (error) {
         console.error("Delete item failed:", error);
         alert(error.message || "刪除項目失敗");
       }
     },
-    [itemsDataRef]
+    [itemsDataRef, deleteMachineStatus]
   );
 
   /**
    * @function handleAddItem
    * @description 添加新的機台狀態項目
    * @param {Date} startTime - 開始時間
-   * @param {string} machineGroup - 機台群組
+   * @param {string} areaCode - 區域代碼
    */
   const handleAddItem = useCallback(
-    (startTime, machineGroup) => {
+    (startTime, areaCode) => {
       try {
         const centerTime = startTime ? dayjs(startTime) : dayjs();
         const endTime = centerTime.add(DEFAULT_DURATION_HOURS, "hour");
 
+        // 生成臨時 ID
+        const tempId = `ITEM-${Date.now()}`;
+
         // 🧠 只創建機台狀態項目，不創建製令單
         const newItem = {
-          id: `ITEM-${Date.now()}`,
-          group: "",
-          area: "",
-          timeLineStatus: MACHINE_STATUS.IDLE,
+          id: tempId,
+          group: "", // 在對話框中選擇機台
+          area: areaCode || "",
+          timeLineStatus: MACHINE_STATUS.IDLE, // 預設狀態
           status: {
             startTime: centerTime.toDate(),
             endTime: endTime.toDate(),
@@ -397,11 +496,14 @@ export function useTimelineDialogs({
           end: endTime.toDate(),
           className: "status-idle",
           content: "新狀態",
+          // 標記為新增項目
+          isNew: true,
         };
 
         openItemDialog(newItem, "add", groups);
       } catch (error) {
-        console.error("Add item failed:", error);
+        console.error("新增狀態失敗:", error);
+        alert(error.message || "新增狀態失敗");
       }
     },
     [groups]

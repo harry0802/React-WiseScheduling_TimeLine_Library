@@ -404,8 +404,10 @@ function fillMachineStatusData(internalData, apiData, startTime, endTime) {
 
   // 實際時間處理 - 只有當原始 API 資料中有實際時間才設置
   apiData.machineStatusActualStartTime =
-    internalData._originalApiData?.machineStatusActualStartTime || null;
-
+    internalData._originalApiData?.machineStatusActualStartTime ||
+    internalData.status?.startTime
+      ? formatDate(internalData.status.startTime)
+      : formattedStartTime;
   apiData.machineStatusActualEndTime =
     internalData._originalApiData?.machineStatusActualEndTime || null;
 
@@ -477,14 +479,6 @@ export const transformNewStatusToApi = (internalData, isTest = false) => {
   return apiData;
 };
 
-/**
- * @function transformUpdateStatusToApi
- * @description 將內部格式的更新狀態轉換為 API 格式，並驗證狀態轉換是否合法
- * @param {Object} internalData - 內部結構的更新資料
- * @param {Object} originalData - 原始內部結構資料
- * @param {boolean} isTest - 是否為測試模式，測試模式下跳過某些驗證
- * @returns {Object} API 格式的資料
- */
 export const transformUpdateStatusToApi = (
   internalData,
   originalData,

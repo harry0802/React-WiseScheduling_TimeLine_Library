@@ -45,6 +45,18 @@ export const machineStatusApi = apiSlice.injectEndpoints({
     }),
 
     // 修改單一機台的狀態
+    /*
+  {
+  "id": 1,
+  "planStartDate": "2025-02-25T00:00:00.000+08:00",
+  "planEndDate": "2025-02-25T00:00:00.000+08:00",
+  "actualStartDate": "2025-02-25T00:00:00.000+08:00",
+  "actualEndDate": "2025-02-25T00:00:00.000+08:00",
+  "status": "status",
+  "reason": "停機原因",
+  "product": "產品名稱"
+}
+  */
     updateMachineStatus: builder.mutation({
       query: (statusData) => ({
         url: "machineStatus/",
@@ -55,6 +67,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
     }),
 
     // 刪除單一機台的狀態
+    // machineStatusId
     deleteMachineStatus: builder.mutation({
       query: (id) => ({
         url: `machineStatus/${id}`,
