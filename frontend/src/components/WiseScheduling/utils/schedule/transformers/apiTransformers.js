@@ -56,10 +56,19 @@ const API_DATA_DEFAULTS = {
  * @description 安全地格式化日期
  * @param {Date|string} date - 要格式化的日期
  * @param {string} format - 日期格式
+ * @param {boolean} toUTC - 是否轉換為 UTC 時間
  * @returns {string} 格式化的日期字符串，無效則返回null
  */
-function formatDate(date, format = TIME_FORMAT) {
-  return !date ? null : dayjs(date).format(format);
+function formatDate(date, format = TIME_FORMAT, toUTC = true) {
+  if (!date) return null;
+
+  let dateObj = dayjs(date);
+  // 如果需要轉換為 UTC 時間
+  if (toUTC) {
+    dateObj = dateObj.utc();
+  }
+
+  return dateObj.format(format);
 }
 
 /**
@@ -328,8 +337,8 @@ export const transformApiToInternalFormat = (apiData) => {
  */
 function fillWorkOrderData(internalData, apiData, startTime, endTime) {
   // WORK_ORDER_TIME - 將多次使用的時間格式提前處理
-  const formattedStartTime = formatDate(startTime);
-  const formattedEndTime = formatDate(endTime);
+  const formattedStartTime = formatDate(startTime, TIME_FORMAT, true);
+  const formattedEndTime = formatDate(endTime, TIME_FORMAT, true);
 
   // 修正: 使用 orderInfo.id 作為 productionScheduleId，而不是 internalData.id
   apiData.productionScheduleId =
@@ -339,20 +348,20 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
 
   // 計劃時間處理 - 使用邏輯短路簡化判斷
   apiData.planOnMachineDate = internalData.orderInfo?.scheduledStartTime
-    ? formatDate(internalData.orderInfo.scheduledStartTime)
+    ? formatDate(internalData.orderInfo.scheduledStartTime, TIME_FORMAT, true)
     : formattedStartTime;
 
   apiData.planFinishDate = internalData.orderInfo?.scheduledEndTime
-    ? formatDate(internalData.orderInfo.scheduledEndTime)
+    ? formatDate(internalData.orderInfo.scheduledEndTime, TIME_FORMAT, true)
     : formattedEndTime;
 
   // 實際時間處理
   apiData.actualOnMachineDate = internalData.orderInfo?.actualStartTime
-    ? formatDate(internalData.orderInfo.actualStartTime)
+    ? formatDate(internalData.orderInfo.actualStartTime, TIME_FORMAT, true)
     : null;
 
   apiData.actualFinishDate = internalData.orderInfo?.actualEndTime
-    ? formatDate(internalData.orderInfo.actualEndTime)
+    ? formatDate(internalData.orderInfo.actualEndTime, TIME_FORMAT, true)
     : null;
 
   // 產品資訊 - 使用邏輯短路簡化
@@ -388,28 +397,47 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
  */
 function fillMachineStatusData(internalData, apiData, startTime, endTime) {
   // MACHINE_STATUS_TIME - 將多次使用的時間格式提前處理
-  const formattedStartTime = formatDate(startTime);
-  const formattedEndTime = formatDate(endTime);
+  const formattedStartTime = formatDate(startTime, TIME_FORMAT, true);
+  const formattedEndTime = formatDate(endTime, TIME_FORMAT, true);
 
   apiData.machineStatusId = internalData.status?.id || "";
 
   // 計劃時間處理
   apiData.machineStatusPlanStartTime = internalData.status?.startTime
-    ? formatDate(internalData.status.startTime)
+    ? formatDate(internalData.status.startTime, TIME_FORMAT, true)
     : formattedStartTime;
 
   apiData.machineStatusPlanEndTime = internalData.status?.endTime
-    ? formatDate(internalData.status.endTime)
+    ? formatDate(internalData.status.endTime, TIME_FORMAT, true)
     : formattedEndTime;
 
-  // 實際時間處理 - 只有當原始 API 資料中有實際時間才設置
-  apiData.machineStatusActualStartTime =
-    internalData._originalApiData?.machineStatusActualStartTime ||
-    internalData.status?.startTime
-      ? formatDate(internalData.status.startTime)
-      : formattedStartTime;
-  apiData.machineStatusActualEndTime =
-    internalData._originalApiData?.machineStatusActualEndTime || null;
+  // 實際時間處理
+  if (internalData._originalApiData?.machineStatusActualStartTime) {
+    apiData.machineStatusActualStartTime = formatDate(
+      internalData._originalApiData.machineStatusActualStartTime,
+      TIME_FORMAT,
+      true
+    );
+  } else if (internalData.status?.startTime) {
+    apiData.machineStatusActualStartTime = formatDate(
+      internalData.status.startTime,
+      TIME_FORMAT,
+      true
+    );
+  } else {
+    apiData.machineStatusActualStartTime = formattedStartTime;
+  }
+
+  // 結束時間處理
+  if (internalData._originalApiData?.machineStatusActualEndTime) {
+    apiData.machineStatusActualEndTime = formatDate(
+      internalData._originalApiData.machineStatusActualEndTime,
+      TIME_FORMAT,
+      true
+    );
+  } else {
+    apiData.machineStatusActualEndTime = null;
+  }
 
   // 狀態詳情 - 使用邏輯短路簡化
   apiData.machineStatusReason = internalData.status?.reason || null;
@@ -441,7 +469,7 @@ export const transformInternalToApiFormat = (
   if (originalData && !isTest) {
     validateApiStatusTransition(internalData, originalData);
   }
-
+  // TODO: 添加 這裡決定 回傳資料
   // 創建基本 API 結構 - 使用預設值初始化
   const apiData = {
     ...API_DATA_DEFAULTS,
