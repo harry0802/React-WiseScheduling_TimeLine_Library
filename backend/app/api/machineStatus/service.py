@@ -138,18 +138,22 @@ class MachineStatusService:
     def create_machineStatus(payload):
         """新增機台狀態並觸發排程調整"""
         try:
+            planStartDate = datetime.fromisoformat(payload["planStartDate"]) \
+                if payload.get("planStartDate") is not None else None
+            planEndDate = datetime.fromisoformat(payload["planEndDate"]) \
+                if payload.get("planEndDate") is not None else None
             # 0. 確認新的機台狀態區間(planStartDate, planEndDate)不會與現有的機台狀態區間重疊
             machineStatus_query = MachineStatus.query
             machineStatus_query = machineStatus_query.filter(MachineStatus.machineId == payload["machineId"])
             machineStatus_query = machineStatus_query.filter(
                 or_(
                     and_(
-                        MachineStatus.planStartDate >= payload["planStartDate"],
-                        MachineStatus.planEndDate <= payload["planEndDate"]
+                        MachineStatus.planStartDate >= planStartDate,
+                        MachineStatus.planEndDate <= planEndDate
                     ),
                     and_(
-                        MachineStatus.actualStartDate >= payload["planStartDate"],
-                        MachineStatus.actualEndDate <= payload["planEndDate"]
+                        MachineStatus.actualStartDate >= planStartDate,
+                        MachineStatus.actualEndDate <= planEndDate
                     )
                 )
             )
