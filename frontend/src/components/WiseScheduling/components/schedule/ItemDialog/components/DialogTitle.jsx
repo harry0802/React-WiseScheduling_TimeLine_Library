@@ -5,10 +5,12 @@
  */
 
 import React from "react";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography, CircularProgress, Chip } from "@mui/material";
+import HistoryIcon from "@mui/icons-material/History";
 import CustomStatusChip from "../CustomStatusChip";
 import { getStatusColor } from "../../styles/industrialTheme";
 import { getDialogTitle } from "../../../../utils/schedule/statusHelpers";
+import { isHistoricalData } from "../../../../configs/validations/schedule/constants";
 import StatusIcon from "./StatusIcon";
 
 //! =============== 對話框標題組件 ===============
@@ -20,11 +22,13 @@ import StatusIcon from "./StatusIcon";
  * @param {string} status - 當前狀態
  * @param {boolean} isSubmitting - 是否正在提交
  * @param {string} mode - 對話框模式
+ * @param {Object} item - 項目數據，用於判斷是否為歷史資料
  */
-function DialogTitle({ status, isSubmitting, mode }) {
+function DialogTitle({ status, isSubmitting, mode, item }) {
   // 🧠 Push Ifs Up - 在組件層級計算所需資訊
   const statusColor = getStatusColor(status);
   const title = getDialogTitle(isSubmitting, mode);
+  const isHistorical = isHistoricalData(item);
 
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -39,6 +43,22 @@ function DialogTitle({ status, isSubmitting, mode }) {
       {/* 🔧 只在需要時顯示加載指示器 */}
       {isSubmitting && (
         <CircularProgress size={24} sx={{ ml: 2 }} color="inherit" />
+      )}
+      
+      {/* 🧠 歷史資料標籤 */}
+      {isHistorical && (
+        <Chip
+          icon={<HistoryIcon />}
+          label="歷史資料"
+          size="small"
+          color="warning"
+          variant="outlined"
+          sx={{ 
+            ml: 2,
+            fontSize: "12px",
+            fontWeight: 500,
+          }}
+        />
       )}
       
       {/* 🔧 狀態標籤 */}

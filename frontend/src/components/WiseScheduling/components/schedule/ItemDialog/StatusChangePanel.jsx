@@ -8,7 +8,10 @@ import React from "react";
 import { Paper, Typography } from "@mui/material";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import { SecondaryButton } from "../styles/DialogStyles";
-import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
+import { 
+  MACHINE_STATUS,
+  canShowStatusChangeButton 
+} from "../../../configs/validations/schedule/constants";
 
 //! =============== 狀態變更面板組件 ===============
 //* 專職處理狀態切換的 UI 面板
@@ -19,10 +22,11 @@ import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants"
  * @param {string} status - 當前狀態
  * @param {boolean} isSubmitting - 是否正在提交
  * @param {Function} onShowStatusDialog - 顯示狀態切換對話框回調
+ * @param {Object} item - 項目數據，用於判斷是否為歷史資料
  */
-function StatusChangePanel({ status, isSubmitting, onShowStatusDialog }) {
-  // 🧠 Push Ifs Up - 提前返回特殊情況
-  if (status === MACHINE_STATUS.ORDER_CREATED) return null;
+function StatusChangePanel({ status, isSubmitting, onShowStatusDialog, item }) {
+  // 🧠 Push Ifs Up - 使用通用判斷函數決定是否顯示面板
+  if (!canShowStatusChangeButton(item)) return null;
 
   return (
     <Paper

@@ -31,7 +31,10 @@ import {
 } from "../styles/DialogStyles";
 import StatusController from "../StatusForms/StatusForms";
 import StatusChangeDialog from "./StatusChangeDialog";
-import { MACHINE_STATUS } from "../../../configs/validations/schedule/constants";
+import { 
+  MACHINE_STATUS,
+  isHistoricalData 
+} from "../../../configs/validations/schedule/constants";
 import {
   isOrderType,
   isOrderOnGoing,
@@ -144,6 +147,7 @@ function EnhancedDialog({
             status={dialog.currentStatus}
             isSubmitting={dialog.isSubmitting}
             mode={mode}
+            item={item} // 🔧 新增：傳遞 item 用於歷史資料判斷
           />
           <DialogActions
             mode={mode}
@@ -174,6 +178,7 @@ function EnhancedDialog({
               status={dialog.currentStatus}
               isSubmitting={dialog.isSubmitting}
               onShowStatusDialog={handleShowStatusDialog}
+              item={item} // 🔧 新增：傳遞 item 用於歷史資料判斷
             />
           )}
 

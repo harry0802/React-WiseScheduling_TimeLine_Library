@@ -115,6 +115,109 @@ export const isHistoricalRecord = (status, item) => {
   return false;
 };
 
+/**
+ * 🧠 通用的歷史資料判斷函數
+ * @description 判斷項目是否為歷史資料（有實際時間即為歷史資料）
+ * @param {Object} item - 項目數據
+ * @returns {boolean} 是否為歷史資料
+ */
+export const isHistoricalData = (item) => {
+  if (!item) return false;
+
+  // 🔍 檢查各種可能的實際時間欄位
+  const actualTimeFields = [
+    // 機台狀態相關的實際時間
+    item?.actualStartTime,
+    item?.actualEndTime,
+    item?.status?.actualStartTime,
+    item?.status?.actualEndTime,
+    item?.machineStatusActualStartTime,
+    item?.machineStatusActualEndTime,
+    
+    // 製令單相關的實際時間
+    item?.orderInfo?.actualStartTime,
+    item?.orderInfo?.actualEndTime,
+  ];
+
+  // 只要有任何一個實際時間欄位有值，就視為歷史資料
+  return actualTimeFields.some(time => 
+    time !== null && 
+    time !== undefined && 
+    time !== "" &&
+    time !== "null" // 排除字串 "null"
+  );
+};
+
+/**
+ * 🚀 判斷項目是否可以編輯
+ * @description 結合狀態配置和歷史資料判斷
+ * @param {Object} item - 項目數據
+ * @returns {boolean} 是否可以編輯
+ */
+export const canEditItem = (item) => {
+  if (!item) return false;
+  
+  // 🧠 歷史資料一律不可編輯
+  if (isHistoricalData(item)) {
+    return false;
+  }
+  
+  // 🧠 製令單狀態不可編輯狀態切換
+  if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
+    return false;  
+  }
+  
+  // 🧠 檢查狀態配置
+  const status = item.timeLineStatus;
+  return canEditStatus(status, item);
+};
+
+/**
+ * 🚀 判斷項目是否可以刪除
+ * @description 結合狀態配置和歷史資料判斷
+ * @param {Object} item - 項目數據
+ * @returns {boolean} 是否可以刪除
+ */
+export const canDeleteItem = (item) => {
+  if (!item) return false;
+  
+  // 🧠 歷史資料一律不可刪除
+  if (isHistoricalData(item)) {
+    return false;
+  }
+  
+  // 🧠 製令單不可刪除
+  if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
+    return false;
+  }
+  
+  // 🧠 檢查狀態配置
+  const status = item.timeLineStatus;
+  return canDeleteStatus(status, item);
+};
+
+/**
+ * 🚀 判斷是否可以顯示狀態切換按鈕
+ * @description 歷史資料和製令單都不顯示狀態切換按鈕
+ * @param {Object} item - 項目數據
+ * @returns {boolean} 是否顯示狀態切換按鈕
+ */
+export const canShowStatusChangeButton = (item) => {
+  if (!item) return false;
+  
+  // 🧠 歷史資料不顯示狀態切換按鈕
+  if (isHistoricalData(item)) {
+    return false;
+  }
+  
+  // 🧠 製令單不顯示狀態切換按鈕
+  if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
+    return false;
+  }
+  
+  return true;
+};
+
 // ✨ 新增的輔助函數
 export const canDeleteStatus = (status, item = null) => {
   // 如果是歷史紀錄，不能刪除

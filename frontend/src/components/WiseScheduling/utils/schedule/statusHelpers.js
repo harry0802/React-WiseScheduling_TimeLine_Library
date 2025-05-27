@@ -7,6 +7,7 @@
 import {
   MACHINE_STATUS,
   canTransitTo,
+  isHistoricalData,
 } from "../../configs/validations/schedule/constants";
 import { createStateTransitionError } from "./errorHandler";
 import {
@@ -295,14 +296,16 @@ const isFormDisabled = (mode, isSubmitting, item) => {
     return false;
   }
 
-  // 檢查項目已完成/進行中狀態
+  // 🧠 核心邏輯：有實際時間的資料一律禁用編輯
+  if (isHistoricalData(item)) {
+    return true;
+  }
+
+  // 🧠 檢查訂單狀態 - 進行中的訂單也禁用
   return (
     mode !== "add" &&
-    // 有實際結束時間就禁用
-    ((item.machineStatusActualEndTime !== null &&
-      item.machineStatusActualEndTime !== undefined) ||
-      // 訂單狀態是 "On-going" 也禁用
-      item.productionScheduleStatus === "On-going" ||
+    // 訂單狀態是 "On-going" 也禁用
+    (item.productionScheduleStatus === "On-going" ||
       (item.orderInfo &&
         item.orderInfo.orderStatus?.toLowerCase() === "on-going"))
   );
