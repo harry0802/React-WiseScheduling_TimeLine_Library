@@ -27,6 +27,7 @@ import moment from "moment";
 
 //* 自定義元件
 import TimelineControls from "./TimelineControls";
+import TimeRangeSelector from "./TimeRangeSelector";
 import DialogPortals from "./dialogs/DialogPortals";
 import "./styles/industrialTheme"; // 引入工業風格主題
 
@@ -44,6 +45,7 @@ import { momentLocaleConfig } from "../../configs/validations/schedule/timeline/
 import { useTimelineData } from "../../hooks/schedule/useTimelineData";
 import { useTimelineConfig } from "../../hooks/schedule/useTimelineConfig";
 import { useTimelineDialogs } from "../../hooks/schedule/useTimelineDialogs";
+import useTimeRange from "../../hooks/schedule/useTimeRange";
 import { setGroups } from "./DialogManager";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 
@@ -60,16 +62,20 @@ if (moment) {
  * @function useAreaScheduleData
  * @description 獲取特定區域的排程數據，分別提取最新的製令單和機台狀態
  * @param {string} area - 區域代碼，例如 "A"、"B" 等
+ * @param {string} startTime - 開始時間 (ISO string)
+ * @param {string} endTime - 結束時間 (ISO string)
  * @returns {Object} 排程數據和加載狀態
  */
-function useAreaScheduleData(area = "A") {
-  // 🧠 API 查詢，獲取智能排程數據
+function useAreaScheduleData(area = "A", startTime = null, endTime = null) {
+  // 🧠 API 查詢，獲取智能排程數據（包含時間範圍）
   const {
     isSuccess,
     isLoading,
     data: scheduleData,
   } = useGetSmartScheduleQuery({
     productionArea: area,
+    startTime,
+    endTime,
   });
 
   // ✨ 使用 useMemo 處理數據，避免重複計算
@@ -152,9 +158,22 @@ function DynamicTimeline() {
   const [timeRange, setTimeRange] = useState("day");
   const [selectedArea, setSelectedArea] = useState("A");
 
+  // 🔧 新增：時間範圍管理
+  const {
+    timeRange: selectedTimeRange,
+    formattedTimeRange,
+    handleStartTimeChange,
+    handleEndTimeChange,
+  } = useTimeRange();
+
   //! =============== 4. 數據獲取 ===============
-  // 獲取特定區域的排程數據
-  const { scheduleList } = useAreaScheduleData(selectedArea);
+  // 獲取特定區域的排程數據（包含時間範圍）
+  const { scheduleList } = useAreaScheduleData(
+    selectedArea,
+    formattedTimeRange.startTime,
+    formattedTimeRange.endTime
+  );
+  
   // 獲取機台數據
   const { filteredMachines } = useAreaMachines(selectedArea);
 
@@ -263,6 +282,14 @@ function DynamicTimeline() {
     <Box sx={{ width: "100%", p: 4 }}>
       {/* 時間線顯示 */}
       <TimelineContainer>
+        {/* 🔧 新增：時間範圍選擇器 */}
+        <TimeRangeSelector
+          startTime={selectedTimeRange.startTime}
+          endTime={selectedTimeRange.endTime}
+          onStartTimeChange={handleStartTimeChange}
+          onEndTimeChange={handleEndTimeChange}
+        />
+
         {/* 控制面板 */}
         <TimelineControls
           timeRange={timeRange}
