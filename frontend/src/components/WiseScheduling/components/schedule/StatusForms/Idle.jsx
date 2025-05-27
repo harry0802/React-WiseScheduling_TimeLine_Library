@@ -140,7 +140,7 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
             <Controller
               name="group" // Controller 的 name 屬性
               control={control} // 從 useForm 獲取 control
-              rules={VALIDATION_RULES.group} // 驗證規則
+              rules={isEditMode ? {} : VALIDATION_RULES.group} // 編輯模式時不驗證
               render={({ field }) => (
                 <TextField
                   {...field} // 包含 name, value, onChange, onBlur
@@ -157,6 +157,7 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
                       (m) => m.machineSN === e.target.value
                     );
                     if (selectedMachine) {
+                      // 確保 machineId 是數字類型
                       setValue("machineId", selectedMachine.id);
                     }
                     // 然後呼叫 react-hook-form 提供的 onChange

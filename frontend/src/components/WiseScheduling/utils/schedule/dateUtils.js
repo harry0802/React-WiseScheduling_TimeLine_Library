@@ -90,10 +90,10 @@ export const isValidDate = (date) => dayjs(date).isValid();
 
 /**
  * @function formatToFormDateTime
- * @description 轉換日期為表單所需的 datetime-local 格式
+ * @description 轉換日期為表單所需的 datetime-local 格式（本地時間）
  * @param {Date|string|null} date - 要格式化的日期
  * @param {string} [defaultValue=""] - 當日期無效時返回的默認值
- * @returns {string} 格式化的日期字符串，格式爲 YYYY-MM-DDTHH:mm
+ * @returns {string} 格式化的本地時間字符串，格式爲 YYYY-MM-DDTHH:mm
  */
 export const formatToFormDateTime = (date, defaultValue = "") => {
   // 如果沒有日期，返回默認值
@@ -109,8 +109,12 @@ export const formatToFormDateTime = (date, defaultValue = "") => {
       return defaultValue;
     }
 
-    // 返回 HTML datetime-local 格式
-    return dayjsObj.format(DATE_FORMATS.isoDateTime);
+    // 🔧 修正：確保轉換為本地時間（台北時間）
+    // 如果是 UTC 時間，先轉換為本地時間，然後格式化
+    const localTime = dayjsObj.tz ? dayjsObj.tz(DEFAULT_TIMEZONE) : dayjsObj.local();
+    
+    // 返回 HTML datetime-local 格式（本地時間）
+    return localTime.format(DATE_FORMATS.isoDateTime);
   } catch (error) {
     console.error("[formatToFormDateTime] Error:", error, { date });
     return defaultValue;
@@ -162,7 +166,7 @@ export const ensureFormDateTime = (date, defaultDate = new Date()) => {
 
 /**
  * @function prepareFormDateValues
- * @description 為表單準備所有日期相關欄位的預設值
+ * @description 為表單準備所有日期相關欄位的預設值，正確處理時區轉換
  * @param {Object} item - 項目數據
  * @returns {Object} 所有日期欄位格式化並更新的對象
  */

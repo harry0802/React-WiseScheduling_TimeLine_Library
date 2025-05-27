@@ -62,13 +62,12 @@ const API_DATA_DEFAULTS = {
 function formatDate(date, format = TIME_FORMAT, toUTC = true) {
   if (!date) return null;
 
-  let dateObj = dayjs(date);
-  // 如果需要轉換為 UTC 時間
   if (toUTC) {
-    dateObj = dateObj.utc();
+    // 直接返回標準 UTC 格式
+    return dayjs(date).utc().toISOString();
   }
 
-  return dateObj.format(format);
+  return dayjs(date).format(format);
 }
 
 /**
@@ -396,54 +395,52 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
  * @param {Date} endTime - 結束時間
  */
 function fillMachineStatusData(internalData, apiData, startTime, endTime) {
-  // MACHINE_STATUS_TIME - 將多次使用的時間格式提前處理
+  console.log("🚀 ~ fillMachineStatusData ~ internalData:", internalData);
+
   const formattedStartTime = formatDate(startTime, TIME_FORMAT, true);
   const formattedEndTime = formatDate(endTime, TIME_FORMAT, true);
+  const { status, _originalApiData } = internalData;
 
-  apiData.machineStatusId = internalData.status?.id || "";
+  apiData.machineStatusId = status.id || "";
+  apiData.status = internalData.timeLineStatus || "";
 
   // 計劃時間處理
-  apiData.machineStatusPlanStartTime = internalData.status?.startTime
-    ? formatDate(internalData.status.startTime, TIME_FORMAT, true)
+  apiData.planStartDate = status?.startTime
+    ? formatDate(status.startTime, TIME_FORMAT, true)
     : formattedStartTime;
 
-  apiData.machineStatusPlanEndTime = internalData.status?.endTime
-    ? formatDate(internalData.status.endTime, TIME_FORMAT, true)
+  apiData.planEndDate = status?.endTime
+    ? formatDate(status.endTime, TIME_FORMAT, true)
     : formattedEndTime;
 
-  // 實際時間處理
-  if (internalData._originalApiData?.machineStatusActualStartTime) {
-    apiData.machineStatusActualStartTime = formatDate(
-      internalData._originalApiData.machineStatusActualStartTime,
+  // 實際開始時間處理
+  if (_originalApiData?.machineStatusActualStartTime) {
+    apiData.actualStartDate = formatDate(
+      _originalApiData.machineStatusActualStartTime,
       TIME_FORMAT,
       true
     );
-  } else if (internalData.status?.startTime) {
-    apiData.machineStatusActualStartTime = formatDate(
-      internalData.status.startTime,
+  } else if (status?.startTime) {
+    apiData.actualStartDate = formatDate(status.startTime, TIME_FORMAT, true);
+  } else {
+    apiData.actualStartDate = formattedStartTime;
+  }
+
+  // 實際結束時間處理
+  if (_originalApiData?.machineStatusActualEndTime) {
+    apiData.actualEndDate = formatDate(
+      _originalApiData.machineStatusActualEndTime,
       TIME_FORMAT,
       true
     );
   } else {
-    apiData.machineStatusActualStartTime = formattedStartTime;
+    apiData.actualEndDate = null;
   }
 
-  // 結束時間處理
-  if (internalData._originalApiData?.machineStatusActualEndTime) {
-    apiData.machineStatusActualEndTime = formatDate(
-      internalData._originalApiData.machineStatusActualEndTime,
-      TIME_FORMAT,
-      true
-    );
-  } else {
-    apiData.machineStatusActualEndTime = null;
-  }
-
-  // 狀態詳情 - 使用邏輯短路簡化
-  apiData.machineStatusReason = internalData.status?.reason || null;
-  apiData.machineStatusProduct = internalData.status?.product || null;
+  // 狀態詳情
+  apiData.machineStatusReason = status?.reason || null;
+  apiData.machineStatusProduct = status?.product || null;
 }
-
 //! =============== 7. 主要轉換函數 ===============
 
 /**

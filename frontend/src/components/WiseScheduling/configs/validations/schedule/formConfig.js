@@ -65,11 +65,11 @@ export const STATUS_FORM_CONFIG = {
     name: "待機表單",
     schema: getValidationSchema(MACHINE_STATUS.IDLE),
     defaultValues: {
-      startTime: dayjs().toDate(),
-      endTime: dayjs().add(2, "hour").toDate(),
+      start: dayjs().format("YYYY-MM-DDTHH:mm"), // 本地時間格式
+      end: dayjs().add(2, "hour").format("YYYY-MM-DDTHH:mm"), // 本地時間格式
       group: "",
       area: "",
-      machineId: "",
+      machineId: 0, // 修正：確保是數字類型
     },
   },
 
@@ -77,8 +77,11 @@ export const STATUS_FORM_CONFIG = {
     name: "上模與調機表單",
     schema: getValidationSchema(MACHINE_STATUS.SETUP),
     defaultValues: {
-      startTime: "",
+      start: dayjs().format("YYYY-MM-DDTHH:mm"), // 本地時間格式
+      end: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"), // 本地時間格式
       setupInfo: "",
+      group: "",
+      area: "",
     },
   },
 
@@ -86,8 +89,11 @@ export const STATUS_FORM_CONFIG = {
     name: "產品試模表單",
     schema: getValidationSchema(MACHINE_STATUS.TESTING),
     defaultValues: {
-      startTime: "",
+      start: dayjs().format("YYYY-MM-DDTHH:mm"), // 本地時間格式
+      end: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"), // 本地時間格式
       product: "",
+      group: "",
+      area: "",
     },
   },
 
@@ -95,8 +101,11 @@ export const STATUS_FORM_CONFIG = {
     name: "機台停機表單",
     schema: getValidationSchema(MACHINE_STATUS.STOPPED),
     defaultValues: {
-      startTime: "",
+      start: dayjs().format("YYYY-MM-DDTHH:mm"), // 本地時間格式
+      end: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"), // 本地時間格式
       reason: "",
+      group: "",
+      area: "",
     },
   },
 };

@@ -36,11 +36,29 @@ export const machineStatusApi = apiSlice.injectEndpoints({
      * });
      */
     createMachineStatus: builder.mutation({
-      query: (statusData) => ({
-        url: "machineStatus/",
-        method: "POST",
-        body: statusData,
-      }),
+      query: (fullApiData) => {
+        // 直接過濾成需要的格式
+        const filteredData = {
+          machineId: fullApiData.machineId,
+          planStartDate: fullApiData.planStartDate,
+          planEndDate: fullApiData.planEndDate,
+          status: fullApiData.status,
+          reason: fullApiData.machineStatusReason,
+          product: fullApiData.machineStatusProduct,
+        };
+
+        // 過濾掉 null 值
+        const cleanData = Object.fromEntries(
+          Object.entries(filteredData).filter(([_, value]) => value != null)
+        );
+        console.log("🚀 ~ cleanData:", cleanData);
+
+        return {
+          url: "machineStatus/",
+          method: "POST",
+          body: cleanData,
+        };
+      },
       invalidatesTags: ["MachineStatus"],
     }),
 
@@ -58,11 +76,29 @@ export const machineStatusApi = apiSlice.injectEndpoints({
 }
   */
     updateMachineStatus: builder.mutation({
-      query: (statusData) => ({
-        url: "machineStatus/",
-        method: "PUT",
-        body: statusData,
-      }),
+      query: (fullApiData) => {
+        // 過濾成需要的格式
+        const filteredData = {
+          id: fullApiData.machineStatusId, // 使用 machineStatusId 作為 id
+          machineId: fullApiData.machineId,
+          planStartDate: fullApiData.planStartDate,
+          planEndDate: fullApiData.planEndDate,
+          status: fullApiData.status,
+          reason: fullApiData?.machineStatusReason,
+          product: fullApiData?.machineStatusProduct,
+        };
+
+        // 過濾掉 null 值
+        const cleanData = Object.fromEntries(
+          Object.entries(filteredData).filter(([_, value]) => value != null)
+        );
+
+        return {
+          url: "machineStatus/",
+          method: "PUT",
+          body: cleanData,
+        };
+      },
       invalidatesTags: ["MachineStatus"],
     }),
 

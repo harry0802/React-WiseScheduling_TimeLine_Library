@@ -14,16 +14,14 @@ const timeFieldValidation = {
   start: z
     .string()
     .min(1, "開始時間為必填")
-    .pipe(z.coerce.date())
-    .refine((date) => dayjs(date).isValid(), "時間格式錯誤"),
+    .refine((val) => dayjs(val).isValid(), "時間格式錯誤"),
 
   // 結束時間 - 可選但若提供必須是有效日期時間
   end: z
     .string()
     .optional()
-    .pipe(z.coerce.date())
-    .refine((date) => !date || dayjs(date).isValid(), "時間格式錯誤")
-    .optional(),
+    .or(z.literal(""))
+    .refine((val) => !val || dayjs(val).isValid(), "時間格式錯誤"),
 };
 
 /**
@@ -92,7 +90,7 @@ const orderSchema = createOrderSchema({
  */
 const idleSchema = createRegularSchema({
   // 待機狀態不需要額外的驗證字段
-  machineId: z.number().optional(),
+  machineId: z.coerce.number().optional(), // 修正：允許字符串轉數字
 });
 
 /**

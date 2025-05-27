@@ -61,6 +61,7 @@ function EnhancedDialog({
   onDelete,
   groups,
 }) {
+  console.log("🚀 ~ item:", item);
   // 🦉 使用 Custom Hook 管理所有業務邏輯
   const dialog = useEnhancedDialog(item, mode, {
     onSave,
@@ -72,7 +73,7 @@ function EnhancedDialog({
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
-  
+
   // 🚀 使用 useId 生成唯一 ID
   const dialogId = useId();
 

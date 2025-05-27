@@ -115,19 +115,34 @@ const StatusChangeDialog = ({
   onStatusChange,
   disabled,
   mode,
+  item, // 確保接收 item 參數
 }) => {
   // 檢查狀態是否可用
   const canChangeStatus = (targetStatus) => {
+    console.log('🔍 檢查狀態切換:', {
+      currentStatus,
+      targetStatus,
+      mode,
+      item: item ? {
+        timeLineStatus: item.timeLineStatus,
+        actualStartTime: item.actualStartTime,
+        statusActualStartTime: item.status?.actualStartTime
+      } : null
+    });
+    
     try {
-      // 如果當前狀態等於目標狀態，那麼始終允許選擇（稍後會在handleStatusChange進行進一步驗證）
+      // 如果當前狀態等於目標狀態，那麼始終允許選擇
       if (currentStatus === targetStatus) {
+        console.log('✅ 相同狀態，允許選擇');
         return true;
       }
 
       // 使用輔助函數進行狀態轉換驗證
-      validateStatusTransition(currentStatus, targetStatus, null, mode);
+      validateStatusTransition(currentStatus, targetStatus, item, mode);
+      console.log('✅ 狀態轉換驗證通過');
       return true;
     } catch (error) {
+      console.log('❌ 狀態轉換被阻止:', error.message);
       return false;
     }
   };

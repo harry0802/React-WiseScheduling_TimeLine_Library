@@ -319,6 +319,7 @@ class SmartScheduleService:
                     diff = abs((old_end - old_start).total_seconds()) - (count_holidays * 24 * 60 * 60)
                     is_postpone = False
                 else:
+                    print(f"new_start: {new_start}, old_start: {old_start}, new_end: {new_end}, old_end: {old_end}", file=sys.stderr)
                     is_postpone = new_end > old_end
                     count_holidays = _calculate_holidays_between(old_end, new_end, holidays) if is_postpone else _calculate_holidays_between(new_end, old_end, holidays)
                     diff = abs((new_end - old_end).total_seconds()) - (count_holidays * 24 * 60 * 60)
