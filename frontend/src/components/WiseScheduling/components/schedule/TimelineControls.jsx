@@ -1,309 +1,549 @@
 /**
- * @file TimelineControls.jsx
- * @description 時間線控制組件，提供時間範圍切換、地區選擇和基本操作按鈕
- * @version 3.0.0
+ * @file TimelineControls.jsx - 老人友善版
+ * @description 專為工廠老人使用者優化的排程控制組件
+ * @version 6.0.0 (Elderly-Friendly Redesign)
  */
 
-import React from "react";
+import React, { createContext, useContext, useState } from "react";
 import styled from "styled-components";
+import { 
+  Accordion, 
+  AccordionSummary, 
+  AccordionDetails,
+  Typography 
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { TIME_RANGES } from "../../configs/validations/schedule/timeline/timelineConfigs";
-import { MACHINE_CONFIG } from "../../configs/validations/schedule/constants";
+import DateRangeIcon from "@mui/icons-material/DateRange";
 
-/**
- * 工廠系統風格的配色方案
- */
+// 🎨 老人友善主題 - 優化配色和尺寸
 const theme = {
   colors: {
-    // 主色系 - 深藍色系
     primary: {
-      main: "#1B2A47", // 深藍主色
-      light: "#2E3E5C", // 亮深藍
-      dark: "#0F172A", // 暗深藍
-      contrast: "#FFFFFF", // 文字對比色
+      main: "#1565c0",      // 調整為更深的藍色，提升對比度
+      light: "#1976d2",     // 統一藍色系
+      dark: "#0d47a1",      // 深藍色
+      contrast: "#ffffff",
     },
-    // 強調色 - 高對比醒目色系
     accent: {
-      blue: "#007AFF", // 亮藍色 - 主操作按鈕
-      red: "#FF3B30", // 警告紅 - 錯誤/警告按鈕
-      orange: "#FF9500", // 橙色 - 待處理/警示
-      green: "#34C759", // 綠色 - 成功/確認
-      yellow: "#FFCC00", // 黃色 - 注意/提醒
+      blue: "#1976d2",      // 與 primary 協調
+      red: "#d32f2f",       // 稍微調暗，降低刺眼感
+      orange: "#f57c00",    // 橙色調整
+      green: "#388e3c",     // 綠色調整
+      grey: "#757575",      // 灰色調整
     },
-    // 背景色
     background: {
-      primary: "transparent", // 主背景
-      hover: "rgba(255, 255, 255, 0.1)", // 懸停背景
-      active: "rgba(255, 255, 255, 0.2)", // 激活背景
+      primary: "transparent",
+      hover: "rgba(25, 118, 210, 0.08)",
+      active: "rgba(25, 118, 210, 0.12)",
+      panel: "rgba(25, 118, 210, 0.04)",
     },
-    // 文字色
     text: {
-      primary: "#FFFFFF", // 主要文字
-      secondary: "rgba(255, 255, 255, 0.8)", // 次要文字
-      disabled: "rgba(255, 255, 255, 0.5)", // 禁用文字
+      primary: "#ffffff",
+      secondary: "rgba(255, 255, 255, 0.85)",
+      disabled: "rgba(255, 255, 255, 0.6)",
     },
-    // 邊框色
     border: {
-      default: "rgba(255, 255, 255, 0.7)", // 默認邊框
-      active: "#FFFFFF", // 激活邊框
+      default: "rgba(255, 255, 255, 0.4)", // 提升邊框對比
+      active: "#1976d2",
+      hover: "rgba(25, 118, 210, 0.8)",
     },
+  },
+  size: {
+    height: "48px",        // 從 36px 增加到 48px
+    fontSize: "18px",      // 從 14px 增加到 18px  
+    buttonFontSize: "20px", // 按鈕文字更大
+    iconSize: "24px",      // 從 18px 增加到 24px
+    padding: "0 20px",     // 從 12px 增加到 20px
+    borderRadius: "8px",   // 從 4px 增加到 8px
+    minWidth: "120px",     // 從 80px 增加到 120px
+    gap: "16px",           // 間距加大
   },
 };
 
-// 統一尺寸設定
-const SIZE = {
-  height: "36px",
-  fontSize: "14px",
-  iconSize: "20px",
-  padding: "0 12px",
-  borderRadius: "4px",
-  minWidth: "90px",
-};
+// 🧠 Context 創建 - 只提供主題
+const TimelineStyleContext = createContext(theme);
 
-// 控制容器
-const ControlsContainer = styled.div`
+function useTimelineStyle() {
+  return useContext(TimelineStyleContext);
+}
+
+// 📏 基礎樣式組件 - 老人友善尺寸
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${props => props.theme.size.gap};
+  margin-bottom: 20px;
+  width: 100%;
+`;
+
+const Row = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
   width: 100%;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: ${props => props.theme.size.gap};
 
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
 `;
 
-// 按鈕組容器
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 8px;
-
-  @media (max-width: 576px) {
-    flex-wrap: wrap;
-  }
+  gap: 12px; // 增加按鈕間距
+  flex-wrap: wrap;
+  align-items: center;
 `;
 
-// 基礎按鈕樣式
 const BaseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: ${SIZE.height};
-  padding: ${SIZE.padding};
-  border-radius: ${SIZE.borderRadius};
-  font-size: ${SIZE.fontSize};
-  min-width: ${SIZE.minWidth};
-  background-color: ${theme.colors.background.primary};
-  border: 1px solid ${theme.colors.border.default};
-  color: ${theme.colors.text.primary};
+  gap: 8px; // 圖標和文字間距加大
+  height: ${props => props.theme.size.height};
+  padding: ${props => props.theme.size.padding};
+  border-radius: ${props => props.theme.size.borderRadius};
+  font-size: ${props => props.theme.size.buttonFontSize}; // 使用更大的按鈕字體
+  min-width: ${props => props.theme.size.minWidth};
+  background-color: ${props => props.theme.colors.background.primary};
+  border: 2px solid ${props => props.theme.colors.border.default}; // 邊框加粗
+  color: ${props => props.theme.colors.text.primary};
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  font-weight: 500;
+  transition: all 0.25s ease-in-out; // 稍微放慢動畫
+  font-weight: 600; // 字重加粗
+  font-family: "Noto Sans TC", sans-serif;
+  line-height: 1.2;
 
   &:hover {
-    background-color: ${theme.colors.background.hover};
-    border-color: ${theme.colors.border.active};
+    background-color: ${props => props.theme.colors.background.hover};
+    border-color: ${props => props.theme.colors.border.hover};
+    transform: translateY(-2px); // 增加懸浮效果
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); // 添加陰影
   }
 
   &:active {
-    background-color: ${theme.colors.background.active};
-    transform: translateY(1px);
+    background-color: ${props => props.theme.colors.background.active};
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 
   svg {
-    font-size: ${SIZE.iconSize};
+    font-size: ${props => props.theme.size.iconSize};
   }
 `;
 
-// 時間範圍按鈕
-const TimeRangeButton = styled(BaseButton)`
-  background-color: ${(props) =>
-    props.active ? theme.colors.accent.blue : theme.colors.background.primary};
-  border-color: ${(props) =>
-    props.active ? theme.colors.accent.blue : theme.colors.border.default};
-
-  &:hover {
-    background-color: ${(props) =>
-      props.active ? theme.colors.accent.blue : theme.colors.background.hover};
-    opacity: ${(props) => (props.active ? 0.9 : 1)};
-  }
-`;
-
-// 新增按鈕 - 綠色版本，用於製令單
-const OrderAddButton = styled(BaseButton)`
-  background-color: ${theme.colors.accent.green};
-  border-color: ${theme.colors.accent.green};
-
-  &:hover {
-    opacity: 0.9;
-    background-color: ${theme.colors.accent.green};
-    border-color: ${theme.colors.accent.green};
-  }
-`;
-
-// 新增按鈕 - 藍色版本，用於一般狀態
-const AddButton = styled(BaseButton)`
-  background-color: ${theme.colors.accent.blue};
-  border-color: ${theme.colors.accent.blue};
-
-  &:hover {
-    opacity: 0.9;
-    background-color: ${theme.colors.accent.blue};
-    border-color: ${theme.colors.accent.blue};
-  }
-`;
-
-// 現在按鈕
-const NowButton = styled(BaseButton)`
-  background-color: ${theme.colors.accent.green};
-  border-color: ${theme.colors.accent.green};
-
-  &:hover {
-    opacity: 0.9;
-    background-color: ${theme.colors.accent.green};
-    border-color: ${theme.colors.accent.green};
-  }
-`;
-
-// 選擇器容器
-const SelectContainer = styled.div`
-  position: relative;
-  min-width: 100px;
-  height: ${SIZE.height};
-`;
-
-// 區域選擇器
 const Select = styled.select`
   appearance: none;
-  width: 100%;
-  height: ${SIZE.height};
-  padding: 0 28px 0 12px;
-  color: ${theme.colors.text.primary};
-  background-color: ${theme.colors.background.primary};
-  border: 1px solid ${theme.colors.border.default};
-  border-radius: ${SIZE.borderRadius};
-  font-size: ${SIZE.fontSize};
+  height: ${props => props.theme.size.height};
+  padding: 0 40px 0 20px; // 增加內距
+  color: ${props => props.theme.colors.text.primary};
+  background-color: ${props => props.theme.colors.background.primary};
+  border: 2px solid ${props => props.theme.colors.border.default};
+  border-radius: ${props => props.theme.size.borderRadius};
+  font-size: ${props => props.theme.size.fontSize};
+  font-family: "Noto Sans TC", sans-serif;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  outline: none;
+  transition: all 0.25s ease-in-out;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px; // 下拉箭頭加大
 
   &:hover {
-    background-color: ${theme.colors.background.hover};
-    border-color: ${theme.colors.border.active};
+    border-color: ${props => props.theme.colors.border.hover};
+    background-color: ${props => props.theme.colors.background.hover};
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
   &:focus {
-    border-color: ${theme.colors.border.active};
+    outline: none;
+    border-color: ${props => props.theme.colors.border.active};
+    background-color: ${props => props.theme.colors.background.hover};
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2); // 焦點指示加強
   }
 
   option {
-    background-color: #1a2a42; // 深藍色下拉背景
-    color: ${theme.colors.text.primary};
-    padding: 8px;
+    background-color: ${props => props.theme.colors.primary.main};
+    color: ${props => props.theme.colors.text.primary};
+    padding: 12px; // 選項內距加大
+    font-size: ${props => props.theme.size.fontSize};
   }
 `;
 
-// 選擇器箭頭
-const SelectArrow = styled.div`
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid ${theme.colors.text.primary};
-  pointer-events: none;
+const TimeInput = styled.input`
+  height: ${props => props.theme.size.height};
+  padding: 0 20px;
+  border: 2px solid ${props => props.theme.colors.border.default};
+  border-radius: ${props => props.theme.size.borderRadius};
+  background-color: ${props => props.theme.colors.background.primary};
+  color: ${props => props.theme.colors.text.primary};
+  font-size: ${props => props.theme.size.fontSize};
+  font-family: "Noto Sans TC", sans-serif;
+  font-weight: 500;
+  transition: all 0.25s ease-in-out;
+
+  &:hover {
+    border-color: ${props => props.theme.colors.border.hover};
+    background-color: ${props => props.theme.colors.background.hover};
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.colors.border.active};
+    background-color: ${props => props.theme.colors.background.hover};
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+  }
+
+  &::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.8;
+    width: 20px; // 日期選擇器圖標加大
+    height: 20px;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 `;
 
-/**
- * @component TimelineControls
- * @description 時間線控制組件，提供時間範圍切換、地區選擇和基本操作按鈕
- * @param {Object} props - 組件屬性
- * @param {string} props.timeRange - 當前選中的時間範圍
- * @param {string} props.selectedArea - 當前選中的區域
- * @param {Function} props.onTimeRangeChange - 時間範圍變更處理函數
- * @param {Function} props.onAreaChange - 區域變更處理函數
- * @param {Function} props.onAddItem - 添加狀態項目處理函數
- * @param {Function} props.onMoveToNow - 移至當前時間處理函數
- */
-const TimelineControls = React.memo(
-  ({
-    timeRange,
-    selectedArea,
-    onTimeRangeChange,
-    onAreaChange,
-    onAddItem,
-    onMoveToNow,
-  }) => {
-    // 處理地區變更
-    const handleAreaSelect = (event) => {
-      const area = event.target.value;
-      onAreaChange(area);
-    };
+// 🎛️ MUI Accordion 樣式化
+const StyledAccordion = styled(Accordion).withConfig({
+  shouldForwardProp: (prop) => prop !== 'customTheme'
+})`
+  background: ${props => props.customTheme?.colors.background.panel || 'rgba(25, 118, 210, 0.04)'} !important;
+  border: 2px solid ${props => props.customTheme?.colors.border.default || 'rgba(255, 255, 255, 0.4)'} !important;
+  border-radius: ${props => props.customTheme?.size.borderRadius || '8px'} !important;
+  box-shadow: none !important;
+  margin: 8px 0 !important;
 
-    return (
-      <ControlsContainer>
-        {/* 時間範圍選擇按鈕組 */}
-        <ButtonGroup>
-          {Object.entries(TIME_RANGES).map(([key, { label }]) => (
-            <TimeRangeButton
-              key={key}
-              active={timeRange === key}
-              onClick={() => onTimeRangeChange(key)}
+  &:before {
+    display: none;
+  }
+
+  &.Mui-expanded {
+    border-color: ${props => props.customTheme?.colors.border.active || '#1976d2'} !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  }
+`;
+
+const StyledAccordionSummary = styled(AccordionSummary).withConfig({
+  shouldForwardProp: (prop) => prop !== 'customTheme'
+})`
+  .MuiAccordionSummary-content {
+    margin: 16px 0 !important;
+    align-items: center;
+  }
+  
+  .MuiAccordionSummary-expandIconWrapper {
+    color: ${props => props.customTheme?.colors.text.primary || '#ffffff'} !important;
+    
+    svg {
+      font-size: 28px !important;
+    }
+  }
+  
+  &:hover {
+    background-color: ${props => props.customTheme?.colors.background.hover || 'rgba(25, 118, 210, 0.08)'} !important;
+  }
+`;
+
+const StyledAccordionDetails = styled(AccordionDetails).withConfig({
+  shouldForwardProp: (prop) => prop !== 'customTheme'
+})`
+  padding: 20px !important;
+`;
+
+// 🚀 主要組件 - Context Provider
+function TimelineControls({ children, customTheme }) {
+  const mergedTheme = customTheme ? { ...theme, ...customTheme } : theme;
+  
+  return (
+    <TimelineStyleContext.Provider value={mergedTheme}>
+      <Container theme={mergedTheme}>
+        {children}
+      </Container>
+    </TimelineStyleContext.Provider>
+  );
+}
+
+// 🔧 子組件 - 使用者控制功能，Context 提供樣式
+
+// 布局組件
+TimelineControls.Row = function TimelineControlsRow({ children, ...props }) {
+  const theme = useTimelineStyle();
+  return <Row theme={theme} {...props}>{children}</Row>;
+};
+
+TimelineControls.ButtonGroup = function TimelineControlsButtonGroup({ children, ...props }) {
+  const theme = useTimelineStyle();
+  return <ButtonGroup theme={theme} {...props}>{children}</ButtonGroup>;
+};
+
+// 基礎按鈕 - 使用者控制所有邏輯
+TimelineControls.Button = function TimelineControlsButton({ 
+  variant = "default", 
+  active = false,
+  children, 
+  onClick,
+  ...props 
+}) {
+  const theme = useTimelineStyle();
+  
+  const StyledButton = styled(BaseButton)`
+    ${variant === "primary" && `
+      background-color: ${theme.colors.accent.blue};
+      border-color: ${theme.colors.accent.blue};
+      &:hover {
+        background-color: ${theme.colors.accent.blue};
+        opacity: 0.9;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+    `}
+    ${variant === "success" && `
+      background-color: ${theme.colors.accent.green};
+      border-color: ${theme.colors.accent.green};
+      &:hover {
+        background-color: ${theme.colors.accent.green};
+        opacity: 0.9;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+    `}
+    ${variant === "warning" && `
+      background-color: ${theme.colors.accent.orange};
+      border-color: ${theme.colors.accent.orange};
+      &:hover {
+        background-color: ${theme.colors.accent.orange};
+        opacity: 0.9;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+    `}
+    ${variant === "danger" && `
+      background-color: ${theme.colors.accent.red};
+      border-color: ${theme.colors.accent.red};
+      &:hover {
+        background-color: ${theme.colors.accent.red};
+        opacity: 0.9;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+    `}
+    ${active && `
+      background-color: ${theme.colors.primary.light};
+      border-color: ${theme.colors.primary.light};
+      &:hover {
+        background-color: ${theme.colors.primary.light};
+        opacity: 0.9;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+    `}
+  `;
+  
+  return (
+    <StyledButton theme={theme} onClick={onClick} {...props}>
+      {children}
+    </StyledButton>
+  );
+};
+
+// 時間範圍按鈕 - 使用者控制選項和邏輯
+TimelineControls.TimeRangeButton = function TimelineControlsTimeRangeButton({ 
+  value, 
+  currentValue, 
+  onChange, 
+  children,
+  icon: Icon = CalendarMonthIcon
+}) {
+  return (
+    <TimelineControls.Button 
+      active={value === currentValue}
+      onClick={() => onChange?.(value)}
+    >
+      <Icon />
+      {children}
+    </TimelineControls.Button>
+  );
+};
+
+// 區域選擇器 - 使用者控制選項和邏輯
+TimelineControls.AreaSelect = function TimelineControlsAreaSelect({ 
+  value, 
+  onChange, 
+  options = [],
+  placeholder = "選擇區域"
+}) {
+  const theme = useTimelineStyle();
+  
+  return (
+    <Select 
+      theme={theme}
+      value={value} 
+      onChange={(e) => onChange?.(e.target.value)}
+    >
+      <option value="" disabled>{placeholder}</option>
+      {options.map(option => (
+        <option 
+          key={typeof option === 'string' ? option : option.value} 
+          value={typeof option === 'string' ? option : option.value}
+        >
+          {typeof option === 'string' ? option : option.label}
+        </option>
+      ))}
+    </Select>
+  );
+};
+
+// 操作按鈕 - 使用者控制行為
+TimelineControls.AddButton = function TimelineControlsAddButton({ onClick, children = "新增狀態", icon: Icon = AddIcon }) {
+  return (
+    <TimelineControls.Button variant="primary" onClick={onClick}>
+      <Icon />
+      {children}
+    </TimelineControls.Button>
+  );
+};
+
+TimelineControls.NowButton = function TimelineControlsNowButton({ onClick, children = "移至現在", icon: Icon = AccessTimeIcon }) {
+  return (
+    <TimelineControls.Button variant="success" onClick={onClick}>
+      <Icon />
+      {children}
+    </TimelineControls.Button>
+  );
+};
+
+// 時間輸入 - 使用者控制格式和邏輯
+TimelineControls.TimeInput = function TimelineControlsTimeInput({ 
+  label, 
+  value, 
+  onChange, 
+  type = "datetime-local" 
+}) {
+  const theme = useTimelineStyle();
+  
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {label && (
+        <span style={{ 
+          fontSize: theme.size.fontSize, 
+          minWidth: '60px', // 增加標籤寬度
+          color: theme.colors.text.primary,
+          fontFamily: "Noto Sans TC, sans-serif",
+          fontWeight: 500
+        }}>
+          {label}：
+        </span>
+      )}
+      <TimeInput
+        theme={theme}
+        type={type}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+      />
+    </div>
+  );
+};
+
+// 🎛️ MUI 展開面板 - 替代原本的 Panel
+TimelineControls.Panel = function TimelineControlsPanel({ 
+  title, 
+  expanded = false, // 預設值
+  onToggle, 
+  icon: Icon = DateRangeIcon,
+  children,
+  info
+}) {
+  const theme = useTimelineStyle();
+  
+  const handleToggle = (event, isExpanded) => {
+    console.log('Panel toggle:', { title, isExpanded, currentExpanded: expanded }); // Debug log
+    // 確保回調正確執行
+    if (onToggle) {
+      onToggle(isExpanded);
+    }
+  };
+  
+  // 如果沒有 onToggle，使用內部狀態
+  const [internalExpanded, setInternalExpanded] = React.useState(expanded);
+  
+  const isControlled = onToggle !== undefined;
+  const actualExpanded = isControlled ? expanded : internalExpanded;
+  
+  const actualOnChange = isControlled ? handleToggle : (event, isExpanded) => {
+    console.log('Internal toggle:', isExpanded);
+    setInternalExpanded(isExpanded);
+  };
+  
+  return (
+    <StyledAccordion 
+      customTheme={theme}
+      expanded={actualExpanded}
+      onChange={actualOnChange}
+      // 強制 MUI 不使用自己的狀態
+      disableGutters={false}
+    >
+      <StyledAccordionSummary 
+        customTheme={theme}
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls={`${title}-content`}
+        id={`${title}-header`}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Icon style={{ 
+            fontSize: '28px', // 圖標加大
+            color: theme.colors.primary.light 
+          }} />
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontSize: '20px', // 標題字體加大
+              fontWeight: 600,
+              color: theme.colors.text.primary,
+              fontFamily: '"Noto Sans TC", sans-serif'
+            }}
+          >
+            {title}
+          </Typography>
+          {info && (
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontSize: '16px', // 資訊文字也加大
+                opacity: 0.8,
+                color: theme.colors.text.secondary,
+                fontFamily: '"Noto Sans TC", sans-serif'
+              }}
             >
-              <CalendarMonthIcon />
-              {label}
-            </TimeRangeButton>
-          ))}
-        </ButtonGroup>
-
-        {/* 操作控制區 */}
-        <ButtonGroup>
-          {/* 地區選擇 */}
-          <SelectContainer>
-            <Select value={selectedArea} onChange={handleAreaSelect}>
-              <option value="" disabled>
-                區域
-              </option>
-              {MACHINE_CONFIG.AREAS.map((area) => (
-                <option key={area} value={area}>
-                  {area}
-                </option>
-              ))}
-            </Select>
-            <SelectArrow />
-          </SelectContainer>
-
-          {/* 操作按鈕 */}
-          <AddButton onClick={() => onAddItem(null, selectedArea)}>
-            <AddIcon />
-            新增狀態
-          </AddButton>
-          {/* 製令單不允許手動增加，因此移除此按鈕 */}
-          <NowButton onClick={onMoveToNow}>
-            <AccessTimeIcon />
-            現在
-          </NowButton>
-        </ButtonGroup>
-      </ControlsContainer>
-    );
-  }
-);
-
-// 添加 displayName 以便於調試
-TimelineControls.displayName = "TimelineControls";
+              ({info})
+            </Typography>
+          )}
+        </div>
+      </StyledAccordionSummary>
+      <StyledAccordionDetails customTheme={theme}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '16px' 
+        }}>
+          {children}
+        </div>
+      </StyledAccordionDetails>
+    </StyledAccordion>
+  );
+};
 
 export default TimelineControls;
