@@ -13,8 +13,6 @@ import TimePickerSection from "./TimePickerSection";
  * @returns {JSX.Element} 渲染的表單組件
  */
 const Setup = ({ disabled, item }) => {
-  console.log("🚀 ~ Setup ~ item:", item);
-  
   // 使用狀態表單鉤子
   const { register, errors, initialized } = useStatusForm(
     MACHINE_STATUS.SETUP,

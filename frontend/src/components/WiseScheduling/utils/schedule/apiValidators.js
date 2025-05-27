@@ -406,7 +406,7 @@ function validateSchema(apiItem) {
 /**
  * @function validateApiItemCompleteness
  * @description 驗證 API 項目完整性的統一入口
- * @param {Object} apiItem - API 項目數據
+ * @param {Object} apiItem - API 項目數據-
  * @param {boolean} isTest - 是否為測試模式
  */
 function validateApiItemCompleteness(apiItem, isTest = false) {

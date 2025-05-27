@@ -119,31 +119,34 @@ const StatusChangeDialog = ({
 }) => {
   // 檢查狀態是否可用
   const canChangeStatus = (targetStatus) => {
-    console.log('🔍 檢查狀態切換:', {
-      currentStatus,
-      targetStatus,
-      mode,
-      item: item ? {
-        timeLineStatus: item.timeLineStatus,
-        actualStartTime: item.actualStartTime,
-        statusActualStartTime: item.status?.actualStartTime
-      } : null
-    });
-    
     try {
       // 如果當前狀態等於目標狀態，那麼始終允許選擇
       if (currentStatus === targetStatus) {
-        console.log('✅ 相同狀態，允許選擇');
         return true;
       }
 
-      // 使用輔助函數進行狀態轉換驗證
-      validateStatusTransition(currentStatus, targetStatus, item, mode);
-      console.log('✅ 狀態轉換驗證通過');
+      // 🧠 核心修正：在狀態選擇階段，只做基本的業務規則檢查
+      // 不檢查結束時間等表單層面的驗證，那些在表單提交時處理
+      const actualCurrentStatus = item?.timeLineStatus || currentStatus;
+      
+      // 🚀 簡化驗證邏輯：只檢查基本的狀態轉換規則
+      // 1. 製令單不能切換 (這個是業務規則)
+      if (actualCurrentStatus === MACHINE_STATUS.ORDER_CREATED) {
+        return false;
+      }
+
+      // 2. 從非待機狀態的基本轉換規則
+      if (actualCurrentStatus !== MACHINE_STATUS.IDLE && 
+          targetStatus !== MACHINE_STATUS.IDLE) {
+        return false;
+      }
+
+      // 3. 其他情況都允許選擇，具體的驗證在表單提交時進行
       return true;
+
     } catch (error) {
-      console.log('❌ 狀態轉換被阻止:', error.message);
-      return false;
+      // 發生異常時，允許選擇但會在表單提交時再次驗證
+      return true;
     }
   };
 

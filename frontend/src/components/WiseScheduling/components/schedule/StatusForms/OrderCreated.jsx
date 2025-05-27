@@ -116,18 +116,7 @@ const OrderCreated = ({ item, disabled }) => {
   // 直接使用 createAreaMachines 生成當前區域的機台
   const filteredGroups = selectedArea ? createAreaMachines(selectedArea) : [];
   
-  // 查看表單欄位的值，特別是預計完成日 (end) 欄位
-  console.log(`🔍 [製令單表單] 監聽欄位值 watch("start"):`, watch("start"));
-  console.log(`🔍 [製令單表單] 監聽欄位值 watch("end"):`, watch("end"));
-  console.log(`🔍 [製令單表單] 監聽欄位值 watch("area"):`, watch("area"));
-  console.log(`🔍 [製令單表單] 監聽欄位值 watch("group"):`, watch("group"));
-
   // 監聽表單錯誤
-  console.log(`🔍 [製令單表單] 表單錯誤:`, errors);
-  
-  // 輸出原始項目數據，用於調試
-  console.log(`🔍 [製令單表單] 原始項目數據 (item):`, item);
-  
   if (!initialized) {
     return <CircularProgress />;
   }
@@ -135,7 +124,6 @@ const OrderCreated = ({ item, disabled }) => {
   if (!item?.id || !item?.orderInfo) {
     return null;
   }
-  console.log("🚀 ~ OrderCreated ~ item:", item);
 
   // 計算完成率，確保數值有效並處理邊緣情況
   const completedPercentage =

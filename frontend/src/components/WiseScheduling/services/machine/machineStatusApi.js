@@ -39,6 +39,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
       query: (fullApiData) => {
         // 直接過濾成需要的格式
         const filteredData = {
+          id: fullApiData.id,
           machineId: fullApiData.machineId,
           planStartDate: fullApiData.planStartDate,
           planEndDate: fullApiData.planEndDate,
@@ -51,8 +52,6 @@ export const machineStatusApi = apiSlice.injectEndpoints({
         const cleanData = Object.fromEntries(
           Object.entries(filteredData).filter(([_, value]) => value != null)
         );
-        console.log("🚀 ~ cleanData:", cleanData);
-
         return {
           url: "machineStatus/",
           method: "POST",
@@ -79,7 +78,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
       query: (fullApiData) => {
         // 過濾成需要的格式
         const filteredData = {
-          id: fullApiData.machineStatusId, // 使用 machineStatusId 作為 id
+          id: fullApiData.machineStatusId ?? fullApiData.id, // 使用 machineStatusId 作為 id
           machineId: fullApiData.machineId,
           planStartDate: fullApiData.planStartDate,
           planEndDate: fullApiData.planEndDate,

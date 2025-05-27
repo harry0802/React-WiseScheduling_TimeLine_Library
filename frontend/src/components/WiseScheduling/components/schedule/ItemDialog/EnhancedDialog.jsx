@@ -61,7 +61,6 @@ function EnhancedDialog({
   onDelete,
   groups,
 }) {
-  console.log("🚀 ~ item:", item);
   // 🦉 使用 Custom Hook 管理所有業務邏輯
   const dialog = useEnhancedDialog(item, mode, {
     onSave,
@@ -211,6 +210,7 @@ function EnhancedDialog({
         onStatusChange={handleStatusChange}
         disabled={dialog.isSubmitting}
         mode={mode}
+        item={item} // 🔧 新增：傳遞 item 參數，讓 canChangeStatus 能夠正確驗證
       />
 
       {/* 🐻 錯誤通知 - 使用組合組件 */}

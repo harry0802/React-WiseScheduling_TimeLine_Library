@@ -47,11 +47,8 @@ export const STATUS_CONFIG = {
     // 新增：檢查是否為歷史紀錄的函數
     checkHistorical: (item) => {
       // 只有當有實際開始時間時才算歷史紀錄
-      return !!(
-        item?.actualStartTime || 
-        item?.status?.actualStartTime
-      );
-    }
+      return !!(item?.actualStartTime || item?.status?.actualStartTime);
+    },
   },
 
   [MACHINE_STATUS.SETUP]: {
