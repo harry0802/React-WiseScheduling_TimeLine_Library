@@ -108,9 +108,12 @@ function EnhancedDialog({
   );
 
   const handleDeleteClick = useCallback(() => {
-    onDelete?.();
+    // 🔧 連接到 DialogManager 的刪除流程
+    if (item?.id) {
+      onDelete?.(item.id);
+    }
     handleMenuClose();
-  }, [onDelete, handleMenuClose]);
+  }, [item, onDelete, handleMenuClose]);
 
   //! =============== 渲染邏輯 ===============
   //* Push Ifs Up - 在頂層決定渲染條件

@@ -323,7 +323,7 @@ export function useTimelineDialogs({
    * @param {Object} updatedItem - 更新的項目數據
    */
   const saveOrderItem = useCallback(
-    (updatedItem) => {
+    function saveOrderItem(updatedItem) {
       try {
         const processedItem = processOrderItem(updatedItem.internal);
 
@@ -351,7 +351,7 @@ export function useTimelineDialogs({
    * @param {Object} updatedItem - 更新的項目數據
    */
   const saveMachineStatus = useCallback(
-    (updatedItem) => {
+    function saveMachineStatus(updatedItem) {
       try {
         const processedItem = processMachineStatus(updatedItem.internal);
 
@@ -403,7 +403,7 @@ export function useTimelineDialogs({
    * @param {Object} updatedItem - 更新的項目數據
    */
   const handleSaveItem = useCallback(
-    (updatedItem) => {
+    function handleSaveItem(updatedItem) {
       try {
         // 🧠 在最頂層進行結構驗證和類型判斷
         validateItemStructure(updatedItem);
@@ -428,7 +428,9 @@ export function useTimelineDialogs({
    * @param {string} itemId - 項目ID
    */
   const handleDeleteItem = useCallback(
-    (itemId) => {
+    function handleDeleteItem(itemId) {
+      console.log("🚀 ~ itemId:", itemId);
+
       if (!itemId?.length || !itemsDataRef.current) {
         return;
       }
@@ -446,6 +448,7 @@ export function useTimelineDialogs({
 
         // 如果有狀態 ID，則調用 API 刪除
         if (item.statusId) {
+          console.log("🚀 ~ item.statusId:", item.statusId);
           deleteMachineStatus(item.statusId)
             .unwrap()
             .then(() => {
@@ -471,7 +474,7 @@ export function useTimelineDialogs({
    * @param {string} areaCode - 區域代碼
    */
   const handleAddItem = useCallback(
-    (startTime, areaCode) => {
+    function handleAddItem(startTime, areaCode) {
       try {
         const centerTime = startTime ? dayjs(startTime) : dayjs();
         const endTime = centerTime.add(DEFAULT_DURATION_HOURS, "hour");
@@ -515,7 +518,7 @@ export function useTimelineDialogs({
    * @param {Object} item - 要編輯的項目
    */
   const handleEditItem = useCallback(
-    (item) => {
+    function handleEditItem(item) {
       if (!item) return;
       openItemDialog(item, "edit", groups);
     },
@@ -526,7 +529,7 @@ export function useTimelineDialogs({
    * @function handleMoveToNow
    * @description 移動時間軸到當前時間
    */
-  const handleMoveToNow = useCallback(() => {
+  const handleMoveToNow = useCallback(function handleMoveToNow() {
     if (!timelineRef?.current) return;
 
     try {

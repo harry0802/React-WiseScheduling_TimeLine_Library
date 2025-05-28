@@ -175,7 +175,7 @@ function DynamicTimeline() {
     formattedTimeRange.startTime,
     formattedTimeRange.endTime
   );
-  
+
   // 獲取機台數據
   const { filteredMachines } = useAreaMachines(selectedArea);
 
@@ -280,7 +280,7 @@ function DynamicTimeline() {
   // 判斷整體載入狀態
 
   //! =============== 7. 渲染 ===============
-  
+
   // 🔧 格式化函數 - 父組件控制格式邏輯
   const formatTimeForInput = (isoString) => {
     if (!isoString) return "";
@@ -295,35 +295,40 @@ function DynamicTimeline() {
   // 🎯 時間範圍選項 - 父組件定義選項
   const timeRangeOptions = Object.entries(TIME_RANGES).map(([key, config]) => ({
     value: key,
-    label: config.label
+    label: config.label,
   }));
 
-  const areaOptions = MACHINE_CONFIG.AREAS.map(area => ({
+  const areaOptions = MACHINE_CONFIG.AREAS.map((area) => ({
     value: area,
-    label: `${area}區`
+    label: `${area}區`,
   }));
 
   // 🧠 快捷時間設定邏輯 - 父組件控制
   const handleQuickTimeSelect = (type) => {
     const now = dayjs();
-    switch(type) {
-      case 'today':
-        handleStartTimeChange(now.startOf('day').toISOString());
-        handleEndTimeChange(now.endOf('day').toISOString());
+    switch (type) {
+      case "today":
+        handleStartTimeChange(now.startOf("day").toISOString());
+        handleEndTimeChange(now.endOf("day").toISOString());
         break;
-      case 'week':
-        handleStartTimeChange(now.startOf('week').toISOString());
-        handleEndTimeChange(now.endOf('week').toISOString());
+      case "week":
+        handleStartTimeChange(now.startOf("week").toISOString());
+        handleEndTimeChange(now.endOf("week").toISOString());
         break;
-      case 'month':
-        handleStartTimeChange(now.startOf('month').toISOString());
-        handleEndTimeChange(now.endOf('month').toISOString());
+      case "month":
+        handleStartTimeChange(now.startOf("month").toISOString());
+        handleEndTimeChange(now.endOf("month").toISOString());
         break;
-      case 'default':
-        const defaultStart = now.subtract(1, "month").startOf("day").toISOString();
+      case "default":
+        const defaultStart = now
+          .subtract(1, "month")
+          .startOf("day")
+          .toISOString();
         const defaultEnd = now.add(1, "month").endOf("day").toISOString();
         handleStartTimeChange(defaultStart);
         handleEndTimeChange(defaultEnd);
+        break;
+      default:
         break;
     }
   };
@@ -334,12 +339,11 @@ function DynamicTimeline() {
       <TimelineContainer>
         {/* 🚀 控制反轉版本 - 父組件完全控制功能 */}
         <TimelineControls>
-          
           {/* 主控制列 */}
           <TimelineControls.Row>
             {/* 時間範圍選擇 - 父組件決定有哪些選項 */}
             <TimelineControls.ButtonGroup>
-              {timeRangeOptions.map(option => (
+              {timeRangeOptions.map((option) => (
                 <TimelineControls.TimeRangeButton
                   key={option.value}
                   value={option.value}
@@ -359,14 +363,12 @@ function DynamicTimeline() {
                 options={areaOptions}
                 placeholder="選擇區域"
               />
-              
-              <TimelineControls.AddButton 
+
+              <TimelineControls.AddButton
                 onClick={() => handleAddItem(null, selectedArea)}
               />
-              
-              <TimelineControls.NowButton 
-                onClick={handleMoveToNow}
-              />
+
+              <TimelineControls.NowButton onClick={handleMoveToNow} />
             </TimelineControls.ButtonGroup>
           </TimelineControls.Row>
 
@@ -375,9 +377,12 @@ function DynamicTimeline() {
             title="時間範圍設定"
             expanded={timePanelExpanded}
             onToggle={setTimePanelExpanded}
-            info={formattedTimeRange.startTime && formattedTimeRange.endTime ? 
-              `${dayjs(formattedTimeRange.startTime).format('MM/DD')} - ${dayjs(formattedTimeRange.endTime).format('MM/DD')}` : 
-              "預設範圍"
+            info={
+              formattedTimeRange.startTime && formattedTimeRange.endTime
+                ? `${dayjs(formattedTimeRange.startTime).format(
+                    "MM/DD"
+                  )} - ${dayjs(formattedTimeRange.endTime).format("MM/DD")}`
+                : "預設範圍"
             }
           >
             <TimelineControls.Row>
@@ -386,33 +391,44 @@ function DynamicTimeline() {
                 <TimelineControls.TimeInput
                   label="開始"
                   value={formatTimeForInput(selectedTimeRange.startTime)}
-                  onChange={(value) => handleTimeInputChange(value, handleStartTimeChange)}
+                  onChange={(value) =>
+                    handleTimeInputChange(value, handleStartTimeChange)
+                  }
                 />
                 <TimelineControls.TimeInput
                   label="結束"
                   value={formatTimeForInput(selectedTimeRange.endTime)}
-                  onChange={(value) => handleTimeInputChange(value, handleEndTimeChange)}
+                  onChange={(value) =>
+                    handleTimeInputChange(value, handleEndTimeChange)
+                  }
                 />
               </TimelineControls.ButtonGroup>
 
               {/* 快捷按鈕 - 父組件決定有哪些 */}
               <TimelineControls.ButtonGroup>
-                <TimelineControls.Button onClick={() => handleQuickTimeSelect('today')}>
+                <TimelineControls.Button
+                  onClick={() => handleQuickTimeSelect("today")}
+                >
                   今天
                 </TimelineControls.Button>
-                <TimelineControls.Button onClick={() => handleQuickTimeSelect('week')}>
+                <TimelineControls.Button
+                  onClick={() => handleQuickTimeSelect("week")}
+                >
                   本週
                 </TimelineControls.Button>
-                <TimelineControls.Button onClick={() => handleQuickTimeSelect('month')}>
+                <TimelineControls.Button
+                  onClick={() => handleQuickTimeSelect("month")}
+                >
                   本月
                 </TimelineControls.Button>
-                <TimelineControls.Button onClick={() => handleQuickTimeSelect('default')}>
+                <TimelineControls.Button
+                  onClick={() => handleQuickTimeSelect("default")}
+                >
                   預設範圍
                 </TimelineControls.Button>
               </TimelineControls.ButtonGroup>
             </TimelineControls.Row>
           </TimelineControls.Panel>
-
         </TimelineControls>
 
         {/* 時間線容器 */}
