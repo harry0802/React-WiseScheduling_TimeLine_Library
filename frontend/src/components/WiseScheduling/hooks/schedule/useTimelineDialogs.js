@@ -388,9 +388,12 @@ function hasTimeOverlap(item1, item2) {
   );
 }
 
+//! =============== 4. 工具函數 ===============
+//* 通用功能區，可被多個模組復用
+
 /**
  * @function determineAction
- * @description 根據ID特徵判斷操作類型 (add 或 update)
+ * @description 根據ID特徵判斷操作類型 (add 或 update) - 僅用於機台狀態
  * @param {string|any} id - 項目ID
  * @returns {string} 操作類型 ("add" 或 "update")
  * @example
@@ -405,36 +408,10 @@ function hasTimeOverlap(item1, item2) {
  * @notes
  * - 臨時ID（ITEM-前綴）表示新增操作
  * - 數字ID表示更新操作
+ * - 製令單不使用此函數，只有更新操作
  */
 function determineAction(id) {
   return isTemporaryId(id) ? "add" : "update";
-}
-
-//! =============== 4. 工具函數 ===============
-//* 通用功能區，可被多個模組復用
-
-/**
- * @function hasScheduleTimeChanged
- * @description 檢查製令單的排程時間是否有變化
- * @param {Object} originalItem - 原始項目數據
- * @param {Object} updatedItem - 更新後的項目數據
- * @returns {boolean} 排程時間是否有變化
- * @example
- * // 檢查時間變化
- * const changed = hasScheduleTimeChanged(original, updated);
- * 
- * @notes
- * - 比較 planOnMachineDate 或 start 時間
- * - 使用 dayjs 進行精確比較
- * - 只針對製令單項目進行檢查
- */
-function hasScheduleTimeChanged(originalItem, updatedItem) {
-  if (!isOrderItem(updatedItem)) return false;
-  
-  const originalStart = dayjs(originalItem.planOnMachineDate || originalItem.start);
-  const updatedStart = dayjs(updatedItem.planOnMachineDate || updatedItem.start);
-  
-  return !originalStart.isSame(updatedStart);
 }
 
 /**
@@ -557,73 +534,6 @@ function validateNoOverlap(item, dataSet) {
 }
 
 /**
- * @function submitToOrderAPI
- * @description 提交製令單數據到後端API
- * @param {Object} apiData - API格式的數據
- * @param {Function} changeWorkOrder - API調用函數
- * @example
- * // 提交製令單更新
- * submitToOrderAPI(orderApiData, changeWorkOrderFn);
- *
- * @notes
- * - 異步提交，不阻塞UI
- * - 成功和失敗都會記錄到控制台
- * - 空數據時直接返回
- */
-function submitToOrderAPI(apiData, changeWorkOrder) {
-  if (!apiData) return;
-
-  changeWorkOrder(apiData)
-    .unwrap()
-    .then((response) => {
-      console.log("製令單 API 更新成功:", response);
-    })
-    .catch((error) => {
-      console.error("製令單 API 更新失敗:", error);
-    });
-}
-
-/**
- * @function submitToMachineStatusAPI
- * @description 提交機台狀態數據到後端API
- * @param {Object} apiData - API格式的數據
- * @param {Function} createStatus - 創建API調用函數
- * @param {Function} updateStatus - 更新API調用函數
- * @param {boolean} isUpdate - 是否為更新操作
- * @example
- * // 創建新的機台狀態
- * submitToMachineStatusAPI(newStatusData, createFn, updateFn, false);
- *
- * // 更新現有機台狀態
- * submitToMachineStatusAPI(updateStatusData, createFn, updateFn, true);
- *
- * @notes
- * - 根據 isUpdate 參數選擇對應的API函數
- * - 異步執行，記錄操作結果
- * - 空數據時直接返回
- */
-function submitToMachineStatusAPI(
-  apiData,
-  createStatus,
-  updateStatus,
-  isUpdate
-) {
-  console.log("🚀 ~ submitToMachineStatusAPI ~ apiData:", apiData);
-  if (!apiData) return;
-
-  const apiFunction = isUpdate ? updateStatus : createStatus;
-
-  apiFunction(apiData)
-    .unwrap()
-    .then((response) => {
-      console.log(`機台狀態 API ${isUpdate ? "更新" : "創建"}成功:`, response);
-    })
-    .catch((error) => {
-      console.error(`機台狀態 API ${isUpdate ? "更新" : "創建"}失敗:`, error);
-    });
-}
-
-/**
  * @function processItemDeletion
  * @description 根據項目類型處理刪除邏輯（Push Ifs Up + Push Fors Down）
  * @param {Object} item - 項目數據
@@ -715,10 +625,10 @@ export function useTimelineDialogs({
 
   /**
    * @function saveOrderItem
-   * @description 專門處理製令單項目保存 (Push Ifs Up 原則)
+   * @description 專門處理製令單項目保存 - 只處理更新操作
    * @param {Object} updatedItem - 更新的項目數據
    * @example
-   * * // 保存製令單更新
+   * // 保存製令單更新
    * const orderUpdate = {
    *   internal: { id: 1, timeLineStatus: 'ORDER_CREATED' },
    *   api: { orderId: 1, startTime: '2024-01-01T08:00:00Z' }
@@ -726,35 +636,44 @@ export function useTimelineDialogs({
    * saveOrderItem(orderUpdate);
    *
    * @notes
-   * - 只處理製令單相關邏輯
-   * - 自動判斷新增或更新操作
-   * - 同步更新本地數據和後端API
-   * - 支援機台排程調整功能
+   * - 製令單只有更新操作，不會新增
+   * - 只有 API 成功後才更新本地數據
+   * - 一律觸發機台排程調整
    */
   const saveOrderItem = useCallback(
     function saveOrderItem(updatedItem) {
       try {
         const processedItem = processOrderItem(updatedItem.internal);
         console.log("🚀 ~ saveOrderItem ~ processedItem:", processedItem);
-        const action = determineAction(processedItem.id);
 
-        // 更新本地數據
-        itemsDataRef.current[action](processedItem);
-        
         // 提交到製令單 API
         if (updatedItem.api) {
-          submitToOrderAPI(updatedItem.api, changeWorkOrder);
-        }
+          changeWorkOrder(updatedItem.api)
+            .unwrap()
+            .then((response) => {
+              console.log("製令單 API 更新成功:", response);
+              // ✅ API 成功後才更新本地數據
+              itemsDataRef.current.update(processedItem);
 
-        // 🆕 檢查是否需要機台排程調整
-        // 當製令單的開始時間有變化且有完整的排程資訊時，觸發機台排程調整
-        const originalItem = action === "update" ? 
-          itemsDataRef.current.get(processedItem.id) : null;
-        
-        if (originalItem && hasScheduleTimeChanged(originalItem, processedItem)) {
-          console.log("🚀 觸發機台排程調整:", processedItem);
-          // 🔄 使用統一的 changeWorkOrder API，讓 API 層判斷格式
-          changeWorkOrder(processedItem);
+              // 🔄 一律觸發機台排程調整
+              console.log("🚀 觸發機台排程調整:", processedItem);
+              changeWorkOrder(processedItem)
+                .unwrap()
+                .then((scheduleResponse) => {
+                  console.log("機台排程調整成功:", scheduleResponse);
+                })
+                .catch((scheduleError) => {
+                  console.error("機台排程調整失敗:", scheduleError);
+                  // 排程調整失敗不影響製令單更新
+                });
+            })
+            .catch((error) => {
+              console.error("製令單 API 更新失敗:", error);
+              alert(error.message || ERROR_MESSAGES.SAVE_ORDER_FAILED);
+            });
+        } else {
+          // 沒有 API 數據時，直接更新本地
+          itemsDataRef.current.update(processedItem);
         }
       } catch (error) {
         console.error("保存製令單失敗:", error);
@@ -806,16 +725,23 @@ export function useTimelineDialogs({
           }
         }
 
-        // 更新本地數據
-        itemsDataRef.current[action](processedItem);
+        // 提交到 API，成功後才更新本地數據
+        const apiFunction = isUpdate
+          ? updateMachineStatus
+          : createMachineStatus;
+        const actionName = isUpdate ? "更新" : "創建";
 
-        // 提交到 API
-        submitToMachineStatusAPI(
-          apiData,
-          createMachineStatus,
-          updateMachineStatus,
-          isUpdate
-        );
+        apiFunction(apiData)
+          .unwrap()
+          .then((response) => {
+            console.log(`機台狀態 API ${actionName}成功:`, response);
+            // ✅ API 成功後才更新本地數據
+            itemsDataRef.current[action](processedItem);
+          })
+          .catch((error) => {
+            console.error(`機台狀態 API ${actionName}失敗:`, error);
+            alert(error.message || ERROR_MESSAGES.SAVE_STATUS_FAILED);
+          });
       } catch (error) {
         console.error("保存機台狀態失敗:", error);
         alert(error.message || ERROR_MESSAGES.SAVE_STATUS_FAILED);

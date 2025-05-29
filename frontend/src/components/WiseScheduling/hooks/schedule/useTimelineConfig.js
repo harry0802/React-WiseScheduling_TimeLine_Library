@@ -134,14 +134,20 @@ function useTimelineConfig(itemsDataRef, timeRange) {
   const getBaseOptions = useCallback(() => {
     return {
       ...BASE_TIMELINE_OPTIONS,
+      //TODO: 編輯功能控制 - 目前一律禁用，未來可能需要依角色權限開放
       editable: {
-        add: false,
-        updateTime: true,
-        updateGroup: true,
-        remove: false,
+        add: false,         //TODO: 雙擊新增功能 - 未來管理員可能需要
+        updateTime: false,  //TODO: 水平拖拽調整時間 - 排程人員可能需要
+        updateGroup: false, //TODO: 垂直拖拽換機台 - 排程人員可能需要
+        remove: false,      //TODO: 刪除按鈕 - 管理員可能需要
+        overrideItems: true //TODO: 強制覆蓋個別項目設定
       },
+      //TODO: 互動功能控制 - 目前僅允許查看，未來可能需要選取功能
+      selectable: false,    //TODO: 項目選取功能 - 查看詳情時可能需要
+      multiselect: false,   //TODO: 多選功能 - 批次操作時可能需要
       format: TIME_FORMAT_CONFIG,
-      onMove: (item, callback) => handleItemMove(item, callback, itemsDataRef),
+      //TODO: 移動事件處理 - 目前已禁用，但保留邏輯供未來使用
+      // onMove: (item, callback) => handleItemMove(item, callback, itemsDataRef),
       snap: null,
       margin: {
         item: { vertical: 8 },
