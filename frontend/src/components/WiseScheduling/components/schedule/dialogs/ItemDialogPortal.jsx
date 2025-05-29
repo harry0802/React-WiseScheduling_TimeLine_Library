@@ -45,7 +45,7 @@ function ItemDialogPortal() {
   // 處理打開刪除對話框
   const handleOpenDelete = () => {
     if (dialogState.item?.id) {
-      openDeleteDialog(dialogState.item.id);
+      openDeleteDialog(dialogState.item.status.id);
     }
   };
 

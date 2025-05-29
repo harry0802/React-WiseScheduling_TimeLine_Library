@@ -251,9 +251,6 @@ export const transformApiToInternalFormat = (apiData) => {
     apiData.timeLineStatus === "製令單" ? ORDER_STATUS : apiData.timeLineStatus;
   const isWorkOrder = timeLineStatus === ORDER_STATUS;
 
-  // 設置ID - 使用邏輯短路簡化
-  const generatedId = uuidv4();
-
   // WORK_ORDER_TIME - 提取時間資訊
   let startTime, endTime;
 
@@ -287,7 +284,10 @@ export const transformApiToInternalFormat = (apiData) => {
 
   // 組裝內部格式資料
   const internalData = {
-    id: generatedId,
+    // 設置ID - 優先使用API提供的ID，否則生成新的UUID
+    id: isWorkOrder
+      ? apiData.productionScheduleId || uuidv4()
+      : apiData.machineStatusId || uuidv4(),
     group: apiData.machineSN,
     area: apiData.productionArea,
     timeLineStatus,

@@ -58,7 +58,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
           body: cleanData,
         };
       },
-      invalidatesTags: ["MachineStatus"],
+      invalidatesTags: ["MachineStatus", "schedule"],
     }),
 
     // 修改單一機台的狀態
@@ -98,7 +98,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
           body: cleanData,
         };
       },
-      invalidatesTags: ["MachineStatus"],
+      invalidatesTags: ["MachineStatus", "schedule"],
     }),
 
     // 刪除單一機台的狀態
@@ -108,7 +108,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
         url: `machineStatus/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["MachineStatus"],
+      invalidatesTags: ["MachineStatus", "schedule"],
     }),
   }),
 });

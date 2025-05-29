@@ -195,11 +195,11 @@ const createDialogManager = () => {
    */
   const confirmDelete = () => {
     // 🧠 觸發刪除事件，同時傳遞要刪除的項目ID
-    eventSystem.emit("deleteDialog:confirm", deleteDialogState.itemId);
+    eventSystem.emit("deleteDialog:confirm", deleteDialogState.itemId); // ✨ 新增：發出刪除確認事件
     // 刪除後自動關閉對話框
     closeDeleteDialog();
+    closeItemDialog(); // ✨ 新增：同時關閉項目對話框
   };
-
   /**
    * 監聽刪除確認事件
    * @param {Function} callback - 回調函數

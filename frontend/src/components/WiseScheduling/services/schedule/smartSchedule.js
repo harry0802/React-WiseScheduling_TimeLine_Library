@@ -9,7 +9,7 @@ export const smartScheduleApi = apiSlice.injectEndpoints({
         method: "GET",
         params: { productionArea, startTime, endTime }, // Updated params
       }),
-      providesTags: ["SmartSchedule"],
+      providesTags: ["schedule"],
     }),
 
     changeWorkOrder: builder.mutation({
@@ -18,7 +18,7 @@ export const smartScheduleApi = apiSlice.injectEndpoints({
         method: "PUT",
         body: payload,
       }),
-      invalidatesTags: ["SmartSchedule"],
+      invalidatesTags: ["schedule"],
     }),
   }),
 });

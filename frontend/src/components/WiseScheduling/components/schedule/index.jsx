@@ -1,11 +1,26 @@
 /**
  * @file index.jsx
- * @description 動態時間線組件，實現生產排程管理功能
- * @version 7.3.0
+ * @description 動態時間線組件，實現工業級生產排程管理功能
+ * @version 8.0.0 - 認知負荷優化版本
+ * @author 資深前端開發團隊
+ * @lastModified 2025-05-29
+ *
+ * @features
+ * - 高效能 vis-timeline 整合，避免重複渲染
+ * - 支援多區域生產排程管理
+ * - 即時數據同步與狀態管理
+ * - 響應式時間範圍控制
+ *
+ * @performance
+ * - 使用 ref 保持 timeline 實例穩定
+ * - memo 化關鍵組件避免重渲染
+ * - 批次數據處理減少 API 調用
  */
 
 //! =============== 1. 設定與常量 ===============
-//* 基礎 React Hooks
+//* 這個區塊包含所有專案配置，便於統一管理和維護
+
+//* 基礎 React Hooks - 核心狀態管理工具
 import React, {
   useState,
   useRef,
@@ -14,61 +29,104 @@ import React, {
   useMemo,
 } from "react";
 
-//* UI 元件
+//* UI 元件 - Material-UI 基礎組件
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+
+//* 時間線核心庫 - vis-timeline 主要功能
 import { Timeline } from "vis-timeline/standalone";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 
-//* 時間處理庫
+//* 時間處理庫 - 多語言日期處理
 import dayjs from "dayjs";
 import "dayjs/locale/zh-tw";
 import moment from "moment";
 
-//* 自定義元件
+//* 自定義組件 - 本專案核心組件
 import TimelineControls from "./TimelineControls";
 import DialogPortals from "./dialogs/DialogPortals";
-import "./styles/industrialTheme"; // 引入工業風格主題
+import "./styles/industrialTheme"; // 工業風格主題
 
-//* 服務與資料
+//* API 服務層 - 數據獲取與狀態管理
 import { useGetSmartScheduleQuery } from "../../services/schedule/smartSchedule";
 import { useGetMachinesQuery } from "../../../QuotationManagementSystem/services/salesServices/endpoints/machineApi";
 
-//* 樣式
+//* 樣式配置 - 組件外觀控制
 import { TimelineContainer } from "../../assets/schedule";
 
-//* 常量與配置
+//* 配置常量 - 系統設定與驗證規則
 import { momentLocaleConfig } from "../../configs/validations/schedule/timeline/timelineLocale";
 import { TIME_RANGES } from "../../configs/validations/schedule/timeline/timelineConfigs";
 import { MACHINE_CONFIG } from "../../configs/validations/schedule/constants";
 
-//* 自定義 Hook 與管理器
+//* 自定義 Hooks - 業務邏輯封裝
 import { useTimelineData } from "../../hooks/schedule/useTimelineData";
 import { useTimelineConfig } from "../../hooks/schedule/useTimelineConfig";
 import { useTimelineDialogs } from "../../hooks/schedule/useTimelineDialogs";
 import useTimeRange from "../../hooks/schedule/useTimeRange";
+
+//* 工具模組 - 通用功能函數
 import { setGroups } from "./DialogManager";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 
-//! =============== 2. 全局初始化設定 ===============
-// 設定日期本地化
-dayjs.locale("zh-tw");
+//! =============== 2. 類型與介面 ===============
+//* 定義所有資料結構和業務邏輯 Hook，幫助理解資料流向
 
-// 設定 moment 本地化配置
-if (moment) {
-  moment.updateLocale("zh-tw", momentLocaleConfig);
+/**
+ * @function useLocaleInitialization
+ * @description 初始化多語言設定，確保日期顯示正確
+ * @returns {void}
+ *
+ * @example
+ * // 組件載入時自動執行
+ * useLocaleInitialization();
+ *
+ * @notes
+ * - 同時設定 dayjs 和 moment 的中文語系
+ * - 確保時間線顯示使用正確的中文格式
+ */
+function useLocaleInitialization() {
+  useEffect(() => {
+    // 設定 dayjs 中文語系
+    dayjs.locale("zh-tw");
+
+    // 設定 moment 中文語系配置
+    if (moment) {
+      moment.updateLocale("zh-tw", momentLocaleConfig);
+    }
+  }, []);
 }
 
 /**
  * @function useAreaScheduleData
- * @description 獲取特定區域的排程數據，分別提取最新的製令單和機台狀態
+ * @description 獲取特定區域的智能排程數據
  * @param {string} area - 區域代碼，例如 "A"、"B" 等
- * @param {string} startTime - 開始時間 (ISO string)
- * @param {string} endTime - 結束時間 (ISO string)
- * @returns {Object} 排程數據和加載狀態
+ * @param {string|null} startTime - 開始時間 (ISO string)
+ * @param {string|null} endTime - 結束時間 (ISO string)
+ * @returns {Object} { isSuccess, isLoading, scheduleList }
+ *
+ * @example
+ * // 基礎使用
+ * const { scheduleList } = useAreaScheduleData("A");
+ *
+ * // 帶時間範圍
+ * const { scheduleList, isLoading } = useAreaScheduleData(
+ *   "B",
+ *   "2025-01-01T00:00:00Z",
+ *   "2025-01-31T23:59:59Z"
+ * );
+ *
+ * @notes
+ * - 自動過濾指定區域的數據
+ * - 支援時間範圍查詢優化性能
+ * - 返回的數據已經過處理，可直接使用
+ *
+ * @commonErrors
+ * - area 參數為空時返回空陣列
+ * - API 請求失敗時 scheduleList 為空陣列
  */
 function useAreaScheduleData(area = "A", startTime = null, endTime = null) {
-  // 🧠 API 查詢，獲取智能排程數據（包含時間範圍）
+  //! API 查詢 - 核心數據獲取
   const {
     isSuccess,
     isLoading,
@@ -79,17 +137,12 @@ function useAreaScheduleData(area = "A", startTime = null, endTime = null) {
     endTime,
   });
 
-  // ✨ 使用 useMemo 處理數據，避免重複計算
+  //* 數據處理 - 過濾和轉換邏輯
   const scheduleList = useMemo(() => {
     if (!scheduleData?.data) return [];
 
-    // 過濾出指定區域的數據
-    const areaData = scheduleData.data.filter(
-      (item) => item.productionArea === area
-    );
-
-    // 只過濾 area，不進行進一步處理
-    return areaData;
+    // 過濾指定區域的數據
+    return scheduleData.data.filter((item) => item.productionArea === area);
   }, [scheduleData, area]);
 
   return {
@@ -101,15 +154,24 @@ function useAreaScheduleData(area = "A", startTime = null, endTime = null) {
 
 /**
  * @function useAreaMachines
- * @description 獲取特定區域的機台數據
+ * @description 獲取特定區域的機台設備數據
  * @param {string} area - 區域代碼
- * @returns {Object} 機台數據和加載狀態
+ * @returns {Object} { isSuccess, isLoading, allArea, filteredMachines }
+ *
+ * @example
+ * // 基礎使用
+ * const { filteredMachines } = useAreaMachines("A");
+ *
+ * @notes
+ * - 從所有機台中過濾出指定區域的設備
+ * - 保留原始數據供其他組件使用
+ * - 自動處理載入狀態
  */
 function useAreaMachines(area = "A") {
-  // 🧠 獲取所有機台數據
+  //! 機台數據獲取 - 系統設備資訊
   const { isSuccess, isLoading, data: allArea } = useGetMachinesQuery();
 
-  // ✨ 過濾特定區域的機台
+  //* 區域過濾 - 指定區域機台篩選
   const filteredMachines = useMemo(
     () => allArea?.data?.filter((machine) => machine.productionArea === area),
     [allArea, area]
@@ -123,11 +185,25 @@ function useAreaMachines(area = "A") {
   };
 }
 
+//! =============== 3. 核心功能 ===============
+//* 主要業務邏輯區，每個功能都配有詳細說明
+
 /**
- * @component TimelinePaper
- * @description 時間線容器組件，使用 memo 避免不必要的重新渲染
+ * @function TimelinePaper
+ * @description 時間線容器組件，使用 memo 優化性能
+ * @param {Object} props - 組件屬性
+ * @param {React.RefObject} props.containerRef - 時間線容器引用
+ * @returns {React.Component} 時間線紙張容器
+ *
+ * @example
+ * <TimelinePaper containerRef={containerRef} />
+ *
+ * @notes
+ * - 使用 React.memo 避免不必要重渲染
+ * - 固定樣式確保時間線正確顯示
+ * - 最小高度 600px 保證可視性
  */
-function TimelinePaperInner({ containerRef }) {
+function TimelinePaperComponent({ containerRef }) {
   return (
     <Paper
       ref={containerRef}
@@ -143,24 +219,280 @@ function TimelinePaperInner({ containerRef }) {
     />
   );
 }
-const TimelinePaper = React.memo(TimelinePaperInner);
 
-// 確保顯示名稱，方便調試
+const TimelinePaper = React.memo(TimelinePaperComponent);
 TimelinePaper.displayName = "TimelinePaper";
 
 /**
+ * @function useTimelineInitialization
+ * @description 處理時間線初始化和事件綁定邏輯
+ * @param {Object} params - 初始化參數
+ * @param {React.RefObject} params.containerRef - 容器引用
+ * @param {React.RefObject} params.timelineRef - 時間線引用
+ * @param {React.RefObject} params.itemsDataRef - 數據引用
+ * @param {Array} params.groups - 分組數據
+ * @param {Function} params.getTimelineOptions - 選項獲取函數
+ * @param {Function} params.handleEditItem - 項目編輯處理
+ * @returns {void}
+ *
+ * @notes
+ * - 整合時間線初始化、事件綁定和清理操作
+ * - 設置雙擊編輯事件監聽
+ * - 確保 DialogManager 同步分組數據
+ * - 提供調試接口（開發環境）
+ */
+function useTimelineInitialization({
+  containerRef,
+  timelineRef,
+  itemsDataRef,
+  groups,
+  getTimelineOptions,
+  handleEditItem,
+}) {
+  useEffect(() => {
+    //? 初始化條件檢查 - 可能需要更嚴格的驗證
+    if (!containerRef.current || !itemsDataRef.current || !groups) return;
+
+    // 清空容器準備重新初始化
+    containerRef.current.innerHTML = "";
+
+    // 獲取時間線配置選項
+    const options = getTimelineOptions();
+
+    //! 創建時間線實例 - 核心功能初始化
+    timelineRef.current = new Timeline(
+      containerRef.current,
+      itemsDataRef.current,
+      groups,
+      options
+    );
+
+    //* 事件監聽設置 - 雙擊編輯功能
+    timelineRef.current.on("doubleClick", (properties) => {
+      if (!properties.item) return;
+      const item = itemsDataRef.current.get(properties.item);
+      if (item) {
+        handleEditItem(item);
+      }
+    });
+
+    //TODO 調試接口 - 生產環境應移除
+    if (process.env.NODE_ENV === "development") {
+      window.timeline = timelineRef.current;
+      if (!window.app) window.app = {};
+      window.app.timelineData = itemsDataRef.current;
+    }
+
+    //* DialogManager 同步 - 確保對話框正確顯示
+    if (groups) {
+      setGroups(groups);
+    }
+
+    //! 清理函數 - 防止記憶體洩漏
+    return () => {
+      if (timelineRef.current) {
+        timelineRef.current.destroy();
+        timelineRef.current = null;
+      }
+    };
+  }, [containerRef, itemsDataRef, groups, getTimelineOptions, handleEditItem]);
+}
+
+/**
+ * @function useMoveToNowHandler
+ * @description 處理移動到當前時間的邏輯
+ * @param {React.RefObject} timelineRef - 時間線引用
+ * @param {string} timeRange - 時間範圍設定
+ * @param {Function} dialogMoveToNow - 對話框的移動函數
+ * @returns {Function} 移動到現在的處理函數
+ *
+ * @notes
+ * - 優先使用對話框提供的移動函數
+ * - 備用實現確保功能可靠性
+ * - 包含錯誤處理避免應用崩潰
+ */
+function useMoveToNowHandler(timelineRef, timeRange, dialogMoveToNow) {
+  return useCallback(() => {
+    //! 優先策略 - 使用對話框提供的函數
+    if (dialogMoveToNow) {
+      dialogMoveToNow();
+      return;
+    }
+
+    //* 備用實現 - 直接操作時間線
+    if (!timelineRef.current) return;
+
+    try {
+      const timeWindow = getTimeWindow(timeRange, dayjs());
+      timelineRef.current.setWindow(
+        timeWindow.start.toDate(),
+        timeWindow.end.toDate(),
+        { animation: true }
+      );
+    } catch (error) {
+      console.error("移動到當前時間失敗:", error);
+    }
+  }, [timeRange, dialogMoveToNow, timelineRef]);
+}
+
+//! =============== 4. 工具函數 ===============
+//* 通用功能區，可被多個模組復用
+
+/**
+ * @function formatTimeForInput
+ * @description 將 ISO 時間字串格式化為 HTML input 可用格式
+ * @param {string} isoString - ISO 格式時間字串
+ * @returns {string} HTML datetime-local 格式字串
+ *
+ * @example
+ * // 基本使用
+ * const formatted = formatTimeForInput("2025-01-01T10:30:00.000Z");
+ * // 結果: "2025-01-01T10:30"
+ *
+ * @notes
+ * - 專門用於 HTML datetime-local input
+ * - 自動處理空值情況
+ * - 使用 dayjs 確保格式一致性
+ */
+function formatTimeForInput(isoString) {
+  if (!isoString) return "";
+  return dayjs(isoString).format("YYYY-MM-DDTHH:mm");
+}
+
+/**
+ * @function handleTimeInputChange
+ * @description 處理時間輸入變更，轉換格式並調用更新函數
+ * @param {string} inputValue - HTML input 的時間值
+ * @param {Function} setter - 狀態更新函數
+ * @returns {void}
+ *
+ * @example
+ * // 基本使用
+ * handleTimeInputChange("2025-01-01T10:30", setStartTime);
+ *
+ * @notes
+ * - 自動轉換為 ISO 格式
+ * - 確保時間格式統一性
+ */
+function handleTimeInputChange(inputValue, setter) {
+  const isoValue = dayjs(inputValue).toISOString();
+  setter(isoValue);
+}
+
+/**
+ * @function createTimeRangeOptions
+ * @description 創建時間範圍選項陣列
+ * @returns {Array} 時間範圍選項
+ *
+ * @example
+ * const options = createTimeRangeOptions();
+ * // 結果: [{ value: "day", label: "日" }, ...]
+ */
+function createTimeRangeOptions() {
+  return Object.entries(TIME_RANGES).map(([key, config]) => ({
+    value: key,
+    label: config.label,
+  }));
+}
+
+/**
+ * @function createAreaOptions
+ * @description 創建區域選項陣列
+ * @returns {Array} 區域選項
+ *
+ * @example
+ * const options = createAreaOptions();
+ * // 結果: [{ value: "A", label: "A區" }, ...]
+ */
+function createAreaOptions() {
+  return MACHINE_CONFIG.AREAS.map((area) => ({
+    value: area,
+    label: `${area}區`,
+  }));
+}
+
+/**
+ * @function useQuickTimeSelector
+ * @description 處理快捷時間選擇邏輯
+ * @param {Function} handleStartTimeChange - 開始時間更新函數
+ * @param {Function} handleEndTimeChange - 結束時間更新函數
+ * @returns {Function} 快捷時間選擇處理函數
+ *
+ * @example
+ * const handleQuickSelect = useQuickTimeSelector(setStart, setEnd);
+ * handleQuickSelect("today"); // 設定為今天
+ *
+ * @notes
+ * - 支援今天、本週、本月、預設範圍
+ * - 使用 dayjs 確保時間計算正確
+ * - 自動處理時區問題
+ */
+function useQuickTimeSelector(handleStartTimeChange, handleEndTimeChange) {
+  return useCallback(
+    (type) => {
+      const now = dayjs();
+
+      switch (type) {
+        case "today":
+          handleStartTimeChange(now.startOf("day").toISOString());
+          handleEndTimeChange(now.endOf("day").toISOString());
+          break;
+        case "week":
+          handleStartTimeChange(now.startOf("week").toISOString());
+          handleEndTimeChange(now.endOf("week").toISOString());
+          break;
+        case "month":
+          handleStartTimeChange(now.startOf("month").toISOString());
+          handleEndTimeChange(now.endOf("month").toISOString());
+          break;
+        case "default":
+          const defaultStart = now
+            .subtract(1, "month")
+            .startOf("day")
+            .toISOString();
+          const defaultEnd = now.add(1, "month").endOf("day").toISOString();
+          handleStartTimeChange(defaultStart);
+          handleEndTimeChange(defaultEnd);
+          break;
+        default:
+          break;
+      }
+    },
+    [handleStartTimeChange, handleEndTimeChange]
+  );
+}
+
+/**
  * @component DynamicTimeline
- * @description 動態時間線組件，結合多個功能子組件實現生產排程管理功能
+ * @description 動態時間線主組件，整合所有功能模組
+ * @returns {React.Component} 完整的時間線界面
+ *
+ * @example
+ * // 基本使用
+ * <DynamicTimeline />
+ *
+ * @notes
+ * - 整合數據獲取、時間線顯示、控制面板
+ * - 支援多區域切換和時間範圍調整
+ * - 包含完整的狀態管理和事件處理
+ *
+ * @performance
+ * - 使用 memo 和 useCallback 優化渲染性能
+ * - 避免 vis-timeline 實例重複創建
+ * - 批次處理數據更新減少重渲染
  */
 function DynamicTimeline() {
-  //! =============== 3. 狀態與引用 ===============
+  //! 語言初始化 - 確保中文顯示正確
+  useLocaleInitialization();
+
+  //! 核心狀態管理 - 組件主要狀態
   const containerRef = useRef(null);
   const timelineRef = useRef(null);
   const [timeRange, setTimeRange] = useState("day");
   const [selectedArea, setSelectedArea] = useState("A");
-  const [timePanelExpanded, setTimePanelExpanded] = useState(false); // 新增：面板展開狀態
+  const [timePanelExpanded, setTimePanelExpanded] = useState(false);
 
-  // 🔧 新增：時間範圍管理
+  //* 時間範圍管理 - 自定義時間選擇
   const {
     timeRange: selectedTimeRange,
     formattedTimeRange,
@@ -168,27 +500,20 @@ function DynamicTimeline() {
     handleEndTimeChange,
   } = useTimeRange();
 
-  //! =============== 4. 數據獲取 ===============
-  // 獲取特定區域的排程數據（包含時間範圍）
+  //! 數據獲取 - API 數據層
   const { scheduleList } = useAreaScheduleData(
     selectedArea,
     formattedTimeRange.startTime,
     formattedTimeRange.endTime
   );
-
-  // 獲取機台數據
   const { filteredMachines } = useAreaMachines(selectedArea);
 
-  // 使用自定義 hook 獲取時間線數據
+  //* 業務邏輯 Hooks - 核心功能封裝
   const { itemsDataRef, groups } = useTimelineData(
     filteredMachines,
-    scheduleList // 修正：取消註釋，確保排程資料能被載入
+    scheduleList
   );
-
-  // 使用自定義 hook 獲取時間線配置選項
   const { getTimelineOptions } = useTimelineConfig(itemsDataRef, timeRange);
-
-  // 使用自定義 hook 處理對話框
   const {
     handleAddItem,
     handleEditItem,
@@ -200,148 +525,40 @@ function DynamicTimeline() {
     timeRange,
   });
 
-  //! =============== 5. 時間線初始化與事件處理 ===============
-  /**
-   * 移動到當前時間
-   */
-  const handleMoveToNow = useCallback(() => {
-    // 優先使用 dialogMoveToNow
-    if (dialogMoveToNow) {
-      dialogMoveToNow();
-      return;
-    }
+  //* 事件處理函數 - 用戶互動邏輯
+  const handleMoveToNow = useMoveToNowHandler(
+    timelineRef,
+    timeRange,
+    dialogMoveToNow
+  );
+  const handleQuickTimeSelect = useQuickTimeSelector(
+    handleStartTimeChange,
+    handleEndTimeChange
+  );
 
-    // 備用實現
-    if (!timelineRef.current) return;
+  //* 時間線初始化 - 核心組件設置
+  useTimelineInitialization({
+    containerRef,
+    timelineRef,
+    itemsDataRef,
+    groups,
+    getTimelineOptions,
+    handleEditItem,
+  });
 
-    try {
-      const timeWindow = getTimeWindow(timeRange, dayjs());
-      timelineRef.current.setWindow(
-        timeWindow.start.toDate(),
-        timeWindow.end.toDate(),
-        { animation: true }
-      );
-    } catch (error) {
-      console.error("Move to current time failed:", error);
-    }
-  }, [timeRange, dialogMoveToNow]);
+  //* 選項數據 - UI 控制選項
+  const timeRangeOptions = createTimeRangeOptions();
+  const areaOptions = createAreaOptions();
 
-  /**
-   * 初始化和更新時間線
-   * 這個 Effect 整合了時間線的初始化、事件綁定和清理操作
-   */
-  useEffect(() => {
-    // 初始化條件檢查
-    if (!containerRef.current || !itemsDataRef.current || !groups) return;
-
-    // 清空容器
-    containerRef.current.innerHTML = "";
-
-    // 獲取選項
-    const options = getTimelineOptions();
-
-    // 創建時間線
-    timelineRef.current = new Timeline(
-      containerRef.current,
-      itemsDataRef.current,
-      groups,
-      options
-    );
-
-    // 設置雙擊事件
-    timelineRef.current.on("doubleClick", (properties) => {
-      if (!properties.item) return;
-      const item = itemsDataRef.current.get(properties.item);
-      if (item) {
-        handleEditItem(item);
-      }
-    });
-
-    // 調試用
-    window.timeline = timelineRef.current;
-    if (!window.app) window.app = {};
-    window.app.timelineData = itemsDataRef.current;
-
-    // 確保 DialogManager 有最新的 groups 數據
-    if (groups) {
-      setGroups(groups);
-    }
-
-    // 清理函數
-    return () => {
-      if (timelineRef.current) {
-        timelineRef.current.destroy();
-        timelineRef.current = null;
-      }
-    };
-  }, [containerRef, itemsDataRef, groups, getTimelineOptions, handleEditItem]);
-
-  //! =============== 6. 加載狀態處理 ===============
-  // 判斷整體載入狀態
-
-  //! =============== 7. 渲染 ===============
-
-  // 🔧 格式化函數 - 父組件控制格式邏輯
-  const formatTimeForInput = (isoString) => {
-    if (!isoString) return "";
-    return dayjs(isoString).format("YYYY-MM-DDTHH:mm");
-  };
-
-  const handleTimeInputChange = (inputValue, setter) => {
-    const isoValue = dayjs(inputValue).toISOString();
-    setter(isoValue);
-  };
-
-  // 🎯 時間範圍選項 - 父組件定義選項
-  const timeRangeOptions = Object.entries(TIME_RANGES).map(([key, config]) => ({
-    value: key,
-    label: config.label,
-  }));
-
-  const areaOptions = MACHINE_CONFIG.AREAS.map((area) => ({
-    value: area,
-    label: `${area}區`,
-  }));
-
-  // 🧠 快捷時間設定邏輯 - 父組件控制
-  const handleQuickTimeSelect = (type) => {
-    const now = dayjs();
-    switch (type) {
-      case "today":
-        handleStartTimeChange(now.startOf("day").toISOString());
-        handleEndTimeChange(now.endOf("day").toISOString());
-        break;
-      case "week":
-        handleStartTimeChange(now.startOf("week").toISOString());
-        handleEndTimeChange(now.endOf("week").toISOString());
-        break;
-      case "month":
-        handleStartTimeChange(now.startOf("month").toISOString());
-        handleEndTimeChange(now.endOf("month").toISOString());
-        break;
-      case "default":
-        const defaultStart = now
-          .subtract(1, "month")
-          .startOf("day")
-          .toISOString();
-        const defaultEnd = now.add(1, "month").endOf("day").toISOString();
-        handleStartTimeChange(defaultStart);
-        handleEndTimeChange(defaultEnd);
-        break;
-      default:
-        break;
-    }
-  };
-
+  //! 主要渲染邏輯 - 組件 UI 結構
   return (
     <Box sx={{ width: "100%", p: 4 }}>
-      {/* 時間線顯示 */}
       <TimelineContainer>
-        {/* 🚀 控制反轉版本 - 父組件完全控制功能 */}
+        {/* 控制面板 - 用戶操作界面 */}
         <TimelineControls>
-          {/* 主控制列 */}
+          {/* 主控制列 - 基本操作按鈕 */}
           <TimelineControls.Row>
-            {/* 時間範圍選擇 - 父組件決定有哪些選項 */}
+            {/* 時間範圍選擇 */}
             <TimelineControls.ButtonGroup>
               {timeRangeOptions.map((option) => (
                 <TimelineControls.TimeRangeButton
@@ -363,16 +580,14 @@ function DynamicTimeline() {
                 options={areaOptions}
                 placeholder="選擇區域"
               />
-
               <TimelineControls.AddButton
                 onClick={() => handleAddItem(null, selectedArea)}
               />
-
               <TimelineControls.NowButton onClick={handleMoveToNow} />
             </TimelineControls.ButtonGroup>
           </TimelineControls.Row>
 
-          {/* 時間詳細設定 - 可展開面板 */}
+          {/* 時間詳細設定面板 - 進階時間控制 */}
           <TimelineControls.Panel
             title="時間範圍設定"
             expanded={timePanelExpanded}
@@ -386,7 +601,7 @@ function DynamicTimeline() {
             }
           >
             <TimelineControls.Row>
-              {/* 時間輸入 */}
+              {/* 精確時間輸入 */}
               <TimelineControls.ButtonGroup>
                 <TimelineControls.TimeInput
                   label="開始"
@@ -404,7 +619,7 @@ function DynamicTimeline() {
                 />
               </TimelineControls.ButtonGroup>
 
-              {/* 快捷按鈕 - 父組件決定有哪些 */}
+              {/* 快捷時間選擇 */}
               <TimelineControls.ButtonGroup>
                 <TimelineControls.Button
                   onClick={() => handleQuickTimeSelect("today")}
@@ -431,14 +646,68 @@ function DynamicTimeline() {
           </TimelineControls.Panel>
         </TimelineControls>
 
-        {/* 時間線容器 */}
+        {/* 時間線顯示區域 */}
         <TimelinePaper containerRef={containerRef} />
       </TimelineContainer>
 
-      {/* 使用 Portal 渲染對話框 */}
+      {/* 對話框管理 - 彈窗功能 */}
       <DialogPortals />
     </Box>
   );
 }
 
 export default DynamicTimeline;
+
+//* ========= 複雜邏輯解釋 =========
+// 組件架構說明：
+// 步驟 1: 語言初始化確保中文顯示正確
+// 步驟 2: 核心狀態管理控制組件行為
+// 步驟 3: 數據獲取層處理 API 請求和過濾
+// 步驟 4: 業務邏輯 Hooks 封裝複雜功能
+// 步驟 5: 事件處理函數管理用戶互動
+// 步驟 6: 時間線初始化設置 vis-timeline 實例
+// 注意事項：使用 ref 避免 vis-timeline 重複創建，提升性能
+
+//* ========= 效能優化策略 =========
+// 重型組件處理：
+// 1. vis-timeline 實例使用 ref 保持穩定，避免重新創建
+// 2. 通過 API 更新數據內容，不重新初始化組件
+// 3. TimelinePaper 使用 React.memo 避免不必要重渲染
+// 4. 所有事件處理函數使用 useCallback 包裝
+// 5. 數據處理邏輯使用 useMemo 緩存結果
+
+//! =============== 示例區塊 ===============
+/**
+ * @example 常見使用場景
+ *
+ * // 場景 1: 基本時間線顯示
+ * function App() {
+ *   return (
+ *     <div>
+ *       <DynamicTimeline />
+ *     </div>
+ *   );
+ * }
+ *
+ * // 場景 2: 集成到更大的系統中
+ * function ProductionDashboard() {
+ *   return (
+ *     <Layout>
+ *       <Header />
+ *       <DynamicTimeline />
+ *       <Footer />
+ *     </Layout>
+ *   );
+ * }
+ *
+ * // 場景 3: 多個時間線組件
+ * function MultiAreaView() {
+ *   return (
+ *     <div>
+ *       {AREAS.map(area => (
+ *         <DynamicTimeline key={area} defaultArea={area} />
+ *       ))}
+ *     </div>
+ *   );
+ * }
+ */

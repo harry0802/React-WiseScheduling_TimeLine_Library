@@ -7,10 +7,10 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import EnhancedDeleteDialog from "./EnhancedDeleteDialog";
-import { 
-  onDeleteDialogChange, 
-  confirmDelete, 
-  closeDeleteDialog 
+import {
+  onDeleteDialogChange,
+  confirmDelete,
+  closeDeleteDialog,
 } from "../DialogManager";
 
 /**
@@ -27,7 +27,10 @@ function DeleteDialogPortal() {
   // 監聽對話框狀態變化
   useEffect(() => {
     // 當對話框狀態變化時更新本地狀態
-    const unsubscribe = onDeleteDialogChange(setDialogState);
+    const unsubscribe = onDeleteDialogChange((newState) => {
+      console.log("🚀 ~ DeleteDialogPortal: new dialogState:", newState); // ✨ 新增日誌
+      setDialogState(newState);
+    });
 
     // 清理函數
     return unsubscribe;

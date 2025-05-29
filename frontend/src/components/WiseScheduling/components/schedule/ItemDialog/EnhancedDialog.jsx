@@ -31,9 +31,9 @@ import {
 } from "../styles/DialogStyles";
 import StatusController from "../StatusForms/StatusForms";
 import StatusChangeDialog from "./StatusChangeDialog";
-import { 
+import {
   MACHINE_STATUS,
-  isHistoricalData 
+  isHistoricalData,
 } from "../../../configs/validations/schedule/constants";
 import {
   isOrderType,
@@ -110,6 +110,7 @@ function EnhancedDialog({
   const handleDeleteClick = useCallback(() => {
     // 🔧 連接到 DialogManager 的刪除流程
     if (item?.id) {
+      console.log("🚀 ~ handleDeleteClick ~ item:", item);
       onDelete?.(item.id);
     }
     handleMenuClose();
