@@ -655,17 +655,18 @@ export function useTimelineDialogs({
               // ✅ API 成功後才更新本地數據
               itemsDataRef.current.update(processedItem);
 
+              //TODO: 機台排程調整 - 目前註解避免重複更新，未來可能需要獨立的排程API
               // 🔄 一律觸發機台排程調整
-              console.log("🚀 觸發機台排程調整:", processedItem);
-              changeWorkOrder(processedItem)
-                .unwrap()
-                .then((scheduleResponse) => {
-                  console.log("機台排程調整成功:", scheduleResponse);
-                })
-                .catch((scheduleError) => {
-                  console.error("機台排程調整失敗:", scheduleError);
-                  // 排程調整失敗不影響製令單更新
-                });
+              // console.log("🚀 觸發機台排程調整:", processedItem);
+              // changeWorkOrder(processedItem)
+              //   .unwrap()
+              //   .then((scheduleResponse) => {
+              //     console.log("機台排程調整成功:", scheduleResponse);
+              //   })
+              //   .catch((scheduleError) => {
+              //     console.error("機台排程調整失敗:", scheduleError);
+              //     // 排程調整失敗不影響製令單更新
+              //   });
             })
             .catch((error) => {
               console.error("製令單 API 更新失敗:", error);
