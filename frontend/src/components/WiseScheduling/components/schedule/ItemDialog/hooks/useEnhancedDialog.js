@@ -34,6 +34,7 @@ import {
  * @returns {Object} 業務邏輯狀態和方法
  */
 function useEnhancedDialog(item, mode, options = {}) {
+  console.log("🚀 ~ useEnhancedDialog ~ item:", item);
   const { onSave, onClose, groups } = options;
 
   // 🦉 核心狀態管理
@@ -149,11 +150,13 @@ function useEnhancedDialog(item, mode, options = {}) {
         transformedData.orderInfo = {
           ...item?.orderInfo,
           productName: formData.productName || "",
-          process: formData.process || "",
+          process: formData.process ?? 0,
           scheduledStartTime: formData.start,
           scheduledEndTime: item?.orderInfo?.scheduledEndTime || formData.end,
-          actualStartTime: formData.start,
-          actualEndTime: item?.orderInfo?.actualEndTime || formData.end,
+          actualStartTime:
+            item?.actualEndTime ?? item?.orderInfo?.actualStartTime ?? null,
+          actualEndTime:
+            item?.actualEndTime ?? item?.orderInfo?.actualEndTime ?? null,
         };
 
         // 機台狀態數據清空
@@ -172,6 +175,7 @@ function useEnhancedDialog(item, mode, options = {}) {
         transformedData.orderInfo = {};
       }
 
+      console.log("🚀 ~ useEnhancedDialog ~ transformedData:", transformedData);
       return transformedData;
     },
     [item, currentStatus]

@@ -5,19 +5,28 @@ export const smartScheduleApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSmartSchedule: builder.query({
       query: ({ productionArea, startTime, endTime }) => ({
-        url: `${API_BASE}/smartSchedule/`, // Updated URL to include trailing slash
+        url: `${API_BASE}smartSchedule/`,
         method: "GET",
-        params: { productionArea, startTime, endTime }, // Updated params
+        params: { productionArea, startTime, endTime },
       }),
       providesTags: ["schedule"],
     }),
 
     changeWorkOrder: builder.mutation({
-      query: (payload) => ({
-        url: `${API_BASE}/smartSchedule/changeWorkOrder`,
-        method: "PUT",
-        body: payload,
-      }),
+      query: (payload) => {
+        // 🔄 強制統一轉換格式 - 只保留核心欄位
+        const transformedPayload = {
+          productionScheduleId: payload.productionScheduleId,
+          newStartDate: payload.planOnMachineDate,
+          machineSN: payload.machineSN,
+        };
+
+        return {
+          url: `${API_BASE}smartSchedule/changeWorkOrder`,
+          method: "PUT",
+          body: transformedPayload,
+        };
+      },
       invalidatesTags: ["schedule"],
     }),
   }),

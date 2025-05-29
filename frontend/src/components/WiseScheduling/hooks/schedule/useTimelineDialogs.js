@@ -9,7 +9,7 @@ import { useEffect, useCallback } from "react";
 import {
   setGroups,
   openItemDialog,
-  closeItemDialog,                        
+  closeItemDialog,
   onSaveItem,
   onConfirmDelete,
   openDeleteDialog,
@@ -299,6 +299,7 @@ function getEditableConfig(timeLineStatus, orderStatus) {
  * - 缺少 orderInfo 會影響可編輯性判斷
  */
 function processOrderItem(item) {
+  console.log("🚀 ~ processOrderItem ~ item:", item);
   const timing = getItemTiming(item);
 
   return {
@@ -411,6 +412,30 @@ function determineAction(id) {
 
 //! =============== 4. 工具函數 ===============
 //* 通用功能區，可被多個模組復用
+
+/**
+ * @function hasScheduleTimeChanged
+ * @description 檢查製令單的排程時間是否有變化
+ * @param {Object} originalItem - 原始項目數據
+ * @param {Object} updatedItem - 更新後的項目數據
+ * @returns {boolean} 排程時間是否有變化
+ * @example
+ * // 檢查時間變化
+ * const changed = hasScheduleTimeChanged(original, updated);
+ * 
+ * @notes
+ * - 比較 planOnMachineDate 或 start 時間
+ * - 使用 dayjs 進行精確比較
+ * - 只針對製令單項目進行檢查
+ */
+function hasScheduleTimeChanged(originalItem, updatedItem) {
+  if (!isOrderItem(updatedItem)) return false;
+  
+  const originalStart = dayjs(originalItem.planOnMachineDate || originalItem.start);
+  const updatedStart = dayjs(updatedItem.planOnMachineDate || updatedItem.start);
+  
+  return !originalStart.isSame(updatedStart);
+}
 
 /**
  * @function validateDeletePermission
@@ -704,19 +729,32 @@ export function useTimelineDialogs({
    * - 只處理製令單相關邏輯
    * - 自動判斷新增或更新操作
    * - 同步更新本地數據和後端API
+   * - 支援機台排程調整功能
    */
   const saveOrderItem = useCallback(
     function saveOrderItem(updatedItem) {
       try {
         const processedItem = processOrderItem(updatedItem.internal);
+        console.log("🚀 ~ saveOrderItem ~ processedItem:", processedItem);
         const action = determineAction(processedItem.id);
 
         // 更新本地數據
         itemsDataRef.current[action](processedItem);
-
+        
         // 提交到製令單 API
         if (updatedItem.api) {
           submitToOrderAPI(updatedItem.api, changeWorkOrder);
+        }
+
+        // 🆕 檢查是否需要機台排程調整
+        // 當製令單的開始時間有變化且有完整的排程資訊時，觸發機台排程調整
+        const originalItem = action === "update" ? 
+          itemsDataRef.current.get(processedItem.id) : null;
+        
+        if (originalItem && hasScheduleTimeChanged(originalItem, processedItem)) {
+          console.log("🚀 觸發機台排程調整:", processedItem);
+          // 🔄 使用統一的 changeWorkOrder API，讓 API 層判斷格式
+          changeWorkOrder(processedItem);
         }
       } catch (error) {
         console.error("保存製令單失敗:", error);
@@ -805,6 +843,7 @@ export function useTimelineDialogs({
    */
   const handleSaveItem = useCallback(
     function handleSaveItem(updatedItem) {
+      console.log("🚀 ~ handleSaveItem ~ updatedItem:", updatedItem);
       try {
         // 🧠 在最頂層進行結構驗證和類型判斷
         validateItemStructure(updatedItem);

@@ -320,7 +320,6 @@ export const transformApiToInternalFormat = (apiData) => {
     internalData.actualStartTime = status.actualStartTime;
     internalData.actualEndTime = status.actualEndTime;
   }
-
   return internalData;
 };
 
@@ -395,8 +394,6 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
  * @param {Date} endTime - 結束時間
  */
 function fillMachineStatusData(internalData, apiData, startTime, endTime) {
-  console.log("🚀 ~ fillMachineStatusData ~ internalData:", internalData);
-
   const formattedStartTime = formatDate(startTime, TIME_FORMAT, true);
   const formattedEndTime = formatDate(endTime, TIME_FORMAT, true);
   const { status, _originalApiData } = internalData;
