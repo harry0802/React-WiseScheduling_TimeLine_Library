@@ -62,12 +62,38 @@ export const industrialTheme = {
       xl: "32px",
     },
     fontSize: {
-      xs: "14px", // 增加最小字體大小
-      sm: "16px", // 增加小字體大小
-      md: "18px", // 增加中字體大小
-      lg: "20px", // 增加大字體大小
-      xl: "24px", // 增加超大字體大小
-      xxl: "28px", // 增加最大字體大小
+      xs: "16px", // 最小字體大小 (從 14px 提升)
+      sm: "18px", // 小字體大小 (從 16px 提升)
+      md: "20px", // 中字體大小 (從 18px 提升)
+      lg: "24px", // 大字體大小 (從 20px 提升)
+      xl: "28px", // 超大字體大小 (從 24px 提升)
+      xxl: "32px", // 最大字體大小 (從 28px 提升)
+      
+      // 🏭 工廠專用字體大小
+      factory: {
+        timeline: {
+          axisLarge: "28px",    // 時間軸主要刻度 (工廠環境)
+          axisMedium: "22px",   // 時間軸次要刻度
+          axisSmall: "18px",    // 時間軸小刻度
+          itemTitle: "20px",    // 項目標題
+          itemContent: "18px",  // 項目內容
+          itemMeta: "16px",     // 項目細節
+          machineLabel: "20px", // 機台標籤
+        },
+        button: {
+          sm: "16px",
+          md: "18px",
+          lg: "20px",
+        },
+        heading: {
+          h1: "36px",
+          h2: "32px",
+          h3: "28px",
+          h4: "24px",
+          h5: "20px",
+          h6: "18px",
+        },
+      },
     },
   },
   // 動畫效果 - 簡化

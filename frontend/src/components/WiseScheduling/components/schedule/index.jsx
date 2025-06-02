@@ -37,6 +37,9 @@ import Paper from "@mui/material/Paper";
 import { Timeline } from "vis-timeline/standalone";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 
+//* 🏭 工廠友善字體樣式 - 簡單字體放大
+import "../../assets/schedule/simpleFactoryFonts.css";
+
 //* 時間處理庫 - 多語言日期處理
 import dayjs from "dayjs";
 import "dayjs/locale/zh-tw";
