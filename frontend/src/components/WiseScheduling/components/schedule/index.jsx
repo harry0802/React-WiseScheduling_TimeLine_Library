@@ -37,9 +37,6 @@ import Paper from "@mui/material/Paper";
 import { Timeline } from "vis-timeline/standalone";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 
-//* 🏭 工廠友善字體樣式 - 簡單字體放大
-import "../../assets/schedule/simpleFactoryFonts.css";
-
 //* 時間處理庫 - 多語言日期處理
 import dayjs from "dayjs";
 import "dayjs/locale/zh-tw";
@@ -48,7 +45,7 @@ import moment from "moment";
 //* 自定義組件 - 本專案核心組件
 import TimelineControls from "./TimelineControls";
 import DialogPortals from "./dialogs/DialogPortals";
-import "./styles/industrialTheme"; // 工業風格主題
+import { TimelineGlobalStyles } from "./styles/industrialTheme"; // 工業風格主題與全域樣式
 
 //* API 服務層 - 數據獲取與狀態管理
 import { useGetSmartScheduleQuery } from "../../services/schedule/smartSchedule";
@@ -555,8 +552,12 @@ function DynamicTimeline() {
 
   //! 主要渲染邏輯 - 組件 UI 結構
   return (
-    <Box sx={{ width: "100%", p: 4 }}>
-      <TimelineContainer>
+    <>
+      {/* 🎨 全域時間線樣式 */}
+      <TimelineGlobalStyles />
+      
+      <Box sx={{ width: "100%", p: 4 }}>
+        <TimelineContainer>
         {/* 控制面板 - 用戶操作界面 */}
         <TimelineControls>
           {/* 主控制列 - 基本操作按鈕 */}
@@ -656,6 +657,7 @@ function DynamicTimeline() {
       {/* 對話框管理 - 彈窗功能 */}
       <DialogPortals />
     </Box>
+    </>
   );
 }
 

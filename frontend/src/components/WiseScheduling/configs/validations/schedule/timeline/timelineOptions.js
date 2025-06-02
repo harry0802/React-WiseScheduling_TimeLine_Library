@@ -4,10 +4,14 @@ import { zhTWLocale } from "./timelineLocale";
 
 export const BASE_TIMELINE_OPTIONS = {
   width: "100%",
-  height: "600px",
+  minHeight: "600px",
   margin: {
-    item: 1,
+    item: {
+      horizontal: 10,
+      vertical: 10, // 🎯 增加垂直間距，讓 row 高度更舒適
+    },
   },
+  groupHeightMode: "auto", // 🔧 自動調整群組高度，保持標籤與內容同步
   orientation: "top",
   zoomable: false,
   moveable: true,

@@ -156,9 +156,7 @@ function useTimelineConfig(itemsDataRef, timeRange) {
       // 移動事件處理 - 目前已禁用，但保留邏輯供未來使用
       // onMove: (item, callback) => handleItemMove(item, callback, itemsDataRef),
       snap: null,
-      margin: {
-        item: { vertical: 8 },
-      },
+      // margin 設定已在 BASE_TIMELINE_OPTIONS 中定義，這裡不需要重複覆蓋
       zoomMax: MAX_ZOOM_RANGE_MS,
     };
   }, [itemsDataRef]);

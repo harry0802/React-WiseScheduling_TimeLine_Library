@@ -128,16 +128,24 @@ export const TimelineContainer = styled.div`
   /* 標籤樣式 */
   .vis-labelset .vis-label {
     padding: ${timelineTheme.spacing.label};
+    min-height: 45px;  /* 🎯 與項目高度保持一致 */
+    display: flex;
+    align-items: center;  /* 垂直居中對齊 */
 
     &[data-color] {
       background-color: var(--row-color);
     }
   }
 
+  /* 群組樣式 - 確保與標籤高度一致 */
+  .vis-foreground .vis-group {
+    min-height: 45px;  /* 🎯 與項目和標籤高度保持一致 */
+  }
+
   /* 項目樣式 (BaseItem) */
   .vis-item {
-    height: 40px;
-    line-height: 40px;
+    min-height: 45px;  /* 🎯 改為 min-height，讓 vis-timeline 控制實際高度 */
+    line-height: 1.4;  /* 🔧 改為相對行高，更靈活 */
     border-radius: 4px;
     font-size: 14px;
     padding: 0 8px;
