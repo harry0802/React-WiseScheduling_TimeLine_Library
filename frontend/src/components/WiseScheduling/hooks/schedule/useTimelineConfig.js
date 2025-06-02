@@ -49,6 +49,13 @@ const createItemTemplate = (item) => {
 };
 
 //! =============== 1. 設定與常量 ===============
+//* 這個區塊包含所有專案配置，便於統一管理
+
+//TODO: 編輯功能控制規劃 - 目前一律禁用，未來可能需要依角色權限開放
+//TODO: - 管理員：可能需要 add, remove 權限
+//TODO: - 排程人員：可能需要 updateTime, updateGroup 權限  
+//TODO: - 一般用戶：維持目前的 selectable 查看權限
+
 //* 時間線最大縮放範圍（10年的毫秒數）
 const MAX_ZOOM_RANGE_MS = 1000 * 60 * 60 * 24 * 31 * 12 * 10;
 
@@ -134,19 +141,19 @@ function useTimelineConfig(itemsDataRef, timeRange) {
   const getBaseOptions = useCallback(() => {
     return {
       ...BASE_TIMELINE_OPTIONS,
-      //TODO: 編輯功能控制 - 目前一律禁用，未來可能需要依角色權限開放
+      // 編輯功能 - 參考頂部 TODO 規劃
       editable: {
-        add: false,         //TODO: 雙擊新增功能 - 未來管理員可能需要
-        updateTime: false,  //TODO: 水平拖拽調整時間 - 排程人員可能需要
-        updateGroup: false, //TODO: 垂直拖拽換機台 - 排程人員可能需要
-        remove: false,      //TODO: 刪除按鈕 - 管理員可能需要
-        overrideItems: true //TODO: 強制覆蓋個別項目設定
+        add: false,         // 雙擊新增功能
+        updateTime: false,  // 水平拖拽調整時間
+        updateGroup: false, // 垂直拖拽換機台
+        remove: false,      // 刪除按鈕
+        overrideItems: true // 強制覆蓋個別項目設定
       },
-      //TODO: 互動功能控制 - 目前僅允許查看，未來可能需要選取功能
-      selectable: false,    //TODO: 項目選取功能 - 查看詳情時可能需要
-      multiselect: false,   //TODO: 多選功能 - 批次操作時可能需要
+      // 互動功能 - 保留聚焦查看，禁用編輯操作
+      selectable: true,     // 項目選取功能 - 用於聚焦和查看詳情
+      multiselect: false,   // 多選功能 - 禁用避免誤操作
       format: TIME_FORMAT_CONFIG,
-      //TODO: 移動事件處理 - 目前已禁用，但保留邏輯供未來使用
+      // 移動事件處理 - 目前已禁用，但保留邏輯供未來使用
       // onMove: (item, callback) => handleItemMove(item, callback, itemsDataRef),
       snap: null,
       margin: {
