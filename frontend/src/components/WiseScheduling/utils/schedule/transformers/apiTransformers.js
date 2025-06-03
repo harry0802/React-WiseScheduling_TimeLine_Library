@@ -409,30 +409,30 @@ function fillMachineStatusData(internalData, apiData, startTime, endTime) {
   apiData.planEndDate = status?.endTime
     ? formatDate(status.endTime, TIME_FORMAT, true)
     : formattedEndTime;
-
+  // TODO 生管永遠不會給他實際時間 除非是現場
   // 實際開始時間處理
-  if (_originalApiData?.machineStatusActualStartTime) {
-    apiData.actualStartDate = formatDate(
-      _originalApiData.machineStatusActualStartTime,
-      TIME_FORMAT,
-      true
-    );
-  } else if (status?.startTime) {
-    apiData.actualStartDate = formatDate(status.startTime, TIME_FORMAT, true);
-  } else {
-    apiData.actualStartDate = formattedStartTime;
-  }
+  // if (_originalApiData?.machineStatusActualStartTime) {
+  //   apiData.actualStartDate = formatDate(
+  //     _originalApiData.machineStatusActualStartTime,
+  //     TIME_FORMAT,
+  //     true
+  //   );
+  // } else if (status?.startTime) {
+  //   apiData.actualStartDate = formatDate(status.startTime, TIME_FORMAT, true);
+  // } else {
+  //   apiData.actualStartDate = formattedStartTime;
+  // }
 
-  // 實際結束時間處理
-  if (_originalApiData?.machineStatusActualEndTime) {
-    apiData.actualEndDate = formatDate(
-      _originalApiData.machineStatusActualEndTime,
-      TIME_FORMAT,
-      true
-    );
-  } else {
-    apiData.actualEndDate = null;
-  }
+  // // 實際結束時間處理
+  // if (_originalApiData?.machineStatusActualEndTime) {
+  //   apiData.actualEndDate = formatDate(
+  //     _originalApiData.machineStatusActualEndTime,
+  //     TIME_FORMAT,
+  //     true
+  //   );
+  // } else {
+  //   apiData.actualEndDate = null;
+  // }
 
   // 狀態詳情
   apiData.machineStatusReason = status?.reason || null;
@@ -479,7 +479,6 @@ export const transformInternalToApiFormat = (
   } else {
     fillMachineStatusData(internalData, apiData, startTime, endTime);
   }
-
   return apiData;
 };
 

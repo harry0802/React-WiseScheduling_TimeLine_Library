@@ -82,11 +82,12 @@ export const machineStatusApi = apiSlice.injectEndpoints({
           machineId: fullApiData.machineId,
           planStartDate: fullApiData.planStartDate,
           planEndDate: fullApiData.planEndDate,
+          actualStartDate: fullApiData.actualStartDate,
           status: fullApiData.status,
-          reason: fullApiData?.machineStatusReason,
-          product: fullApiData?.machineStatusProduct,
+          reason: fullApiData?.machineStatusReason ?? fullApiData.reason,
+          product: fullApiData?.machineStatusProduct ?? fullApiData.product,
         };
-
+        console.log("🚀 ~ fullApiData:", fullApiData);
         // 過濾掉 null 值
         const cleanData = Object.fromEntries(
           Object.entries(filteredData).filter(([_, value]) => value != null)
