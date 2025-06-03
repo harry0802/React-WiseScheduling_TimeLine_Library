@@ -45,14 +45,16 @@ import moment from "moment";
 //* 自定義組件 - 本專案核心組件
 import TimelineControls from "./TimelineControls";
 import DialogPortals from "./dialogs/DialogPortals";
-import { TimelineGlobalStyles } from "./styles/industrialTheme"; // 工業風格主題與全域樣式
+
+//* 🎨 主題與全域樣式 - 工廠老人友善設計
+import { TimelineGlobalStyles } from "../../assets/schedule/TimelineGlobalStyles";
+
+//* 🏗️ 樣式配置 - 組件外觀控制
+import { TimelineContainer } from "../../assets/schedule";
 
 //* API 服務層 - 數據獲取與狀態管理
 import { useGetSmartScheduleQuery } from "../../services/schedule/smartSchedule";
 import { useGetMachinesQuery } from "../../../QuotationManagementSystem/services/salesServices/endpoints/machineApi";
-
-//* 樣式配置 - 組件外觀控制
-import { TimelineContainer } from "../../assets/schedule";
 
 //* 配置常量 - 系統設定與驗證規則
 import { momentLocaleConfig } from "../../configs/validations/schedule/timeline/timelineLocale";

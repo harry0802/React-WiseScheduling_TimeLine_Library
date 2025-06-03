@@ -24,7 +24,7 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from '../styles/DialogStyles';
-import { industrialTheme } from '../styles/industrialTheme';
+import { industrialTheme } from '../../../assets/schedule/industrialTheme';
 
 /**
  * @component EnhancedDeleteDialog

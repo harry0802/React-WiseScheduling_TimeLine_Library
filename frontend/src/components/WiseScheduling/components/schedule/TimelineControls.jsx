@@ -2,7 +2,6 @@
  * @file TimelineControls.jsx - 老人友善版
  * @description 專為工廠老人使用者優化的排程控制組件
  * @version 6.0.0 (Elderly-Friendly Redesign)
- * @author 資深前端開發團隊
  * @lastModified 2025-5-29
  */
 

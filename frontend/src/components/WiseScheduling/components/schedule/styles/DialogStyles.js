@@ -19,7 +19,7 @@ import {
   Tab,
   Paper,
 } from "@mui/material";
-import { industrialTheme } from "./industrialTheme";
+import { industrialTheme } from "../../../assets/schedule/industrialTheme";
 
 // 工業風格的對話框 - 增加邊框和簡化陰影
 export const IndustrialDialog = styled(Dialog)(({ theme }) => ({

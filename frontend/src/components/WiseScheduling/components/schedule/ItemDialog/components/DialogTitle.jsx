@@ -8,7 +8,7 @@ import React from "react";
 import { Box, Typography, CircularProgress, Chip } from "@mui/material";
 import HistoryIcon from "@mui/icons-material/History";
 import CustomStatusChip from "../CustomStatusChip";
-import { getStatusColor } from "../../styles/industrialTheme";
+import { getStatusColor } from "../../../../assets/schedule/industrialTheme";
 import { getDialogTitle } from "../../../../utils/schedule/statusHelpers";
 import { isHistoricalData } from "../../../../configs/validations/schedule/constants";
 import StatusIcon from "./StatusIcon";
