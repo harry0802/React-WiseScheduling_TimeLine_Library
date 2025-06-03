@@ -1,5 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
+import pytz
+import os
 from app import db
 from sqlalchemy import and_, or_
 from app.utils_log import message, err_resp, internal_err_resp
@@ -10,6 +12,7 @@ from app.api.option.optionEnum import WorkOrderStatusEnum, MachineStatusEnum
 from app.api.smartSchedule.service import SmartScheduleService
 from .schemas import MachineStatusSchema
 machineStatus_schema = MachineStatusSchema()
+TZ = os.getenv("TIMEZONE","Asia/Taipei")
 
 
 def complete_machineStatus(db_obj, payload):
@@ -36,37 +39,46 @@ class MachineStatusService:
     @staticmethod
     def get_machineStatus(productionArea):
         try:
+            # Current time
+            current_time = datetime.now(pytz.timezone(TZ))
+            midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            next_day = current_time + timedelta(days=1)
+
             # 1. 列出某區域的所有機台
             machine_query = Machine.query
             machine_query = machine_query.filter_by(productionArea=productionArea) if productionArea is not None else machine_query
             machine_db_list = machine_query.all()
 
-            # 2. 機台生產中，列出productionSchedule中，某區域的所有狀態為On-goin的生產排程
+            # 2. 機台生產中，列出productionSchedule中，某區域的所有狀態為On-going的生產排程
             productionSchedule_query = ProductionSchedule.query
             productionSchedule_query = productionSchedule_query.filter_by(status=WorkOrderStatusEnum.ON_GOING.value)
             productionSchedule_query = productionSchedule_query.filter_by(productionArea=productionArea) if productionArea is not None else productionSchedule_query
             productionSchedule_db_list = productionSchedule_query.all()
             # 從productionSchedule_db_list列出所有machineSN
-            machineSN_list = [productionSchedule_db.machineSN for productionSchedule_db in productionSchedule_db_list]
+            ongoing_machineSN_list = [productionSchedule_db.machineSN for productionSchedule_db in productionSchedule_db_list]
 
             # 3. 機台已開始某個狀態，從machineStatus找出當日，有actualStartDate，且無actualFinishDate的 (machineStatusId)，並排除productionSchedule中的machineSN
             machineStatus_query = MachineStatus.query
             machineStatus_query = machineStatus_query.join(Machine, Machine.id == MachineStatus.machineId)
             machineStatus_query = machineStatus_query.filter(Machine.productionArea == productionArea) if productionArea is not None else machineStatus_query
-            machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate <= datetime.now())
+            machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate >= midnight)
+            machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate <= current_time)
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualEndDate == None)
-            machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(machineSN_list))
+            machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(ongoing_machineSN_list))
+            machineStatus_query = machineStatus_query.group_by(MachineStatus.machineId)
             machineStatus_db_list = machineStatus_query.all()
+            started_machineSN_list = [machineStatus_db.machine.machineSN for machineStatus_db in machineStatus_db_list]
 
             # 4. 機台待機中(生管有預排，但現場師傅還沒開始)，找出planStartDate <= Now() <= planEndDate，沒有actualStartDate，也沒有actualFinishDate的，並排除productionSchedule中的machineSN
             machineStatus_query = MachineStatus.query
             machineStatus_query = machineStatus_query.join(Machine, Machine.id == MachineStatus.machineId)
             machineStatus_query = machineStatus_query.filter(Machine.productionArea == productionArea) if productionArea is not None else machineStatus_query
-            machineStatus_query = machineStatus_query.filter(MachineStatus.planStartDate <= datetime.now())
-            machineStatus_query = machineStatus_query.filter(MachineStatus.planEndDate >= datetime.now())
+            machineStatus_query = machineStatus_query.filter(MachineStatus.planStartDate >= midnight)
+            machineStatus_query = machineStatus_query.filter(MachineStatus.planStartDate <= current_time)
+            machineStatus_query = machineStatus_query.filter(MachineStatus.planEndDate >= current_time)
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate == None)
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualEndDate == None)
-            machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(machineSN_list))
+            machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(ongoing_machineSN_list+started_machineSN_list))
             results = machineStatus_query.all()
             for item in results:
                 # 覆蓋原有的 status 值
