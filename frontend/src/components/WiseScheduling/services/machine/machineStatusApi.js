@@ -39,15 +39,16 @@ export const machineStatusApi = apiSlice.injectEndpoints({
       query: (fullApiData) => {
         // 直接過濾成需要的格式
         const filteredData = {
-          id: fullApiData.id,
+          id: fullApiData.machineStatusId ?? fullApiData.id, // 使用 machineStatusId 作為 id
           machineId: fullApiData.machineId,
           planStartDate: fullApiData.planStartDate,
           planEndDate: fullApiData.planEndDate,
+          actualStartDate: fullApiData.actualStartDate,
+          actualEndDate: fullApiData.actualEndDate,
           status: fullApiData.status,
-          reason: fullApiData.machineStatusReason,
-          product: fullApiData.machineStatusProduct,
+          reason: fullApiData?.machineStatusReason ?? fullApiData.reason,
+          product: fullApiData?.machineStatusProduct ?? fullApiData.product,
         };
-
         // 過濾掉 null 值
         const cleanData = Object.fromEntries(
           Object.entries(filteredData).filter(([_, value]) => value != null)

@@ -1,5 +1,5 @@
 /**
- * @file MachineStatusManager.jsx
+ * @file StatusManager.jsx
  * @description 機台狀態管理器 - 使用 Hook 重構版本
  * @version 2.0.0
  */

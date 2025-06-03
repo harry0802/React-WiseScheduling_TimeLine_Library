@@ -1,9 +1,10 @@
 /**
- * @file MachineStatusBoard.jsx
- * @description 機台狀態看板，用於顯示和管理廠區各機台狀態
+ * @file MachineBoard.jsx
+ * @description 機台狀態看板 - 簡化版本
+ * @version 2.0.0
  */
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import HandymanIcon from "@mui/icons-material/Handyman";
 
 // 導入
@@ -31,170 +32,107 @@ import {
   MachinesGrid,
   MachineBox,
 } from "../../../assets/machineBoard.styles";
-import { v4 as uuidv4 } from "uuid";
-/**
- * 區域選擇器元件
- */
-const AreaSelector = ({ value, onChange }) => {
-  return (
-    <FilterSection>
-      <StyledSelect value={value} onChange={(e) => onChange(e.target.value)}>
-        {PRODUCTION_AREA.map(({ value, label }) => (
-          <StyledMenuItem key={value} value={value}>
-            {label}
-          </StyledMenuItem>
-        ))}
-      </StyledSelect>
-    </FilterSection>
-  );
-};
 
 /**
- * 機台卡片組件
- * - 根據狀態顯示不同顏色和圖標
- * - 運行中的機台不可點擊修改狀態
+ * 機台狀態看板組件 - 簡化版本
  */
-const MachineCard = ({ machine, onClick }) => {
-  const englishStatus = convertTimeLineStatus(machine.status);
-  const statusText =
-    STATUS_STYLE_MAP[englishStatus]?.text || STATUS_STYLE_MAP.IDLE.text;
-
-  return (
-    <MachineBox
-      $status={englishStatus}
-      onClick={englishStatus === "RUN" ? undefined : () => onClick(machine)}
-      style={{
-        cursor: englishStatus === "RUN" ? "not-allowed" : "pointer",
-      }}
-    >
-      <div className="title-container">
-        <h1>{machine.machineSN}</h1>
-      </div>
-
-      <div className="status-container">
-        <p>{statusText}</p>
-        {englishStatus !== "RUN" && <HandymanIcon className="icon" />}
-      </div>
-    </MachineBox>
-  );
-};
-
-/**
- * 獲取機台數據的自訂 Hook
- */
-const useMachineData = (area) => {
-  const { data: machineStatus, isLoading } = useGetMachineStatusQuery(area);
-  return {
-    machines: machineStatus || [],
-    isLoading,
-  };
-};
-
-/**
- * 新增機台狀態的自訂 Hook
- */
-const useCreateMachineStatus = () => {
-  const [createMachineStatus, { isLoading }] = useCreateMachineStatusMutation();
-  return {
-    createMachineStatus,
-    isLoading,
-  };
-};
-
-/**
- * 修改機台狀態的自訂 Hook
- */
-const useUpdateMachineStatus = () => {
-  const [updateMachineStatus, { isLoading }] = useUpdateMachineStatusMutation();
-  return {
-    updateMachineStatus,
-    isLoading,
-  };
-};
-
-/**
- * 機台狀態看板主元件
- */
-const MachineStatusBoard = () => {
-  // 狀態管理
+function MachineStatusBoard() {
+  // 1. 基礎狀態
   const [area, setArea] = useState("A");
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const statusManagerRef = useRef(null);
 
-  // 獲取機台數據
-  const { machines, isLoading } = useMachineData(area);
+  // 2. API 調用
+  const { data: machineStatus, isLoading } = useGetMachineStatusQuery(area);
+  const [createMachineStatus, { isLoading: isCreateLoading }] =
+    useCreateMachineStatusMutation();
+  const [updateMachineStatus, { isLoading: isUpdateLoading }] =
+    useUpdateMachineStatusMutation();
 
-  // 事件處理
-  const handleMachineClick = useCallback((machine) => {
-    setSelectedMachine(machine);
+  // 3. 處理機台數據
+  const processedMachines = useMemo(() => {
+    if (!machineStatus) return [];
+    
+    return machineStatus.map((machine) => {
+      const englishStatus = convertTimeLineStatus(machine.status);
+      const isRunning = englishStatus === "RUN";
+
+      return {
+        machine,
+        englishStatus,
+        statusText: STATUS_STYLE_MAP[englishStatus]?.text || STATUS_STYLE_MAP.IDLE.text,
+        isClickable: !isRunning,
+        showIcon: !isRunning,
+      };
+    });
+  }, [machineStatus]);
+
+  // 4. 事件處理
+  const handleMachineClick = useCallback((machineData) => {
+    setSelectedMachine(machineData.machine);
     setDrawerVisible(true);
   }, []);
 
-  const { createMachineStatus, isLoading: isCreateLoading } =
-    useCreateMachineStatus();
-  const { updateMachineStatus, isLoading: isUpdateLoading } =
-    useUpdateMachineStatus();
-
-  const handleStatusUpdate = useCallback(async (data) => {
-    console.log("更新機台狀態:", data);
-    //TODO 這裡需要實現實際的狀態更新API調用
-
-    // 如果沒有 planStartDate，則使用 actualStartDate 加一小時
-    const calculatePlanStartDate = () => {
-      if (data.planStartDate) return data.planStartDate;
-
-      if (data.actualStartDate) {
-        const date = new Date(data.actualStartDate);
-        date.setHours(date.getHours() + 1);
-        return date.toISOString();
-      }
-
-      return null;
-    };
-
-    if (data.id) {
-      await updateMachineStatus({
-        ...data,
-        status: getChineseStatus(data.status),
-      });
-    } else {
-      await createMachineStatus({
-        ...data,
-        status: getChineseStatus(data.status),
-        planStartDate: data.planStartDate ?? data.actualStartDate,
-        planEndDate: calculatePlanStartDate(),
-      });
-    }
-
-    setDrawerVisible(false);
-    return data; // 返回提交結果
-  }, []);
-
-  const handleDrawerClose = useCallback(() => {
+  const handleCloseDrawer = useCallback(() => {
     setDrawerVisible(false);
   }, []);
 
-  // 使用 StatusManager 中的表單提交方法
-  const handleFormSubmit = useCallback(async () => {
-    if (statusManagerRef.current) {
-      console.log("開始提交表單");
-      try {
-        const success = await statusManagerRef.current.submit();
-        console.log("表單提交結果:", success);
-        if (success) {
-          // 提交成功後自動關閉抽屜
-          setDrawerVisible(false);
-        }
-      } catch (error) {
-        console.error("表單提交發生錯誤:", error);
-      }
-    } else {
+  const handleSubmitForm = useCallback(async () => {
+    if (!statusManagerRef.current) {
       console.warn("表單引用不存在");
+      return false;
+    }
+
+    try {
+      const success = await statusManagerRef.current.submit();
+      if (success) {
+        setDrawerVisible(false);
+      }
+      return success;
+    } catch (error) {
+      console.error("表單提交發生錯誤:", error);
+      return false;
     }
   }, []);
 
-  // 加載狀態
+  const handleUpdateStatus = useCallback(async (data) => {
+    console.log("更新機台狀態:", data);
+
+    try {
+      if (data.id) {
+        await updateMachineStatus({
+          ...data,
+          status: getChineseStatus(data.status),
+        });
+      } else {
+        // 計算計劃開始時間
+        let planEndDate = null;
+        if (data.planStartDate) {
+          planEndDate = data.planStartDate;
+        } else if (data.actualStartDate) {
+          const date = new Date(data.actualStartDate);
+          date.setHours(date.getHours() + 1);
+          planEndDate = date.toISOString();
+        }
+
+        await createMachineStatus({
+          ...data,
+          status: getChineseStatus(data.status),
+          planStartDate: data.planStartDate ?? data.actualStartDate,
+          planEndDate,
+        });
+      }
+
+      setDrawerVisible(false);
+      return data;
+    } catch (error) {
+      console.error("更新狀態失敗:", error);
+      throw error;
+    }
+  }, [createMachineStatus, updateMachineStatus]);
+
+  // 5. 渲染
   if (isLoading) {
     return <p>加載中...</p>;
   }
@@ -202,29 +140,49 @@ const MachineStatusBoard = () => {
   return (
     <Container>
       <Box>
-        {/* 標題與篩選 */}
         <TitleBox>
           <Title>機台狀態與保養紀錄</Title>
-          <AreaSelector value={area} onChange={setArea} />
+          
+          {/* 區域選擇器 */}
+          <FilterSection>
+            <StyledSelect value={area} onChange={(e) => setArea(e.target.value)}>
+              {PRODUCTION_AREA.map(({ value, label }) => (
+                <StyledMenuItem key={value} value={value}>
+                  {label}
+                </StyledMenuItem>
+              ))}
+            </StyledSelect>
+          </FilterSection>
         </TitleBox>
 
-        {/* 機台列表 */}
+        {/* 機台網格 */}
         <MachinesGrid>
-          {machines.map((machine) => (
-            <MachineCard
-              // 時間戳記避免重複渲染
-              key={uuidv4()}
-              machine={machine}
-              onClick={handleMachineClick}
-            />
+          {processedMachines.map((machineData) => (
+            <MachineBox
+              key={machineData.machine.id || machineData.machine.machineSN}
+              $status={machineData.englishStatus}
+              onClick={machineData.isClickable ? () => handleMachineClick(machineData) : undefined}
+              style={{
+                cursor: machineData.isClickable ? "pointer" : "not-allowed",
+              }}
+            >
+              <div className="title-container">
+                <h1>{machineData.machine.machineSN}</h1>
+              </div>
+
+              <div className="status-container">
+                <p>{machineData.statusText}</p>
+                {machineData.showIcon && <HandymanIcon className="icon" />}
+              </div>
+            </MachineBox>
           ))}
         </MachinesGrid>
       </Box>
 
-      {/* 機台狀態修改抽屉 */}
+      {/* 狀態編輯抽屜 */}
       <BaseDrawer
         visible={drawerVisible}
-        onClose={handleDrawerClose}
+        onClose={handleCloseDrawer}
         width={700}
       >
         <BaseDrawer.Header>修改機台狀態</BaseDrawer.Header>
@@ -233,14 +191,14 @@ const MachineStatusBoard = () => {
             <StatusManager
               ref={statusManagerRef}
               initialData={selectedMachine}
-              onSubmit={handleStatusUpdate}
+              onSubmit={handleUpdateStatus}
             />
           )}
         </BaseDrawer.Body>
-        <BaseDrawer.Footer onSubmit={handleFormSubmit} />
+        <BaseDrawer.Footer onSubmit={handleSubmitForm} />
       </BaseDrawer>
     </Container>
   );
-};
+}
 
 export default MachineStatusBoard;

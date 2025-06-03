@@ -34,7 +34,6 @@ import {
  * @returns {Object} 業務邏輯狀態和方法
  */
 function useEnhancedDialog(item, mode, options = {}) {
-  console.log("🚀 ~ useEnhancedDialog ~ item:", item);
   const { onSave, onClose, groups } = options;
 
   // 🦉 核心狀態管理
@@ -174,8 +173,6 @@ function useEnhancedDialog(item, mode, options = {}) {
         // 製令單數據清空
         transformedData.orderInfo = {};
       }
-
-      console.log("🚀 ~ useEnhancedDialog ~ transformedData:", transformedData);
       return transformedData;
     },
     [item, currentStatus]
@@ -235,14 +232,12 @@ function useEnhancedDialog(item, mode, options = {}) {
 
         // 🧠 Step 2: 轉換數據格式
         let updatedItem = transformFormData(formData);
-
         // 🧠 Step 3: 驗證業務規則
         validateStateTransition(updatedItem);
         validateTimeOverlap(updatedItem);
 
         // 🧠 Step 4: 處理特殊情況
         updatedItem = ensureEndTimeForIdleTransition(updatedItem);
-
         // 🧠 Step 5: Push Ifs Up - 根據模式選擇處理路徑
         if (mode === "add") {
           await processNewItem(updatedItem);
