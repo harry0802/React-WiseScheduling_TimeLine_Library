@@ -147,3 +147,36 @@ export const WiseSchedulingPage = lazyImport(() =>
 export const TimelineGanttPage = lazyImport(() =>
   import("../pages/TimelineGanttPage")
 );
+
+// ManufacturingLiveMonitor 系統
+export const ManufacturingLiveMonitor = lazyImport(() =>
+  import("../components/ManufacturingLiveMonitor/index")
+);
+
+export const DashboardEntry = lazyImport(() =>
+  import("../components/ManufacturingLiveMonitor/components/DashboardEntry/index")
+);
+
+export const LoadingWrapper = lazyImport(() =>
+  import("../components/ManufacturingLiveMonitor/components/Loading/index")
+);
+
+export const RealTimeOEEMonitor = lazyImport(() =>
+  import("../components/ManufacturingLiveMonitor/feature/RealTimeOEEMonitor/index")
+);
+
+export const ProductionProgressTracker = lazyImport(() =>
+  import("../components/ManufacturingLiveMonitor/feature/ProductionProgressTracker/index")
+);
+
+export const DeliveryTrendAnalyzer = lazyImport(() =>
+  import("../components/ManufacturingLiveMonitor/feature/DeliveryTrendAnalyzer/index")
+);
+
+export const OEEInsightSystem = lazyImport(() =>
+  import("../components/ManufacturingLiveMonitor/feature/OEEInsightSystem/index")
+);
+
+export const FactoryPerformanceDashboard = lazyImport(() =>
+  import("../components/ManufacturingLiveMonitor/feature/FactoryPerformanceDashboard/Index")
+);
