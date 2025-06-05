@@ -111,13 +111,15 @@ const router = createHashRouter([
       {
         path: 'FactoryPerformanceDashboard',
         element: (
-          <Suspense
-            fallback={
-              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
-            }
-          >
-            <FactoryPerformanceDashboard />
-          </Suspense>
+          
+            <Suspense
+              fallback={
+                <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+              }
+            >
+              <FactoryPerformanceDashboard />
+            </Suspense>
+          
         )
       },
       {
@@ -125,50 +127,57 @@ const router = createHashRouter([
         path: 'RealTimeOEEMonitor',
         element: (
           //  使用 await 加上 setTimeout 來模擬載入時間
-
-          <Suspense
-            fallback={
-              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
-            }
-          >
-            <RealTimeOEEMonitor />
-          </Suspense>
+          
+            <Suspense
+              fallback={
+                <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+              }
+            >
+              <RealTimeOEEMonitor />
+            </Suspense>
+          
         )
       },
       {
         path: 'ProductionProgressTracker',
         element: (
-          <Suspense
-            fallback={
-              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
-            }
-          >
-            <ProductionProgressTracker />
-          </Suspense>
+          
+            <Suspense
+              fallback={
+                <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+              }
+            >
+              <ProductionProgressTracker />
+            </Suspense>
+          
         )
       },
       {
         path: 'DeliveryTrendAnalyzer',
         element: (
-          <Suspense
-            fallback={
-              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
-            }
-          >
-            <DeliveryTrendAnalyzer />
-          </Suspense>
+          
+            <Suspense
+              fallback={
+                <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+              }
+            >
+              <DeliveryTrendAnalyzer />
+            </Suspense>
+          
         )
       },
       {
         path: 'OEEInsightSystem',
         element: (
-          <Suspense
-            fallback={
-              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
-            }
-          >
-            <OEEInsightSystem />
-          </Suspense>
+          
+            <Suspense
+              fallback={
+                <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+              }
+            >
+              <OEEInsightSystem />
+            </Suspense>
+          
         )
       }
       // 未來可能的其他全屏頁面可在此添加
