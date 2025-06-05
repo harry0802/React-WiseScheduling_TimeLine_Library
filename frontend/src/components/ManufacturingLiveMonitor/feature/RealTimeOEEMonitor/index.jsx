@@ -3,7 +3,7 @@
 
 // import GridExample from "../../components/GridSystem/GridExample";
 import { Stack } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import Grid from "@mui/material/Grid";
 
 import { Decoration10 } from "@iimm/data-view-react";
 
@@ -40,25 +40,25 @@ function RealTimeOEEMonitor({ onChangeSectTitle }) {
       />
       <Stack spacing={1.25}>
         <Grid container spacing={1.25}>
-          <Grid size={8}>
+          <Grid xs={8}>
             <Stack spacing={1.25}>
               <DailyProduction />
               <RealTimeDeviceTracker />
             </Stack>
           </Grid>
-          <Grid size={4}>
+          <Grid xs={4}>
             <OEEMonitor />
           </Grid>
         </Grid>
 
         <Grid container spacing={1.25}>
-          <Grid size={5}>
+          <Grid xs={5}>
             <OverdueTasks />
           </Grid>
-          <Grid size={3}>
+          <Grid xs={3}>
             <MachineStateTimeRatio />
           </Grid>
-          <Grid size={4}>
+          <Grid xs={4}>
             <EquipmentRiskModule />
           </Grid>
         </Grid>

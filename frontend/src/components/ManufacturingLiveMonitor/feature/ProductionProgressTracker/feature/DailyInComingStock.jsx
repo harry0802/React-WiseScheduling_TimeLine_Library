@@ -9,12 +9,8 @@ function DailyIncomingStock() {
     <BorderBox>
       <BaseCard style={{ backgroundColor: "transparent" }}>
         <BaseCard.Content>
-          <Grid
-            container
-            spacing={2.5}
-            sx={{ height: "100%", alignItems: "center" }}
-          >
-            <Grid xs={9} sx={{ height: "100%" }}>
+          <Grid container sx={{ height: "100%", alignItems: "center" }}>
+            <Grid xs={9} sx={{ height: "100%", paddingRight: "1.25rem" }}>
               <ProgressBarChart
                 inStockPercentage={30}
                 inStockGradient={{

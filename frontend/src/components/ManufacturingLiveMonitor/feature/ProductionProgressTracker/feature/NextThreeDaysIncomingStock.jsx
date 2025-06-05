@@ -11,10 +11,12 @@ function NextThreeDaysIncomingStock() {
         <BaseCard.Content>
           <Grid
             container
-            spacing={2.5}
-            sx={{ height: "100%", alignItems: "center" }}
+            sx={{
+              height: "100%",
+              alignItems: "center",
+            }}
           >
-            <Grid xs={9} sx={{ height: "100%" }}>
+            <Grid xs={9} sx={{ height: "100%", paddingRight: "1.25rem" }}>
               <ProgressBarChart
                 inStockPercentage={30}
                 inStockGradient={{

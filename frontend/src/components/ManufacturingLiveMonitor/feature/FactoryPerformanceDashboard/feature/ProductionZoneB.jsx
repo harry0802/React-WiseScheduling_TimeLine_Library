@@ -156,7 +156,7 @@ const CardContainer = styled.div`
  */
 function ProductionZoneB() {
   return (
-    <BaseSection backgroundImage={'public/images/ProductionZoneB.jpg'}>
+    <BaseSection backgroundImage={'/images/ProductionZoneB.jpg'}>
       <FactoryLayout>
         {equipmentData.map((equipment) => (
           <CardContainer
