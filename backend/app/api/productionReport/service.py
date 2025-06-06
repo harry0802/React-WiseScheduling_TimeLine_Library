@@ -525,7 +525,7 @@ class productionReportService:
                             ProductionSchedule.id == productionReport_db.pschedule_id
                         ).first()
                         production_dict = {
-                            "unfinishedQuantity": productionReport_db.unfinishedQuantity,
+                            "unfinishedQuantity": productionReport_db.unfinishedQuantity if productionReport_db.unfinishedQuantity else 0,
                             "hourlyCapacity": productionSchedule_db.hourlyCapacity if productionSchedule_db else 1,
                             "planFinishDate": productionSchedule_db.planFinishDate,
                             "isResume": False # 是否為已暫停的製令單恢復生產
