@@ -1,5 +1,6 @@
 from app.service.customField import *
 from flask_restx import Namespace, fields
+from app.api.option.optionEnum import MachineStatusEnum
 import copy
 
 class SmartScheduleDto:
@@ -14,7 +15,7 @@ class SmartScheduleDto:
         "planEndDate": NullableDateTime(required=False, description="預計結束日期", example="2025-02-25T00:00:00.000+08:00"),
         "actualStartDate": NullableDateTime(required=False, description="實際開始日期", example="2025-02-25T00:00:00.000+08:00"),
         "actualEndDate": NullableDateTime(required=False, description="實際結束日期", example="2025-02-25T00:00:00.000+08:00"),
-        "status": NullableString(required=False, description="機台狀態", example="status", enum=["生產中", "待機中", "上模與調機", "產品試模", "機台停機"]),
+        "status": NullableString(required=False, description="機台狀態", example="status", enum=[e.value for e in MachineStatusEnum]),
         "reason": NullableString(required=False, description="停機原因", example="停機原因"),
         "product": NullableString(required=False, description="試模產品", example="產品名稱")
     }
