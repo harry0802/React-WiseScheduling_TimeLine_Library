@@ -19,6 +19,7 @@ class SmartScheduleSchema(Schema):
     actualOnMachineDate = fields.DateTime(description='製令單實際上機日')
     actualFinishDate = fields.DateTime(description='製令單實際完成日')
     postponeTime = fields.String(description='製令單延後時間')
+    workOrderSN = fields.String(description='製令單號')
     productSN = fields.String(description='產品編號')
     productName = fields.String(description='產品名稱')
     workOrderQuantity = fields.String(description='製令單數量')
