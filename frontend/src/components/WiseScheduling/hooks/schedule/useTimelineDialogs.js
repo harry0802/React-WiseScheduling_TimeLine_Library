@@ -31,6 +31,11 @@ import {
   transformUpdateStatusToApi,
 } from "../../utils/schedule/transformers/apiTransformers";
 import { isNumber } from "@mui/x-data-grid/internals";
+import {
+  createApiError,
+  handleFormError,
+  logError,
+} from "../../utils/schedule/errorHandler";
 
 //! =============== 1. 設定與常量 ===============
 //* 這個區塊包含所有專案配置，便於統一管理
@@ -58,6 +63,8 @@ const ERROR_MESSAGES = {
   SAVE_ORDER_FAILED: "保存製令單失敗",
   SAVE_STATUS_FAILED: "保存機台狀態失敗",
   DELETE_FAILED: "刪除項目失敗",
+  START_DATE_TOO_EARLY: "預計上機日不能早於當前時間，請選擇未來的時間",
+  INVALID_INPUT: "輸入資料有誤，請檢查後重試",
 };
 
 //! =============== 2. 類型與介面 ===============
@@ -146,6 +153,67 @@ function canDeleteItem(item) {
  */
 function needsApiDeletion(item, itemId) {
   return item?.status?.id && item.status.id === itemId;
+}
+
+/**
+ * @function handleApiError
+ * @description 使用錯誤處理系統處理 API 錯誤並返回友善的錯誤訊息
+ * @param {Object} error - API 錯誤對象
+ * @returns {string} 友善的錯誤訊息
+ * @example
+ * // 處理開始時間太早的錯誤
+ * const error = {
+ *   data: { message: 'New start date is earlier than now.', error_reason: 'Invalid_input' }
+ * };
+ * const message = handleApiError(error); // "預計上機日不能早於當前時間，請選擇未來的時間"
+ *
+ * @notes
+ * - 使用錯誤處理系統提供結構化錯誤處理
+ * - 針對特定的 error_reason 和 message 提供客製化訊息
+ * - 自動記錄錯誤到日誌系統
+ */
+function handleApiError(error) {
+  // 檢查錯誤結構
+  const errorData = error?.data;
+  const errorReason = errorData?.error_reason;
+  const errorMessage = errorData?.message;
+
+  // 確定用戶友好的錯誤訊息
+  let userMessage;
+  
+  // 處理特定的錯誤情境
+  if (errorReason === "Invalid_input") {
+    if (errorMessage?.includes("New start date is earlier than now")) {
+      userMessage = ERROR_MESSAGES.START_DATE_TOO_EARLY;
+    } else {
+      userMessage = ERROR_MESSAGES.INVALID_INPUT;
+    }
+  } else if (errorMessage) {
+    // 如果有自定義錯誤訊息，優先使用
+    userMessage = errorMessage;
+  } else {
+    // 回退到通用錯誤訊息
+    userMessage = error.message || ERROR_MESSAGES.SAVE_ORDER_FAILED;
+  }
+
+  // 使用錯誤處理系統創建結構化錯誤
+  const structuredError = createApiError(userMessage, {
+    originalError: error,
+    errorData,
+    errorReason,
+    apiEndpoint: "smart-schedule",
+    timestamp: new Date().toISOString(),
+  });
+
+  // 記錄錯誤到日誌系統
+  logError(structuredError, {
+    context: "製令單 API 更新",
+    errorReason,
+    originalMessage: errorMessage,
+  });
+
+  // 使用錯誤處理系統返回用戶友好的訊息
+  return handleFormError(structuredError);
 }
 
 /**
@@ -478,7 +546,18 @@ function executeApiDeletion(item, deleteMachineStatus) {
       console.log("機台狀態 API 刪除成功");
     })
     .catch((error) => {
-      console.error("機台狀態 API 刪除失敗:", error);
+      // 使用錯誤處理系統記錄錯誤但不顯示給用戶
+      const structuredError = createApiError("機台狀態 API 刪除失敗", {
+        originalError: error,
+        context: "刪除機台狀態",
+        operation: "deleteMachineStatus",
+        itemId: item.status.id,
+      });
+      
+      logError(structuredError, {
+        context: "機台狀態刪除流程",
+        note: "本地已成功刪除，API失敗不影響用戶體驗",
+      });
       // 💡 不顯示錯誤給用戶，因為本地已成功刪除
     });
 }
@@ -670,15 +749,32 @@ export function useTimelineDialogs({
             })
             .catch((error) => {
               console.error("製令單 API 更新失敗:", error);
-              alert(error.message || ERROR_MESSAGES.SAVE_ORDER_FAILED);
+              
+              // 處理特定的 API 錯誤
+              const errorMessage = handleApiError(error);
+              alert(errorMessage);
             });
         } else {
           // 沒有 API 數據時，直接更新本地
           itemsDataRef.current.update(processedItem);
         }
       } catch (error) {
-        console.error("保存製令單失敗:", error);
-        alert(error.message || ERROR_MESSAGES.SAVE_ORDER_FAILED);
+        // 使用錯誤處理系統處理錯誤
+        const structuredError = createApiError(
+          error.message || ERROR_MESSAGES.SAVE_ORDER_FAILED,
+          {
+            originalError: error,
+            context: "保存製令單",
+            operation: "saveOrderItem",
+          }
+        );
+        
+        logError(structuredError, {
+          context: "製令單保存流程",
+          itemId: updatedItem?.internal?.id,
+        });
+        
+        alert(handleFormError(structuredError));
       }
     },
     [itemsDataRef, changeWorkOrder]
@@ -740,12 +836,39 @@ export function useTimelineDialogs({
             itemsDataRef.current[action](processedItem);
           })
           .catch((error) => {
-            console.error(`機台狀態 API ${actionName}失敗:`, error);
-            alert(error.message || ERROR_MESSAGES.SAVE_STATUS_FAILED);
+            // 使用錯誤處理系統處理 API 錯誤
+            const structuredError = createApiError(`機台狀態 API ${actionName}失敗`, {
+              originalError: error,
+              context: `${actionName}機台狀態`,
+              operation: isUpdate ? "updateMachineStatus" : "createMachineStatus",
+              actionName,
+            });
+            
+            logError(structuredError, {
+              context: "機台狀態保存流程",
+              action: actionName,
+              isUpdate,
+            });
+            
+            alert(handleFormError(structuredError));
           });
       } catch (error) {
-        console.error("保存機台狀態失敗:", error);
-        alert(error.message || ERROR_MESSAGES.SAVE_STATUS_FAILED);
+        // 使用錯誤處理系統處理一般錯誤
+        const structuredError = createApiError(
+          error.message || ERROR_MESSAGES.SAVE_STATUS_FAILED,
+          {
+            originalError: error,
+            context: "保存機台狀態",
+            operation: "saveMachineStatus",
+          }
+        );
+        
+        logError(structuredError, {
+          context: "機台狀態保存流程",
+          stage: "數據處理階段",
+        });
+        
+        alert(handleFormError(structuredError));
       }
     },
     [itemsDataRef, createMachineStatus, updateMachineStatus]
@@ -916,8 +1039,25 @@ export function useTimelineDialogs({
 
         openItemDialog(newItem, "add", groups);
       } catch (error) {
-        console.error("新增狀態失敗:", error);
-        alert(error.message || "新增狀態失敗");
+        // 使用錯誤處理系統處理錯誤
+        const structuredError = createApiError(
+          error.message || "新增狀態失敗",
+          {
+            originalError: error,
+            context: "新增機台狀態",
+            operation: "handleAddItem",
+            startTime,
+            areaCode,
+          }
+        );
+        
+        logError(structuredError, {
+          context: "新增狀態流程",
+          startTime: startTime?.toISOString?.() || startTime,
+          areaCode,
+        });
+        
+        alert(handleFormError(structuredError));
       }
     },
     [groups]

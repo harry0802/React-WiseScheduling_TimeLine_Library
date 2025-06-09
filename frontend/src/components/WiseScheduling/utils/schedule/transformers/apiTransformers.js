@@ -41,6 +41,7 @@ const API_DATA_DEFAULTS = {
   actualOnMachineDate: null,
   actualFinishDate: null,
   postponeTime: null,
+  workOrderSN: null, // 製令單號
   productSN: null,
   productName: null,
   workOrderQuantity: null,
@@ -206,6 +207,8 @@ function extractOrderInfoFromApi(apiData, { startTime, endTime }) {
     completedQty: safeParseInt(apiData.productionQuantity),
     process: apiData.processName || "",
     orderStatus: apiData.productionScheduleStatus || "",
+    postponeTime: apiData.postponeTime || null, // 延遲完成日
+    workOrderSN: apiData.workOrderSN || "", // 製令單號
   };
 }
 
@@ -381,6 +384,11 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
   // 其他資訊
   apiData.processName = internalData.orderInfo?.process || "";
   apiData.productionScheduleStatus = internalData.orderInfo?.orderStatus || "";
+  
+  // 新增欄位 - 僅用於顯示，不提交給 API
+  // 注意：這些欄位在實際 API 呼叫時應該被過濾掉
+  apiData.postponeTime = internalData.orderInfo?.postponeTime || null;
+  apiData.workOrderSN = internalData.orderInfo?.workOrderSN || "";
 }
 
 //! =============== 6. 內部格式轉API - 機台狀態 ===============

@@ -557,108 +557,108 @@ function DynamicTimeline() {
     <>
       {/* 🎨 全域時間線樣式 */}
       <TimelineGlobalStyles />
-      
+
       <Box sx={{ width: "100%", p: 4 }}>
         <TimelineContainer>
-        {/* 控制面板 - 用戶操作界面 */}
-        <TimelineControls>
-          {/* 主控制列 - 基本操作按鈕 */}
-          <TimelineControls.Row>
-            {/* 時間範圍選擇 */}
-            <TimelineControls.ButtonGroup>
-              {timeRangeOptions.map((option) => (
-                <TimelineControls.TimeRangeButton
-                  key={option.value}
-                  value={option.value}
-                  currentValue={timeRange}
-                  onChange={setTimeRange}
-                >
-                  {option.label}
-                </TimelineControls.TimeRangeButton>
-              ))}
-            </TimelineControls.ButtonGroup>
-
-            {/* 操作控制 */}
-            <TimelineControls.ButtonGroup>
-              <TimelineControls.AreaSelect
-                value={selectedArea}
-                onChange={setSelectedArea}
-                options={areaOptions}
-                placeholder="選擇區域"
-              />
-              <TimelineControls.AddButton
-                onClick={() => handleAddItem(null, selectedArea)}
-              />
-              <TimelineControls.NowButton onClick={handleMoveToNow} />
-            </TimelineControls.ButtonGroup>
-          </TimelineControls.Row>
-
-          {/* 時間詳細設定面板 - 進階時間控制 */}
-          <TimelineControls.Panel
-            title="時間範圍設定"
-            expanded={timePanelExpanded}
-            onToggle={setTimePanelExpanded}
-            info={
-              formattedTimeRange.startTime && formattedTimeRange.endTime
-                ? `${dayjs(formattedTimeRange.startTime).format(
-                    "MM/DD"
-                  )} - ${dayjs(formattedTimeRange.endTime).format("MM/DD")}`
-                : "預設範圍"
-            }
-          >
+          {/* 控制面板 - 用戶操作界面 */}
+          <TimelineControls>
+            {/* 主控制列 - 基本操作按鈕 */}
             <TimelineControls.Row>
-              {/* 精確時間輸入 */}
+              {/* 時間範圍選擇 */}
               <TimelineControls.ButtonGroup>
-                <TimelineControls.TimeInput
-                  label="開始"
-                  value={formatTimeForInput(selectedTimeRange.startTime)}
-                  onChange={(value) =>
-                    handleTimeInputChange(value, handleStartTimeChange)
-                  }
-                />
-                <TimelineControls.TimeInput
-                  label="結束"
-                  value={formatTimeForInput(selectedTimeRange.endTime)}
-                  onChange={(value) =>
-                    handleTimeInputChange(value, handleEndTimeChange)
-                  }
-                />
+                {timeRangeOptions.map((option) => (
+                  <TimelineControls.TimeRangeButton
+                    key={option.value}
+                    value={option.value}
+                    currentValue={timeRange}
+                    onChange={setTimeRange}
+                  >
+                    {option.label}
+                  </TimelineControls.TimeRangeButton>
+                ))}
               </TimelineControls.ButtonGroup>
 
-              {/* 快捷時間選擇 */}
+              {/* 操作控制 */}
               <TimelineControls.ButtonGroup>
-                <TimelineControls.Button
-                  onClick={() => handleQuickTimeSelect("today")}
-                >
-                  今天
-                </TimelineControls.Button>
-                <TimelineControls.Button
-                  onClick={() => handleQuickTimeSelect("week")}
-                >
-                  本週
-                </TimelineControls.Button>
-                <TimelineControls.Button
-                  onClick={() => handleQuickTimeSelect("month")}
-                >
-                  本月
-                </TimelineControls.Button>
-                <TimelineControls.Button
-                  onClick={() => handleQuickTimeSelect("default")}
-                >
-                  預設範圍
-                </TimelineControls.Button>
+                <TimelineControls.AreaSelect
+                  value={selectedArea}
+                  onChange={setSelectedArea}
+                  options={areaOptions}
+                  placeholder="選擇區域"
+                />
+                <TimelineControls.AddButton
+                  onClick={() => handleAddItem(null, selectedArea)}
+                />
+                <TimelineControls.NowButton onClick={handleMoveToNow} />
               </TimelineControls.ButtonGroup>
             </TimelineControls.Row>
-          </TimelineControls.Panel>
-        </TimelineControls>
 
-        {/* 時間線顯示區域 */}
-        <TimelinePaper containerRef={containerRef} />
-      </TimelineContainer>
+            {/* 時間詳細設定面板 - 進階時間控制 */}
+            <TimelineControls.Panel
+              title="時間範圍設定"
+              expanded={timePanelExpanded}
+              onToggle={setTimePanelExpanded}
+              info={
+                formattedTimeRange.startTime && formattedTimeRange.endTime
+                  ? `${dayjs(formattedTimeRange.startTime).format(
+                      "MM/DD"
+                    )} - ${dayjs(formattedTimeRange.endTime).format("MM/DD")}`
+                  : "預設範圍"
+              }
+            >
+              <TimelineControls.Row>
+                {/* 精確時間輸入 */}
+                <TimelineControls.ButtonGroup>
+                  <TimelineControls.TimeInput
+                    label="開始"
+                    value={formatTimeForInput(selectedTimeRange.startTime)}
+                    onChange={(value) =>
+                      handleTimeInputChange(value, handleStartTimeChange)
+                    }
+                  />
+                  <TimelineControls.TimeInput
+                    label="結束"
+                    value={formatTimeForInput(selectedTimeRange.endTime)}
+                    onChange={(value) =>
+                      handleTimeInputChange(value, handleEndTimeChange)
+                    }
+                  />
+                </TimelineControls.ButtonGroup>
 
-      {/* 對話框管理 - 彈窗功能 */}
-      <DialogPortals />
-    </Box>
+                {/* 快捷時間選擇 */}
+                <TimelineControls.ButtonGroup>
+                  <TimelineControls.Button
+                    onClick={() => handleQuickTimeSelect("today")}
+                  >
+                    今天
+                  </TimelineControls.Button>
+                  <TimelineControls.Button
+                    onClick={() => handleQuickTimeSelect("week")}
+                  >
+                    本週
+                  </TimelineControls.Button>
+                  <TimelineControls.Button
+                    onClick={() => handleQuickTimeSelect("month")}
+                  >
+                    本月
+                  </TimelineControls.Button>
+                  <TimelineControls.Button
+                    onClick={() => handleQuickTimeSelect("default")}
+                  >
+                    預設範圍
+                  </TimelineControls.Button>
+                </TimelineControls.ButtonGroup>
+              </TimelineControls.Row>
+            </TimelineControls.Panel>
+          </TimelineControls>
+
+          {/* 時間線顯示區域 */}
+          <TimelinePaper containerRef={containerRef} />
+        </TimelineContainer>
+
+        {/* 對話框管理 - 彈窗功能 */}
+        <DialogPortals />
+      </Box>
     </>
   );
 }

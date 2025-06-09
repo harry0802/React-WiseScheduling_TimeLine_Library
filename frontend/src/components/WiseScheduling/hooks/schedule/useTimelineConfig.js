@@ -13,6 +13,66 @@ import {
 import { TIMELINE_STYLES } from "../../configs/validations/schedule/timeline/timelineConfigs";
 import { getTimeWindow } from "../../utils/schedule/dateUtils";
 import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
+
+/**
+ * @description 狀態顯示邏輯控制器 - 使用控制反轉模式
+ * 根據不同的時間線狀態決定顯示內容
+ */
+const StatusDisplayController = {
+  /**
+   * 製令單狀態顯示邏輯
+   * @param {Object} item - 時間線項目數據
+   * @returns {string} 顯示內容
+   */
+  [MACHINE_STATUS.ORDER_CREATED]: (item) => {
+    return (
+      // 添加 製令單號
+      item.orderInfo?.workOrderSN ||
+      item.orderInfo?.productId ||
+      "製令單號未設定"
+    );
+  },
+
+  /**
+   * 機台停機狀態顯示邏輯
+   * @param {Object} item - 時間線項目數據
+   * @returns {string} 顯示內容
+   */
+  [MACHINE_STATUS.STOPPED]: (item) => {
+    return item.status?.reason || item.machineStatusReason || "停機原因未設定";
+  },
+
+  /**
+   * 產品試模狀態顯示邏輯
+   * @param {Object} item - 時間線項目數據
+   * @returns {string} 顯示內容
+   */
+  [MACHINE_STATUS.TESTING]: (item) => {
+    return item.status?.product || item.machineStatusProduct || "";
+  },
+
+  /**
+   * 預設狀態顯示邏輯
+   * @param {Object} item - 時間線項目數據
+   * @returns {string} 顯示內容
+   */
+  default: (item) => {
+    return "";
+  },
+};
+
+/**
+ * 獲取狀態顯示內容的統一接口
+ * @param {Object} item - 時間線項目數據
+ * @returns {string} 根據狀態決定的顯示內容
+ */
+const getStatusDisplayContent = (item) => {
+  const statusKey = item.timeLineStatus;
+  const displayHandler =
+    StatusDisplayController[statusKey] || StatusDisplayController.default;
+  return displayHandler(item);
+};
+
 /**
  * 創建時間頁item的模板函數
  * @param {Object} item - 時間線項目數據
@@ -20,30 +80,36 @@ import { MACHINE_STATUS } from "../../configs/validations/schedule/constants";
  */
 const createItemTemplate = (item) => {
   // 得到項目內容
-  const content = item.content || '';
-  const status = item.timeLineStatus || '';
-  
+  const content = item.content || "";
+
   // 根據狀態指定樣式類
   const getStatusClass = () => {
     const statusClasses = {
-      'IDLE': 'status-idle',
-      'TUNING': 'status-tuning',
-      'TESTING': 'status-testing',
-      'OFFLINE': 'status-offline',
-      'ORDER_CREATED': 'status-order',
+      IDLE: "status-idle",
+      TUNING: "status-tuning",
+      TESTING: "status-testing",
+      OFFLINE: "status-offline",
+      ORDER_CREATED: "status-order",
     };
-    
-    return statusClasses[status] || '';
+
+    return statusClasses[item.timeLineStatus] || "";
   };
-  
+
+  // 使用控制反轉獲取狀態顯示內容
+  const statusDisplayContent = getStatusDisplayContent(item);
+
   // 設置項目標題
-  const title = content || status;
-  
+  const title = content || statusDisplayContent;
+
   // 返回 HTML 模板
   return `
     <div class="timeline-item ${getStatusClass()}" title="${title}">
       <div class="timeline-item-content">${content}</div>
-      ${status ? `<div class="timeline-item-status">${status}</div>` : ''}
+      ${
+        statusDisplayContent
+          ? `<div class="timeline-item-status">${statusDisplayContent}</div>`
+          : ""
+      }
     </div>
   `;
 };
@@ -53,7 +119,7 @@ const createItemTemplate = (item) => {
 
 //TODO: 編輯功能控制規劃 - 目前一律禁用，未來可能需要依角色權限開放
 //TODO: - 管理員：可能需要 add, remove 權限
-//TODO: - 排程人員：可能需要 updateTime, updateGroup 權限  
+//TODO: - 排程人員：可能需要 updateTime, updateGroup 權限
 //TODO: - 一般用戶：維持目前的 selectable 查看權限
 
 //* 時間線最大縮放範圍（10年的毫秒數）
@@ -143,15 +209,15 @@ function useTimelineConfig(itemsDataRef, timeRange) {
       ...BASE_TIMELINE_OPTIONS,
       // 編輯功能 - 參考頂部 TODO 規劃
       editable: {
-        add: false,         // 雙擊新增功能
-        updateTime: false,  // 水平拖拽調整時間
+        add: false, // 雙擊新增功能
+        updateTime: false, // 水平拖拽調整時間
         updateGroup: false, // 垂直拖拽換機台
-        remove: false,      // 刪除按鈕
-        overrideItems: true // 強制覆蓋個別項目設定
+        remove: false, // 刪除按鈕
+        overrideItems: true, // 強制覆蓋個別項目設定
       },
       // 互動功能 - 保留聚焦查看，禁用編輯操作
-      selectable: true,     // 項目選取功能 - 用於聚焦和查看詳情
-      multiselect: false,   // 多選功能 - 禁用避免誤操作
+      selectable: true, // 項目選取功能 - 用於聚焦和查看詳情
+      multiselect: false, // 多選功能 - 禁用避免誤操作
       format: TIME_FORMAT_CONFIG,
       // 移動事件處理 - 目前已禁用，但保留邏輯供未來使用
       // onMove: (item, callback) => handleItemMove(item, callback, itemsDataRef),

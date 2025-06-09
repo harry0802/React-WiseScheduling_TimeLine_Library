@@ -4,16 +4,11 @@
  * @version 1.0.0
  */
 
-import React from 'react';
-import {
-  Box,
-  Typography,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
-import WarningIcon from '@mui/icons-material/Warning';
+import React from "react";
+import { Box, Typography, IconButton, Tooltip } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import WarningIcon from "@mui/icons-material/Warning";
 
 // 導入樣式組件
 import {
@@ -23,8 +18,8 @@ import {
   DialogFooter,
   PrimaryButton,
   SecondaryButton,
-} from '../styles/DialogStyles';
-import { industrialTheme } from '../../../assets/schedule/industrialTheme';
+} from "../styles/DialogStyles";
+import { industrialTheme } from "../../../assets/schedule/industrialTheme";
 
 /**
  * @component EnhancedDeleteDialog
@@ -47,15 +42,13 @@ const EnhancedDeleteDialog = ({
       aria-labelledby="delete-dialog-title"
     >
       {/* 對話框標題 */}
-      <DialogHeader 
+      <DialogHeader
         id="delete-dialog-title"
         sx={{ backgroundColor: industrialTheme.colors.accent.red }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {title}
-        </Box>
-        <IconButton 
-          aria-label="關閉" 
+        <Box sx={{ display: "flex", alignItems: "center" }}>{title}</Box>
+        <IconButton
+          aria-label="關閉"
           onClick={onCancel}
           sx={{ color: industrialTheme.colors.text.contrast }}
         >
@@ -65,28 +58,26 @@ const EnhancedDeleteDialog = ({
 
       {/* 對話框內容 */}
       <DialogBody>
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            backgroundColor: 'rgba(244, 67, 54, 0.08)',
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "rgba(244, 67, 54, 0.08)",
             borderRadius: industrialTheme.size.borderRadius,
             padding: 2,
-            marginBottom: 2
+            marginBottom: 2,
           }}
         >
-          <WarningIcon 
-            sx={{ 
-              fontSize: 40, 
+          <WarningIcon
+            sx={{
+              fontSize: 40,
               color: industrialTheme.colors.accent.red,
-              marginRight: 2
-            }} 
+              marginRight: 2,
+            }}
           />
-          <Typography variant="body1">
-            {content}
-          </Typography>
+          <Typography variant="body1">{content}</Typography>
         </Box>
-        
+
         <Typography variant="body2" color="textSecondary">
           此操作不可撤銷，刪除後的數據無法復原。
         </Typography>
@@ -94,10 +85,7 @@ const EnhancedDeleteDialog = ({
 
       {/* 對話框操作按鈕 */}
       <DialogFooter>
-        <SecondaryButton 
-          onClick={onCancel}
-          sx={{ mr: 1 }}
-        >
+        <SecondaryButton onClick={onCancel} sx={{ mr: 1 }}>
           {cancelText}
         </SecondaryButton>
         <PrimaryButton
@@ -105,12 +93,12 @@ const EnhancedDeleteDialog = ({
           variant="contained"
           color="error"
           startIcon={<DeleteIcon />}
-          sx={{ 
+          sx={{
             backgroundColor: industrialTheme.colors.accent.red,
-            '&:hover': {
+            "&:hover": {
               backgroundColor: industrialTheme.colors.accent.red,
-              opacity: 0.9
-            }
+              opacity: 0.9,
+            },
           }}
         >
           {confirmText}

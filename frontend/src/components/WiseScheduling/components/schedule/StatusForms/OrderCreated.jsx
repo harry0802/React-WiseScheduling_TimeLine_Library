@@ -115,12 +115,12 @@ const OrderCreated = ({ item, disabled }) => {
   const selectedArea = watch("area");
   // 直接使用 createAreaMachines 生成當前區域的機台
   const filteredGroups = selectedArea ? createAreaMachines(selectedArea) : [];
-  
+
   // 監聽表單錯誤
   if (!initialized) {
     return <CircularProgress />;
   }
-  
+
   if (!item?.id || !item?.orderInfo) {
     return null;
   }
@@ -198,7 +198,7 @@ const OrderCreated = ({ item, disabled }) => {
           <Grid item xs={12} sm={4}>
             <FieldLabel>製令單號</FieldLabel>
             <ReadOnlyField>
-              <FieldValue>{item.orderInfo.productId}</FieldValue>
+              <FieldValue>{item.orderInfo.workOrderSN}</FieldValue>
             </ReadOnlyField>
           </Grid>
 
@@ -418,7 +418,7 @@ const OrderCreated = ({ item, disabled }) => {
           <Grid item xs={12} sm={6}>
             <FieldLabel>延遲完成日</FieldLabel>
             <ReadOnlyField>
-              <FieldValue>-</FieldValue>
+              <FieldValue>{item.orderInfo.postponeTime || "-"}</FieldValue>
             </ReadOnlyField>
           </Grid>
 

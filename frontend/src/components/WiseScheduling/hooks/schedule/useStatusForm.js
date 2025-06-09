@@ -32,6 +32,8 @@ export const FORM_FIELDS = {
     "scheduledStartTime",
     "scheduledEndTime",
     "orderStatus",
+    "postponeTime", // 延遲完成日 - 僅用於顯示
+    "workOrderSN", // 製令單號 - 僅用於顯示
   ],
   time: ["start", "end"], // 時間欄位 - 通用時間控制
   status: [
@@ -78,6 +80,8 @@ export const FIELD_MAPPING = {
   quantity: "orderInfo.quantity",
   completedQty: "orderInfo.completedQty",
   orderStatus: "orderInfo.orderStatus",
+  postponeTime: "orderInfo.postponeTime", // 延遲完成日
+  workOrderSN: "orderInfo.workOrderSN", // 製令單號
 
   // 狀態資料嵌套映射
   reason: "status.reason",
