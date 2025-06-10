@@ -35,6 +35,29 @@ def complete_machineStatus(db_obj, payload):
     return db_obj
 
 
+def _update_machineStatus_to_finish(ongoing_machineSN_list):
+    """將所有在ongoing_machineSN_list中的機台狀態更新實際結束時間。
+    預防現場師傅忘記結束機台狀態，或是忘記更新實際結束時間
+    Args:
+        ongoing_machineSN_list (list): 機台編號列表，表示正在進行中的機台
+    """
+    try:
+        # 1. 查詢所有在ongoing_machineSN_list中的機台狀態
+        machineStatus_query = MachineStatus.query
+        machineStatus_query = machineStatus_query.join(Machine, Machine.id == MachineStatus.machineId)
+        machineStatus_query = machineStatus_query.filter(Machine.machineSN.in_(ongoing_machineSN_list))
+        machineStatus_query = machineStatus_query.filter(MachineStatus.actualEndDate == None)
+        machineStatus_db_list = machineStatus_query.all()
+
+        # 2. 更新機台狀態為已完成
+        for machineStatus_db in machineStatus_db_list:
+            machineStatus_db.actualEndDate = datetime.now(pytz.timezone(TZ))
+        db.session.commit()
+    except Exception as error:
+        db.session.rollback()
+        raise error
+
+
 class MachineStatusService:
     @staticmethod
     def get_machineStatus(productionArea):
@@ -61,7 +84,7 @@ class MachineStatusService:
             machineStatus_query = MachineStatus.query
             machineStatus_query = machineStatus_query.join(Machine, Machine.id == MachineStatus.machineId)
             machineStatus_query = machineStatus_query.filter(Machine.productionArea == productionArea) if productionArea is not None else machineStatus_query
-            machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate >= midnight)
+            # machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate >= midnight) # 因為有時候師傅修復機台會跨日，所以不限定當日
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate <= current_time)
             machineStatus_query = machineStatus_query.filter(MachineStatus.actualEndDate == None)
             machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(ongoing_machineSN_list))
@@ -136,6 +159,11 @@ class MachineStatusService:
                     }
                     machineStatus_dict_list.append(machineStatus_dict)
 
+            # 7. 如果有ongoing的機台狀態，則將有actualStartTime但沒有actualEndTime的排程，將其實際結束時間更新為現在時間
+            if ongoing_machineSN_list:
+                _update_machineStatus_to_finish(ongoing_machineSN_list)
+            
+            # 8. 將機台狀態資料轉換為序列化格式
             machineStatus_dump = machineStatus_schema.dump(machineStatus_dict_list, many=True)
             resp = message(True, "machineStatus data sent")
             resp["data"] = machineStatus_dump
