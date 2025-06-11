@@ -16,6 +16,9 @@
 /docs/memory_bank.md
 
 
+# claude configuration
+.claude/
+
 # misc
 .DS_Store
 .env.local

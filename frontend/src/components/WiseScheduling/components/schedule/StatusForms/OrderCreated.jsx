@@ -182,11 +182,12 @@ const OrderCreated = ({ item, disabled }) => {
         </Alert>
 
         {/* 顯示關於製令單狀態的說明 */}
-        {item?.orderInfo?.orderStatus !== "尚未上機" && (
-          <Alert severity="info" sx={{ mb: 2 }}>
-            此製令單已開始執行，無法編輯。您只能查看製令單的詳細資訊。
-          </Alert>
-        )}
+        {item?.orderInfo?.orderStatus !== "尚未上機" &&
+          item?.orderInfo?.orderStatus !== "暫停生產" && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              此製令單無法編輯。您只能查看製令單的詳細資訊。
+            </Alert>
+          )}
       </Grid>
 
       {/* 基本資訊區 */}

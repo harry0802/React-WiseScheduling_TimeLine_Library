@@ -109,3 +109,8 @@ const EnhancedDeleteDialog = ({
 };
 
 export default EnhancedDeleteDialog;
+
+//  暫停 與 刪除 狀態
+// 生產暫停 生產完成  取消生產  尚未上機 生產中
+//  可修改   尚未上機  生產暫停
+// 其餘皆不可修改

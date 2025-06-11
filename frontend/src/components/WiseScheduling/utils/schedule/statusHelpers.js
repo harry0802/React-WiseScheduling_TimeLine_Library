@@ -301,13 +301,15 @@ const isFormDisabled = (mode, isSubmitting, item) => {
     return true;
   }
 
-  // 🧠 檢查訂單狀態 - 進行中的訂單也禁用
+  // 🧠 檢查訂單狀態 - 進行中的訂單也禁用，但暫停生產允許編輯
   return (
     mode !== "add" &&
-    // 訂單狀態是 "On-going" 也禁用
+    // 訂單狀態是 "On-going" 也禁用，但「暫停生產」除外
     (item.productionScheduleStatus === "On-going" ||
       (item.orderInfo &&
-        item.orderInfo.orderStatus?.toLowerCase() === "on-going"))
+        item.orderInfo.orderStatus?.toLowerCase() === "on-going")) &&
+    // 「暫停生產」狀態允許編輯
+    item.orderInfo?.orderStatus !== "暫停生產"
   );
 };
 
