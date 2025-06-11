@@ -198,6 +198,7 @@ def upgrade():
             pso.ProductionScheduleId = psrv.ProductionScheduleId
 		WHERE
 			pso.startTime > current_timestamp() - interval 6 month
+            AND psrv.status != '暫停生產'
 
         UNION ALL
 
@@ -236,7 +237,8 @@ def upgrade():
         LEFT JOIN
 			processOption po ON proc.processOptionId = po.id
         WHERE 
-            ps.status = '尚未上機';
+            ps.status = '尚未上機'
+            OR ps.status = '暫停生產';
     """)
 
     # Insert Option Data
