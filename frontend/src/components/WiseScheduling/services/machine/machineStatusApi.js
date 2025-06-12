@@ -78,12 +78,14 @@ export const machineStatusApi = apiSlice.injectEndpoints({
     updateMachineStatus: builder.mutation({
       query: (fullApiData) => {
         // 過濾成需要的格式
+        console.log("🚀 ~ fullApiData:", fullApiData);
         const filteredData = {
           id: fullApiData.machineStatusId ?? fullApiData.id, // 使用 machineStatusId 作為 id
           machineId: fullApiData.machineId,
           planStartDate: fullApiData.planStartDate,
           planEndDate: fullApiData.planEndDate,
           actualStartDate: fullApiData.actualStartDate,
+          actualEndDate: fullApiData.actualEndDate ?? null,
           status: fullApiData.status,
           reason: fullApiData?.machineStatusReason ?? fullApiData.reason,
           product: fullApiData?.machineStatusProduct ?? fullApiData.product,
