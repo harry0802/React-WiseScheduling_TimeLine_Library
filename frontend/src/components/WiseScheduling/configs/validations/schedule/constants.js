@@ -126,25 +126,23 @@ export const isHistoricalData = (item) => {
 
   // 🔍 檢查各種可能的實際時間欄位
   const actualTimeFields = [
-    // 機台狀態相關的實際時間
-    item?.actualStartTime,
-    item?.actualEndTime,
+    // 機台狀態相關的實際時間 這邊改為透過 訂單與狀態模式區分
+    // item?.actualStartTime,
+    // item?.actualEndTime,
     item?.status?.actualStartTime,
     item?.status?.actualEndTime,
     item?.machineStatusActualStartTime,
     item?.machineStatusActualEndTime,
-    
-    // 製令單相關的實際時間
-    item?.orderInfo?.actualStartTime,
+
+    // 製令單相關的實際時間 不看實際開始時間是因為 訂單有可能會是暫停狀態
+    // item?.orderInfo?.actualStartTime,
     item?.orderInfo?.actualEndTime,
   ];
 
   // 只要有任何一個實際時間欄位有值，就視為歷史資料
-  return actualTimeFields.some(time => 
-    time !== null && 
-    time !== undefined && 
-    time !== "" &&
-    time !== "null" // 排除字串 "null"
+  return actualTimeFields.some(
+    (time) =>
+      time !== null && time !== undefined && time !== "" && time !== "null" // 排除字串 "null"
   );
 };
 
@@ -156,17 +154,17 @@ export const isHistoricalData = (item) => {
  */
 export const canEditItem = (item) => {
   if (!item) return false;
-  
+
   // 🧠 歷史資料一律不可編輯
   if (isHistoricalData(item)) {
     return false;
   }
-  
+
   // 🧠 製令單狀態不可編輯狀態切換
   if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
-    return false;  
+    return false;
   }
-  
+
   // 🧠 檢查狀態配置
   const status = item.timeLineStatus;
   return canEditStatus(status, item);
@@ -180,17 +178,17 @@ export const canEditItem = (item) => {
  */
 export const canDeleteItem = (item) => {
   if (!item) return false;
-  
+
   // 🧠 歷史資料一律不可刪除
   if (isHistoricalData(item)) {
     return false;
   }
-  
+
   // 🧠 製令單不可刪除
   if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
     return false;
   }
-  
+
   // 🧠 檢查狀態配置
   const status = item.timeLineStatus;
   return canDeleteStatus(status, item);
@@ -204,17 +202,17 @@ export const canDeleteItem = (item) => {
  */
 export const canShowStatusChangeButton = (item) => {
   if (!item) return false;
-  
+
   // 🧠 歷史資料不顯示狀態切換按鈕
   if (isHistoricalData(item)) {
     return false;
   }
-  
+
   // 🧠 製令單不顯示狀態切換按鈕
   if (item.timeLineStatus === MACHINE_STATUS.ORDER_CREATED) {
     return false;
   }
-  
+
   return true;
 };
 

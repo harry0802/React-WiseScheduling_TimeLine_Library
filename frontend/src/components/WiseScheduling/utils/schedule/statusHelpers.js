@@ -290,26 +290,21 @@ const isFormDisabled = (mode, isSubmitting, item) => {
   if (mode === "view" || isSubmitting) {
     return true;
   }
-
   // 空項目時不禁用（可能是新建項目）
   if (!item) {
     return false;
   }
-
   // 🧠 核心邏輯：有實際時間的資料一律禁用編輯
   if (isHistoricalData(item)) {
     return true;
   }
-
   // 🧠 檢查訂單狀態 - 進行中的訂單也禁用，但暫停生產允許編輯
   return (
     mode !== "add" &&
     // 訂單狀態是 "On-going" 也禁用，但「暫停生產」除外
     (item.productionScheduleStatus === "On-going" ||
       (item.orderInfo &&
-        item.orderInfo.orderStatus?.toLowerCase() === "on-going")) &&
-    // 「暫停生產」狀態允許編輯
-    item.orderInfo?.orderStatus !== "暫停生產"
+        item.orderInfo.orderStatus?.toLowerCase() === "on-going"))
   );
 };
 

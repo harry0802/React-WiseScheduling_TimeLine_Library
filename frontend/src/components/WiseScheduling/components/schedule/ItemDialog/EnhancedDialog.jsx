@@ -110,7 +110,6 @@ function EnhancedDialog({
   const handleDeleteClick = useCallback(() => {
     // 🔧 連接到 DialogManager 的刪除流程
     if (item?.id) {
-      console.log("🚀 ~ handleDeleteClick ~ item:", item);
       onDelete?.(item.id);
     }
     handleMenuClose();
