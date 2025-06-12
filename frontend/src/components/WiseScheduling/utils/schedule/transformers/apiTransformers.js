@@ -287,10 +287,8 @@ export const transformApiToInternalFormat = (apiData) => {
 
   // 組裝內部格式資料
   const internalData = {
-    // 設置ID - 優先使用API提供的ID，否則生成新的UUID
-    id: isWorkOrder
-      ? apiData.productionScheduleId || uuidv4()
-      : apiData.machineStatusId || uuidv4(),
+    // 設置ID - 使用UUID確保唯一性
+    id: uuidv4(),
     group: apiData.machineSN,
     area: apiData.productionArea,
     timeLineStatus,
