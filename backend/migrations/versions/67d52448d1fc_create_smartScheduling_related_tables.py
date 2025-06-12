@@ -199,6 +199,8 @@ def upgrade():
 		WHERE
 			pso.startTime > current_timestamp() - interval 6 month
             AND psrv.status != '暫停生產'
+        GROUP BY 
+			pso.ProductionScheduleId
 
         UNION ALL
 
