@@ -69,6 +69,7 @@ def upgrade():
             {'productionArea': 'D', 'machineSN': 'D4', 'tonnage': '120T', 'singleOrDoubleColor': '單', 'moldTrialCost': 2400, 'electricityCostPerSec': 0.0234},
             {'productionArea': 'D', 'machineSN': 'D5', 'tonnage': '80T', 'singleOrDoubleColor': '單', 'moldTrialCost': 2000, 'electricityCostPerSec': 0.0249},
             {'productionArea': 'D', 'machineSN': 'D6', 'tonnage': '450T', 'singleOrDoubleColor': '單', 'moldTrialCost': 5500, 'electricityCostPerSec': 0.0362},
+            {'productionArea': 'D', 'machineSN': 'D7', 'tonnage': '250T', 'singleOrDoubleColor': '單', 'moldTrialCost': 4800, 'electricityCostPerSec': 0.0712},
         ]
     )
 

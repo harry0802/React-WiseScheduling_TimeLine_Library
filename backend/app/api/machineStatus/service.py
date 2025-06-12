@@ -76,6 +76,7 @@ class MachineStatusService:
             productionSchedule_query = ProductionSchedule.query
             productionSchedule_query = productionSchedule_query.filter_by(status=WorkOrderStatusEnum.ON_GOING.value)
             productionSchedule_query = productionSchedule_query.filter_by(productionArea=productionArea) if productionArea is not None else productionSchedule_query
+            productionSchedule_query = productionSchedule_query.group_by(ProductionSchedule.machineSN)
             productionSchedule_db_list = productionSchedule_query.all()
             # 從productionSchedule_db_list列出所有machineSN
             ongoing_machineSN_list = [productionSchedule_db.machineSN for productionSchedule_db in productionSchedule_db_list]
