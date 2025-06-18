@@ -78,7 +78,6 @@ export const machineStatusApi = apiSlice.injectEndpoints({
     updateMachineStatus: builder.mutation({
       query: (fullApiData) => {
         // 過濾成需要的格式
-        console.log("🚀 ~ fullApiData:", fullApiData);
         const filteredData = {
           id: fullApiData.machineStatusId ?? fullApiData.id, // 使用 machineStatusId 作為 id
           machineId: fullApiData.machineId,
@@ -90,7 +89,6 @@ export const machineStatusApi = apiSlice.injectEndpoints({
           reason: fullApiData?.machineStatusReason ?? fullApiData.reason,
           product: fullApiData?.machineStatusProduct ?? fullApiData.product,
         };
-        console.log("🚀 ~ fullApiData:", fullApiData);
         // 過濾掉 null 值
         const cleanData = Object.fromEntries(
           Object.entries(filteredData).filter(([_, value]) => value != null)

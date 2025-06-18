@@ -25,10 +25,10 @@ const StatusDisplayController = {
    * @returns {string} 顯示內容
    */
   [MACHINE_STATUS.ORDER_CREATED]: (item) => {
+    console.log("🚀 ~ item:", item);
     return (
       // 添加 製令單號
-      item.orderInfo?.workOrderSN ||
-      item.orderInfo?.productId ||
+      `${item._originalApiData?.productionScheduleStatus}  /  製令單號: ${item.orderInfo?.workOrderSN} ` ||
       "製令單號未設定"
     );
   },
