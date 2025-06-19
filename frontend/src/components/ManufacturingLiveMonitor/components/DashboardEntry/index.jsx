@@ -1,57 +1,57 @@
-import { useState, useEffect } from 'react'
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import styles from './styles.module.css'
-import DashboardEntryCar from './DashboardEntryCar'
+import { useState, useEffect } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import styles from "./styles.module.css";
+import DashboardEntryCar from "./DashboardEntryCar";
 
 //! =============== 1. 設定與常量 ===============
 //* 定義系統模組及其配置
 const SYSTEM_MODULES = [
   {
-    id: 'realtime-oee',
-    title: 'OEE 即時監控',
-    description: '即時監控生產線效率，包含設備運作狀態、產能以及良率指標',
-    icon: 'dashboard',
-    path: '/RealTimeOEEMonitor',
-    color: 'rgba(0, 123, 255, 0.85)',
-    stats: { value: '87.2%', trend: 'up', change: '2.4%' }
+    id: "realtime-oee",
+    title: "OEE 即時監控",
+    description: "即時監控生產線效率，包含設備運作狀態、產能以及良率指標",
+    icon: "dashboard",
+    path: "/RealTimeOEEMonitor",
+    color: "rgba(0, 123, 255, 0.85)",
+    stats: { value: "87.2%", trend: "up", change: "2.4%" },
   },
   {
-    id: 'production-progress',
-    title: '生產進度追蹤',
-    description: '監控各產線生產進度，提供工單達成率、實際生產數量與計劃比較',
-    icon: 'trending_up',
-    path: '/ProductionProgressTracker',
-    color: 'rgba(40, 167, 69, 0.85)',
-    stats: { value: '94.5%', trend: 'up', change: '3.7%' }
+    id: "production-progress",
+    title: "生產進度追蹤",
+    description: "監控各產線生產進度，提供工單達成率、實際生產數量與計劃比較",
+    icon: "trending_up",
+    path: "/ProductionProgressTracker",
+    color: "rgba(40, 167, 69, 0.85)",
+    stats: { value: "94.5%", trend: "up", change: "3.7%" },
   },
   {
-    id: 'delivery-trend',
-    title: '交貨趨勢分析',
-    description: '分析出貨數據趨勢，預測未來產能需求及規劃',
-    icon: 'assessment',
-    path: '/DeliveryTrendAnalyzer',
-    color: 'rgba(255, 193, 7, 0.85)',
-    stats: { value: '98.3%', trend: 'stable', change: '0.2%' }
+    id: "delivery-trend",
+    title: "交貨趨勢分析",
+    description: "分析出貨數據趨勢，預測未來產能需求及規劃",
+    icon: "assessment",
+    path: "/DeliveryTrendAnalyzer",
+    color: "rgba(255, 193, 7, 0.85)",
+    stats: { value: "98.3%", trend: "stable", change: "0.2%" },
   },
   {
-    id: 'oee-insight',
-    title: 'OEE 深度分析',
-    description: '深入分析設備OEE指標，找出瓶頸及改善方向',
-    icon: 'insights',
-    path: '/OEEInsightSystem',
-    color: 'rgba(220, 53, 69, 0.85)',
-    stats: { value: '76.8%', trend: 'down', change: '1.5%' }
+    id: "oee-insight",
+    title: "OEE 深度分析",
+    description: "深入分析設備OEE指標，找出瓶頸及改善方向",
+    icon: "insights",
+    path: "/OEEInsightSystem",
+    color: "rgba(220, 53, 69, 0.85)",
+    stats: { value: "76.8%", trend: "down", change: "1.5%" },
   },
   {
-    id: 'factory-performance',
-    title: '工廠績效儀表板',
-    description: '全廠生產線即時狀態監控，包含設備狀態、良率及完成率指標',
-    icon: 'factory',
-    path: '/FactoryPerformanceDashboard',
-    color: 'rgba(111, 66, 193, 0.85)',
-    stats: { value: '82.5%', trend: 'up', change: '1.8%' }
-  }
-]
+    id: "factory-performance",
+    title: "工廠績效儀表板",
+    description: "全廠生產線即時狀態監控，包含設備狀態、良率及完成率指標",
+    icon: "factory",
+    path: "/FactoryPerformanceDashboard",
+    color: "rgba(111, 66, 193, 0.85)",
+    stats: { value: "82.5%", trend: "up", change: "1.8%" },
+  },
+];
 
 /**
  * @function ManufacturingLiveMonitor
@@ -59,20 +59,20 @@ const SYSTEM_MODULES = [
  * @returns {JSX.Element} 渲染的模組導航頁或子路由內容
  */
 function DashboardEntry() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [showDashboard, setShowDashboard] = useState(true)
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [showDashboard, setShowDashboard] = useState(true);
   const [systemStatus, setSystemStatus] = useState({
     lastUpdate: new Date().toLocaleString(),
     activeLines: 12,
     alertCount: 3,
-    systemHealth: '98.7%'
-  })
+    systemHealth: "98.7%",
+  });
 
   // 🧠 根據當前路徑判斷是否顯示儀表板
   useEffect(() => {
     // 如果路徑正好是製造監控首頁，顯示儀表板
-    setShowDashboard(location.pathname === '/ManufacturingLiveMonitor')
+    setShowDashboard(location.pathname === "/ManufacturingLiveMonitor");
 
     // 系統狀態模擬更新
     const statusInterval = setInterval(() => {
@@ -80,27 +80,27 @@ function DashboardEntry() {
         ...prev,
         lastUpdate: new Date().toLocaleString(),
         alertCount: Math.floor(Math.random() * 5),
-        systemHealth: (97 + Math.random() * 3).toFixed(1) + '%'
-      }))
-    }, 15000)
+        systemHealth: (97 + Math.random() * 3).toFixed(1) + "%",
+      }));
+    }, 15000);
 
-    return () => clearInterval(statusInterval)
-  }, [location.pathname])
+    return () => clearInterval(statusInterval);
+  }, [location.pathname]);
 
   /**
    * 處理模組卡片點擊
    * @param {string} path - 目標路徑
    */
   const handleModuleClick = (path) => {
-    navigate(path)
-  }
+    navigate(path);
+  };
 
   /**
    * 返回儀表板
    */
   const handleBackToDashboard = () => {
-    navigate('/ManufacturingLiveMonitor')
-  }
+    navigate("/ManufacturingLiveMonitor");
+  };
 
   return (
     <div className={styles.container}>
@@ -154,9 +154,9 @@ function DashboardEntry() {
             <div className={styles.footerContent}>
               <p>© {new Date().getFullYear()} 製造智能監控系統 - v1.2.0</p>
               <div className={styles.footerLinks}>
-                <a href='#help'>系統說明</a>
-                <a href='#settings'>系統設定</a>
-                <a href='#contact'>聯絡支援</a>
+                <a href="#help">系統說明</a>
+                <a href="#settings">系統設定</a>
+                <a href="#contact">聯絡支援</a>
               </div>
             </div>
           </footer>
@@ -182,7 +182,7 @@ function DashboardEntry() {
         </>
       )}
     </div>
-  )
+  );
 }
 
-export default DashboardEntry
+export default DashboardEntry;

@@ -10,7 +10,7 @@ import maintenanceApi from "../components/MaintenanceSystem/features/machineMain
 import moldMaintenanceApi from "../components/MaintenanceSystem/features/moldMaintenance/services/moldMaintenanceApi.js";
 import productionCostApi from "../components/CostWiseSystem/service/ReceiptApi";
 import wiseSchedulingApiSlice from "../components/WiseScheduling/services/apiSlice";
-import manufacturingApiSlice from "../components/ManufacturingLiveMonitor/services/manufacturingApiSlice";
+import { manufacturingApiSlice } from "../components/ManufacturingLiveMonitor/services";
 
 const store = configureStore({
   reducer: {

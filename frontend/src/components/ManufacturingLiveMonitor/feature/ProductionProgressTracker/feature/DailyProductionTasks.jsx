@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useGetDailyProductionTasksQuery } from "../../../services/manufacturingApiSlice";
+import { useGetDailyProductionTasksQuery } from "../../../services";
 import { BorderBox } from "../../../styles/Content";
 import { FlexFlow } from "../../../styles/Dataflow";
 import DashBordrdMark from "../../../components/Marks/DashBordrdMark";

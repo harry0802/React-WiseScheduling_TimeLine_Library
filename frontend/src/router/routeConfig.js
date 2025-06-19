@@ -201,51 +201,71 @@ const routeConfig = [
     children: [
       {
         index: true,
-        path: 'ManufacturingLiveMonitor',
-        element: <DashboardEntry />
+        path: "ManufacturingLiveMonitor",
+        element: <DashboardEntry />,
       },
       {
-        path: 'FactoryPerformanceDashboard',
+        path: "FactoryPerformanceDashboard",
         element: (
-          <React.Suspense fallback={<LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>}>
+          <React.Suspense
+            fallback={
+              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+            }
+          >
             <FactoryPerformanceDashboard />
           </React.Suspense>
-        )
+        ),
       },
       {
-        path: 'RealTimeOEEMonitor',
+        path: "RealTimeOEEMonitor",
         element: (
-          <React.Suspense fallback={<LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>}>
+          <React.Suspense
+            fallback={
+              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+            }
+          >
             <RealTimeOEEMonitor />
           </React.Suspense>
-        )
+        ),
       },
       {
-        path: 'ProductionProgressTracker',
+        path: "ProductionProgressTracker",
         element: (
-          <React.Suspense fallback={<LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>}>
+          <React.Suspense
+            fallback={
+              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+            }
+          >
             <ProductionProgressTracker />
           </React.Suspense>
-        )
+        ),
       },
       {
-        path: 'DeliveryTrendAnalyzer',
+        path: "DeliveryTrendAnalyzer",
         element: (
-          <React.Suspense fallback={<LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>}>
+          <React.Suspense
+            fallback={
+              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+            }
+          >
             <DeliveryTrendAnalyzer />
           </React.Suspense>
-        )
+        ),
       },
       {
-        path: 'OEEInsightSystem',
+        path: "OEEInsightSystem",
         element: (
-          <React.Suspense fallback={<LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>}>
+          <React.Suspense
+            fallback={
+              <LoadingWrapper>載入製造現場即時監控中...</LoadingWrapper>
+            }
+          >
             <OEEInsightSystem />
           </React.Suspense>
-        )
-      }
-    ]
-  }
+        ),
+      },
+    ],
+  },
 ];
 
 export default routeConfig;

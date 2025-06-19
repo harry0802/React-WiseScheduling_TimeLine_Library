@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useGetRecentShippingPanelQuery } from '../../../services/manufacturingApiSlice'
+import { useGetRecentShippingPanelQuery } from '../../../services'
 import { BorderBox } from '../../../styles/Content'
 import { FlexFlow } from '../../../styles/Dataflow'
 import DashBordrdMark from '../../../components/Marks/DashBordrdMark'
