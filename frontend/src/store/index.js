@@ -11,6 +11,7 @@ import moldMaintenanceApi from "../components/MaintenanceSystem/features/moldMai
 import productionCostApi from "../components/CostWiseSystem/service/ReceiptApi";
 import wiseSchedulingApiSlice from "../components/WiseScheduling/services/apiSlice";
 import { manufacturingApiSlice } from "../components/ManufacturingLiveMonitor/services";
+import { realTimeMonitorApi } from "../components/ManufacturingLiveMonitor/services/endpoints/realTimeMonitorApi";
 
 const store = configureStore({
   reducer: {
@@ -25,6 +26,7 @@ const store = configureStore({
     [productionCostApi.reducerPath]: productionCostApi.reducer,
     [wiseSchedulingApiSlice.reducerPath]: wiseSchedulingApiSlice.reducer,
     [manufacturingApiSlice.reducerPath]: manufacturingApiSlice.reducer,
+    [realTimeMonitorApi.reducerPath]: realTimeMonitorApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -39,7 +41,8 @@ const store = configureStore({
       moldMaintenanceApi.middleware,
       productionCostApi.middleware,
       wiseSchedulingApiSlice.middleware,
-      manufacturingApiSlice.middleware
+      manufacturingApiSlice.middleware,
+      realTimeMonitorApi.middleware
     ),
 });
 

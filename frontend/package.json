@@ -85,7 +85,14 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "claude:create-component": "node claude-commands.js /create-component",
+    "claude:discover": "node claude-commands.js /discover",
+    "claude:create-feature": "node claude-commands.js /create-feature", 
+    "claude:impact-analyze": "node claude-commands.js /impact-analyze",
+    "claude:optimize": "node claude-commands.js /optimize",
+    "claude:quick-fix": "node claude-commands.js /quick-fix",
+    "claude:help": "node claude-commands.js"
   },
   "eslintConfig": {
     "extends": [

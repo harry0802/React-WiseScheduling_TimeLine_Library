@@ -92,13 +92,13 @@ const logError = (error, info) => {
 const CustomErrorBoundary = ({ children, resetKey = false, onReset }) => {
   // 🧠 使用內部狀態跟蹤重置次數，與外部resetKey結合形成完整重置鍵
   const [resetCount, setResetCount] = useState(0);
-  
+
   // ✨ 封裝重置邏輯，便於維護
   const handleReset = useCallback(() => {
     // 增加重置計數
-    setResetCount(prev => prev + 1);
+    setResetCount((prev) => prev + 1);
     // 調用外部傳入的重置處理函數
-    if (typeof onReset === 'function') {
+    if (typeof onReset === "function") {
       onReset();
     }
   }, [onReset]);
