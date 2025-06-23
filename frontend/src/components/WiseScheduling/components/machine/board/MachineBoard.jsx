@@ -1,6 +1,6 @@
 /**
  * @file MachineBoard.jsx
- * @description 機台狀態看板 - 企業級優化版本
+ * @description 機台狀態看板
  * @version 2.1.0
  * @author Harry's Engineering Team
  * @lastModified 2025-06-19
@@ -239,9 +239,10 @@ function MachineStatusBoard() {
    *
    * 業務邏輯說明：
    * 1. 數據預處理：統一狀態格式轉換
-   * 2. 更新/創建判斷：根據是否存在 ID 決定操作類型
-   * 3. 時間計算：自動計算計劃結束時間（+1小時）
-   * 4. 狀態清理：操作成功後關閉抽屜
+   * 2. 動態 payload 構建：根據狀態類型決定是否包含 status 屬性
+   * 3. 更新/創建判斷：根據是否存在 ID 決定操作類型
+   * 4. 時間計算：自動計算計劃結束時間（+1小時）
+   * 5. 狀態清理：操作成功後關閉抽屜
    *
    * 錯誤處理：完整的 try-catch 機制確保錯誤可追蹤
    */
@@ -250,10 +251,23 @@ function MachineStatusBoard() {
       console.log("更新機台狀態:", data);
 
       try {
-        const statusData = {
-          ...data,
-          status: getChineseStatus(data.status),
-        };
+        // 根據新狀態動態決定是否包含 status 屬性
+        const allowedStatusList = ["TUNING", "TESTING", "OFFLINE"];
+        const shouldIncludeStatus = allowedStatusList.includes(data.status);
+
+        // 動態構建最終的 statusData payload
+        let statusData;
+        if (shouldIncludeStatus) {
+          // 包含 status 屬性的完整 payload
+          statusData = {
+            ...data,
+            status: getChineseStatus(data.status),
+          };
+        } else {
+          // 排除 status 屬性的 payload（創建新物件，避免修改原始 data）
+          const { status, ...payloadWithoutStatus } = data;
+          statusData = payloadWithoutStatus;
+        }
 
         if (data.id) {
           // 更新現有機台狀態

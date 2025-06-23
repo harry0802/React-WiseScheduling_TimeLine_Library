@@ -21,10 +21,10 @@ import { validateStatusTransition } from "../../utils/validator/statusValidator"
 const useStatusForm = ({ initialData = {}, onSubmit, machineId, formRef }) => {
   // 錯誤訊息狀態
   const [errorMessage, setErrorMessage] = useState("");
-  
+
   // 成功訊息狀態
   const [successMessage, setSuccessMessage] = useState("");
-  
+
   // 保存前一次提交的數據
   const previousSubmit = useRef(null);
 
@@ -99,8 +99,8 @@ const useStatusForm = ({ initialData = {}, onSubmit, machineId, formRef }) => {
       // 步驟1: 執行基本表單驗證
       const { isValid, values, errors, hasChanges } = await validateForm();
       if (!isValid) {
-        const errorMsg = errors?._form || 
-          (!hasChanges ? "表單未發生變更" : "表單驗證失敗");
+        const errorMsg =
+          errors?._form || (!hasChanges ? "表單未發生變更" : "表單驗證失敗");
         setErrorMessage(errorMsg);
         return false;
       }
@@ -109,7 +109,7 @@ const useStatusForm = ({ initialData = {}, onSubmit, machineId, formRef }) => {
       const currentStatus = initialData?.status || "IDLE";
       const targetStatus = values.status;
       const formState = formRef.current?.formState || {};
-      
+
       const { valid, message, timeInfo } = validateStatusTransition({
         currentStatus,
         targetStatus,
@@ -139,7 +139,6 @@ const useStatusForm = ({ initialData = {}, onSubmit, machineId, formRef }) => {
       // 步驟5: 執行實際提交
       await prepareFormData(updatedValues);
       return true;
-      
     } catch (error) {
       setErrorMessage(error?.message || "提交失敗");
       console.error("表單提交錯誤:", error);
