@@ -5,7 +5,7 @@ export const smartScheduleApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getSmartSchedule: builder.query({
       query: ({ productionArea, startTime, endTime }) => ({
-        url: `${API_BASE}smartSchedule/`,
+        url: `smartSchedule/`,
         method: "GET",
         params: { productionArea, startTime, endTime },
       }),
@@ -22,7 +22,7 @@ export const smartScheduleApi = apiSlice.injectEndpoints({
         };
 
         return {
-          url: `${API_BASE}smartSchedule/changeWorkOrder`,
+          url: `smartSchedule/changeWorkOrder`,
           method: "PUT",
           body: transformedPayload,
         };

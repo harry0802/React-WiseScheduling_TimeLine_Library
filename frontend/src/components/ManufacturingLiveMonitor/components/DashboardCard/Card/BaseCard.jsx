@@ -1,36 +1,36 @@
-import React, { createContext, useContext, useState } from 'react'
-import styled from 'styled-components'
-import { Card as MuiCard, CardContent as MuiCardContent } from '@mui/material'
+import React, { createContext, useContext, useState } from "react";
+import styled from "styled-components";
+import { Card as MuiCard, CardContent as MuiCardContent } from "@mui/material";
 
 //! =============== 1. 設定與常量 ===============
 const CARD_VARIANTS = {
   default: {
-    backgroundColor: 'rgba(1.2%, 12.2%, 31.4%, 0.7)',
-    borderColor: 'rgba(25.5%, 35.3%, 54.5%, 0.5)'
+    backgroundColor: "rgba(1.2%, 12.2%, 31.4%, 0.7)",
+    borderColor: "rgba(25.5%, 35.3%, 54.5%, 0.5)",
   },
   active: {
-    backgroundColor: 'rgba(1.6%, 16.1%, 39.2%, 0.7)',
-    borderColor: 'rgba(0%, 43.9%, 95.3%, 0.7)'
+    backgroundColor: "rgba(1.6%, 16.1%, 39.2%, 0.7)",
+    borderColor: "rgba(0%, 43.9%, 95.3%, 0.7)",
   },
   warning: {
-    backgroundColor: 'rgba(23.5%, 16.1%, 0%, 0.7)',
-    borderColor: 'rgba(96.1%, 62%, 4.3%, 0.7)'
+    backgroundColor: "rgba(23.5%, 16.1%, 0%, 0.7)",
+    borderColor: "rgba(96.1%, 62%, 4.3%, 0.7)",
   },
   error: {
-    backgroundColor: 'rgba(31.4%, 6.7%, 0%, 0.7)',
-    borderColor: 'rgba(86.3%, 14.9%, 14.9%, 0.7)'
-  }
-}
+    backgroundColor: "rgba(31.4%, 6.7%, 0%, 0.7)",
+    borderColor: "rgba(86.3%, 14.9%, 14.9%, 0.7)",
+  },
+};
 
 //! =============== 2. Context 定義 ===============
-const CardContext = createContext(undefined)
+const CardContext = createContext(undefined);
 
 function useCardContext() {
-  const context = useContext(CardContext)
+  const context = useContext(CardContext);
   if (context === undefined) {
-    throw new Error('useCardContext must be used within a Card component')
+    throw new Error("useCardContext must be used within a Card component");
   }
-  return context
+  return context;
 }
 
 //! =============== 3. 樣式組件 ===============
@@ -62,7 +62,7 @@ const StyledCard = styled(MuiCard)`
       box-shadow: 0 0.375rem 1rem rgba(0%, 0%, 0%, 0.4);
     }
   }
-`
+`;
 
 //* 卡片標題
 const StyledCardHeader = styled.div`
@@ -78,7 +78,7 @@ const StyledCardHeader = styled.div`
   border-bottom: 0.0625rem solid rgba(100%, 100%, 100%, 0.1);
   font-weight: 600;
   font-size: 1rem;
-`
+`;
 
 //* 卡片內容
 const StyledCardContent = styled(MuiCardContent)`
@@ -92,7 +92,7 @@ const StyledCardContent = styled(MuiCardContent)`
     /* 視覺樣式 */
     color: rgba(100%, 100%, 100%, 0.85);
   }
-`
+`;
 
 //* 卡片底部
 const StyledCardFooter = styled.div`
@@ -107,7 +107,7 @@ const StyledCardFooter = styled.div`
   /* 視覺樣式 */
   border-top: 0.0625rem solid rgba(100%, 100%, 100%, 0.1);
   font-size: 0.875rem;
-`
+`;
 
 //! =============== 4. 卡片組件 ===============
 /**
@@ -117,8 +117,8 @@ const StyledCardFooter = styled.div`
 const Card = React.forwardRef(
   (
     {
-      className = '',
-      variant = 'default',
+      className = "",
+      variant = "default",
       children,
       collapsible = false,
       defaultExpanded = true,
@@ -127,9 +127,9 @@ const Card = React.forwardRef(
     ref
   ) => {
     // 如果卡片是可折疊的，設置展開狀態
-    const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+    const [isExpanded, setIsExpanded] = useState(defaultExpanded);
     // 切換展開狀態
-    const toggleExpand = () => setIsExpanded((prev) => !prev)
+    const toggleExpand = () => setIsExpanded((prev) => !prev);
 
     return (
       <CardContext.Provider
@@ -137,7 +137,7 @@ const Card = React.forwardRef(
           variant,
           isExpanded,
           toggleExpand,
-          collapsible
+          collapsible,
         }}
       >
         <StyledCard
@@ -149,41 +149,37 @@ const Card = React.forwardRef(
           {children}
         </StyledCard>
       </CardContext.Provider>
-    )
+    );
   }
-)
-Card.displayName = 'Card'
+);
+Card.displayName = "Card";
 
 // 卡片標題區域
 const CardHeader = React.forwardRef(
   ({ className, children, ...props }, ref) => {
-    const { collapsible, isExpanded, toggleExpand } = useCardContext()
+    const { collapsible, isExpanded, toggleExpand } = useCardContext();
 
     return (
-      <StyledCardHeader
-        className={className}
-        ref={ref}
-        {...props}
-      >
-        <div style={{ width: '100%' }}>{children}</div>
+      <StyledCardHeader className={className} ref={ref} {...props}>
+        <div style={{ width: "100%" }}>{children}</div>
         {collapsible && (
           <button
             onClick={toggleExpand}
             style={{
-              background: 'none',
-              border: 'none',
-              color: 'rgba(100%, 100%, 100%, 1)',
-              cursor: 'pointer'
+              background: "none",
+              border: "none",
+              color: "rgba(100%, 100%, 100%, 1)",
+              cursor: "pointer",
             }}
           >
-            {isExpanded ? '▲' : '▼'}
+            {isExpanded ? "▲" : "▼"}
           </button>
         )}
       </StyledCardHeader>
-    )
+    );
   }
-)
-CardHeader.displayName = 'CardHeader'
+);
+CardHeader.displayName = "CardHeader";
 
 // 卡片標題文本
 const CardTitle = React.forwardRef(({ className, children, ...props }, ref) => (
@@ -192,16 +188,16 @@ const CardTitle = React.forwardRef(({ className, children, ...props }, ref) => (
     ref={ref}
     style={{
       margin: 0,
-      fontSize: '1.5rem',
+      fontSize: "1.5rem",
       fontWeight: 600,
-      letterSpacing: '.085em'
+      letterSpacing: ".085em",
     }}
     {...props}
   >
     {children}
   </h3>
-))
-CardTitle.displayName = 'CardTitle'
+));
+CardTitle.displayName = "CardTitle";
 
 // 卡片描述文本
 const CardDescription = React.forwardRef(
@@ -210,70 +206,61 @@ const CardDescription = React.forwardRef(
       className={className}
       ref={ref}
       style={{
-        margin: '0.3125rem 0 0',
-        fontSize: '0.875rem',
-        color: 'rgba(100%, 100%, 100%, 0.6)'
+        margin: "0.3125rem 0 0",
+        fontSize: "0.875rem",
+        color: "rgba(100%, 100%, 100%, 0.6)",
       }}
       {...props}
     >
       {children}
     </p>
   )
-)
-CardDescription.displayName = 'CardDescription'
+);
+CardDescription.displayName = "CardDescription";
 
 // 卡片內容區域
 const CardContent = React.forwardRef(
   ({ className, children, ...props }, ref) => {
-    const { collapsible, isExpanded } = useCardContext()
+    const { collapsible, isExpanded } = useCardContext();
 
     // 如果是可折疊的並且沒有展開，則隱藏內容
     if (collapsible && !isExpanded) {
-      return null
+      return null;
     }
 
     return (
-      <StyledCardContent
-        className={className}
-        ref={ref}
-        {...props}
-      >
+      <StyledCardContent className={className} ref={ref} {...props}>
         {children}
       </StyledCardContent>
-    )
+    );
   }
-)
-CardContent.displayName = 'CardContent'
+);
+CardContent.displayName = "CardContent";
 
 // 卡片底部區域
 const CardFooter = React.forwardRef(
   ({ className, children, ...props }, ref) => {
-    const { collapsible, isExpanded } = useCardContext()
+    const { collapsible, isExpanded } = useCardContext();
 
     // 如果是可折疊的並且沒有展開，則隱藏底部
     if (collapsible && !isExpanded) {
-      return null
+      return null;
     }
 
     return (
-      <StyledCardFooter
-        className={className}
-        ref={ref}
-        {...props}
-      >
+      <StyledCardFooter className={className} ref={ref} {...props}>
         {children}
       </StyledCardFooter>
-    )
+    );
   }
-)
-CardFooter.displayName = 'CardFooter'
+);
+CardFooter.displayName = "CardFooter";
 
 // 將所有子組件附加到 Card 上，形成 Compound Component
-Card.Header = CardHeader
-Card.Title = CardTitle
-Card.Description = CardDescription
-Card.Content = CardContent
-Card.Footer = CardFooter
+Card.Header = CardHeader;
+Card.Title = CardTitle;
+Card.Description = CardDescription;
+Card.Content = CardContent;
+Card.Footer = CardFooter;
 
-export { Card }
-
+export { Card };

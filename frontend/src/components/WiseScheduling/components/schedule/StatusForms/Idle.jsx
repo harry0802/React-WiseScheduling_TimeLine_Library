@@ -17,7 +17,7 @@ import {
 } from "../../../configs/validations/schedule/constants";
 import { useGetMachinesQuery } from "../../../../QuotationManagementSystem/services/salesServices/endpoints/machineApi";
 import TimePickerSection from "./TimePickerSection";
-import { set } from "js-cookie";
+// import Cookies from "js-cookie"; // 暫時移除未使用的導入
 import { Controller } from "react-hook-form"; // 引入 Controller
 
 const Idle = ({ disabled, item, status, mode = "create" }) => {
