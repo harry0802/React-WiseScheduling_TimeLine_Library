@@ -29,7 +29,9 @@ const FIELD_NAME = "product";
  * 輸入容器樣式 - 提供一致的間距 🧠
  */
 const InputContainer = styled.div`
-  padding: 2rem 1.5rem 0 1.5rem;
+  && {
+    padding: 2rem 1.5rem 0 1.5rem;
+  }
 `;
 
 /**
@@ -111,7 +113,6 @@ const ProductInput = ({
   //* 檢測是否在表單上下文中使用
   const formContext = useFormContext();
   const isMountedInForm = !!formContext;
-
   //* 獲取錯誤狀態和訊息
   const { showError, errorMessage } = getErrorState(
     formContext,
@@ -139,20 +140,24 @@ const ProductInput = ({
 
   //* 表單模式：使用 Controller 包裝
   return (
-    <InputContainer>
-      <Controller
-        name={name}
-        control={formContext.control}
-        render={({ field }) => (
-          <StyledTextField
-            {...field}
-            {...TEXT_FIELD_PROPS}
-            error={showError}
-            helperText={errorMessage}
-          />
-        )}
-      />
-    </InputContainer>
+    <Controller
+      name={name}
+      control={formContext.control}
+      render={({ field }) => (
+        <TextField
+          {...field}
+          label="產品名稱"
+          variant="outlined"
+          fullWidth
+          placeholder="請輸入產品名稱"
+          error={showError}
+          helperText={errorMessage}
+          sx={{
+            marginBottom: "1rem",
+          }}
+        />
+      )}
+    />
   );
 };
 

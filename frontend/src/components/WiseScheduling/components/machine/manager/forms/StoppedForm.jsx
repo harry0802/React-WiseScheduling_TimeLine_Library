@@ -8,7 +8,6 @@ import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import { Box, Typography, Grid } from "@mui/material";
 import { Controller } from "react-hook-form";
-import dayjs from "dayjs";
 
 // 導入自定義表單處理 Hook
 import { useFormHandler } from "../../../../hooks/machine/useFormHandler";
@@ -18,6 +17,9 @@ import ReasonSelector from "../../controls/ReasonSelector";
 
 // 導入驗證 schema
 import { offlineSchema } from "../../../../configs/validations/machine/machineSchemas";
+
+// 導入狀態常數
+import { MACHINE_STATUS } from "../../../../configs/constants/fieldNames";
 
 /**
  * 機台停機狀態表單
@@ -32,12 +34,12 @@ const StoppedForm = forwardRef(({ initialData }, ref) => {
   // 獲取默認日期的函數
 
   const getDefaultValues = () => ({
-    reason: "",
+    reason: initialData?.reason || "",
     planStartDate: initialData?.planStartDate,
     planEndDate: initialData?.planEndDate,
     actualStartDate: initialData?.actualStartDate,
     actualEndDate: initialData?.actualEndDate,
-    status: "OFFLINE",
+    status: MACHINE_STATUS.OFFLINE,
     id: initialData?.id,
     machineId: initialData?.machineId,
   });
@@ -50,7 +52,6 @@ const StoppedForm = forwardRef(({ initialData }, ref) => {
     ref,
   });
 
-  console.log("🚀 ~ StoppedForm ~ isDirty:", isDirty);
 
   return (
     <Box sx={{ mt: 2 }}>

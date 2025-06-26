@@ -23,6 +23,7 @@ import {
 } from "../../../configs/validations/schedule/constants";
 import { createAreaMachines } from "../../../configs/validations/schedule/machineGroups";
 import { Controller } from "react-hook-form";
+// import { formatISOToDateTime } from "../index";
 
 // 自定義唯讀欄位的樣式
 const ReadOnlyField = styled(Box)(({ theme }) => ({
@@ -101,6 +102,61 @@ const SimpleProgressBar = styled(Box)(({ value, color, theme }) => ({
 }));
 
 /**
+ * @function formatISOToDateTime
+ * @description 將 ISO 8601 格式時間字串轉換為中文時間格式
+ * @param {string} isoString - ISO 8601 格式時間字串
+ * @returns {string} 中文格式的時間字串 (YYYY/MM/DD 上午/下午HH:mm)
+ *
+ * @example
+ * // 基本使用 - 轉換為中文時間格式
+ * const result = formatISOToDateTime("2025-06-10T05:45:18.000Z");
+ * console.log(result); // "2025/06/10 上午05:45"
+ *
+ * // 下午時間示例
+ * const afternoon = formatISOToDateTime("2025-06-17T18:06:07.000Z");
+ * console.log(afternoon); // "2025/06/17 下午18:06"
+ *
+ * // OrderCreated 使用場景
+ * console.log(`🚀 ~ OrderCreated ~ item: ${formatISOToDateTime(item.timestamp)}`);
+ * // 輸出: "🚀 ~ OrderCreated ~ item: 2025/06/12 上午04:09"
+ *
+ * @notes
+ * - 使用原生 JavaScript Date 處理，移除外部依賴
+ * - 支援中文上午/下午顯示
+ * - 自動處理空值和無效時間
+ * - 格式：YYYY/MM/DD 上午/下午HH:mm
+ */
+function formatISOToDateTime(isoString) {
+  if (!isoString) return "";
+
+  try {
+    const date = new Date(isoString);
+
+    // 檢查日期是否有效
+    if (isNaN(date.getTime())) {
+      console.warn("[formatISOToDateTime] 無效的日期格式:", isoString);
+      return "";
+    }
+
+    // 使用 UTC 方法避免時區轉換問題
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const hours = date.getUTCHours();
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+
+    // 判斷上午/下午
+    const period = hours < 12 ? "上午" : "下午";
+    const formatHours = String(hours).padStart(2, "0");
+
+    return `${year}/${month}/${day} ${period}${formatHours}:${minutes}`;
+  } catch (error) {
+    console.error("[formatISOToDateTime] 時間格式轉換錯誤:", error);
+    return "";
+  }
+}
+
+/**
  * @function OrderCreated
  * @description 製令單狀態的表單組件 - 因其複雜性保持獨立實現，不強行套用抽象
  * @param {boolean} disabled - 是否禁用表單
@@ -108,6 +164,10 @@ const SimpleProgressBar = styled(Box)(({ value, color, theme }) => ({
  * @returns {JSX.Element} 渲染的表單組件
  */
 const OrderCreated = ({ item, disabled }) => {
+  console.log(
+    "🚀 ~ OrderCreated ~ item:",
+    formatISOToDateTime(item.orderInfo.actualStartTime)
+  );
   const { register, errors, watch, control, initialized } = useStatusForm(
     MACHINE_STATUS.ORDER_CREATED,
     item
@@ -381,15 +441,7 @@ const OrderCreated = ({ item, disabled }) => {
             <FieldLabel>預計完成日</FieldLabel>
             <ReadOnlyField>
               <FieldValue>
-                {item.end
-                  ? new Date(item.end).toLocaleString("zh-TW", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "-"}
+                {item.end ? formatISOToDateTime(item.end) : "-"}
               </FieldValue>
             </ReadOnlyField>
           </Grid>
@@ -407,9 +459,7 @@ const OrderCreated = ({ item, disabled }) => {
             <ReadOnlyField>
               <FieldValue>
                 {item.orderInfo.actualStartTime
-                  ? new Date(
-                      item.orderInfo.actualStartTime
-                    ).toLocaleDateString()
+                  ? formatISOToDateTime(item.orderInfo.actualStartTime)
                   : "尚未開始"}
               </FieldValue>
             </ReadOnlyField>

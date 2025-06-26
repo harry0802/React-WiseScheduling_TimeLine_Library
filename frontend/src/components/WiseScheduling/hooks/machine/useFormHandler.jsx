@@ -27,9 +27,19 @@ import { isEqual } from "lodash";
  */
 function useFormHandler({ initialData, getDefaultValues, schema, ref }) {
   const initialDataRef = useRef(initialData);
-  const defaults = getDefaultValues();
+
+  // 使用 useMemo 確保 defaults 隨 initialData 更新
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const defaults = useMemo(() => getDefaultValues(), [initialData]);
+  console.log("🚀 ~ useFormHandler ~ defaults:", defaults);
 
   // 使用 React Hook Form 設置表單
+  const formMethods = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: defaults,
+    mode: "onChange",
+  });
+
   const {
     control,
     formState: { errors, isDirty, touchedFields, dirtyFields },
@@ -38,11 +48,7 @@ function useFormHandler({ initialData, getDefaultValues, schema, ref }) {
     setValue,
     trigger,
     watch,
-  } = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: defaults,
-    mode: "onChange",
-  });
+  } = formMethods;
 
   // 當 initialData 變更時重置表單
   useEffect(() => {
@@ -81,6 +87,7 @@ function useFormHandler({ initialData, getDefaultValues, schema, ref }) {
   );
 
   return {
+    formMethods,
     control,
     errors,
     reset: resetForm,

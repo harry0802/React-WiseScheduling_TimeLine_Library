@@ -7,8 +7,7 @@
 import React, { forwardRef } from "react";
 import PropTypes from "prop-types";
 import { Box, Typography, Grid } from "@mui/material";
-import { Controller } from "react-hook-form";
-import dayjs from "dayjs";
+import { FormProvider } from "react-hook-form";
 
 // 導入自定義表單處理 Hook
 import { useFormHandler } from "../../../../hooks/machine/useFormHandler";
@@ -18,6 +17,9 @@ import ProductInput from "../../controls/ProductInput";
 
 // 導入驗證 schema
 import { testingSchema } from "../../../../configs/validations/machine/machineSchemas";
+
+// 導入狀態常數
+import { MACHINE_STATUS } from "../../../../configs/constants/fieldNames";
 
 /**
  * 產品試模狀態表單
@@ -31,18 +33,18 @@ import { testingSchema } from "../../../../configs/validations/machine/machineSc
 const TestingForm = forwardRef(({ initialData }, ref) => {
   // 獲取默認日期的函數
   const getDefaultValues = () => ({
-    product: "",
+    product: initialData?.product || "",
     planStartDate: initialData?.planStartDate,
     planEndDate: initialData?.planEndDate,
     actualStartDate: initialData?.actualStartDate,
     actualEndDate: initialData?.actualEndDate,
-    status: "TESTING",
+    status: MACHINE_STATUS.TESTING,
     id: initialData?.id,
     machineId: initialData?.machineId,
   });
 
   // 使用自定義表單 Hook
-  const { control, errors } = useFormHandler({
+  const { formMethods } = useFormHandler({
     initialData,
     getDefaultValues,
     schema: testingSchema,
@@ -50,31 +52,22 @@ const TestingForm = forwardRef(({ initialData }, ref) => {
   });
 
   return (
-    <Box sx={{ mt: 2 }}>
-      <Grid container spacing={2}>
-        {/* 表單頭部信息 */}
-        <Grid item xs={12}>
-          <Typography variant="subtitle1" gutterBottom>
-            產品試模設定
-          </Typography>
+    <FormProvider {...formMethods}>
+      <Box sx={{ mt: 2 }}>
+        <Grid container spacing={2}>
+          {/* 表單頭部信息 */}
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" gutterBottom>
+              產品試模設定
+            </Typography>
+          </Grid>
+          {/* 產品輸入 */}
+          <Grid item xs={12}>
+            <ProductInput name="product" />
+          </Grid>
         </Grid>
-        {/* 產品輸入 */}
-        <Grid item xs={12}>
-          <Controller
-            name="product"
-            control={control}
-            render={({ field }) => (
-              <ProductInput
-                value={field.value}
-                onChange={field.onChange}
-                error={!!errors.product}
-                helperText={errors.product?.message}
-              />
-            )}
-          />
-        </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </FormProvider>
   );
 });
 

@@ -1,4 +1,5 @@
 import apiSlice from "../apiSlice";
+import { getStatusCode } from "../../configs/constants/fieldNames";
 
 export const machineStatusApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -7,7 +8,14 @@ export const machineStatusApi = apiSlice.injectEndpoints({
       query: (productionArea) =>
         `machineStatus/?productionArea=${productionArea}`,
       providesTags: ["MachineStatus"],
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => {
+        const data = response.data;
+        // 在 API 層統一將中文狀態轉換為英文狀態碼
+        return data.map(machine => ({
+          ...machine,
+          status: getStatusCode(machine.status) // 中文狀態 → 英文狀態碼
+        }));
+      },
     }),
 
     /**

@@ -15,10 +15,7 @@ import PropTypes from "prop-types";
 import { Box, Alert, Typography } from "@mui/material";
 
 // 導入狀態與組件
-import {
-  MACHINE_STATUS,
-  convertTimeLineStatus,
-} from "../../../configs/constants/fieldNames";
+import { MACHINE_STATUS } from "../../../configs/constants/fieldNames";
 import { StatusHeader, SliderContainer } from "../../../assets/machine.styles";
 import StatusSlider from "../controls/StatusSlider";
 
@@ -45,8 +42,9 @@ const FORM_COMPONENTS = {
  */
 const MachineStatusManager = forwardRef((props, ref) => {
   const { initialData = {}, onSubmit, machineId } = props;
+  console.log("🚀 ~ MachineStatusManager ~ initialData:", initialData);
 
-  // 機台當前狀態
+  // 機台當前狀態（確保使用英文狀態碼）
   const [currentStatus, setCurrentStatus] = useState(
     initialData?.status || MACHINE_STATUS.IDLE
   );
@@ -104,14 +102,17 @@ const MachineStatusManager = forwardRef((props, ref) => {
    * 渲染狀態規則提示
    */
   const renderStatusRuleHint = () => {
-    const currentNormalizedStatus = convertTimeLineStatus(
-      initialData?.status || MACHINE_STATUS.IDLE
-    );
+    // API 層已統一轉換為英文狀態碼，直接使用
+    const currentStatus = initialData?.status || MACHINE_STATUS.IDLE;
 
-    if (currentNormalizedStatus === "IDLE") {
+    if (currentStatus === MACHINE_STATUS.IDLE) {
       return "待機狀態可切換至任何狀態";
     } else if (
-      ["TUNING", "TESTING", "OFFLINE"].includes(currentNormalizedStatus)
+      [
+        MACHINE_STATUS.TUNING,
+        MACHINE_STATUS.TESTING,
+        MACHINE_STATUS.OFFLINE,
+      ].includes(currentStatus)
     ) {
       return "非待機狀態只能切換至待機狀態";
     }
@@ -186,12 +187,6 @@ const MachineStatusManager = forwardRef((props, ref) => {
     </Box>
   );
 });
-
-MachineStatusManager.propTypes = {
-  initialData: PropTypes.object,
-  onSubmit: PropTypes.func.isRequired,
-  machineId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-};
 
 MachineStatusManager.displayName = "MachineStatusManager";
 

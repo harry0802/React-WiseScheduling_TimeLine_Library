@@ -586,9 +586,9 @@ function DynamicTimeline() {
                   options={areaOptions}
                   placeholder="選擇區域"
                 />
-                <TimelineControls.AddButton
+                {/* <TimelineControls.AddButton
                   onClick={() => handleAddItem(null, selectedArea)}
-                />
+                /> */}
                 <TimelineControls.NowButton onClick={handleMoveToNow} />
               </TimelineControls.ButtonGroup>
             </TimelineControls.Row>
