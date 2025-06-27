@@ -102,7 +102,7 @@ export const tuningSchema = baseSchema.extend({
  */
 export const testingSchema = baseSchema.extend({
   // TestingForm.jsx 中使用的欄位
-  product: z.string().min(1, { message: "請輸入試模產品名稱" }),
+  product: z.string().optional(),
 });
 
 /**

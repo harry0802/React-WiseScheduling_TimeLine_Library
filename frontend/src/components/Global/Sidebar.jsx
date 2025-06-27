@@ -47,6 +47,10 @@ const MENU_ITEMS = [
         key: "CostWiseSystemPage",
         label: "智慧成本分析表",
       },
+      {
+        key: "SmartScheduling",
+        label: "智慧排程",
+      },
     ],
   },
   {
@@ -87,6 +91,10 @@ const MENU_ITEMS = [
       {
         key: "MachineSelectPage",
         label: "派工系統",
+      },
+      {
+        key: "MachineStatusBoard",
+        label: "機台狀態操作面板",
       },
     ],
   },

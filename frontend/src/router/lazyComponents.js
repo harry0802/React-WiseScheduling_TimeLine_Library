@@ -138,10 +138,14 @@ export const SubBatch = lazyImport(() =>
   import("../components/CostWiseSystem/features/batchManagement/subBatch/index")
 );
 
-// WiseScheduling
-export const WiseSchedulingPage = lazyImport(() =>
-  import("../pages/WiseSchedulingPage")
+// WiseScheduling - 重構後的獨立頁面
+export const MachineStatusBoard = lazyImport(() =>
+  import("../pages/MachineStatusBoard")
 );
+export const SmartScheduling = lazyImport(() =>
+  import("../pages/SmartScheduling")
+);
+
 
 // TimelineGantt
 export const TimelineGanttPage = lazyImport(() =>
