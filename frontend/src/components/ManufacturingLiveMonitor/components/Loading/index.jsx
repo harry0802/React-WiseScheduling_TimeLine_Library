@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types'
-import styled, { keyframes } from 'styled-components'
+import PropTypes from "prop-types";
+import styled, { keyframes } from "styled-components";
 
 //! =============== 1. 動畫定義 ===============
 //* 定義組件所需的關鍵幀動畫
@@ -10,7 +10,7 @@ const rotateSpinner = keyframes`
   100% {
     transform: rotateX(360deg) rotateY(360deg);
   }
-`
+`;
 
 const pulseOpacity = keyframes`
   0%, 100% {
@@ -19,7 +19,7 @@ const pulseOpacity = keyframes`
   50% {
     opacity: 1;
   }
-`
+`;
 
 const pulseText = keyframes`
   0%, 100% {
@@ -29,7 +29,7 @@ const pulseText = keyframes`
     opacity: 1;
     text-shadow: 0 0 25px rgba(69, 156, 255, 0.7);
   }
-`
+`;
 
 const typeText = keyframes`
   from {
@@ -40,7 +40,7 @@ const typeText = keyframes`
     width: 100%;
     opacity: 0.6;
   }
-`
+`;
 
 //! =============== 2. 樣式組件 ===============
 //* 基礎布局層
@@ -66,7 +66,7 @@ const LoadingContainer = styled.div`
   /* 其他屬性 */
   overflow: hidden;
   isolation: isolate;
-`
+`;
 
 const LoadingContent = styled.div`
   /* 布局定位 */
@@ -78,7 +78,7 @@ const LoadingContent = styled.div`
 
   /* 盒模型 */
   padding: 2rem;
-`
+`;
 
 //* 動效處理層
 const Spinner = styled.div`
@@ -101,7 +101,7 @@ const Spinner = styled.div`
     height: 60px;
     margin-bottom: 1.5rem;
   }
-`
+`;
 
 //* 狀態邏輯層
 const Circle = styled.div`
@@ -143,7 +143,7 @@ const Circle = styled.div`
     animation-delay: 1.5s;
     transform: rotateX(45deg) rotateY(45deg);
   }
-`
+`;
 
 const LoadingText = styled.div`
   /* 視覺樣式 */
@@ -161,7 +161,7 @@ const LoadingText = styled.div`
   @media (max-width: 768px) {
     font-size: 1.2rem;
   }
-`
+`;
 
 const InfoText = styled.div`
   /* 視覺樣式 */
@@ -171,7 +171,7 @@ const InfoText = styled.div`
 
   /* CSS3特效 */
   animation: ${typeText} 3s steps(40, end) 1;
-`
+`;
 
 /**
  * @function LoadingWrapper
@@ -180,7 +180,7 @@ const InfoText = styled.div`
  * @param {Node} props.children - 載入文字或內容
  * @returns {JSX.Element} 渲染的載入組件
  */
-function LoadingWrapper({ children = '載入中...' }) {
+function LoadingWrapper({ children = "載入中..." }) {
   return (
     <LoadingContainer>
       <LoadingContent>
@@ -194,8 +194,7 @@ function LoadingWrapper({ children = '載入中...' }) {
         <InfoText>正在建立安全連接...</InfoText>
       </LoadingContent>
     </LoadingContainer>
-  )
+  );
 }
 
-export default LoadingWrapper
-
+export default LoadingWrapper;
