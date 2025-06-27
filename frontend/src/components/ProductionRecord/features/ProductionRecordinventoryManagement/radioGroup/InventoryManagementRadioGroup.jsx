@@ -2,7 +2,7 @@ import React from "react";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import Grid from "@mui/material/Unstable_Grid2";
+import Grid from "@mui/material/Grid";
 import styles from "./InventoryManagementRadioGroup.module.scss";
 /* ASCII 
 InventoryManagementRadioGroup

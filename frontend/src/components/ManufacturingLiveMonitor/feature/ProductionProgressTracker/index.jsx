@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Stack } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import Grid from "@mui/material/Grid";
 import { useHeaderNameStore } from "../../slice/LayoutSlice";
 import DailyIncomingStock from "./feature/DailyInComingStock";
 import NextThreeDaysIncomingStock from "./feature/NextThreeDaysIncomingStock";

@@ -1,6 +1,6 @@
 import { BorderBox } from "../../../styles/Content";
 import { BaseCard } from "../../../components/DashboardCard";
-import Grid from "@mui/material/Unstable_Grid2";
+import Grid from "@mui/material/Grid";
 import ProcessText from "../components/ProcessText";
 import ProgressBarChart from "../components/Dashboard/ProgressBarChart";
 
