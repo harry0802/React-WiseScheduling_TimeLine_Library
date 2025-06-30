@@ -1,3 +1,4 @@
+from flask import request,current_app
 from flask_restx import Resource
 from app.utils_log import controller_entrance_log
 from .service import DashboardService
@@ -164,7 +165,7 @@ class DashboardMachineStatusHoursStatisticsController(Resource):
     machineStatusHoursStatistics_resp = DashboardDto.machineStatusHoursStatistics_resp
 
     @api.doc(description="""當日機台各狀態時數統計
-             加總各個機台當天累積的生產/調機/停機/試模/待機時間。"""
+             加總各個機台當天累積的生產/調機/停機/試模/待機時間(單位:小時)。"""
             )
     @api.doc(
         "Get machineStatusHoursStatistics",
@@ -182,7 +183,7 @@ class DashboardMachineStatusHoursStatisticsController(Resource):
 class DashboardMachineUtilizationStatisticsController(Resource):
     machineUtilizationStatistics_resp = DashboardDto.machineUtilizationStatistics_resp
 
-    @api.doc(description="""設備稼動分析 (尚未完成，先串其他API)
+    @api.doc(description="""設備稼動分析
             1.「稼動時間 」=當天所有機台「生產時間 」(機)的總合
             2. 「稼動率」=「所有機台「生產中」時間」(機)/(「所有機台*24*60」(機)-「所有待機中的機台待機時間」(機)-「所有上模調機的時間」(機))*100%時間範圍為每天00:00-24:00
             3.「生產機台數」=目前為「生產中」的機台數總合
@@ -199,3 +200,45 @@ class DashboardMachineUtilizationStatisticsController(Resource):
     @controller_entrance_log(description="Get machineUtilizationStatistics")
     def get(self):
         return DashboardService.get_machineUtilizationStatistics()
+    
+
+@api.route("/dailyOEE")
+class DashboardDailyOEEController(Resource):
+    dailyOEE_resp = DashboardDto.dailyOEE_resp
+
+    @api.doc(description="""每日全廠OEE(%)趨勢，顯示過去7天的OEE趨勢圖。
+            全廠「OEE」=「稼動率」*「產能效率」*「良率」(每日資料)
+            「稼動率」=「所有機台「生產中」時間」(機)/(「所有機台*24*60」(機)-「所有待機中的機台待機時間」(機)-「所有上模調機的時間」(機))*100%時間範圍為每天00:00-24:00
+            「產能效率」=「所有機台的「良品數」(派)+「不良品數」(派)」/(所有機台的「穴數」(排)*「產能小時」(排))
+            「良率」= 「良品數量」(派)/(「不良數」(派)+「良品數量」(派))
+             """
+            )
+    @api.doc(
+        "Get dailyOEE",
+        responses={
+            200: ("dailyOEE data successfully sent", dailyOEE_resp),
+            404: "dailyOEE not found",
+        },
+    )
+    @controller_entrance_log(description="Get dailyOEE")
+    def get(self):
+        return DashboardService.get_dailyOEE()
+    
+
+@api.route("/machineOverview")
+class DashboardMachineOverviewController(Resource):
+    machineOverview_resp = DashboardDto.machineOverview_resp
+
+    @api.doc(description="""A/B/C/D區域機台Overview""")
+    @api.doc(
+        "Get machineOverview",
+        responses={
+            200: ("machineOverview data successfully sent", machineOverview_resp),
+            404: "machineOverview not found",
+        },
+    )
+    @api.param("productionArea", "機台區域", type=str, required=True, enum=["A", "B", "C", "D"])
+    @controller_entrance_log(description="Get machineOverview")
+    def get(self):
+        productionArea = request.args.get('productionArea', default="A", type=str)
+        return DashboardService.get_machineOverview(productionArea)

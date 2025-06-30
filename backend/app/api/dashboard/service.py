@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timedelta
 import sys
 import os
@@ -21,6 +22,124 @@ from .schemas import (TodayWorkOrderSchema, OverdueWorkOrderSchema, MachineAccum
 MachineOfflineEventSchema, TodayWorkOrderWithProcess, MachineStatusHoursStatisticsSchema)
 TZ = os.getenv("TIMEZONE","Asia/Taipei")
 
+def _get_machineStatus_statistics(start_time, end_time) -> tuple:
+    """取得所有機台在指定時間範圍內的狀態統計。
+
+    Args:
+        start_time (_type_): _description_
+        end_time (_type_): _description_
+
+    Returns:
+        tuple: 包含機台列表和每個機台的狀態時間統計。
+    """
+    # Time from midnight to current time (used for per-machine idle time)
+    day_seconds = Decimal((end_time - start_time).total_seconds())
+
+    # Get all machines
+    machines = db.session.query(Machine.id).all()
+    if not machines:
+        return message(True, "No machines found"), 200
+    
+    # 統計所有機台的狀態時間
+    total_status_times = {
+        MachineStatusEnum.RUN.value: Decimal('0'),
+        MachineStatusEnum.TUNING.value: Decimal('0'),
+        MachineStatusEnum.OFFLINE.value: Decimal('0'),
+        MachineStatusEnum.TESTING.value: Decimal('0'),
+        MachineStatusEnum.IDLE.value: Decimal('0')
+    }
+
+    # 記錄每一個機台各個狀態時間
+    each_machine_status_times = []
+
+    # Process each machine
+    for machine_id, in machines:
+        # Query production time for this machine
+        # 利用distinct避免重複計算同一個機台多張製令單生產的情況
+        production_time_subquery = db.session.query(
+            ProductionScheduleOngoing.startTime,
+            func.timestampdiff(
+                text('SECOND'),
+                ProductionScheduleOngoing.startTime,
+                func.coalesce(ProductionScheduleOngoing.endTime, func.now())
+            ).label('production_seconds')
+        ).join(
+            ProductionSchedule,
+            ProductionScheduleOngoing.productionScheduleId == ProductionSchedule.id
+        ).join(
+            Machine,
+            ProductionSchedule.machineSN == Machine.machineSN
+        ).filter(
+            Machine.id == machine_id,
+            ProductionScheduleOngoing.startTime >= start_time,
+            or_(
+                ProductionScheduleOngoing.endTime < end_time,
+                ProductionScheduleOngoing.endTime.is_(None)
+            )
+        ).distinct().subquery()
+
+        production_time_query = db.session.query(
+            func.sum(production_time_subquery.c.production_seconds).label('total_production_seconds')
+        )
+        production_time = (
+            production_time_query.scalar() or Decimal('0')
+        )
+        
+        # Query machine status times for this machine
+        machine_status_times = (
+            db.session.query(
+                MachineStatus.status,
+                func.sum(
+                    func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, func.coalesce(MachineStatus.actualEndDate, func.now()))
+                ).label('status_seconds')
+            )
+            .filter(
+                MachineStatus.machineId == machine_id,
+                MachineStatus.actualStartDate >= start_time,
+                or_(
+                    MachineStatus.actualEndDate < end_time,
+                    MachineStatus.actualEndDate.is_(None)
+                )
+            )
+            .group_by(MachineStatus.status)
+            .all()
+        )
+
+        # Initialize status times for this machine
+        status_times = {
+            MachineStatusEnum.RUN.value: production_time,
+            MachineStatusEnum.TUNING.value: Decimal('0'),
+            MachineStatusEnum.OFFLINE.value: Decimal('0'),
+            MachineStatusEnum.TESTING.value: Decimal('0'),
+            MachineStatusEnum.IDLE.value: Decimal('0')
+        }
+
+        # Update status times from machineStatus
+        for status, seconds in machine_status_times:
+            if status in status_times:
+                status_times[status] = seconds if seconds is not None else Decimal('0')
+
+        # Calculate idle time for this machine
+        used_seconds = status_times[MachineStatusEnum.RUN.value] + status_times[MachineStatusEnum.TUNING.value] + status_times[MachineStatusEnum.OFFLINE.value] + status_times[MachineStatusEnum.TESTING.value]
+        idle_seconds = day_seconds - used_seconds
+        if idle_seconds < 0:
+            idle_seconds = Decimal('0')  # Clamp to zero if negative
+        status_times[MachineStatusEnum.IDLE.value] = idle_seconds
+
+        # Add to total status times
+        for status, seconds in status_times.items():
+            total_status_times[status] += seconds
+        
+        each_machine_status_times.append({
+            "machineSN": Machine.query.get(machine_id).machineSN,
+            MachineStatusEnum.RUN.value: status_times[MachineStatusEnum.RUN.value],
+            MachineStatusEnum.TUNING.value: status_times[MachineStatusEnum.TUNING.value],
+            MachineStatusEnum.OFFLINE.value: status_times[MachineStatusEnum.OFFLINE.value],
+            MachineStatusEnum.TESTING.value: status_times[MachineStatusEnum.TESTING.value],
+            MachineStatusEnum.IDLE.value: status_times[MachineStatusEnum.IDLE.value]
+        })
+
+    return machines, total_status_times, each_machine_status_times
 
 class DashboardService:
     @staticmethod
@@ -259,107 +378,25 @@ class DashboardService:
             current_time = datetime.now(pytz.timezone(TZ))
             midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
 
-            # Time from midnight to current time (used for per-machine idle time)
-            day_seconds = Decimal((current_time - midnight).total_seconds())
-
-            # Get all machines
-            machines = db.session.query(Machine.id).all()
-            if not machines:
-                return message(True, "No machines found"), 200
-
-            # Initialize aggregated status times
-            total_status_times = {
-                '生產中': Decimal('0'),
-                '上模與調機': Decimal('0'),
-                '機台停機': Decimal('0'),
-                '產品試模': Decimal('0'),
-                '待機中': Decimal('0')
-            }
-
-            # Process each machine
-            for machine_id, in machines:
-                # Query production time for this machine
-                production_time = (
-                    db.session.query(
-                        func.sum(
-                            func.timestampdiff(text('SECOND'), ProductionScheduleOngoing.startTime, ProductionScheduleOngoing.endTime)
-                        ).label('production_seconds')
-                    )
-                    .join(ProductionSchedule, ProductionScheduleOngoing.productionScheduleId == ProductionSchedule.id)
-                    .join(Machine, ProductionSchedule.machineSN == Machine.machineSN)
-                    .filter(
-                        Machine.id == machine_id,
-                        ProductionScheduleOngoing.startTime >= midnight,
-                        ProductionScheduleOngoing.startTime < current_time,
-                        ProductionScheduleOngoing.endTime > midnight,
-                        ProductionScheduleOngoing.endTime <= current_time
-                    )
-                    .scalar() or Decimal('0')
-                )
-
-                # Query machine status times for this machine
-                machine_status_times = (
-                    db.session.query(
-                        MachineStatus.status,
-                        func.sum(
-                            func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)
-                        ).label('status_seconds')
-                    )
-                    .filter(
-                        MachineStatus.machineId == machine_id,
-                        MachineStatus.actualStartDate >= midnight,
-                        MachineStatus.actualStartDate < current_time,
-                        MachineStatus.actualEndDate > midnight,
-                        MachineStatus.actualEndDate <= current_time
-                    )
-                    .group_by(MachineStatus.status)
-                    .all()
-                )
-
-                # Initialize status times for this machine
-                status_times = {
-                    '生產中': production_time,
-                    '上模與調機': Decimal('0'),
-                    '機台停機': Decimal('0'),
-                    '產品試模': Decimal('0'),
-                    '待機中': Decimal('0')
-                }
-
-                # Update status times from machineStatus
-                for status, seconds in machine_status_times:
-                    if status in status_times:
-                        status_times[status] = seconds if seconds is not None else Decimal('0')
-
-                # Calculate idle time for this machine
-                used_seconds = status_times['生產中'] + status_times['上模與調機'] + status_times['機台停機'] + status_times['產品試模']
-                idle_seconds = day_seconds - used_seconds
-                if idle_seconds < 0:
-                    idle_seconds = Decimal('0')  # Clamp to zero if negative
-                status_times['待機中'] = idle_seconds
-
-                # Add to total status times
-                for status, seconds in status_times.items():
-                    total_status_times[status] += seconds
+            # Get all machines and their status times
+            machines, total_status_times, each_machine_status_times = _get_machineStatus_statistics(midnight, current_time)
 
             # Calculate total seconds for proportion denominator
             total_seconds = sum(total_status_times.values())
 
             # Calculate proportions
             proportions = {
-                status: (seconds / total_seconds * 100) if total_seconds > 0 else Decimal('0')
+                status: round(float(seconds / total_seconds * 100), 1) if total_seconds > 0 else Decimal('0')
                 for status, seconds in total_status_times.items()
             }
 
-            # Round to one decimal place
-            proportions = {status: round(float(proportion), 1) for status, proportion in proportions.items()}
-
             # Prepare result list with hours
             result_list = [
-                {"status": "生產", "percentage": proportions.get('生產中', 0.0), "hours": math.ceil(float(total_status_times['生產中'] / Decimal('3600')))},
-                {"status": "上模與調機", "percentage": proportions.get('上模與調機', 0.0), "hours": math.ceil(float(total_status_times['上模與調機'] / Decimal('3600')))},
-                {"status": "機台停機", "percentage": proportions.get('機台停機', 0.0), "hours": math.ceil(float(total_status_times['機台停機'] / Decimal('3600')))},
-                {"status": "產品試模", "percentage": proportions.get('產品試模', 0.0), "hours": math.ceil(float(total_status_times['產品試模'] / Decimal('3600')))},
-                {"status": "待機", "percentage": proportions.get('待機中', 0.0), "hours": math.ceil(float(total_status_times['待機中'] / Decimal('3600')))}
+                {"status": MachineStatusEnum.RUN.value, "percentage": proportions.get(MachineStatusEnum.RUN.value, 0.0), "hours": math.ceil(float(total_status_times[MachineStatusEnum.RUN.value] / Decimal('3600')))},
+                {"status": MachineStatusEnum.TUNING.value, "percentage": proportions.get(MachineStatusEnum.TUNING.value, 0.0), "hours": math.ceil(float(total_status_times[MachineStatusEnum.TUNING.value] / Decimal('3600')))},
+                {"status": MachineStatusEnum.OFFLINE.value, "percentage": proportions.get(MachineStatusEnum.OFFLINE.value, 0.0), "hours": math.ceil(float(total_status_times[MachineStatusEnum.OFFLINE.value] / Decimal('3600')))},
+                {"status": MachineStatusEnum.TESTING.value, "percentage": proportions.get(MachineStatusEnum.TESTING.value, 0.0), "hours": math.ceil(float(total_status_times[MachineStatusEnum.TESTING.value] / Decimal('3600')))},
+                {"status": MachineStatusEnum.IDLE.value, "percentage": proportions.get(MachineStatusEnum.IDLE.value, 0.0), "hours": math.ceil(float(total_status_times[MachineStatusEnum.IDLE.value] / Decimal('3600')))}
             ]
 
             resp = message(True, "dashboard data sent")
@@ -611,7 +648,7 @@ class DashboardService:
         except Exception as error:
             raise error
         
-
+    
     @staticmethod
     def get_machineStatusHoursStatistics():
         try:
@@ -619,88 +656,18 @@ class DashboardService:
             current_time = datetime.now(pytz.timezone(TZ))
             midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
 
-            # Time from midnight to current time (used for per-machine idle time)
-            day_seconds = Decimal((current_time - midnight).total_seconds())
+            # Get all machines and their status times
+            machines, total_status_times, each_machine_status_times = _get_machineStatus_statistics(midnight, current_time)
 
-            # Get all machines
-            machines = db.session.query(Machine.id).all()
-            if not machines:
-                return message(True, "No machines found"), 200
-
-            # Initialize aggregated status times
-            result_list = []    
-
-            # Process each machine
-            for machine_id, in machines:
-                # Query production time for this machine
-                production_time = (
-                    db.session.query(
-                        func.sum(
-                            func.timestampdiff(text('SECOND'), ProductionScheduleOngoing.startTime, ProductionScheduleOngoing.endTime)
-                        ).label('production_seconds')
-                    )
-                    .join(ProductionSchedule, ProductionScheduleOngoing.productionScheduleId == ProductionSchedule.id)
-                    .join(Machine, ProductionSchedule.machineSN == Machine.machineSN)
-                    .filter(
-                        Machine.id == machine_id,
-                        ProductionScheduleOngoing.startTime >= midnight,
-                        ProductionScheduleOngoing.startTime < current_time,
-                        ProductionScheduleOngoing.endTime > midnight,
-                        ProductionScheduleOngoing.endTime <= current_time
-                    )
-                    .scalar() or Decimal('0')
-                )
-
-                # Query machine status times for this machine
-                machine_status_times = (
-                    db.session.query(
-                        MachineStatus.status,
-                        func.sum(
-                            func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)
-                        ).label('status_seconds')
-                    )
-                    .filter(
-                        MachineStatus.machineId == machine_id,
-                        MachineStatus.actualStartDate >= midnight,
-                        MachineStatus.actualStartDate < current_time,
-                        MachineStatus.actualEndDate > midnight,
-                        MachineStatus.actualEndDate <= current_time
-                    )
-                    .group_by(MachineStatus.status)
-                    .all()
-                )
-
-                print(f"Machine ID: {machine_id}, Production Time: {production_time}, Machine Status Times: {machine_status_times}", file=sys.stderr)
-
-                # Initialize status times for this machine
-                status_times = {
-                    'machineSN': str(''),
-                    MachineStatusEnum.RUN.value: production_time,
-                    MachineStatusEnum.TUNING.value: Decimal('0'),
-                    MachineStatusEnum.OFFLINE.value: Decimal('0'),
-                    MachineStatusEnum.TESTING.value: Decimal('0'),
-                    MachineStatusEnum.IDLE.value: Decimal('0')
-                }
-
-                # Update status times from machineStatus
-                for status, seconds in machine_status_times:
-                    if status in status_times:
-                        status_times[status] = seconds if seconds is not None else Decimal('0')
-
-                # Calculate idle time for this machine
-                used_seconds = status_times[MachineStatusEnum.RUN.value] + status_times[MachineStatusEnum.TUNING.value] + status_times[MachineStatusEnum.OFFLINE.value] + status_times[MachineStatusEnum.TESTING.value]
-                idle_seconds = day_seconds - used_seconds
-                if idle_seconds < 0:
-                    idle_seconds = Decimal('0')  # Clamp to zero if negative
-                status_times[MachineStatusEnum.IDLE.value] = idle_seconds
-
+            result_list = []
+            for status_times in each_machine_status_times:
                 result_list.append({
-                    'machineSN': Machine.query.filter(Machine.id == machine_id).first().machineSN,
-                    'run': round(status_times[MachineStatusEnum.RUN.value]/ Decimal('3600'), 1),
-                    'idle': round(status_times[MachineStatusEnum.IDLE.value]/ Decimal('3600'), 1),
-                    'tuning': round(status_times[MachineStatusEnum.TUNING.value]/ Decimal('3600'), 1),
-                    'testing': round(status_times[MachineStatusEnum.TESTING.value]/ Decimal('3600'), 1),
-                    'offline': round(status_times[MachineStatusEnum.OFFLINE.value]/ Decimal('3600'), 1)
+                    'machineSN': status_times.get('machineSN', ''),
+                    'run': round(status_times.get(MachineStatusEnum.RUN.value)/ Decimal('3600'), 1),
+                    'idle': round(status_times.get(MachineStatusEnum.IDLE.value)/ Decimal('3600'), 1),
+                    'tuning': round(status_times.get(MachineStatusEnum.TUNING.value)/ Decimal('3600'), 1),
+                    'testing': round(status_times.get(MachineStatusEnum.TESTING.value)/ Decimal('3600'), 1),
+                    'offline': round(status_times.get(MachineStatusEnum.OFFLINE.value)/ Decimal('3600'), 1)
                 })
 
             machine_status_hours_statistics_dump = MachineStatusHoursStatisticsSchema().dump(result_list, many=True)
@@ -718,94 +685,234 @@ class DashboardService:
             # Current time
             current_time = datetime.now(pytz.timezone(TZ))
             midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            # Get all machines and their status times
+            machines, total_status_times, each_machine_status_times = _get_machineStatus_statistics(midnight, current_time)
 
-            # Time from midnight to current time (used for per-machine idle time)
-            day_seconds = Decimal((current_time - midnight).total_seconds())
-
-            # Get all machines
-            machines = db.session.query(Machine.id).all()
-            if not machines:
-                return message(True, "No machines found"), 200
+            # 1.「稼動時間 」=當天所有機台「生產時間 」(機)的總合，將秒數轉成格式 hh:mm
+            total_run_time_seconds = total_status_times[MachineStatusEnum.RUN.value]
+            total_run_time_str = f"{int(total_run_time_seconds // 3600):02}時{int((total_run_time_seconds % 3600) // 60):02}分"
             
-            # Initialize aggregated status times
-            total_status_times = {
-                '生產中': Decimal('0'),
-                '上模與調機': Decimal('0'),
-                '機台停機': Decimal('0'),
-                '產品試模': Decimal('0'),
-                '待機中': Decimal('0')
-            }
-            
-            # Process each machine
-            for machine_id, in machines:
-                # Query production time for this machine
-                production_time = (
-                    db.session.query(
-                        func.sum(
-                            func.timestampdiff(text('SECOND'), ProductionScheduleOngoing.startTime, 
-                                               func.coalesce(ProductionScheduleOngoing.endTime, func.now()))
-                        ).label('production_seconds')
-                    )
-                    .join(Machine, ProductionSchedule.machineSN == Machine.machineSN)
-                    .filter(
-                        Machine.id == machine_id,
-                        ProductionScheduleOngoing.startTime >= midnight,
-                        ProductionScheduleOngoing.startTime < current_time
-                    )
-                    .scalar() or Decimal('0')
-                )
+            # 2. 「稼動率」=「所有機台「生產中」時間」(機)/(「所有機台*24*60」(機)-「所有上模調機的時間」(機))*100%
+            total_run_time_minutes = total_status_times[MachineStatusEnum.RUN.value] / 60 / 2
+            total_tuning_time_minutes = total_status_times[MachineStatusEnum.TUNING.value] / 60
+            total_utilization_rate = (total_run_time_minutes / ((len(machines) * 24 * 60) - total_tuning_time_minutes)) * 100
+            total_utilization_rate = round(float(total_utilization_rate), 1)  
 
-                # Query machine status times for this machine
-                machine_status_times = (
-                    db.session.query(
-                        MachineStatus.status,
-                        func.sum(
-                            func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)
-                        ).label('status_seconds')
-                    )
-                    .filter(
-                        MachineStatus.machineId == machine_id,
-                        MachineStatus.actualStartDate >= midnight,
-                        MachineStatus.actualStartDate < current_time,
-                        MachineStatus.actualEndDate > midnight,
-                        MachineStatus.actualEndDate <= current_time
-                    )
-                    .group_by(MachineStatus.status)
-                    .all()
-                )
-
-                # Initialize status times for this machine
-                status_times = {
-                    '生產中': production_time,
-                    '上模與調機': Decimal('0'),
-                    '機台停機': Decimal('0'),
-                    '產品試模': Decimal('0'),
-                    '待機中': Decimal('0')
-                }
-
-                # Update status times from machineStatus
-                for status, seconds in machine_status_times:
-                    if status in status_times:
-                        status_times[status] = seconds if seconds is not None else Decimal('0')
-
-                # Calculate idle time for this machine
-                used_seconds = status_times['生產中'] + status_times['上模與調機'] + status_times['機台停機'] + status_times['產品試模']
-                idle_seconds = day_seconds - used_seconds
-                if idle_seconds < 0:
-                    idle_seconds = Decimal('0')  # Clamp to zero if negative
-                status_times['待機中'] = idle_seconds
-
-                # Add to total status times
-                for status, seconds in status_times.items():
-                    total_status_times[status] += seconds
-
-            # 1.「稼動時間 」=當天所有機台「生產時間 」(機)的總合
-            # 2. 「稼動率」=「所有機台「生產中」時間」(機)/(「所有機台*24*60」(機)-「所有待機中的機台待機時間」(機)-「所有上模調機的時間」(機))*100%
             # 3.「生產機台數」=目前為「生產中」的機台數總合
+            total_production_machines = sum(1 for status in total_status_times if status == MachineStatusEnum.RUN.value and total_status_times[status] > 0)
+            
             # 4.「停機次數」=累計當天所有機台「停機」的次數
+            total_offline_count = (
+                db.session.query(func.count(MachineStatus.id))
+                .filter(
+                    MachineStatus.status == MachineStatusEnum.OFFLINE.value,
+                    MachineStatus.actualStartDate >= midnight,
+                    MachineStatus.actualEndDate <= current_time
+                )
+            ).scalar() or 0
+            
+            # Prepare the result
+            result = {
+                "utilizationTime": total_run_time_str,
+                "utilizationRate": total_utilization_rate,
+                "runCount": total_production_machines,
+                "offlineCount": total_offline_count
+            }
 
             resp = message(True, "dashboard data sent")
-            resp["data"] = None
+            resp["data"] = result
             return resp, 200
+        except Exception as error:
+            raise error
+        
+    
+    @staticmethod
+    def get_dailyOEE():
+        try:
+            # 列出今天以及過去六天的日期範圍
+            current_time = datetime.now(pytz.timezone(TZ))
+            date_ranges = []
+            for i in range(6, 0, -1):
+                day = current_time.date() - timedelta(days=i)
+                # 使用 datetime.combine 建立 naive datetime，然後用 localize 附加時區
+                start_time = datetime.combine(day, datetime.min.time())
+                start_time = pytz.timezone(TZ).localize(start_time)
+                end_time = start_time + timedelta(days=1)
+                date_ranges.append({
+                    'date': start_time.date(),
+                    'start_time': start_time,
+                    'end_time': end_time
+                })
+                
+            # First day: from midnight to current time
+            first_day_start = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            date_ranges.append({
+                'date': first_day_start.date(),
+                'start_time': first_day_start,
+                'end_time': current_time
+            })
+            
+            oee_data = []
+            for date in date_ranges:
+                start_time = date['start_time']
+                end_time = date['end_time']
+                # Get all machines and their status times
+                machines, total_status_times, each_machine_status_times = _get_machineStatus_statistics(start_time, end_time)
+
+                # 1. 「稼動率」=「所有機台「生產中」時間」(機)/(「所有機台*24*60」(機)-「所有上模調機的時間」(機))*100%
+                total_run_time_minutes = total_status_times[MachineStatusEnum.RUN.value] / 60 / 2
+                total_tuning_time_minutes = total_status_times[MachineStatusEnum.TUNING.value] / 60
+                total_utilization_rate = (total_run_time_minutes / ((len(machines) * 24 * 60) - total_tuning_time_minutes)) * 100
+                total_utilization_rate = round(float(total_utilization_rate), 1)  
+
+                # 2. 「產能效率」=「所有機台的「良品數(productionQuantity)」(ProductionReport)+「不良品數(defectiveQuantity)」(ProductionReport)」/(所有機台的「穴數(moldCavity)」(ProductionSchedule)*「產能小時(hourlyCapacity)」(ProductionSchedule))
+                total_good_quantity = (
+                    db.session.query(func.sum(ProductionReport.productionQuantity))
+                    .filter(
+                        ProductionReport.startTime >= start_time,
+                        ProductionReport.endTime <= end_time
+                    )
+                ).scalar() or 0
+                total_defective_quantity = (
+                    db.session.query(func.sum(ProductionReport.defectiveQuantity))
+                    .filter(
+                        ProductionReport.startTime >= start_time,
+                        ProductionReport.endTime <= end_time
+                    )
+                ).scalar() or 0
+                total_mold_cavity = (
+                    db.session.query(func.sum(ProductionSchedule.moldCavity))
+                    .filter(
+                        ProductionSchedule.planOnMachineDate >= start_time,
+                        ProductionSchedule.planOnMachineDate < end_time
+                    )
+                ).scalar() or 0
+                total_hourly_capacity = (
+                    db.session.query(func.sum(ProductionSchedule.hourlyCapacity))
+                    .filter(
+                        ProductionSchedule.planOnMachineDate >= start_time,
+                        ProductionSchedule.planOnMachineDate < end_time
+                    )
+                ).scalar() or 0
+                if total_mold_cavity > 0 and total_hourly_capacity > 0:
+                    total_capacity_efficiency = ((total_good_quantity + total_defective_quantity) / (total_mold_cavity * total_hourly_capacity))
+                else:
+                    total_capacity_efficiency = 0.0
+                total_capacity_efficiency = round(float(total_capacity_efficiency), 2)
+
+                # 3. 「良率」= 「良品數量(productionQuantity)」(ProductionReport)/(「不良數(defectiveQuantity)」(ProductionReport)+「良品數量」(派))
+                if total_good_quantity + total_defective_quantity > 0:
+                    total_yield = (total_good_quantity / (total_good_quantity + total_defective_quantity))
+                else:
+                    total_yield = 0.0
+                total_yield = round(float(total_yield), 2)
+
+                # 4. 「OEE」=「稼動率」*「產能效率」*「良率」
+                total_oee = (total_utilization_rate * total_capacity_efficiency * total_yield)
+                total_oee = round(float(total_oee), 2)
+
+                oee_data.append({
+                    'date': date['date'].isoformat(),
+                    'OEE': total_oee,
+                })
+            
+            resp = message(True, "dashboard data sent")
+            resp["data"] = oee_data
+            return resp, 200
+        except Exception as error:
+            raise error
+        
+    
+    def get_machineOverview(productionArea="A"):
+        try:
+            # Current time
+            current_time = datetime.now(pytz.timezone(TZ))
+            overview_data_list = []
+
+            # 1. 列出某區域的所有機台
+            machine_query = Machine.query
+            machine_query = machine_query.filter_by(productionArea=productionArea) if productionArea is not None else machine_query
+            machine_db_list = machine_query.all()
+
+            # 2. 機台生產中，列出productionSchedule中，某區域的所有狀態為On-going的生產排程，並取得產品編號、良率(良品數量 /(不良數+良品數量))、計算完成率
+            productionSchedule_query = ProductionSchedule.query
+            productionSchedule_query = productionSchedule_query.with_entities(ProductionSchedule.machineSN, ProductionSchedule.workOrderQuantity,
+                ProductionSchedule.productionArea, ProductionReport.productionQuantity, ProductionReport.defectiveQuantity,Product.productSN,
+            )
+            productionSchedule_query = productionSchedule_query.outerjoin(ProductionReport, ProductionSchedule.id == ProductionReport.pschedule_id)
+            productionSchedule_query = productionSchedule_query.outerjoin(Product, ProductionSchedule.productId == Product.id)
+            productionSchedule_query = productionSchedule_query.filter(ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value)
+            productionSchedule_query = productionSchedule_query.filter(ProductionSchedule.productionArea == productionArea)
+            productionSchedule_query = productionSchedule_query.group_by(ProductionSchedule.machineSN)
+            productionSchedule_db_list = productionSchedule_query.all()
+            for productionSchedule_db in productionSchedule_db_list:
+                # 計算良率，「良率」=「良品數量(派)」/(「不良數」(派)+「良品數量」(派))
+                good_quantity = productionSchedule_db.productionQuantity
+                defective_quantity = productionSchedule_db.defectiveQuantity
+                yield_rate = Decimal(good_quantity) / (Decimal(good_quantity) + Decimal(defective_quantity)) if (good_quantity + defective_quantity) > 0 else Decimal(0)
+                yield_rate = round(float(yield_rate), 2)
+                # 計算完成率，「完成率」=「良品數量」(派)/「製令數量」(派)
+                completion_rate = Decimal(good_quantity) / Decimal(productionSchedule_db.workOrderQuantity) if productionSchedule_db.workOrderQuantity > 0 else Decimal(0)
+                completion_rate = round(float(completion_rate), 2)
+                overview_data_list.append( {
+                    "machineStatus": MachineStatusEnum.RUN.value,
+                    "productionArea": productionSchedule_db.productionArea,
+                    "machineSN": productionSchedule_db.machineSN,
+                    "productSN": productionSchedule_db.productSN,
+                    "yield": yield_rate,
+                    "completionRate": completion_rate,
+                })
+            
+            # 從productionSchedule_db_list列出所有machineSN
+            ongoing_machineSN_list = [productionSchedule_db.machineSN for productionSchedule_db in productionSchedule_db_list]
+
+            # 3. 機台已開始某個狀態，從machineStatus找出當日，有actualStartDate，且無actualFinishDate的 (machineStatusId)，並排除productionSchedule中的machineSN
+            machineStatus_query = MachineStatus.query
+            machineStatus_query = machineStatus_query.with_entities(MachineStatus.status, Machine.machineSN, Machine.productionArea)
+            machineStatus_query = machineStatus_query.join(Machine, Machine.id == MachineStatus.machineId)
+            machineStatus_query = machineStatus_query.filter(Machine.productionArea == productionArea)
+            machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate <= current_time)
+            machineStatus_query = machineStatus_query.filter(MachineStatus.actualEndDate == None)
+            machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(ongoing_machineSN_list))
+            machineStatus_query = machineStatus_query.group_by(MachineStatus.machineId)
+            machineStatus_db_list = machineStatus_query.all()
+            for machineStatus_db in machineStatus_db_list:
+                overview_data_list.append({
+                    "machineStatus": machineStatus_db.status,
+                    "productionArea": machineStatus_db.productionArea,
+                    "machineSN": machineStatus_db.machineSN,
+                    "productSN": None,
+                    "yield": None,
+                    "completionRate": None,
+                })
+            started_machineSN_list = [machineStatus_db.machineSN for machineStatus_db in machineStatus_db_list]
+            
+            # 整理出所有機台的machineSN
+            all_machineSN_list = [machine.machineSN for machine in machine_db_list]
+            # 整理出生產中機台的machineSN和已開始某個狀態的機台的machineSN
+            ongoing_machineSN_list = [productionSchedule_db.machineSN for productionSchedule_db in productionSchedule_db_list]
+            started_machineSN_list = [machineStatus_db.machineSN for machineStatus_db in machineStatus_db_list]
+            # 所有機台machineSN 排除掉生產中和已開始某個狀態的機台
+            idle_machineSN_list = list(set(all_machineSN_list) - set(ongoing_machineSN_list) - set(started_machineSN_list))
+            # 剩下機台都顯示為待機
+            for machineSN in idle_machineSN_list:
+                overview_data_list.append({
+                    "machineStatus": MachineStatusEnum.IDLE.value,
+                    "productionArea": productionArea,
+                    "machineSN": machineSN,
+                    "productSN": None,
+                    "yield": None,
+                    "completionRate": None,
+                })  
+
+            
+            # 依照machineSN排序
+            overview_data_list.sort(key=lambda x: (x['machineSN'][0], int(x['machineSN'][1:])))
+            
+
+            resp = message(True, "machineStatus data sent")
+            resp["data"] = overview_data_list
+            return resp, 200
+        # exception without handling should raise to the caller
         except Exception as error:
             raise error

@@ -205,3 +205,42 @@ class DashboardDto:
             "data": fields.Nested(machineUtilizationStatistics_object),
         }
     )
+
+    # 每日全廠OEE(%)趨勢(dailyOEE)
+    dailyOEE_object = api.model(
+        "dailyOEE object",
+        {
+            "date": NullableDateTime(required=False, description="日期", example="2025-07-01T00:00:00.000+08:00"),
+            "OEE": NullableFloat(required=False, description="OEE", example=0.1),
+        }
+    )
+    dailyOEE_resp = api.model(
+        "dailyOEE response",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "data": fields.Nested(dailyOEE_object),
+        }
+    )
+
+
+    # A/B/C/D區域機台Overview(machineOverview)
+    machineOverview_object = api.model(
+        "machineOverview object",
+        {
+            "productionArea": NullableString(required=False, description="機台區域", example="A"),
+            "machineSN": NullableString(required=False, description="機台編號", example="A1"),
+            "status": NullableString(required=False, description="機台狀態", example="status", enum=[e.value for e in MachineStatusEnum]),
+            "productSN": NullableString(required=False, description="產品編號", example="PROD-00001-01"),
+            "yield": NullableFloat(required=False, description="良率", example=0.1),
+            "completionRate": NullableFloat(required=False, description="完成率", example=0.1)
+        }
+    )
+    machineOverview_resp = api.model(
+        "machineOverview response",
+        {
+            "status": fields.Boolean,
+            "message": fields.String,
+            "data": fields.Nested(machineOverview_object),
+        }
+    )

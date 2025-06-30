@@ -5,7 +5,7 @@ from marshmallow import Schema, fields
 class TodayWorkOrderSchema(Schema):
     machineSN = fields.String(required=False, description="機台編號")
     workOrderSN = fields.String(required=False, description="製令單號")
-    planFinishDate = fields.String(required=False, description="預計完工日")
+    planFinishDate = fields.DateTime(required=False, description="預計完工日")
     status = fields.String(required=False, description="製令單狀態")
     productionQuantity = fields.String(required=False, description="生產數量")
     productSN = fields.String(required=False, description="產品編號")
@@ -15,7 +15,7 @@ class TodayWorkOrderSchema(Schema):
 class OverdueWorkOrderSchema(Schema):
     machineSN = fields.String(required=False, description="機台編號")
     workOrderSN = fields.String(required=False, description="製令單號")
-    planFinishDate = fields.String(required=False, description="預計完工日")
+    planFinishDate = fields.DateTime(required=False, description="預計完工日")
     unfinishedQuantity = fields.String(required=False, description="未完成數量")
     productSN = fields.String(required=False, description="產品編號")
 
@@ -31,7 +31,7 @@ class MachineAccumulatedTimeSchema(Schema):
 
 
 class MachineOfflineEventSchema(Schema):
-    actualStartDate = fields.String(required=False, description="停機實際開始時間")
+    actualStartDate = fields.DateTime(required=False, description="停機實際開始時間")
     machineSN = fields.String(required=False, description="機台編號")
     reason = fields.String(required=False, description="停機原因")
 
