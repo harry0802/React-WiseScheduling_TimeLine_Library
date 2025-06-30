@@ -71,18 +71,70 @@ export const realTimeMonitorApi = createApi({
     }),
 
     /**
-     * @description 取得機台累計時間資料
-     * @endpoint GET /dashboard/machineAccumulatedTime
-     * @usage 用於 RealTimeDeviceTrackerDashboard 組件
-     * @returns {Object} { machineSN, runTime, tuningTime, offlineTime, testingTime, idleTime, status }
+     * 取得機台累計時間資料
      *
-     * 提供各機台詳細時間統計：
-     * - 運行時間、調機時間、離線時間、測試時間、閒置時間
+     * @description 提供製造業機台的詳細時間統計資料，包含運行、調機、離線、測試、閒置等各種狀態的累計時間
+     *
+     * @endpoint GET /dashboard/machineAccumulatedTime
+     * @usage 主要用於 RealTimeDeviceTrackerDashboard 組件的即時監控顯示
+     *
+     * @returns {Promise<Array<Object>>} 機台時間資料陣列
+     * @returns {string} returns[].id - 機台唯一識別碼（基於 machineSN）
+     * @returns {string} returns[].machine - 機台編號
+     * @returns {string} returns[].productionTime - 生產時間（格式化後，空值顯示為 "--:--:--"）
+     * @returns {string} returns[].adjustmentTime - 調機時間（格式化後）
+     * @returns {string} returns[].downtime - 停機時間（格式化後）
+     * @returns {string} returns[].testingTime - 測試時間（格式化後）
+     * @returns {string} returns[].waitingTime - 等待時間（格式化後）
+     * @returns {string} returns[].status - 機台當前狀態
+     *
+     * @example
+     * // 使用範例
+     * const { data, isLoading, error } = useGetMachineAccumulatedTimeQuery();
+     * if (data) {
+     *   data.forEach(machine => {
+     *     console.log(`機台 ${machine.machine}: 生產時間 ${machine.productionTime}`);
+     *   });
+     * }
+     *
+     * @since 2024.12 - 新增時間格式化功能（"0:00:00" 顯示為 "--:--:--"）
+     * @notes
+     * - 所有時間欄位已在 API 層進行格式化處理
+     * - 符合製造業界面慣例，空值統一顯示為破折號格式
+     * - 資料來源：生產管理系統即時統計
      */
     getMachineAccumulatedTime: builder.query({
       query: () => "dashboard/machineAccumulatedTime",
       providesTags: ["MachineAccumulatedTime"],
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => {
+        if (!response.data || !Array.isArray(response.data)) {
+          return [];
+        }
+
+        /**
+         * 格式化時間顯示值
+         * @description 將空值或 "0:00:00" 格式化為 "--:--:--"，符合製造業界面慣例
+         * @param {string|null|undefined} timeValue - 原始時間值
+         * @returns {string} 格式化後的時間顯示值
+         */
+        const formatTimeDisplay = (timeValue) => {
+          if (!timeValue || timeValue === "0:00:00") {
+            return "-- -- -- ";
+          }
+          return timeValue;
+        };
+
+        return response.data.map((item, index) => ({
+          id: item.machineSN || `machine-${index}`,
+          machine: item.machineSN,
+          productionTime: formatTimeDisplay(item.runTime),
+          adjustmentTime: formatTimeDisplay(item.tuningTime),
+          downtime: formatTimeDisplay(item.offlineTime),
+          testingTime: formatTimeDisplay(item.testingTime),
+          waitingTime: formatTimeDisplay(item.idleTime),
+          status: item.status || "IDLE",
+        }));
+      },
       transformErrorResponse: (response) => ({
         message: response.data?.message || "無法讀取機台累計時間資料",
         status: response.data?.status || false,
@@ -93,16 +145,51 @@ export const realTimeMonitorApi = createApi({
      * @description 取得逾期工單資料
      * @endpoint GET /dashboard/overdueWorkOrder
      * @usage 用於 OverdueTasksDashboard 組件
-     * @returns {Object} { machineSN, workOrderSN, planFinishDate, unfinishedQuantity, productSN }
+     * @returns {Array<Object>} 轉換後的逾期工單陣列
+     * @returns {string} returns[].orderNumber - 製令單號 (從 workOrderSN 轉換)
+     * @returns {string} returns[].productId - 產品編號 (從 productSN 轉換)
+     * @returns {number} returns[].incompleteQty - 未完成數量 (從 unfinishedQuantity 轉換)
+     * @returns {string} returns[].machine - 機台編號 (從 machineSN 轉換)
+     * @returns {string} returns[].expiryDate - 到期日期 (從 planFinishDate 轉換為 YYYY-MM-DD 格式)
      *
      * 列出生產逾期任務：
      * - 預計完成日前七天或已過預計完成日但未完成的製令單
-     * - 包含機台編號、工單編號、計畫完成日、未完成數量、產品編號
+     * - 資料已在 API 層完成欄位映射和日期格式轉換
      */
     getOverdueWorkOrder: builder.query({
       query: () => "dashboard/overdueWorkOrder",
       providesTags: ["OverdueWorkOrder"],
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => {
+        if (!response || !response.data || !Array.isArray(response.data)) {
+          return [];
+        }
+
+        /**
+         * 格式化日期為本地 YYYY-MM-DD 格式
+         * @param {string} isoDateString - ISO 8601 格式的日期字串
+         * @returns {string} YYYY-MM-DD 格式的日期或空字串
+         */
+        const formatDateToLocal = (isoDateString) => {
+          if (!isoDateString) return "";
+          try {
+            const date = new Date(isoDateString);
+            return isNaN(date.getTime())
+              ? ""
+              : date.toLocaleDateString("sv-SE");
+          } catch (error) {
+            console.warn("Date parsing error:", error);
+            return "";
+          }
+        };
+
+        return response.data.map((item) => ({
+          orderNumber: String(item.workOrderSN || ""),
+          productId: String(item.productSN || ""),
+          incompleteQty: Number(item.unfinishedQuantity) || 0,
+          machine: String(item.machineSN || ""),
+          expiryDate: formatDateToLocal(item.planFinishDate),
+        }));
+      },
       transformErrorResponse: (response) => ({
         message: response.data?.message || "無法讀取逾期工單資料",
         status: response.data?.status || false,
@@ -122,7 +209,40 @@ export const realTimeMonitorApi = createApi({
     getMachineOfflineEvent: builder.query({
       query: () => "dashboard/machineOfflineEvent",
       providesTags: ["MachineOfflineEvent"],
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => {
+        if (!response || !response.data || !Array.isArray(response.data)) {
+          return [];
+        }
+
+        /**
+         * 格式化 ISO 日期字串為本地時間的 HH:mm 格式
+         * @param {string} isoString - ISO 8601 格式的日期字串
+         * @returns {string} HH:mm 格式的時間或 "--:--"
+         */
+        const formatTimeFromISO = (isoString) => {
+          if (!isoString) return "--:--";
+          try {
+            const date = new Date(isoString);
+            return isNaN(date.getTime()) 
+              ? "--:--" 
+              : date.toLocaleTimeString("zh-TW", { 
+                  hour: "2-digit", 
+                  minute: "2-digit",
+                  hour12: false 
+                });
+          } catch (error) {
+            console.warn("Date parsing error:", error);
+            return "--:--";
+          }
+        };
+
+        return response.data.map((item, index) => ({
+          id: String(index),
+          time: formatTimeFromISO(item.actualStartDate),
+          machine: String(item.machineSN || ""),
+          reason: String(item.reason || "未知原因"),
+        }));
+      },
       transformErrorResponse: (response) => ({
         message: response.data?.message || "無法讀取機台離線事件資料",
         status: response.data?.status || false,

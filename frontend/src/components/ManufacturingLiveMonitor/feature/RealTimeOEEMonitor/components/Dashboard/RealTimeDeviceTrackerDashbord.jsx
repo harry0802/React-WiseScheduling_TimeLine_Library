@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import ProductionTable from "../../../../components/Carousel/CarouselTable/CarouselTable";
 import { DEVICE_STATUS_COLORS } from "../../../../configs/Color";
 import { useGetMachineAccumulatedTimeQuery } from "../../../../services";
@@ -418,23 +418,8 @@ function RealTimeDeviceTrackerDashbord() {
     error,
   } = useGetMachineAccumulatedTimeQuery();
 
-  // 資料轉換：將 API 格式轉換為組件所需格式
-  const transformedData = useMemo(() => {
-    if (!apiData || !Array.isArray(apiData)) {
-      return [];
-    }
-
-    return apiData.map((item, index) => ({
-      id: item.machineSN || `machine-${index}`,
-      machine: item.machineSN,
-      productionTime: item.runTime || "--",
-      adjustmentTime: item.tuningTime || "--",
-      downtime: item.offlineTime || "--",
-      testingTime: item.testingTime || "--",
-      waitingTime: item.idleTime || "--",
-      status: item.status || "IDLE",
-    }));
-  }, [apiData]);
+  // API 已在轉換層處理資料格式，直接使用
+  // 舊的 transformedData 邏輯已移至 API 層的 transformResponse
 
   // 載入狀態處理
   if (isLoading) {
@@ -477,7 +462,7 @@ function RealTimeDeviceTrackerDashbord() {
       <ProductionTable
         // height={270}
         rowNum={3}
-        initialData={transformedData}
+        initialData={apiData || []}
         header={[
           "NO.",
           "機台",
