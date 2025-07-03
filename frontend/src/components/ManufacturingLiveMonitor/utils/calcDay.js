@@ -12,3 +12,5 @@ const isExpiredSoon = (date, days) => {
   const itemDate = dayjs(date);
   return itemDate.isAfter(today) && itemDate.isBefore(today.add(days, "day"));
 };
+
+export { isExpired, isExpiredSoon };

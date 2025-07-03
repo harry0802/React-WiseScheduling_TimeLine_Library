@@ -30,6 +30,7 @@ export const realTimeMonitorApi = createApi({
     "MachineAccumulatedTime",
     "OverdueWorkOrder",
     "MachineOfflineEvent",
+    "DailyOEE",
   ],
   endpoints: (builder) => ({
     /**
@@ -223,12 +224,12 @@ export const realTimeMonitorApi = createApi({
           if (!isoString) return "--:--";
           try {
             const date = new Date(isoString);
-            return isNaN(date.getTime()) 
-              ? "--:--" 
-              : date.toLocaleTimeString("zh-TW", { 
-                  hour: "2-digit", 
+            return isNaN(date.getTime())
+              ? "--:--"
+              : date.toLocaleTimeString("zh-TW", {
+                  hour: "2-digit",
                   minute: "2-digit",
-                  hour12: false 
+                  hour12: false,
                 });
           } catch (error) {
             console.warn("Date parsing error:", error);
@@ -248,6 +249,56 @@ export const realTimeMonitorApi = createApi({
         status: response.data?.status || false,
       }),
     }),
+    /**
+     * @description 取得今日製令單資料
+     * @endpoint GET /dashboard/todayWorkOrder
+     * @usage 用於 DailyProductionDashboard 組件
+     * @returns {Object} { workOrderSN, productSN, unfinishedQuantity, machineSN, planFinishDate }
+     */
+    getTodayWorkOrder: builder.query({
+      query: () => "dashboard/todayWorkOrder",
+      providesTags: ["TodayWorkOrder"],
+      transformResponse: (response) => {
+        if (!response || !response.data || !Array.isArray(response.data)) {
+          return [];
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response) => ({
+        message: response.data?.message || "無法讀取今日製令單資料",
+        status: response.data?.status || false,
+      }),
+    }),
+
+    /**
+     * @description 取得每日 OEE 資料
+     * @endpoint GET /dashboard/dailyOEE
+     * @usage 用於 OEEMonitorBarChart 組件
+     * @returns {Array<Object>} 每日 OEE 資料陣列，按日期排序
+     * @returns {string} returns[].date - 日期 (YYYY-MM-DD 格式)
+     * @returns {number} returns[].OEE - OEE 值
+     *
+     * 提供每日 OEE 圖表資料：
+     * - 資料按日期由小到大排序
+     * - 用於替換 OEEMonitorBarChart 中的靜態資料
+     */
+    getDailyOEE: builder.query({
+      query: () => "dashboard/dailyOEE",
+      providesTags: ["DailyOEE"],
+      transformResponse: (response) => {
+        if (!response || !response.data || !Array.isArray(response.data)) {
+          return [];
+        }
+        // 按日期排序 (由小到大)
+        return response.data.sort(
+          (a, b) => new Date(a.date) - new Date(b.date)
+        );
+      },
+      transformErrorResponse: (response) => ({
+        message: response.data?.message || "無法讀取每日 OEE 資料",
+        status: response.data?.status || false,
+      }),
+    }),
   }),
 });
 
@@ -261,6 +312,7 @@ export const realTimeMonitorApi = createApi({
  * - useGetMachineAccumulatedTimeQuery: RealTimeDeviceTrackerDashboard.jsx
  * - useGetOverdueWorkOrderQuery: OverdueTasksDashboard.jsx
  * - useGetMachineOfflineEventQuery: EquipmentRiskModuleDashboard.jsx
+ * - useGetTodayWorkOrderQuery: DailyProductionDashboard.jsx
  */
 export const {
   useGetCurrentMachineStatusCountQuery,
@@ -268,4 +320,6 @@ export const {
   useGetMachineAccumulatedTimeQuery,
   useGetOverdueWorkOrderQuery,
   useGetMachineOfflineEventQuery,
+  useGetTodayWorkOrderQuery,
+  useGetDailyOEEQuery,
 } = realTimeMonitorApi;

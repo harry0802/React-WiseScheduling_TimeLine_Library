@@ -1,17 +1,17 @@
 // src/components/ProductionTable/ProductionTable.jsx
-import React, { useState, useEffect, useMemo } from 'react'
-import { ScrollBoard } from '@iimm/data-view-react'
+import React, { useState, useEffect, useMemo } from "react";
+import { ScrollBoard } from "@iimm/data-view-react";
 
 import {
   DEFAULT_HEADER,
   DEFAULT_STYLE,
   DEFAULT_COLUMN_WIDTHS,
   DEFAULT_COLUMN_ALIGNS,
-  DEFAULT_TABLE_CONFIG
-} from './config'
-import { transformApiData } from './transformers'
-import { createScrollBoardConfig } from './utils'
-import styled from 'styled-components'
+  DEFAULT_TABLE_CONFIG,
+} from "./config";
+import { transformApiData } from "./transformers";
+import { createScrollBoardConfig } from "./utils";
+import styled from "styled-components";
 
 const TheScrollBoard = styled(ScrollBoard)`
   && {
@@ -28,19 +28,19 @@ const TheScrollBoard = styled(ScrollBoard)`
       font-size: 20px;
     }
   }
-`
+`;
 
 // 主元件
 const ProductionTable = (props) => {
   const {
-    width = '100%',
-    height = '152px',
+    width = "100%",
+    height = "152px",
     initialData = [],
     header = DEFAULT_HEADER,
     fieldMapping,
     formatters,
     statusRules,
-    defaultStatus = 'normal',
+    defaultStatus = "normal",
     refreshInterval = 0,
     tableStyle = {},
     scrollBoardConfig = {},
@@ -48,11 +48,11 @@ const ProductionTable = (props) => {
     columnAligns = DEFAULT_COLUMN_ALIGNS,
     dataProcessor,
     onRowClick,
-    rowNum
-  } = props
+    rowNum,
+  } = props;
 
-  const [tableConfig, setTableConfig] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [tableConfig, setTableConfig] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 數據轉換選項
   const transformOptions = useMemo(
@@ -62,7 +62,7 @@ const ProductionTable = (props) => {
       formatters,
       statusRules,
       defaultStatus,
-      dataProcessor
+      dataProcessor,
     }),
     [
       header,
@@ -70,9 +70,9 @@ const ProductionTable = (props) => {
       formatters,
       statusRules,
       defaultStatus,
-      dataProcessor
+      dataProcessor,
     ]
-  )
+  );
 
   // 簡化的數據處理邏輯
   useEffect(() => {
@@ -82,50 +82,50 @@ const ProductionTable = (props) => {
         const { header: dataHeader, data: transformedData } = transformApiData(
           initialData,
           transformOptions
-        )
+        );
 
         const config = createScrollBoardConfig(dataHeader, transformedData, {
           columnWidths,
           columnAligns,
           scrollBoardConfig,
-          rowNum
-        })
-        setTableConfig(config)
+          rowNum,
+        });
+        setTableConfig(config);
       } catch (error) {
-        console.error('數據處理錯誤:', error)
+        console.error("數據處理錯誤:", error);
         setTableConfig({
           header,
-          data: [['數據處理失敗，請重試']],
-          ...DEFAULT_TABLE_CONFIG
-        })
+          data: [["數據處理失敗，請重試"]],
+          ...DEFAULT_TABLE_CONFIG,
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    processData()
+    processData();
 
     // 定時刷新邏輯
-    let timer
+    let timer;
     if (refreshInterval > 0) {
-      timer = setInterval(processData, refreshInterval)
+      timer = setInterval(processData, refreshInterval);
     }
 
     return () => {
-      if (timer) clearInterval(timer)
-    }
-  }, [initialData])
+      if (timer) clearInterval(timer);
+    };
+  }, [initialData]);
 
   // 樣式設置
   const combinedStyle = {
     width,
     height,
     ...DEFAULT_STYLE,
-    ...tableStyle
-  }
+    ...tableStyle,
+  };
   // 載入狀態
   if (isLoading || !tableConfig) {
-    return <div style={combinedStyle}>載入中...</div>
+    return <div style={combinedStyle}>載入中...</div>;
   }
 
   // 渲染
@@ -137,8 +137,7 @@ const ProductionTable = (props) => {
         onClick={onRowClick}
       />
     </>
-  )
-}
+  );
+};
 
-export default ProductionTable
-
+export default ProductionTable;

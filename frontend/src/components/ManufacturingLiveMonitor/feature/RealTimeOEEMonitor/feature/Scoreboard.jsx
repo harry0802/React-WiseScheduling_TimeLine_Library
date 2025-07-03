@@ -23,7 +23,7 @@ const CenteredContainer = styled(Box)`
 
 /**
  * 階段三：完整的 UI 狀態處理展示
- * 
+ *
  * 特點：
  * - 移除所有靜態 productionData
  * - 使用 useScoreboardData Hook 獲取即時資料
@@ -49,7 +49,7 @@ function Scoreboard() {
     return (
       <StatusContent>
         <CenteredContainer>
-          <Alert severity="error" sx={{ minWidth: '300px' }}>
+          <Alert severity="error" sx={{ minWidth: "300px" }}>
             載入資料失敗：{error}
           </Alert>
         </CenteredContainer>
