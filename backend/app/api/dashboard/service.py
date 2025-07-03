@@ -247,6 +247,25 @@ class DashboardService:
             # Alias for the CTE
             ls = latest_status_cte.alias('ls')
 
+            # Subquery for machine status
+            machine_status_subquery = (
+                select(
+                    MachineStatus.machineId,
+                    MachineStatus.actualStartDate,
+                    MachineStatus.actualEndDate,
+                    MachineStatus.status,
+                )
+                .where(
+                    and_(
+                        MachineStatus.actualStartDate >= midnight,
+                        MachineStatus.actualStartDate.isnot(None),
+                        MachineStatus.actualEndDate <= current_time,
+                        MachineStatus.actualEndDate.isnot(None)
+                    )
+                )
+                .subquery('machine_status')
+            )
+
             # Subquery for runTime from productionScheduleOngoing
             run_time_subquery = (
                 select(
@@ -311,7 +330,7 @@ class DashboardService:
                     func.sec_to_time(
                         func.sum(
                             case(
-                                (MachineStatus.status == MachineStatusEnum.TUNING.value, 
+                                (machine_status_subquery.c.status == MachineStatusEnum.TUNING.value, 
                                 func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
                                 else_=0
                             )
@@ -320,7 +339,7 @@ class DashboardService:
                     func.sec_to_time(
                         func.sum(
                             case(
-                                (MachineStatus.status == MachineStatusEnum.OFFLINE.value, 
+                                (machine_status_subquery.c.status == MachineStatusEnum.OFFLINE.value, 
                                 func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
                                 else_=0
                             )
@@ -329,7 +348,7 @@ class DashboardService:
                     func.sec_to_time(
                         func.sum(
                             case(
-                                (MachineStatus.status == MachineStatusEnum.TESTING.value, 
+                                (machine_status_subquery.c.status == MachineStatusEnum.TESTING.value, 
                                 func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
                                 else_=0
                             )
