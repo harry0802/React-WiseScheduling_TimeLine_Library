@@ -494,6 +494,10 @@ function DynamicTimeline() {
   const [selectedArea, setSelectedArea] = useState("A");
   const [timePanelExpanded, setTimePanelExpanded] = useState(false);
 
+  //! 視圖中心保持狀態 - 時間範圍切換優化
+  const centerTimeRef = useRef(null);
+  const shouldRestoreCenter = useRef(false);
+
   //* 時間範圍管理 - 自定義時間選擇
   const {
     timeRange: selectedTimeRange,
@@ -538,6 +542,50 @@ function DynamicTimeline() {
     handleEndTimeChange
   );
 
+  /**
+   * @function handleTimeRangeChangeWithViewPreservation
+   * @description 帶視圖保持的時間範圍切換處理器
+   * @param {string} newTimeRange - 新的時間範圍值
+   * @returns {void}
+   *
+   * @notes
+   * - 在切換前保存當前視圖中心點
+   * - 設置恢復標記供後續使用
+   * - 確保平滑的用戶體驗
+   */
+  const handleTimeRangeChangeWithViewPreservation = useCallback(
+    (newTimeRange) => {
+      try {
+        // 1. 保存當前視圖中心點
+        if (timelineRef.current) {
+          const window = timelineRef.current.getWindow();
+          if (window && window.start && window.end) {
+            const centerTime = new Date(
+              (window.start.getTime() + window.end.getTime()) / 2
+            );
+            centerTimeRef.current = centerTime;
+            shouldRestoreCenter.current = true;
+
+            // 調試日誌
+            if (process.env.NODE_ENV === "development") {
+              console.log(
+                `[Timeline] 保存視圖中心: ${centerTime.toISOString()}, 切換到: ${newTimeRange}`
+              );
+            }
+          }
+        }
+
+        // 2. 更新時間範圍狀態
+        setTimeRange(newTimeRange);
+      } catch (error) {
+        console.warn("時間範圍切換失敗:", error);
+        // 降級處理：直接切換時間範圍
+        setTimeRange(newTimeRange);
+      }
+    },
+    []
+  );
+
   //* 時間線初始化 - 核心組件設置
   useTimelineInitialization({
     containerRef,
@@ -547,6 +595,78 @@ function DynamicTimeline() {
     getTimelineOptions,
     handleEditItem,
   });
+
+  /**
+   * @effect useTimelineViewPreservation
+   * @description 監聽時間範圍變化並恢復視圖中心
+   * @dependencies [timeRange]
+   *
+   * @notes
+   * - 使用 timeline 的 'changed' 事件確保時機準確
+   * - 包含錯誤處理和調試日誌
+   * - 自動清理事件監聽器防止記憶體洩漏
+   */
+  useEffect(() => {
+    if (!timelineRef.current || !shouldRestoreCenter.current) return;
+
+    const handleTimelineChanged = () => {
+      if (shouldRestoreCenter.current && centerTimeRef.current) {
+        try {
+          // 調試日誌
+          if (process.env.NODE_ENV === "development") {
+            console.log(
+              `[Timeline] 恢復視圖中心: ${centerTimeRef.current.toISOString()}`
+            );
+          }
+
+          // 使用動畫移動到保存的中心點
+          timelineRef.current.moveTo(centerTimeRef.current, {
+            animation: { duration: 300, easingFunction: "easeInOutQuad" },
+          });
+
+          // 清理狀態
+          shouldRestoreCenter.current = false;
+          centerTimeRef.current = null;
+        } catch (error) {
+          console.warn("恢復視圖中心失敗:", error);
+          // 清理狀態即使失敗
+          shouldRestoreCenter.current = false;
+          centerTimeRef.current = null;
+        }
+      }
+    };
+
+    // 添加事件監聽器
+    timelineRef.current.on("changed", handleTimelineChanged);
+
+    // 清理函數
+    return () => {
+      if (timelineRef.current) {
+        timelineRef.current.off("changed", handleTimelineChanged);
+      }
+    };
+  }, [timeRange]); // 監聽 timeRange 變化
+
+  /**
+   * @effect useComponentCleanup
+   * @description 組件卸載時清理視圖保持相關的狀態
+   * @dependencies []
+   *
+   * @notes
+   * - 防止記憶體洩漏
+   * - 確保組件重新掛載時狀態乾淨
+   */
+  useEffect(() => {
+    return () => {
+      // 組件卸載時清理狀態
+      centerTimeRef.current = null;
+      shouldRestoreCenter.current = false;
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("[Timeline] 組件卸載，清理視圖保持狀態");
+      }
+    };
+  }, []);
 
   //* 選項數據 - UI 控制選項
   const timeRangeOptions = createTimeRangeOptions();
@@ -571,7 +691,7 @@ function DynamicTimeline() {
                     key={option.value}
                     value={option.value}
                     currentValue={timeRange}
-                    onChange={setTimeRange}
+                    onChange={handleTimeRangeChangeWithViewPreservation}
                   >
                     {option.label}
                   </TimelineControls.TimeRangeButton>

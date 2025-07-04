@@ -24,7 +24,7 @@ function isWorkOrder(item) {
 
 /**
  * @function isPastWorkOrder
- * @description 判斷製令單是否為過去項目
+ * @description 判斷製令單是否為過去項目（基於計劃時間）
  * @param {Object} orderInfo - 訂單信息
  * @returns {boolean}
  */
@@ -32,10 +32,10 @@ function isPastWorkOrder(orderInfo) {
   if (!orderInfo) return false;
 
   const now = new Date();
+  // 修改為基於計劃時間判斷，但保留實際時間作為輔助判斷
   return (
     (orderInfo.actualStartTime && new Date(orderInfo.actualStartTime) < now) ||
-    (orderInfo.scheduledStartTime &&
-      new Date(orderInfo.scheduledStartTime) < now)
+    (orderInfo.scheduledStartTime && new Date(orderInfo.scheduledStartTime) < now)
   );
 }
 
@@ -51,17 +51,18 @@ function isPastMachineStatus(status) {
 
 /**
  * @function getWorkOrderTimes
- * @description 獲取製令單的時間（實際時間優先）
+ * @description 獲取製令單的時間（統一使用計劃時間）
  * @param {Object} orderInfo - 訂單信息
  * @param {Object} fallback - 備用時間
  * @returns {Object} { startDate, endDate }
  */
 function getWorkOrderTimes(orderInfo, fallback) {
+  // 修改為統一使用計劃時間 (配合 apiTransformers 的修改)
   const startDate =
-    orderInfo.actualStartTime || orderInfo.scheduledStartTime || fallback.start;
+    orderInfo.scheduledStartTime || fallback.start;
 
   const endDate =
-    orderInfo.actualEndTime || orderInfo.scheduledEndTime || fallback.end;
+    orderInfo.scheduledEndTime || fallback.end;
 
   return { startDate, endDate };
 }

@@ -102,22 +102,21 @@ const SimpleProgressBar = styled(Box)(({ value, color, theme }) => ({
 }));
 
 /**
- * @function formatISOToDateTime
+ * @function formatISOToChineseDateTime
  * @description 將 ISO 8601 格式時間字串轉換為中文本地時間格式
  * @param {string} isoString - ISO 8601 格式時間字串
  * @returns {string} 中文格式的本地時間字串 (YYYY/MM/DD 上午/下午HH:mm)
  *
  * @example
  * // 基本使用 - 轉換為中文時間格式
- * const result = formatISOToDateTime("2025-06-10T05:45:18.000Z");
+ * const result = formatISOToChineseDateTime("2025-06-10T05:45:18.000Z");
  * console.log(result); // "2025/06/10 上午05:45"
  *
  * // 下午時間示例
- * const afternoon = formatISOToDateTime("2025-06-17T18:06:07.000Z");
+ * const afternoon = formatISOToChineseDateTime("2025-06-17T18:06:07.000Z");
  * console.log(afternoon); // "2025/06/17 下午18:06"
  *
  * // OrderCreated 使用場景
- * console.log(`🚀 ~ OrderCreated ~ item: ${formatISOToDateTime(item.timestamp)}`);
  * // 輸出: "🚀 ~ OrderCreated ~ item: 2025/06/12 上午04:09"
  *
  * @notes
@@ -127,8 +126,7 @@ const SimpleProgressBar = styled(Box)(({ value, color, theme }) => ({
  * - 自動處理空值和無效時間
  * - 格式：YYYY/MM/DD 上午/下午HH:mm
  */
-function formatISOToDateTime(isoString) {
-  console.log("🚀 ~ formatISOToDateTime ~ isoString:", isoString);
+function formatISOToChineseDateTime(isoString) {
   if (!isoString) return "";
 
   try {
@@ -136,7 +134,7 @@ function formatISOToDateTime(isoString) {
 
     // 檢查日期是否有效
     if (isNaN(date.getTime())) {
-      console.warn("[formatISOToDateTime] 無效的日期格式:", isoString);
+      console.warn("[formatISOToChineseDateTime] 無效的日期格式:", isoString);
       return "";
     }
 
@@ -149,11 +147,22 @@ function formatISOToDateTime(isoString) {
 
     // 判斷上午/下午
     const period = hours < 12 ? "上午" : "下午";
-    const formatHours = String(hours).padStart(2, "0");
+
+    // 轉換為12小時制
+    let displayHours;
+    if (hours === 0) {
+      displayHours = 12; // 午夜12點
+    } else if (hours <= 12) {
+      displayHours = hours; // 上午1-11點和中午12點
+    } else {
+      displayHours = hours - 12; // 下午1-11點
+    }
+
+    const formatHours = String(displayHours).padStart(2, "0");
 
     return `${year}/${month}/${day} ${period}${formatHours}:${minutes}`;
   } catch (error) {
-    console.error("[formatISOToDateTime] 時間格式轉換錯誤:", error);
+    console.error("[formatISOToChineseDateTime] 時間格式轉換錯誤:", error);
     return "";
   }
 }
@@ -166,10 +175,6 @@ function formatISOToDateTime(isoString) {
  * @returns {JSX.Element} 渲染的表單組件
  */
 const OrderCreated = ({ item, disabled }) => {
-  console.log(
-    "🚀 ~ OrderCreated ~ item:",
-    formatISOToDateTime(item.orderInfo.actualStartTime)
-  );
   const { register, errors, watch, control, initialized } = useStatusForm(
     MACHINE_STATUS.ORDER_CREATED,
     item
@@ -443,7 +448,7 @@ const OrderCreated = ({ item, disabled }) => {
             <FieldLabel>預計完成日</FieldLabel>
             <ReadOnlyField>
               <FieldValue>
-                {item.end ? formatISOToDateTime(item.end) : "-"}
+                {item.end ? formatISOToChineseDateTime(item.end) : "-"}
               </FieldValue>
             </ReadOnlyField>
           </Grid>
@@ -461,7 +466,7 @@ const OrderCreated = ({ item, disabled }) => {
             <ReadOnlyField>
               <FieldValue>
                 {item.orderInfo.actualStartTime
-                  ? formatISOToDateTime(item.orderInfo.actualStartTime)
+                  ? formatISOToChineseDateTime(item.orderInfo.actualStartTime)
                   : "尚未開始"}
               </FieldValue>
             </ReadOnlyField>
@@ -471,7 +476,11 @@ const OrderCreated = ({ item, disabled }) => {
           <Grid item xs={12} sm={6}>
             <FieldLabel>延遲完成日</FieldLabel>
             <ReadOnlyField>
-              <FieldValue>{item.orderInfo.postponeTime || "-"}</FieldValue>
+              <FieldValue>
+                {item.orderInfo.postponeTime
+                  ? formatISOToChineseDateTime(item.orderInfo.postponeTime)
+                  : "-"}
+              </FieldValue>
             </ReadOnlyField>
           </Grid>
 

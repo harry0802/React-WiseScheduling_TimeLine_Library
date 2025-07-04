@@ -258,13 +258,13 @@ export const transformApiToInternalFormat = (apiData) => {
   let startTime, endTime;
 
   if (isWorkOrder) {
-    // 製令單時間處理 - 優先使用實際時間，其次是計劃時間
-    startTime = dayjs(apiData.actualOnMachineDate || apiData.planOnMachineDate);
-    endTime = apiData.actualFinishDate
-      ? dayjs(apiData.actualFinishDate)
-      : apiData.planFinishDate
+    // 製令單時間處理 - 統一使用計劃時間 (方案A：保留資料完整性檢查)
+    startTime = apiData.planOnMachineDate
+      ? dayjs(apiData.planOnMachineDate)
+      : dayjs(); // 如果計劃時間為空，使用當前時間作為備用
+    endTime = apiData.planFinishDate
       ? dayjs(apiData.planFinishDate)
-      : startTime.add(1, "hour");
+      : startTime.add(1, "hour"); // 保留後備邏輯確保資料完整性
   } else {
     // MACHINE_STATUS_TIME - 機台狀態時間處理
     // 優先使用實際時間，其次是計畫時間
@@ -382,10 +382,12 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
   // 其他資訊
   apiData.processName = internalData.orderInfo?.process || "";
   apiData.productionScheduleStatus = internalData.orderInfo?.orderStatus || "";
-  
+
   // 新增欄位 - 僅用於顯示，不提交給 API
   // 注意：這些欄位在實際 API 呼叫時應該被過濾掉
-  apiData.postponeTime = internalData.orderInfo?.postponeTime || null;
+  apiData.postponeTime =
+    formatDate(internalData.orderInfo?.postponeTime, TIME_FORMAT, false) ||
+    null;
   apiData.workOrderSN = internalData.orderInfo?.workOrderSN || "";
 }
 

@@ -187,7 +187,7 @@ export const getStatusFromSliderValue = (value) => {
 export const getSliderValueFromStatus = (status) => {
   // 先標準化為英文狀態碼
   const englishStatus = getStatusCode(status);
-  
+
   // 根據英文狀態代碼映射到滑塊值
   switch (englishStatus) {
     case MACHINE_STATUS.TESTING:
