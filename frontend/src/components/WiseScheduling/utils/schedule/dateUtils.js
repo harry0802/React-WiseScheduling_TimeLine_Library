@@ -111,8 +111,10 @@ export const formatToFormDateTime = (date, defaultValue = "") => {
 
     // 🔧 修正：確保轉換為本地時間（台北時間）
     // 如果是 UTC 時間，先轉換為本地時間，然後格式化
-    const localTime = dayjsObj.tz ? dayjsObj.tz(DEFAULT_TIMEZONE) : dayjsObj.local();
-    
+    const localTime = dayjsObj.tz
+      ? dayjsObj.tz(DEFAULT_TIMEZONE)
+      : dayjsObj.local();
+
     // 返回 HTML datetime-local 格式（本地時間）
     return localTime.format(DATE_FORMATS.isoDateTime);
   } catch (error) {

@@ -103,9 +103,9 @@ const SimpleProgressBar = styled(Box)(({ value, color, theme }) => ({
 
 /**
  * @function formatISOToDateTime
- * @description 將 ISO 8601 格式時間字串轉換為中文時間格式
+ * @description 將 ISO 8601 格式時間字串轉換為中文本地時間格式
  * @param {string} isoString - ISO 8601 格式時間字串
- * @returns {string} 中文格式的時間字串 (YYYY/MM/DD 上午/下午HH:mm)
+ * @returns {string} 中文格式的本地時間字串 (YYYY/MM/DD 上午/下午HH:mm)
  *
  * @example
  * // 基本使用 - 轉換為中文時間格式
@@ -121,12 +121,14 @@ const SimpleProgressBar = styled(Box)(({ value, color, theme }) => ({
  * // 輸出: "🚀 ~ OrderCreated ~ item: 2025/06/12 上午04:09"
  *
  * @notes
- * - 使用原生 JavaScript Date 處理，移除外部依賴
+ * - 🔄 2025/01 修改：從 UTC 時間改為本地時間顯示
+ * - ⏰ 時區依賴：依賴客戶端系統時區設定 (預期：Asia/Taipei)
  * - 支援中文上午/下午顯示
  * - 自動處理空值和無效時間
  * - 格式：YYYY/MM/DD 上午/下午HH:mm
  */
 function formatISOToDateTime(isoString) {
+  console.log("🚀 ~ formatISOToDateTime ~ isoString:", isoString);
   if (!isoString) return "";
 
   try {
@@ -138,12 +140,12 @@ function formatISOToDateTime(isoString) {
       return "";
     }
 
-    // 使用 UTC 方法避免時區轉換問題
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(date.getUTCDate()).padStart(2, "0");
-    const hours = date.getUTCHours();
-    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+    // 使用本地時間方法顯示使用者時區的時間
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
 
     // 判斷上午/下午
     const period = hours < 12 ? "上午" : "下午";
