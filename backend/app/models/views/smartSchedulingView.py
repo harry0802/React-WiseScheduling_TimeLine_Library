@@ -24,7 +24,7 @@ class SmartSchedulingView(Model):
     planFinishDate = Column(TimestampDatetime, comment='製令單預計完成日')
     actualOnMachineDate = Column(TimestampDatetime, comment='製令單實際上機日')
     actualFinishDate = Column(TimestampDatetime, comment='製令單實際完成日')
-    postponeTime = Column(db.String(255), comment='製令單延後時間')
+    postponeTime = Column(TimestampDatetime, comment='製令單延後時間')
     workOrderSN = Column(db.String(255), comment='製令單號')
     productSN = Column(db.String(255), comment='產品編號')
     productName = Column(db.String(255), comment='產品名稱')
