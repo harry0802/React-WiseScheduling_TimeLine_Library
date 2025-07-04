@@ -12,7 +12,7 @@ function DailyIncomingStock() {
           <Grid container sx={{ height: "100%", alignItems: "center" }}>
             <Grid xs={9} sx={{ height: "100%", paddingRight: "1.25rem" }}>
               <ProgressBarChart
-                inStockPercentage={30}
+                inStockPercentage={0}
                 inStockGradient={{
                   startColor: "#04B30A",
                   endColor: "#37FFF2",
@@ -24,8 +24,8 @@ function DailyIncomingStock() {
               <ProcessText
                 data={{
                   title: "當日入庫",
-                  percentage: 30,
-                  quantity: 100000,
+                  percentage: 0,
+                  quantity: 0,
                 }}
               />
             </Grid>

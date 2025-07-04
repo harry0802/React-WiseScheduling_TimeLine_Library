@@ -18,7 +18,7 @@ function NextThreeDaysIncomingStock() {
           >
             <Grid xs={9} sx={{ height: "100%", paddingRight: "1.25rem" }}>
               <ProgressBarChart
-                inStockPercentage={30}
+                inStockPercentage={0}
                 inStockGradient={{
                   startColor: "#0491B4",
                   endColor: "#37FFF2",
@@ -30,8 +30,8 @@ function NextThreeDaysIncomingStock() {
               <ProcessText
                 data={{
                   title: "未來三天入庫",
-                  percentage: 30,
-                  quantity: 100000,
+                  percentage: 0,
+                  quantity: 0,
                 }}
               />
             </Grid>
