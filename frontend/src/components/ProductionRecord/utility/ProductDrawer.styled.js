@@ -1,6 +1,6 @@
-import styled from 'styled-components';
-import { Drawer } from 'antd';
-import { commonTheme } from '../styles/common';
+import styled from "styled-components";
+import { Drawer } from "antd";
+import { commonTheme } from "../styles/common";
 
 // 樣式化的 Drawer 組件
 export const StyledDrawer = styled(Drawer)`
@@ -74,22 +74,26 @@ export const DrawerFooter = styled.div`
 
 // 取消按鈕
 export const CancelButton = styled.button`
-  color: ${commonTheme.colors.textPrimary};
+  color: #8f8f8f;
   background: unset;
-  text-decoration-line: underline;
-  text-decoration-color: transparent;
-  transition: all 0.2s;
 
   &:hover {
-    text-decoration-color: currentColor;
+    color: #6fc1ae;
+    text-decoration: underline;
+  }
+
+  &:active {
+    color: #8bc1e3;
   }
 `;
 
 // 確認按鈕
 export const ConfirmButton = styled.button`
-  color: #e1e7f5;
-  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  background: #186c98;
+  background-color: #83bf45;
+  border: none;
+  color: white;
+  transition: background-color 0.3s, transform 0.1s;
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.25));
 
   &:disabled {
     opacity: 0.6;
@@ -97,10 +101,10 @@ export const ConfirmButton = styled.button`
   }
 
   &:hover:not(:disabled) {
-    background: #155a80;
+    background-color: #6fc1ae;
   }
 
   &:active:not(:disabled) {
-    background: #124865;
+    background-color: #8bc1e3;
   }
 `;

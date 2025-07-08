@@ -6,7 +6,7 @@ import {
   DrawerBody,
   DrawerFooter,
   CancelButton,
-  ConfirmButton
+  ConfirmButton,
 } from "./ProductDrawer.styled";
 
 function ProductDrawer({
@@ -39,13 +39,8 @@ function ProductDrawer({
       </DrawerBody>
 
       <DrawerFooter>
-        <CancelButton onClick={onClose}>
-          取消
-        </CancelButton>
-        <ConfirmButton
-          disabled={disabled}
-          onClick={onSubmit}
-        >
+        <CancelButton onClick={onClose}>取消</CancelButton>
+        <ConfirmButton disabled={disabled} onClick={onSubmit}>
           確定
         </ConfirmButton>
       </DrawerFooter>

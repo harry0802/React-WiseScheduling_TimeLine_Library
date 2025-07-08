@@ -2,10 +2,10 @@ import ProductionRecordCard from "./ProductionRecordCard";
 import { useNavigate } from "react-router-dom";
 import { homeSlice } from "../../slice/HomeSlice";
 import { useEffectOnce } from "react-use";
-import { 
-  RecordHomeContainer, 
-  RecordHomeContent, 
-  StyledPagination 
+import {
+  RecordHomeContainer,
+  RecordHomeContent,
+  StyledPagination,
 } from "./ProductionRecordHome.styled";
 
 // 分頁器
