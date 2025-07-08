@@ -5,7 +5,7 @@ import ProductionRecordButton from "../../../utility/ProductionRecordButton";
 import {
   StyledAccordion,
   StyledAccordionHeader,
-  StyledAccordionContent
+  StyledAccordionContent,
 } from "./ProcessAccordion.styled";
 
 function ProcessAccordion({ children, title, OnClick = null }) {
@@ -24,9 +24,7 @@ function ProcessAccordion({ children, title, OnClick = null }) {
         </ProductionRecordButton>
       </StyledAccordionHeader>
 
-      <StyledAccordionContent>
-        {children}
-      </StyledAccordionContent>
+      <StyledAccordionContent>{children}</StyledAccordionContent>
     </StyledAccordion>
   );
 }

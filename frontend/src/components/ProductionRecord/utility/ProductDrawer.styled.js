@@ -4,6 +4,16 @@ import { commonTheme } from "../styles/common";
 
 // 樣式化的 Drawer 組件
 export const StyledDrawer = styled(Drawer)`
+  && {
+    color: ${commonTheme.colors.textPrimary};
+    font-family: Roboto, sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.25rem;
+    background: #ebecf0;
+  }
+
   .ant-drawer-content-wrapper > .ant-drawer-content {
     color: ${commonTheme.colors.textPrimary};
     font-family: Roboto;
@@ -12,7 +22,6 @@ export const StyledDrawer = styled(Drawer)`
     font-weight: 400;
     line-height: 1.25rem;
     border-radius: 10px 0px 0px 10px;
-    background: #ebecf0;
     box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.25);
     padding-bottom: 6.625rem !important;
   }
@@ -36,8 +45,9 @@ export const DrawerHeader = styled.div`
 
 // Drawer 內容區域
 export const DrawerBody = styled.div`
-  margin-top: 3.125rem;
   flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
 `;
 
 // Drawer 底部按鈕區域
@@ -53,7 +63,7 @@ export const DrawerFooter = styled.div`
   bottom: 0;
   gap: 1.875rem;
   z-index: 2;
-  background: #ebecf0;
+  /* background: #ebecf0; */
 
   button {
     width: 5rem;

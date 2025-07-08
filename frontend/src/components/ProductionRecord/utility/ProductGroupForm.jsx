@@ -8,7 +8,7 @@ import {
   GroupFormContent,
   GroupFormInput,
   GroupFormRemoveButton,
-  GroupFormAddition
+  GroupFormAddition,
 } from "./ProductGroupForm.styled";
 
 // Purchase Order Form Component
@@ -20,7 +20,7 @@ function ProductGroupForm() {
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }) => (
-                <Space key={key} style={{ display: 'flex', width: '100%' }}>
+                <Space key={key} style={{ display: "flex", width: "100%" }}>
                   <GroupFormContent>
                     <GroupFormInput>
                       <Form.Item

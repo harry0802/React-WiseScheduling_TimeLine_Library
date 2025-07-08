@@ -1,5 +1,5 @@
-import styled from 'styled-components';
-import { commonTheme } from '../styles/common';
+import styled from "styled-components";
+import { commonTheme } from "../styles/common";
 
 // 群組表單主容器（使用 ProductForm.styles.js 的 FormContainer）
 export const GroupFormContainer = styled.div`
@@ -11,6 +11,29 @@ export const GroupFormContainer = styled.div`
   overflow: hidden;
   grid-column: 0;
   margin-top: 1.3125rem;
+
+  /* Ant Design Form 樣式覆蓋 */
+  && .ant-row {
+    display: flex;
+    flex-direction: column;
+  }
+
+  && .ant-space {
+    gap: 0;
+    width: 100%;
+
+    &-item {
+      width: 100%;
+    }
+  }
+
+  && .ant-form-item-label {
+    align-self: flex-start;
+    label {
+      color: ${commonTheme.colors.border};
+      height: 1.0625rem;
+    }
+  }
 `;
 
 // 表單項目容器
@@ -31,10 +54,9 @@ export const GroupFormContent = styled.div`
 // 表單輸入框容器
 export const GroupFormInput = styled.div`
   padding: 8px 10px 0.875rem;
-  margin-bottom: 0;
   flex: 1;
 
-  input {
+  && input {
     width: 100%;
     border: none;
     color: ${commonTheme.colors.border};
@@ -44,7 +66,7 @@ export const GroupFormInput = styled.div`
     }
   }
 
-  .ant-form-item-label {
+  && .ant-form-item-label {
     align-self: flex-start;
 
     label {
@@ -96,7 +118,7 @@ export const GroupFormAddition = styled.div`
   background: ${commonTheme.colors.white};
   padding-bottom: 5px;
 
-  .ant-btn {
+  && .ant-btn {
     display: inline-flex;
     align-items: center;
     height: auto;
@@ -105,30 +127,5 @@ export const GroupFormAddition = styled.div`
     font-weight: 400;
     border: none;
     background: transparent;
-  }
-`;
-
-// Antd Form 樣式覆蓋
-export const antdFormOverrides = `
-  .ant-row {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .ant-space {
-    gap: 0;
-
-    &-item:has(.groupForm__input) {
-      width: 100%;
-    }
-  }
-
-  .ant-form-item-label {
-    align-self: flex-start;
-
-    label {
-      color: ${commonTheme.colors.border};
-      height: 1.0625rem;
-    }
   }
 `;

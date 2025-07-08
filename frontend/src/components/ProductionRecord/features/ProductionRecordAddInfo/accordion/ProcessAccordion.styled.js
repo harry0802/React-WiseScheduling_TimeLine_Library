@@ -1,8 +1,8 @@
-import styled from 'styled-components';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import { commonTheme } from '../../../styles/common';
+import styled from "styled-components";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import { commonTheme } from "../../../styles/common";
 
 // 樣式化的手風琴組件
 export const StyledAccordion = styled(Accordion)`
