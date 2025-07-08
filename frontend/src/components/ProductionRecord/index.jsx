@@ -9,7 +9,7 @@ import {
   RecordWrapper,
   RecordHeader,
   RecordTitle,
-  RecordSections
+  RecordSections,
 } from "./styles/ProductionRecordLayout.styles";
 
 // wrapper
