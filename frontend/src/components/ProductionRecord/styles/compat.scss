@@ -1,0 +1,482 @@
+// 樣式兼容層 - 為其他依賴組件提供必要的樣式
+// 這個檔案確保其他頁面不會因為我們的 styled-components 遷移而破壞
+
+@import "../../../styles/_variables.scss";
+
+// 混合器
+@mixin flex-center {
+  display: flex;
+  place-content: center center;
+}
+
+@mixin button-base {
+  @include flex-center;
+  width: 2.1875rem;
+  height: 2.1875rem;
+  background-color: $palette-primary-main;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+
+  & > svg {
+    align-self: center;
+  }
+}
+
+@mixin hover-active-states($hover-bg, $active-bg) {
+  &:hover {
+    background-color: $hover-bg !important;
+    color: white !important;
+  }
+
+  &:active {
+    background-color: $active-bg !important;
+    color: white !important;
+  }
+}
+
+// 通用類
+.color-danger {
+  font-weight: 800;
+  color: $danger-text-color;
+}
+
+// 按鈕樣式
+button.ant-btn-default,
+.ant-btn-default {
+  @include button-base;
+}
+
+.c-btn-primars {
+  background-color: #83bf45 !important;
+  border: none;
+  color: white !important;
+  transition: background-color 0.3s, transform 0.1s;
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.25));
+
+  @include hover-active-states(#6fc1ae, #8bc1e3);
+
+  &--cancel {
+    color: #8f8f8f;
+    background: unset;
+    &:hover {
+      color: #6fc1ae;
+      text-decoration: underline;
+    }
+    &:active {
+      color: #8bc1e3;
+    }
+  }
+
+  &--delete {
+    background-color: #eb0004 !important;
+    color: #fff !important;
+    @include hover-active-states(#e8686a, #be090c);
+  }
+}
+
+// MUI 表單控件樣式
+.MuiFormControl-root {
+  transition: all 0.3s;
+  &:hover {
+    .MuiFormLabel-root,
+    .MuiOutlinedInput-root,
+    fieldset {
+      color: #4f9ab1;
+      border-color: #4f9ab1 !important;
+    }
+  }
+  .Mui-focused {
+    color: #8bc1e3 !important;
+    .MuiOutlinedInput-root,
+    .MuiFormLabel-root,
+    label,
+    fieldset {
+      color: #8bc1e3 !important;
+      border-color: #8bc1e3 !important;
+    }
+  }
+}
+
+// 記錄頁面樣式 - 保留給其他組件使用
+.record {
+  width: 100%;
+  &__container {
+    width: 100%;
+    padding: 20px 0;
+  }
+
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &__title {
+      color: #fff;
+      font-family: Roboto;
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.25rem;
+    }
+  }
+
+  &-actions {
+    @include flex-center;
+    gap: 10px;
+    &__button {
+      display: flex;
+      gap: 10px;
+    }
+  }
+
+  &-sections {
+    margin-top: 1.187rem;
+  }
+}
+
+// 通知樣式
+.notificationStyle {
+  background: rgba(238, 238, 238, 0.9);
+  padding: 1.5rem 1.4375rem 1.5625rem 1.125rem;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+
+  & .ant-notification-notice-message {
+    color: #8f8f8f !important;
+    font-family: Roboto;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  &__icon {
+    width: 2.5rem;
+    height: 1.9375rem;
+  }
+}
+
+// 產品相關樣式
+.product-content {
+  &__breadcrumb {
+    font-family: Roboto;
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.25rem;
+  }
+  &__sections > div {
+    margin-top: 1.25rem;
+  }
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  align-items: self-start;
+  padding: 1.875rem 1.4375rem 5.125rem 1.4375rem;
+  font-family: Roboto;
+  color: $palette-text-primary;
+  font-family: Roboto;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.25rem;
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid #fff;
+  background: #f1f1f1;
+
+  &__header {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    :where(h3) {
+      font-size: 1.5rem;
+    }
+  }
+
+  &__text {
+    height: 100%;
+    font-size: 0.875rem;
+  }
+  &__text > p:not(:first-child) {
+    margin-top: 1.25rem;
+    font-weight: 400;
+  }
+}
+
+// Drawer 樣式
+.ant-drawer-content-wrapper > .product-drawer {
+  color: #8f8f8f;
+  font-family: Roboto;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.25rem;
+  border-radius: 10px 0px 0px 10px;
+  background: #ebecf0;
+  box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  padding-bottom: 6.625rem !important;
+}
+
+.ant-drawer-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.product-drawer {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
+  &__body {
+    margin-top: 3.125rem;
+  }
+
+  &__footer {
+    position: absolute;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 2.625rem;
+    padding-bottom: 1.5rem;
+    padding-right: 2.5rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    gap: 1.875rem;
+    z-index: 2;
+    background: #ebecf0;
+    & button {
+      width: 5rem;
+      height: 2.5rem;
+      padding: 0.5625rem 1.375rem 0.625rem 1.375rem;
+      justify-content: center;
+      align-items: center;
+      border: none;
+      font-family: Roboto;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      border-radius: 1.875rem;
+      cursor: pointer;
+    }
+  }
+  & .footer__drawerc--cancel {
+    color: #8f8f8f;
+    background: unset;
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    transition: all 0.2s;
+    &:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  & .footer__drawer--confirm {
+    color: #e1e7f5;
+    box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    background: #186c98;
+  }
+}
+
+// 其他必要的樣式
+.info__item {
+  display: flex;
+  flex-direction: column;
+  max-height: 3.875rem;
+  gap: 9px;
+  font-family: Inter;
+  line-height: 1.0625rem;
+
+  &:not(:first-child) {
+    margin-top: 1.25rem;
+  }
+
+  > span {
+    font-size: 0.875rem;
+  }
+}
+
+// TransferList 樣式
+.product-drawer__body :is(.transferList__container) {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  margin-top: 21px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.transferList__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  & .MuiGrid-item {
+    width: 100%;
+  }
+
+  & .MuiPaper-elevation {
+    width: 100% !important;
+    border: 1px solid #8f8f8f;
+    border-radius: 4px;
+  }
+
+  & .MuiList-dense {
+    width: 100%;
+    max-height: 11.375rem;
+  }
+}
+
+// GroupForm 樣式
+$border-color: #8f8f8f;
+$highlight-color: #83bf45;
+$font-size: 18px;
+$background-color: #fff;
+$padding-standard: 8px 10px 0.875rem;
+$border-radius: 4px;
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin button-style($width, $height, $color) {
+  width: $width !important;
+  height: $height !important;
+  stroke-width: 1;
+  color: $color;
+  stroke: $color;
+  cursor: pointer;
+}
+
+@mixin border-box {
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+}
+
+.groupForm {
+  @include border-box;
+  background: $background-color;
+  font-size: $font-size;
+  color: $border-color;
+  overflow: hidden;
+  grid-column: 0;
+  margin-top: 1.3125rem;
+
+  &-item {
+    position: relative;
+    height: max(250px);
+    overflow-y: auto;
+  }
+
+  .ant-row {
+    @include flex-column;
+  }
+
+  .ant-space {
+    gap: 0;
+
+    &-item:has(.groupForm__input) {
+      width: 100%;
+    }
+  }
+
+  .ant-form-item-label {
+    align-self: flex-start;
+
+    label {
+      color: $border-color;
+      height: 1.0625rem;
+    }
+  }
+
+  &__content {
+    width: 100%;
+    position: relative;
+    display: flex;
+    border-bottom: 1px solid $border-color;
+  }
+
+  &__input {
+    padding: $padding-standard;
+    margin-bottom: 0;
+
+    input {
+      width: 100%;
+      border: none;
+      color: $border-color;
+
+      &:not(:first-child) {
+        border-bottom: 1px solid $border-color;
+      }
+    }
+  }
+
+  &__button--remove {
+    margin-right: 12px;
+    @include button-style(35px, 35px, $highlight-color);
+    transition: all 0.3s;
+    &:hover {
+      color: #6fc1ae;
+      stroke: #6fc1ae;
+    }
+    &:active {
+      color: #8bc1e3;
+      stroke: #8bc1e3;
+    }
+  }
+
+  &__addition {
+    position: sticky;
+    z-index: 1;
+    text-align: center;
+    bottom: 0;
+    margin-bottom: 0;
+    background: $background-color;
+    padding-bottom: 5px;
+    .ant-btn {
+      display: inline-flex;
+      align-items: center;
+      height: auto;
+      font-size: 18px;
+      color: $border-color;
+      font-weight: 400;
+    }
+  }
+}
+
+// TextField 樣式
+.MuiFormControl-root {
+  width: 100%;
+  color: #8f8f8f;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  font-size: 0.875rem;
+  &:not(:last-child) {
+    margin-bottom: 21px;
+  }
+
+  & > label {
+    font-size: inherit;
+    color: currentColor;
+  }
+
+  & .MuiInputBase-root {
+    color: currentColor;
+    font-size: inherit;
+    input {
+      padding: 1.0625rem 0.5625rem;
+    }
+  }
+}

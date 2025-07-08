@@ -1,9 +1,12 @@
 import ProductionRecordCard from "./ProductionRecordCard";
-import "../../index.scss";
-import { Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
 import { homeSlice } from "../../slice/HomeSlice";
 import { useEffectOnce } from "react-use";
+import { 
+  RecordHomeContainer, 
+  RecordHomeContent, 
+  StyledPagination 
+} from "./ProductionRecordHome.styled";
 
 // 分頁器
 function ProductionRecordPaginations() {
@@ -16,8 +19,7 @@ function ProductionRecordPaginations() {
   }
 
   return (
-    <Pagination
-      className="record-paginations"
+    <StyledPagination
       itemActiveColorDisabled
       total={total}
       current={currentPage}
@@ -36,8 +38,8 @@ function ProductionRecordHome() {
   useEffectOnce(() => setPageStatus("產品履歷與BOM"));
 
   return (
-    <div className="record-home">
-      <div className="record-home__content">
+    <RecordHomeContainer>
+      <RecordHomeContent>
         {displayedData?.map((data) => (
           <ProductionRecordCard
             key={data.id}
@@ -46,9 +48,9 @@ function ProductionRecordHome() {
             onButtonClick={() => navigate(`addProductInfo/${data.id}`)}
           />
         ))}
-      </div>
+      </RecordHomeContent>
       <ProductionRecordPaginations />
-    </div>
+    </RecordHomeContainer>
   );
 }
 

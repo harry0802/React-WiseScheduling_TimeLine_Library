@@ -1,5 +1,6 @@
-import { Button, Tooltip } from "antd";
+import { Tooltip } from "antd";
 import { memo } from "react";
+import { StyledProductionButton } from "./ProductionRecordButton.styled";
 
 function ProductionRecordButton({
   children,
@@ -12,7 +13,7 @@ function ProductionRecordButton({
 }) {
   return (
     <Tooltip title={tooltip}>
-      <Button
+      <StyledProductionButton
         onClick={OnClick}
         className={`c-btn-primars ${className}`}
         shape={shape}
@@ -20,7 +21,7 @@ function ProductionRecordButton({
         disabled={!!disabled ? disabled : null}
       >
         {children}
-      </Button>
+      </StyledProductionButton>
     </Tooltip>
   );
 }

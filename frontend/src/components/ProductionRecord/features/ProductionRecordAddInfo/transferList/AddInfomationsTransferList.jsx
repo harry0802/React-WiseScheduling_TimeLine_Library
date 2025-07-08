@@ -2,6 +2,7 @@ import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import TransferListCustomList from "./TransferListCustomList.jsx";
 import { useTransferListSlice } from "../../../slice/TransferListSlice.jsx";
+import { TransferListContainer } from "./AddInfomationsTransferList.styled";
 /*
 AddInfomationsTransferList
 │
@@ -39,8 +40,7 @@ function AddInfomationsTransferList({ type = "屬性" }) {
     useTransferListSlice();
 
   return (
-    <Grid
-      className="transferList__container"
+    <TransferListContainer
       container
       spacing={2}
       justifyContent="space-between"
@@ -78,7 +78,7 @@ function AddInfomationsTransferList({ type = "屬性" }) {
       <Grid item xs={5}>
         <TransferListCustomList title={`已選${type}編號`} items={right} />
       </Grid>
-    </Grid>
+    </TransferListContainer>
   );
 }
 

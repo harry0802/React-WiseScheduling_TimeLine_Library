@@ -1,5 +1,4 @@
-import TextField from "@mui/material/TextField";
-import MenuItem from "@mui/material/MenuItem";
+import { StyledSelectTextField, StyledMenuItem } from "./ProductTextFieldSelect.styled";
 
 function ProductTextFieldSelect({
   label = "設定中...",
@@ -8,24 +7,22 @@ function ProductTextFieldSelect({
   option = [],
 }) {
   return (
-    <TextField
+    <StyledSelectTextField
       select
       label={label}
       value={value}
       onChange={OnChange}
-      className="textField-select "
     >
       {option.length > 0 &&
         option.map((opt) => (
-          <MenuItem
-            className="textField-select__menuItem"
+          <StyledMenuItem
             key={opt.id}
             value={opt.category}
           >
             {opt.category}
-          </MenuItem>
+          </StyledMenuItem>
         ))}
-    </TextField>
+    </StyledSelectTextField>
   );
 }
 

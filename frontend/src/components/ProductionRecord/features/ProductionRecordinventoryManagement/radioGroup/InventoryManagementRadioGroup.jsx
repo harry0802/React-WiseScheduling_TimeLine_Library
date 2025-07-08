@@ -1,9 +1,8 @@
 import React from "react";
 import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
-import styles from "./InventoryManagementRadioGroup.module.scss";
+import { StyledInventoryRadioGroup } from "./InventoryManagementRadioGroup.styled";
 /* ASCII 
 InventoryManagementRadioGroup
 │
@@ -49,8 +48,7 @@ function RadioItem({ item }) {
 
 function InventoryManagementRadioGroup({ data, value, onChange }) {
   return (
-    <RadioGroup
-      className={styles["InventoryManagement-radioGroup"]}
+    <StyledInventoryRadioGroup
       aria-label="原物料分類"
       name="controlled-radio-buttons-group"
       value={value}
@@ -64,7 +62,7 @@ function InventoryManagementRadioGroup({ data, value, onChange }) {
             </Grid>
           ))}
       </Grid>
-    </RadioGroup>
+    </StyledInventoryRadioGroup>
   );
 }
 

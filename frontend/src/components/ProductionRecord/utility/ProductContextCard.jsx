@@ -1,4 +1,10 @@
 import ProductionRecordButton from "./ProductionRecordButton";
+import {
+  ProductInfoContainer,
+  ProductInfoHeader,
+  HeaderTitle,
+  HeaderButton
+} from "./ProductContextCard.styled";
 
 function ProductContextCard({
   children,
@@ -12,22 +18,22 @@ function ProductContextCard({
   // PdId =產品編號
 
   return (
-    <div className={`product-info ${style}`}>
-      <div className="product-info__header">
-        <div className="header__title">
+    <ProductInfoContainer className={style}>
+      <ProductInfoHeader>
+        <HeaderTitle>
           <h3>{title}</h3>
-        </div>
+        </HeaderTitle>
 
-        <div className="header__button">
+        <HeaderButton>
           {!hideButton && (
             <ProductionRecordButton OnClick={OnClick}>
               {icon}
             </ProductionRecordButton>
           )}
-        </div>
-      </div>
+        </HeaderButton>
+      </ProductInfoHeader>
       {children}
-    </div>
+    </ProductInfoContainer>
   );
 }
 export default ProductContextCard;

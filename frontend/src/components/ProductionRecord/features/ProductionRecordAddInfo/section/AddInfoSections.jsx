@@ -7,6 +7,11 @@ import TextField from "@mui/material/TextField";
 import useNotification from "../../../hook/useNotification.js";
 import { homeSlice } from "../../../slice/HomeSlice.jsx";
 import { useProductActions } from "../../../service/endpoints/productApi.js";
+import {
+  ProductDrawerInfo,
+  InfoItem,
+  ProductInfoText,
+} from "./AddInfoSections.styled";
 
 function InfoSectionsDialog() {
   const {
@@ -39,32 +44,32 @@ function InfoSectionsDialog() {
       onSubmit={() => handleConfirm()}
       disabled={oldPdNb === ""}
     >
-      <div className="product-drawer__info">
-        <div className="info__item">
+      <ProductDrawerInfo>
+        <InfoItem>
           <span>產品編號</span>
           <p>{product.productSN}</p>
-        </div>
+        </InfoItem>
 
-        <div className="info__item">
+        <InfoItem>
           <span>產品名稱</span>
           <p style={{ fontSize: 14, lineHeight: "20px" }}>
             {product.productName}
           </p>
-        </div>
+        </InfoItem>
 
-        <div className="info__item">
+        <InfoItem>
           <span>客戶名稱</span>
           <p>{product.customerName}</p>
-        </div>
+        </InfoItem>
 
-        <div className="info__item">
+        <InfoItem>
           <TextField
             label="舊產品編號"
             defaultValue={product.oldProductSN}
             onChange={(e) => setOldPdNb(e.target.value)}
           />
-        </div>
-      </div>
+        </InfoItem>
+      </ProductDrawerInfo>
     </ProductDrawer>
   );
 }
@@ -83,11 +88,11 @@ function InfoSections() {
     >
       {product && (
         <>
-          <div className="product-info__text">
+          <ProductInfoText>
             <p>產品編號 : {product.productSN}</p>
             <p>舊產品編號 :{product.oldProductSN}</p>
             <p>產品名稱 : {product.productName} </p>
-          </div>
+          </ProductInfoText>
           <InfoSectionsDialog />
         </>
       )}
