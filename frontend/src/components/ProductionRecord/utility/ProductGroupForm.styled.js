@@ -55,6 +55,11 @@ export const GroupFormContent = styled.div`
 export const GroupFormInput = styled.div`
   padding: 8px 10px 0.875rem;
   flex: 1;
+  margin-bottom: 0;
+
+  && .ant-form-item {
+    margin-bottom: 0 !important;
+  }
 
   && input {
     width: 100%;
@@ -91,6 +96,7 @@ export const GroupFormRemoveButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
 
   &:hover {
     color: ${commonTheme.colors.buttonHover};

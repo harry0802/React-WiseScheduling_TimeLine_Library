@@ -20,23 +20,24 @@ function ProductGroupForm() {
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }) => (
-                <Space key={key} style={{ display: "flex", width: "100%" }}>
-                  <GroupFormContent>
-                    <GroupFormInput>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "moldno"]}
-                        label={`模具編號${name + 1}`} // Custom label for each item
-                      >
-                        <Input placeholder="XXX-00XX-XXXD" />
-                      </Form.Item>
-                    </GroupFormInput>
+                <GroupFormContent
+                  key={key}
+                  style={{ display: "flex", width: "100%" }}
+                >
+                  <GroupFormInput>
+                    <Form.Item
+                      {...restField}
+                      name={[name, "moldno"]}
+                      label={`模具編號${name + 1}`} // Custom label for each item
+                    >
+                      <Input placeholder="XXX-00XX-XXXD" />
+                    </Form.Item>
+                  </GroupFormInput>
 
-                    <GroupFormRemoveButton onClick={() => remove(name)}>
-                      <CloseIcon />
-                    </GroupFormRemoveButton>
-                  </GroupFormContent>
-                </Space>
+                  <GroupFormRemoveButton onClick={() => remove(name)}>
+                    <CloseIcon />
+                  </GroupFormRemoveButton>
+                </GroupFormContent>
               ))}
 
               <GroupFormAddition>

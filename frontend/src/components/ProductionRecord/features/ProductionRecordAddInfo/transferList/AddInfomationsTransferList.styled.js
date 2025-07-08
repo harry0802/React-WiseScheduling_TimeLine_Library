@@ -1,28 +1,40 @@
-import styled from 'styled-components';
-import Grid from '@mui/material/Grid';
-import { commonTheme } from '../../../styles/common';
+import styled from "styled-components";
+import Grid from "@mui/material/Grid";
+import { commonTheme } from "../../../styles/common";
 
 // 傳輸清單主容器
 export const TransferListContainer = styled(Grid)`
-  width: 100%;
-  padding: 0;
-  margin: 0;
-  margin-top: 21px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  && {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    margin-top: 21px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
 
-  .MuiGrid-item {
+  && .MuiGrid-item {
     width: 100%;
   }
 
-  .MuiPaper-elevation {
+  && .MuiPaper-elevation {
     width: 100% !important;
     border: 1px solid ${commonTheme.colors.border};
     border-radius: 4px;
   }
 
-  .MuiList-dense {
+  && .MuiList-dense {
+    width: 100%;
+    max-height: 11.375rem;
+  }
+
+  /* 如果有 Ant Design 組件，新增以下樣式 */
+  && .ant-btn {
+    margin: 0.5rem 0;
+  }
+
+  && .ant-list {
     width: 100%;
     max-height: 11.375rem;
   }
