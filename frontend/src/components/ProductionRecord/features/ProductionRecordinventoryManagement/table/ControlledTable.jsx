@@ -4,7 +4,7 @@ import {
   ControlledTableContainer,
   ControlledTableContent,
   ControlledTableActions,
-  ControlledTableGlobalStyles
+  ControlledTableGlobalStyles,
 } from "./ControlledTable.styled";
 
 // 控制表格組件，用於展示和管理表格數據

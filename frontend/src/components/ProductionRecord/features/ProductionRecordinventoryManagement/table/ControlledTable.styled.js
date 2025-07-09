@@ -1,5 +1,5 @@
-import styled, { createGlobalStyle } from 'styled-components';
-import { commonTheme } from '../../../styles/common';
+import styled, { createGlobalStyle } from "styled-components";
+import { commonTheme } from "../../../styles/common";
 
 // 受控表格主容器
 export const ControlledTableContainer = styled.div`
