@@ -54,7 +54,7 @@ function InventoryManagementRadioGroup({ data, value, onChange }) {
       value={value}
       onChange={onChange}
     >
-      <Grid container spacing={2}>
+      <Grid container spacing={0}>
         {data &&
           data.map((item, index) => (
             <Grid xs={12} sm={6} md={4} lg={3} key={index}>

@@ -27,8 +27,8 @@ export const StyledPagination = styled(Pagination)`
     align-self: center;
     justify-self: center;
     min-width: unset;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
     padding: 0px 6px;
     align-items: center;
     justify-content: center;
@@ -47,7 +47,8 @@ export const StyledPagination = styled(Pagination)`
       color: currentColor;
       font-size: 0.875rem;
       font-style: normal;
-      font-weight: 400;
+      font-weight: 600;
+      font-size: 1.125rem;
     }
   }
 
