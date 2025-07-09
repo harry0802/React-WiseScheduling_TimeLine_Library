@@ -10,7 +10,6 @@ export { manufacturingApiSlice } from "./manufacturingApiSlice";
 // 導入並註冊所有按 feature 分類的端點 API
 export * from "./endpoints/deliveryTrendApi"; // 配送趨勢分析
 export * from "./endpoints/factoryPerformanceApi"; // 工廠績效儀表板
-export * from "./endpoints/oeeInsightApi"; // OEE 洞察系統
 export * from "./endpoints/productionProgressApi"; // 生產進度追蹤
 export * from "./endpoints/realTimeMonitorApi"; // 即時 OEE 監控
 
@@ -37,13 +36,10 @@ export {
 
 // 📈 OEE 洞察系統 (OEEInsightSystem)
 export {
-  useGetMachineOperationRateQuery,
-  useGetDowntimeFactorsQuery,
-  useGetMachineStatusDurationQuery,
-  useGetMachineOperationSummaryQuery,
-  useGetOEEInsightsQuery,
-  useGetEquipmentEfficiencyQuery,
-  useGetQualityLossQuery,
+  useGetMachineStatusProportionQuery,
+  useGetMachineUtilizationStatisticsQuery,
+  useGetMachineOfflineReasonProportionQuery,
+  useGetMachineStatusHoursStatisticsQuery,
 } from "./endpoints/oeeInsightApi";
 
 // 📋 生產進度追蹤 (ProductionProgressTracker)
@@ -60,8 +56,9 @@ export {
 // ⚡ 即時 OEE 監控 (RealTimeOEEMonitor)
 export {
   useGetCurrentMachineStatusCountQuery,
-  useGetMachineStatusProportionQuery,
   useGetMachineAccumulatedTimeQuery,
   useGetOverdueWorkOrderQuery,
   useGetMachineOfflineEventQuery,
+  useGetTodayWorkOrderQuery,
+  useGetDailyOEEQuery,
 } from "./endpoints/realTimeMonitorApi";

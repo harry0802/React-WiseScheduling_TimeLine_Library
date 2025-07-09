@@ -1,117 +1,164 @@
-import { manufacturingApiSlice } from "../manufacturingApiSlice";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_BASE } from "../../../../store/api/apiConfig";
+
+/**
+ * @description OEE 洞察系統 API 專用 baseQuery
+ * 使用真實 API 配置，完全脫離 mock 資料依賴
+ */
+const oeeInsightBaseQuery = fetchBaseQuery({
+  baseUrl: API_BASE,
+});
 
 /**
  * @description OEE 洞察系統 API 端點
- * 對應 OEEInsightSystem feature
- * 處理設備稼動率分析、停機因素、機台狀態等 OEE 相關數據
+ * 提供實際被使用的 OEE 分析功能
+ *
+ * 功能涵蓋：
+ * - 機台各狀態時間佔比
+ * - 設備稼動分析統計
+ * - 停機因素佔比分析
+ * - 當日機台各狀態時數統計
+ *
+ * @note 所有端點均使用真實 API，回應格式統一為 { status, message, data }
  */
-export const oeeInsightApi = manufacturingApiSlice.injectEndpoints({
+export const oeeInsightApi = createApi({
+  reducerPath: "oeeInsightApi",
+  baseQuery: oeeInsightBaseQuery,
+  tagTypes: [
+    "MachineStatusProportion",
+    "MachineUtilizationStatistics",
+    "MachineOfflineReasonProportion",
+    "MachineStatusHoursStatistics",
+  ],
   endpoints: (builder) => ({
     /**
-     * @description 取得機台稼動時間率資料
-     * 📁 對應檔案: /public/mock/MachineOperationRateMock.json
-     * 🎯 對應組件: OEEInsightSystem/feature/MachineOperationRate
+     * @description 取得機台各狀態時間佔比
+     * @endpoint GET /dashboard/machineStatusProportion
+     * @usage 用於 MachineStateTimeRatioPieChart 圓餅圖組件
+     * @returns {Promise<Array<Object>>} 機台狀態佔比資料陣列
+     * @returns {string} returns[].status - 機台狀態名稱 (生產中、上模與調機、機台停機、產品試模、待機中)
+     * @returns {number} returns[].percentage - 時間佔比 (百分比)
+     * @returns {number} returns[].hours - 累計時間 (小時)
      */
-    getMachineOperationRate: builder.query({
-      query: () => "mock/MachineOperationRateMock.json",
-      providesTags: ["MachineOperationRate"],
+    getMachineStatusProportion: builder.query({
+      query: () => "dashboard/machineStatusProportion",
+      providesTags: ["MachineStatusProportion"],
+      transformResponse: (response) => {
+        if (!response || !response.data || !Array.isArray(response.data)) {
+          return [];
+        }
+        return response.data;
+      },
       transformErrorResponse: (response) => ({
-        message: "無法讀取機台稼動時間率資料",
-        status: response.status,
+        message: response.data?.message || "無法讀取機台各狀態時間佔比資料",
+        status: response.data?.status || false,
       }),
     }),
 
     /**
-     * @description 取得停機因素分析資料
-     * 📁 對應檔案: /public/mock/DowntimeFactorsMock.json
-     * 🎯 對應組件: OEEInsightSystem/feature/DowntimeFactors
+     * @description 取得設備稼動分析統計
+     * @endpoint GET /dashboard/machineUtilizationStatistics
+     * @usage 用於 OEE 設備稼動摘要儀表板
+     * @returns {Promise<Object>} 設備稼動統計資料
+     * @returns {string} returns.utilizationTime - 稼動時間 (格式: "XX時XX分")
+     * @returns {number} returns.utilizationRate - 稼動率 (百分比)
+     * @returns {number} returns.runCount - 運行機台數量
+     * @returns {number} returns.offlineCount - 離線機台數量
      */
-    getDowntimeFactors: builder.query({
-      query: () => "mock/DowntimeFactorsMock.json",
-      providesTags: ["DowntimeFactors"],
+    getMachineUtilizationStatistics: builder.query({
+      query: () => "dashboard/machineUtilizationStatistics",
+      providesTags: ["MachineUtilizationStatistics"],
+      transformResponse: (response) => {
+        if (!response || !response.data) {
+          return {
+            utilizationTime: "00時00分",
+            utilizationRate: 0,
+            runCount: 0,
+            offlineCount: 0,
+          };
+        }
+        return response.data;
+      },
       transformErrorResponse: (response) => ({
-        message: "無法讀取停機因素分析資料",
-        status: response.status,
+        message: response.data?.message || "無法讀取設備稼動分析統計資料",
+        status: response.data?.status || false,
       }),
     }),
 
     /**
-     * @description 取得機台狀態持續時間資料
-     * 📁 對應檔案: /public/mock/MachineStatusDurationMock.json
-     * 🎯 對應組件: OEEInsightSystem/feature/MachineStatusDuration
+     * @description 取得停機因素佔比分析
+     * @endpoint GET /dashboard/machineOfflineReasonProportion
+     * @usage 用於 OEE 停機原因分析圖表
+     * @returns {Promise<Object>} 停機因素佔比資料
+     * @returns {string} returns.reason - 停機原因
+     * @returns {number} returns.hours - 停機時間 (小時)
      */
-    getMachineStatusDuration: builder.query({
-      query: () => "mock/MachineStatusDurationMock.json",
-      providesTags: ["MachineStatusDuration"],
+    getMachineOfflineReasonProportion: builder.query({
+      query: () => "dashboard/machineOfflineReasonProportion",
+      providesTags: ["MachineOfflineReasonProportion"],
+      transformResponse: (response) => {
+        if (!response || !response.data) {
+          return {
+            reason: "",
+            hours: 0,
+          };
+        }
+        return response.data;
+      },
       transformErrorResponse: (response) => ({
-        message: "無法讀取機台狀態持續時間資料",
-        status: response.status,
+        message: response.data?.message || "無法讀取停機因素佔比分析資料",
+        status: response.data?.status || false,
       }),
     }),
 
     /**
-     * @description 取得機台操作摘要資料
-     * 📁 對應檔案: /public/mock/MachineOperationSummaryMock.json
-     * 🎯 對應組件: OEEInsightSystem/feature/MachineOperationSummary
+     * @description 取得當日機台各狀態時數統計
+     * @endpoint GET /dashboard/machineStatusHoursStatistics
+     * @usage 用於 OEE 機台狀態時數統計表格或圖表
+     * @returns {Promise<Array<Object>>} 機台狀態時數統計陣列
+     * @returns {string} returns[].machineSN - 機台編號 (用作唯一識別)
+     * @returns {number} returns[].run - 運行時間 (小時)
+     * @returns {number} returns[].idle - 閒置時間 (小時)
+     * @returns {number} returns[].tuning - 調機時間 (小時)
+     * @returns {number} returns[].testing - 測試時間 (小時)
+     * @returns {number} returns[].offline - 離線時間 (小時)
      */
-    getMachineOperationSummary: builder.query({
-      query: () => "mock/MachineOperationSummaryMock.json",
-      providesTags: ["MachineOperationSummary"],
+    getMachineStatusHoursStatistics: builder.query({
+      query: () => "dashboard/machineStatusHoursStatistics",
+      providesTags: ["MachineStatusHoursStatistics"],
+      transformResponse: (response) => {
+        if (!response || !response.data || !Array.isArray(response.data)) {
+          return [];
+        }
+        // 為陣列資料添加唯一 id (使用 machineSN)
+        return response.data.map((item) => ({
+          ...item,
+          id:
+            item.machineSN ||
+            `machine-${Math.random().toString(36).substr(2, 9)}`,
+        }));
+      },
       transformErrorResponse: (response) => ({
-        message: "無法讀取機台操作摘要資料",
-        status: response.status,
-      }),
-    }),
-
-    // 未來擴展的 OEE 洞察相關端點
-    /**
-     * @description 取得 OEE 綜合洞察資料 (未來擴展)
-     * 📁 對應檔案: /public/mock/OEEInsightsMock.json
-     */
-    getOEEInsights: builder.query({
-      query: () => "mock/OEEInsightsMock.json",
-      providesTags: ["OEEInsights"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取 OEE 綜合洞察資料",
-        status: response.status,
-      }),
-    }),
-
-    /**
-     * @description 取得設備效率分析資料 (未來擴展)
-     * 📁 對應檔案: /public/mock/EquipmentEfficiencyMock.json
-     */
-    getEquipmentEfficiency: builder.query({
-      query: () => "mock/EquipmentEfficiencyMock.json",
-      providesTags: ["EquipmentEfficiency"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取設備效率分析資料",
-        status: response.status,
-      }),
-    }),
-
-    /**
-     * @description 取得品質損失分析資料 (未來擴展)
-     * 📁 對應檔案: /public/mock/QualityLossMock.json
-     */
-    getQualityLoss: builder.query({
-      query: () => "mock/QualityLossMock.json",
-      providesTags: ["QualityLoss"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取品質損失分析資料",
-        status: response.status,
+        message: response.data?.message || "無法讀取當日機台各狀態時數統計資料",
+        status: response.data?.status || false,
       }),
     }),
   }),
 });
 
-// 匯出生成的 hooks
+/**
+ * @description 匯出自動生成的 React Hooks
+ * 供實際使用的組件調用
+ *
+ * Hook 與組件對應關係：
+ * - useGetMachineStatusProportionQuery: MachineStateTimeRatioPieChart.jsx
+ * - useGetMachineUtilizationStatisticsQuery: 設備稼動摘要儀表板
+ * - useGetMachineOfflineReasonProportionQuery: 停機原因分析圖表
+ * - useGetMachineStatusHoursStatisticsQuery: 機台狀態時數統計表格/圖表
+ */
 export const {
-  useGetMachineOperationRateQuery,
-  useGetDowntimeFactorsQuery,
-  useGetMachineStatusDurationQuery,
-  useGetMachineOperationSummaryQuery,
-  useGetOEEInsightsQuery,
-  useGetEquipmentEfficiencyQuery,
-  useGetQualityLossQuery,
+  useGetMachineStatusProportionQuery,
+  useGetMachineUtilizationStatisticsQuery,
+  useGetMachineOfflineReasonProportionQuery,
+  useGetMachineStatusHoursStatisticsQuery,
 } = oeeInsightApi;

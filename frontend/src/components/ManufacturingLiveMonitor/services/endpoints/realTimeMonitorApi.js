@@ -26,7 +26,6 @@ export const realTimeMonitorApi = createApi({
   baseQuery: realTimeMonitorBaseQuery,
   tagTypes: [
     "CurrentMachineStatusCount",
-    "MachineStatusProportion",
     "MachineAccumulatedTime",
     "OverdueWorkOrder",
     "MachineOfflineEvent",
@@ -52,24 +51,6 @@ export const realTimeMonitorApi = createApi({
       }),
     }),
 
-    /**
-     * @description 取得機台各狀態時間佔比
-     * @endpoint GET /dashboard/machineStatusProportion
-     * @usage 用於 Scoreboard 與 MachineStateTimeRatioPieChart 組件
-     * @returns {Object} { status: string, percentage: number, hours: number }
-     *
-     * 加總所有設備機台當天累積時間並以佔比顯示：
-     * - 生產/調機/停機/試模/待機時間統計與佔比分析
-     */
-    getMachineStatusProportion: builder.query({
-      query: () => "dashboard/machineStatusProportion",
-      providesTags: ["MachineStatusProportion"],
-      transformResponse: (response) => response.data,
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取機台狀態比例資料",
-        status: response.data?.status || false,
-      }),
-    }),
 
     /**
      * 取得機台累計時間資料
@@ -308,15 +289,14 @@ export const realTimeMonitorApi = createApi({
  *
  * Hook 與組件對應關係：
  * - useGetCurrentMachineStatusCountQuery: Scoreboard.jsx
- * - useGetMachineStatusProportionQuery: Scoreboard.jsx + MachineStateTimeRatioPieChart.jsx
  * - useGetMachineAccumulatedTimeQuery: RealTimeDeviceTrackerDashboard.jsx
  * - useGetOverdueWorkOrderQuery: OverdueTasksDashboard.jsx
  * - useGetMachineOfflineEventQuery: EquipmentRiskModuleDashboard.jsx
  * - useGetTodayWorkOrderQuery: DailyProductionDashboard.jsx
+ * - useGetDailyOEEQuery: OEEMonitorBarChart.jsx
  */
 export const {
   useGetCurrentMachineStatusCountQuery,
-  useGetMachineStatusProportionQuery,
   useGetMachineAccumulatedTimeQuery,
   useGetOverdueWorkOrderQuery,
   useGetMachineOfflineEventQuery,

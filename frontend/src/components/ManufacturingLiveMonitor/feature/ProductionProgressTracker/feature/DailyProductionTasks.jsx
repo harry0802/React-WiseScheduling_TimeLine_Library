@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useGetDailyProductionTasksQuery } from "../../../services";
+import { useGetTodayWorkOrderWithProcessQuery } from "../../../services/endpoints/productionProgressApi";
 import { BorderBox } from "../../../styles/Content";
 import { FlexFlow } from "../../../styles/Dataflow";
 import DashBordrdMark from "../../../components/Marks/DashBordrdMark";
@@ -26,37 +26,14 @@ function DailyProductionTasks() {
   // 使用狀態鉤子控制錯誤信息顯示
   const [errorMessage, setErrorMessage] = useState("");
 
-  // 🧪 測試直接 fetch mock 檔案
-  useEffect(() => {
-    const testFetch = async () => {
-      try {
-        console.log("🧪 測試直接 fetch mock 檔案...");
-        const response = await fetch("/mock/DailyProductionTasksMock.json");
-        console.log("📁 Response status:", response.status);
-        console.log("📁 Response ok:", response.ok);
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("✅ 直接 fetch 成功，資料筆數:", data?.length);
-          console.log("📊 前三筆資料:", data?.slice(0, 3));
-        } else {
-          console.error("❌ 直接 fetch 失敗:", response.statusText);
-        }
-      } catch (err) {
-        console.error("💥 Fetch 錯誤:", err);
-      }
-    };
-
-    testFetch();
-  }, []);
-
-  // 🔄 使用 RTK Query hook 替換 TanStack Query
+  // 🔄 使用新的 RTK Query hook 獲取今日工單製程資料
   const {
     data: productionTasks,
     isLoading,
     isError,
     error,
-  } = useGetDailyProductionTasksQuery();
+  } = useGetTodayWorkOrderWithProcessQuery();
 
   console.log("🔍 API 請求狀態:", {
     data: productionTasks,
@@ -71,7 +48,7 @@ function DailyProductionTasks() {
     // 處理錯誤狀態
     if (isError) {
       if (!errorMessage) {
-        setErrorMessage(error?.message || "無法讀取每日生產任務資料");
+        setErrorMessage(error?.message || "無法讀取今日工單製程資料");
       }
       return <div className="error-container">{errorMessage}</div>;
     }
@@ -92,7 +69,7 @@ function DailyProductionTasks() {
           <BaseCard.Header>
             <BaseCard.Title>
               <FlexFlow>
-                <BaseCard.Title>本日生產任務</BaseCard.Title>
+                <BaseCard.Title>今日工單製程</BaseCard.Title>
                 <DashBordrdMark data={MockData} />
               </FlexFlow>
             </BaseCard.Title>

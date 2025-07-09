@@ -1,7 +1,5 @@
-import {
-  useGetCurrentMachineStatusCountQuery,
-  useGetMachineStatusProportionQuery,
-} from '../../../services/endpoints/realTimeMonitorApi';
+import { useGetCurrentMachineStatusCountQuery } from '../../../services/endpoints/realTimeMonitorApi';
+import { useGetMachineStatusProportionQuery } from '../../../services/endpoints/oeeInsightApi';
 
 // 狀態映射表：API 中文狀態 -> 元件內部英文鍵
 const STATUS_MAP = {

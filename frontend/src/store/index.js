@@ -12,6 +12,8 @@ import productionCostApi from "../components/CostWiseSystem/service/ReceiptApi";
 import wiseSchedulingApiSlice from "../components/WiseScheduling/services/apiSlice";
 import { manufacturingApiSlice } from "../components/ManufacturingLiveMonitor/services";
 import { realTimeMonitorApi } from "../components/ManufacturingLiveMonitor/services/endpoints/realTimeMonitorApi";
+import { productionProgressApi } from "../components/ManufacturingLiveMonitor/services/endpoints/productionProgressApi";
+import { oeeInsightApi } from "../components/ManufacturingLiveMonitor/services/endpoints/oeeInsightApi";
 
 const store = configureStore({
   reducer: {
@@ -27,6 +29,8 @@ const store = configureStore({
     [wiseSchedulingApiSlice.reducerPath]: wiseSchedulingApiSlice.reducer,
     [manufacturingApiSlice.reducerPath]: manufacturingApiSlice.reducer,
     [realTimeMonitorApi.reducerPath]: realTimeMonitorApi.reducer,
+    [productionProgressApi.reducerPath]: productionProgressApi.reducer,
+    [oeeInsightApi.reducerPath]: oeeInsightApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -42,7 +46,9 @@ const store = configureStore({
       productionCostApi.middleware,
       wiseSchedulingApiSlice.middleware,
       manufacturingApiSlice.middleware,
-      realTimeMonitorApi.middleware
+      realTimeMonitorApi.middleware,
+      productionProgressApi.middleware,
+      oeeInsightApi.middleware
     ),
 });
 
