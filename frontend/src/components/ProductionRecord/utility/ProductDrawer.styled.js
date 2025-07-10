@@ -47,7 +47,7 @@ export const DrawerHeader = styled.div`
 export const DrawerBody = styled.div`
   flex: 1;
   overflow-y: auto;
-  margin-top: 3.125rem;
+  padding-top: 3.125rem;
 `;
 
 // Drawer 底部按鈕區域
