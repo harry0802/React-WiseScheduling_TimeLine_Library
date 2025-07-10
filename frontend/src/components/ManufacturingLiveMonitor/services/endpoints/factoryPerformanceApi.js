@@ -1,20 +1,33 @@
-import { manufacturingApiSlice } from "../manufacturingApiSlice";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+// 確保此路徑能正確對應到您的 apiConfig 檔案
+import { API_BASE } from "../../../../store/api/apiConfig";
 
 /**
  * @description 工廠績效儀表板 API 端點
- * 對應 FactoryPerformanceDashboard feature
+ * @feature FactoryPerformanceDashboard
  * 處理各生產區域績效數據與工廠總體表現
  */
-export const factoryPerformanceApi = manufacturingApiSlice.injectEndpoints({
+export const factoryPerformanceApi = createApi({
+  reducerPath: "factoryPerformanceApi",
+  baseQuery: fetchBaseQuery({ baseUrl: API_BASE }),
+  tagTypes: [
+    "ProductionZoneA",
+    "ProductionZoneB",
+    "ProductionZoneC",
+    "ProductionZoneD",
+  ],
   endpoints: (builder) => ({
     /**
      * @description 取得生產區域 A 資料
-     * 📁 對應檔案: /public/mock/ProductionZoneAMock.json
-     * 🎯 對應組件: FactoryPerformanceDashboard/feature/ProductionZoneA
+     * @endpoint GET /dashboard/machineOverview?productionArea=A
      */
     getProductionZoneA: builder.query({
-      query: () => "mock/ProductionZoneAMock.json",
+      query: () => "dashboard/machineOverview?productionArea=A",
       providesTags: ["ProductionZoneA"],
+      transformResponse: (response) => {
+        // 提取 data 欄位，如果 response 已經是陣列則直接返回
+        return Array.isArray(response) ? response : response?.data || [];
+      },
       transformErrorResponse: (response) => ({
         message: "無法讀取生產區域 A 資料",
         status: response.status,
@@ -23,12 +36,15 @@ export const factoryPerformanceApi = manufacturingApiSlice.injectEndpoints({
 
     /**
      * @description 取得生產區域 B 資料
-     * 📁 對應檔案: /public/mock/ProductionZoneBMock.json
-     * 🎯 對應組件: FactoryPerformanceDashboard/feature/ProductionZoneB
+     * @endpoint GET /dashboard/machineOverview?productionArea=B
      */
     getProductionZoneB: builder.query({
-      query: () => "mock/ProductionZoneBMock.json",
+      query: () => "dashboard/machineOverview?productionArea=B",
       providesTags: ["ProductionZoneB"],
+      transformResponse: (response) => {
+        // 提取 data 欄位，如果 response 已經是陣列則直接返回
+        return Array.isArray(response) ? response : response?.data || [];
+      },
       transformErrorResponse: (response) => ({
         message: "無法讀取生產區域 B 資料",
         status: response.status,
@@ -37,12 +53,15 @@ export const factoryPerformanceApi = manufacturingApiSlice.injectEndpoints({
 
     /**
      * @description 取得生產區域 C 資料
-     * 📁 對應檔案: /public/mock/ProductionZoneCMock.json
-     * 🎯 對應組件: FactoryPerformanceDashboard/feature/ProductionZoneC
+     * @endpoint GET /dashboard/machineOverview?productionArea=C
      */
     getProductionZoneC: builder.query({
-      query: () => "mock/ProductionZoneCMock.json",
+      query: () => "dashboard/machineOverview?productionArea=C",
       providesTags: ["ProductionZoneC"],
+      transformResponse: (response) => {
+        // 提取 data 欄位，如果 response 已經是陣列則直接返回
+        return Array.isArray(response) ? response : response?.data || [];
+      },
       transformErrorResponse: (response) => ({
         message: "無法讀取生產區域 C 資料",
         status: response.status,
@@ -51,67 +70,27 @@ export const factoryPerformanceApi = manufacturingApiSlice.injectEndpoints({
 
     /**
      * @description 取得生產區域 D 資料
-     * 📁 對應檔案: /public/mock/ProductionZoneDMock.json
-     * 🎯 對應組件: FactoryPerformanceDashboard/feature/ProductionZoneD
+     * @endpoint GET /dashboard/machineOverview?productionArea=D
      */
     getProductionZoneD: builder.query({
-      query: () => "mock/ProductionZoneDMock.json",
+      query: () => "dashboard/machineOverview?productionArea=D",
       providesTags: ["ProductionZoneD"],
+      transformResponse: (response) => {
+        // 提取 data 欄位，如果 response 已經是陣列則直接返回
+        return Array.isArray(response) ? response : response?.data || [];
+      },
       transformErrorResponse: (response) => ({
         message: "無法讀取生產區域 D 資料",
-        status: response.status,
-      }),
-    }),
-
-    // 未來擴展的工廠績效相關端點
-    /**
-     * @description 取得工廠總覽資料 (未來擴展)
-     * 📁 對應檔案: /public/mock/FactoryOverviewMock.json
-     */
-    getFactoryOverview: builder.query({
-      query: () => "mock/FactoryOverviewMock.json",
-      providesTags: ["FactoryOverview"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取工廠總覽資料",
-        status: response.status,
-      }),
-    }),
-
-    /**
-     * @description 取得生產區域比較資料 (未來擴展)
-     * 📁 對應檔案: /public/mock/ZoneComparisonMock.json
-     */
-    getZoneComparison: builder.query({
-      query: () => "mock/ZoneComparisonMock.json",
-      providesTags: ["ZoneComparison"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取生產區域比較資料",
-        status: response.status,
-      }),
-    }),
-
-    /**
-     * @description 取得工廠績效指標 (未來擴展)
-     * 📁 對應檔案: /public/mock/FactoryKPIMock.json
-     */
-    getFactoryKPI: builder.query({
-      query: () => "mock/FactoryKPIMock.json",
-      providesTags: ["FactoryKPI"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取工廠績效指標資料",
         status: response.status,
       }),
     }),
   }),
 });
 
-// 匯出生成的 hooks
+// 匯出 RTK Query 自動生成的 hooks
 export const {
   useGetProductionZoneAQuery,
   useGetProductionZoneBQuery,
   useGetProductionZoneCQuery,
   useGetProductionZoneDQuery,
-  useGetFactoryOverviewQuery,
-  useGetZoneComparisonQuery,
-  useGetFactoryKPIQuery,
 } = factoryPerformanceApi;

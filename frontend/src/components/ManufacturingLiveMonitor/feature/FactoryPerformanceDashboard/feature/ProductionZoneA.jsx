@@ -1,94 +1,23 @@
 import React from "react";
-import BaseSection from "../components/BaseSection";
-import DashboardCard from "../components/DashboardCard";
 import styled from "styled-components";
 
+import ProductionZoneTemplate from "../components/ProductionZoneTemplate";
+import { useGetProductionZoneAQuery } from "../../../services";
+
 //! =============== 1. 設定與常量 ===============
-//* 設備資料模型，對應A1-A10十台機器
-const equipmentData = [
-  // 下排機台 (A1-A6)
-  {
-    id: "A1",
-    model: "BT-244297",
-    goodRate: 66,
-    completionRate: 30,
-    status: "success",
-    gridArea: "a1",
-  },
-  {
-    id: "A2",
-    model: "--",
-    goodRate: 0,
-    completionRate: 0,
-    status: "inactive",
-    gridArea: "a2",
-  },
-  {
-    id: "A3",
-    model: "--",
-    goodRate: 0,
-    completionRate: 0,
-    status: "inactive",
-    gridArea: "a3",
-  },
-  {
-    id: "A4",
-    model: "WQ-87439",
-    goodRate: 20,
-    completionRate: 30,
-    status: "warning",
-    gridArea: "a4",
-  },
-  {
-    id: "A5",
-    model: "--",
-    goodRate: 0,
-    completionRate: 0,
-    status: "inactive",
-    gridArea: "a5",
-  },
-  {
-    id: "A6",
-    model: "--",
-    goodRate: 0,
-    completionRate: 0,
-    status: "inactive",
-    gridArea: "a6",
-  },
-  // 上排機台 (A7-A10)
-  {
-    id: "A7",
-    model: "BT-244297",
-    goodRate: 66,
-    completionRate: 30,
-    status: "danger",
-    gridArea: "a7",
-  },
-  {
-    id: "A8",
-    model: "BT-244297",
-    goodRate: 66,
-    completionRate: 30,
-    status: "danger",
-    gridArea: "a8",
-  },
-  {
-    id: "A9",
-    model: "BT-244297",
-    goodRate: 66,
-    completionRate: 30,
-    status: "success",
-    gridArea: "a9",
-  },
-  {
-    id: "A10",
-    model: "--",
-    goodRate: 0,
-    completionRate: 0,
-    status: "inactive",
-    gridArea: "a10", // 這台沒有卡片顯示在截圖中，先設為未啟用
-  },
-];
+//* 機台位置映射 - 根據machineSN映射到對應的grid位置
+const MACHINE_POSITION_MAP = {
+  A1: "a1",
+  A2: "a2",
+  A3: "a3",
+  A4: "a4",
+  A5: "a5",
+  A6: "a6",
+  A7: "a7",
+  A8: "a8",
+  A9: "a9",
+  A10: "a10",
+};
 
 //! =============== 2. 樣式定義 ===============
 //* 工廠布局容器 - 使用grid佈局實現固定位置
@@ -106,7 +35,7 @@ const FactoryLayout = styled.div`
     "empty empty empty empty empty empty"
     "a6 a5 a4 a3 a2 a1";
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: 2, 300, 1fr;
+  grid-template-rows: auto 1fr auto;
   align-items: center;
   /* 盒模型 */
   gap: 1.25rem;
@@ -124,38 +53,27 @@ const FactoryLayout = styled.div`
   }
 `;
 
-//* 卡片容器 - 根據設備ID定位
-const CardContainer = styled.div`
-  grid-area: ${(props) => props.gridArea};
-  display: ${(props) => (props.hidden ? "none" : "block")};
-`;
-
 /**
  * @function ProductionZoneA
- * @description 生產區域A的設備狀態顯示組件，顯示對應工廠布局的機台
+ * @description 生產區域A的設備狀態顯示組件，從API獲取即時資料
  * @returns {JSX.Element} 渲染的生產區域A組件
  */
 function ProductionZoneA() {
+  // 🔄 使用RTK Query hook獲取生產區域A的資料，啟用輪詢
+  const queryResult = useGetProductionZoneAQuery(undefined, {
+    pollingInterval: 5000, // 每5秒輪詢一次
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+
   return (
-    <BaseSection backgroundImage={"/images/ProductionZoneA.jpg"}>
-      <FactoryLayout>
-        {equipmentData.map((equipment) => (
-          <CardContainer
-            key={equipment.id}
-            gridArea={equipment.gridArea}
-            // hidden={equipment.id === 'A10'} // A10沒有卡片顯示在截圖中
-          >
-            <DashboardCard status={equipment.status}>
-              <DashboardCard.Header id={equipment.id} model={equipment.model} />
-              <DashboardCard.Stats
-                goodRate={equipment.goodRate}
-                completionRate={equipment.completionRate}
-              />
-            </DashboardCard>
-          </CardContainer>
-        ))}
-      </FactoryLayout>
-    </BaseSection>
+    <ProductionZoneTemplate
+      zoneName="A"
+      backgroundImage="/images/ProductionZoneA.jpg"
+      queryResult={queryResult}
+      machinePositionMap={MACHINE_POSITION_MAP}
+      FactoryLayout={FactoryLayout}
+    />
   );
 }
 

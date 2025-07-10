@@ -1,6 +1,6 @@
 // DashboardCard.jsx
-import React, { createContext, useContext } from 'react'
-import styled, { css } from 'styled-components'
+import React, { createContext, useContext, useMemo } from "react";
+import styled, { css } from "styled-components";
 
 //! =============== 1. 設定與常量 ===============
 //* 🧠 狀態配置常量 - 集中管理所有視覺相關屬性
@@ -8,87 +8,69 @@ import styled, { css } from 'styled-components'
 //* 🧠 狀態配置常量 - 集中管理所有視覺相關屬性
 const STATUS_CONFIG = {
   success: {
-    bgColor: 'rgba(19, 70, 58, 0.85)', // 深綠色 + 透明度
-    statusDot: '#4ade80', // 鮮明的綠色指示燈
-    statusText: '正常運行',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-    lightColor: '#6ee7b7', // 淺綠色
-    darkColor: '#a7f3d0' // 明亮的淺綠色
+    bgColor: "rgba(19, 70, 58, 0.85)", // 深綠色 + 透明度
+    statusDot: "#4ade80", // 鮮明的綠色指示燈
+    statusText: "正常運行",
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+    lightColor: "#6ee7b7", // 淺綠色
+    darkColor: "#a7f3d0", // 明亮的淺綠色
   },
   testing: {
-    bgColor: 'rgba(22, 78, 99, 0.85)', // 深藍色 + 透明度
-    statusDot: '#38bdf8', // 鮮明的藍色指示燈
-    statusText: '試模中',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-    lightColor: '#7dd3fc', // 淺藍色
-    darkColor: '#bae6fd' // 明亮的淺藍色
+    bgColor: "rgba(22, 78, 99, 0.85)", // 深藍色 + 透明度
+    statusDot: "#38bdf8", // 鮮明的藍色指示燈
+    statusText: "試模中",
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+    lightColor: "#7dd3fc", // 淺藍色
+    darkColor: "#bae6fd", // 明亮的淺藍色
   },
   adjusting: {
-    bgColor: 'rgba(99, 84, 0, 0.85)', // 深浅色黃 + 透明度
-    statusDot: '#eab308', // 鮮明的黃色指示燈
-    statusText: '調機中',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-    lightColor: '#facc15', // 金黃色
-    darkColor: '#fef08a' // 淺黃色
+    bgColor: "rgba(99, 84, 0, 0.85)", // 深浅色黃 + 透明度
+    statusDot: "#eab308", // 鮮明的黃色指示燈
+    statusText: "調機中",
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+    lightColor: "#facc15", // 金黃色
+    darkColor: "#fef08a", // 淺黃色
   },
   warning: {
-    bgColor: 'rgba(78, 53, 22, 0.85)', // 深橙色 + 透明度
-    statusDot: '#f97316', // 鮮明的橙色指示燈
-    statusText: '需注意',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-    lightColor: '#fdba74', // 淺橙色
-    darkColor: '#fed7aa' // 明亮的淺橙色
+    bgColor: "rgba(78, 53, 22, 0.85)", // 深橙色 + 透明度
+    statusDot: "#f97316", // 鮮明的橙色指示燈
+    statusText: "需注意",
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+    lightColor: "#fdba74", // 淺橙色
+    darkColor: "#fed7aa", // 明亮的淺橙色
   },
   danger: {
-    bgColor: 'rgba(120, 37, 46, 0.85)', // 深紅色 + 透明度
-    statusDot: '#f87171', // 鮮明的紅色指示燈
-    statusText: '異常狀態',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-    lightColor: '#fca5a5', // 淺紅色
-    darkColor: '#fee2e2' // 明亮的淺紅色
+    bgColor: "rgba(120, 37, 46, 0.85)", // 深紅色 + 透明度
+    statusDot: "#f87171", // 鮮明的紅色指示燈
+    statusText: "異常狀態",
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+    lightColor: "#fca5a5", // 淺紅色
+    darkColor: "#fee2e2", // 明亮的淺紅色
   },
   inactive: {
-    bgColor: 'rgba(55, 65, 81, 0.75)', // 深灰色 + 透明度
-    statusDot: '#9ca3af', // 淺灰色指示燈
-    statusText: '未啟用',
-    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)',
-    lightColor: '#d1d5db', // 中灰色
-    darkColor: '#e5e7eb' // 淺灰色
-  }
-}
+    bgColor: "rgba(55, 65, 81, 0.75)", // 深灰色 + 透明度
+    statusDot: "#9ca3af", // 淺灰色指示燈
+    statusText: "未啟用",
+    textShadow: "1px 1px 2px rgba(0, 0, 0, 0.5)",
+    lightColor: "#d1d5db", // 中灰色
+    darkColor: "#e5e7eb", // 淺灰色
+  },
+};
 //* 💡 通用陰影效果 - 抽象重複的樣式定義
 const SHADOWS = {
-  main: '0 10px 20px rgba(0, 0, 0, 0.4), 0 6px 6px rgba(0, 0, 0, 0.3)',
-  hover: '0 15px 25px rgba(0, 0, 0, 0.4), 0 10px 10px rgba(0, 0, 0, 0.2)',
+  main: "0 10px 20px rgba(0, 0, 0, 0.4), 0 6px 6px rgba(0, 0, 0, 0.3)",
+  hover: "0 15px 25px rgba(0, 0, 0, 0.4), 0 10px 10px rgba(0, 0, 0, 0.2)",
   inner:
-    'inset 0 4px 8px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.2)',
-  text: '1px 1px 2px rgba(0, 0, 0, 0.6)'
-}
+    "inset 0 4px 8px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.2)",
+  text: "1px 1px 2px rgba(0, 0, 0, 0.6)",
+};
 
 //! =============== 2. 工具函數 ===============
-/**
- * 計算顏色的深淺變化
- * @param {string} color - 原始色碼
- * @param {number} amount - 調整量 (正數變亮，負數變暗)
- * @returns {string} 調整後的色碼
- */
-function adjustColor(color, amount) {
-  if (color === '#d3d3d3' && amount < 0) return '#b3b3b3'
-  if (color === '#d3d3d3' && amount > 0) return '#f3f3f3'
-
-  return color
-    .replace(/#/g, '')
-    .match(/.{2}/g)
-    .map((c) => {
-      let num = Math.max(0, Math.min(255, parseInt(c, 16) + amount))
-      return num.toString(16).padStart(2, '0')
-    })
-    .join('')
-}
+//* 此區塊保留用於未來的工具函數擴展
 
 //! =============== 3. Context 定義 ===============
 //* 建立卡片元件的 Context
-const CardContext = createContext()
+const CardContext = createContext();
 
 //! =============== 4. Styled Components ===============
 //* 基礎卡片容器
@@ -108,7 +90,7 @@ const CardContainer = styled.div`
     box-shadow: ${SHADOWS.hover};
     transform: translateY(-5px);
   }
-`
+`;
 
 //* 頂部區域排版
 const HeaderContainer = styled.div`
@@ -116,13 +98,13 @@ const HeaderContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
-`
+`;
 
 //* ID 和狀態區域
 const IdStatusContainer = styled.div`
   display: flex;
   flex-direction: column;
-`
+`;
 
 //* 設備 ID 樣式
 const EquipmentId = styled.span`
@@ -133,14 +115,14 @@ const EquipmentId = styled.span`
     STATUS_CONFIG[props.$status]?.textShadow ||
     STATUS_CONFIG.inactive.textShadow};
   letter-spacing: -0.02em;
-`
+`;
 
 //* 狀態指示器容器
 const StatusContainer = styled.div`
   display: flex;
   align-items: center;
   margin-top: 0.75rem;
-`
+`;
 
 //* 狀態指示點
 const StatusDot = styled.span`
@@ -158,7 +140,7 @@ const StatusDot = styled.span`
   position: relative;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -170,7 +152,7 @@ const StatusDot = styled.span`
     filter: blur(4px);
     z-index: -1;
   }
-`
+`;
 
 //* 狀態文字
 const StatusText = styled.span`
@@ -181,7 +163,7 @@ const StatusText = styled.span`
     STATUS_CONFIG[props.$status]?.textShadow ||
     STATUS_CONFIG.inactive.textShadow};
   letter-spacing: 0.02em;
-`
+`;
 
 //* 型號標籤
 const ModelBadge = styled.div`
@@ -195,7 +177,7 @@ const ModelBadge = styled.div`
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(4px);
   letter-spacing: 0.05em;
-`
+`;
 
 //* 數據區域
 const StatsContainer = styled.div`
@@ -206,19 +188,19 @@ const StatsContainer = styled.div`
   box-shadow: ${SHADOWS.inner};
   display: flex;
   border: 1px solid rgba(255, 255, 255, 0.1);
-`
+`;
 
 //* 共用的統計項目樣式
 const StatItem = styled.div`
   width: 50%;
   text-align: center;
-  padding: ${(props) => (props.$isLeft ? '0 0.75rem 0 0' : '0 0 0 0.75rem')};
+  padding: ${(props) => (props.$isLeft ? "0 0.75rem 0 0" : "0 0 0 0.75rem")};
   ${(props) =>
     !props.$isLeft &&
     css`
       border-left: 1px solid rgba(255, 255, 255, 0.2);
     `}
-`
+`;
 
 //* 統計標題
 const StatLabel = styled.span`
@@ -230,24 +212,24 @@ const StatLabel = styled.span`
   display: block;
   margin-bottom: 0.25rem;
   text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.3);
-`
+`;
 
 //* 統計數值容器
 const StatValueContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-`
+`;
 
 //* 統計數值
 const StatValue = styled.span`
   font-size: 2.5rem;
   font-weight: 700;
   color: ${(props) => {
-    if (!props.$isActive) return STATUS_CONFIG.inactive.lightColor
-    return props.$type === 'goodRate'
+    if (!props.$isActive) return STATUS_CONFIG.inactive.lightColor;
+    return props.$type === "goodRate"
       ? STATUS_CONFIG[props.$status]?.lightColor
-      : STATUS_CONFIG[props.$status]?.darkColor
+      : STATUS_CONFIG[props.$status]?.darkColor;
   }};
   text-shadow: ${SHADOWS.text};
   position: relative;
@@ -255,43 +237,43 @@ const StatValue = styled.span`
   font-variant-numeric: tabular-nums;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -5px;
     left: -5px;
     right: -5px;
     bottom: -5px;
     background: ${(props) => {
-      if (!props.$isActive) return 'transparent'
+      if (!props.$isActive) return "transparent";
       const color =
-        props.$type === 'goodRate'
+        props.$type === "goodRate"
           ? STATUS_CONFIG[props.$status]?.lightColor
-          : STATUS_CONFIG[props.$status]?.darkColor
-      return color ? `${color}22` : 'transparent' // 22 is alpha in hex (13%)
+          : STATUS_CONFIG[props.$status]?.darkColor;
+      return color ? `${color}22` : "transparent"; // 22 is alpha in hex (13%)
     }};
     filter: blur(8px);
     opacity: 0.6;
     z-index: -1;
     border-radius: 8px;
   }
-`
+`;
 
 //* 統計單位
 const StatUnit = styled.span`
   margin-left: 0.25rem;
   font-size: 1rem;
   color: ${(props) => {
-    if (!props.$isActive) return STATUS_CONFIG.inactive.lightColor
-    return props.$type === 'goodRate'
+    if (!props.$isActive) return STATUS_CONFIG.inactive.lightColor;
+    return props.$type === "goodRate"
       ? STATUS_CONFIG[props.$status]?.lightColor
-      : STATUS_CONFIG[props.$status]?.darkColor
+      : STATUS_CONFIG[props.$status]?.darkColor;
   }};
   text-shadow: ${SHADOWS.text};
   opacity: 0.8;
   font-weight: 500;
   align-self: flex-start;
   margin-top: 0.5rem;
-`
+`;
 
 //! =============== 5. Compound Component 實現 ===============
 /**
@@ -306,23 +288,26 @@ const StatUnit = styled.span`
  *   <DashboardCard.Stats goodRate={66} completionRate={30} />
  * </DashboardCard>
  */
-function DashboardCard({ status = 'inactive', children }) {
+function DashboardCard({ status = "inactive", children }) {
   // ✨ 驗證狀態值是否有效
   const validStatus = Object.keys(STATUS_CONFIG).includes(status)
     ? status
-    : 'inactive'
+    : "inactive";
 
-  // 將狀態傳入 Context 供子元件使用
-  const contextValue = {
-    status: validStatus,
-    isActive: validStatus !== 'inactive'
-  }
+  // 🚀 使用 useMemo 優化 Context 值，避免不必要的重新渲染
+  const contextValue = useMemo(
+    () => ({
+      status: validStatus,
+      isActive: validStatus !== "inactive",
+    }),
+    [validStatus]
+  );
 
   return (
     <CardContext.Provider value={contextValue}>
       <CardContainer $status={validStatus}>{children}</CardContainer>
     </CardContext.Provider>
-  )
+  );
 }
 
 /**
@@ -333,7 +318,7 @@ function DashboardCard({ status = 'inactive', children }) {
  * @param {string} props.model - 設備型號
  */
 function Header({ id, model, statusText }) {
-  const { status } = useContext(CardContext)
+  const { status } = useContext(CardContext);
 
   return (
     <HeaderContainer>
@@ -342,17 +327,18 @@ function Header({ id, model, statusText }) {
         <StatusContainer>
           <StatusDot $status={status} />
           <StatusText $status={status}>
-            {statusText || STATUS_CONFIG[status]?.statusText ||
+            {statusText ||
+              STATUS_CONFIG[status]?.statusText ||
               STATUS_CONFIG.inactive.statusText}
           </StatusText>
         </StatusContainer>
       </IdStatusContainer>
 
       <ModelBadge $status={status}>
-        {model !== '--' ? model : '無數據'}
+        {model !== "--" ? model : "無數據"}
       </ModelBadge>
     </HeaderContainer>
-  )
+  );
 }
 
 /**
@@ -363,25 +349,17 @@ function Header({ id, model, statusText }) {
  * @param {number} props.completionRate - 完成率百分比
  */
 function Stats({ goodRate = 0, completionRate = 0 }) {
-  const { status, isActive } = useContext(CardContext)
+  const { status, isActive } = useContext(CardContext);
 
   return (
     <StatsContainer $status={status}>
       <StatItem $isLeft={true}>
         <StatLabel>良率</StatLabel>
         <StatValueContainer>
-          <StatValue
-            $isActive={isActive}
-            $status={status}
-            $type='goodRate'
-          >
+          <StatValue $isActive={isActive} $status={status} $type="goodRate">
             {goodRate}
           </StatValue>
-          <StatUnit
-            $isActive={isActive}
-            $status={status}
-            $type='goodRate'
-          >
+          <StatUnit $isActive={isActive} $status={status} $type="goodRate">
             %
           </StatUnit>
         </StatValueContainer>
@@ -393,27 +371,31 @@ function Stats({ goodRate = 0, completionRate = 0 }) {
           <StatValue
             $isActive={isActive}
             $status={status}
-            $type='completionRate'
+            $type="completionRate"
           >
             {completionRate}
           </StatValue>
           <StatUnit
             $isActive={isActive}
             $status={status}
-            $type='completionRate'
+            $type="completionRate"
           >
             %
           </StatUnit>
         </StatValueContainer>
       </StatItem>
     </StatsContainer>
-  )
+  );
 }
 
 //! =============== 6. 組合元件 ===============
 // 將子元件附加到主元件上
-DashboardCard.Header = Header
-DashboardCard.Stats = Stats
+DashboardCard.Header = Header;
+DashboardCard.Stats = Stats;
 
-export default DashboardCard
+// 設定 displayName 以便於調試
+DashboardCard.displayName = "DashboardCard";
+Header.displayName = "DashboardCard.Header";
+Stats.displayName = "DashboardCard.Stats";
 
+export default DashboardCard;

@@ -1,11 +1,11 @@
-import { BorderBox } from '../../../styles/Content'
+import { BorderBox } from "../../../styles/Content";
 
-import { BaseCard } from '../../../components/DashboardCard'
-import MachineStatusDurationDashboard from '../components/Dashboard/MachineStatusDurationDashboard'
+import { BaseCard } from "../../../components/DashboardCard";
+import MachineStatusDurationDashboard from "../components/Dashboard/MachineStatusDurationDashboard";
 function MachineStatusDuration() {
   return (
     <BorderBox>
-      <BaseCard style={{ backgroundColor: 'transparent' }}>
+      <BaseCard style={{ backgroundColor: "transparent" }}>
         <BaseCard.Header>
           <BaseCard.Title>當日機台各狀態時數統計</BaseCard.Title>
         </BaseCard.Header>
@@ -14,8 +14,7 @@ function MachineStatusDuration() {
         </BaseCard.Content>
       </BaseCard>
     </BorderBox>
-  )
+  );
 }
 
-export default MachineStatusDuration
-
+export default MachineStatusDuration;

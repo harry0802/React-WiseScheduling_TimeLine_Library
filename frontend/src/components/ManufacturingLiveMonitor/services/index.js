@@ -29,9 +29,6 @@ export {
   useGetProductionZoneBQuery,
   useGetProductionZoneCQuery,
   useGetProductionZoneDQuery,
-  useGetFactoryOverviewQuery,
-  useGetZoneComparisonQuery,
-  useGetFactoryKPIQuery,
 } from "./endpoints/factoryPerformanceApi";
 
 // 📈 OEE 洞察系統 (OEEInsightSystem)

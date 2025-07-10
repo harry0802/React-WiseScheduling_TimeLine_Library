@@ -14,6 +14,7 @@ import { manufacturingApiSlice } from "../components/ManufacturingLiveMonitor/se
 import { realTimeMonitorApi } from "../components/ManufacturingLiveMonitor/services/endpoints/realTimeMonitorApi";
 import { productionProgressApi } from "../components/ManufacturingLiveMonitor/services/endpoints/productionProgressApi";
 import { oeeInsightApi } from "../components/ManufacturingLiveMonitor/services/endpoints/oeeInsightApi";
+import { factoryPerformanceApi } from "../components/ManufacturingLiveMonitor/services/endpoints/factoryPerformanceApi";
 
 const store = configureStore({
   reducer: {
@@ -31,6 +32,7 @@ const store = configureStore({
     [realTimeMonitorApi.reducerPath]: realTimeMonitorApi.reducer,
     [productionProgressApi.reducerPath]: productionProgressApi.reducer,
     [oeeInsightApi.reducerPath]: oeeInsightApi.reducer,
+    [factoryPerformanceApi.reducerPath]: factoryPerformanceApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -48,7 +50,8 @@ const store = configureStore({
       manufacturingApiSlice.middleware,
       realTimeMonitorApi.middleware,
       productionProgressApi.middleware,
-      oeeInsightApi.middleware
+      oeeInsightApi.middleware,
+      factoryPerformanceApi.middleware
     ),
 });
 
