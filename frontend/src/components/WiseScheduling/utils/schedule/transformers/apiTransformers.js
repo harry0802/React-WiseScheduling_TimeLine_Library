@@ -316,7 +316,6 @@ export const transformApiToInternalFormat = (apiData) => {
     internalData.actualEndTime = orderInfo.actualEndTime;
   } else {
     // 機台狀態只使用 status
-    console.log("🚀 ~ transformApiToInternalFormat ~ apiData:", apiData);
     internalData.status = status;
     internalData.orderInfo = null; // 確保不使用 orderInfo
     internalData.start = status.startTime; // 添加開始時間
