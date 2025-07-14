@@ -28,7 +28,7 @@ const Stopped = ({ disabled, item }) => {
     "塑料未乾",
     "模具維修",
     "換模換線",
-    "異常停機"
+    "異常停機",
     // "其他原因" - 暫時不啟用其他原因選項
   ];
 
@@ -41,10 +41,10 @@ const Stopped = ({ disabled, item }) => {
   const validateReason = (value) => {
     // 基本驗證：必須選擇一個原因
     if (!value) return "請選擇停機原因";
-    
+
     // 確保選擇的值在允許的選項中
     if (!STOP_REASONS.includes(value)) return "請選擇有效的停機原因";
-    
+
     // 其他原因的驗證邏輯 - 暫時注釋掉
     /*
     if (value === "其他原因") {
@@ -54,16 +54,16 @@ const Stopped = ({ disabled, item }) => {
       }
     }
     */
-    
+
     return true;
   };
 
   return (
     <Grid container spacing={2}>
       {/* 使用抽象的時間選擇器部分 */}
-      <TimePickerSection 
-        register={register} 
-        errors={errors} 
+      <TimePickerSection
+        register={register}
+        errors={errors}
         disabled={disabled}
       />
 
@@ -73,7 +73,7 @@ const Stopped = ({ disabled, item }) => {
           fullWidth
           {...register("reason", {
             required: "請選擇停機原因",
-            validate: validateReason
+            validate: validateReason,
           })}
           select
           label="停機原因"
@@ -83,7 +83,9 @@ const Stopped = ({ disabled, item }) => {
           disabled={disabled}
           value={selectedReason || ""}
         >
-          <MenuItem value="" disabled>請選擇停機原因</MenuItem>
+          <MenuItem value="" disabled>
+            請選擇停機原因
+          </MenuItem>
           {STOP_REASONS.map((reason) => (
             <MenuItem key={reason} value={reason}>
               {reason}

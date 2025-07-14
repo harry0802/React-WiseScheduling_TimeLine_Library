@@ -85,6 +85,7 @@ const StatusController = ({
   onClose,
   groups,
 }) => {
+  console.log("🚀 ~ item:", item);
   // 本地錯誤狀態管理
   const [formError, setFormError] = useState(null);
 

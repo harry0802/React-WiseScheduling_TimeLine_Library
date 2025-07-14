@@ -38,25 +38,29 @@ const generateOrderTemplate = (item, startTime, endTime) => `
 // 🧠 狀態模板
 const generateStatusTemplate = (status, startTime, endTime, item) => {
   const isHistorical = isHistoricalRecord(status, item);
-  
+
   const containerStyle = `
-    background-color: ${isHistorical ? '#f5f5f5' : '#fff'};
+    background-color: ${isHistorical ? "#f5f5f5" : "#fff"};
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.12);
     padding: 4px 8px;
     width: 100%;
-    ${isHistorical ? 'border-left: 4px solid #757575; opacity: 0.8;' : ''}
+    ${isHistorical ? "border-left: 4px solid #757575; opacity: 0.8;" : ""}
   `;
 
   return `
     <div style="${containerStyle}">
       <div style="${TIMELINE_ITEM_STYLES.title}">
         ${getStatusName(status)}
-        ${isHistorical ? ' 🔒' : ''}
+        ${isHistorical ? " 🔒" : ""}
       </div>
       <div style="${TIMELINE_ITEM_STYLES.info}">
         ${startTime} - ${endTime}
-        ${isHistorical ? '<br><small style="color: #757575;">歷史紀錄</small>' : ''}
+        ${
+          isHistorical
+            ? '<br><small style="color: #757575;">歷史紀錄</small>'
+            : ""
+        }
       </div>
     </div>
   `;
@@ -64,7 +68,6 @@ const generateStatusTemplate = (status, startTime, endTime, item) => {
 
 // 🧠 主模板函數
 export const createItemTemplate = (item) => {
-  console.log("🚀 ~ createItemTemplate ~ item:", item.orderInfo?.process);
   const startTime = dayjs(item.start).format("HH:mm");
   const endTime = dayjs(item.end).format("HH:mm");
 

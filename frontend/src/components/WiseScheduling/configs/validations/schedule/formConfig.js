@@ -12,6 +12,11 @@ export const FORM_CONFIG = {
     content: "",
     start: "",
     end: "",
+    // 新增四個獨立時間欄位
+    planStartTime: "",
+    planEndTime: "",
+    actualStartTime: "",
+    actualEndTime: "",
     productId: "",
     productName: "",
     quantity: 0,
@@ -58,6 +63,10 @@ export const STATUS_FORM_CONFIG = {
       group: "",
       start: "",
       // end 欄位對於製令單是唯讀的，不需要預設值
+      planStartTime: "",
+      planEndTime: "",
+      actualStartTime: "",
+      actualEndTime: "",
     },
   },
 
@@ -67,6 +76,10 @@ export const STATUS_FORM_CONFIG = {
     defaultValues: {
       start: dayjs().format("YYYY-MM-DDTHH:mm"), // 本地時間格式
       end: dayjs().add(2, "hour").format("YYYY-MM-DDTHH:mm"), // 本地時間格式
+      planStartTime: dayjs().format("YYYY-MM-DDTHH:mm"),
+      planEndTime: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"),
+      actualStartTime: "",
+      actualEndTime: "",
       group: "",
       area: "",
       machineId: 0, // 修正：確保是數字類型
@@ -79,6 +92,10 @@ export const STATUS_FORM_CONFIG = {
     defaultValues: {
       start: dayjs().format("YYYY-MM-DDTHH:mm"), // 本地時間格式
       end: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"), // 本地時間格式
+      planStartTime: dayjs().format("YYYY-MM-DDTHH:mm"),
+      planEndTime: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"),
+      actualStartTime: "",
+      actualEndTime: "",
       setupInfo: "",
       group: "",
       area: "",
@@ -91,6 +108,10 @@ export const STATUS_FORM_CONFIG = {
     defaultValues: {
       start: dayjs().format("YYYY-MM-DDTHH:mm"), // 本地時間格式
       end: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"), // 本地時間格式
+      planStartTime: dayjs().format("YYYY-MM-DDTHH:mm"),
+      planEndTime: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"),
+      actualStartTime: "",
+      actualEndTime: "",
       product: "",
       group: "",
       area: "",
@@ -103,6 +124,10 @@ export const STATUS_FORM_CONFIG = {
     defaultValues: {
       start: dayjs().format("YYYY-MM-DDTHH:mm"), // 本地時間格式
       end: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"), // 本地時間格式
+      planStartTime: dayjs().format("YYYY-MM-DDTHH:mm"),
+      planEndTime: dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm"),
+      actualStartTime: "",
+      actualEndTime: "",
       reason: "",
       group: "",
       area: "",

@@ -180,7 +180,7 @@ function handleApiError(error) {
 
   // 確定用戶友好的錯誤訊息
   let userMessage;
-  
+
   // 處理特定的錯誤情境
   if (errorReason === "Invalid_input") {
     if (errorMessage?.includes("New start date is earlier than now")) {
@@ -553,7 +553,7 @@ function executeApiDeletion(item, deleteMachineStatus) {
         operation: "deleteMachineStatus",
         itemId: item.status.id,
       });
-      
+
       logError(structuredError, {
         context: "機台狀態刪除流程",
         note: "本地已成功刪除，API失敗不影響用戶體驗",
@@ -749,7 +749,7 @@ export function useTimelineDialogs({
             })
             .catch((error) => {
               console.error("製令單 API 更新失敗:", error);
-              
+
               // 處理特定的 API 錯誤
               const errorMessage = handleApiError(error);
               alert(errorMessage);
@@ -768,12 +768,12 @@ export function useTimelineDialogs({
             operation: "saveOrderItem",
           }
         );
-        
+
         logError(structuredError, {
           context: "製令單保存流程",
           itemId: updatedItem?.internal?.id,
         });
-        
+
         alert(handleFormError(structuredError));
       }
     },
@@ -837,19 +837,24 @@ export function useTimelineDialogs({
           })
           .catch((error) => {
             // 使用錯誤處理系統處理 API 錯誤
-            const structuredError = createApiError(`機台狀態 API ${actionName}失敗`, {
-              originalError: error,
-              context: `${actionName}機台狀態`,
-              operation: isUpdate ? "updateMachineStatus" : "createMachineStatus",
-              actionName,
-            });
-            
+            const structuredError = createApiError(
+              `機台狀態 API ${actionName}失敗`,
+              {
+                originalError: error,
+                context: `${actionName}機台狀態`,
+                operation: isUpdate
+                  ? "updateMachineStatus"
+                  : "createMachineStatus",
+                actionName,
+              }
+            );
+
             logError(structuredError, {
               context: "機台狀態保存流程",
               action: actionName,
               isUpdate,
             });
-            
+
             alert(handleFormError(structuredError));
           });
       } catch (error) {
@@ -862,12 +867,12 @@ export function useTimelineDialogs({
             operation: "saveMachineStatus",
           }
         );
-        
+
         logError(structuredError, {
           context: "機台狀態保存流程",
           stage: "數據處理階段",
         });
-        
+
         alert(handleFormError(structuredError));
       }
     },
@@ -1050,13 +1055,13 @@ export function useTimelineDialogs({
             areaCode,
           }
         );
-        
+
         logError(structuredError, {
           context: "新增狀態流程",
           startTime: startTime?.toISOString?.() || startTime,
           areaCode,
         });
-        
+
         alert(handleFormError(structuredError));
       }
     },

@@ -230,11 +230,14 @@ function extractStatusInfoFromApi(apiData, { startTime, endTime }) {
   return {
     id: apiData.machineStatusId || "",
     // 計劃時間
-    startTime: dayjs(planStartTime).toDate(),
-    endTime: dayjs(planEndTime).toDate(),
+    startTime,
+    endTime,
+
     // 實際時間 (只有當實際執行時才會有值)
     actualStartTime: actualStartTime ? dayjs(actualStartTime).toDate() : null,
     actualEndTime: actualEndTime ? dayjs(actualEndTime).toDate() : null,
+    planStartTime: dayjs(planStartTime).toDate(),
+    planEndTime: dayjs(planEndTime).toDate(),
     reason: apiData.machineStatusReason || "",
     product: apiData.machineStatusProduct || apiData.productName || "",
   };
@@ -268,6 +271,7 @@ export const transformApiToInternalFormat = (apiData) => {
   } else {
     // MACHINE_STATUS_TIME - 機台狀態時間處理
     // 優先使用實際時間，其次是計畫時間
+
     startTime = dayjs(
       apiData.machineStatusActualStartTime || apiData.machineStatusPlanStartTime
     );
@@ -312,12 +316,14 @@ export const transformApiToInternalFormat = (apiData) => {
     internalData.actualEndTime = orderInfo.actualEndTime;
   } else {
     // 機台狀態只使用 status
-
+    console.log("🚀 ~ transformApiToInternalFormat ~ apiData:", apiData);
     internalData.status = status;
     internalData.orderInfo = null; // 確保不使用 orderInfo
     internalData.start = status.startTime; // 添加開始時間
     internalData.end = status.endTime; // 添加結束時間
     // 添加實際時間到頂層，方便歷史紀錄檢查
+    internalData.planStartTime = status.machineStatusPlanStartTime;
+    internalData.planEndTime = status.machineStatusPlanEndTime;
     internalData.actualStartTime = status.actualStartTime;
     internalData.actualEndTime = status.actualEndTime;
   }

@@ -35,7 +35,14 @@ export const FORM_FIELDS = {
     "postponeTime", // 延遲完成日 - 僅用於顯示
     "workOrderSN", // 製令單號 - 僅用於顯示
   ],
-  time: ["start", "end"], // 時間欄位 - 通用時間控制
+  time: [
+    "start",
+    "end",
+    "planStartTime",
+    "planEndTime",
+    "actualStartTime",
+    "actualEndTime",
+  ], // 時間欄位 - 通用時間控制
   status: [
     // 狀態相關欄位 - 機台狀態特定
     "startTime",
@@ -71,8 +78,27 @@ export const FIELD_MAPPING = {
   machineId: "machineId", // 添加 machineId
 
   // 多路徑映射欄位（按優先順序嘗試）
-  start: ["start", "status.startTime", "orderInfo.scheduledStartTime"],
-  end: ["end", "status.endTime", "orderInfo.scheduledEndTime"],
+  // 實際時間優先，預計時間備用的業務邏輯
+  start: [
+    "status.actualStartTime",
+    "orderInfo.actualStartTime",
+    "status.startTime",
+    "orderInfo.scheduledStartTime",
+    "start",
+  ],
+  end: [
+    "status.actualEndTime",
+    "orderInfo.actualEndTime",
+    "status.endTime",
+    "orderInfo.scheduledEndTime",
+    "end",
+  ],
+
+  // 新增四個獨立時間欄位的映射規則
+  planStartTime: ["status.planStartTime", "orderInfo.planStartTime"],
+  planEndTime: ["status.planEndTime", "orderInfo.planStartTime"],
+  actualStartTime: ["status.actualStartTime", "orderInfo.actualStartTime"],
+  actualEndTime: ["status.actualEndTime", "orderInfo.actualEndTime"],
 
   // 訂單資料嵌套映射
   productName: "orderInfo.productName",
@@ -267,9 +293,10 @@ function shouldSkipPath(path, isOrderStatus) {
  *
  * ⏰ 處理邏輯：
  * 1. 唯讀時間：製令單的結束時間保持原始格式，供顯示用
- * 2. 可編輯時間：其他時間欄位格式化為表單可用格式
- * 3. 預設值：開始時間若無值則使用當前時間
- * 4. 空值處理：其他情況返回 null
+ * 2. 可編輯時間：所有時間欄位(start, end, planStartTime, planEndTime, actualStartTime, actualEndTime)格式化為表單可用格式
+ * 3. 預設值：開始時間和預計開始時間若無值則使用當前時間
+ * 4. 實際時間：actualStartTime和actualEndTime可以為空值，不提供預設值
+ * 5. 空值處理：其他情況返回 null
  */
 function processTimeField(field, item, status) {
   // 🔒 製令單結束時間 - 保持原始值（唯讀）
@@ -285,8 +312,19 @@ function processTimeField(field, item, status) {
 
   // ⚙️ 其他時間欄位 - 格式化處理
   const rawValue = getFieldValue(field, item, status);
+
+  // 🕒 開始時間欄位預設值處理（start 和 planStartTime）
+  const shouldUseCurrentTimeAsDefault =
+    field === "start" || field === "planStartTime";
+
+  // 🔧 實際時間欄位可以為空，不提供預設值
+  const isActualTimeField =
+    field === "actualStartTime" || field === "actualEndTime";
+
   return formatToFormDateTime(
-    rawValue || (field === "start" && new Date()) || null
+    rawValue ||
+      (!isActualTimeField && shouldUseCurrentTimeAsDefault && new Date()) ||
+      null
   );
 }
 
@@ -310,8 +348,16 @@ function buildFormFields(fields, item, status) {
   fields.forEach((field) => {
     let value;
 
-    // ⏰ 時間欄位特殊處理
-    if (field === "start" || field === "end") {
+    // ⏰ 時間欄位特殊處理 - 包含所有 6 個時間欄位
+    const timeFields = [
+      "start",
+      "end",
+      "planStartTime",
+      "planEndTime",
+      "actualStartTime",
+      "actualEndTime",
+    ];
+    if (timeFields.includes(field)) {
       value = processTimeField(field, item, status);
     } else {
       // 📝 一般欄位處理
