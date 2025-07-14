@@ -150,9 +150,11 @@ class SmartScheduleService:
             old_start, old_end = schedule.planOnMachineDate, schedule.planFinishDate
             old_machine_sn = schedule.machineSN
             new_machine_sn = payload.get("machineSN", old_machine_sn)
+            production_area = new_machine_sn[0] if new_machine_sn else old_machine_sn[0]
             new_end = shift_by_holiday(start_date=new_start, workdays=schedule.workDays + schedule.moldWorkDays)
 
             # Update the schedule's machine and times
+            schedule.productionArea = production_area
             schedule.machineSN = new_machine_sn
             schedule.planOnMachineDate = new_start
             schedule.planFinishDate = new_end
