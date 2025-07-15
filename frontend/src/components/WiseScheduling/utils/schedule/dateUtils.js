@@ -10,7 +10,7 @@ import timezone from "dayjs/plugin/timezone";
 
 //* 預設配置
 const DEFAULT_TIMEZONE = "Asia/Taipei";
-const DATE_FORMATS = {
+export const DATE_FORMATS = {
   fullDateTime: "YYYY-MM-DD HH:mm:ss",
   dateTime: "YYYY-MM-DD HH:mm",
   date: "YYYY-MM-DD",

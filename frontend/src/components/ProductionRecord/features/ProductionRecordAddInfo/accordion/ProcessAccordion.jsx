@@ -1,11 +1,12 @@
 import * as React from "react";
-import Accordion from "@mui/material/Accordion";
-// import AccordionActions from "@mui/material/AccordionActions";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
 import ProductionRecordButton from "../../../utility/ProductionRecordButton";
+import {
+  StyledAccordion,
+  StyledAccordionHeader,
+  StyledAccordionContent,
+} from "./ProcessAccordion.styled";
 
 function ProcessAccordion({ children, title, OnClick = null }) {
   function handleButtonClick(e) {
@@ -15,24 +16,16 @@ function ProcessAccordion({ children, title, OnClick = null }) {
   }
 
   return (
-    <Accordion className="accordion" defaultExpanded>
-      <AccordionSummary
-        className="accordion__header"
-        expandIcon={<ExpandMoreIcon />}
-      >
+    <StyledAccordion defaultExpanded>
+      <StyledAccordionHeader expandIcon={<ExpandMoreIcon />}>
         {title}
         <ProductionRecordButton OnClick={handleButtonClick}>
           <EditIcon />
         </ProductionRecordButton>
-      </AccordionSummary>
+      </StyledAccordionHeader>
 
-      <AccordionDetails
-        style={{ display: "flex", flexDirection: "column", rowGap: "1.25rem" }}
-        className="accordion__content"
-      >
-        {children}
-      </AccordionDetails>
-    </Accordion>
+      <StyledAccordionContent>{children}</StyledAccordionContent>
+    </StyledAccordion>
   );
 }
 

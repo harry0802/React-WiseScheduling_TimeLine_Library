@@ -27,6 +27,7 @@ from .productionCost.controller import api as productionCost_ns
 from .maintenance.controller import api as maintenance_ns
 from .machineStatus.controller import api as machineStatus_ns
 from .smartSchedule.controller import api as smartSchedule_ns
+from .dashboard.controller import api as dashboard_ns
 from app.api.calendar.service import CalendarService
 from app.api.lysErp.service import LyService
 from app.api.maintenance.service import MaintenanceService
@@ -72,6 +73,7 @@ api.add_namespace(productionCost_ns)
 api.add_namespace(maintenance_ns)
 api.add_namespace(machineStatus_ns)
 api.add_namespace(smartSchedule_ns)
+api.add_namespace(dashboard_ns)
 
 
 @api_bp.cli.command('update_calendar')

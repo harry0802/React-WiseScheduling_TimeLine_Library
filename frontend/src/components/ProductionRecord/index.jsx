@@ -1,17 +1,23 @@
-import "./index.scss";
+import React from "react";
 import ProductionRecordActions from "./features/ProductionRecordHome/ProductionRecordActions.jsx";
 import { Outlet } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import InventoryManagementActions from "./features/ProductionRecordinventoryManagement/InventoryManagementActions.jsx";
-
 import { homeSlice } from "./slice/HomeSlice";
+import {
+  RecordContainer,
+  RecordWrapper,
+  RecordHeader,
+  RecordTitle,
+  RecordSections,
+} from "./styles/ProductionRecordLayout.styles";
 
 // wrapper
 function ProductionRecordWarpper({ children }) {
   return (
-    <div className="record">
-      <div className="record__container">{children}</div>
-    </div>
+    <RecordContainer>
+      <RecordWrapper>{children}</RecordWrapper>
+    </RecordContainer>
   );
 }
 
@@ -19,18 +25,16 @@ function ProductionRecordWarpper({ children }) {
 function ProductionRecordHeader({ children }) {
   const { pageStatus } = homeSlice();
   return (
-    <div className="record-header">
-      <div className="record-header__title">
-        <h3 className="record-header__title">{pageStatus} </h3>
-      </div>
+    <RecordHeader>
+      <RecordTitle>{pageStatus}</RecordTitle>
       {children}
-    </div>
+    </RecordHeader>
   );
 }
 
 // sections
 function ProductionRecordSections({ children }) {
-  return <section className="record-sections">{children}</section>;
+  return <RecordSections>{children}</RecordSections>;
 }
 
 function ProductionRecord() {

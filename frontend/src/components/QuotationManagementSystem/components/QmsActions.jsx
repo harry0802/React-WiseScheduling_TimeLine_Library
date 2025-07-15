@@ -5,6 +5,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { useDebounce } from "react-use";
 import ProductDropdownSearch from "../../ProductionRecord/utility/ProductDropdownSearch.jsx";
 import ProductionRecordButton from "../../ProductionRecord/utility/ProductionRecordButton.jsx";
+import { ActionsContainer, ActionsButtonGroup } from "./QmsActions.styled";
 
 const options = [
   { label: "產品名稱", value: "productName" },
@@ -21,7 +22,7 @@ function QmsActions({ onCreate, onSearch }) {
   ]);
 
   return (
-    <div className="record-actions">
+    <ActionsContainer>
       <ProductDropdownSearch
         options={options}
         userSelect={userSelect}
@@ -29,7 +30,7 @@ function QmsActions({ onCreate, onSearch }) {
         handleSearchChange={(e) => setUserSearch(e.currentTarget.value)}
       />
 
-      <div className="record-actions__button">
+      <ActionsButtonGroup>
         <ProductionRecordButton
           tooltip="新增空白報價單"
           OnClick={() => {
@@ -38,8 +39,8 @@ function QmsActions({ onCreate, onSearch }) {
         >
           <AddIcon />
         </ProductionRecordButton>
-      </div>
-    </div>
+      </ActionsButtonGroup>
+    </ActionsContainer>
   );
 }
 

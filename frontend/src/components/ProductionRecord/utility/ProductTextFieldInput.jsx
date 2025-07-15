@@ -1,4 +1,4 @@
-import TextField from "@mui/material/TextField";
+import { StyledTextField } from "./ProductTextFieldInput.styled";
 
 function ProductTextFieldInput({
   label = "設定中...",
@@ -6,8 +6,7 @@ function ProductTextFieldInput({
   value = "設定中...",
 }) {
   return (
-    <TextField
-      className="c-textfield"
+    <StyledTextField
       value={value}
       label={label}
       onChange={OnChange}

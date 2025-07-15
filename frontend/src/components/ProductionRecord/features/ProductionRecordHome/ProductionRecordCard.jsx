@@ -1,17 +1,19 @@
 import React from "react";
-import { Card, Typography } from "antd";
-const { Title, Text, Paragraph } = Typography;
+import {
+  StyledRecordCard,
+  StyledCardTitle,
+  StyledCardSubtitle,
+  StyledCardContent,
+} from "./ProductionRecordCard.styled";
 
 function ProductionRecordCard({ title, subtitle, content, onButtonClick }) {
   return (
-    <Card onClick={onButtonClick} className="record-card" bordered={false}>
-      <Title level={5} className="record-card__title">
-        {title}
-      </Title>
+    <StyledRecordCard onClick={onButtonClick} bordered={false}>
+      <StyledCardTitle level={5}>{title}</StyledCardTitle>
 
-      <Text className="record-card__subtitle">{subtitle}</Text>
-      <Paragraph className="record-card__content">{content}</Paragraph>
-    </Card>
+      <StyledCardSubtitle>{subtitle}</StyledCardSubtitle>
+      <StyledCardContent>{content}</StyledCardContent>
+    </StyledRecordCard>
   );
 }
 

@@ -71,9 +71,9 @@ def create_moldMaintenances_weekly():
 LY_ERP_ON = os.getenv("LY_ERP_ON", "False")
 if LY_ERP_ON.lower() == "true":
     @scheduler.task(
-    "cron",
+    "interval",
     id="sync_ly_00000R",
-    hour='*',
+    minutes=30,
     max_instances=1,
     )
     def sync_ly_00000R():
@@ -85,9 +85,9 @@ if LY_ERP_ON.lower() == "true":
 
     
     @scheduler.task(
-    "cron",
+    "interval",
     id="sync_ly_0000AB",
-    hour='*',
+    minutes=30,
     max_instances=1,
     )
     def sync_ly_0000AB():
@@ -98,9 +98,9 @@ if LY_ERP_ON.lower() == "true":
                 current_app.logger.error(error)
 
     @scheduler.task(
-    "cron",
+    "interval",
     id="sync_ly_0000AO",
-    hour='*',
+    minutes=30,
     max_instances=1,
     )
     def sync_ly_0000AO():

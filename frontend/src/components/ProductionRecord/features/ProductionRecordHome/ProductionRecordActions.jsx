@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import ProductionRecordButton from "../../utility/ProductionRecordButton.jsx";
-
 import ProductDropdownSearch from "../../utility/ProductDropdownSearch.jsx";
+import { RecordActionsContainer, RecordActionsButtons } from "./ProductionRecordActions.styled";
 
 // UI Icon
 import ScienceIcon from "@mui/icons-material/Science";
@@ -30,7 +30,7 @@ function ProductionRecordActions() {
   useDebounce(handleSearch, 500, [userSearch, userSelect]);
 
   return (
-    <div className="record-actions">
+    <RecordActionsContainer>
       <ProductDropdownSearch
         options={options}
         userSelect={userSelect}
@@ -38,7 +38,7 @@ function ProductionRecordActions() {
         handleSearchChange={(e) => setUserSearch(e.currentTarget.value)}
       />
 
-      <div className="record-actions__button">
+      <RecordActionsButtons>
         <ProductionRecordButton
           tooltip="歸類物料"
           OnClick={() => navigate("inventoryManagement")}
@@ -52,8 +52,8 @@ function ProductionRecordActions() {
         >
           <MenuBookOutlinedIcon />
         </ProductionRecordButton>
-      </div>
-    </div>
+      </RecordActionsButtons>
+    </RecordActionsContainer>
   );
 }
 

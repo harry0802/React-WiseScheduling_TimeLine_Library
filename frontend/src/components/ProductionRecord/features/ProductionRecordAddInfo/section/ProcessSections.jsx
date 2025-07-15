@@ -8,6 +8,12 @@ import TextField from "@mui/material/TextField";
 import AddInfomationsTransferList from "../transferList/AddInfomationsTransferList.jsx";
 import { useRecordAddInfo } from "../../../context/RecordAddInfoProvider.jsx";
 import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  DeleteButton,
+  DangerText,
+  DrawerInfo,
+  InfoItem,
+} from "./ProcessSections.styled";
 
 import ProductGroupForm from "../../../utility/ProductGroupForm.jsx";
 import useNotification from "../../../hook/useNotification.js";
@@ -137,9 +143,9 @@ function ProcessSectionsDialog() {
         headericon={
           <>
             {isEditMode && onDelete && (
-              <Button
+              <DeleteButton
                 style={{ borderRadius: "50%" }}
-                className="ant-btn-default c-btn-primars--delete"
+                className="ant-btn-default"
                 onClick={() => {
                   handleDeleteProcess(processId);
                   setTimeout(() => notifySuccess(), 100);
@@ -147,17 +153,17 @@ function ProcessSectionsDialog() {
                 }}
               >
                 <DeleteIcon />
-              </Button>
+              </DeleteButton>
             )}
 
             {!onDelete && isEditMode && (
-              <div className="color-danger">產線排程中，無法變動</div>
+              <DangerText>產線排程中，無法變動</DangerText>
             )}
           </>
         }
       >
-        <div className="product-drawer__info">
-          <div className="info__item">
+        <DrawerInfo>
+          <InfoItem>
             <Autocomplete
               defaultValue={processName}
               freeSolo
@@ -170,9 +176,9 @@ function ProcessSectionsDialog() {
                 <TextField {...params} label="製程名稱" />
               )}
             />
-          </div>
+          </InfoItem>
 
-          <div className="info__item">
+          <InfoItem>
             <TextField
               label="製具編號"
               defaultValue={jigSN}
@@ -180,8 +186,8 @@ function ProcessSectionsDialog() {
                 setFormValues({ ...formValues, moldName: e.target.value })
               }
             />
-          </div>
-        </div>
+          </InfoItem>
+        </DrawerInfo>
         <ProductGroupForm />
         <AddInfomationsTransferList type={"物料"} />
       </ProductDrawer>

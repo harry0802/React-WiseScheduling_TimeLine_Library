@@ -5,8 +5,14 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/harry/flaskplastic/frontend",
-        "/home/harry/flaskplastic"
+        "/home/harry/flaskplastic/frontend"
+      ]
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
       ]
     },
     "sequential-thinking": {
@@ -14,13 +20,13 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
-      ] 
+      ]
     },
-    "memory": {
+    "context7": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-memory"
+        "@upstash/context7-mcp"
       ]
     },
     "desktop-commander": {
@@ -30,13 +36,6 @@
         "@wonderwhy-er/desktop-commander"
       ]
     },
-        "Context7": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@latest"
-      ]
-    },
     "puppeteer": {
       "command": "npx",
       "args": [
@@ -44,16 +43,13 @@
         "@modelcontextprotocol/server-puppeteer"
       ]
     },
-"git": {
-    "command": "uvx",
-    "args": [
+    "git": {
+      "command": "uvx",
+      "args": [
         "mcp-server-git",
         "--repository",
         "/home/harry/flaskplastic"
-    ]
-}
-
-
-
+      ]
+    }
   }
 }

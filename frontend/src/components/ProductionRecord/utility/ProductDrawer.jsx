@@ -1,6 +1,13 @@
-import { Drawer } from "antd";
 import Box from "@mui/material/Box";
 import { memo } from "react";
+import {
+  StyledDrawer,
+  DrawerHeader,
+  DrawerBody,
+  DrawerFooter,
+  CancelButton,
+  ConfirmButton,
+} from "./ProductDrawer.styled";
 
 function ProductDrawer({
   visible,
@@ -12,8 +19,7 @@ function ProductDrawer({
   disabled,
 }) {
   return (
-    <Drawer
-      className="product-drawer"
+    <StyledDrawer
       width={700}
       placement="right"
       onClose={onClose}
@@ -21,30 +27,24 @@ function ProductDrawer({
       closable={false}
       destroyOnClose={true}
     >
-      <div className="product-drawer__header">
+      <DrawerHeader>
         <div>{title}</div>
         {!!headericon && headericon}
-      </div>
+      </DrawerHeader>
 
-      <div className="product-drawer__body">
+      <DrawerBody>
         <Box component="div" noValidate autoComplete="off">
           {children}
         </Box>
-      </div>
+      </DrawerBody>
 
-      <div className="product-drawer__footer">
-        <button onClick={onClose} className="c-btn-primars--cancel">
-          取消
-        </button>
-        <button
-          disabled={disabled}
-          onClick={onSubmit}
-          className="c-btn-primars"
-        >
+      <DrawerFooter>
+        <CancelButton onClick={onClose}>取消</CancelButton>
+        <ConfirmButton disabled={disabled} onClick={onSubmit}>
           確定
-        </button>
-      </div>
-    </Drawer>
+        </ConfirmButton>
+      </DrawerFooter>
+    </StyledDrawer>
   );
 }
 export default memo(ProductDrawer);

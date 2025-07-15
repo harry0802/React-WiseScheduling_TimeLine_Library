@@ -1,4 +1,3 @@
-import styles from "./ProductionRecordProcMaterials.module.scss";
 import Productcontent from "../../utility/ProductContent";
 import ProcMaterialsTable from "./ProcMaterialsTable";
 import ProcMaterialsDrawer from "./ProcMaterialsDrawer";
@@ -7,6 +6,7 @@ import {
   productColumns,
   materialColumns,
 } from "../../hook/useRecordProcMaterials";
+import { ProcMaterialsContext, AntdTableGlobalStyles } from "./ProductionRecordProcMaterials.styled";
 
 // Main Component
 function ProductionRecordProcMaterials() {
@@ -31,8 +31,9 @@ function ProductionRecordProcMaterials() {
 
   return (
     <div>
+      <AntdTableGlobalStyles />
       <Productcontent title="製程與物料編碼">
-        <div className={styles["procMaterials-context"]}>
+        <ProcMaterialsContext>
           <ProcMaterialsTable
             title="製程編碼管理"
             columns={productColumns}
@@ -50,7 +51,7 @@ function ProductionRecordProcMaterials() {
             onRowClick={(record) => openDrawer(record, "material")}
             onAddClick={() => openDrawer(null, "material")}
           />
-        </div>
+        </ProcMaterialsContext>
 
         {drawerVisible && (
           <ProcMaterialsDrawer

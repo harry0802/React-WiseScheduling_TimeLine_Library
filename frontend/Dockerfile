@@ -1,30 +1,47 @@
-FROM node:19-alpine AS builder
-ENV NODE_ENV production
+FROM node:20-alpine AS builder
+
+# 設定工作目錄
+WORKDIR /app
+
+# 設定環境變數
+ENV NODE_ENV=production
 ARG REACT_APP_API_HOST
 ARG REACT_APP_API_PORT
+ENV VITE_API_HOST=${REACT_APP_API_HOST}
+ENV VITE_API_PORT=${REACT_APP_API_PORT}
 ENV REACT_APP_API_HOST=${REACT_APP_API_HOST}
 ENV REACT_APP_API_PORT=${REACT_APP_API_PORT}
-# Add a work directory
-WORKDIR /app
-# Cache and Install dependencies
-COPY package.json .
-COPY package-lock.json .
-# prodcution -訂正->  production
-RUN npm install
-# Copy app files
+
+# 複製 package 檔案
+COPY package.json package-lock.json ./
+
+# 清理並安裝依賴
+RUN npm cache clean --force || true
+RUN rm -rf node_modules || true
+RUN npm ci --omit=dev --ignore-scripts
+
+# 複製專案檔案
 COPY . .
-# Build the app
+
+# 建置專案
 RUN npm run build
 
-# Bundle static assets with nginx
-FROM nginx:1.24-alpine as production
-ENV NODE_ENV production
+# 生產階段
+FROM nginx:1.24-alpine AS production
+
+ENV NODE_ENV=production
+
+# 清理預設檔案
 RUN rm -rf /usr/share/nginx/html/*
-# Copy built assets from builder
+
+# 複製建置檔案
 COPY --from=builder /app/build /usr/share/nginx/html
-# Add nginx.conf
+
+# 複製 nginx 配置
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-# Expose port
+
+# 暴露端口
 EXPOSE 80
-# Start nginx
+
+# 啟動 nginx
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,8 +1,11 @@
 import React, { memo } from "react";
-
 import { Table } from "antd";
-//import "./ControlledTable.css";
-import styles from "./ControlledTable.module.scss";
+import {
+  ControlledTableContainer,
+  ControlledTableContent,
+  ControlledTableActions,
+  ControlledTableGlobalStyles,
+} from "./ControlledTable.styled";
 
 // 控制表格組件，用於展示和管理表格數據
 function ControlledTable({
@@ -20,9 +23,11 @@ function ControlledTable({
   };
 
   return (
-    <div className={styles["controlled-table"]}>
-      <div className={styles["controlled-table__content"]}>
+    <ControlledTableContainer>
+      <ControlledTableGlobalStyles />
+      <ControlledTableContent>
         <Table
+          className="controlled-table-wrapper"
           rowKey="id"
           columns={columns}
           dataSource={dataSource}
@@ -33,10 +38,10 @@ function ControlledTable({
             },
           })}
         />
-      </div>
+      </ControlledTableContent>
 
-      <div className={styles["controlled-table__actions"]}>{children}</div>
-    </div>
+      <ControlledTableActions>{children}</ControlledTableActions>
+    </ControlledTableContainer>
   );
 }
 
