@@ -1,3 +1,8 @@
+/*
+ * description : 生產報表配置
+ * data: 2025-7-15
+ */
+
 // 🧠 表格列寬配置
 const columnsWithOption = {
   small: 100,
@@ -178,7 +183,7 @@ export const ProductionTableColumns = [
   },
   {
     field: "shortage",
-    headerName: "短少",
+    headerName: "缺料",
     width: columnsWithOption.normal,
     type: "number",
   },
@@ -202,7 +207,7 @@ export const ProductionTableColumns = [
   },
   {
     field: "pressure",
-    headerName: "壓力",
+    headerName: "壓克",
     width: columnsWithOption.normal,
     type: "number",
   },
@@ -220,7 +225,7 @@ export const ProductionTableColumns = [
   },
   {
     field: "oilStain",
-    headerName: "油漬",
+    headerName: "油污",
     width: columnsWithOption.normal,
     type: "number",
   },
