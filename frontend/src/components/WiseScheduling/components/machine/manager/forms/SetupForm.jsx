@@ -35,8 +35,6 @@ const SetupForm = forwardRef(({ initialData }, ref) => {
     id: initialData?.id,
     machineId: initialData?.machineId,
   });
-  console.log("🚀 ~ SetupForm ~ getDefaultValues:", getDefaultValues());
-
   // 使用自定義表單 Hook
   useFormHandler({
     initialData,

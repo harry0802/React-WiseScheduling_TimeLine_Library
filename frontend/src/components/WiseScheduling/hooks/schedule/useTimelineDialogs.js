@@ -367,7 +367,6 @@ function getEditableConfig(timeLineStatus, orderStatus) {
  * - 缺少 orderInfo 會影響可編輯性判斷
  */
 function processOrderItem(item) {
-  console.log("🚀 ~ processOrderItem ~ item:", item);
   const timing = getItemTiming(item);
 
   return {
@@ -723,8 +722,6 @@ export function useTimelineDialogs({
     function saveOrderItem(updatedItem) {
       try {
         const processedItem = processOrderItem(updatedItem.internal);
-        console.log("🚀 ~ saveOrderItem ~ processedItem:", processedItem);
-
         // 提交到製令單 API
         if (updatedItem.api) {
           changeWorkOrder(updatedItem.api)
@@ -898,7 +895,6 @@ export function useTimelineDialogs({
    */
   const handleSaveItem = useCallback(
     function handleSaveItem(updatedItem) {
-      console.log("🚀 ~ handleSaveItem ~ updatedItem:", updatedItem);
       try {
         // 🧠 在最頂層進行結構驗證和類型判斷
         validateItemStructure(updatedItem);
@@ -937,8 +933,6 @@ export function useTimelineDialogs({
    */
   const performDeleteItem = useCallback(
     function performDeleteItem(itemId) {
-      console.log("🚀 ~ performDeleteItem ~ itemId:", itemId);
-
       // 🧠 早期返回 - 參數驗證
       if (!isNumber(itemId) || !itemsDataRef.current) {
         console.warn("無效的刪除參數:", {
@@ -953,13 +947,6 @@ export function useTimelineDialogs({
         console.warn("找不到要刪除的項目:", itemId);
         return;
       }
-
-      console.log("🚀 ~ performDeleteItem ~ item:", item);
-      console.log(
-        "🚀 ~ performDeleteItem ~ item.timeLineStatus:",
-        item?.timeLineStatus
-      );
-
       try {
         // ✨ Push Ifs Up - 頂層驗證刪除權限
         validateDeletePermission(item);

@@ -414,7 +414,7 @@ const OrderCreated = ({ item, disabled }) => {
           <Grid item xs={12} sm={6}>
             <FieldLabel>預計上機日</FieldLabel>
             <Controller
-              name="start"
+              name="planStartTime"
               control={control}
               render={({ field, fieldState: { error } }) => (
                 <TextField
@@ -448,7 +448,9 @@ const OrderCreated = ({ item, disabled }) => {
             <FieldLabel>預計完成日</FieldLabel>
             <ReadOnlyField>
               <FieldValue>
-                {item.end ? formatISOToChineseDateTime(item.end) : "-"}
+                {item.planEndTime
+                  ? formatISOToChineseDateTime(item.planEndTime)
+                  : "-"}
               </FieldValue>
             </ReadOnlyField>
           </Grid>

@@ -35,7 +35,8 @@ function isPastWorkOrder(orderInfo) {
   // 修改為基於計劃時間判斷，但保留實際時間作為輔助判斷
   return (
     (orderInfo.actualStartTime && new Date(orderInfo.actualStartTime) < now) ||
-    (orderInfo.scheduledStartTime && new Date(orderInfo.scheduledStartTime) < now)
+    (orderInfo.scheduledStartTime &&
+      new Date(orderInfo.scheduledStartTime) < now)
   );
 }
 
@@ -59,10 +60,10 @@ function isPastMachineStatus(status) {
 function getWorkOrderTimes(orderInfo, fallback) {
   // 修改為統一使用計劃時間 (配合 apiTransformers 的修改)
   const startDate =
-    orderInfo.scheduledStartTime || fallback.start;
+    orderInfo.actualStartTime || orderInfo.planStartTime || fallback.start;
 
   const endDate =
-    orderInfo.scheduledEndTime || fallback.end;
+    orderInfo.actualEndTime || orderInfo.planEndTime || fallback.end;
 
   return { startDate, endDate };
 }
@@ -113,10 +114,13 @@ function processWorkOrderItem(item) {
     ? getWorkOrderTimes(item.orderInfo, fallback)
     : fallback;
 
+  if (item?.orderInfo?.orderStatus === "Done") {
+  }
+
   return {
     ...item,
-    start: dayjs(startDate).toDate(),
-    end: dayjs(endDate).toDate(),
+    start: startDate,
+    end: endDate,
     editable: isPast
       ? { updateTime: false, updateGroup: false, remove: false }
       : { updateTime: true, updateGroup: true, remove: false },

@@ -193,6 +193,10 @@ function extractOrderInfoFromApi(apiData, { startTime, endTime }) {
   // TIME_HANDLING - 訂單信息 - 從API轉換到內部格式
   return {
     id: apiData.productionScheduleId || "",
+    // 新字段 - 主要使用
+    planStartTime: dayjs(apiData.planOnMachineDate || startTime).toDate(),
+    planEndTime: dayjs(apiData.planFinishDate || endTime).toDate(),
+    // 舊字段 - 保持相容性
     scheduledStartTime: dayjs(apiData.planOnMachineDate || startTime).toDate(),
     scheduledEndTime: dayjs(apiData.planFinishDate || endTime).toDate(),
     actualStartTime: apiData.actualOnMachineDate
@@ -226,18 +230,18 @@ function extractStatusInfoFromApi(apiData, { startTime, endTime }) {
   const planEndTime = apiData.machineStatusPlanEndTime || endTime;
   const actualStartTime = apiData.machineStatusActualStartTime;
   const actualEndTime = apiData.machineStatusActualEndTime;
-
   return {
     id: apiData.machineStatusId || "",
-    // 計劃時間
+    // 新字段 - 主要使用
+    planStartTime: dayjs(planStartTime).toDate(),
+    planEndTime: dayjs(planEndTime).toDate(),
+    // 舊字段 - 保持相容性
     startTime,
     endTime,
 
     // 實際時間 (只有當實際執行時才會有值)
     actualStartTime: actualStartTime ? dayjs(actualStartTime).toDate() : null,
     actualEndTime: actualEndTime ? dayjs(actualEndTime).toDate() : null,
-    planStartTime: dayjs(planStartTime).toDate(),
-    planEndTime: dayjs(planEndTime).toDate(),
     reason: apiData.machineStatusReason || "",
     product: apiData.machineStatusProduct || apiData.productName || "",
   };
@@ -309,8 +313,12 @@ export const transformApiToInternalFormat = (apiData) => {
     // 製令單只使用 orderInfo
     internalData.orderInfo = orderInfo;
     internalData.status = null; // 確保不使用 status
-    internalData.start = orderInfo.scheduledStartTime; // 添加開始時間
-    internalData.end = orderInfo.scheduledEndTime; // 添加結束時間
+    // 新字段 - 主要使用
+    internalData.planStartTime = orderInfo.planStartTime;
+    internalData.planEndTime = orderInfo.planEndTime;
+    // 舊字段 - vis-timeline 需要
+    internalData.start = orderInfo.actualStartTime ?? orderInfo.planStartTime;
+    internalData.end = orderInfo.actualEndTime ?? orderInfo.planEndTime;
     // 添加實際時間到頂層，方便歷史紀錄檢查
     internalData.actualStartTime = orderInfo.actualStartTime;
     internalData.actualEndTime = orderInfo.actualEndTime;
@@ -318,11 +326,13 @@ export const transformApiToInternalFormat = (apiData) => {
     // 機台狀態只使用 status
     internalData.status = status;
     internalData.orderInfo = null; // 確保不使用 orderInfo
-    internalData.start = status.startTime; // 添加開始時間
-    internalData.end = status.endTime; // 添加結束時間
+    // 新字段 - 主要使用
+    internalData.planStartTime = status.planStartTime;
+    internalData.planEndTime = status.planEndTime;
+    // 舊字段 - vis-timeline 需要
+    internalData.start = status.actualStartTime ?? status.planStartTime;
+    internalData.end = status.actualEndTime ?? status.planEndTime;
     // 添加實際時間到頂層，方便歷史紀錄檢查
-    internalData.planStartTime = status.machineStatusPlanStartTime;
-    internalData.planEndTime = status.machineStatusPlanEndTime;
     internalData.actualStartTime = status.actualStartTime;
     internalData.actualEndTime = status.actualEndTime;
   }
@@ -350,12 +360,16 @@ function fillWorkOrderData(internalData, apiData, startTime, endTime) {
     internalData._originalApiData?.productionScheduleId ||
     "";
 
-  // 計劃時間處理 - 使用邏輯短路簡化判斷
-  apiData.planOnMachineDate = internalData.orderInfo?.scheduledStartTime
+  // 計劃時間處理 - 優先使用新字段，備用舊字段
+  apiData.planOnMachineDate = internalData.orderInfo?.planStartTime
+    ? formatDate(internalData.orderInfo.planStartTime, TIME_FORMAT, true)
+    : internalData.orderInfo?.scheduledStartTime
     ? formatDate(internalData.orderInfo.scheduledStartTime, TIME_FORMAT, true)
     : formattedStartTime;
 
-  apiData.planFinishDate = internalData.orderInfo?.scheduledEndTime
+  apiData.planFinishDate = internalData.orderInfo?.planEndTime
+    ? formatDate(internalData.orderInfo.planEndTime, TIME_FORMAT, true)
+    : internalData.orderInfo?.scheduledEndTime
     ? formatDate(internalData.orderInfo.scheduledEndTime, TIME_FORMAT, true)
     : formattedEndTime;
 
@@ -414,12 +428,16 @@ function fillMachineStatusData(internalData, apiData, startTime, endTime) {
   apiData.machineStatusId = status.id || "";
   apiData.status = internalData.timeLineStatus || "";
 
-  // 計劃時間處理
-  apiData.planStartDate = status?.startTime
+  // 計劃時間處理 - 優先使用新字段，備用舊字段
+  apiData.planStartDate = status?.planStartTime
+    ? formatDate(status.planStartTime, TIME_FORMAT, true)
+    : status?.startTime
     ? formatDate(status.startTime, TIME_FORMAT, true)
     : formattedStartTime;
 
-  apiData.planEndDate = status?.endTime
+  apiData.planEndDate = status?.planEndTime
+    ? formatDate(status.planEndTime, TIME_FORMAT, true)
+    : status?.endTime
     ? formatDate(status.endTime, TIME_FORMAT, true)
     : formattedEndTime;
   // TODO 生管永遠不會給他實際時間 除非是現場

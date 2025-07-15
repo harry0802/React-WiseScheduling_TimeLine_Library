@@ -82,6 +82,7 @@ export const FIELD_MAPPING = {
   start: [
     "status.actualStartTime",
     "orderInfo.actualStartTime",
+    // 預備 - 當實際時間為空時，使用預計時間
     "status.startTime",
     "orderInfo.scheduledStartTime",
     "start",
@@ -89,6 +90,7 @@ export const FIELD_MAPPING = {
   end: [
     "status.actualEndTime",
     "orderInfo.actualEndTime",
+    // 預備 - 當實際時間為空時，使用預計時間
     "status.endTime",
     "orderInfo.scheduledEndTime",
     "end",
@@ -96,7 +98,7 @@ export const FIELD_MAPPING = {
 
   // 新增四個獨立時間欄位的映射規則
   planStartTime: ["status.planStartTime", "orderInfo.planStartTime"],
-  planEndTime: ["status.planEndTime", "orderInfo.planStartTime"],
+  planEndTime: ["status.planEndTime", "orderInfo.planEndTime"],
   actualStartTime: ["status.actualStartTime", "orderInfo.actualStartTime"],
   actualEndTime: ["status.actualEndTime", "orderInfo.actualEndTime"],
 

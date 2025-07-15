@@ -42,8 +42,6 @@ const FORM_COMPONENTS = {
  */
 const MachineStatusManager = forwardRef((props, ref) => {
   const { initialData = {}, onSubmit, machineId } = props;
-  console.log("🚀 ~ MachineStatusManager ~ initialData:", initialData);
-
   // 機台當前狀態（確保使用英文狀態碼）
   const [currentStatus, setCurrentStatus] = useState(
     initialData?.status || MACHINE_STATUS.IDLE

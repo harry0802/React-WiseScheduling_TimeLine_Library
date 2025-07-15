@@ -76,8 +76,15 @@ function useEnhancedDialog(item, mode, options = {}) {
   //* 將驗證邏輯拆分為專門的純函數
 
   const validateFormData = useCallback((formData) => {
-    if (!formData.start) {
-      formData.start = ensureFormDateTime(new Date());
+    // 支援新字段邏輯：優先使用 planStartTime，備用 start
+    const startTime = formData.planStartTime || formData.start;
+    if (!startTime) {
+      const defaultTime = ensureFormDateTime(new Date());
+      formData.planStartTime = defaultTime;
+      formData.start = defaultTime; // 確保向下相容性
+    } else if (formData.planStartTime && !formData.start) {
+      // 確保 start 字段存在（vis-timeline 需要）
+      formData.start = formData.planStartTime;
     }
   }, []);
 
@@ -131,6 +138,10 @@ function useEnhancedDialog(item, mode, options = {}) {
       // 檢查當前狀態是否為製令單
       const isWorkOrder = currentStatus === MACHINE_STATUS.ORDER_CREATED;
 
+      // 處理新舊字段邏輯
+      const startTime = formData.planStartTime || formData.start;
+      const endTime = formData.planEndTime || formData.end;
+
       // 基礎物件結構
       const transformedData = {
         ...item,
@@ -138,8 +149,11 @@ function useEnhancedDialog(item, mode, options = {}) {
         group: formData.group || item?.group || "",
         area: formData.area || item?.area || "",
         machineId: formData.machineId || item?.machineId || null,
-        start: formData.start,
-        end: isWorkOrder ? item?.end : formData.end,
+        // 保持雙重字段確保相容性
+        planStartTime: startTime,
+        planEndTime: isWorkOrder ? item?.planEndTime : endTime,
+        start: startTime, // vis-timeline 需要
+        end: isWorkOrder ? item?.end : endTime, // vis-timeline 需要
         timeLineStatus: formData.timeLineStatus || currentStatus,
         content: formData.content || item?.content || currentStatus,
       };
@@ -150,8 +164,12 @@ function useEnhancedDialog(item, mode, options = {}) {
           ...item?.orderInfo,
           productName: formData.productName || "",
           process: formData.process ?? 0,
-          scheduledStartTime: formData.start,
-          scheduledEndTime: item?.orderInfo?.scheduledEndTime || formData.end,
+          // 使用新字段邏輯
+          planStartTime: startTime,
+          planEndTime: item?.orderInfo?.planEndTime || endTime,
+          // 保留舊字段作為備用
+          scheduledStartTime: startTime,
+          scheduledEndTime: item?.orderInfo?.scheduledEndTime || endTime,
           actualStartTime:
             item?.actualEndTime ?? item?.orderInfo?.actualStartTime ?? null,
           actualEndTime:
@@ -166,8 +184,12 @@ function useEnhancedDialog(item, mode, options = {}) {
           ...item?.status,
           product: formData.product || "",
           reason: formData.reason || "",
-          startTime: formData.start,
-          endTime: formData.end,
+          // 使用新字段邏輯
+          planStartTime: startTime,
+          planEndTime: endTime,
+          // 保留舊字段作為備用
+          startTime: startTime,
+          endTime: endTime,
         };
 
         // 製令單數據清空

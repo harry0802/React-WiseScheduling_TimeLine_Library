@@ -49,6 +49,5 @@ export const generateMachineGroups = (group) => {
 };
 // export const generateMachineGroups = () => {
 //   const machines = MACHINE_CONFIG.AREAS.flatMap(createAreaMachines);
-//   console.log("🚀 ~ generateMachineGroups ~ machines:", machines);
 //   return new DataSet(machines);
 // };

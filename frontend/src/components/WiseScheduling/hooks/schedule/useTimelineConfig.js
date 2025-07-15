@@ -25,7 +25,6 @@ const StatusDisplayController = {
    * @returns {string} 顯示內容
    */
   [MACHINE_STATUS.ORDER_CREATED]: (item) => {
-    console.log("🚀 ~ item:", item);
     return (
       // 添加 製令單號
       `${item._originalApiData?.productionScheduleStatus}  /  製令單號: ${item.orderInfo?.workOrderSN} ` ||

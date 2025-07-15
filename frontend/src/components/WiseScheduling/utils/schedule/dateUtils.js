@@ -173,8 +173,22 @@ export const ensureFormDateTime = (date, defaultDate = new Date()) => {
  * @returns {Object} 所有日期欄位格式化並更新的對象
  */
 export const prepareFormDateValues = (item = {}) => {
-  // 滿足 React Hook Form 的日期欄位
+  // 滿足 React Hook Form 的日期欄位 - 支援新舊字段
   return {
+    // 新字段 - 優先使用
+    planStartTime: formatToFormDateTime(
+      item?.planStartTime ||
+        item?.orderInfo?.planStartTime ||
+        item?.status?.planStartTime ||
+        item?.status?.startTime
+    ),
+    planEndTime: formatToFormDateTime(
+      item?.planEndTime ||
+        item?.orderInfo?.planEndTime ||
+        item?.status?.planEndTime ||
+        item?.status?.endTime
+    ),
+    // 舊字段 - 保持相容性
     start: formatToFormDateTime(item?.start || item?.status?.startTime),
     end: formatToFormDateTime(item?.end || item?.status?.endTime),
     // 保留其他表單欄位的值

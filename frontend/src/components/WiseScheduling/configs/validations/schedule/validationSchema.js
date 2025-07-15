@@ -22,6 +22,19 @@ const timeFieldValidation = {
     .optional()
     .or(z.literal(""))
     .refine((val) => !val || dayjs(val).isValid(), "時間格式錯誤"),
+
+  // 計劃開始時間 - 必填且必須是有效日期時間
+  planStartTime: z
+    .string()
+    .min(1, "計劃開始時間為必填")
+    .refine((val) => dayjs(val).isValid(), "時間格式錯誤"),
+
+  // 計劃結束時間 - 可選但若提供必須是有效日期時間
+  planEndTime: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => !val || dayjs(val).isValid(), "時間格式錯誤"),
 };
 
 /**
@@ -48,9 +61,12 @@ function createOrderSchema(additionalFields = {}) {
   return z.object({
     ...machineFieldValidation,
     ...additionalFields,
-    // 製令單特殊處理：start 必填，end 為唯讀
-    start: timeFieldValidation.start,
-    end: z.any().optional(), // 製令單的結束時間是唯讀計算字段
+    // 製令單特殊處理：planStartTime 必填，planEndTime 為唯讀
+    planStartTime: timeFieldValidation.planStartTime,
+    planEndTime: z.any().optional(), // 製令單的結束時間是唯讀計算字段
+    // 保留舊字段以維持相容性（由系統自動填充）
+    start: z.any().optional(),
+    end: z.any().optional(),
   });
 }
 
