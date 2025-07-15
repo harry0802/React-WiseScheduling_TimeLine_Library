@@ -1,3 +1,10 @@
+/*
+ * 檔案名稱: QmsAccount.js
+ * 檔案路徑: src/components/QualityManagementSystem/slice/QmsAccount.js
+ * 描述: 將 api 添加 Size 獲取最新的資料數據
+ * 最後修改: 2025-07-15
+ */
+
 /* eslint-disable react-hooks/rules-of-hooks */
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -152,7 +159,10 @@ export const useProductionSchedules = () => {
   const {
     data: apiProductionSchedules,
     isLoading: isLoadingProductionSchedules,
-  } = useGetProductionScheduleByMachinesQuery({ status: "On-going" });
+  } = useGetProductionScheduleByMachinesQuery({
+    status: "On-going",
+    size: 100,
+  });
 
   useEffect(() => {
     if (apiProductionSchedules && !isLoadingProductionSchedules) {
