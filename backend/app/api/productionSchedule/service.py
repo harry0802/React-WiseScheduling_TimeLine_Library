@@ -28,15 +28,21 @@ productionSchedule_schema = productionScheduleSchema()
 
 
 def complete_productionSchedule(db_obj, payload):
-    # 確認預計上機日是否有變更或者機台是否有變更，有的話，就更新相關的排程
-    # 若需要更新相關的排程，必須在更新db_obj之前，否則在update_work_order_schedule時查到的ProductionSchedule會是更新後的資料(Session快取)
-    if payload.get("planOnMachineDate") is not None and db_obj.planOnMachineDate != payload.get("planOnMachineDate") or \
-       payload.get("machineSN") is not None and db_obj.machineSN != payload.get("machineSN"):
-        SmartScheduleService.update_work_order_schedule({
-            "productionScheduleId": db_obj.id,
-            "newStartDate": payload.get("planOnMachineDate") or db_obj.planOnMachineDate,
-            "machineSN": payload.get("machineSN") or db_obj.machineSN,
-        })
+    # ====================================================================================================================
+    # 功能：自動調整其他排程的時間。
+    # 註解原因：原本的需求要自動調整其他排程的時間，但是，隆廷的生產線沒有全滿，隆廷希望不要自動調整，所以先註解。
+    # 註解時間：2025-07-18
+    # =====================================================================================================================
+    # # 確認預計上機日是否有變更或者機台是否有變更，有的話，就更新相關的排程
+    # # 若需要更新相關的排程，必須在更新db_obj之前，否則在update_work_order_schedule時查到的ProductionSchedule會是更新後的資料(Session快取)
+    # if payload.get("planOnMachineDate") is not None and db_obj.planOnMachineDate != payload.get("planOnMachineDate") or \
+    #    payload.get("machineSN") is not None and db_obj.machineSN != payload.get("machineSN"):
+    #     SmartScheduleService.update_work_order_schedule({
+    #         "productionScheduleId": db_obj.id,
+    #         "newStartDate": payload.get("planOnMachineDate") or db_obj.planOnMachineDate,
+    #         "machineSN": payload.get("machineSN") or db_obj.machineSN,
+    #     })
+    # =================================================END OF COMMENTED OUT CODE=================================================
     db_obj.productId = int(payload["productId"]) \
         if payload.get("productId") is not None else db_obj.productId
     db_obj.processId = int(payload["processId"]) \

@@ -88,8 +88,12 @@ class ProductionScheduleOngoingService:
             productionScheduleOngoing_db = complete_productionScheduleOngoing(productionScheduleOngoing_db, payload)
             db.session.commit()
 
-            # 更新其他排程系統的時間
-            SmartScheduleService.update_work_order_schedule_by_endtime(payload["productionScheduleId"], payload["endTime"])
+            # ====================================================================================================================
+            # 功能：自動調整其他排程的時間。
+            # 註解原因：原本的需求要自動調整其他排程的時間，但是，隆廷的生產線沒有全滿，隆廷希望不要自動調整，所以先註解。
+            # 註解時間：2025-07-18
+            # =====================================================================================================================
+            # SmartScheduleService.update_work_order_schedule_by_endtime(payload["productionScheduleId"], payload["endTime"])
 
             resp = message(True, "ProductionScheduleOngoing have been updated.")
             return resp, 200
@@ -121,13 +125,19 @@ class ProductionScheduleOngoingService:
             productionScheduleOngoing_db = complete_productionScheduleOngoing(productionScheduleOngoing_db, payload)
             db.session.commit()
 
-             # 如果postponeTime比planFinishDate晚，就更新其他排程系統的時間
-            if postponeTime > productionDict["planFinishDate"]:
-                SmartScheduleService.update_work_order_schedule_by_endtime(payload["productionScheduleId"], payload["postponeTime"])
+            # ====================================================================================================================
+            # 功能：自動調整其他排程的時間。
+            # 註解原因：原本的需求要自動調整其他排程的時間，但是，隆廷的生產線沒有全滿，隆廷希望不要自動調整，所以先註解。
+            # 註解時間：2025-07-18
+            # =====================================================================================================================
+            # # 如果postponeTime比planFinishDate晚，就更新其他排程系統的時間
+            # if postponeTime > productionDict["planFinishDate"]:
+            #     SmartScheduleService.update_work_order_schedule_by_endtime(payload["productionScheduleId"], payload["postponeTime"])
             
-            # 如果是暫停的製令單繼續開始，則更新其他排程系統的時間
-            if productionDict["isResume"]:
-                    SmartScheduleService.update_work_order_schedule_by_resumption(payload["productionScheduleId"], payload["startTime"], payload["postponeTime"])
+            # # 如果是暫停的製令單繼續開始，則更新其他排程系統的時間
+            # if productionDict["isResume"]:
+            #         SmartScheduleService.update_work_order_schedule_by_resumption(payload["productionScheduleId"], payload["startTime"], payload["postponeTime"])
+            # =================================================END OF COMMENTED OUT CODE=================================================
             
             resp = message(True, "ProductionScheduleOngoing have been updated.")
             return resp, 200
