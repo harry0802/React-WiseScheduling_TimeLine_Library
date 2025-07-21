@@ -93,6 +93,7 @@ services:
     environment:
       - REACT_APP_API_HOST=${REACT_APP_API_HOST}
       - REACT_APP_API_PORT=${REACT_APP_API_PORT}
+      - VITE_EXPOSE_PORT=${VITE_EXPOSE_PORT}
       # 凌越ERP
       - REACT_APP_LY_ERP_ON=${LY_ERP_ON}
     restart: always
@@ -101,7 +102,7 @@ services:
     volumes:
       - ./frontend/.:/app/
     expose:
-      - 3000
+      - ${VITE_EXPOSE_PORT}
     networks:
       - frontnet
     depends_on:
