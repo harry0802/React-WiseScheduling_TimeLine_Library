@@ -247,7 +247,6 @@ export const getProcessResolver = (processCategory) => {
     });
   }
   return async (values) => {
-    console.log("🚀 ~ return ~ values:", values);
     try {
       const schema = createDynamicSchema(processCategory);
       const result = await validateWithSchema(schema, values);

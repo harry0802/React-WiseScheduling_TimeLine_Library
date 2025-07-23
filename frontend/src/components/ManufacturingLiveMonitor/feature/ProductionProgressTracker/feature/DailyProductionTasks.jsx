@@ -26,7 +26,6 @@ function DailyProductionTasks() {
   // 使用狀態鉤子控制錯誤信息顯示
   const [errorMessage, setErrorMessage] = useState("");
 
-
   // 🔄 使用新的 RTK Query hook 獲取今日工單製程資料
   const {
     data: productionTasks,
@@ -34,14 +33,6 @@ function DailyProductionTasks() {
     isError,
     error,
   } = useGetTodayWorkOrderWithProcessQuery();
-
-  console.log("🔍 API 請求狀態:", {
-    data: productionTasks,
-    isLoading,
-    isError,
-    error: error?.data || error?.message || error,
-    fullError: error,
-  });
 
   // 渲染內容部分
   const renderContent = () => {

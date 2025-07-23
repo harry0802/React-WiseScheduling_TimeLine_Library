@@ -24,11 +24,10 @@ function DeleteDialogPortal() {
     itemId: null,
   });
 
-  // 監聽對話框狀態變化
+  // 監聽對話框狀態變化d
   useEffect(() => {
     // 當對話框狀態變化時更新本地狀態
     const unsubscribe = onDeleteDialogChange((newState) => {
-      console.log("🚀 ~ DeleteDialogPortal: new dialogState:", newState); // ✨ 新增日誌
       setDialogState(newState);
     });
 

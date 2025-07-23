@@ -1,16 +1,24 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_BASE } from "../../../../store/api/apiConfig";
-
-/**
- * @description 即時監控 API 專用 baseQuery
- * 使用真實 API 配置，完全脫離 customBaseQuery 的 mock 資料依賴
- */
-const realTimeMonitorBaseQuery = fetchBaseQuery({
-  baseUrl: API_BASE,
-});
+import { manufacturingApiSlice } from "../manufacturingApiSlice";
+import {
+  API_ENDPOINTS,
+  ERROR_MESSAGES,
+  TAG_TYPES,
+  POLLING_INTERVALS,
+} from "../shared/constants";
+import {
+  transformArrayResponse,
+  transformObjectResponse,
+  transformErrorResponse,
+  transformMachineTimeData,
+  transformOverdueWorkOrderData,
+  transformMachineOfflineEventData,
+  transformDailyOEEData,
+  transformApiResponse,
+} from "../shared/transformers";
 
 /**
  * @description 即時 OEE 監控 API 端點
+ * @feature RealTimeOEEMonitor
  * 提供戰情室即時監控功能所需的所有 API 端點
  *
  * 功能涵蓋：
@@ -19,18 +27,10 @@ const realTimeMonitorBaseQuery = fetchBaseQuery({
  * - 逾期工單監控
  * - 機台離線事件記錄
  *
- * @note 所有端點均使用真實 API，回應格式統一為 { status, message, data }
+ * @note 已整合至 manufacturingApiSlice，使用端點注入模式
+ * 統一配置、錯誤處理和回應轉換邏輯
  */
-export const realTimeMonitorApi = createApi({
-  reducerPath: "realTimeMonitorApi",
-  baseQuery: realTimeMonitorBaseQuery,
-  tagTypes: [
-    "CurrentMachineStatusCount",
-    "MachineAccumulatedTime",
-    "OverdueWorkOrder",
-    "MachineOfflineEvent",
-    "DailyOEE",
-  ],
+export const realTimeMonitorApi = manufacturingApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     /**
      * @description 取得當前機台狀態統計
@@ -44,13 +44,13 @@ export const realTimeMonitorApi = createApi({
     getCurrentMachineStatusCount: builder.query({
       query: () => "dashboard/currentMachineStatusCount",
       providesTags: ["CurrentMachineStatusCount"],
+      pollingInterval: 3600000, // 每小時輪詢
       transformResponse: (response) => response.data,
       transformErrorResponse: (response) => ({
         message: response.data?.message || "無法讀取當前機台狀態統計資料",
         status: response.data?.status || false,
       }),
     }),
-
 
     /**
      * 取得機台累計時間資料
@@ -88,6 +88,7 @@ export const realTimeMonitorApi = createApi({
     getMachineAccumulatedTime: builder.query({
       query: () => "dashboard/machineAccumulatedTime",
       providesTags: ["MachineAccumulatedTime"],
+      pollingInterval: 3600000, // 每小時輪詢
       transformResponse: (response) => {
         if (!response.data || !Array.isArray(response.data)) {
           return [];
@@ -139,43 +140,16 @@ export const realTimeMonitorApi = createApi({
      * - 資料已在 API 層完成欄位映射和日期格式轉換
      */
     getOverdueWorkOrder: builder.query({
-      query: () => "dashboard/overdueWorkOrder",
-      providesTags: ["OverdueWorkOrder"],
-      transformResponse: (response) => {
-        if (!response || !response.data || !Array.isArray(response.data)) {
-          return [];
-        }
-
-        /**
-         * 格式化日期為本地 YYYY-MM-DD 格式
-         * @param {string} isoDateString - ISO 8601 格式的日期字串
-         * @returns {string} YYYY-MM-DD 格式的日期或空字串
-         */
-        const formatDateToLocal = (isoDateString) => {
-          if (!isoDateString) return "";
-          try {
-            const date = new Date(isoDateString);
-            return isNaN(date.getTime())
-              ? ""
-              : date.toLocaleDateString("sv-SE");
-          } catch (error) {
-            console.warn("Date parsing error:", error);
-            return "";
-          }
-        };
-
-        return response.data.map((item) => ({
-          orderNumber: String(item.workOrderSN || ""),
-          productId: String(item.productSN || ""),
-          incompleteQty: Number(item.unfinishedQuantity) || 0,
-          machine: String(item.machineSN || ""),
-          expiryDate: formatDateToLocal(item.planFinishDate),
-        }));
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取逾期工單資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.REAL_TIME_MONITOR.OVERDUE_WORK_ORDER,
+      providesTags: [TAG_TYPES.OVERDUE_WORK_ORDER],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) =>
+        transformArrayResponse(response, transformOverdueWorkOrderData),
+      transformErrorResponse: (response) =>
+        transformErrorResponse(
+          response,
+          ERROR_MESSAGES.REAL_TIME_MONITOR.OVERDUE_WORK_ORDER
+        ),
     }),
 
     /**
@@ -189,46 +163,16 @@ export const realTimeMonitorApi = createApi({
      * - 包含發生時間、機台編號及停機原因
      */
     getMachineOfflineEvent: builder.query({
-      query: () => "dashboard/machineOfflineEvent",
-      providesTags: ["MachineOfflineEvent"],
-      transformResponse: (response) => {
-        if (!response || !response.data || !Array.isArray(response.data)) {
-          return [];
-        }
-
-        /**
-         * 格式化 ISO 日期字串為本地時間的 HH:mm 格式
-         * @param {string} isoString - ISO 8601 格式的日期字串
-         * @returns {string} HH:mm 格式的時間或 "--:--"
-         */
-        const formatTimeFromISO = (isoString) => {
-          if (!isoString) return "--:--";
-          try {
-            const date = new Date(isoString);
-            return isNaN(date.getTime())
-              ? "--:--"
-              : date.toLocaleTimeString("zh-TW", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                });
-          } catch (error) {
-            console.warn("Date parsing error:", error);
-            return "--:--";
-          }
-        };
-
-        return response.data.map((item, index) => ({
-          id: String(index),
-          time: formatTimeFromISO(item.actualStartDate),
-          machine: String(item.machineSN || ""),
-          reason: String(item.reason || "未知原因"),
-        }));
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取機台離線事件資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.REAL_TIME_MONITOR.MACHINE_OFFLINE_EVENT,
+      providesTags: [TAG_TYPES.MACHINE_OFFLINE_EVENT],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) =>
+        transformArrayResponse(response, transformMachineOfflineEventData),
+      transformErrorResponse: (response) =>
+        transformErrorResponse(
+          response,
+          ERROR_MESSAGES.REAL_TIME_MONITOR.MACHINE_OFFLINE_EVENT
+        ),
     }),
     /**
      * @description 取得今日製令單資料
@@ -237,18 +181,15 @@ export const realTimeMonitorApi = createApi({
      * @returns {Object} { workOrderSN, productSN, unfinishedQuantity, machineSN, planFinishDate }
      */
     getTodayWorkOrder: builder.query({
-      query: () => "dashboard/todayWorkOrder",
-      providesTags: ["TodayWorkOrder"],
-      transformResponse: (response) => {
-        if (!response || !response.data || !Array.isArray(response.data)) {
-          return [];
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取今日製令單資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.REAL_TIME_MONITOR.TODAY_WORK_ORDER,
+      providesTags: [TAG_TYPES.TODAY_WORK_ORDER],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformArrayResponse(response),
+      transformErrorResponse: (response) =>
+        transformErrorResponse(
+          response,
+          ERROR_MESSAGES.REAL_TIME_MONITOR.TODAY_WORK_ORDER
+        ),
     }),
 
     /**
@@ -264,21 +205,16 @@ export const realTimeMonitorApi = createApi({
      * - 用於替換 OEEMonitorBarChart 中的靜態資料
      */
     getDailyOEE: builder.query({
-      query: () => "dashboard/dailyOEE",
-      providesTags: ["DailyOEE"],
-      transformResponse: (response) => {
-        if (!response || !response.data || !Array.isArray(response.data)) {
-          return [];
-        }
-        // 按日期排序 (由小到大)
-        return response.data.sort(
-          (a, b) => new Date(a.date) - new Date(b.date)
-        );
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取每日 OEE 資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.REAL_TIME_MONITOR.DAILY_OEE,
+      providesTags: [TAG_TYPES.DAILY_OEE],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) =>
+        transformApiResponse(response, [], transformDailyOEEData),
+      transformErrorResponse: (response) =>
+        transformErrorResponse(
+          response,
+          ERROR_MESSAGES.REAL_TIME_MONITOR.DAILY_OEE
+        ),
     }),
   }),
 });

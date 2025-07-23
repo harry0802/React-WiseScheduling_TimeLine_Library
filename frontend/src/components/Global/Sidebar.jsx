@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
+import PropTypes from "prop-types";
 import {
   ScheduleOutlined,
   SafetyCertificateOutlined,
@@ -11,68 +12,34 @@ import { Layout, Menu, Button } from "antd";
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
 
-//! =============== 1. 設定與常量 ===============
-//* 這個區塊包含所有專案配置，便於統一管理
-
-/**
- * @constant MENU_ITEMS
- * @description 側邊欄選單項目配置
- * @example
- * // 使用方式
- * <Menu items={MENU_ITEMS} />
- *
- * @notes
- * - 每個項目應包含 key, icon, label 和可選的 children
- * - key 值與路由路徑對應
- */
-const MENU_ITEMS = [
+// =================================================================
+//! =============== 1. 集中化設定 (Centralized Configuration) ===============
+// =================================================================
+const MENU_CONFIG = [
   {
     key: "production",
     icon: <ScheduleOutlined />,
     label: "生管部門",
     children: [
-      {
-        key: "ProductionSchedulePage",
-        label: "計畫排程表",
-      },
-      {
-        key: "FactoryQuotationManagementSystem",
-        label: "廠內報價系統",
-      },
-      {
-        key: "ProductionRecordPage",
-        label: "產品履歷BOM系統",
-      },
-      {
-        key: "CostWiseSystemPage",
-        label: "智慧成本分析表",
-      },
-      {
-        key: "SmartScheduling",
-        label: "智慧排程",
-      },
+      { key: "ProductionSchedulePage", label: "計畫排程表" },
+      { key: "FactoryQuotationManagementSystem", label: "廠內報價系統" },
+      { key: "ProductionRecordPage", label: "產品履歷BOM系統" },
+      { key: "CostWiseSystemPage", label: "智慧成本分析表" },
+      { key: "SmartScheduling", label: "智慧排程" },
     ],
   },
   {
     key: "quality",
     icon: <SafetyCertificateOutlined />,
     label: "品管部門",
-    children: [
-      {
-        key: "QualityManagementSystem",
-        label: "即時品檢系統",
-      },
-    ],
+    children: [{ key: "QualityManagementSystem", label: "即時品檢系統" }],
   },
   {
     key: "sales",
     icon: <ShoppingOutlined />,
     label: "業務部門",
     children: [
-      {
-        key: "SalesQuotationManagementSystem",
-        label: "業務報價系統",
-      },
+      { key: "SalesQuotationManagementSystem", label: "業務報價系統" },
     ],
   },
   {
@@ -80,145 +47,197 @@ const MENU_ITEMS = [
     icon: <SettingOutlined />,
     label: "成型部門",
     children: [
-      {
-        key: "MachineMaintenance",
-        label: "機台保養表",
-      },
-      {
-        key: "MoldMaintenance",
-        label: "模具保養表",
-      },
-      {
-        key: "MachineSelectPage",
-        label: "派工系統",
-      },
+      { key: "MachineMaintenance", label: "機台保養表" },
+      { key: "MoldMaintenance", label: "模具保養表" },
+      { key: "MachineSelectPage", label: "派工系統", hideSidebar: true },
       {
         key: "MachineStatusBoard",
         label: "機台狀態操作面板",
+        hideSidebar: true,
+      },
+      //
+      {
+        key: "FactoryPerformanceDashboard",
+        label: "廠區績效儀表板",
+        openInNewTab: true,
+        hideSidebar: true,
+      },
+      {
+        key: "RealTimeOEEMonitor",
+        label: "施工養護綜合數據",
+        openInNewTab: true,
+        hideSidebar: true,
+      },
+      {
+        key: "ProductionProgressTracker",
+        label: "即時生產進度追蹤",
+        openInNewTab: true,
+        hideSidebar: true,
+      },
+      // ! 因為這個頁面 ERP 沒有提供資料 所以先隱藏
+      // {
+      //   key: "DeliveryTrendAnalyzer",
+      //   label: "交付趨勢分析",
+      //   openInNewTab: true,
+      //   hideSidebar: true,
+      // },
+      {
+        key: "OEEInsightSystem",
+        label: "全廠設備稼動分析",
+        openInNewTab: true,
+        hideSidebar: true,
       },
     ],
   },
 ];
 
-// 排除機台選擇頁面
-const EXCLUDED_PAGES = [
-  "/",
-  "/MachineSelectPage",
-  "/ProductionReportPage",
-  "/LeaderSignPage",
-  "/ProductionDetailPage",
-  "/OperatorSignPage",
-  "/ProductionInspectionPage",
-];
-
+// =================================================================
+//! =============== 2. 衍生設定處理 (Derived Configurations) ===============
+// =================================================================
 /**
- * @constant DEFAULT_OPEN_KEYS
- * @description 預設展開的選單項目
+ * 將複雜的衍生邏輯封裝成一個獨立函數，降低主模組的認知負荷。
+ * @param {Array} config - 原始的選單設定
+ * @returns {{menuItemsForAntd: Array, newTabRoutes: Set, excludedPages: Set}}
  */
-const DEFAULT_OPEN_KEYS = ["production", "quality", "sales", "molding"];
+function processMenuConfig(config) {
+  // 步驟 1: 扁平化所有子選單項目，方便後續處理
+  const allItems = config.flatMap((group) => group.children || []);
 
-/**
- * @constant PATH_PATTERNS
- * @description 定義路徑模式的常量
- */
-const PATH_PATTERNS = {
-  ROOT: "",
-  TRAILING_SLASHES: /\/+$/,
-};
+  // 步驟 2: 產生需要「在新分頁開啟」的路由集合
+  const newTabRoutes = new Set(
+    allItems.filter((item) => item.openInNewTab).map((item) => item.key)
+  );
 
-/**
- * @function normalizePath
- * @description 標準化路徑格式
- */
-const normalizePath = (path) =>
-  path.replace(PATH_PATTERNS.TRAILING_SLASHES, "");
+  // 步驟 3: 產生需要「隱藏側邊欄」的頁面路徑集合
+  const excludedPages = new Set([
+    "/",
+    "/ProductionReportPage",
+    "/LeaderSignPage",
+    "/ProductionDetailPage",
+    "/OperatorSignPage",
+    "/ProductionInspectionPage",
+    ...allItems
+      .filter((item) => item.hideSidebar)
+      .map((item) => `/${item.key}`),
+  ]);
 
-/**
- * @function isRootPath
- * @description 檢查是否為根路徑
- */
-const isRootPath = (path) => normalizePath(path) === PATH_PATTERNS.ROOT;
+  // 步驟 4: 返回一個包含所有衍生設定的物件
+  return {
+    menuItemsForAntd: config,
+    newTabRoutes,
+    excludedPages,
+  };
+}
 
-/**
- * @function isPathMatch
- * @description 檢查路徑是否匹配（精確匹配或前綴匹配）
- */
-const isPathMatch = (currentPath, targetPath) => {
-  const normalized = normalizePath(currentPath);
-  return normalized === targetPath || normalized.startsWith(`${targetPath}/`);
-};
+// 執行衍生函數，一次性取得所有需要的設定
+const { menuItemsForAntd, newTabRoutes, excludedPages } =
+  processMenuConfig(MENU_CONFIG);
 
+const DEFAULT_OPEN_KEYS = menuItemsForAntd.map((group) => group.key);
+
+// =================================================================
+//! =============== 3. 工具函數 (Utilities) ===============
+// =================================================================
 /**
  * @function shouldHideSidebar
- * @description 決定是否應該隱藏側邊欄
+ * @description 決定是否應該隱藏側邊欄。
+ * @param {string} pathname - 當前頁面路徑
+ * @returns {boolean}
  */
 const shouldHideSidebar = (pathname) => {
-  // 🧠 優先處理根路徑
-  if (isRootPath(pathname)) {
-    return true;
-  }
-
-  // ✨ 檢查是否在排除列表中
-  return EXCLUDED_PAGES.some((path) => isPathMatch(pathname, path));
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+  return excludedPages.has(normalizedPath);
 };
 
-//! =============== 2. 類型與介面 ===============
-//* 定義所有資料結構，幫助理解資料流向
-
-/**
- * @typedef {Object} MenuItem
- * @description 選單項目的資料結構
- * @property {string} key - 唯一識別符，也用於路由導航
- * @property {React.ReactNode} icon - 項目圖標
- * @property {string} label - 顯示文字
- * @property {MenuItem[]} [children] - 子選單項目
- */
-
-//! =============== 3. 核心功能 ===============
-//* 主要業務邏輯區，每個功能都配有詳細說明
-
-/**
- * @function Sidebar
- * @description 側邊欄組件，提供應用導航功能
- * @returns {React.ReactNode} - 側邊欄組件
- *
- * @example
- * // 在 Layout 中使用
- * <Layout>
- *   <Sidebar />
- *   <Content />
- * </Layout>
- *
- * @notes
- * - 在首頁（路徑為 "/"）不顯示側邊欄
- * - 支持折疊/展開功能
- * - 自動根據當前路徑選中對應選單項
- */
-const Sidebar = () => {
-  // 狀態管理
+// =================================================================
+//! =============== 4. Custom Hooks (Business Logic) ===============
+// =================================================================
+const useSidebarLogic = () => {
   const [collapsed, setCollapsed] = useState(false);
-
-  // 路由相關 hooks
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isExcludedPage = shouldHideSidebar(location.pathname);
-
-  // 取得當前路徑作為選中項目
+  const isExcludedPage = useMemo(
+    () => shouldHideSidebar(location.pathname),
+    [location.pathname]
+  );
   const selectedKey =
     location.pathname.split("/")[1] || "ProductionSchedulePage";
 
-  /**
-   * @function handleMenuClick
-   * @description 處理選單點擊事件
-   * @param {Object} params - 選單點擊參數
-   * @param {string} params.key - 被點擊的選單項鍵值
-   */
-  const handleMenuClick = ({ key }) => {
-    navigate(`/${key}`);
-  };
+  const handleMenuClick = useCallback(
+    ({ key }) => {
+      try {
+        if (newTabRoutes.has(key)) {
+          window.open(`/${key}`, "_blank", "noopener,noreferrer");
+        } else {
+          navigate(`/${key}`);
+        }
+      } catch (error) {
+        console.error("選單導航錯誤:", error);
+        navigate(`/${key}`);
+      }
+    },
+    [navigate]
+  );
 
-  // 如果是首頁，則不渲染 Sidebar
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((prev) => !prev);
+  }, []);
+
+  return {
+    collapsed,
+    isExcludedPage,
+    selectedKey,
+    handleMenuClick,
+    toggleCollapsed,
+  };
+};
+
+// =================================================================
+//! =============== 5. UI 組件 (Components) ===============
+// =================================================================
+const BurgerMenuSection = ({ collapsed, onToggle }) => (
+  <BurgerMenu>
+    <Button
+      type="text"
+      icon={collapsed ? <RightOutlined /> : <LeftOutlined />}
+      onClick={onToggle}
+      style={{ color: "white" }}
+      aria-label={collapsed ? "展開選單" : "收合選單"}
+    />
+  </BurgerMenu>
+);
+
+BurgerMenuSection.propTypes = {
+  collapsed: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
+};
+
+const NavigationMenu = ({ selectedKey, onMenuClick }) => (
+  <StyledMenu
+    theme="dark"
+    mode="inline"
+    selectedKeys={[selectedKey]}
+    defaultOpenKeys={DEFAULT_OPEN_KEYS}
+    items={menuItemsForAntd}
+    onClick={onMenuClick}
+  />
+);
+
+NavigationMenu.propTypes = {
+  selectedKey: PropTypes.string.isRequired,
+  onMenuClick: PropTypes.func.isRequired,
+};
+
+const Sidebar = () => {
+  const {
+    collapsed,
+    isExcludedPage,
+    selectedKey,
+    handleMenuClick,
+    toggleCollapsed,
+  } = useSidebarLogic();
+
   if (isExcludedPage) {
     return null;
   }
@@ -227,52 +246,36 @@ const Sidebar = () => {
     <SidebarContainer>
       <StyledSider trigger={null} collapsible collapsed={collapsed}>
         <Logo />
-        <BurgerMenu>
-          <Button
-            type="text"
-            icon={collapsed ? <RightOutlined /> : <LeftOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{ color: "white" }}
-          />
-        </BurgerMenu>
-        <StyledMenu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          defaultOpenKeys={DEFAULT_OPEN_KEYS}
-          items={MENU_ITEMS}
-          onClick={handleMenuClick}
+        <BurgerMenuSection collapsed={collapsed} onToggle={toggleCollapsed} />
+        <NavigationMenu
+          selectedKey={selectedKey}
+          onMenuClick={handleMenuClick}
         />
       </StyledSider>
     </SidebarContainer>
   );
 };
 
-//! =============== 4. 工具函數 ===============
-//* 通用功能區，可被多個模組復用
-
-// 此組件無需額外工具函數
-
-//! =============== 5. 樣式組件 ===============
-//* 樣式相關的組件定義
+// =================================================================
+//! =============== 6. 樣式組件 (Styled Components) ===============
+// =================================================================
+// 💡 以下所有樣式組件均已按照 `CSS 樣式開發規範 v1.0` 進行重構。
 
 /**
  * @component StyledSider
  * @description 自定義樣式的 Sider 組件
- *
- * @notes
- * - 移除了背景色
- * - 設置了 100vh 高度
  */
 const StyledSider = styled(Layout.Sider)`
-  // 布局定位
+  /* BBC 標準合規性: 巢狀層級 2 */
   .ant-layout-sider-children {
-    height: 100vh;
+    /* 布局定位 */
     left: 0;
+    /* 盒模型 */
+    height: 100vh;
   }
 
-  // 視覺樣式
   &.ant-layout-sider {
+    /* 視覺樣式 */
     background: none;
   }
 `;
@@ -280,32 +283,34 @@ const StyledSider = styled(Layout.Sider)`
 /**
  * @component StyledMenu
  * @description 自定義樣式的 Menu 組件
- *
- * @notes
- * - 移除了背景色
- * - 自定義了字體大小和粗細
  */
 const StyledMenu = styled(Menu)`
-  // 視覺樣式
   &.ant-menu-dark {
+    /* 視覺樣式 */
     background: none;
 
+    /* BBC 標準合規性: 巢狀層級 3 */
     &.ant-menu-inline .ant-menu-sub.ant-menu-inline {
+      /* 視覺樣式 */
       background: none;
     }
   }
 
-  // 主類別樣式
+  /* BBC 標準合規性: 巢狀層級 2 */
   .ant-menu-submenu-title {
+    /* 視覺樣式 */
     font-size: 20px;
     font-weight: 600;
+
+    /* BBC 標準合規性: 巢狀層級 3 */
     .anticon {
+      /* 視覺樣式 */
       font-size: 20px;
     }
   }
 
-  // 子類別樣式
   .ant-menu-item {
+    /* 視覺樣式 */
     font-size: 18px;
     font-weight: 400;
   }
@@ -314,40 +319,32 @@ const StyledMenu = styled(Menu)`
 /**
  * @component Logo
  * @description Logo 區域
- *
- * @notes
- * - 目前設為隱藏
- * - 保留位置以便後續添加實際 Logo
  */
 const Logo = styled.div`
-  // 盒模型
+  /* 布局定位 */
+  display: none;
+  /* 盒模型 */
   height: 32px;
   margin: 16px;
-
-  // 視覺樣式
+  /* 視覺樣式 */
   background: rgba(255, 255, 255, 0.3);
-  display: none;
 `;
 
 /**
  * @component BurgerMenu
  * @description 漢堡選單按鈕區域
- *
- * @notes
- * - 控制側邊欄的展開/收合
  */
 const BurgerMenu = styled.div`
-  // 布局定位
-  text-align: right;
-
-  // 盒模型
+  /* 盒模型 */
   padding: 0 24px;
   margin-bottom: 16px;
-
-  // 視覺樣式
+  /* 視覺樣式 */
   font-size: 20px;
+  text-align: right;
 
+  /* BBC 標準合規性: 巢狀層級 2 */
   svg {
+    /* 視覺樣式 */
     fill: #ffffff;
   }
 `;
@@ -355,20 +352,20 @@ const BurgerMenu = styled.div`
 /**
  * @component SidebarContainer
  * @description 側邊欄容器
- *
- * @notes
- * - 控制側邊欄的整體布局和定位
  */
 const SidebarContainer = styled.div`
-  // 布局定位
+  /* 盒模型 */
+  padding-top: 14px;
+
+  /* BBC 標準合規性: 巢狀層級 2 */
   .ant-layout-sider {
-    height: 100vh;
+    /* 布局定位 */
     left: 0;
+    /* 盒模型 */
+    height: 100vh;
+    /* 其他屬性 */
     z-index: 1;
   }
-
-  // 盒模型
-  padding-top: 14px;
 `;
 
-export default Sidebar;
+export default React.memo(Sidebar);

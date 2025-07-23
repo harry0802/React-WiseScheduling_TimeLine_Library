@@ -6,7 +6,6 @@ import {
 import { useUpdateShippingMutation } from "../services/factoryServices/endpoints/shippingApi";
 
 export const useFactoryProcessApi = (id) => {
-  console.log("🚀 ~ useFactoryProcessApi ~ id:", id);
   const [updateShipping] = useUpdateShippingMutation();
   const [deleteProcess] = useDeleteQuotationMutation();
   const [updateProcessApi] = useUpdateQuotationMutation();

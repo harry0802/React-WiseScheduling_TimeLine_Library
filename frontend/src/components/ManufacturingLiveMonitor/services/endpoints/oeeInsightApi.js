@@ -1,16 +1,22 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_BASE } from "../../../../store/api/apiConfig";
-
-/**
- * @description OEE 洞察系統 API 專用 baseQuery
- * 使用真實 API 配置，完全脫離 mock 資料依賴
- */
-const oeeInsightBaseQuery = fetchBaseQuery({
-  baseUrl: API_BASE,
-});
+import { manufacturingApiSlice } from "../manufacturingApiSlice";
+import { 
+  API_ENDPOINTS, 
+  ERROR_MESSAGES, 
+  TAG_TYPES,
+  POLLING_INTERVALS 
+} from "../shared/constants";
+import { 
+  transformArrayResponse,
+  transformObjectResponse,
+  transformErrorResponse,
+  transformMachineStatusHoursData,
+  getDefaultUtilizationStatistics,
+  getDefaultOfflineReasonData
+} from "../shared/transformers";
 
 /**
  * @description OEE 洞察系統 API 端點
+ * @feature OEEInsightSystem
  * 提供實際被使用的 OEE 分析功能
  *
  * 功能涵蓋：
@@ -19,17 +25,10 @@ const oeeInsightBaseQuery = fetchBaseQuery({
  * - 停機因素佔比分析
  * - 當日機台各狀態時數統計
  *
- * @note 所有端點均使用真實 API，回應格式統一為 { status, message, data }
+ * @note 已整合至 manufacturingApiSlice，使用端點注入模式
+ * 統一配置、錯誤處理和回應轉換邏輯
  */
-export const oeeInsightApi = createApi({
-  reducerPath: "oeeInsightApi",
-  baseQuery: oeeInsightBaseQuery,
-  tagTypes: [
-    "MachineStatusProportion",
-    "MachineUtilizationStatistics",
-    "MachineOfflineReasonProportion",
-    "MachineStatusHoursStatistics",
-  ],
+export const oeeInsightApi = manufacturingApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     /**
      * @description 取得機台各狀態時間佔比
@@ -41,18 +40,12 @@ export const oeeInsightApi = createApi({
      * @returns {number} returns[].hours - 累計時間 (小時)
      */
     getMachineStatusProportion: builder.query({
-      query: () => "dashboard/machineStatusProportion",
-      providesTags: ["MachineStatusProportion"],
-      transformResponse: (response) => {
-        if (!response || !response.data || !Array.isArray(response.data)) {
-          return [];
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取機台各狀態時間佔比資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.OEE_INSIGHT.MACHINE_STATUS_PROPORTION,
+      providesTags: [TAG_TYPES.MACHINE_STATUS_PROPORTION],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformArrayResponse(response),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.OEE_INSIGHT.MACHINE_STATUS_PROPORTION),
     }),
 
     /**
@@ -66,23 +59,13 @@ export const oeeInsightApi = createApi({
      * @returns {number} returns.offlineCount - 離線機台數量
      */
     getMachineUtilizationStatistics: builder.query({
-      query: () => "dashboard/machineUtilizationStatistics",
-      providesTags: ["MachineUtilizationStatistics"],
-      transformResponse: (response) => {
-        if (!response || !response.data) {
-          return {
-            utilizationTime: "00時00分",
-            utilizationRate: 0,
-            runCount: 0,
-            offlineCount: 0,
-          };
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取設備稼動分析統計資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.OEE_INSIGHT.MACHINE_UTILIZATION_STATISTICS,
+      providesTags: [TAG_TYPES.MACHINE_UTILIZATION_STATISTICS],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => 
+        transformObjectResponse(response, getDefaultUtilizationStatistics()),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.OEE_INSIGHT.MACHINE_UTILIZATION_STATISTICS),
     }),
 
     /**
@@ -94,21 +77,13 @@ export const oeeInsightApi = createApi({
      * @returns {number} returns.hours - 停機時間 (小時)
      */
     getMachineOfflineReasonProportion: builder.query({
-      query: () => "dashboard/machineOfflineReasonProportion",
-      providesTags: ["MachineOfflineReasonProportion"],
-      transformResponse: (response) => {
-        if (!response || !response.data) {
-          return {
-            reason: "",
-            hours: 0,
-          };
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取停機因素佔比分析資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.OEE_INSIGHT.MACHINE_OFFLINE_REASON_PROPORTION,
+      providesTags: [TAG_TYPES.MACHINE_OFFLINE_REASON_PROPORTION],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => 
+        transformObjectResponse(response, getDefaultOfflineReasonData()),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.OEE_INSIGHT.MACHINE_OFFLINE_REASON_PROPORTION),
     }),
 
     /**
@@ -124,24 +99,13 @@ export const oeeInsightApi = createApi({
      * @returns {number} returns[].offline - 離線時間 (小時)
      */
     getMachineStatusHoursStatistics: builder.query({
-      query: () => "dashboard/machineStatusHoursStatistics",
-      providesTags: ["MachineStatusHoursStatistics"],
-      transformResponse: (response) => {
-        if (!response || !response.data || !Array.isArray(response.data)) {
-          return [];
-        }
-        // 為陣列資料添加唯一 id (使用 machineSN)
-        return response.data.map((item) => ({
-          ...item,
-          id:
-            item.machineSN ||
-            `machine-${Math.random().toString(36).substr(2, 9)}`,
-        }));
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取當日機台各狀態時數統計資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.OEE_INSIGHT.MACHINE_STATUS_HOURS_STATISTICS,
+      providesTags: [TAG_TYPES.MACHINE_STATUS_HOURS_STATISTICS],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => 
+        transformArrayResponse(response, transformMachineStatusHoursData),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.OEE_INSIGHT.MACHINE_STATUS_HOURS_STATISTICS),
     }),
   }),
 });

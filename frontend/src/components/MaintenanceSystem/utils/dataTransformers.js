@@ -106,7 +106,6 @@ export const transformToMaintenanceApiFormat = (
   type,
   selectedData
 ) => {
-  console.log("🚀 ~ formData:", formData);
   if (!selectedData.machineId || !selectedData.year || !selectedData.week) {
     throw new Error("缺少必要欄位: machineId, year, week");
   }
@@ -177,7 +176,6 @@ export const transformToMoldMaintenanceForm = (
   type,
   selectedData
 ) => {
-  console.log("🚀 ~ formData:", formData);
   if (!selectedData.moldSN || !selectedData.year || !selectedData.week) {
     throw new Error("缺少必要欄位: moldSN, year, week");
   }

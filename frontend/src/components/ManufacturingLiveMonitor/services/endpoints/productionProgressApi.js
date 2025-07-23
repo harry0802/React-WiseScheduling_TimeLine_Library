@@ -1,16 +1,20 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { API_BASE } from "../../../../store/api/apiConfig";
-
-/**
- * @description 生產進度追蹤 API 專用 baseQuery
- * 使用真實 API 配置，完全脫離 Mock 資料依賴
- */
-const productionProgressBaseQuery = fetchBaseQuery({
-  baseUrl: API_BASE,
-});
+import { manufacturingApiSlice } from "../manufacturingApiSlice";
+import { 
+  API_ENDPOINTS, 
+  ERROR_MESSAGES, 
+  TAG_TYPES,
+  POLLING_INTERVALS 
+} from "../shared/constants";
+import { 
+  transformArrayResponse,
+  transformObjectResponse,
+  transformErrorResponse,
+  transformWorkOrderProcessData
+} from "../shared/transformers";
 
 /**
  * @description 生產進度追蹤 API 端點
+ * @feature ProductionProgressTracker
  * 提供生產進度追蹤功能所需的所有 API 端點
  *
  * 功能涵蓋：
@@ -20,21 +24,10 @@ const productionProgressBaseQuery = fetchBaseQuery({
  * - 材料需求計劃
  * - 今日工單製程資訊
  *
- * @note 所有端點均使用真實 API，回應格式統一為 { status, message, data }
+ * @note 已整合至 manufacturingApiSlice，使用端點注入模式
+ * 統一配置、錯誤處理和回應轉換邏輯
  */
-export const productionProgressApi = createApi({
-  reducerPath: "productionProgressApi",
-  baseQuery: productionProgressBaseQuery,
-  tagTypes: [
-    "DailyProductionTasks",
-    "DailyIncomingStock",
-    "NextThreeDaysIncomingStock",
-    "ProductionSchedule",
-    "InventoryForecast",
-    "ProductionOverview",
-    "MaterialRequirements",
-    "TodayWorkOrderWithProcess",
-  ],
+export const productionProgressApi = manufacturingApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     /**
      * @description 取得每日生產任務資料
@@ -46,18 +39,12 @@ export const productionProgressApi = createApi({
      * - 任務編號、產品資訊、數量、進度等
      */
     getDailyProductionTasks: builder.query({
-      query: () => "dashboard/dailyProductionTasks",
-      providesTags: ["DailyProductionTasks"],
-      transformResponse: (response) => {
-        if (!response?.data) {
-          return [];
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取每日生產任務資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.PRODUCTION_PROGRESS.DAILY_PRODUCTION_TASKS,
+      providesTags: [TAG_TYPES.DAILY_PRODUCTION_TASKS],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformArrayResponse(response),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.PRODUCTION_PROGRESS.DAILY_PRODUCTION_TASKS),
     }),
 
     /**
@@ -70,18 +57,12 @@ export const productionProgressApi = createApi({
      * - 進貨日期、產品編號、數量、供應商等
      */
     getDailyIncomingStock: builder.query({
-      query: () => "dashboard/dailyIncomingStock",
-      providesTags: ["DailyIncomingStock"],
-      transformResponse: (response) => {
-        if (!response?.data) {
-          return [];
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取每日進貨庫存資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.PRODUCTION_PROGRESS.DAILY_INCOMING_STOCK,
+      providesTags: [TAG_TYPES.DAILY_INCOMING_STOCK],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformArrayResponse(response),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.PRODUCTION_PROGRESS.DAILY_INCOMING_STOCK),
     }),
 
     /**
@@ -94,18 +75,12 @@ export const productionProgressApi = createApi({
      * - 預計進貨日期、產品編號、預期數量等
      */
     getNextThreeDaysIncomingStock: builder.query({
-      query: () => "dashboard/nextThreeDaysIncomingStock",
-      providesTags: ["NextThreeDaysIncomingStock"],
-      transformResponse: (response) => {
-        if (!response?.data) {
-          return [];
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取未來三天進貨庫存資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.PRODUCTION_PROGRESS.NEXT_THREE_DAYS_INCOMING_STOCK,
+      providesTags: [TAG_TYPES.NEXT_THREE_DAYS_INCOMING_STOCK],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformArrayResponse(response),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.PRODUCTION_PROGRESS.NEXT_THREE_DAYS_INCOMING_STOCK),
     }),
 
     /**
@@ -118,18 +93,12 @@ export const productionProgressApi = createApi({
      * - 排程時間、機台分配、產品資訊等
      */
     getProductionSchedule: builder.query({
-      query: () => "dashboard/productionSchedule",
-      providesTags: ["ProductionSchedule"],
-      transformResponse: (response) => {
-        if (!response?.data) {
-          return [];
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取生產排程資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.PRODUCTION_PROGRESS.PRODUCTION_SCHEDULE,
+      providesTags: [TAG_TYPES.PRODUCTION_SCHEDULE],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformArrayResponse(response),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.PRODUCTION_PROGRESS.PRODUCTION_SCHEDULE),
     }),
 
     /**
@@ -142,18 +111,12 @@ export const productionProgressApi = createApi({
      * - 產品編號、預測需求、安全庫存等
      */
     getInventoryForecast: builder.query({
-      query: () => "dashboard/inventoryForecast",
-      providesTags: ["InventoryForecast"],
-      transformResponse: (response) => {
-        if (!response?.data) {
-          return [];
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取庫存預測資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.PRODUCTION_PROGRESS.INVENTORY_FORECAST,
+      providesTags: [TAG_TYPES.INVENTORY_FORECAST],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformArrayResponse(response),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.PRODUCTION_PROGRESS.INVENTORY_FORECAST),
     }),
 
     /**
@@ -166,18 +129,12 @@ export const productionProgressApi = createApi({
      * - 整體進度、完成率、異常狀況等
      */
     getProductionOverview: builder.query({
-      query: () => "dashboard/productionOverview",
-      providesTags: ["ProductionOverview"],
-      transformResponse: (response) => {
-        if (!response?.data) {
-          return {};
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取生產進度總覽資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.PRODUCTION_PROGRESS.PRODUCTION_OVERVIEW,
+      providesTags: [TAG_TYPES.PRODUCTION_OVERVIEW],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformObjectResponse(response),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.PRODUCTION_PROGRESS.PRODUCTION_OVERVIEW),
     }),
 
     /**
@@ -190,18 +147,12 @@ export const productionProgressApi = createApi({
      * - 材料編號、需求數量、需求時間等
      */
     getMaterialRequirements: builder.query({
-      query: () => "dashboard/materialRequirements",
-      providesTags: ["MaterialRequirements"],
-      transformResponse: (response) => {
-        if (!response?.data) {
-          return [];
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取材料需求計劃資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.PRODUCTION_PROGRESS.MATERIAL_REQUIREMENTS,
+      providesTags: [TAG_TYPES.MATERIAL_REQUIREMENTS],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => transformArrayResponse(response),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.PRODUCTION_PROGRESS.MATERIAL_REQUIREMENTS),
     }),
 
     /**
@@ -225,44 +176,13 @@ export const productionProgressApi = createApi({
      * - 使用 workOrderSN 作為唯一識別碼
      */
     getTodayWorkOrderWithProcess: builder.query({
-      query: () => "dashboard/todayWorkOrderWithProcess",
-      providesTags: ["TodayWorkOrderWithProcess"],
-      transformResponse: (response) => {
-        if (!response?.data || !Array.isArray(response.data)) {
-          return [];
-        }
-
-        /**
-         * 格式化日期為 YYYY-MM-DD 格式
-         * @param {string} isoDateString - ISO 8601 格式的日期字串
-         * @returns {string} YYYY-MM-DD 格式的日期或空字串
-         */
-        const formatDate = (isoDateString) => {
-          if (!isoDateString) return "";
-          try {
-            return new Date(isoDateString).toLocaleDateString("sv-SE");
-          } catch (error) {
-            console.warn("日期格式化錯誤:", error);
-            return "";
-          }
-        };
-
-        return response.data.map((item) => ({
-          id: item.workOrderSN,
-          workOrderDate: formatDate(item.workOrderDate),
-          workOrderSN: item.workOrderSN,
-          workOrderQuantity: item.workOrderQuantity,
-          productName: item.productName,
-          processOne: item.processOne,
-          processTwo: item.processTwo,
-          planFinishDate: formatDate(item.planFinishDate),
-          status: item.status,
-        }));
-      },
-      transformErrorResponse: (response) => ({
-        message: response.data?.message || "無法讀取今日工單製程資料",
-        status: response.data?.status || false,
-      }),
+      query: () => API_ENDPOINTS.PRODUCTION_PROGRESS.TODAY_WORK_ORDER_WITH_PROCESS,
+      providesTags: [TAG_TYPES.TODAY_WORK_ORDER_WITH_PROCESS],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformResponse: (response) => 
+        transformArrayResponse(response, transformWorkOrderProcessData),
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.PRODUCTION_PROGRESS.TODAY_WORK_ORDER_WITH_PROCESS),
     }),
   }),
 });

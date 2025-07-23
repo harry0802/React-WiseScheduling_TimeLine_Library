@@ -248,8 +248,6 @@ export const transformInhouseInjectionData = (data) => {
  * @returns {Object} 轉換後的數據
  */
 export const transformProcessData = (processCategory, data) => {
-  console.log(PROCESS_CATEGORY_OPTION[0].category);
-
   switch (processCategory) {
     case PROCESS_CATEGORY_OPTION[0].category: // 廠內成型
       return transformInhouseInjectionData(data);

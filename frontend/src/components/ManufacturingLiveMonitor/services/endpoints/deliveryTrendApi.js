@@ -1,73 +1,47 @@
 import { manufacturingApiSlice } from "../manufacturingApiSlice";
+import { 
+  API_ENDPOINTS, 
+  ERROR_MESSAGES, 
+  TAG_TYPES,
+  POLLING_INTERVALS 
+} from "../shared/constants";
+import { transformErrorResponse } from "../shared/transformers";
 
 /**
  * @description 配送趨勢分析 API 端點
- * 對應 DeliveryTrendAnalyzer feature
+ * @feature DeliveryTrendAnalyzer
  * 處理出貨面板、配送戰情等相關功能
+ * 
+ * @note 使用 mock 資料的端點，通過統一的 API slice 管理
+ * 保持架構一致性，同時支援 mock 資料需求
  */
 export const deliveryTrendApi = manufacturingApiSlice.injectEndpoints({
   endpoints: (builder) => ({
     /**
      * @description 取得近期出貨面板資料
-     * 📁 對應檔案: /public/mock/RecentShippingPanelMock.json
-     * 🎯 對應組件: DeliveryTrendAnalyzer/feature/RecentShippingPanel
+     * @endpoint GET /mock/RecentShippingPanelMock.json
+     * @usage 用於 DeliveryTrendAnalyzer/feature/RecentShippingPanel 組件
+     * @returns {Promise<Array<Object>>} 近期出貨面板資料陣列
+     * 
+     * 提供當日待出貨即時戰情：
+     * - 組立包裝狀態、庫存未交數、客戶資訊
+     * - 訂單編號、產品資訊、出貨數量
+     * - 完成數量、未完成數量、交貨日期等
+     * 
+     * @note 目前使用 mock 資料，未來可升級為真實 API
      */
     getRecentShippingPanel: builder.query({
-      query: () => "mock/RecentShippingPanelMock.json",
-      providesTags: ["RecentShippingPanel"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取當日待出貨即時戰情資料",
-        status: response.status,
-      }),
+      query: () => API_ENDPOINTS.DELIVERY_TREND.RECENT_SHIPPING_PANEL,
+      providesTags: [TAG_TYPES.RECENT_SHIPPING_PANEL],
+      pollingInterval: POLLING_INTERVALS.HOURLY,
+      transformErrorResponse: (response) => 
+        transformErrorResponse(response, ERROR_MESSAGES.DELIVERY_TREND.RECENT_SHIPPING_PANEL),
     }),
 
-    /**
-     * @description 取得當日出貨面板資料
-     * 📁 對應檔案: /public/mock/TodayShippingPanelMock.json
-     * 🎯 對應組件: DeliveryTrendAnalyzer/feature/TodayShippingPanel
-     */
-    getTodayShippingPanel: builder.query({
-      query: () => "mock/TodayShippingPanelMock.json",
-      providesTags: ["TodayShippingPanel"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取當日出貨面板資料",
-        status: response.status,
-      }),
-    }),
-
-    // 未來擴展的配送趨勢相關端點
-    /**
-     * @description 取得出貨趨勢分析資料 (未來擴展)
-     * 📁 對應檔案: /public/mock/ShippingTrendsMock.json
-     */
-    getShippingTrends: builder.query({
-      query: () => "mock/ShippingTrendsMock.json",
-      providesTags: ["ShippingTrends"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取出貨趨勢分析資料",
-        status: response.status,
-      }),
-    }),
-
-    /**
-     * @description 取得配送統計資料 (未來擴展)
-     * 📁 對應檔案: /public/mock/DeliveryStatisticsMock.json
-     */
-    getDeliveryStatistics: builder.query({
-      query: () => "mock/DeliveryStatisticsMock.json",
-      providesTags: ["DeliveryStatistics"],
-      transformErrorResponse: (response) => ({
-        message: "無法讀取配送統計資料",
-        status: response.status,
-      }),
-    }),
   }),
 });
 
 // 匯出生成的 hooks
 export const {
   useGetRecentShippingPanelQuery,
-  useGetTodayShippingPanelQuery,
-  useGetShippingTrendsQuery,
-  useGetDeliveryStatisticsQuery,
 } = deliveryTrendApi;

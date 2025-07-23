@@ -27,7 +27,7 @@ function EquipmentRiskModule() {
         <BaseCard.Header>
           <BaseCard.Title>
             <FlexFlow>
-              <BaseCard.Title>設備即時狀態</BaseCard.Title>
+              <BaseCard.Title>設備異常事件</BaseCard.Title>
               {/* <DashBordrdMark data={MockData} /> */}
             </FlexFlow>
           </BaseCard.Title>

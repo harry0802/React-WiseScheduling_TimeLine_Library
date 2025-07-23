@@ -77,8 +77,6 @@ function MachineMaintenance() {
         week: maintenance.week || 1,
         ...maintenance,
       });
-      console.log("🚀 ~ handleUpdateMaintenance ~ data:", data);
-
       // 如果轉換成功，則調用更新
       if (data) {
         await updateMaintenance(data).unwrap();

@@ -593,12 +593,6 @@ function FieldComponent({ field, customProps = {}, onChange, disabled }) {
       dependentValue &&
       dependentValue !== prevDependentValue
     ) {
-      // console.log("依賴值變更，重新獲取選項:", {
-      //   field: field.name,
-      //   dependentValue,
-      //   prevValue: prevDependentValue,
-      // });
-
       fetchDependentOptions(dependentValue);
       setPrevDependentValue(dependentValue);
     }

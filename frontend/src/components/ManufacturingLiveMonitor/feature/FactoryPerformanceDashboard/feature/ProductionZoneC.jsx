@@ -60,9 +60,9 @@ const FactoryLayout = styled.div`
  * @returns {JSX.Element} 渲染的生產區域C組件
  */
 function ProductionZoneC() {
-  // 🔄 使用RTK Query hook獲取生產區域C的資料，啟用輪詢
+  // 🔄 使用RTK Query hook獲取生產區域C的資料，啟用每小時輪詢
   const queryResult = useGetProductionZoneCQuery(undefined, {
-    pollingInterval: 5000, // 每5秒輪詢一次
+    pollingInterval: 3600000, // 每小時輪詢一次
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
