@@ -3,6 +3,8 @@ export const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 // 凌越ERP
 export const REACT_APP_LY_ERP_ON =
   process.env.REACT_APP_LY_ERP_ON === "true" ? true : false;
+console.log("🚀 ~   process.env:", process.env);
+console.log("🚀 ~ REACT_APP_LY_ERP_ON:", REACT_APP_LY_ERP_ON);
 
 export const PRODUCTION_AREA = [
   { value: "A", label: "A" },
