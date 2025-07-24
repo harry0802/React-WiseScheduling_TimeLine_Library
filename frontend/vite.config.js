@@ -147,8 +147,24 @@ export default defineConfig({
       REACT_APP_API_PORT: JSON.stringify(
         process.env.VITE_API_PORT || process.env.REACT_APP_API_PORT
       ),
+      // 💡 布林值環境變數 - 不需要 JSON.stringify()
       REACT_APP_LY_ERP_ON:
         process.env.VITE_LY_ERP_ON || process.env.REACT_APP_LY_ERP_ON,
+
+      // 📝 未來新增環境變數的模板：
+      // 字串類型 (需要 JSON.stringify)
+      // REACT_APP_NEW_STRING_VAR: JSON.stringify(
+      //   process.env.VITE_NEW_STRING_VAR || process.env.REACT_APP_NEW_STRING_VAR
+      // ),
+      //
+      // 布林值類型 (不需要 JSON.stringify)
+      // REACT_APP_NEW_BOOLEAN_VAR:
+      //   process.env.VITE_NEW_BOOLEAN_VAR || process.env.REACT_APP_NEW_BOOLEAN_VAR,
+      //
+      // 數字類型 (需要轉換)
+      // REACT_APP_NEW_NUMBER_VAR: JSON.stringify(
+      //   parseInt(process.env.VITE_NEW_NUMBER_VAR || process.env.REACT_APP_NEW_NUMBER_VAR || "0")
+      // ),
     },
   },
 });
