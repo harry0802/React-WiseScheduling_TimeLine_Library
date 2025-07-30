@@ -23,6 +23,128 @@ MachineOfflineEventSchema, TodayWorkOrderWithProcess, MachineStatusHoursStatisti
 TZ = os.getenv("TIMEZONE","Asia/Taipei")
 
 def _get_machineStatus_statistics(start_time, end_time) -> tuple:
+    """取得所有機台目前的狀態統計，包含之前就已經開始，但還沒結束的機台狀態。
+
+    Args:
+        start_time (_type_): _description_
+        end_time (_type_): _description_
+
+    Returns:
+        tuple: 包含機台列表和每個機台的狀態時間統計。
+    """
+    # Time from midnight to current time (used for per-machine idle time)
+    day_seconds = Decimal((end_time - start_time).total_seconds())
+
+    # Get all machines
+    machines = db.session.query(Machine.id).all()
+    if not machines:
+        return message(True, "No machines found"), 200
+    
+    # 統計所有機台的狀態時間
+    total_status_times = {
+        MachineStatusEnum.RUN.value: Decimal('0'),
+        MachineStatusEnum.TUNING.value: Decimal('0'),
+        MachineStatusEnum.OFFLINE.value: Decimal('0'),
+        MachineStatusEnum.TESTING.value: Decimal('0'),
+        MachineStatusEnum.IDLE.value: Decimal('0')
+    }
+
+    # 記錄每一個機台各個狀態時間
+    each_machine_status_times = []
+
+    # Process each machine
+    for machine_id, in machines:
+        # Query production time for this machine
+        # 利用distinct避免重複計算同一個機台多張製令單生產的情況
+        production_time_subquery = db.session.query(
+            ProductionScheduleOngoing.startTime,
+            func.timestampdiff(
+                text('SECOND'),
+                func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC'),
+                func.coalesce(ProductionScheduleOngoing.endTime, func.now())
+            ).label('production_seconds')
+        ).join(
+            ProductionSchedule,
+            ProductionScheduleOngoing.productionScheduleId == ProductionSchedule.id
+        ).join(
+            Machine,
+            ProductionSchedule.machineSN == Machine.machineSN
+        ).filter(
+            Machine.id == machine_id,
+            ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value,
+            ProductionScheduleOngoing.startTime.isnot(None),
+            or_(
+                ProductionScheduleOngoing.endTime > func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC'),
+                ProductionScheduleOngoing.endTime.is_(None)
+            )
+        ).distinct().subquery()
+
+        production_time_query = db.session.query(
+            func.sum(production_time_subquery.c.production_seconds).label('total_production_seconds')
+        )
+        production_time = (
+            production_time_query.scalar() or Decimal('0')
+        )
+        
+        # Query machine status times for this machine
+        machine_status_times = (
+            db.session.query(
+                MachineStatus.status,
+                func.sum(
+                    func.timestampdiff(text('SECOND'), 
+                    func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC'), 
+                    func.coalesce(MachineStatus.actualEndDate, func.now()))
+                ).label('status_seconds')
+            )
+            .filter(
+                MachineStatus.machineId == machine_id,
+                MachineStatus.actualStartDate.isnot(None),
+                or_(
+                    MachineStatus.actualEndDate > func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC'),
+                    MachineStatus.actualEndDate.is_(None)
+                )
+            )
+            .group_by(MachineStatus.status)
+            .all()
+        )
+        # Initialize status times for this machine
+        status_times = {
+            MachineStatusEnum.RUN.value: production_time,
+            MachineStatusEnum.TUNING.value: Decimal('0'),
+            MachineStatusEnum.OFFLINE.value: Decimal('0'),
+            MachineStatusEnum.TESTING.value: Decimal('0'),
+            MachineStatusEnum.IDLE.value: Decimal('0')
+        }
+
+        # Update status times from machineStatus
+        for status, seconds in machine_status_times:
+            if status in status_times:
+                status_times[status] = seconds if seconds is not None else Decimal('0')
+
+        # Calculate idle time for this machine
+        used_seconds = status_times[MachineStatusEnum.RUN.value] + status_times[MachineStatusEnum.TUNING.value] + status_times[MachineStatusEnum.OFFLINE.value] + status_times[MachineStatusEnum.TESTING.value]
+        idle_seconds = day_seconds - used_seconds
+        if idle_seconds < 0:
+            idle_seconds = Decimal('0')  # Clamp to zero if negative
+        status_times[MachineStatusEnum.IDLE.value] = idle_seconds
+
+        # Add to total status times
+        for status, seconds in status_times.items():
+            total_status_times[status] += seconds
+        
+        each_machine_status_times.append({
+            "machineSN": Machine.query.get(machine_id).machineSN,
+            MachineStatusEnum.RUN.value: status_times[MachineStatusEnum.RUN.value],
+            MachineStatusEnum.TUNING.value: status_times[MachineStatusEnum.TUNING.value],
+            MachineStatusEnum.OFFLINE.value: status_times[MachineStatusEnum.OFFLINE.value],
+            MachineStatusEnum.TESTING.value: status_times[MachineStatusEnum.TESTING.value],
+            MachineStatusEnum.IDLE.value: status_times[MachineStatusEnum.IDLE.value]
+        })
+
+    return machines, total_status_times, each_machine_status_times
+
+
+def _get_machineStatus_statistics_within_period(start_time, end_time) -> tuple:
     """取得所有機台在指定時間範圍內的狀態統計。
 
     Args:
@@ -71,6 +193,7 @@ def _get_machineStatus_statistics(start_time, end_time) -> tuple:
             ProductionSchedule.machineSN == Machine.machineSN
         ).filter(
             Machine.id == machine_id,
+            ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value,
             ProductionScheduleOngoing.startTime >= start_time,
             or_(
                 ProductionScheduleOngoing.endTime < end_time,
@@ -141,6 +264,70 @@ def _get_machineStatus_statistics(start_time, end_time) -> tuple:
 
     return machines, total_status_times, each_machine_status_times
 
+
+def _get_machineStatus_count():
+    """取得目前所有機台狀態的台數統計。
+
+    Returns:
+        _type_: _description_
+    """
+    current_time = datetime.now(pytz.timezone(TZ))
+    midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+        # 從ProductionScheduleOngoin資料表找出所有生產中的製令單數量
+    query = (
+            db.session.query(
+                literal("生產中").label("status"),
+                func.count(func.distinct(ProductionSchedule.machineSN)).label('count')
+            )
+            .select_from(ProductionScheduleOngoing)
+            .join(ProductionSchedule, ProductionScheduleOngoing.productionScheduleId == ProductionSchedule.id)
+            .filter(
+                ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value,
+                ProductionScheduleOngoing.startTime.isnot(None),
+                or_(
+                    ProductionScheduleOngoing.endTime > func.convert_tz(midnight, midnight.tzinfo.zone, 'UTC'),
+                    ProductionScheduleOngoing.endTime.is_(None)  # Only count ongoing production schedules
+                )
+            )
+        )
+    production_schedule_counts = query.all()
+
+        # 從MachineStatus資料表找出目前所有狀態的機台數量
+    query = (
+            db.session.query(
+                MachineStatus.status,
+                func.count(MachineStatus.machineId).label('count')
+            )
+            .select_from(MachineStatus)
+            .join(Machine, MachineStatus.machineId == Machine.id)
+            .filter(
+                MachineStatus.actualStartDate.isnot(None),
+                MachineStatus.actualEndDate.is_(None)  # Only count machines that are currently active
+            )
+            .group_by(MachineStatus.status)
+        )
+    machine_status_counts = query.all()
+        
+        # 從Machine資料表找出所有機台數量
+    all_machines = (
+            db.session.query(Machine.machineSN)
+            .filter(Machine.machineSN.isnot(None))
+            .all()
+        )
+    all_machines_count = len(all_machines)
+        
+        # 待機機台 = 所有機台數量 - 生產機台數 - 其他狀態機台數
+    production_machine_count = sum(count for status, count in production_schedule_counts)
+    other_status_counts = sum(count for status, count in machine_status_counts)
+    idle_machine_count = all_machines_count - production_machine_count - other_status_counts
+        # 如果待機機台數量小於0，則設為0    
+    idle_machine_count = idle_machine_count if idle_machine_count > 0 else 0
+        # 將待機機台數量加入到機台狀態統計中
+    machine_status_counts.append((MachineStatusEnum.RUN.value, production_machine_count))
+    machine_status_counts.append((MachineStatusEnum.IDLE.value, idle_machine_count))
+    return machine_status_counts
+
+
 class DashboardService:
     @staticmethod
     def get_todayWorkOrder():
@@ -149,19 +336,28 @@ class DashboardService:
             current_time = datetime.now(pytz.timezone(TZ))
             midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
             next_day = current_time + timedelta(days=1)
+
+            # Create the subquery for ProductionReport where serialNumber = 0
+            production_report_subquery = select(
+                ProductionReport.productionQuantity,
+                ProductionReport.pschedule_id
+            ).where(ProductionReport.serialNumber == 0).subquery()
+            
             # main query
             query = ProductionSchedule.query
             query = query.with_entities(ProductionSchedule.machineSN, ProductionSchedule.workOrderSN, 
-                                        ProductionSchedule.planFinishDate, ProductionReport.productionQuantity, ProductionSchedule.status,
+                                        ProductionSchedule.planFinishDate, ProductionSchedule.status,
+                                        production_report_subquery.c.productionQuantity,
                                         Product.productSN, Product.productName, ProcessOption.processName)
             # Joins
-            query = query.outerjoin(ProductionReport, ProductionSchedule.productId == ProductionReport.pschedule_id) # left outer join
+            query = query.outerjoin(production_report_subquery, ProductionSchedule.id == production_report_subquery.c.pschedule_id) # left outer join
             query = query.outerjoin(Product, ProductionSchedule.productId == Product.id) # left outer join
             query = query.outerjoin(Process, ProductionSchedule.processId == Process.id) # left outer join
             query = query.outerjoin(ProcessOption, Process.processOptionId == ProcessOption.id) # left outer join
-            # Filters
-            query = query.filter(ProductionSchedule.planOnMachineDate >= midnight)
-            query = query.filter(ProductionSchedule.planOnMachineDate < next_day)
+            # Filters planOnMachineDate < now < planFinishDate
+            query = query.filter(ProductionSchedule.planOnMachineDate <= func.convert_tz(current_time, current_time.tzinfo.zone, 'UTC'))
+            query = query.filter(ProductionSchedule.planFinishDate > func.convert_tz(current_time, current_time.tzinfo.zone, 'UTC'))
+            query = query.filter(ProductionSchedule.status != WorkOrderStatusEnum.CANCEL.value)
             today_work_orders = query.all()
             
             today_work_order_dump = TodayWorkOrderSchema().dump(today_work_orders, many=True)
@@ -178,22 +374,25 @@ class DashboardService:
     def get_overdueWorkOrder():
         try:
             # Query the database to fetch the required fields from the specified tables
+            # Create the subquery for ProductionReport where serialNumber = 0
+            production_report_subquery = select(
+                ProductionReport.unfinishedQuantity,
+                ProductionReport.pschedule_id
+            ).where(ProductionReport.serialNumber == 0).subquery()
+
             # main query
             query = ProductionSchedule.query
             query = query.with_entities(ProductionSchedule.machineSN, ProductionSchedule.workOrderSN, 
-                                        ProductionSchedule.planFinishDate, ProductionReport.unfinishedQuantity, 
+                                        ProductionSchedule.planFinishDate, production_report_subquery.c.unfinishedQuantity, 
                                         Product.productSN)
             # Joins
-            query = query.outerjoin(ProductionReport, ProductionSchedule.productId == ProductionReport.pschedule_id) # left outer join
+            query = query.outerjoin(production_report_subquery, ProductionSchedule.id == production_report_subquery.c.pschedule_id) # left outer join
             query = query.outerjoin(Product, ProductionSchedule.productId == Product.id) # left outer join
-            query = query.outerjoin(Process, ProductionSchedule.processId == Process.id) # left outer join
-            query = query.outerjoin(ProcessOption, Process.processOptionId == ProcessOption.id) # left outer join
             # Filters
             # 列出所有預計完成日前七天或者過了預計完成日還沒完成的的製令單。
             query = query.filter(ProductionSchedule.status != WorkOrderStatusEnum.CANCEL.value)
             query = query.filter(ProductionSchedule.status != WorkOrderStatusEnum.DONE.value)
-            query = query.filter(ProductionSchedule.planFinishDate.between(datetime.now(), datetime.now() + timedelta(days=7)) |
-                                 ProductionSchedule.planFinishDate < datetime.now())
+            query = query.filter(ProductionSchedule.planFinishDate.between(datetime.now(), datetime.now() + timedelta(days=7)))
             overdue_work_orders = query.all()
             
             overdue_work_order_dump = OverdueWorkOrderSchema().dump(overdue_work_orders, many=True)
@@ -219,176 +418,134 @@ class DashboardService:
             _type_: _description_
         """
         try:
+            # 1. 準備動態參數
             # Current time
             current_time = datetime.now(pytz.timezone(TZ))
             midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            # 當天的開始時間 (00:00:00)， midnight 轉成utc時區，再轉字串
+            start_of_day_str = midnight.astimezone(pytz.utc).strftime('%Y-%m-%d %H:%M:%S')
+            # 當下時間 (現在時間)，轉成utc時區，再轉字串
+            end_of_workday_str = current_time.astimezone(pytz.utc).strftime('%Y-%m-%d %H:%M:%S')
+            
+            # 2. 定義 Raw SQL
+            sql_query = text("""
+                WITH 
+                -- 步驟 1: 預先篩選出指定日期範圍內所有相關的機台狀態紀錄
+                RelevantStatus AS (
+                    SELECT
+                        machineId,
+                        status,
+                        TIMESTAMPDIFF(SECOND, actualStartDate, COALESCE(actualEndDate, NOW())) AS duration_seconds
+                    FROM
+                        machineStatus
+                    WHERE
+                        actualStartDate IS NOT NULL
+                        AND (actualEndDate > :start_of_day OR actualEndDate IS NULL)
+                ),
 
-            # Define the CTE for LatestStatus
-            latest_status_cte = (
-                select(
-                    MachineStatus.machineId,
-                    MachineStatus.status,
-                    func.row_number().over(
-                        partition_by=MachineStatus.machineId,
-                        order_by=MachineStatus.actualStartDate.desc()
-                    ).label('rn')
-                )
-                .where(
-                    and_(
-                        MachineStatus.actualStartDate >= midnight,
-                        MachineStatus.actualStartDate.isnot(None),
-                        MachineStatus.actualEndDate <= current_time,
-                        MachineStatus.actualEndDate.isnot(None)
-                    )
-                )
-                .cte(name='LatestStatus')
-            )
+                -- 步驟 2: 一次性聚合計算各種狀態的時間總和
+                AggregatedStatusTimes AS (
+                    SELECT
+                        machineId,
+                        SUM(CASE WHEN status = '上模與調機' THEN duration_seconds ELSE 0 END) AS tuningSeconds,
+                        SUM(CASE WHEN status = '機台停機' THEN duration_seconds ELSE 0 END) AS offlineSeconds,
+                        SUM(CASE WHEN status = '產品試模' THEN duration_seconds ELSE 0 END) AS testingSeconds
+                    FROM
+                        RelevantStatus
+                    GROUP BY
+                        machineId
+                ),
 
-            # Alias for the CTE
-            ls = latest_status_cte.alias('ls')
+                -- 步驟 3: 計算 runTime (生產時間)
+                RunTime AS (
+                    SELECT
+                        ps.machineSN,
+                        SUM(TIMESTAMPDIFF(SECOND, pso.startTime, COALESCE(pso.endTime, NOW()))) AS runTimeSeconds
+                    FROM
+                        productionScheduleOngoing pso
+                    INNER JOIN 
+                        productionSchedule ps ON pso.productionScheduleId = ps.id
+                    WHERE
+                        ps.status = 'On-going'
+                        AND pso.startTime IS NOT NULL
+                        AND (pso.endTime > :start_of_day OR pso.endTime IS NULL)
+                    GROUP BY
+                        ps.machineSN
+                ),
 
-            # Subquery for machine status
-            machine_status_subquery = (
-                select(
-                    MachineStatus.machineId,
-                    MachineStatus.actualStartDate,
-                    MachineStatus.actualEndDate,
-                    MachineStatus.status,
-                )
-                .where(
-                    and_(
-                        MachineStatus.actualStartDate >= midnight,
-                        MachineStatus.actualStartDate.isnot(None),
-                        MachineStatus.actualEndDate <= current_time,
-                        MachineStatus.actualEndDate.isnot(None)
-                    )
-                )
-                .subquery('machine_status')
-            )
+                -- 步驟 4: 取得每台機器的最新(非生產)狀態
+                LatestStatus AS (
+                    SELECT
+                        machineId,
+                        status,
+                        ROW_NUMBER() OVER (PARTITION BY machineId ORDER BY actualStartDate DESC) AS rn
+                    FROM
+                        machineStatus
+                    WHERE
+                        actualStartDate IS NOT NULL
+                        AND (actualEndDate > :start_of_day OR actualEndDate IS NULL)
+                ),
 
-            # Subquery for runTime from productionScheduleOngoing
-            run_time_subquery = (
-                select(
-                    ProductionSchedule.machineSN,
-                    func.sum(
-                        func.timestampdiff(text('SECOND'), ProductionScheduleOngoing.startTime, ProductionScheduleOngoing.endTime)
-                    ).label('run_time_seconds')
+                -- 步驟 5: 獨立找出目前正在「生產中」的機台
+                ProductionStatus AS (
+                    SELECT DISTINCT machineSN
+                    FROM productionSchedule
+                    WHERE status = 'On-going'
                 )
-                .join(
-                    ProductionSchedule,
-                    ProductionScheduleOngoing.productionScheduleId == ProductionSchedule.id
-                )
-                .where(
-                    and_(
-                        ProductionScheduleOngoing.startTime >= midnight,
-                        ProductionScheduleOngoing.startTime.isnot(None),
-                        ProductionScheduleOngoing.endTime <= current_time,
-                        ProductionScheduleOngoing.endTime.isnot(None)
-                    )
-                )
-                .group_by(ProductionSchedule.machineSN)
-                .subquery('run_time')
-            )
 
-            # Subquery for non-idle seconds from machineStatus (tuning, offline, testing)
-            non_idle_subquery = (
-                select(
-                    MachineStatus.machineId,
-                    func.sum(
-                        case(
-                            (MachineStatus.status == MachineStatusEnum.TUNING.value, 
-                            func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
-                            (MachineStatus.status == MachineStatusEnum.OFFLINE.value, 
-                            func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
-                            (MachineStatus.status == MachineStatusEnum.TESTING.value, 
-                            func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
-                            else_=0
-                        )
-                    ).label('non_idle_seconds')
-                )
-                .where(
-                    and_(
-                        MachineStatus.actualStartDate >= midnight,
-                        MachineStatus.actualStartDate.isnot(None),
-                        MachineStatus.actualEndDate <= current_time,
-                        MachineStatus.actualEndDate.isnot(None)
-                    )
-                )
-                .group_by(MachineStatus.machineId)
-                .subquery('non_idle')
-            )
-
-            # Main query
-            query = (
-                db.session.query(
-                    Machine.id.label('machineId'),
-                    Machine.machineSN,
-                    func.date(midnight).label('status_date'),
-                    func.sec_to_time(
-                        func.coalesce(run_time_subquery.c.run_time_seconds, 0)
-                    ).label('runTime'),
-                    func.sec_to_time(
-                        func.sum(
-                            case(
-                                (machine_status_subquery.c.status == MachineStatusEnum.TUNING.value, 
-                                func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
-                                else_=0
-                            )
-                        )
-                    ).label('tuningTime'),
-                    func.sec_to_time(
-                        func.sum(
-                            case(
-                                (machine_status_subquery.c.status == MachineStatusEnum.OFFLINE.value, 
-                                func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
-                                else_=0
-                            )
-                        )
-                    ).label('offlineTime'),
-                    func.sec_to_time(
-                        func.sum(
-                            case(
-                                (machine_status_subquery.c.status == MachineStatusEnum.TESTING.value, 
-                                func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, MachineStatus.actualEndDate)),
-                                else_=0
-                            )
-                        )
-                    ).label('testingTime'),
-                    func.sec_to_time(
-                        func.greatest(
-                            func.timestampdiff(text('SECOND'), midnight, current_time) - 
-                            func.coalesce(run_time_subquery.c.run_time_seconds, 0) - 
-                            func.coalesce(non_idle_subquery.c.non_idle_seconds, 0),
+                -- 最終組合: 將主表與上面準備好的 CTE 進行關聯
+                SELECT
+                    m.id AS machineId,
+                    m.machineSN AS machineSN,
+                    DATE(:start_of_day) AS status_date,
+                    SEC_TO_TIME(COALESCE(rt.runTimeSeconds, 0)) AS runTime,
+                    SEC_TO_TIME(COALESCE(ast.tuningSeconds, 0)) AS tuningTime,
+                    SEC_TO_TIME(COALESCE(ast.offlineSeconds, 0)) AS offlineTime,
+                    SEC_TO_TIME(COALESCE(ast.testingSeconds, 0)) AS testingTime,
+                    SEC_TO_TIME(
+                        GREATEST(
+                            (TIMESTAMPDIFF(SECOND, :start_of_day, :end_of_workday) - COALESCE(rt.runTimeSeconds, 0)) - 
+                            (COALESCE(ast.tuningSeconds, 0) + COALESCE(ast.offlineSeconds, 0) + COALESCE(ast.testingSeconds, 0)),
                             0
                         )
-                    ).label('idleTime'),
-                    ls.c.status.label('status')
-                )
-                .outerjoin(MachineStatus, Machine.id == MachineStatus.machineId)
-                .outerjoin(run_time_subquery, Machine.machineSN == run_time_subquery.c.machineSN)
-                .outerjoin(non_idle_subquery, Machine.id == non_idle_subquery.c.machineId)
-                .outerjoin(ls, and_(Machine.id == ls.c.machineId, ls.c.rn == 1))
-                # .filter(
-                #     or_(
-                #         MachineStatus.id.isnot(None),  # Include machines with MachineStatus records
-                #         run_time_subquery.c.machineSN.isnot(None)  # Include machines with productionSchedule records
-                #     )
-                # )
-                .group_by(
-                    Machine.machineSN
-                )
-                .order_by(Machine.id)
-            )
+                    ) AS idleTime,
+                    
+                    -- 機台目前狀態判斷邏輯
+                    CASE
+                        WHEN ps.machineSN IS NOT NULL THEN '生產中'
+                        WHEN ls.status IS NOT NULL THEN ls.status
+                        ELSE '待機中'
+                    END AS status
 
-            # Execute the query and fetch results
-            machine_accumulatedTime = query.all()
-            machine_accumulatedTime_dump = MachineAccumulatedTimeSchema().dump(machine_accumulatedTime, many=True)
+                FROM
+                    machine m
+                LEFT JOIN AggregatedStatusTimes ast ON m.id = ast.machineId
+                LEFT JOIN RunTime rt ON m.machineSN = rt.machineSN
+                LEFT JOIN LatestStatus ls ON m.id = ls.machineId AND ls.rn = 1
+                LEFT JOIN ProductionStatus ps ON m.machineSN = ps.machineSN
+                ORDER BY
+                    m.id;
+            """)
+
+            # 3. 執行查詢
+            result = db.session.execute(sql_query, {
+                "start_of_day": start_of_day_str,
+                "end_of_workday": end_of_workday_str
+            })
+            
+            # 轉換結果為可序列化的格式 (通常 .execute() 回傳的是 ResultProxy)
+            # 使用 .mappings().all() 可以將結果轉換成 list of dictionaries
+            machine_accumulated_time = result.mappings().all()
+
+            # 4. 處理回傳結果
+            machine_accumulated_time_dump = MachineAccumulatedTimeSchema().dump(machine_accumulated_time, many=True)
             resp = message(True, "dashboard data sent")
-            resp["data"] = machine_accumulatedTime_dump
+            resp["data"] = machine_accumulated_time_dump
             return resp, 200
+
         except Exception as error:
             raise error
-        
+    
     
     @staticmethod
     def get_machineStatusProportion():
@@ -441,7 +598,11 @@ class DashboardService:
                 .join(Machine, MachineStatus.machineId == Machine.id)
                 .filter(
                     MachineStatus.status == MachineStatusEnum.OFFLINE.value,
-                    MachineStatus.actualStartDate >= midnight
+                    MachineStatus.actualStartDate.isnot(None),
+                    or_(
+                        MachineStatus.actualEndDate.is_(None),
+                        MachineStatus.actualEndDate > func.convert_tz(midnight, midnight.tzinfo.zone, 'UTC')
+                    )
                 )
             )
             machine_offline_events = query.all()
@@ -457,58 +618,7 @@ class DashboardService:
     @staticmethod
     def get_currentMachineStatusCount():
         try:
-            current_time = datetime.now(pytz.timezone(TZ))
-            midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-            # 從ProductionScheduleOngoin資料表找出當天所有生產中的製令單數量
-            query = (
-                db.session.query(
-                    literal("生產中").label("status"),
-                    func.count(ProductionSchedule.machineSN).label('count')
-                )
-                .select_from(ProductionScheduleOngoing)
-                .join(ProductionSchedule, ProductionScheduleOngoing.productionScheduleId == ProductionSchedule.id)
-                .filter(
-                    ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value,
-                    ProductionScheduleOngoing.startTime >= midnight,
-                    ProductionScheduleOngoing.endTime.is_(None)  # Only count ongoing production schedules
-                )
-                .group_by(ProductionSchedule.machineSN)
-            )
-            production_schedule_counts = query.all()
-
-            # 從MachineStatus資料表找出當天所有狀態的機台數量
-            query = (
-                db.session.query(
-                    MachineStatus.status,
-                    func.count(MachineStatus.machineId).label('count')
-                )
-                .select_from(MachineStatus)
-                .join(Machine, MachineStatus.machineId == Machine.id)
-                .filter(
-                    MachineStatus.actualStartDate >= midnight,
-                    MachineStatus.actualEndDate.is_(None)  # Only count machines that are currently active
-                )
-                .group_by(MachineStatus.status)
-            )
-            machine_status_counts = query.all()
-            
-            # 從Machine資料表找出所有機台數量
-            all_machines = (
-                db.session.query(Machine.machineSN)
-                .filter(Machine.machineSN.isnot(None))
-                .all()
-            )
-            all_machines_count = len(all_machines)
-            
-            # 待機機台 = 所有機台數量 - 生產機台數 - 其他狀態機台數
-            production_machine_count = sum(count for status, count in production_schedule_counts)
-            other_status_counts = sum(count for status, count in machine_status_counts)
-            idle_machine_count = all_machines_count - production_machine_count - other_status_counts
-            # 如果待機機台數量小於0，則設為0    
-            idle_machine_count = idle_machine_count if idle_machine_count > 0 else 0
-            # 將待機機台數量加入到機台狀態統計中
-            machine_status_counts.append((MachineStatusEnum.RUN.value, production_machine_count))
-            machine_status_counts.append((MachineStatusEnum.IDLE.value, idle_machine_count))
+            machine_status_counts = _get_machineStatus_count()
 
             # Convert the result to a list of dictionaries
             machine_status_counts_dump = [
@@ -524,95 +634,92 @@ class DashboardService:
     @staticmethod
     def get_todayWorkOrderWithProcess():
         try:
-            current_time = datetime.now(pytz.timezone(TZ))
-            midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-            next_day = current_time + timedelta(days=1)
-            """
-            WITH ps as (
-            SELECT productionSchedule.id, productionSchedule.workOrderSN, productionSchedule.planOnMachineDate, processOption.processName, product.productName
-            FROM productionSchedule
-            LEFT OUTER JOIN product ON productionSchedule.productId = product.id
-            LEFT OUTER JOIN process ON productionSchedule.processId = process.id
-            LEFT OUTER JOIN processOption ON process.processOptionId = processOption.id
-            WHERE productionSchedule.workOrderSN in (
-            SELECT workOrderSN FROM productionSchedule WHERE status = 'On-going'
+            # 1. 定義 Raw SQL
+            sql_query = text("""
+            -- Step 1: CTE 用於準備每個工單的最新製程步驟
+            WITH LatestProcessSteps AS (
+                SELECT
+                    id,
+                    status,
+                    workOrderDate,
+                    workOrderSN,
+                    workOrderQuantity,
+                    planOnMachineDate,
+                    planFinishDate,
+                    processName,
+                    productName,
+                    ROW_NUMBER() OVER(PARTITION BY workOrderSN ORDER BY planOnMachineDate, id) as process_sequence
+                FROM (
+                    -- 子查詢：取得每個製程(processId)的最新一筆記錄
+                    SELECT
+                        ps.id,
+                        ps.status,
+                        ps.workOrderDate,
+                        ps.workOrderSN,
+                        ps.workOrderQuantity,
+                        ps.planOnMachineDate,
+                        ps.planFinishDate,
+                        po.processName,
+                        p.productName,
+                        ROW_NUMBER() OVER(PARTITION BY ps.processId ORDER BY ps.id DESC) as row_num
+                    FROM
+                        productionSchedule AS ps
+                    LEFT OUTER JOIN
+                        product AS p ON ps.productId = p.id
+                    LEFT OUTER JOIN
+                        process ON ps.processId = process.id
+                    LEFT OUTER JOIN
+                        processOption AS po ON process.processOptionId = po.id
+                    WHERE
+                        ps.workOrderSN IN (
+                            SELECT workOrderSN FROM productionSchedule WHERE status = 'On-going'
+                        )
+                        AND ps.status != '取消生產'
+                ) AS RankedSchedules
+                WHERE
+                    row_num = 1 -- 只選擇每個獨立製程的最新一筆
             )
-            )
+            -- Step 2: 使用 CTE 的結果並根據 status 條件化顯示製程名稱
             SELECT
-            p1.workOrderSN,
-            COALESCE(p1.processName, 'N/A') AS 'P1',
-            COALESCE(p2.processName, 'N/A') AS 'P2'
+                p1.workOrderDate,
+                p1.workOrderSN,
+                p1.workOrderQuantity,
+                p1.productName,
+                p1.planFinishDate,
+                p1.status,
+                -- 如果 p1 的狀態是 'Done'，則顯示 '已完成'，否則顯示原始製程名稱
+                CASE 
+                    WHEN p1.status = 'Done' THEN '已完成' 
+                    ELSE p1.processName 
+                END AS 'processOne',
+                
+                p2.status AS 'P2 status',
+                -- 同樣的邏輯應用在 p2。COALESCE 確保在沒有次站時顯示 'N/A'
+                COALESCE(
+                    CASE 
+                        WHEN p2.status = 'Done' THEN '已完成' 
+                        ELSE p2.processName 
+                    END, 
+                    'N/A'
+                ) AS 'processTwo'
             FROM
-            ps p1
+                LatestProcessSteps p1
             LEFT JOIN
-            ps p2
-            ON p1.workOrderSN = p2.workOrderSN
-            AND p1.planOnMachineDate < p2.planOnMachineDate
+                LatestProcessSteps p2
+                ON p1.workOrderSN = p2.workOrderSN AND p2.process_sequence = 2
             WHERE
-            p1.planOnMachineDate = (
-            SELECT MIN(planOnMachineDate)
-            FROM ps p3
-            WHERE p3.workOrderSN = p1.workOrderSN
-            )
+                p1.process_sequence = 1
             ORDER BY
-            p1.id;    
-            """
-            
-            # Step 1: Subquery (ps) with required joins and filter
-            ps_subq = db.session.query(
-                ProductionSchedule.id,
-                ProductionSchedule.workOrderDate,
-                ProductionSchedule.workOrderSN,
-                ProductionSchedule.workOrderQuantity,
-                ProductionSchedule.planOnMachineDate,
-                ProductionSchedule.planFinishDate,
-                ProductionSchedule.status,
-                ProcessOption.processName,
-                Product.productName
-            ).outerjoin(
-                Product, ProductionSchedule.productId == Product.id
-            ).outerjoin(
-                Process, ProductionSchedule.processId == Process.id
-            ).outerjoin(
-                ProcessOption, Process.processOptionId == ProcessOption.id
-            ).filter(
-                ProductionSchedule.workOrderSN.in_(
-                    select(ProductionSchedule.workOrderSN).distinct().filter(
-                        ProductionSchedule.planOnMachineDate >= midnight,
-                        ProductionSchedule.planOnMachineDate < next_day,
-                    )
-                )
-            ).subquery('ps')
+                p1.workOrderSN;
+            """)
 
-            # Step 2: Aliases for self-join
-            ps1 = aliased(ps_subq)
-            ps2 = aliased(ps_subq)
+            # 2. 執行查詢
+            result = db.session.execute(sql_query)
 
-            # Step 3: Main query with self-join and COALESCE
-            min_plan_date_subq = db.session.query(
-                ps1.c.workOrderSN,
-                func.min(ps1.c.planOnMachineDate).label('min_planOnMachineDate')
-            ).group_by(ps1.c.workOrderSN).subquery('min_plan_date')
+            # 轉換結果為可序列化的格式 (通常 .execute() 回傳的是 ResultProxy)
+            # 使用 .mappings().all() 可以將結果轉換成 list of dictionaries
+            today_work_order_with_process = result.mappings().all()
 
-            main_query = db.session.query(
-                ps1.c.workOrderDate,
-                ps1.c.workOrderSN,
-                ps1.c.workOrderQuantity,
-                ps1.c.productName,
-                ps1.c.planFinishDate,
-                ps1.c.status,
-                func.coalesce(ps1.c.processName, 'N/A').label('processOne'),
-                func.coalesce(ps2.c.processName, 'N/A').label('processTwo')
-            ).outerjoin(
-                ps2,
-                (ps1.c.workOrderSN == ps2.c.workOrderSN) & (ps1.c.planOnMachineDate < ps2.c.planOnMachineDate)
-            ).join(
-                min_plan_date_subq,
-                (ps1.c.workOrderSN == min_plan_date_subq.c.workOrderSN) &
-                (ps1.c.planOnMachineDate == min_plan_date_subq.c.min_planOnMachineDate)
-            ).order_by(ps1.c.id)
-
-            today_work_order_with_process = main_query.all()
             today_work_order_with_process_dump = TodayWorkOrderWithProcess().dump(today_work_order_with_process, many=True)
             resp = message(True, "dashboard data sent")
             resp["data"] = today_work_order_with_process_dump
@@ -627,7 +734,6 @@ class DashboardService:
             # Current time
             current_time = datetime.now(pytz.timezone(TZ))
             midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-            next_day = current_time + timedelta(days=1)
 
             # 查詢 status 為 '機台停機' 的記錄，並計算各種停機原因的總停機時間
             query = db.session.query(
@@ -637,14 +743,17 @@ class DashboardService:
                         db.func.timestampdiff(
                             db.text('MINUTE'), 
                             MachineStatus.actualStartDate, 
-                            MachineStatus.actualEndDate
+                            func.coalesce(MachineStatus.actualEndDate, func.now())
                         )
                     ) / 60.0, 2).label('hours')
             ).filter(
                 MachineStatus.status == MachineStatusEnum.OFFLINE.value,
                 MachineStatus.reason.isnot(None),
-                MachineStatus.actualStartDate >= midnight,
-                MachineStatus.actualEndDate <= next_day
+                MachineStatus.actualStartDate.isnot(None),
+                or_(
+                    MachineStatus.actualEndDate.is_(None),
+                    MachineStatus.actualEndDate > func.convert_tz(midnight, midnight.tzinfo.zone, 'UTC'),
+                )
             ).group_by(
                 MachineStatus.reason
             ).order_by(
@@ -717,18 +826,14 @@ class DashboardService:
             total_utilization_rate = (total_run_time_minutes / ((len(machines) * 24 * 60) - total_tuning_time_minutes)) * 100
             total_utilization_rate = round(float(total_utilization_rate), 1)  
 
-            # 3.「生產機台數」=目前為「生產中」的機台數總合
-            total_production_machines = sum(1 for status in total_status_times if status == MachineStatusEnum.RUN.value and total_status_times[status] > 0)
-            
-            # 4.「停機次數」=累計當天所有機台「停機」的次數
-            total_offline_count = (
-                db.session.query(func.count(MachineStatus.id))
-                .filter(
-                    MachineStatus.status == MachineStatusEnum.OFFLINE.value,
-                    MachineStatus.actualStartDate >= midnight,
-                    MachineStatus.actualEndDate <= current_time
-                )
-            ).scalar() or 0
+            # 取得所有機台狀態的台數統計
+            machine_status_counts = _get_machineStatus_count()
+            machine_status_count_list = [{"status": status, "count": count} for status, count in machine_status_counts]
+            # 3.「生產機台數」= 目前為「生產中」的機台數總合
+            total_production_machines = next((item['count'] for item in machine_status_count_list if item['status'] == MachineStatusEnum.RUN.value), 0)
+
+            # 4.「停機台數」= 目前為「機台停機」的機台數總合
+            total_offline_count = next((item['count'] for item in machine_status_count_list if item['status'] == MachineStatusEnum.OFFLINE.value), 0)
             
             # Prepare the result
             result = {
@@ -776,7 +881,7 @@ class DashboardService:
                 start_time = date['start_time']
                 end_time = date['end_time']
                 # Get all machines and their status times
-                machines, total_status_times, each_machine_status_times = _get_machineStatus_statistics(start_time, end_time)
+                machines, total_status_times, each_machine_status_times = _get_machineStatus_statistics_within_period(start_time, end_time)
 
                 # 1. 「稼動率」=「所有機台「生產中」時間」(機)/(「所有機台*24*60」(機)-「所有上模調機的時間」(機))*100%
                 total_run_time_minutes = total_status_times[MachineStatusEnum.RUN.value] / 60 / 2
@@ -846,7 +951,15 @@ class DashboardService:
         try:
             # Current time
             current_time = datetime.now(pytz.timezone(TZ))
+            midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
             overview_data_list = []
+
+            # Create the subquery for ProductionReport where serialNumber = 0
+            production_report_subquery = select(
+                ProductionReport.productionQuantity,
+                ProductionReport.defectiveQuantity,
+                ProductionReport.pschedule_id
+            ).where(ProductionReport.serialNumber == 0).subquery()
 
             # 1. 列出某區域的所有機台
             machine_query = Machine.query
@@ -856,9 +969,10 @@ class DashboardService:
             # 2. 機台生產中，列出productionSchedule中，某區域的所有狀態為On-going的生產排程，並取得產品編號、良率(良品數量 /(不良數+良品數量))、計算完成率
             productionSchedule_query = ProductionSchedule.query
             productionSchedule_query = productionSchedule_query.with_entities(ProductionSchedule.machineSN, ProductionSchedule.workOrderQuantity,
-                ProductionSchedule.productionArea, ProductionReport.productionQuantity, ProductionReport.defectiveQuantity,Product.productSN,
+                ProductionSchedule.productionArea, production_report_subquery.c.productionQuantity, production_report_subquery.c.defectiveQuantity,
+                Product.productSN,
             )
-            productionSchedule_query = productionSchedule_query.outerjoin(ProductionReport, ProductionSchedule.id == ProductionReport.pschedule_id)
+            productionSchedule_query = productionSchedule_query.outerjoin(production_report_subquery, ProductionSchedule.id == production_report_subquery.c.pschedule_id) # left outer join
             productionSchedule_query = productionSchedule_query.outerjoin(Product, ProductionSchedule.productId == Product.id)
             productionSchedule_query = productionSchedule_query.filter(ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value)
             productionSchedule_query = productionSchedule_query.filter(ProductionSchedule.productionArea == productionArea)
@@ -866,8 +980,8 @@ class DashboardService:
             productionSchedule_db_list = productionSchedule_query.all()
             for productionSchedule_db in productionSchedule_db_list:
                 # 計算良率，「良率」=「良品數量(派)」/(「不良數」(派)+「良品數量」(派))
-                good_quantity = productionSchedule_db.productionQuantity
-                defective_quantity = productionSchedule_db.defectiveQuantity
+                good_quantity = productionSchedule_db.productionQuantity if productionSchedule_db.productionQuantity is not None else 0
+                defective_quantity = productionSchedule_db.defectiveQuantity if productionSchedule_db.defectiveQuantity is not None else 0
                 yield_rate = Decimal(good_quantity) / (Decimal(good_quantity) + Decimal(defective_quantity)) if (good_quantity + defective_quantity) > 0 else Decimal(0)
                 yield_rate = round(float(yield_rate), 2)
                 # 計算完成率，「完成率」=「良品數量」(派)/「製令數量」(派)
@@ -890,8 +1004,10 @@ class DashboardService:
             machineStatus_query = machineStatus_query.with_entities(MachineStatus.status, Machine.machineSN, Machine.productionArea)
             machineStatus_query = machineStatus_query.join(Machine, Machine.id == MachineStatus.machineId)
             machineStatus_query = machineStatus_query.filter(Machine.productionArea == productionArea)
-            machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate <= current_time)
-            machineStatus_query = machineStatus_query.filter(MachineStatus.actualEndDate == None)
+            machineStatus_query = machineStatus_query.filter(MachineStatus.actualStartDate != None)
+            machineStatus_query = machineStatus_query.filter(or_(MachineStatus.actualEndDate == None,
+                                                                MachineStatus.actualEndDate > func.convert_tz(midnight, midnight.tzinfo.zone, 'UTC'))
+                                                            )
             machineStatus_query = machineStatus_query.filter(Machine.machineSN.notin_(ongoing_machineSN_list))
             machineStatus_query = machineStatus_query.group_by(MachineStatus.machineId)
             machineStatus_db_list = machineStatus_query.all()
@@ -905,12 +1021,11 @@ class DashboardService:
                     "completionRate": None,
                 })
             started_machineSN_list = [machineStatus_db.machineSN for machineStatus_db in machineStatus_db_list]
-            
+
             # 整理出所有機台的machineSN
             all_machineSN_list = [machine.machineSN for machine in machine_db_list]
             # 整理出生產中機台的machineSN和已開始某個狀態的機台的machineSN
             ongoing_machineSN_list = [productionSchedule_db.machineSN for productionSchedule_db in productionSchedule_db_list]
-            started_machineSN_list = [machineStatus_db.machineSN for machineStatus_db in machineStatus_db_list]
             # 所有機台machineSN 排除掉生產中和已開始某個狀態的機台
             idle_machineSN_list = list(set(all_machineSN_list) - set(ongoing_machineSN_list) - set(started_machineSN_list))
             # 剩下機台都顯示為待機
@@ -923,11 +1038,9 @@ class DashboardService:
                     "yield": None,
                     "completionRate": None,
                 })  
-
             
             # 依照machineSN排序
             overview_data_list.sort(key=lambda x: (x['machineSN'][0], int(x['machineSN'][1:])))
-            
 
             resp = message(True, "machineStatus data sent")
             resp["data"] = overview_data_list
