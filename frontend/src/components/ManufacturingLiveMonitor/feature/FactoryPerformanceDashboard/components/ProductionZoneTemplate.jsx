@@ -6,13 +6,12 @@ import styled from "styled-components";
 //! =============== 1. 設定與常量 ===============
 //* 設備狀態映射 - 將API返回的machineStatus轉換為卡片狀態
 const STATUS_MAPPING = {
-  "生產中": "success",
-  "產品試模": "testing",
-  "調機中": "adjusting",
-  "機台停機": "inactive",
-  "待機中": "inactive",
-  "需注意": "warning",
-  "異常狀態": "danger",
+  生產中: "success",
+  產品試模: "testing",
+  上模與調機: "adjusting",
+  機台停機: "danger",
+  待機中: "inactive",
+  ////////////////////////////////////////////
   "": "inactive",
   null: "inactive",
   undefined: "inactive",
@@ -60,6 +59,7 @@ const CardContainer = styled.div`
  * @returns {Array} 轉換後的設備資料陣列
  */
 function transformApiData(apiData, machinePositionMap, productionArea) {
+  console.log("🚀 ~ transformApiData ~ apiData:", apiData);
   if (!Array.isArray(apiData)) return [];
 
   return apiData.map((machine) => ({
@@ -67,7 +67,9 @@ function transformApiData(apiData, machinePositionMap, productionArea) {
     model: machine.productSN || "--",
     // 轉換小數點為百分比顯示
     goodRate: machine.yield ? Math.round(machine.yield * 100) : 0,
-    completionRate: machine.completionRate ? Math.round(machine.completionRate * 100) : 0,
+    completionRate: machine.completionRate
+      ? Math.round(machine.completionRate * 100)
+      : 0,
     status: STATUS_MAPPING[machine.machineStatus] || "inactive",
     gridArea:
       machinePositionMap[machine.machineSN] ||

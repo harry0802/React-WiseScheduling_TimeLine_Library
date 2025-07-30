@@ -5,7 +5,6 @@ import styled, { css } from "styled-components";
 //! =============== 1. 設定與常量 ===============
 //* 🧠 狀態配置常量 - 集中管理所有視覺相關屬性
 // 修改 DashboardCard.jsx 中的 STATUS_CONFIG
-//* 🧠 狀態配置常量 - 集中管理所有視覺相關屬性
 const STATUS_CONFIG = {
   success: {
     bgColor: "rgba(19, 70, 58, 0.85)", // 深綠色 + 透明度
