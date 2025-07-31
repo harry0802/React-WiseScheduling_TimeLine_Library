@@ -1,17 +1,17 @@
 import { manufacturingApiSlice } from "../manufacturingApiSlice";
-import { 
-  API_ENDPOINTS, 
-  ERROR_MESSAGES, 
+import {
+  API_ENDPOINTS,
+  ERROR_MESSAGES,
   TAG_TYPES,
-  POLLING_INTERVALS 
+  POLLING_INTERVALS,
 } from "../shared/constants";
-import { 
+import {
   transformArrayResponse,
   transformObjectResponse,
   transformErrorResponse,
   transformMachineStatusHoursData,
   getDefaultUtilizationStatistics,
-  getDefaultOfflineReasonData
+  getDefaultOfflineReasonData,
 } from "../shared/transformers";
 
 /**
@@ -44,8 +44,11 @@ export const oeeInsightApi = manufacturingApiSlice.injectEndpoints({
       providesTags: [TAG_TYPES.MACHINE_STATUS_PROPORTION],
       pollingInterval: POLLING_INTERVALS.HOURLY,
       transformResponse: (response) => transformArrayResponse(response),
-      transformErrorResponse: (response) => 
-        transformErrorResponse(response, ERROR_MESSAGES.OEE_INSIGHT.MACHINE_STATUS_PROPORTION),
+      transformErrorResponse: (response) =>
+        transformErrorResponse(
+          response,
+          ERROR_MESSAGES.OEE_INSIGHT.MACHINE_STATUS_PROPORTION
+        ),
     }),
 
     /**
@@ -62,10 +65,13 @@ export const oeeInsightApi = manufacturingApiSlice.injectEndpoints({
       query: () => API_ENDPOINTS.OEE_INSIGHT.MACHINE_UTILIZATION_STATISTICS,
       providesTags: [TAG_TYPES.MACHINE_UTILIZATION_STATISTICS],
       pollingInterval: POLLING_INTERVALS.HOURLY,
-      transformResponse: (response) => 
+      transformResponse: (response) =>
         transformObjectResponse(response, getDefaultUtilizationStatistics()),
-      transformErrorResponse: (response) => 
-        transformErrorResponse(response, ERROR_MESSAGES.OEE_INSIGHT.MACHINE_UTILIZATION_STATISTICS),
+      transformErrorResponse: (response) =>
+        transformErrorResponse(
+          response,
+          ERROR_MESSAGES.OEE_INSIGHT.MACHINE_UTILIZATION_STATISTICS
+        ),
     }),
 
     /**
@@ -74,16 +80,19 @@ export const oeeInsightApi = manufacturingApiSlice.injectEndpoints({
      * @usage 用於 OEE 停機原因分析圖表
      * @returns {Promise<Object>} 停機因素佔比資料
      * @returns {string} returns.reason - 停機原因
-     * @returns {number} returns.hours - 停機時間 (小時)
+     * @returns {number} returns.count - 停機次數或數量
      */
     getMachineOfflineReasonProportion: builder.query({
       query: () => API_ENDPOINTS.OEE_INSIGHT.MACHINE_OFFLINE_REASON_PROPORTION,
       providesTags: [TAG_TYPES.MACHINE_OFFLINE_REASON_PROPORTION],
       pollingInterval: POLLING_INTERVALS.HOURLY,
-      transformResponse: (response) => 
+      transformResponse: (response) =>
         transformObjectResponse(response, getDefaultOfflineReasonData()),
-      transformErrorResponse: (response) => 
-        transformErrorResponse(response, ERROR_MESSAGES.OEE_INSIGHT.MACHINE_OFFLINE_REASON_PROPORTION),
+      transformErrorResponse: (response) =>
+        transformErrorResponse(
+          response,
+          ERROR_MESSAGES.OEE_INSIGHT.MACHINE_OFFLINE_REASON_PROPORTION
+        ),
     }),
 
     /**
@@ -102,10 +111,13 @@ export const oeeInsightApi = manufacturingApiSlice.injectEndpoints({
       query: () => API_ENDPOINTS.OEE_INSIGHT.MACHINE_STATUS_HOURS_STATISTICS,
       providesTags: [TAG_TYPES.MACHINE_STATUS_HOURS_STATISTICS],
       pollingInterval: POLLING_INTERVALS.HOURLY,
-      transformResponse: (response) => 
+      transformResponse: (response) =>
         transformArrayResponse(response, transformMachineStatusHoursData),
-      transformErrorResponse: (response) => 
-        transformErrorResponse(response, ERROR_MESSAGES.OEE_INSIGHT.MACHINE_STATUS_HOURS_STATISTICS),
+      transformErrorResponse: (response) =>
+        transformErrorResponse(
+          response,
+          ERROR_MESSAGES.OEE_INSIGHT.MACHINE_STATUS_HOURS_STATISTICS
+        ),
     }),
   }),
 });

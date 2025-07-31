@@ -35,8 +35,8 @@ function DowntimeFactorsDashboard() {
    *
    * 邏輯說明：
    * 1. 遍歷靜態的 DOWNTIME_CATEGORIES 陣列
-   * 2. 為每個類別在 API 資料中查找對應的 hours 值
-   * 3. 如果找到匹配，使用 API 資料的 hours 值
+   * 2. 為每個類別在 API 資料中查找對應的 count 值
+   * 3. 如果找到匹配，使用 API 資料的 count 值
    * 4. 如果未找到或 API 資料為空，使用 0 作為預設值
    * 5. 保持與 yAxis.data 相同的順序
    */
@@ -52,7 +52,7 @@ function DowntimeFactorsDashboard() {
     // 根據 DOWNTIME_CATEGORIES 的順序映射資料
     return DOWNTIME_CATEGORIES.map((category) => {
       const matchedItem = dataArray.find((item) => item.reason === category);
-      return matchedItem ? matchedItem.hours : 0;
+      return matchedItem ? matchedItem.count : 0;
     });
   }, [apiData, isLoading, isError]);
 
@@ -74,11 +74,18 @@ function DowntimeFactorsDashboard() {
 
       // X軸配置 - 水平柱狀圖中表示數值
       xAxis: {
-        name: "",
+        name: "台", // ✨ [修改] 將單位設置為座標軸的名稱
+        nameLocation: "end", // ✨ [新增] 確保名稱顯示在軸的末端
+        nameTextStyle: {
+          // ✨ [新增] 統一名稱與標籤的樣式，並增加一點間距
+          fill: "#ffffff",
+          fontSize: 20,
+          padding: [0, 0, 0, 5], // 避免與最後一個數字重疊
+        },
         data: "value",
         min: 0,
-        max: 24,
-        interval: 3,
+        max: 40,
+        interval: 2,
         axisLine: {
           show: true,
           style: {
@@ -96,9 +103,9 @@ function DowntimeFactorsDashboard() {
         axisLabel: {
           style: {
             fill: "#ffffff",
-            fontSize: 16,
+            fontSize: 20,
           },
-          formatter: "{value}時",
+          formatter: "{value}", // ✨ [修改] 移除每個標籤後的 "台"
         },
       },
 
