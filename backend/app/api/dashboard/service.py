@@ -34,6 +34,7 @@ def _get_machineStatus_statistics(start_time, end_time) -> tuple:
     """
     # Time from midnight to current time (used for per-machine idle time)
     day_seconds = Decimal((end_time - start_time).total_seconds())
+    utc_start_time = func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC')
 
     # Get all machines
     machines = db.session.query(Machine.id).all()
@@ -57,11 +58,12 @@ def _get_machineStatus_statistics(start_time, end_time) -> tuple:
         # Query production time for this machine
         # 利用distinct避免重複計算同一個機台多張製令單生產的情況
         production_time_subquery = db.session.query(
-            ProductionScheduleOngoing.startTime,
-            func.timestampdiff(
-                text('SECOND'),
-                func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC'),
-                func.coalesce(ProductionScheduleOngoing.endTime, func.now())
+            ProductionScheduleOngoing.startTime, func.max(
+                func.timestampdiff(
+                    text('SECOND'),
+                    utc_start_time,
+                    func.coalesce(ProductionScheduleOngoing.endTime, func.now())
+                )
             ).label('production_seconds')
         ).join(
             ProductionSchedule,
@@ -74,10 +76,12 @@ def _get_machineStatus_statistics(start_time, end_time) -> tuple:
             ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value,
             ProductionScheduleOngoing.startTime.isnot(None),
             or_(
-                ProductionScheduleOngoing.endTime > func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC'),
+                ProductionScheduleOngoing.endTime > utc_start_time,
                 ProductionScheduleOngoing.endTime.is_(None)
             )
-        ).distinct().subquery()
+        ).group_by(
+            ProductionScheduleOngoing.startTime
+        ).subquery()
 
         production_time_query = db.session.query(
             func.sum(production_time_subquery.c.production_seconds).label('total_production_seconds')
@@ -85,14 +89,14 @@ def _get_machineStatus_statistics(start_time, end_time) -> tuple:
         production_time = (
             production_time_query.scalar() or Decimal('0')
         )
-        
+
         # Query machine status times for this machine
         machine_status_times = (
             db.session.query(
                 MachineStatus.status,
                 func.sum(
                     func.timestampdiff(text('SECOND'), 
-                    func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC'), 
+                    utc_start_time, 
                     func.coalesce(MachineStatus.actualEndDate, func.now()))
                 ).label('status_seconds')
             )
@@ -100,7 +104,7 @@ def _get_machineStatus_statistics(start_time, end_time) -> tuple:
                 MachineStatus.machineId == machine_id,
                 MachineStatus.actualStartDate.isnot(None),
                 or_(
-                    MachineStatus.actualEndDate > func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC'),
+                    MachineStatus.actualEndDate > utc_start_time,
                     MachineStatus.actualEndDate.is_(None)
                 )
             )
@@ -156,6 +160,8 @@ def _get_machineStatus_statistics_within_period(start_time, end_time) -> tuple:
     """
     # Time from midnight to current time (used for per-machine idle time)
     day_seconds = Decimal((end_time - start_time).total_seconds())
+    utc_start_time = func.convert_tz(start_time, start_time.tzinfo.zone, 'UTC')
+    utc_end_time = func.convert_tz(end_time, end_time.tzinfo.zone, 'UTC')
 
     # Get all machines
     machines = db.session.query(Machine.id).all()
@@ -180,11 +186,17 @@ def _get_machineStatus_statistics_within_period(start_time, end_time) -> tuple:
         # 利用distinct避免重複計算同一個機台多張製令單生產的情況
         production_time_subquery = db.session.query(
             ProductionScheduleOngoing.startTime,
-            func.timestampdiff(
-                text('SECOND'),
-                ProductionScheduleOngoing.startTime,
-                func.coalesce(ProductionScheduleOngoing.endTime, func.now())
-            ).label('production_seconds')
+            func.max(
+                func.timestampdiff(
+                    text('SECOND'),
+                    utc_start_time,
+                    # IF ProductionScheduleOngoing.endTime < end_time, count to ProductionScheduleOngoing.endTime, else count to end_time
+                    case(
+                        (ProductionScheduleOngoing.endTime < utc_end_time, ProductionScheduleOngoing.endTime),
+                        else_=utc_end_time
+                    )
+                )
+            ).label('production_seconds'),
         ).join(
             ProductionSchedule,
             ProductionScheduleOngoing.productionScheduleId == ProductionSchedule.id
@@ -194,12 +206,14 @@ def _get_machineStatus_statistics_within_period(start_time, end_time) -> tuple:
         ).filter(
             Machine.id == machine_id,
             ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value,
-            ProductionScheduleOngoing.startTime >= start_time,
+            ProductionScheduleOngoing.startTime.isnot(None),
             or_(
-                ProductionScheduleOngoing.endTime < end_time,
+                ProductionScheduleOngoing.endTime > utc_start_time,
                 ProductionScheduleOngoing.endTime.is_(None)
             )
-        ).distinct().subquery()
+        ).group_by(
+            ProductionScheduleOngoing.startTime
+        ).subquery()
 
         production_time_query = db.session.query(
             func.sum(production_time_subquery.c.production_seconds).label('total_production_seconds')
@@ -213,21 +227,25 @@ def _get_machineStatus_statistics_within_period(start_time, end_time) -> tuple:
             db.session.query(
                 MachineStatus.status,
                 func.sum(
-                    func.timestampdiff(text('SECOND'), MachineStatus.actualStartDate, func.coalesce(MachineStatus.actualEndDate, func.now()))
+                    func.timestampdiff(text('SECOND'), 
+                    utc_start_time, 
+                    case(
+                        (MachineStatus.actualEndDate < utc_end_time, MachineStatus.actualEndDate),
+                        else_=utc_end_time
+                    ))
                 ).label('status_seconds')
             )
             .filter(
                 MachineStatus.machineId == machine_id,
-                MachineStatus.actualStartDate >= start_time,
+                MachineStatus.actualStartDate.isnot(None),
                 or_(
-                    MachineStatus.actualEndDate < end_time,
+                    MachineStatus.actualEndDate > utc_start_time,
                     MachineStatus.actualEndDate.is_(None)
                 )
             )
             .group_by(MachineStatus.status)
             .all()
         )
-
         # Initialize status times for this machine
         status_times = {
             MachineStatusEnum.RUN.value: production_time,
@@ -661,7 +679,7 @@ class DashboardService:
                         ps.planFinishDate,
                         po.processName,
                         p.productName,
-                        ROW_NUMBER() OVER(PARTITION BY ps.processId ORDER BY ps.id DESC) as row_num
+                        ROW_NUMBER() OVER(PARTITION BY ps.processId ORDER BY ps.id) as row_num
                     FROM
                         productionSchedule AS ps
                     LEFT OUTER JOIN
@@ -735,17 +753,12 @@ class DashboardService:
             current_time = datetime.now(pytz.timezone(TZ))
             midnight = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
 
-            # 查詢 status 為 '機台停機' 的記錄，並計算各種停機原因的總停機時間
+            # 查詢 status 為 '機台停機' 的記錄，並計算各種停機原因的機台數量
             query = db.session.query(
                 MachineStatus.reason.label('reason'),
-                db.func.round(
-                    db.func.sum(
-                        db.func.timestampdiff(
-                            db.text('MINUTE'), 
-                            MachineStatus.actualStartDate, 
-                            func.coalesce(MachineStatus.actualEndDate, func.now())
-                        )
-                    ) / 60.0, 2).label('hours')
+                db.func.count(
+                    MachineStatus.machineId
+                ).label('count'),
             ).filter(
                 MachineStatus.status == MachineStatusEnum.OFFLINE.value,
                 MachineStatus.reason.isnot(None),
@@ -757,7 +770,7 @@ class DashboardService:
             ).group_by(
                 MachineStatus.reason
             ).order_by(
-                db.desc('hours')
+                db.desc('count')
             )
             
             machine_offline_reason = query.all()
@@ -765,7 +778,7 @@ class DashboardService:
             result_list = [
                 {
                     'reason': result.reason,
-                    'hours': float(result.hours)
+                    'count': float(result.count)
                 }
                 for result in machine_offline_reason
             ]
@@ -821,10 +834,10 @@ class DashboardService:
             total_run_time_str = f"{int(total_run_time_seconds // 3600):02}時{int((total_run_time_seconds % 3600) // 60):02}分"
             
             # 2. 「稼動率」=「所有機台「生產中」時間」(機)/(「所有機台*24*60」(機)-「所有上模調機的時間」(機))*100%
-            total_run_time_minutes = total_status_times[MachineStatusEnum.RUN.value] / 60 / 2
+            total_run_time_minutes = total_status_times[MachineStatusEnum.RUN.value] / 60
             total_tuning_time_minutes = total_status_times[MachineStatusEnum.TUNING.value] / 60
             total_utilization_rate = (total_run_time_minutes / ((len(machines) * 24 * 60) - total_tuning_time_minutes)) * 100
-            total_utilization_rate = round(float(total_utilization_rate), 1)  
+            total_utilization_rate = round(float(total_utilization_rate), 2)  
 
             # 取得所有機台狀態的台數統計
             machine_status_counts = _get_machineStatus_count()
@@ -884,47 +897,40 @@ class DashboardService:
                 machines, total_status_times, each_machine_status_times = _get_machineStatus_statistics_within_period(start_time, end_time)
 
                 # 1. 「稼動率」=「所有機台「生產中」時間」(機)/(「所有機台*24*60」(機)-「所有上模調機的時間」(機))*100%
-                total_run_time_minutes = total_status_times[MachineStatusEnum.RUN.value] / 60 / 2
+                total_run_time_minutes = total_status_times[MachineStatusEnum.RUN.value] / 60
                 total_tuning_time_minutes = total_status_times[MachineStatusEnum.TUNING.value] / 60
-                total_utilization_rate = (total_run_time_minutes / ((len(machines) * 24 * 60) - total_tuning_time_minutes)) * 100
-                total_utilization_rate = round(float(total_utilization_rate), 1)  
+                total_utilization_rate = (total_run_time_minutes / ((len(machines) * 24 * 60) - total_tuning_time_minutes))
+                total_utilization_rate = round(float(total_utilization_rate), 2)  
 
-                # 2. 「產能效率」=「所有機台的「良品數(productionQuantity)」(ProductionReport)+「不良品數(defectiveQuantity)」(ProductionReport)」/(所有機台的「穴數(moldCavity)」(ProductionSchedule)*「產能小時(hourlyCapacity)」(ProductionSchedule))
+                # 2. 「產能效率」=「所有機台的「良品數(productionQuantity)」(ProductionReport)」 / ((所有機台的「產能小時(hourlyCapacity)」(ProductionSchedule) *「日工時(dailyWorkingHours)」(ProductionSchedule))
+                # 在productionReport資料表統計startTime == date所有的productionQuantity
                 total_good_quantity = (
                     db.session.query(func.sum(ProductionReport.productionQuantity))
                     .filter(
-                        ProductionReport.startTime >= start_time,
-                        ProductionReport.endTime <= end_time
+                        func.date(ProductionReport.startTime) == date['date'],
                     )
                 ).scalar() or 0
-                total_defective_quantity = (
-                    db.session.query(func.sum(ProductionReport.defectiveQuantity))
+                # 在productionSchedule資料表統計status == ongoing的 hourlyCapacity * dailyWorkingHours
+                total_expected_quantity = (
+                    db.session.query(func.sum(ProductionSchedule.hourlyCapacity * ProductionSchedule.dailyWorkingHours))
                     .filter(
-                        ProductionReport.startTime >= start_time,
-                        ProductionReport.endTime <= end_time
+                        ProductionSchedule.status == WorkOrderStatusEnum.ON_GOING.value,
                     )
                 ).scalar() or 0
-                total_mold_cavity = (
-                    db.session.query(func.sum(ProductionSchedule.moldCavity))
-                    .filter(
-                        ProductionSchedule.planOnMachineDate >= start_time,
-                        ProductionSchedule.planOnMachineDate < end_time
-                    )
-                ).scalar() or 0
-                total_hourly_capacity = (
-                    db.session.query(func.sum(ProductionSchedule.hourlyCapacity))
-                    .filter(
-                        ProductionSchedule.planOnMachineDate >= start_time,
-                        ProductionSchedule.planOnMachineDate < end_time
-                    )
-                ).scalar() or 0
-                if total_mold_cavity > 0 and total_hourly_capacity > 0:
-                    total_capacity_efficiency = ((total_good_quantity + total_defective_quantity) / (total_mold_cavity * total_hourly_capacity))
+                if total_expected_quantity > 0:
+                    total_capacity_efficiency = total_good_quantity / total_expected_quantity
                 else:
                     total_capacity_efficiency = 0.0
                 total_capacity_efficiency = round(float(total_capacity_efficiency), 2)
+                
 
                 # 3. 「良率」= 「良品數量(productionQuantity)」(ProductionReport)/(「不良數(defectiveQuantity)」(ProductionReport)+「良品數量」(派))
+                total_defective_quantity = (
+                    db.session.query(func.sum(ProductionReport.defectiveQuantity))
+                    .filter(
+                        func.date(ProductionReport.startTime) == date['date'],
+                    )
+                ).scalar() or 0
                 if total_good_quantity + total_defective_quantity > 0:
                     total_yield = (total_good_quantity / (total_good_quantity + total_defective_quantity))
                 else:
@@ -932,14 +938,14 @@ class DashboardService:
                 total_yield = round(float(total_yield), 2)
 
                 # 4. 「OEE」=「稼動率」*「產能效率」*「良率」
-                total_oee = (total_utilization_rate * total_capacity_efficiency * total_yield)
+                total_oee = (total_utilization_rate * total_capacity_efficiency * total_yield) * 100
                 total_oee = round(float(total_oee), 2)
 
                 oee_data.append({
                     'date': date['date'].isoformat(),
                     'OEE': total_oee,
                 })
-            
+
             resp = message(True, "dashboard data sent")
             resp["data"] = oee_data
             return resp, 200
