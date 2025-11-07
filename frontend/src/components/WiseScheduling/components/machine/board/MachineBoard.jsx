@@ -65,13 +65,18 @@ const BoardHeader = ({ area, onAreaChange }) => (
  */
 const MachinesGridContainer = ({ machines, onMachineClick }) => (
   <MachinesGrid>
-    {machines.map((machineData) => (
-      <MachineCard
-        key={machineData.machine.machineSN}
-        machineData={machineData}
-        onMachineClick={onMachineClick}
-      />
-    ))}
+    {machines.map((machineData) => {
+      const key = machineData.machine?.machine?.machineSN ||
+                  machineData.machine?.machineSN ||
+                  Math.random();
+      return (
+        <MachineCard
+          key={key}
+          machineData={machineData}
+          onMachineClick={onMachineClick}
+        />
+      );
+    })}
   </MachinesGrid>
 );
 
@@ -93,22 +98,33 @@ const StatusDrawer = ({
   onUpdateStatus,
   onSubmit,
   statusManagerRef,
-}) => (
-  <BaseDrawer visible={visible} onClose={onClose} width={700}>
-    <BaseDrawer.Header>修改機台狀態</BaseDrawer.Header>
-    <BaseDrawer.Body>
-      {selectedMachine && (
-        <StatusManager
-          ref={statusManagerRef}
-          initialData={selectedMachine}
-          onSubmit={onUpdateStatus}
-          machineId={selectedMachine.machineId}
-        />
-      )}
-    </BaseDrawer.Body>
-    <BaseDrawer.Footer onSubmit={onSubmit} />
-  </BaseDrawer>
-);
+}) => {
+  // 除錯日誌
+  React.useEffect(() => {
+    if (selectedMachine) {
+      console.log('[StatusDrawer] Selected machine:', selectedMachine);
+      console.log('[StatusDrawer] Machine ID:', selectedMachine.machineId);
+      console.log('[StatusDrawer] Machine SN:', selectedMachine.machine?.machineSN);
+    }
+  }, [selectedMachine]);
+
+  return (
+    <BaseDrawer visible={visible} onClose={onClose} width={700}>
+      <BaseDrawer.Header>修改機台狀態</BaseDrawer.Header>
+      <BaseDrawer.Body>
+        {selectedMachine && (
+          <StatusManager
+            ref={statusManagerRef}
+            initialData={selectedMachine}
+            onSubmit={onUpdateStatus}
+            machineId={selectedMachine.machineId}
+          />
+        )}
+      </BaseDrawer.Body>
+      <BaseDrawer.Footer onSubmit={onSubmit} />
+    </BaseDrawer>
+  );
+};
 
 /**
  * 機台狀態看板主組件
