@@ -124,7 +124,7 @@ const MachineStatusManager = forwardRef((props, ref) => {
       <StatusHeader>
         <div>
           <h3>
-            {initialData?.productionArea || ""} - {initialData?.machineSN || ""}
+            {initialData?.machine?.productionArea || ""} - {initialData?.machine?.machineSN || ""}
           </h3>
           <p>
             稼動時間：
