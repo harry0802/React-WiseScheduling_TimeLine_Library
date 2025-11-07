@@ -39,26 +39,32 @@ export const useMachineBoard = (initialArea = "A") => {
   const processedMachines = useMemo(() => {
     if (!machineStatus?.length) return [];
 
-    // 先處理機台數據
-    const processedData = machineStatus.map((machine) => {
-      const englishStatus = machine.status;
-      const isRunning = englishStatus === "RUN";
+    console.log('[useMachineBoard] Raw machine status:', machineStatus);
 
-      return {
-        machine,
-        englishStatus,
-        statusText:
-          STATUS_STYLE_MAP[englishStatus]?.text || STATUS_STYLE_MAP.IDLE.text,
-        isClickable: !isRunning,
-        showIcon: !isRunning,
-      };
-    });
+    // 先處理機台數據
+    const processedData = machineStatus
+      .filter(item => item && item.machine) // 過濾無效資料
+      .map((item) => {
+        const englishStatus = item.status;
+        const isRunning = englishStatus === "RUN";
+
+        return {
+          machine: item, // 整個 item 包含 machine 和 status 資訊
+          englishStatus,
+          statusText:
+            STATUS_STYLE_MAP[englishStatus]?.text || STATUS_STYLE_MAP.IDLE.text,
+          isClickable: !isRunning,
+          showIcon: !isRunning,
+        };
+      });
 
     // 按機台編號自然排序 (A1, A2, A10, A11...)
     return processedData.sort((a, b) => {
-      return a.machine.machineSN.localeCompare(b.machine.machineSN, 'zh-TW', { 
-        numeric: true, 
-        sensitivity: 'base' 
+      const machineA = a.machine?.machine?.machineSN || '';
+      const machineB = b.machine?.machine?.machineSN || '';
+      return machineA.localeCompare(machineB, 'zh-TW', {
+        numeric: true,
+        sensitivity: 'base'
       });
     });
   }, [machineStatus]);
