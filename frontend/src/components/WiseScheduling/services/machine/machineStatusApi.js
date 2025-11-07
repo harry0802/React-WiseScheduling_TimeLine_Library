@@ -15,30 +15,35 @@ export const machineStatusApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // 獲取某一區全部機台，以及機台狀態
     getMachineStatus: builder.query({
-      queryFn: async (productionArea) => {
+      async queryFn(productionArea) {
         // 如果啟用 Mock API
         if (USE_MOCK_API) {
           await delay();
           const data = mockDataStore[productionArea] || [];
+          console.log(`[Mock API] 獲取區域 ${productionArea} 的機台狀態:`, data.length, '台機器');
           return { data };
         }
 
-        // 使用真實 API（保留原有邏輯）
-        return { error: { status: "CUSTOM_ERROR", error: "請設定真實 API" } };
-      },
-      query: (productionArea) =>
-        `machineStatus/?productionArea=${productionArea}`,
-      providesTags: ["MachineStatus"],
-      transformResponse: (response) => {
-        if (USE_MOCK_API) return response;
+        // 如果沒有啟用 Mock，則使用真實 API
+        // 這裡需要手動調用 fetch
+        try {
+          const baseUrl = apiSlice.reducerPath ? '' : '/api';
+          const response = await fetch(`${baseUrl}/api/machineStatus/?productionArea=${productionArea}`);
+          const result = await response.json();
+          const data = result.data;
 
-        const data = response.data;
-        // 在 API 層統一將中文狀態轉換為英文狀態碼
-        return data.map(machine => ({
-          ...machine,
-          status: getStatusCode(machine.status) // 中文狀態 → 英文狀態碼
-        }));
+          // 在 API 層統一將中文狀態轉換為英文狀態碼
+          return {
+            data: data.map(machine => ({
+              ...machine,
+              status: getStatusCode(machine.status)
+            }))
+          };
+        } catch (error) {
+          return { error: { status: "FETCH_ERROR", error: error.message } };
+        }
       },
+      providesTags: ["MachineStatus"],
     }),
 
     /**
@@ -67,7 +72,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
      * });
      */
     createMachineStatus: builder.mutation({
-      queryFn: async (fullApiData) => {
+      async queryFn(fullApiData) {
         if (USE_MOCK_API) {
           await delay();
           // 模擬新增資料
@@ -79,32 +84,37 @@ export const machineStatusApi = apiSlice.injectEndpoints({
           mockDataStore[area] = mockDataStore[area].map((m) =>
             m.machineId === fullApiData.machineId ? { ...m, ...newStatus } : m
           );
+          console.log('[Mock API] 新增機台狀態:', newStatus);
           return { data: newStatus };
         }
-        return { error: { status: "CUSTOM_ERROR", error: "請設定真實 API" } };
-      },
-      query: (fullApiData) => {
-        // 直接過濾成需要的格式
-        const filteredData = {
-          id: fullApiData.machineStatusId ?? fullApiData.id, // 使用 machineStatusId 作為 id
-          machineId: fullApiData.machineId,
-          planStartDate: fullApiData.planStartDate,
-          planEndDate: fullApiData.planEndDate,
-          actualStartDate: fullApiData.actualStartDate,
-          actualEndDate: fullApiData.actualEndDate,
-          status: fullApiData.status,
-          reason: fullApiData?.machineStatusReason ?? fullApiData.reason,
-          product: fullApiData?.machineStatusProduct ?? fullApiData.product,
-        };
-        // 過濾掉 null 值
-        const cleanData = Object.fromEntries(
-          Object.entries(filteredData).filter(([_, value]) => value != null)
-        );
-        return {
-          url: "machineStatus/",
-          method: "POST",
-          body: cleanData,
-        };
+
+        // 真實 API
+        try {
+          const filteredData = {
+            id: fullApiData.machineStatusId ?? fullApiData.id,
+            machineId: fullApiData.machineId,
+            planStartDate: fullApiData.planStartDate,
+            planEndDate: fullApiData.planEndDate,
+            actualStartDate: fullApiData.actualStartDate,
+            actualEndDate: fullApiData.actualEndDate,
+            status: fullApiData.status,
+            reason: fullApiData?.machineStatusReason ?? fullApiData.reason,
+            product: fullApiData?.machineStatusProduct ?? fullApiData.product,
+          };
+          const cleanData = Object.fromEntries(
+            Object.entries(filteredData).filter(([_, value]) => value != null)
+          );
+
+          const response = await fetch('/api/machineStatus/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cleanData),
+          });
+          const result = await response.json();
+          return { data: result };
+        } catch (error) {
+          return { error: { status: "FETCH_ERROR", error: error.message } };
+        }
       },
       invalidatesTags: ["MachineStatus", "schedule"],
     }),
@@ -123,7 +133,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
 }
   */
     updateMachineStatus: builder.mutation({
-      queryFn: async (fullApiData) => {
+      async queryFn(fullApiData) {
         if (USE_MOCK_API) {
           await delay();
           // 模擬更新資料
@@ -133,33 +143,37 @@ export const machineStatusApi = apiSlice.injectEndpoints({
               ? { ...m, ...fullApiData }
               : m
           );
+          console.log('[Mock API] 更新機台狀態:', fullApiData);
           return { data: fullApiData };
         }
-        return { error: { status: "CUSTOM_ERROR", error: "請設定真實 API" } };
-      },
-      query: (fullApiData) => {
-        // 過濾成需要的格式
-        const filteredData = {
-          id: fullApiData.machineStatusId ?? fullApiData.id, // 使用 machineStatusId 作為 id
-          machineId: fullApiData.machineId,
-          planStartDate: fullApiData.planStartDate,
-          planEndDate: fullApiData.planEndDate,
-          actualStartDate: fullApiData.actualStartDate,
-          actualEndDate: fullApiData.actualEndDate ?? null,
-          status: fullApiData.status,
-          reason: fullApiData?.machineStatusReason ?? fullApiData.reason,
-          product: fullApiData?.machineStatusProduct ?? fullApiData.product,
-        };
-        // 過濾掉 null 值
-        const cleanData = Object.fromEntries(
-          Object.entries(filteredData).filter(([_, value]) => value != null)
-        );
 
-        return {
-          url: "machineStatus/",
-          method: "PUT",
-          body: cleanData,
-        };
+        // 真實 API
+        try {
+          const filteredData = {
+            id: fullApiData.machineStatusId ?? fullApiData.id,
+            machineId: fullApiData.machineId,
+            planStartDate: fullApiData.planStartDate,
+            planEndDate: fullApiData.planEndDate,
+            actualStartDate: fullApiData.actualStartDate,
+            actualEndDate: fullApiData.actualEndDate ?? null,
+            status: fullApiData.status,
+            reason: fullApiData?.machineStatusReason ?? fullApiData.reason,
+            product: fullApiData?.machineStatusProduct ?? fullApiData.product,
+          };
+          const cleanData = Object.fromEntries(
+            Object.entries(filteredData).filter(([_, value]) => value != null)
+          );
+
+          const response = await fetch('/api/machineStatus/', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cleanData),
+          });
+          const result = await response.json();
+          return { data: result };
+        } catch (error) {
+          return { error: { status: "FETCH_ERROR", error: error.message } };
+        }
       },
       invalidatesTags: ["MachineStatus", "schedule"],
     }),
@@ -167,7 +181,7 @@ export const machineStatusApi = apiSlice.injectEndpoints({
     // 刪除單一機台的狀態
     // machineStatusId
     deleteMachineStatus: builder.mutation({
-      queryFn: async (id) => {
+      async queryFn(id) {
         if (USE_MOCK_API) {
           await delay();
           // 模擬刪除資料（將狀態重置為 IDLE）
@@ -178,14 +192,21 @@ export const machineStatusApi = apiSlice.injectEndpoints({
                 : m
             );
           });
+          console.log('[Mock API] 刪除機台狀態 ID:', id);
           return { data: { success: true } };
         }
-        return { error: { status: "CUSTOM_ERROR", error: "請設定真實 API" } };
+
+        // 真實 API
+        try {
+          const response = await fetch(`/api/machineStatus/${id}`, {
+            method: 'DELETE',
+          });
+          const result = await response.json();
+          return { data: result };
+        } catch (error) {
+          return { error: { status: "FETCH_ERROR", error: error.message } };
+        }
       },
-      query: (id) => ({
-        url: `machineStatus/${id}`,
-        method: "DELETE",
-      }),
       invalidatesTags: ["MachineStatus", "schedule"],
     }),
   }),
