@@ -1,14 +1,37 @@
 import apiSlice from "../apiSlice";
 import { getStatusCode } from "../../configs/constants/fieldNames";
+import { USE_MOCK_API, delay } from "../mockData/useMockApi";
+import { generateAreaMachineStatus } from "../mockData/machineStatusMockData";
+
+// Mock 資料儲存（用於 CRUD 操作）
+let mockDataStore = {
+  A: generateAreaMachineStatus("A"),
+  B: generateAreaMachineStatus("B"),
+  C: generateAreaMachineStatus("C"),
+  D: generateAreaMachineStatus("D"),
+};
 
 export const machineStatusApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // 獲取某一區全部機台，以及機台狀態
     getMachineStatus: builder.query({
+      queryFn: async (productionArea) => {
+        // 如果啟用 Mock API
+        if (USE_MOCK_API) {
+          await delay();
+          const data = mockDataStore[productionArea] || [];
+          return { data };
+        }
+
+        // 使用真實 API（保留原有邏輯）
+        return { error: { status: "CUSTOM_ERROR", error: "請設定真實 API" } };
+      },
       query: (productionArea) =>
         `machineStatus/?productionArea=${productionArea}`,
       providesTags: ["MachineStatus"],
       transformResponse: (response) => {
+        if (USE_MOCK_API) return response;
+
         const data = response.data;
         // 在 API 層統一將中文狀態轉換為英文狀態碼
         return data.map(machine => ({
@@ -44,6 +67,22 @@ export const machineStatusApi = apiSlice.injectEndpoints({
      * });
      */
     createMachineStatus: builder.mutation({
+      queryFn: async (fullApiData) => {
+        if (USE_MOCK_API) {
+          await delay();
+          // 模擬新增資料
+          const newStatus = {
+            ...fullApiData,
+            machineStatusId: fullApiData.machineStatusId || Date.now(),
+          };
+          const area = fullApiData.machine?.productionArea || "A";
+          mockDataStore[area] = mockDataStore[area].map((m) =>
+            m.machineId === fullApiData.machineId ? { ...m, ...newStatus } : m
+          );
+          return { data: newStatus };
+        }
+        return { error: { status: "CUSTOM_ERROR", error: "請設定真實 API" } };
+      },
       query: (fullApiData) => {
         // 直接過濾成需要的格式
         const filteredData = {
@@ -84,6 +123,20 @@ export const machineStatusApi = apiSlice.injectEndpoints({
 }
   */
     updateMachineStatus: builder.mutation({
+      queryFn: async (fullApiData) => {
+        if (USE_MOCK_API) {
+          await delay();
+          // 模擬更新資料
+          const area = fullApiData.machine?.productionArea || "A";
+          mockDataStore[area] = mockDataStore[area].map((m) =>
+            m.machineId === fullApiData.machineId
+              ? { ...m, ...fullApiData }
+              : m
+          );
+          return { data: fullApiData };
+        }
+        return { error: { status: "CUSTOM_ERROR", error: "請設定真實 API" } };
+      },
       query: (fullApiData) => {
         // 過濾成需要的格式
         const filteredData = {
@@ -114,6 +167,21 @@ export const machineStatusApi = apiSlice.injectEndpoints({
     // 刪除單一機台的狀態
     // machineStatusId
     deleteMachineStatus: builder.mutation({
+      queryFn: async (id) => {
+        if (USE_MOCK_API) {
+          await delay();
+          // 模擬刪除資料（將狀態重置為 IDLE）
+          Object.keys(mockDataStore).forEach((area) => {
+            mockDataStore[area] = mockDataStore[area].map((m) =>
+              m.machineStatusId === id
+                ? { ...m, status: "IDLE", machineStatusProduct: null, machineStatusReason: null }
+                : m
+            );
+          });
+          return { data: { success: true } };
+        }
+        return { error: { status: "CUSTOM_ERROR", error: "請設定真實 API" } };
+      },
       query: (id) => ({
         url: `machineStatus/${id}`,
         method: "DELETE",
