@@ -54,7 +54,7 @@ import { TimelineContainer } from "../../assets/schedule";
 
 //* API 服務層 - 數據獲取與狀態管理
 import { useGetSmartScheduleQuery } from "../../services/schedule/smartSchedule";
-import { useGetMachinesQuery } from "../../../QuotationManagementSystem/services/salesServices/endpoints/machineApi";
+import { useGetMachinesQuery } from "../../services/machine/machineApi";
 
 //* 配置常量 - 系統設定與驗證規則
 import { momentLocaleConfig } from "../../configs/validations/schedule/timeline/timelineLocale";
@@ -174,10 +174,15 @@ function useAreaMachines(area = "A") {
   const { isSuccess, isLoading, data: allArea } = useGetMachinesQuery();
 
   //* 區域過濾 - 指定區域機台篩選
-  const filteredMachines = useMemo(
-    () => allArea?.data?.filter((machine) => machine.productionArea === area),
-    [allArea, area]
-  );
+  const filteredMachines = useMemo(() => {
+    console.log('[useAreaMachines] allArea 數據:', allArea);
+    // 嘗試多種數據路徑以相容不同的 API 格式
+    const machines = allArea?.data || allArea || [];
+    console.log('[useAreaMachines] machines 陣列:', machines);
+    const filtered = machines.filter((machine) => machine.productionArea === area);
+    console.log('[useAreaMachines] 過濾後的機台:', filtered.length, '台');
+    return filtered;
+  }, [allArea, area]);
 
   return {
     isSuccess,
