@@ -30,12 +30,21 @@ import {
   transformNewStatusToApi,
   transformUpdateStatusToApi,
 } from "../../utils/schedule/transformers/apiTransformers";
-import { isNumber } from "@mui/x-data-grid/internals";
 import {
   createApiError,
   handleFormError,
   logError,
 } from "../../utils/schedule/errorHandler";
+
+/**
+ * @function isNumber
+ * @description 檢查值是否為數字類型（包括數字和數字字串）
+ * @param {any} value - 要檢查的值
+ * @returns {boolean} 是否為有效數字
+ */
+function isNumber(value) {
+  return typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)));
+}
 
 //! =============== 1. 設定與常量 ===============
 //* 這個區塊包含所有專案配置，便於統一管理

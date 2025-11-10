@@ -44,6 +44,8 @@ export const machineApi = apiSlice.injectEndpoints({
           });
 
           console.log(`[Mock API] 獲取機台列表:`, allMachines.length, '台機器');
+          console.log(`[Mock API] 機台資料前3筆:`, allMachines.slice(0, 3));
+          console.log(`[Mock API] 返回結構:`, { data: allMachines });
           return { data: allMachines };
         }
 

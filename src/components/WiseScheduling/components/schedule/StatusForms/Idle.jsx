@@ -34,12 +34,24 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
     useStatusForm(MACHINE_STATUS.IDLE, item);
 
   // 直接從 API 獲取所有機台數據
-  const { isSuccess, isLoading, data: machinesData } = useGetMachinesQuery();
+  // RTK Query 的 data 就是我們需要的機台陣列
+  const queryResult = useGetMachinesQuery();
+  const { isSuccess, isLoading, data: machinesData } = queryResult;
+
+  // Debug: 檢查完整的 query result
+  console.log('[Idle] queryResult 完整結構:', queryResult);
+  console.log('[Idle] queryResult.data:', queryResult.data);
+  console.log('[Idle] queryResult.data?.data:', queryResult.data?.data);
 
   // 獲取表單控制值
   const selectedArea = watch("area");
   const selectedGroup = watch("group");
   const isEditMode = mode === "edit";
+
+  // Debug: 檢查表單初始值
+  console.log('[Idle] 表單模式:', mode);
+  console.log('[Idle] watch("area"):', selectedArea);
+  console.log('[Idle] watch("group"):', selectedGroup);
 
   // 檢查是否為歷史紀錄
   const isHistorical = useMemo(() => {
@@ -47,18 +59,19 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
   }, [item]);
 
   // 從 API 數據中提取所有唯一的區域
+  // machinesData 本身就是陣列，不需要 .data
   const availableAreas = useMemo(() => {
-    if (!isSuccess || !machinesData?.data) return [];
+    if (!isSuccess || !machinesData) return [];
     // 使用 Set 來獲取唯一值並轉換回數組
     return [
-      ...new Set(machinesData.data.map((machine) => machine.productionArea)),
+      ...new Set(machinesData.map((machine) => machine.productionArea)),
     ].sort();
   }, [machinesData, isSuccess]);
 
   // 根據選擇的區域過濾機台
   const filteredMachines = useMemo(() => {
-    if (!isSuccess || !machinesData?.data || !selectedArea) return [];
-    return machinesData.data.filter(
+    if (!isSuccess || !machinesData || !selectedArea) return [];
+    return machinesData.filter(
       (machine) => machine.productionArea === selectedArea
     );
   }, [machinesData, selectedArea, isSuccess]);
@@ -74,21 +87,32 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
   }
 
   // 設置表單禁用狀態
+  // 只有歷史紀錄才禁用區域和機台，編輯模式下允許修改
   const isFormDisabled = disabled || isHistorical;
-  const isAreaDisabled = isFormDisabled || isEditMode;
-  const isGroupDisabled = isFormDisabled || !selectedArea || isEditMode;
+  const isAreaDisabled = isFormDisabled;  // 移除 isEditMode 限制
+  const isGroupDisabled = isFormDisabled || !selectedArea;  // 移除 isEditMode 限制
+
+  // Debug: 輸出機台資料
+  console.log('[Idle] 機台API狀態:', { isSuccess, isLoading, machinesDataLength: machinesData?.length });
+  console.log('[Idle] machinesData 類型:', Array.isArray(machinesData) ? '陣列' : typeof machinesData);
+  console.log('[Idle] machinesData 完整:', machinesData);
+  console.log('[Idle] machinesData 前3筆:', machinesData?.slice(0, 3));
+  console.log('[Idle] machinesData[0] 結構:', machinesData?.[0]);
+  console.log('[Idle] 可用區域:', availableAreas);
+  console.log('[Idle] 選擇的區域:', selectedArea);
+  console.log('[Idle] 過濾後的機台:', filteredMachines);
+  console.log('[Idle] item 資料:', item);
 
   // 幫助文本函數
   const getMachineHelperText = () => {
     if (isHistorical) return "此狀態已開始執行，無法修改";
-    if (isEditMode) return "編輯現有事件時不可變更機台";
     if (!selectedArea) return "請先選擇區域";
+    if (filteredMachines.length === 0) return "此區域無可用機台";
     return errors.group?.message || "";
   };
 
   const getAreaHelperText = () => {
     if (isHistorical) return "此狀態已開始執行，無法修改";
-    if (isEditMode) return "編輯現有事件時不可變更區域";
     return errors.area?.message || "";
   };
 
@@ -105,8 +129,7 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
 
       <Grid item xs={12}>
         <Typography variant="subtitle1" color="primary" gutterBottom>
-          機台選擇{isEditMode ? " (編輯模式下不可變更)" : ""}
-          {isHistorical ? " - 歷史紀錄" : ""}
+          機台選擇{isHistorical ? " - 歷史紀錄" : ""}
         </Typography>
 
         <Grid container spacing={2}>
@@ -153,7 +176,8 @@ const Idle = ({ disabled, item, status, mode = "create" }) => {
                   value={field.value || ""} // 使用 field.value
                   onChange={(e) => {
                     // 先執行原有的邏輯
-                    const selectedMachine = machinesData.data.find(
+                    // machinesData 本身就是陣列，不需要 .data
+                    const selectedMachine = machinesData?.find(
                       (m) => m.machineSN === e.target.value
                     );
                     if (selectedMachine) {

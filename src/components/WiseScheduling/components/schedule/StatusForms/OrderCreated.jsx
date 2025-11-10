@@ -203,6 +203,15 @@ const OrderCreated = ({ item, disabled }) => {
         )
       : 0;
 
+  // 判斷製令單是否可編輯
+  // 只有「尚未上機」和「暫停生產」狀態可以編輯
+  const isOrderEditable =
+    item.orderInfo.orderStatus === "尚未上機" ||
+    item.orderInfo.orderStatus === "暫停生產";
+
+  // 最終的禁用狀態：外部 disabled 或訂單狀態不可編輯
+  const finalDisabled = disabled || !isOrderEditable;
+
   return (
     <Grid container spacing={3}>
       {/* 表單圖例 */}
@@ -249,10 +258,10 @@ const OrderCreated = ({ item, disabled }) => {
         </Alert>
 
         {/* 顯示關於製令單狀態的說明 */}
-        {item?.orderInfo?.orderStatus !== "尚未上機" &&
-          item?.orderInfo?.orderStatus !== "暫停生產" && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              此製令單無法編輯。您只能查看製令單的詳細資訊。
+        {!isOrderEditable && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              此製令單目前狀態為「{item.orderInfo.orderStatus}」，無法編輯。
+              只有「尚未上機」或「暫停生產」狀態的製令單可以修改區域、機台和預計上機日。
             </Alert>
           )}
       </Grid>
@@ -295,7 +304,7 @@ const OrderCreated = ({ item, disabled }) => {
               label="區域"
               error={!!errors.area}
               helperText={errors.area?.message}
-              disabled={disabled}
+              disabled={finalDisabled}
               value={watch("area") || ""}
               sx={{
                 mt: 1, // 與唯讀欄位對齊
@@ -327,7 +336,7 @@ const OrderCreated = ({ item, disabled }) => {
               label="機台編號"
               error={!!errors.group}
               helperText={errors.group?.message}
-              disabled={disabled || !selectedArea}
+              disabled={finalDisabled || !selectedArea}
               value={watch("group") || filteredGroups[0]?.id || ""}
               sx={{
                 mt: 1, // 與唯讀欄位對齊
@@ -423,7 +432,7 @@ const OrderCreated = ({ item, disabled }) => {
                   type="datetime-local"
                   error={!!error}
                   helperText={error?.message || ""}
-                  disabled={disabled}
+                  disabled={finalDisabled}
                   InputLabelProps={{ shrink: true }}
                   sx={{
                     "& .MuiOutlinedInput-root": {

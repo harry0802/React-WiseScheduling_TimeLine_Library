@@ -24,11 +24,60 @@ export const TimelineContainer = styled.div`
   display: flex;
   flex-direction: column;
 
+  /* 🎨 科技感漸層背景 */
+  background: linear-gradient(
+    135deg,
+    #0f2027 0%,
+    #203a43 25%,
+    #2c5364 50%,
+    #203a43 75%,
+    #0f2027 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+
+  /* 添加微妙的網格紋理效果 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    border-radius: 12px;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* 漸層動畫 */
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
   /* BaseTimelineContainer 樣式 */
   .vis-timeline {
     border: none;
     font-family: "Noto Sans TC", sans-serif;
     padding: ${timelineTheme.spacing.base};
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
   }
 
   /* TimeAxisStyles 樣式 */

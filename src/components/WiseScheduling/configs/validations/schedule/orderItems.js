@@ -4,11 +4,11 @@
  * @version 3.2.0 - 優化 mapItemToVisDataFormat，應用 Push Ifs Up 原則
  */
 
-import dayjs from "dayjs";
-import { transformApiToInternalFormat } from "../../../utils/schedule/transformers/apiTransformers";
+import dayjs from 'dayjs'
+import { transformApiToInternalFormat } from '../../../utils/schedule/transformers/apiTransformers'
 
 //! =============== 1. 常量定義 ===============
-const DEFAULT_DURATION_HOURS = 2;
+const DEFAULT_DURATION_HOURS = 2
 
 //! =============== 2. 輔助函數 ===============
 
@@ -19,7 +19,7 @@ const DEFAULT_DURATION_HOURS = 2;
  * @returns {boolean}
  */
 function isWorkOrder(item) {
-  return item.timeLineStatus === "製令單";
+  return item.timeLineStatus === '製令單'
 }
 
 /**
@@ -29,15 +29,15 @@ function isWorkOrder(item) {
  * @returns {boolean}
  */
 function isPastWorkOrder(orderInfo) {
-  if (!orderInfo) return false;
+  if (!orderInfo) return false
 
-  const now = new Date();
+  const now = new Date()
   // 修改為基於計劃時間判斷，但保留實際時間作為輔助判斷
   return (
     (orderInfo.actualStartTime && new Date(orderInfo.actualStartTime) < now) ||
     (orderInfo.scheduledStartTime &&
       new Date(orderInfo.scheduledStartTime) < now)
-  );
+  )
 }
 
 /**
@@ -47,7 +47,7 @@ function isPastWorkOrder(orderInfo) {
  * @returns {boolean}
  */
 function isPastMachineStatus(status) {
-  return status?.startTime && new Date(status.startTime) < new Date();
+  return status?.startTime && new Date(status.startTime) < new Date()
 }
 
 /**
@@ -60,12 +60,12 @@ function isPastMachineStatus(status) {
 function getWorkOrderTimes(orderInfo, fallback) {
   // 修改為統一使用計劃時間 (配合 apiTransformers 的修改)
   const startDate =
-    orderInfo.actualStartTime || orderInfo.planStartTime || fallback.start;
+    orderInfo.actualStartTime || orderInfo.planStartTime || fallback.start
 
   const endDate =
-    orderInfo.actualEndTime || orderInfo.planEndTime || fallback.end;
+    orderInfo.actualEndTime || orderInfo.planEndTime || fallback.end
 
-  return { startDate, endDate };
+  return { startDate, endDate }
 }
 
 /**
@@ -76,14 +76,14 @@ function getWorkOrderTimes(orderInfo, fallback) {
  * @returns {Object} { startDate, endDate }
  */
 function getMachineStatusTimes(status, fallback) {
-  const startDate = status.startTime || fallback.start;
+  const startDate = status.startTime || fallback.start
   const endDate =
     status.endTime ||
     (status.startTime &&
-      dayjs(status.startTime).add(DEFAULT_DURATION_HOURS, "hour").toDate()) ||
-    fallback.end;
+      dayjs(status.startTime).add(DEFAULT_DURATION_HOURS, 'hour').toDate()) ||
+    fallback.end
 
-  return { startDate, endDate };
+  return { startDate, endDate }
 }
 
 /**
@@ -93,10 +93,10 @@ function getMachineStatusTimes(status, fallback) {
  * @returns {Object} { startDate, endDate }
  */
 function getFallbackTimes(item) {
-  const startDate = item.start;
+  const startDate = item.start
   const endDate =
-    item.end || dayjs(item.start).add(DEFAULT_DURATION_HOURS, "hour").toDate();
-  return { startDate, endDate };
+    item.end || dayjs(item.start).add(DEFAULT_DURATION_HOURS, 'hour').toDate()
+  return { startDate, endDate }
 }
 
 //! =============== 3. 主要處理函數 ===============
@@ -108,13 +108,13 @@ function getFallbackTimes(item) {
  * @returns {Object} 處理後的項目
  */
 function processWorkOrderItem(item) {
-  const isPast = isPastWorkOrder(item.orderInfo);
-  const fallback = getFallbackTimes(item);
+  const isPast = isPastWorkOrder(item.orderInfo)
+  const fallback = getFallbackTimes(item)
   const { startDate, endDate } = item.orderInfo
     ? getWorkOrderTimes(item.orderInfo, fallback)
-    : fallback;
+    : fallback
 
-  if (item?.orderInfo?.orderStatus === "Done") {
+  if (item?.orderInfo?.orderStatus === 'Done') {
   }
 
   return {
@@ -123,8 +123,8 @@ function processWorkOrderItem(item) {
     end: endDate,
     editable: isPast
       ? { updateTime: false, updateGroup: false, remove: false }
-      : { updateTime: true, updateGroup: true, remove: false },
-  };
+      : { updateTime: true, updateGroup: true, remove: false }
+  }
 }
 
 /**
@@ -134,11 +134,11 @@ function processWorkOrderItem(item) {
  * @returns {Object} 處理後的項目
  */
 function processMachineStatusItem(item) {
-  const isPast = isPastMachineStatus(item.status);
-  const fallback = getFallbackTimes(item);
+  const isPast = isPastMachineStatus(item.status)
+  const fallback = getFallbackTimes(item)
   const { startDate, endDate } = item.status
     ? getMachineStatusTimes(item.status, fallback)
-    : fallback;
+    : fallback
 
   return {
     ...item,
@@ -146,8 +146,8 @@ function processMachineStatusItem(item) {
     end: dayjs(endDate).toDate(),
     editable: isPast
       ? { updateTime: false, updateGroup: false, remove: false }
-      : { updateTime: false, updateGroup: true, remove: true },
-  };
+      : { updateTime: false, updateGroup: true, remove: true }
+  }
 }
 
 /**
@@ -159,11 +159,11 @@ function processMachineStatusItem(item) {
 export const mapItemToVisDataFormat = (item) => {
   // ✨ Push Ifs Up - 在頂層進行類型判斷和路由
   if (isWorkOrder(item)) {
-    return processWorkOrderItem(item);
+    return processWorkOrderItem(item)
   } else {
-    return processMachineStatusItem(item);
+    return processMachineStatusItem(item)
   }
-};
+}
 
 /**
  * @function transformScheduleData
@@ -172,20 +172,21 @@ export const mapItemToVisDataFormat = (item) => {
  * @returns {Array} 轉換後的時間線項目格式數據
  */
 export const transformScheduleData = (scheduleList) => {
-  if (!Array.isArray(scheduleList)) return [];
+  if (!Array.isArray(scheduleList)) return []
 
   try {
     const transformedItems = scheduleList.map((schedule) => {
       // 使用新的轉換函數將 API 資料轉為內部格式
-      const item = transformApiToInternalFormat(schedule);
+      const item = transformApiToInternalFormat(schedule)
 
       // 映射到 vis-data 格式
-      return mapItemToVisDataFormat(item);
-    });
+      return mapItemToVisDataFormat(item)
+    })
 
-    return transformedItems;
+    return transformedItems
   } catch (error) {
-    console.error("轉換排程數據時出錯:", error);
-    return [];
+    console.error('轉換排程數據時出錯:', error)
+    return []
   }
-};
+}
+

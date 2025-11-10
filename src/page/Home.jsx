@@ -84,6 +84,12 @@ const Home = () => {
 
       <CardGrid>
         <FeatureCard>
+          <h2>🤖 智慧排程系統</h2>
+          <p>工業級生產排程管理，支援多區域即時調度與狀態追蹤</p>
+          <FeatureLink to="/wise-scheduling">進入智慧排程</FeatureLink>
+        </FeatureCard>
+
+        <FeatureCard>
           <h2>動態時間軸</h2>
           <p>檢視互動式的甘特圖和時間軸視覺化</p>
           <FeatureLink to="/dynamic-timeline">前往動態時間軸</FeatureLink>
@@ -94,6 +100,7 @@ const Home = () => {
           <p>了解如何使用查詢功能來過濾和檢索數據</p>
           <FeatureLink to="/query-example">查看查詢範例</FeatureLink>
         </FeatureCard>
+
         <FeatureCard>
           <h2>製造現場即時監控</h2>
           <p>查看製造現場的即時監控數據</p>

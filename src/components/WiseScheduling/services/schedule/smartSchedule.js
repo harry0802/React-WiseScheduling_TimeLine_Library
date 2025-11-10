@@ -2,16 +2,17 @@ import { API_BASE } from "../../../../store/api/apiConfig";
 import apiSlice from "../apiSlice";
 import { USE_MOCK_API, delay } from "../mockData/useMockApi";
 import {
-  generateScheduleByArea,
-  filterSchedulesByTimeRange,
-} from "../mockData/smartScheduleMockData";
+  generateAreaComprehensiveData,
+  filterDataByTimeRange,
+} from "../mockData/comprehensiveMockData";
 
 // Mock 資料儲存（用於 CRUD 操作）
+// 使用綜合 Mock 資料生成器（包含所有狀態類型）
 let mockScheduleStore = {
-  A: generateScheduleByArea("A"),
-  B: generateScheduleByArea("B"),
-  C: generateScheduleByArea("C"),
-  D: generateScheduleByArea("D"),
+  A: generateAreaComprehensiveData("A"),
+  B: generateAreaComprehensiveData("B"),
+  C: generateAreaComprehensiveData("C"),
+  D: generateAreaComprehensiveData("D"),
 };
 
 export const smartScheduleApi = apiSlice.injectEndpoints({
@@ -26,13 +27,20 @@ export const smartScheduleApi = apiSlice.injectEndpoints({
 
           // 如果有時間範圍，進行過濾
           if (startTime && endTime) {
-            schedules = filterSchedulesByTimeRange(schedules, startTime, endTime);
+            schedules = filterDataByTimeRange(schedules, startTime, endTime);
           }
+
+          // 統計資料類型
+          const statusCounts = schedules.reduce((acc, item) => {
+            acc[item.timeLineStatus] = (acc[item.timeLineStatus] || 0) + 1;
+            return acc;
+          }, {});
 
           console.log(
             `[Mock API] 獲取區域 ${productionArea} 的排程:`,
             schedules.length,
-            "筆工單"
+            "筆資料",
+            statusCounts
           );
 
           return { data: { data: schedules } };
