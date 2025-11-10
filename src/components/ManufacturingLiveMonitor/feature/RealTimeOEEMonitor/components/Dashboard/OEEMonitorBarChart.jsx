@@ -1,10 +1,11 @@
 import { Charts } from "@iimm/data-view-react";
 const option1 = {
   title: {
+    show:false,
     text: "當日全廠OEE(%)",
     style: {
       fill: "#fff",
-      fontSize: 16,
+      fontSize: 18,
       fontWeight: "bold",
     },
     offset: [0, -10],
@@ -13,7 +14,7 @@ const option1 = {
     name: "(時)",
     nameTextStyle: {
       fill: "#fff",
-      fontSize: 14,
+      fontSize: 18,
     },
     data: [
       "20:00",
@@ -41,7 +42,7 @@ const option1 = {
     name: "OEE(%)",
     nameTextStyle: {
       fill: "#fff",
-      fontSize: 14,
+      fontSize: 20,
     },
     data: "value",
     min: 0,
@@ -50,7 +51,7 @@ const option1 = {
     axisLabel: {
       style: {
         fill: "#fff",
-        fontSize: 12,
+        fontSize: 18,
       },
     },
   },
@@ -82,8 +83,8 @@ const option1 = {
   grid: {
     top: 60,
     bottom: 50,
-    left: "10%",
-    right: "10%",
+    left: "8%",
+    right: "8%",
   },
   legend: {
     show: true,

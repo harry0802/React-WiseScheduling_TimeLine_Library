@@ -2,19 +2,19 @@
 // 使用統一導出接口導入卡片元件
 
 // import GridExample from "../../components/GridSystem/GridExample";
-import Grid from "@mui/material/Grid2";
-import { Stack } from "@mui/material";
-import { Decoration10 } from "@iimm/data-view-react";
+import Grid from '@mui/material/Grid2'
+import { Stack } from '@mui/material'
+import { Decoration10 } from '@iimm/data-view-react'
 
-import DailyProduction from "./feature/DailyProduction";
-import Scoreboard from "./feature/Scoreboard";
-import OverdueTasks from "./feature/OverdueTasks";
-import OEEMonitor from "./feature/OEEMonitor";
-import RealTimeDeviceTracker from "./feature/RealTimeDeviceTracker";
-import MachineStateTimeRatio from "./feature/MachineStateTimeRatio";
-import EquipmentRiskModule from "./feature/EquipmentRiskModule";
-import { useEffect } from "react";
-import { useHeaderNameStore } from "../../slice/LayoutSlice";
+import DailyProduction from './feature/DailyProduction'
+import Scoreboard from './feature/Scoreboard'
+import OverdueTasks from './feature/OverdueTasks'
+import OEEMonitor from './feature/OEEMonitor'
+import RealTimeDeviceTracker from './feature/RealTimeDeviceTracker'
+import MachineStateTimeRatio from './feature/MachineStateTimeRatio'
+import EquipmentRiskModule from './feature/EquipmentRiskModule'
+import { useEffect } from 'react'
+import { useHeaderNameStore } from '../../slice/LayoutSlice'
 
 //! =============== 2. 樣式定義 ===============
 
@@ -23,26 +23,29 @@ import { useHeaderNameStore } from "../../slice/LayoutSlice";
  * @description 實時OEE監控元件，展示生產狀態和進度
  */
 function RealTimeOEEMonitor({ onChangeSectTitle }) {
-  const { setHeaderName } = useHeaderNameStore();
-  // 靜態生產數據 (實際項目中應從API或狀態管理獲取)
+  const { setHeaderName } = useHeaderNameStore()
 
+  // 靜態生產數據 (實際項目中應從API或狀態管理獲取)
   useEffect(() => {
-    if (!setHeaderName) return;
-    setHeaderName("施工養護綜合數據");
-  }, []);
+    if (!setHeaderName) return
+    setHeaderName('施工養護綜合數據')
+  }, [])
 
   return (
     <section>
       <Scoreboard />
       <Decoration10
-        style={{ width: "100%", height: "5px", marginBottom: "10px" }}
+        style={{ width: '100%', height: '5px', marginBottom: '10px' }}
       />
       <Stack spacing={1.25}>
-        <Grid container spacing={1.25}>
+        <Grid
+          container
+          spacing={1.25}
+        >
           <Grid size={8}>
             <Stack spacing={1.25}>
               <DailyProduction />
-              <OverdueTasks />
+              <RealTimeDeviceTracker />
             </Stack>
           </Grid>
           <Grid size={4}>
@@ -50,9 +53,12 @@ function RealTimeOEEMonitor({ onChangeSectTitle }) {
           </Grid>
         </Grid>
 
-        <Grid container spacing={1.25}>
+        <Grid
+          container
+          spacing={1.25}
+        >
           <Grid size={5}>
-            <RealTimeDeviceTracker />
+            <OverdueTasks />
           </Grid>
           <Grid size={3}>
             <MachineStateTimeRatio />
@@ -63,7 +69,8 @@ function RealTimeOEEMonitor({ onChangeSectTitle }) {
         </Grid>
       </Stack>
     </section>
-  );
+  )
 }
 
-export default RealTimeOEEMonitor;
+export default RealTimeOEEMonitor
+

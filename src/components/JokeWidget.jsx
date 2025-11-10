@@ -1,11 +1,11 @@
-import React, { useState, memo, useMemo } from "react";
-import styled from "styled-components";
-import { useQuery } from "@tanstack/react-query";
-import { fetchRandomJoke } from "../services/jokeService";
+import React, { useState, memo, useMemo } from 'react'
+import styled from 'styled-components'
+import { useQuery } from '@tanstack/react-query'
+import { fetchRandomJoke } from '../services/jokeService'
 
 // 常量定義
-const ANIMATION_DURATION = "0.3s";
-const WIDGET_WIDTH = "300px";
+const ANIMATION_DURATION = '0.3s'
+const WIDGET_WIDTH = '300px'
 
 //! =============== 樣式組件 ===============
 // 將樣式拆分到自己的文件或集中在組件頂部
@@ -22,11 +22,11 @@ const JokeContainer = styled.div`
   transition: transform ${ANIMATION_DURATION} ease,
     opacity ${ANIMATION_DURATION} ease;
   transform: ${(props) =>
-    props.$isVisible ? "translateY(0)" : "translateY(120%)"};
+    props.$isVisible ? 'translateY(0)' : 'translateY(120%)'};
   opacity: ${(props) => (props.$isVisible ? 1 : 0)};
   max-height: 80vh;
   overflow-y: auto;
-`;
+`
 
 const JokeHeader = styled.div`
   display: flex;
@@ -39,7 +39,7 @@ const JokeHeader = styled.div`
     font-size: 1rem;
     color: ${(props) => props.theme.colors.text};
   }
-`;
+`
 
 const CloseButton = styled.button`
   background: none;
@@ -55,22 +55,22 @@ const CloseButton = styled.button`
   &:hover {
     color: ${(props) => props.theme.colors.text};
   }
-`;
+`
 
 const JokeContent = styled.div`
   padding: 0.5rem 0;
-`;
+`
 
 const JokeSetup = styled.p`
   margin-bottom: 0.5rem;
   font-weight: 500;
-`;
+`
 
 const JokePunchline = styled.p`
   color: ${(props) => props.theme.colors.secondary};
   font-weight: bold;
   margin-top: 0.5rem;
-`;
+`
 
 const RefreshButton = styled.button`
   background-color: ${(props) => props.theme.colors.primary};
@@ -92,7 +92,7 @@ const RefreshButton = styled.button`
     background-color: #cccccc;
     cursor: not-allowed;
   }
-`;
+`
 
 const ToggleButton = styled.button`
   position: fixed;
@@ -115,13 +115,13 @@ const ToggleButton = styled.button`
   &:hover {
     background-color: ${(props) => props.theme.colors.primaryDark};
   }
-`;
+`
 
 const ErrorMessage = styled.p`
   color: ${(props) => props.theme.colors.error};
   margin: 0;
   text-align: center;
-`;
+`
 
 const LoadingIndicator = styled.div`
   display: flex;
@@ -157,56 +157,56 @@ const LoadingIndicator = styled.div`
       transform: translateY(-10px);
     }
   }
-`;
+`
 
 //! =============== 圖標組件 ===============
 // 將SVG抽取為獨立組件
 const CloseIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    width="24"
-    height="24"
+    xmlns='http://www.w3.org/2000/svg'
+    fill='none'
+    viewBox='0 0 24 24'
+    stroke='currentColor'
+    width='24'
+    height='24'
   >
     <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeLinecap='round'
+      strokeLinejoin='round'
       strokeWidth={2}
-      d="M6 18L18 6M6 6l12 12"
+      d='M6 18L18 6M6 6l12 12'
     />
   </svg>
-);
+)
 
 const SmileIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    width="24"
-    height="24"
+    xmlns='http://www.w3.org/2000/svg'
+    fill='none'
+    viewBox='0 0 24 24'
+    stroke='currentColor'
+    width='24'
+    height='24'
   >
     <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeLinecap='round'
+      strokeLinejoin='round'
       strokeWidth={2}
-      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      d='M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
     />
   </svg>
-);
+)
 
 //! =============== 子組件 ===============
 // 分離加載指示器為獨立組件
 const Loader = memo(() => (
   <LoadingIndicator>
-    <div className="dot"></div>
-    <div className="dot"></div>
-    <div className="dot"></div>
+    <div className='dot'></div>
+    <div className='dot'></div>
+    <div className='dot'></div>
   </LoadingIndicator>
-));
-Loader.displayName = "Loader";
+))
+Loader.displayName = 'Loader'
 
 // 分離笑話顯示為獨立組件
 const JokeDisplay = memo(({ joke }) => (
@@ -214,8 +214,8 @@ const JokeDisplay = memo(({ joke }) => (
     <JokeSetup>{joke.setup}</JokeSetup>
     <JokePunchline>{joke.punchline}</JokePunchline>
   </>
-));
-JokeDisplay.displayName = "JokeDisplay";
+))
+JokeDisplay.displayName = 'JokeDisplay'
 
 /**
  * 笑話小工具組件
@@ -224,7 +224,7 @@ JokeDisplay.displayName = "JokeDisplay";
  */
 const JokeWidget = () => {
   // 狀態管理
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
 
   // API查詢
   const {
@@ -232,34 +232,38 @@ const JokeWidget = () => {
     isLoading,
     isError,
     refetch,
-    isFetching,
+    isFetching
   } = useQuery({
-    queryKey: ["randomJoke"],
+    queryKey: ['randomJoke'],
     queryFn: fetchRandomJoke,
     enabled: isVisible, // 🧠 只有當小工具可見時才獲取數據
     refetchOnWindowFocus: false,
-  });
+    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 分鐘
+    onError: (error) => {
+      console.error('獲取笑話時出錯:', error)
+    }
+  })
 
   // 事件處理
-  const toggleVisibility = () => setIsVisible(!isVisible);
-  const handleRefresh = () => refetch();
+  const toggleVisibility = () => setIsVisible(!isVisible)
+  const handleRefresh = () => refetch()
 
   // 計算加載狀態
-  const isLoadingContent = isLoading || isFetching;
+  const isLoadingContent = isLoading || isFetching
 
   // 記憶化按鈕文本
   const buttonText = useMemo(
-    () => (isLoadingContent ? "載入中..." : "換個笑話"),
+    () => (isLoadingContent ? '載入中...' : '換個笑話'),
     [isLoadingContent]
-  );
-
+  )
   return (
     <>
       {/* 切換按鈕，始終可見 */}
       <ToggleButton
         onClick={toggleVisibility}
-        title="笑話小工具"
-        aria-label={isVisible ? "關閉笑話小工具" : "開啟笑話小工具"}
+        title='笑話小工具'
+        aria-label={isVisible ? '關閉笑話小工具' : '開啟笑話小工具'}
       >
         {isVisible ? <CloseIcon /> : <SmileIcon />}
       </ToggleButton>
@@ -268,7 +272,10 @@ const JokeWidget = () => {
       <JokeContainer $isVisible={isVisible}>
         <JokeHeader>
           <h3>每日笑話</h3>
-          <CloseButton onClick={toggleVisibility} aria-label="關閉">
+          <CloseButton
+            onClick={toggleVisibility}
+            aria-label='關閉'
+          >
             ×
           </CloseButton>
         </JokeHeader>
@@ -285,12 +292,16 @@ const JokeWidget = () => {
           )}
         </JokeContent>
 
-        <RefreshButton onClick={handleRefresh} disabled={isLoadingContent}>
+        <RefreshButton
+          onClick={handleRefresh}
+          disabled={isLoadingContent}
+        >
           {buttonText}
         </RefreshButton>
       </JokeContainer>
     </>
-  );
-};
+  )
+}
 
-export default JokeWidget;
+export default JokeWidget
+
