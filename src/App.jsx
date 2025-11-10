@@ -68,6 +68,10 @@ const FactoryPerformanceDashboard = lazyLoad(() =>
   )
 )
 
+const WiseScheduling = lazyLoad(() =>
+  import('./components/WiseScheduling/components/schedule/index.jsx')
+)
+
 // 使用 HashRouter 代替 BrowserRouter
 const router = createHashRouter([
   {
@@ -92,6 +96,14 @@ const router = createHashRouter([
         element: (
           <Suspense fallback={<LoadingSpinner text='載入查詢範例中...' />}>
             <QueryExample />
+          </Suspense>
+        )
+      },
+      {
+        path: 'wise-scheduling',
+        element: (
+          <Suspense fallback={<LoadingSpinner text='載入智能排程系統中...' />}>
+            <WiseScheduling />
           </Suspense>
         )
       },

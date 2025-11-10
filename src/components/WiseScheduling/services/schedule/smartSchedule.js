@@ -1,0 +1,139 @@
+import { API_BASE } from "../../../../store/api/apiConfig";
+import apiSlice from "../apiSlice";
+import { USE_MOCK_API, delay } from "../mockData/useMockApi";
+import {
+  generateAreaComprehensiveData,
+  filterDataByTimeRange,
+} from "../mockData/comprehensiveMockData";
+
+// Mock 資料儲存（用於 CRUD 操作）
+// 使用綜合 Mock 資料生成器（包含所有狀態類型）
+let mockScheduleStore = {
+  A: generateAreaComprehensiveData("A"),
+  B: generateAreaComprehensiveData("B"),
+  C: generateAreaComprehensiveData("C"),
+  D: generateAreaComprehensiveData("D"),
+};
+
+export const smartScheduleApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getSmartSchedule: builder.query({
+      async queryFn({ productionArea, startTime, endTime }) {
+        // 如果啟用 Mock API
+        if (USE_MOCK_API) {
+          await delay();
+
+          let schedules = mockScheduleStore[productionArea] || [];
+
+          // 如果有時間範圍，進行過濾
+          if (startTime && endTime) {
+            schedules = filterDataByTimeRange(schedules, startTime, endTime);
+          }
+
+          // 統計資料類型
+          const statusCounts = schedules.reduce((acc, item) => {
+            acc[item.timeLineStatus] = (acc[item.timeLineStatus] || 0) + 1;
+            return acc;
+          }, {});
+
+          console.log(
+            `[Mock API] 獲取區域 ${productionArea} 的排程:`,
+            schedules.length,
+            "筆資料",
+            statusCounts
+          );
+
+          return { data: { data: schedules } };
+        }
+
+        // 真實 API
+        try {
+          const params = new URLSearchParams({
+            productionArea,
+            ...(startTime && { startTime }),
+            ...(endTime && { endTime }),
+          });
+
+          const baseUrl = apiSlice.reducerPath ? "" : "/api";
+          const response = await fetch(
+            `${baseUrl}/api/smartSchedule/?${params.toString()}`
+          );
+          const result = await response.json();
+
+          return { data: result };
+        } catch (error) {
+          return { error: { status: "FETCH_ERROR", error: error.message } };
+        }
+      },
+      providesTags: ["schedule"],
+    }),
+
+    changeWorkOrder: builder.mutation({
+      async queryFn(payload) {
+        // 如果啟用 Mock API
+        if (USE_MOCK_API) {
+          await delay();
+
+          const { productionScheduleId, planOnMachineDate, machineSN } = payload;
+
+          // 在所有區域中尋找並更新工單
+          let updated = false;
+          Object.keys(mockScheduleStore).forEach((area) => {
+            mockScheduleStore[area] = mockScheduleStore[area].map((schedule) => {
+              if (schedule.productionScheduleId === productionScheduleId) {
+                updated = true;
+                return {
+                  ...schedule,
+                  planOnMachineDate: planOnMachineDate,
+                  machineSN: machineSN,
+                  updatedAt: new Date().toISOString(),
+                };
+              }
+              return schedule;
+            });
+          });
+
+          console.log(
+            `[Mock API] 更新工單 ${productionScheduleId}:`,
+            updated ? "成功" : "找不到工單"
+          );
+
+          return {
+            data: {
+              success: updated,
+              message: updated ? "工單已更新" : "找不到工單",
+            },
+          };
+        }
+
+        // 真實 API
+        try {
+          const transformedPayload = {
+            productionScheduleId: payload.productionScheduleId,
+            newStartDate: payload.planOnMachineDate,
+            machineSN: payload.machineSN,
+          };
+
+          const baseUrl = apiSlice.reducerPath ? "" : "/api";
+          const response = await fetch(
+            `${baseUrl}/api/smartSchedule/changeWorkOrder`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(transformedPayload),
+            }
+          );
+          const result = await response.json();
+
+          return { data: result };
+        } catch (error) {
+          return { error: { status: "FETCH_ERROR", error: error.message } };
+        }
+      },
+      invalidatesTags: ["schedule"],
+    }),
+  }),
+});
+
+export const { useGetSmartScheduleQuery, useChangeWorkOrderMutation } =
+  smartScheduleApi;
