@@ -6,6 +6,8 @@ import Home from './page/Home'
 import Timeline from './page/Timeline'
 import About from './page/About'
 import Contact from './page/Contact'
+import ProjectShowcase from './page/ProjectShowcase'
+import DesignToken from './page/DesignToken'
 import ErrorPage from './page/ErrorPage'
 import LoadingSpinner from './components/LoadingSpinner'
 import ManufacturingLiveMonitor from './components/ManufacturingLiveMonitor/index.jsx'
@@ -37,9 +39,6 @@ const lazyLoad = (importFn, callback, delay = 1200) => {
   })
 }
 const DynamicTimeline = lazyLoad(() => import('./components/timelineGantt'))
-const QueryExample = lazyLoad(() =>
-  import('./components/examples/QueryExample')
-)
 const RealTimeOEEMonitor = lazyLoad(() =>
   import(
     './components/ManufacturingLiveMonitor/feature/RealTimeOEEMonitor/index.jsx'
@@ -83,19 +82,13 @@ const router = createHashRouter([
       { path: 'timeline', element: <Timeline /> },
       { path: 'about', element: <About /> },
       { path: 'contact', element: <Contact /> },
+      { path: 'project-showcase', element: <ProjectShowcase /> },
+      { path: 'design-token', element: <DesignToken /> },
       {
         path: 'dynamic-timeline',
         element: (
           <Suspense fallback={<LoadingSpinner text='載入動態時間軸中...' />}>
             <DynamicTimeline />
-          </Suspense>
-        )
-      },
-      {
-        path: 'query-example',
-        element: (
-          <Suspense fallback={<LoadingSpinner text='載入查詢範例中...' />}>
-            <QueryExample />
           </Suspense>
         )
       },

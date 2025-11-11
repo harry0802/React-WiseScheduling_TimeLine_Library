@@ -1,50 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  PageContainer,
-  Title,
-  Paragraph,
-  CardGrid,
-} from "../styles/SharedStyles";
-import styled from "styled-components";
 import { useQuery } from "@tanstack/react-query";
-
-const FeatureCard = styled.div`
-  padding: 1.5rem;
-  background-color: ${(props) => props.theme.colors.cardBackground};
-  border-radius: 8px;
-  box-shadow: ${(props) => props.theme.shadows.md};
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: ${(props) => props.theme.shadows.lg};
-  }
-
-  h2 {
-    margin-top: 0;
-    color: ${(props) => props.theme.colors.text};
-    font-size: ${(props) => props.theme.fontSizes["2xl"]};
-    margin-bottom: ${(props) => props.theme.spacing.sm};
-  }
-`;
-
-const FeatureLink = styled(Link)`
-  display: inline-block;
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: ${(props) => props.theme.colors.primary};
-  color: #fff;
-  text-decoration: none;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: ${(props) => props.theme.colors.primaryDark};
-    text-decoration: none;
-  }
-`;
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Grid,
+  Box,
+} from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import muiTheme from "../styles/muiTheme";
 
 // 模擬一個假的 API 調用，用於激活 React Query
 const fetchAppInfo = async () => {
@@ -68,48 +36,145 @@ const Home = () => {
 
   if (isLoading) {
     return (
-      <PageContainer>
-        <p>載入中...</p>
-      </PageContainer>
+      <ThemeProvider theme={muiTheme}>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Typography>載入中...</Typography>
+        </Container>
+      </ThemeProvider>
     );
   }
 
+  const featureCards = [
+    {
+      icon: "👨‍💻",
+      title: "關於我",
+      description: "前端工程師，專注於 React 生態系統與工業級系統開發",
+      link: "/about",
+      buttonText: "查看履歷",
+    },
+    {
+      icon: "📅",
+      title: "開發歷程",
+      description: "專案開發時程與技術演進歷程",
+      link: "/timeline",
+      buttonText: "查看開發歷程",
+    },
+    {
+      icon: "🤖",
+      title: "智慧排程系統",
+      description: "工業級生產排程管理，支援多區域即時調度與狀態追蹤",
+      link: "/wise-scheduling",
+      buttonText: "進入智慧排程",
+    },
+    {
+      icon: "📊",
+      title: "專案作品展示",
+      description: "科專_TIIP模具產業高階製造系統展示",
+      link: "/project-showcase",
+      buttonText: "查看專案詳情",
+    },
+    {
+      icon: "🏭",
+      title: "製造監控中心",
+      description: "多功能生產監控儀表板，包含 OEE 分析、進度追蹤等",
+      link: "/ManufacturingLiveMonitor",
+      buttonText: "進入監控中心",
+    },
+    {
+      icon: "🎨",
+      title: "Design Token 推動",
+      description: "設計系統規範化，推動設計與開發協作效率提升",
+      link: "/design-token",
+      buttonText: "查看 Design Token",
+    },
+    {
+      icon: "📬",
+      title: "聯絡方式",
+      description: "歡迎聯繫討論專案合作或技術交流",
+      link: "/contact",
+      buttonText: "聯絡我",
+    },
+  ];
+
   return (
-    <PageContainer>
-      <Title>時間軸專案首頁</Title>
-      <Paragraph>
-        歡迎來到{appInfo?.name || "時間軸專案"}
-        ，這是一個用於展示和管理時間軸數據的應用。
-      </Paragraph>
+    <ThemeProvider theme={muiTheme}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ mb: 4, textAlign: "center" }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              color: "primary.main",
+              mb: 2,
+            }}
+          >
+            林志翰 - 前端工程師作品集
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "text.secondary",
+              lineHeight: 1.8,
+              maxWidth: 800,
+              mx: "auto",
+            }}
+          >
+            歡迎來到我的個人作品集！這裡展示了我在智慧製造領域的專案經驗，
+            包含生產排程系統、即時監控儀表板等工業級應用開發。
+          </Typography>
+        </Box>
 
-      <CardGrid>
-        <FeatureCard>
-          <h2>🤖 智慧排程系統</h2>
-          <p>工業級生產排程管理，支援多區域即時調度與狀態追蹤</p>
-          <FeatureLink to="/wise-scheduling">進入智慧排程</FeatureLink>
-        </FeatureCard>
-
-        <FeatureCard>
-          <h2>動態時間軸</h2>
-          <p>檢視互動式的甘特圖和時間軸視覺化</p>
-          <FeatureLink to="/dynamic-timeline">前往動態時間軸</FeatureLink>
-        </FeatureCard>
-
-        <FeatureCard>
-          <h2>查詢範例</h2>
-          <p>了解如何使用查詢功能來過濾和檢索數據</p>
-          <FeatureLink to="/query-example">查看查詢範例</FeatureLink>
-        </FeatureCard>
-
-        <FeatureCard>
-          <h2>製造現場即時監控</h2>
-          <p>查看製造現場的即時監控數據</p>
-          <FeatureLink to="/ManufacturingLiveMonitor">
-            前往製造現場即時監控
-          </FeatureLink>
-        </FeatureCard>
-      </CardGrid>
-    </PageContainer>
+        <Grid container spacing={3}>
+          {featureCards.map((card, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Card
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: 6,
+                  },
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="h4"
+                    component="h2"
+                    gutterBottom
+                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  >
+                    <span style={{ fontSize: "2rem" }}>{card.icon}</span>
+                    {card.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {card.description}
+                  </Typography>
+                </CardContent>
+                <CardActions sx={{ p: 2, pt: 0 }}>
+                  <Button
+                    component={Link}
+                    to={card.link}
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {card.buttonText}
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    </ThemeProvider>
   );
 };
 
