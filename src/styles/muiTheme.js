@@ -1,40 +1,48 @@
 import { createTheme } from '@mui/material/styles';
 import { theme as styledTheme } from './theme';
+import { colors, typography, spacing, borders, effects } from '../designTokens';
 
 /**
  * MUI Theme Configuration
- * 整合現有的 styled-components theme 配置
+ * 整合 Design Tokens 與現有的 styled-components theme 配置
  * 提供一致的設計系統給 MUI 組件使用
+ * 日式高級餐廳風格
  */
 const muiTheme = createTheme({
   palette: {
+    mode: 'dark', // 啟用深色模式
     primary: {
-      main: styledTheme.colors.primary,
-      dark: styledTheme.colors.primaryDark,
-      contrastText: '#fff',
+      main: colors.accent.gold,
+      dark: colors.accent.goldHover,
+      light: colors.accent.goldLight,
+      contrastText: colors.text.inverse,
     },
     secondary: {
       main: styledTheme.colors.secondary,
       contrastText: '#fff',
     },
     error: {
-      main: styledTheme.colors.error,
+      main: colors.functional.error,
     },
     success: {
-      main: styledTheme.colors.success,
+      main: colors.functional.success,
     },
     warning: {
-      main: styledTheme.colors.warning,
+      main: colors.functional.warning,
+    },
+    info: {
+      main: colors.functional.info,
     },
     text: {
-      primary: styledTheme.colors.text,
-      secondary: styledTheme.colors.lightText,
+      primary: colors.text.primary,
+      secondary: colors.text.secondary,
+      disabled: colors.text.tertiary,
     },
     background: {
-      default: styledTheme.colors.background,
-      paper: styledTheme.colors.cardBackground,
+      default: colors.background.primary,
+      paper: colors.background.surface,
     },
-    divider: styledTheme.colors.border,
+    divider: colors.border.light,
   },
   typography: {
     fontFamily: styledTheme.fonts.main,
@@ -126,23 +134,31 @@ const muiTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: styledTheme.borderRadius.md,
-          padding: `${styledTheme.spacing.sm} ${styledTheme.spacing.lg}`,
+          borderRadius: borders.radius.small,
+          padding: `${spacing.md} ${spacing.xl}`,
+          textTransform: 'none',
+          fontWeight: typography.fontWeight.semibold,
+          transition: effects.transitions.normal,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: styledTheme.borderRadius.lg,
-          boxShadow: styledTheme.shadows.md,
+          borderRadius: borders.radius.medium,
+          boxShadow: effects.shadows.small,
+          transition: effects.transitions.normal,
+          '&:hover': {
+            boxShadow: effects.shadows.medium,
+          },
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: styledTheme.borderRadius.lg,
+          borderRadius: borders.radius.small,
+          backgroundImage: 'none', // 移除 MUI 預設漸層
         },
       },
     },
@@ -150,7 +166,17 @@ const muiTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: styledTheme.borderRadius.md,
+            borderRadius: borders.radius.small,
+            backgroundColor: colors.background.surface,
+            '& fieldset': {
+              borderColor: colors.border.light,
+            },
+            '&:hover fieldset': {
+              borderColor: colors.accent.gold,
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: colors.accent.gold,
+            },
           },
         },
       },
@@ -158,7 +184,8 @@ const muiTheme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: styledTheme.borderRadius.md,
+          borderRadius: borders.radius.small,
+          fontWeight: typography.fontWeight.medium,
         },
       },
     },

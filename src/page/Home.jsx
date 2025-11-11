@@ -4,15 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Container,
   Typography,
-  Card,
   CardContent,
   CardActions,
-  Button,
   Grid,
   Box,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import muiTheme from "../styles/muiTheme";
+import {
+  CreamPaper,
+  GoldBorderContainer,
+  GoldDivider,
+  CornerButton,
+} from "../components/StyledComponents";
+import { colors } from "../designTokens";
 
 // 模擬一個假的 API 調用，用於激活 React Query
 const fetchAppInfo = async () => {
@@ -37,8 +42,8 @@ const Home = () => {
   if (isLoading) {
     return (
       <ThemeProvider theme={muiTheme}>
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-          <Typography>載入中...</Typography>
+        <Container maxWidth="lg" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
+          <Typography sx={{ color: colors.text.inverse }}>載入中...</Typography>
         </Container>
       </ThemeProvider>
     );
@@ -98,78 +103,79 @@ const Home = () => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ mb: 4, textAlign: "center" }}>
-          <Typography
-            variant="h3"
-            component="h1"
-            gutterBottom
-            sx={{
-              fontWeight: 700,
-              color: "primary.main",
-              mb: 2,
-            }}
-          >
-            林志翰 - 前端工程師作品集
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: "text.secondary",
-              lineHeight: 1.8,
-              maxWidth: 800,
-              mx: "auto",
-            }}
-          >
-            歡迎來到我的個人作品集！這裡展示了我在智慧製造領域的專案經驗，
-            包含生產排程系統、即時監控儀表板等工業級應用開發。
-          </Typography>
-        </Box>
+      <Container maxWidth="lg" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
+        <GoldBorderContainer sx={{ mb: 4 }}>
+          <Box sx={{ textAlign: "center" }}>
+            <Typography
+              variant="h3"
+              component="h1"
+              gutterBottom
+              sx={{
+                fontWeight: 700,
+                color: colors.accent.gold,
+                mb: 2,
+              }}
+            >
+              林志翰 - 前端工程師作品集
+            </Typography>
+            <GoldDivider />
+            <Typography
+              variant="body1"
+              sx={{
+                color: colors.text.inverse,
+                lineHeight: 1.8,
+                maxWidth: 800,
+                mx: "auto",
+                mt: 2,
+              }}
+            >
+              歡迎來到我的個人作品集！這裡展示了我在智慧製造領域的專案經驗，
+              包含生產排程系統、即時監控儀表板等工業級應用開發。
+            </Typography>
+          </Box>
+        </GoldBorderContainer>
 
         <Grid container spacing={3}>
           {featureCards.map((card, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card
+              <CreamPaper
+                elevation={2}
                 sx={{
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-5px)",
-                    boxShadow: 6,
-                  },
                 }}
               >
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography
-                    variant="h4"
+                    variant="h5"
                     component="h2"
                     gutterBottom
-                    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      color: colors.accent.gold,
+                      fontWeight: 600,
+                    }}
                   >
                     <span style={{ fontSize: "2rem" }}>{card.icon}</span>
                     {card.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: colors.text.primary }}>
                     {card.description}
                   </Typography>
                 </CardContent>
                 <CardActions sx={{ p: 2, pt: 0 }}>
-                  <Button
+                  <CornerButton
                     component={Link}
                     to={card.link}
-                    variant="contained"
                     fullWidth
-                    sx={{
-                      textTransform: "none",
-                      fontWeight: 500,
-                    }}
                   >
                     {card.buttonText}
-                  </Button>
+                  </CornerButton>
                 </CardActions>
-              </Card>
+              </CreamPaper>
             </Grid>
           ))}
         </Grid>

@@ -14,12 +14,21 @@ const GlobalStyles = createGlobalStyle`
   }
 
   /* 基本樣式 */
+  html {
+    background-color: #1a1a1a;
+  }
+
   body {
     font-family: ${(props) => props.theme.fonts.main};
-    background-color: ${(props) => props.theme.colors.background};
-    color: ${(props) => props.theme.colors.text};
+    background-color: #1a1a1a;
+    color: #f5f5f5;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    background-color: #1a1a1a;
+    min-height: 100vh;
   }
 
   /* 改進媒體元素預設值 */

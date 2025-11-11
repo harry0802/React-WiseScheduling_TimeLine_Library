@@ -3,7 +3,6 @@ import {
   Container,
   Typography,
   Box,
-  Paper,
   Chip,
   Grid,
 } from '@mui/material';
@@ -18,6 +17,13 @@ import {
 } from '@mui/lab';
 import { ThemeProvider } from '@mui/material/styles';
 import muiTheme from '../styles/muiTheme';
+import {
+  CreamPaper,
+  GoldBorderContainer,
+  GoldDivider,
+  GoldBadge,
+} from '../components/StyledComponents';
+import { colors } from '../designTokens';
 
 const Timeline = () => {
   const timelinePhases = [
@@ -116,38 +122,30 @@ const Timeline = () => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          sx={{
-            fontWeight: 700,
-            color: 'primary.main',
-            mb: 3,
-            textAlign: 'center',
-          }}
-        >
-          開發歷程
-        </Typography>
+      <Container maxWidth="lg" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
+        <GoldBorderContainer sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              color: colors.accent.gold,
+              mb: 2,
+            }}
+          >
+            開發歷程
+          </Typography>
+          <GoldDivider />
+        </GoldBorderContainer>
 
-        <Paper
-          elevation={0}
-          sx={{
-            mb: 4,
-            p: 3,
-            background: 'linear-gradient(135deg, rgba(97, 218, 251, 0.15), rgba(58, 133, 137, 0.10))',
-            borderLeft: 4,
-            borderColor: 'primary.main',
-            borderRadius: 2,
-          }}
-        >
+        <CreamPaper elevation={2} sx={{ mb: 4 }}>
           <Typography
             variant="h5"
             component="h2"
             gutterBottom
             sx={{
-              color: 'primary.main',
+              color: colors.accent.gold,
               fontWeight: 600,
               mt: 0,
               mb: 2,
@@ -155,36 +153,26 @@ const Timeline = () => {
           >
             專案簡介
           </Typography>
-          <Typography variant="body1" color="text.secondary" paragraph>
+          <Typography variant="body1" sx={{ color: colors.text.primary }} paragraph>
             這是一個工業級智慧製造管理系統，專注於生產排程、即時監控與數據分析。
             專案從 2025 年 6 月啟動，經過持續迭代開發，目前已整合智慧排程系統、製造監控中心、
             OEE 分析等多個核心模組。
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" sx={{ color: colors.text.primary }}>
             開發過程中注重系統架構設計、使用者體驗優化、以及程式碼品質維護，
             採用現代化的前端技術棧與最佳實踐，確保系統的可擴展性與可維護性。
           </Typography>
-        </Paper>
+        </CreamPaper>
 
         <Box sx={{ position: 'relative' }}>
           {timelinePhases.map((phase, phaseIndex) => (
             <Box key={phaseIndex} sx={{ mb: phaseIndex < timelinePhases.length - 1 ? 6 : 0 }}>
               {/* Phase Header */}
-              <Paper
-                elevation={3}
-                sx={{
-                  p: 3,
-                  mb: 3,
-                  background: 'linear-gradient(135deg, rgba(97, 218, 251, 0.15), rgba(58, 133, 137, 0.10))',
-                  borderLeft: 6,
-                  borderColor: 'primary.main',
-                  borderRadius: 2,
-                }}
-              >
+              <GoldBorderContainer sx={{ mb: 3 }}>
                 <Typography
                   variant="h5"
                   sx={{
-                    color: 'primary.main',
+                    color: colors.accent.gold,
                     fontWeight: 700,
                     mb: 0.5,
                   }}
@@ -194,13 +182,13 @@ const Timeline = () => {
                 <Typography
                   variant="subtitle1"
                   sx={{
-                    color: 'text.secondary',
+                    color: colors.text.inverse,
                     fontWeight: 600,
                   }}
                 >
                   {phase.phaseTitle}
                 </Typography>
-              </Paper>
+              </GoldBorderContainer>
 
               {/* Phase Items */}
               <MuiTimeline position="right" sx={{ mt: 0, pt: 0 }}>
@@ -214,41 +202,29 @@ const Timeline = () => {
                       }}
                       align="right"
                       variant="body2"
-                      color="text.secondary"
                     >
-                      <Chip
-                        label={item.date}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                        sx={{ fontWeight: 600 }}
-                      />
+                      <GoldBadge sx={{ display: 'inline-block' }}>
+                        {item.date}
+                      </GoldBadge>
                     </TimelineOppositeContent>
                     <TimelineSeparator>
                       <TimelineDot
-                        color="primary"
-                        variant="outlined"
                         sx={{
                           borderWidth: 2,
+                          borderColor: colors.accent.gold,
+                          backgroundColor: colors.background.primary,
                         }}
                       />
                       {itemIndex < phase.items.length - 1 && (
-                        <TimelineConnector sx={{ bgcolor: 'primary.light' }} />
+                        <TimelineConnector sx={{ bgcolor: colors.accent.gold }} />
                       )}
                     </TimelineSeparator>
                     <TimelineContent sx={{ py: 1.5, px: 2 }}>
-                      <Paper
+                      <CreamPaper
                         elevation={2}
                         sx={{
                           p: 2.5,
-                          borderLeft: 4,
-                          borderColor: 'primary.main',
-                          transition: 'all 0.2s ease',
-                          '&:hover': {
-                            elevation: 4,
-                            transform: 'translateX(4px)',
-                            borderColor: 'primary.dark',
-                          },
+                          borderLeft: `4px solid ${colors.accent.gold}`,
                         }}
                       >
                         <Typography
@@ -257,7 +233,7 @@ const Timeline = () => {
                           gutterBottom
                           sx={{
                             fontWeight: 600,
-                            color: 'primary.dark',
+                            color: colors.accent.gold,
                             mb: 1,
                           }}
                         >
@@ -265,12 +241,11 @@ const Timeline = () => {
                         </Typography>
                         <Typography
                           variant="body2"
-                          color="text.secondary"
-                          sx={{ lineHeight: 1.8 }}
+                          sx={{ color: colors.text.primary, lineHeight: 1.8 }}
                         >
                           {item.description}
                         </Typography>
-                      </Paper>
+                      </CreamPaper>
                     </TimelineContent>
                   </TimelineItem>
                 ))}
@@ -279,12 +254,12 @@ const Timeline = () => {
           ))}
         </Box>
 
-        <Paper elevation={2} sx={{ mt: 4, p: 3 }}>
+        <CreamPaper elevation={2} sx={{ mt: 4 }}>
           <Typography
             variant="h5"
             gutterBottom
             sx={{
-              color: 'primary.main',
+              color: colors.accent.gold,
               fontWeight: 600,
               mb: 2,
             }}
@@ -296,17 +271,19 @@ const Timeline = () => {
               <Grid item key={index}>
                 <Chip
                   label={tech}
-                  color="primary"
-                  variant="outlined"
                   sx={{
                     fontWeight: 500,
                     borderWidth: 2,
+                    borderColor: colors.accent.gold,
+                    color: colors.accent.gold,
+                    borderStyle: 'solid',
+                    backgroundColor: 'transparent',
                   }}
                 />
               </Grid>
             ))}
           </Grid>
-        </Paper>
+        </CreamPaper>
       </Container>
     </ThemeProvider>
   );

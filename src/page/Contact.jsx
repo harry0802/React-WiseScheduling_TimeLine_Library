@@ -3,7 +3,6 @@ import {
   Container,
   Typography,
   Box,
-  Paper,
   TextField,
   Link as MuiLink,
   Grid,
@@ -14,58 +13,45 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import muiTheme from "../styles/muiTheme";
+import {
+  CreamPaper,
+  GoldBorderContainer,
+  GoldDivider,
+} from "../components/StyledComponents";
+import { colors } from "../designTokens";
 
 const Contact = () => {
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography
-          variant="h3"
-          component="h1"
-          gutterBottom
-          sx={{
-            fontWeight: 700,
-            color: "primary.main",
-            mb: 3,
-            textAlign: "center",
-          }}
-        >
-          聯絡方式
-        </Typography>
-
-        <Paper
-          elevation={0}
-          sx={{
-            mb: 4,
-            p: 3,
-            background:
-              "linear-gradient(135deg, rgba(97, 218, 251, 0.15), rgba(58, 133, 137, 0.10))",
-            borderLeft: 4,
-            borderColor: "primary.main",
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="body1" color="text.secondary" align="center">
+      <Container maxWidth="md" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
+        <GoldBorderContainer sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              color: colors.accent.gold,
+              mb: 2,
+            }}
+          >
+            聯絡方式
+          </Typography>
+          <GoldDivider />
+          <Typography variant="body1" sx={{ color: colors.text.inverse, mt: 2 }}>
             歡迎透過以下方式與我聯繫，我很樂意與您討論專案合作或技術交流的機會。
           </Typography>
-        </Paper>
+        </GoldBorderContainer>
 
         <Grid container spacing={3}>
           {/* Social Links Section */}
           <Grid item xs={12}>
-            <Paper
-              elevation={2}
-              sx={{
-                p: 3,
-                borderLeft: 4,
-                borderColor: "primary.main",
-              }}
-            >
+            <CreamPaper elevation={2}>
               <Typography
                 variant="h5"
                 gutterBottom
                 sx={{
-                  color: "primary.main",
+                  color: colors.accent.gold,
                   fontWeight: 600,
                   mb: 3,
                 }}
@@ -80,20 +66,20 @@ const Contact = () => {
                     alignItems: "center",
                     gap: 2,
                     p: 2,
-                    background: "rgba(97, 218, 251, 0.08)",
+                    backgroundColor: colors.background.surfaceAlt,
+                    border: `1px solid ${colors.border.light}`,
                     borderRadius: 2,
                     transition: "all 0.3s ease",
                     "&:hover": {
-                      background: "rgba(97, 218, 251, 0.15)",
+                      borderColor: colors.accent.gold,
                     },
                   }}
                 >
-                  <GitHubIcon sx={{ color: "primary.main", fontSize: 32 }} />
+                  <GitHubIcon sx={{ color: colors.accent.gold, fontSize: 32 }} />
                   <Box sx={{ flex: 1 }}>
                     <Typography
                       variant="subtitle2"
-                      color="text.secondary"
-                      sx={{ mb: 0.5 }}
+                      sx={{ mb: 0.5, color: colors.text.secondary }}
                     >
                       GitHub
                     </Typography>
@@ -102,7 +88,7 @@ const Contact = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: "primary.main",
+                        color: colors.accent.gold,
                         fontWeight: 600,
                         textDecoration: "none",
                         "&:hover": {
@@ -115,24 +101,17 @@ const Contact = () => {
                   </Box>
                 </Box>
               </Box>
-            </Paper>
+            </CreamPaper>
           </Grid>
 
           {/* Contact Information Form Section */}
           <Grid item xs={12}>
-            <Paper
-              elevation={2}
-              sx={{
-                p: 3,
-                borderLeft: 4,
-                borderColor: "primary.main",
-              }}
-            >
+            <CreamPaper elevation={2}>
               <Typography
                 variant="h5"
                 gutterBottom
                 sx={{
-                  color: "primary.main",
+                  color: colors.accent.gold,
                   fontWeight: 600,
                   mb: 3,
                 }}
@@ -143,8 +122,8 @@ const Contact = () => {
               <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                    <EmailIcon sx={{ color: "primary.main" }} />
-                    <Typography variant="subtitle1" fontWeight={600}>
+                    <EmailIcon sx={{ color: colors.accent.gold }} />
+                    <Typography variant="subtitle1" fontWeight={600} sx={{ color: colors.text.primary }}>
                       電子郵件
                     </Typography>
                   </Box>
@@ -153,16 +132,10 @@ const Contact = () => {
                     placeholder="請填寫您的電子郵件"
                     variant="outlined"
                     disabled
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "rgba(0, 0, 0, 0.02)",
-                      },
-                    }}
                   />
                   <Typography
                     variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 0.5, display: "block", fontStyle: "italic" }}
+                    sx={{ mt: 0.5, display: "block", fontStyle: "italic", color: colors.text.secondary }}
                   >
                     ※ 此欄位預留給您填寫
                   </Typography>
@@ -170,8 +143,8 @@ const Contact = () => {
 
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                    <PhoneIcon sx={{ color: "primary.main" }} />
-                    <Typography variant="subtitle1" fontWeight={600}>
+                    <PhoneIcon sx={{ color: colors.accent.gold }} />
+                    <Typography variant="subtitle1" fontWeight={600} sx={{ color: colors.text.primary }}>
                       電話號碼
                     </Typography>
                   </Box>
@@ -180,16 +153,10 @@ const Contact = () => {
                     placeholder="請填寫您的電話號碼"
                     variant="outlined"
                     disabled
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "rgba(0, 0, 0, 0.02)",
-                      },
-                    }}
                   />
                   <Typography
                     variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 0.5, display: "block", fontStyle: "italic" }}
+                    sx={{ mt: 0.5, display: "block", fontStyle: "italic", color: colors.text.secondary }}
                   >
                     ※ 此欄位預留給您填寫
                   </Typography>
@@ -197,8 +164,8 @@ const Contact = () => {
 
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                    <LinkedInIcon sx={{ color: "primary.main" }} />
-                    <Typography variant="subtitle1" fontWeight={600}>
+                    <LinkedInIcon sx={{ color: colors.accent.gold }} />
+                    <Typography variant="subtitle1" fontWeight={600} sx={{ color: colors.text.primary }}>
                       LinkedIn
                     </Typography>
                   </Box>
@@ -207,51 +174,44 @@ const Contact = () => {
                     placeholder="請填寫您的 LinkedIn 個人檔案連結"
                     variant="outlined"
                     disabled
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "rgba(0, 0, 0, 0.02)",
-                      },
-                    }}
                   />
                   <Typography
                     variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 0.5, display: "block", fontStyle: "italic" }}
+                    sx={{ mt: 0.5, display: "block", fontStyle: "italic", color: colors.text.secondary }}
                   >
                     ※ 此欄位預留給您填寫
                   </Typography>
                 </Box>
               </Box>
-            </Paper>
+            </CreamPaper>
           </Grid>
 
           {/* Note Section */}
           <Grid item xs={12}>
-            <Paper
-              elevation={0}
+            <Box
               sx={{
                 p: 2,
-                background: "rgba(97, 218, 251, 0.10)",
-                borderLeft: 4,
-                borderColor: "primary.main",
-                borderRadius: 2,
+                backgroundColor: colors.background.surfaceAlt,
+                border: `2px solid ${colors.border.light}`,
+                borderLeft: `4px solid ${colors.accent.gold}`,
+                borderRadius: 1,
               }}
             >
               <Typography
                 variant="subtitle1"
                 gutterBottom
                 sx={{
-                  color: "primary.main",
+                  color: colors.accent.gold,
                   fontWeight: 700,
                 }}
               >
                 📝 提示
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{ color: colors.text.primary }}>
                 以上欄位預留給您填寫個人聯絡資訊。您可以編輯此頁面來新增您的電子郵件、電話號碼和
                 LinkedIn 連結。
               </Typography>
-            </Paper>
+            </Box>
           </Grid>
         </Grid>
       </Container>
