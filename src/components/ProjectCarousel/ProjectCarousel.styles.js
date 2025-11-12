@@ -105,3 +105,66 @@ export const ProgressBarFill = styled.div`
   transition: height 0.1s ease-out;
 `
 
+//! =============== 部門標記樣式 ===============
+
+export const DepartmentMarker = styled.div`
+  position: absolute;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  z-index: 12;
+  transition: all 0.2s ease;
+
+  &:hover .marker-line {
+    width: 14px;
+    box-shadow: 0 0 12px ${colors.accent.gold}cc;
+  }
+
+  &:hover .marker-label {
+    opacity: 1;
+  }
+`
+
+export const MarkerLine = styled.div`
+  width: 8px;
+  height: 2px;
+  background-color: ${colors.accent.gold};
+  opacity: 0.6;
+  transition: all 0.2s ease;
+
+  &.active {
+    width: 12px;
+    height: 3px;
+    opacity: 1;
+    box-shadow: 0 0 8px ${colors.accent.gold}cc;
+  }
+`
+
+export const MarkerLabel = styled.div`
+  font-size: 0.7rem;
+  color: ${colors.accent.gold};
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  margin-left: 6px;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+
+  &.active {
+    font-weight: 600;
+    opacity: 1;
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+    margin-left: 4px;
+  }
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+`
+

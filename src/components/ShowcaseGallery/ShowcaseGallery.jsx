@@ -72,6 +72,33 @@ function useShowcaseGallery(items) {
     return allSlides
   }, [items])
 
+  // 計算每個部門在進度條上的位置
+  const departmentPositions = useMemo(() => {
+    const positions = []
+    let currentIndex = 0
+
+    items.forEach((item) => {
+      const imageCount = item.images?.length || (item.pic ? 1 : 0)
+
+      // 提取部門簡稱（取 "-" 前的部分，如 "生管部門 - 生產管理系統" → "生管部門"）
+      const titleParts = item.title.split('-')
+      const shortTitle = titleParts[0].trim()
+
+      positions.push({
+        id: item.id,
+        title: item.title,
+        shortTitle: shortTitle,
+        startIndex: currentIndex,
+        imageCount: imageCount,
+        percentage: slides.length > 0 ? (currentIndex / slides.length) * 100 : 0
+      })
+
+      currentIndex += imageCount
+    })
+
+    return positions
+  }, [items, slides.length])
+
   // 根據當前 slide 的 categoryId 找到對應的類別資訊
   const currentCategory = useMemo(() => {
     const currentSlide = slides[currentSlideIndex]
@@ -87,7 +114,9 @@ function useShowcaseGallery(items) {
   return {
     currentCategory,
     handleSlideChange,
-    slides
+    slides,
+    departmentPositions,
+    currentSlideIndex
   }
 }
 
@@ -171,11 +200,22 @@ const ShowcaseGallery = ({
   showProgress = true,
   showAboutNote = true
 }) => {
+  const carouselRef = React.useRef(null)
+
   const {
     currentCategory,
     handleSlideChange,
-    slides
+    slides,
+    departmentPositions,
+    currentSlideIndex
   } = useShowcaseGallery(items)
+
+  // 處理部門點擊跳轉
+  const handleDepartmentClick = useCallback((startIndex) => {
+    if (carouselRef.current?.scrollToSlide) {
+      carouselRef.current.scrollToSlide(startIndex)
+    }
+  }, [])
 
   // 驗證是否有項目
   if (!items || items.length === 0) {
@@ -241,9 +281,13 @@ const ShowcaseGallery = ({
                 }}
               >
                 <ProjectCarousel
+                  ref={carouselRef}
                   slides={slides}
                   onSlideChange={handleSlideChange}
                   showProgress={showProgress}
+                  departmentPositions={departmentPositions}
+                  currentSlideIndex={currentSlideIndex}
+                  onDepartmentClick={handleDepartmentClick}
                 />
               </Box>
             </Grid>

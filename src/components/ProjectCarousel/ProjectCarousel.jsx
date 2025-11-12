@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useImperativeHandle } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures'
 import {
@@ -8,7 +8,10 @@ import {
   Slide,
   ImageContainer,
   ProgressBarContainer,
-  ProgressBarFill
+  ProgressBarFill,
+  DepartmentMarker,
+  MarkerLine,
+  MarkerLabel
 } from './ProjectCarousel.styles'
 
 //! =============== 類型定義 ===============
@@ -32,13 +35,19 @@ import {
  * @param {(progress: number) => void} [props.onProgressChange] - 滾動進度回調 (0-1)
  * @param {(index: number) => void} [props.onSlideChange] - 投影片切換回調
  * @param {boolean} [props.showProgress=true] - 是否顯示內建進度條
+ * @param {Array} [props.departmentPositions] - 部門位置資訊陣列
+ * @param {number} [props.currentSlideIndex] - 當前投影片索引
+ * @param {Function} [props.onDepartmentClick] - 部門點擊回調
  */
-const ProjectCarousel = ({
+const ProjectCarousel = React.forwardRef(({
   slides = [],
   onProgressChange = null,
   onSlideChange = null,
-  showProgress = true
-}) => {
+  showProgress = true,
+  departmentPositions = [],
+  currentSlideIndex = 0,
+  onDepartmentClick = null
+}, ref) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
       axis: 'y',
@@ -51,6 +60,15 @@ const ProjectCarousel = ({
   )
 
   const progressRef = useRef(null)
+
+  // 暴露 scrollToSlide 方法給父組件
+  useImperativeHandle(ref, () => ({
+    scrollToSlide: (index) => {
+      if (emblaApi) {
+        emblaApi.scrollTo(index, true) // true = 使用平滑動畫
+      }
+    }
+  }), [emblaApi])
 
   // 滾動進度處理
   const onScroll = useCallback(() => {
@@ -148,11 +166,32 @@ const ProjectCarousel = ({
       {showProgress && (
         <ProgressBarContainer>
           <ProgressBarFill ref={progressRef} />
+
+          {/* 部門刻度標記 */}
+          {departmentPositions.map((dept) => {
+            const isActive = currentSlideIndex >= dept.startIndex &&
+                           currentSlideIndex < dept.startIndex + dept.imageCount
+
+            return (
+              <DepartmentMarker
+                key={dept.id}
+                style={{ top: `${dept.percentage}%` }}
+                onClick={() => onDepartmentClick?.(dept.startIndex)}
+              >
+                <MarkerLine className={`marker-line ${isActive ? 'active' : ''}`} />
+                <MarkerLabel className={`marker-label ${isActive ? 'active' : ''}`}>
+                  {dept.shortTitle}
+                </MarkerLabel>
+              </DepartmentMarker>
+            )
+          })}
         </ProgressBarContainer>
       )}
     </CarouselContainer>
   )
-}
+})
+
+ProjectCarousel.displayName = 'ProjectCarousel'
 
 export default ProjectCarousel
 
