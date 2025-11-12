@@ -83,7 +83,8 @@ export const DetailsSection = styled(Box)`
   padding: 0 16px;
 
   @media (min-width: 1200px) {
-    padding: 0 32px;
+    padding: 0 0 0 64px;
+    z-index: 999;
   }
 `
 
@@ -206,3 +207,72 @@ export const AboutNoteText = styled(Typography)`
     margin-bottom: 0;
   }
 `
+
+//! =============== 主容器佈局樣式 ===============
+
+export const MainContainer = styled(Box)`
+  width: calc(100% - 6rem);
+  padding: 0 16px;
+
+  @media (min-width: 900px) {
+    padding: 0 32px;
+  }
+
+  @media (min-width: 1200px) {
+    padding: 0 48px;
+  }
+`
+
+export const EmptyStateContainer = styled(Box)`
+  padding: 0 16px;
+
+  @media (min-width: 900px) {
+    padding: 0 48px;
+  }
+
+  @media (min-width: 1200px) {
+    padding: 0 96px;
+  }
+`
+
+export const ContentGrid = styled(Box)`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  position: relative;
+  align-items: stretch;
+
+  @media (min-width: 900px) {
+    gap: 32px;
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: 2fr 1fr;
+    gap: 48px;
+  }
+`
+
+export const CarouselGridItem = styled(Box)`
+  order: 1;
+  z-index: 10;
+  position: relative;
+
+  @media (min-width: 1200px) {
+    order: 1;
+  }
+`
+
+export const CarouselBox = styled(Box)`
+  height: 710px;
+  width: 100%;
+`
+
+export const DetailsGridItem = styled(Box)`
+  order: 3;
+  z-index: 1;
+
+  @media (min-width: 1200px) {
+    order: 3;
+  }
+`
+

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react'
-import { Container, Typography, Box, Grid, Chip } from '@mui/material'
+import { Typography } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import muiTheme from '../../styles/muiTheme'
 import { colors, typography } from '../../designTokens'
@@ -19,7 +19,13 @@ import {
   StyledTechChip,
   AboutNoteSection,
   AboutNoteTitle,
-  AboutNoteText
+  AboutNoteText,
+  MainContainer,
+  EmptyStateContainer,
+  ContentGrid,
+  CarouselGridItem,
+  CarouselBox,
+  DetailsGridItem
 } from './ShowcaseGallery.styles'
 
 //! =============== 1. 類型與介面定義 ===============
@@ -55,45 +61,82 @@ function useShowcaseGallery(items) {
   const slides = useMemo(() => {
     const allSlides = []
     items.forEach((item) => {
-      // 支援舊格式 (pic) 和新格式 (images)
-      const imageList = item.images || (item.pic ? [item.pic] : [])
-
-      imageList.forEach((imagePath, imgIndex) => {
-        allSlides.push({
-          id: `${item.id}-${imgIndex}`,
-          pic: imagePath,
-          categoryId: item.id,
-          categoryTitle: item.title,
-          categoryDec: item.dec,
-          categoryTechStack: item.techStack
+      // 支援新格式 (systems) 和舊格式 (images/pic)
+      if (item.systems && Array.isArray(item.systems)) {
+        // 新格式：包含 systems 陣列
+        item.systems.forEach((system, sysIndex) => {
+          system.images.forEach((imagePath, imgIndex) => {
+            allSlides.push({
+              id: `${item.id}-${sysIndex}-${imgIndex}`,
+              pic: imagePath,
+              categoryId: item.id,
+              categoryTitle: item.title,
+              categoryDec: item.dec,
+              categoryTechStack: item.techStack,
+              systemName: system.name
+            })
+          })
         })
-      })
+      } else {
+        // 舊格式：直接使用 images 或 pic
+        const imageList = item.images || (item.pic ? [item.pic] : [])
+        imageList.forEach((imagePath, imgIndex) => {
+          allSlides.push({
+            id: `${item.id}-${imgIndex}`,
+            pic: imagePath,
+            categoryId: item.id,
+            categoryTitle: item.title,
+            categoryDec: item.dec,
+            categoryTechStack: item.techStack
+          })
+        })
+      }
     })
     return allSlides
   }, [items])
 
-  // 計算每個部門在進度條上的位置
+  // 計算每個部門和系統在進度條上的位置
   const departmentPositions = useMemo(() => {
     const positions = []
     let currentIndex = 0
 
     items.forEach((item) => {
-      const imageCount = item.images?.length || (item.pic ? 1 : 0)
-
-      // 提取部門簡稱（取 "-" 前的部分，如 "生管部門 - 生產管理系統" → "生管部門"）
+      // 提取部門簡稱
       const titleParts = item.title.split('-')
       const shortTitle = titleParts[0].trim()
+
+      const departmentStartIndex = currentIndex
+      const systems = []
+
+      // 處理系統位置
+      if (item.systems && Array.isArray(item.systems)) {
+        item.systems.forEach((system) => {
+          const systemImageCount = system.images.length
+          systems.push({
+            name: system.name,
+            startIndex: currentIndex,
+            imageCount: systemImageCount,
+            percentage: slides.length > 0 ? (currentIndex / slides.length) * 100 : 0
+          })
+          currentIndex += systemImageCount
+        })
+      } else {
+        // 舊格式
+        const imageCount = item.images?.length || (item.pic ? 1 : 0)
+        currentIndex += imageCount
+      }
+
+      const departmentImageCount = currentIndex - departmentStartIndex
 
       positions.push({
         id: item.id,
         title: item.title,
         shortTitle: shortTitle,
-        startIndex: currentIndex,
-        imageCount: imageCount,
-        percentage: slides.length > 0 ? (currentIndex / slides.length) * 100 : 0
+        startIndex: departmentStartIndex,
+        imageCount: departmentImageCount,
+        percentage: slides.length > 0 ? (departmentStartIndex / slides.length) * 100 : 0,
+        systems: systems
       })
-
-      currentIndex += imageCount
     })
 
     return positions
@@ -222,17 +265,14 @@ const ShowcaseGallery = ({
     return (
       <ThemeProvider theme={muiTheme}>
         <ShowcaseWrapper>
-          <Container
-            maxWidth={false}
-            sx={{ px: { xs: 2, md: 6, lg: 12 } }}
-          >
+          <EmptyStateContainer>
             <Typography
               variant='h4'
               color='white'
             >
               沒有可展示的項目
             </Typography>
-          </Container>
+          </EmptyStateContainer>
         </ShowcaseWrapper>
       </ThemeProvider>
     )
@@ -241,13 +281,7 @@ const ShowcaseGallery = ({
   return (
     <ThemeProvider theme={muiTheme}>
       <ShowcaseWrapper>
-        <Container
-          maxWidth={false}
-          sx={{
-            width: 'calc(100% - 6rem)',
-            px: { xs: 2, md: 4, lg: 6 }
-          }}
-        >
+        <MainContainer>
           {/* 頁首標題 */}
           <GalleryHeader
             title={config.pageTitle}
@@ -255,31 +289,10 @@ const ShowcaseGallery = ({
           />
 
           {/* 分屏佈局：左側輪播 + 右側詳情 */}
-          <Grid
-            container
-            spacing={{ xs: 3, md: 4, lg: 6 }}
-            sx={{
-              position: 'relative',
-              alignItems: 'stretch'
-            }}
-          >
+          <ContentGrid>
             {/* 左側 - 輪播區 */}
-            <Grid
-              item
-              xs={12}
-              lg={8}
-              sx={{
-                order: { xs: 1, lg: 1 },
-                zIndex: 10,
-                position: 'relative'
-              }}
-            >
-              <Box
-                sx={{
-                  height: '710px',
-                  width: '100%'
-                }}
-              >
+            <CarouselGridItem>
+              <CarouselBox>
                 <ProjectCarousel
                   ref={carouselRef}
                   slides={slides}
@@ -289,25 +302,17 @@ const ShowcaseGallery = ({
                   currentSlideIndex={currentSlideIndex}
                   onDepartmentClick={handleDepartmentClick}
                 />
-              </Box>
-            </Grid>
+              </CarouselBox>
+            </CarouselGridItem>
 
             {/* 右側 - 詳情區 */}
-            <Grid
-              item
-              xs={12}
-              lg={4}
-              sx={{
-                order: { xs: 3, lg: 3 },
-                zIndex: 1
-              }}
-            >
+            <DetailsGridItem>
               <ItemDetails
                 key={currentCategory.id}
                 item={currentCategory}
               />
-            </Grid>
-          </Grid>
+            </DetailsGridItem>
+          </ContentGrid>
 
           {/* 底部關於區塊 */}
           {showAboutNote && (
@@ -316,7 +321,7 @@ const ShowcaseGallery = ({
               content={config.aboutContent}
             />
           )}
-        </Container>
+        </MainContainer>
       </ShowcaseWrapper>
     </ThemeProvider>
   )

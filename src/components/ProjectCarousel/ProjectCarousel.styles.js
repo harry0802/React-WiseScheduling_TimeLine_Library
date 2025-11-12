@@ -90,16 +90,26 @@ export const ProgressBarContainer = styled.div`
   right: 0;
   top: 0;
   height: 100%;
-  width: 2px;
-  background-color: ${colors.accent.gold}30;
+  width: auto;
+  min-width: 2px;
   z-index: 11;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background-color: ${colors.accent.gold}30;
+  }
 `
 
 export const ProgressBarFill = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 2px;
   background-color: ${colors.accent.gold};
   box-shadow: 0 0 20px ${colors.accent.gold}80;
   transition: height 0.1s ease-out;
@@ -109,6 +119,7 @@ export const ProgressBarFill = styled.div`
 
 export const DepartmentMarker = styled.div`
   position: absolute;
+  left: 0;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
@@ -121,7 +132,8 @@ export const DepartmentMarker = styled.div`
     box-shadow: 0 0 12px ${colors.accent.gold}cc;
   }
 
-  &:hover .marker-label {
+  &:hover .marker-label,
+  &:hover .marker-system {
     opacity: 1;
   }
 `
@@ -141,16 +153,31 @@ export const MarkerLine = styled.div`
   }
 `
 
+export const MarkerLabelGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 6px;
+  gap: 2px;
+
+  @media (max-width: 768px) {
+    margin-left: 4px;
+  }
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+`
+
 export const MarkerLabel = styled.div`
   font-size: 0.7rem;
   color: ${colors.accent.gold};
   font-weight: 400;
   letter-spacing: 0.05em;
-  margin-left: 6px;
   opacity: 0.6;
   transition: all 0.2s ease;
   white-space: nowrap;
   user-select: none;
+  line-height: 1.2;
 
   &.active {
     font-weight: 600;
@@ -160,10 +187,94 @@ export const MarkerLabel = styled.div`
 
   @media (max-width: 768px) {
     font-size: 0.65rem;
-    margin-left: 4px;
+  }
+`
+
+export const MarkerSystem = styled.div`
+  font-size: 0.55rem;
+  color: ${colors.accent.gold};
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  opacity: 0.4;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+  line-height: 1.2;
+
+  &.active {
+    opacity: 0.6;
+    font-size: 0.6rem;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
+    font-size: 0.5rem;
+  }
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+`
+
+//! =============== 系統子標記樣式 ===============
+
+export const SystemMarker = styled.div`
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  z-index: 11;
+  transition: all 0.2s ease;
+
+  &:hover .system-line {
+    width: 7px;
+    box-shadow: 0 0 8px ${colors.accent.gold}99;
+  }
+
+  &:hover .system-label {
+    opacity: 0.8;
+  }
+`
+
+export const SystemLine = styled.div`
+  width: 5px;
+  height: 1px;
+  background-color: ${colors.accent.gold};
+  opacity: 0.4;
+  transition: all 0.2s ease;
+
+  &.active {
+    width: 6px;
+    height: 1.5px;
+    opacity: 0.7;
+    box-shadow: 0 0 6px ${colors.accent.gold}99;
+  }
+`
+
+export const SystemLabelGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 4px;
+`
+
+export const SystemLabel = styled.div`
+  font-size: 0.5rem;
+  color: ${colors.accent.gold};
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  opacity: 0.35;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+  line-height: 1.2;
+
+  &.active {
+    opacity: 0.55;
+    font-size: 0.55rem;
+    font-weight: 400;
+  }
+
+  @media (max-width: 1200px) {
     display: none;
   }
 `
