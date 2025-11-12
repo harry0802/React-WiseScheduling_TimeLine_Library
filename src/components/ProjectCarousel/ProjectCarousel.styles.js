@@ -270,7 +270,7 @@ export const SystemLabel = styled.div`
 
   &.active {
     opacity: 0.55;
-    font-size: 0.55rem;
+    font-size: 0.75rem;
     font-weight: 400;
   }
 
