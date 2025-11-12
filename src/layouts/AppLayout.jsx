@@ -10,17 +10,20 @@ const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: #1a1a1a;
 `
 
 const Content = styled.div`
   flex: 1;
+  background-color: #1a1a1a;
 `
 
 const Footer = styled.footer`
-  background-color: ${(props) => props.theme.colors.secondary};
-  color: white;
+  background-color: #2c2c2c;
+  color: #f5f5f5;
   padding: ${(props) => props.theme.spacing.md};
   text-align: center;
+  border-top: 1px solid #d4af37;
 `
 
 function AppLayout() {

@@ -1,0 +1,963 @@
+import React from "react";
+import {
+  Container,
+  Typography,
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Grid,
+  Divider,
+  Alert,
+} from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import muiTheme from "../styles/muiTheme";
+
+const DesignToken = () => {
+  const namingExamples = [
+    {
+      element: "button",
+      type: "bg",
+      hierarchy: "primary",
+      state: "default",
+      name: "button-bg-primary-default",
+      description: "主按鈕預設底色",
+    },
+    {
+      element: "button",
+      type: "bg",
+      hierarchy: "primary",
+      state: "hover",
+      name: "button-bg-primary-hover",
+      description: "主按鈕hover底色",
+    },
+    {
+      element: "button",
+      type: "bg",
+      hierarchy: "secondary",
+      state: "disabled",
+      name: "button-bg-secondary-disabled",
+      description: "次要按鈕禁用底色",
+    },
+    {
+      element: "input",
+      type: "border",
+      hierarchy: "primary",
+      state: "focus",
+      name: "input-border-primary-focus",
+      description: "輸入框focus主色",
+    },
+    {
+      element: "card",
+      type: "bg",
+      hierarchy: "weak",
+      state: "",
+      name: "card-bg-weak",
+      description: "卡片淡化底色",
+    },
+    {
+      element: "text",
+      type: "",
+      hierarchy: "secondary",
+      state: "",
+      name: "text-secondary",
+      description: "輔助文字色",
+    },
+  ];
+
+  const scssExample = `$button-bg-primary-default:   #1976d2;
+$button-bg-primary-hover:     #115293;
+$button-bg-secondary-default: #eeeeee;
+$button-bg-secondary-hover:   #cccccc;
+
+$text-primary:      #212121;
+$text-secondary:    #757575;
+$text-weak:         #bdbdbd;
+
+$input-border-primary-focus:  #1976d2;
+$input-border-default:        #cccccc;
+$card-bg-default:             #FFFFFF;
+$card-bg-weak:                #fafafa;`;
+
+  const cssVariablesExample = `:root {
+  --color-mist: #EEE;
+  --color-fog: #DDD;
+  --color-asphalt: #333;
+  --color-void: #202020;
+
+  /* Usage specific color variables */
+  --card-bg-color: var(--color-mist);
+  --card-text-color: var(--color-void);
+}
+
+:root[data-theme="dark"] {
+  --card-bg-color: var(--color-asphalt);
+  --card-text-color: var(--color-fog);
+}
+
+.card {
+  color: var(--card-text-color);
+  background-color: var(--card-bg-color);
+}`;
+
+  const tokenStructureExample = `src/
+  styles/
+    tokens/
+      colors.ts
+      spacing.ts
+      fontSize.ts
+      fontWeight.ts
+      radius.ts
+      border.ts
+      shadow.ts
+      animation.ts
+      index.ts       // 統一匯出所有 Token
+    globalStyles.tsx // Emotion Global 注入 CSS Variables`;
+
+  const colorsObjectExample = `export const colors = {
+  base: {
+    primary: '#1976d2',
+    secondary: '#ff4081',
+    background: '#ffffff',
+    text: '#333333',
+  },
+  states: {
+    error: '#ff4d4f',
+    success: '#52c41a',
+    warning: '#faad14',
+  },
+  brand: {
+    logoBlue: '#0047ab',
+  },
+};`;
+
+  const tokenCategories = [
+    { category: "colors/", description: "基礎色、狀態色、品牌色" },
+    { category: "spacing/", description: "間距尺寸、欄間距" },
+    { category: "font/", description: "字體大小、字重、字體族群、行高" },
+    { category: "radius/", description: "圓角設定" },
+    { category: "border/", description: "邊框寬度、樣式、顏色" },
+    { category: "shadow/", description: "陰影深度與樣式" },
+    { category: "animation/", description: "動畫時長、緩動函數" },
+    { category: "opacity/", description: "透明度分級" },
+    { category: "zIndex/", description: "圖層順序" },
+    { category: "breakpoints/", description: "響應式斷點設定" },
+  ];
+
+  return (
+    <ThemeProvider theme={muiTheme}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography
+          variant="h3"
+          component="h1"
+          gutterBottom
+          sx={{
+            fontWeight: 700,
+            color: "primary.main",
+            mb: 3,
+            textAlign: "center",
+          }}
+        >
+          Design Token 推動
+        </Typography>
+
+        {/* Introduction */}
+        <Paper
+          elevation={0}
+          sx={{
+            mb: 4,
+            p: 3,
+            background:
+              "linear-gradient(135deg, rgba(97, 218, 251, 0.15), rgba(58, 133, 137, 0.10))",
+            borderLeft: 4,
+            borderColor: "primary.main",
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h5" gutterBottom sx={{ color: "primary.main", fontWeight: 600 }}>
+            前言
+          </Typography>
+          <Typography variant="body1" color="text.secondary" paragraph>
+            在前端開發的流程中，設計師與工程師的協作密不可分。理想情況是，設計師交付的視覺稿與交互稿，能被工程師以像素級的精準度實現。然而，在設計到開發的轉化過程中，往往存在著一些效率瓶頸。
+          </Typography>
+        </Paper>
+
+        {/* Problems */}
+        <Paper
+          elevation={2}
+          sx={{
+            mb: 3,
+            p: 3,
+            borderLeft: 4,
+            borderColor: "primary.main",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            協作痛點
+          </Typography>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              1. 樣式的重複勞動
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              設計稿中的佈局、文字、顏色等核心元素，需要前端工程師花費大量時間手動轉譯為程式碼。儘管近年來出現了如 Zeplin、藍湖等協作平台，可以自動生成部分 CSS 程式碼，但它們難以完全滿足 Web、iOS、Android 等多平台的代碼需求，跨平台的轉譯成本依然很高。
+            </Typography>
+          </Box>
+
+          <Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              2. 更新不同步的困擾
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              設計稿的迭代更新，無法即時反映在工程師的程式碼中。傳統流程下，工程師需要取得新的設計稿，透過肉眼比對或依賴標注來找出差異點，再手動修改程式碼。更麻煩的是，有時一個看似微小的改動（例如調整一個全域字體大小），可能會牽一髮而動全身，導致大範圍的程式碼重構。
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* What is Design System */}
+        <Paper
+          elevation={2}
+          sx={{
+            mb: 3,
+            p: 3,
+            borderLeft: 4,
+            borderColor: "primary.main",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            什麼是設計系統 (Design System)
+          </Typography>
+          <Typography variant="body1" color="text.secondary" paragraph>
+            設計系統被譽為「團隊的單一事實來源 (Single Source of Truth)」，它整合了所有設計與開發產品所需的元素。
+          </Typography>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              mb: 2,
+              background: "rgba(97, 218, 251, 0.08)",
+              borderRadius: 2,
+              fontStyle: "italic",
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              &quot;A Design System is the single source of truth which groups all the elements that will allow the teams to design, realize and develop a product.&quot;
+            </Typography>
+          </Paper>
+          <Typography variant="body1" color="text.secondary" paragraph>
+            在這個系統中，設計師將介面拆解為標準化的組件，並定義好每個組件的樣式、文字屬性、顏色色值等規範。開發者則可以依據這個系統來獲取所需的組件與規範，確保了雙方工作的高度一致性。
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            然而，一個靜態的規範庫如何真正解決前文提到的效率與同步問題呢？這就需要設計系統中的核心——<strong>Design Tokens</strong>。
+          </Typography>
+
+          {/* Design Token Concept Image */}
+          <Box
+            sx={{
+              mt: 3,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              component="img"
+              src={`${import.meta.env.BASE_URL}images/desighToken/design-token-concept.png`}
+              alt="Design Token 概念圖"
+              sx={{
+                maxWidth: "100%",
+                height: "auto",
+                borderRadius: 2,
+                boxShadow: 2,
+              }}
+            />
+          </Box>
+        </Paper>
+
+        {/* What is Design Token */}
+        <Paper
+          elevation={2}
+          sx={{
+            mb: 3,
+            p: 3,
+            borderLeft: 4,
+            borderColor: "primary.main",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            什麼是 Design Tokens
+          </Typography>
+          <Typography variant="body1" color="text.secondary" paragraph>
+            我們可以將 Design Tokens 理解為「設計系統中的視覺設計原子」。
+          </Typography>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              mb: 2,
+              background: "rgba(97, 218, 251, 0.08)",
+              borderRadius: 2,
+              fontStyle: "italic",
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              &quot;Design tokens are the visual design atoms of the design system.&quot;
+            </Typography>
+          </Paper>
+          <Typography variant="body1" color="text.secondary" paragraph>
+            它的核心思想是：將設計規範中最基礎的屬性（如顏色、間距、字體大小等）抽象化，並賦予其一個與平台無關的「名稱」（即 Token）。這個 Token 就如同一個前端開發者熟悉的「變數」。
+          </Typography>
+
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>舉個例子：</strong>設計師決定品牌主色為 #FF5733。在設計系統中，我們不直接記錄這個色值，而是創建一個名為 <code>color.brand.primary</code> 的 Token，並將其值設為 #FF5733。
+            </Typography>
+          </Alert>
+
+          <Typography variant="body1" color="text.secondary" paragraph>
+            這個 Token 接著可以被自動轉換成各個平台所需的格式：
+          </Typography>
+          <Box sx={{ mb: 2, pl: 2 }}>
+            <Typography variant="body2" component="div" sx={{ fontFamily: "monospace", mb: 1 }}>
+              • Web (CSS): <code>--color-brand-primary: #FF5733;</code>
+            </Typography>
+            <Typography variant="body2" component="div" sx={{ fontFamily: "monospace", mb: 1 }}>
+              • iOS (Swift): <code>let colorBrandPrimary = UIColor(hex: &quot;#FF5733&quot;)</code>
+            </Typography>
+            <Typography variant="body2" component="div" sx={{ fontFamily: "monospace" }}>
+              • Android (XML): <code>&lt;color name=&quot;color_brand_primary&quot;&gt;#FF5733&lt;/color&gt;</code>
+            </Typography>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+            這樣做的好處
+          </Typography>
+          <Box sx={{ pl: 2 }}>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              <strong>✅ 解決了重複勞動：</strong>開發者只需引用變數，無需關心具體數值，也無需為不同平台手動轉換。
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              <strong>✅ 解決了更新困擾：</strong>當設計師決定將品牌主色改為 #C70039 時，只需在設計系統中更新 <code>color.brand.primary</code> 這個 Token 的值。接著，所有平台的程式碼只需導入最新的 Token 檔案，所有使用到此顏色的地方就會自動更新，徹底告別了手動查找和修改的低效率。
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* My Contribution */}
+        <Paper
+          elevation={0}
+          sx={{
+            mb: 4,
+            p: 3,
+            background:
+              "linear-gradient(135deg, rgba(97, 218, 251, 0.15), rgba(58, 133, 137, 0.10))",
+            borderLeft: 4,
+            borderColor: "primary.main",
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" gutterBottom sx={{ color: "primary.main", fontWeight: 600 }}>
+            🚀 我的貢獻
+          </Typography>
+          <Typography variant="body1" color="text.secondary" paragraph>
+            在協作中觀察到設計與開發流程的潛在痛點，主動向主管提出導入 Design Token 的構想。
+            在獲得認可後，著手研究並協同設計師與主管三方共同擬定出一套符合團隊需求的協作模式，
+            舉辦分享會從前端視角解說實作方式，成功在專案中試行，促進了設計與開發的協作效率。
+          </Typography>
+        </Paper>
+
+        {/* Naming Convention */}
+        <Paper
+          elevation={2}
+          sx={{
+            mb: 3,
+            p: 3,
+            borderLeft: 4,
+            borderColor: "primary.main",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            🎯 色彩命名整合守則
+          </Typography>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              結構公式
+            </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                background: "rgba(97, 218, 251, 0.08)",
+                borderRadius: 2,
+                fontFamily: "monospace",
+              }}
+            >
+              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                [元件類別]-[屬性]-[層次]-[狀態]
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                element-type-hierarchy-state
+              </Typography>
+            </Paper>
+
+            {/* Token Architecture Image */}
+            <Box
+              sx={{
+                mt: 3,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Box
+                component="img"
+                src={`${import.meta.env.BASE_URL}images/desighToken/token-architecture.png`}
+                alt="Token 架構示意圖"
+                sx={{
+                  maxWidth: "100%",
+                  height: "auto",
+                  borderRadius: 2,
+                  boxShadow: 2,
+                }}
+              />
+            </Box>
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+              結構說明
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Chip
+                  label="元件類別：button, input, card, modal, table"
+                  sx={{ width: "100%", height: "auto", py: 1 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Chip
+                  label="屬性：bg, text, icon, border"
+                  sx={{ width: "100%", height: "auto", py: 1 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Chip
+                  label="層次：primary, secondary, tertiary"
+                  sx={{ width: "100%", height: "auto", py: 1 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Chip
+                  label="狀態：default, hover, active, disabled"
+                  sx={{ width: "100%", height: "auto", py: 1 }}
+                />
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+            命名範例
+          </Typography>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600 }}>元件</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>類型</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>層次</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>狀態</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>命名範例</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>說明</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {namingExamples.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{row.element}</TableCell>
+                    <TableCell>{row.type}</TableCell>
+                    <TableCell>{row.hierarchy}</TableCell>
+                    <TableCell>{row.state || "-"}</TableCell>
+                    <TableCell>
+                      <Box
+                        component="code"
+                        sx={{
+                          px: 1,
+                          py: 0.5,
+                          background: "rgba(97, 218, 251, 0.08)",
+                          borderRadius: 1,
+                          fontSize: "0.875rem",
+                          fontFamily: "monospace",
+                        }}
+                      >
+                        {row.name}
+                      </Box>
+                    </TableCell>
+                    <TableCell>{row.description}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+            命名精簡要點
+          </Typography>
+          <Box component="ul" sx={{ pl: 3 }}>
+            <Typography component="li" variant="body2" color="text.secondary" paragraph>
+              若沒必要，可省略沒用到的層（如 most 元件只有 primary，沒 secondary/weak 就不加）
+            </Typography>
+            <Typography component="li" variant="body2" color="text.secondary" paragraph>
+              狀態常見 default、hover、active、disabled，沒用到時省略
+            </Typography>
+            <Typography component="li" variant="body2" color="text.secondary">
+              全域主題色、最關鍵顏色（如系統主色）可特別命名如 main-color 或 common-bg
+            </Typography>
+          </Box>
+        </Paper>
+
+        {/* Code Example */}
+        <Paper
+          elevation={2}
+          sx={{
+            mb: 3,
+            p: 3,
+            borderLeft: 4,
+            borderColor: "primary.main",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            實務應用範例
+          </Typography>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              SCSS 變數定義
+            </Typography>
+            <SyntaxHighlighter language="scss" style={vscDarkPlus}>
+              {scssExample}
+            </SyntaxHighlighter>
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              CSS Variables 範例
+            </Typography>
+            <SyntaxHighlighter language="css" style={vscDarkPlus}>
+              {cssVariablesExample}
+            </SyntaxHighlighter>
+          </Box>
+        </Paper>
+
+        {/* Token Architecture */}
+        <Paper
+          elevation={2}
+          sx={{
+            mb: 3,
+            p: 3,
+            borderLeft: 4,
+            borderColor: "primary.main",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            📦 Token 架構分類
+          </Typography>
+
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="body2">
+              採用「以設計屬性大類拆分 → 檔案模組化 → 物件結構化 → 統一出口管理 → 動態生成 CSS Variables」的架構，是目前管理 Design Tokens 最穩健且主流的方式。
+            </Typography>
+          </Alert>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              按屬性大類型拆分
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              第一步是將所有的 Design Tokens 按照其 CSS 屬性進行分類。這種方式非常直觀，完全對應設計師與開發者共同的認知模型。
+            </Typography>
+            <Grid container spacing={2}>
+              {tokenCategories.map((item, index) => (
+                <Grid item xs={12} sm={6} key={index}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      background: "rgba(97, 218, 251, 0.08)",
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 600, fontFamily: "monospace" }}
+                    >
+                      {item.category}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {item.description}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+            檔案與目錄組織結構
+          </Typography>
+          <SyntaxHighlighter language="text" style={vscDarkPlus}>
+            {tokenStructureExample}
+          </SyntaxHighlighter>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+            物件化的內部檔案結構
+          </Typography>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            在每一個 Token 檔案內部，使用 JavaScript/TypeScript 物件來進行更細緻的分類：
+          </Typography>
+          <SyntaxHighlighter language="typescript" style={vscDarkPlus}>
+            {colorsObjectExample}
+          </SyntaxHighlighter>
+
+          {/* Semantic Naming Example Image */}
+          <Box
+            sx={{
+              mt: 3,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              component="img"
+              src={`${import.meta.env.BASE_URL}images/desighToken/semantic-naming-example.png`}
+              alt="語義化命名範例"
+              sx={{
+                maxWidth: "100%",
+                height: "auto",
+                borderRadius: 2,
+                boxShadow: 2,
+              }}
+            />
+          </Box>
+        </Paper>
+
+        {/* CSS Variables vs ThemeProvider */}
+        <Paper
+          elevation={2}
+          sx={{
+            mb: 3,
+            p: 3,
+            borderLeft: 4,
+            borderColor: "primary.main",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            CSS Variables vs ThemeProvider
+          </Typography>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              本質差異與優劣
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              <strong>CSS Variables</strong>{" "}
+              是瀏覽器標準機制，變數儲存在 CSS
+              層級，且會依照 DOM 層級及 selector cascade
+              直接生效，不需 React 重新渲染。
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              <strong>ThemeProvider</strong> 用 React Context
+              傳變數，改變主題狀態會導致所有消費該 Context
+              的元件重渲，影響效能。
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              實際案例比較
+            </Typography>
+            <Typography variant="body2" color="text.secondary" paragraph>
+              • 用 <strong>ThemeProvider</strong> 切換 Light/Dark，會讓所有 Emotion 組件重新渲染
+            </Typography>
+            <Typography variant="body2" color="text.secondary" paragraph>
+              • 用 <strong>CSS Variables</strong>（掛在 <code>&lt;body data-theme=&quot;dark|light&quot;&gt;</code>），只有切換 <code>&lt;body&gt;</code> 屬性，僅body改變樣式，子元件不會重渲，對效能更友善
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              開發體驗 (DX)
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              • <strong>CSS Variables：</strong>寫法簡單，不用寫成函式傳遞 theme
+              物件，樣式直接 <code>color: var(--colors-primary);</code>
+              ，門檻更低
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              • <strong>ThemeProvider：</strong>可享受 TypeScript
+              型別安全，但用 CSS Variables 也能搭配 TS theme 物件達成型別支持
+            </Typography>
+          </Box>
+
+          <Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              最佳實踐
+            </Typography>
+            <Typography variant="body1" color="text.secondary" paragraph>
+              保留 CSS Variables
+              作為全域設計 Token，同時使用 TS 物件定義這些 Token 並作為
+              Emotion ThemeProvider 的 theme，讓元件擁有型別安全且方便調用的參數。這種結合方式既能享受 CSS Variables 的效能優勢，又能保有 TypeScript 的型別檢查。
+            </Typography>
+          </Box>
+
+          <Alert severity="success" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              <strong>參考文章：</strong>
+              <a
+                href="https://www.epicreact.dev/css-variables"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "inherit", marginLeft: "0.5rem" }}
+              >
+                Use CSS Variables instead of React Context
+              </a>
+            </Typography>
+          </Alert>
+
+          {/* CSS Variables vs ThemeProvider Comparison Images */}
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, textAlign: "center" }}>
+              效能比較示意圖
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={`${import.meta.env.BASE_URL}images/desighToken/css-variables-theme-comparison-1.png`}
+                    alt="CSS Variables vs ThemeProvider 比較 1"
+                    sx={{
+                      maxWidth: "100%",
+                      height: "auto",
+                      borderRadius: 2,
+                      boxShadow: 2,
+                    }}
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={`${import.meta.env.BASE_URL}images/desighToken/css-variables-theme-comparison-2.png`}
+                    alt="CSS Variables vs ThemeProvider 比較 2"
+                    sx={{
+                      maxWidth: "100%",
+                      height: "auto",
+                      borderRadius: 2,
+                      boxShadow: 2,
+                    }}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        </Paper>
+
+        {/* Benefits */}
+        <Paper
+          elevation={2}
+          sx={{
+            p: 3,
+            borderLeft: 4,
+            borderColor: "primary.main",
+          }}
+        >
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            核心價值
+          </Typography>
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  height: "100%",
+                  background: "rgba(97, 218, 251, 0.08)",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  sx={{ fontWeight: 600 }}
+                >
+                  ✅ 提升協作效率
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  設計與開發使用統一語言，減少溝通成本，讓每個顏色變數一看就懂用在哪裡、是什麼層、什麼狀態
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  height: "100%",
+                  background: "rgba(97, 218, 251, 0.08)",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  sx={{ fontWeight: 600 }}
+                >
+                  ✅ 確保一致性
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  所有元件使用統一的設計 Token，保證視覺風格一致，避免色值不一致問題
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  height: "100%",
+                  background: "rgba(97, 218, 251, 0.08)",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  sx={{ fontWeight: 600 }}
+                >
+                  ✅ 易於維護
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  當設計變更時，只需修改 Token
+                  定義，所有使用該 Token 的地方自動更新
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  height: "100%",
+                  background: "rgba(97, 218, 251, 0.08)",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  sx={{ fontWeight: 600 }}
+                >
+                  ✅ 支援主題切換
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  使用 CSS Variables 可輕鬆實現多主題切換，提升使用者體驗
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Paper>
+      </Container>
+    </ThemeProvider>
+  );
+};
+
+export default DesignToken;

@@ -26,7 +26,10 @@ const Container = styled.div`
 const Main = styled.div`
   display: flex;
   flex-direction: column;
-  padding: ${(props) => (props.isEntry ? '0' : '0 1.25rem')};
+  width: 100%;
+  margin: 0;
+  padding: ${(props) => (props.$isEntry ? '0' : '0 1.25rem')};
+  box-sizing: border-box;
 `
 
 //! =============== 2. 核心功能 ===============
@@ -95,8 +98,8 @@ function ManufacturingLiveMonitor() {
   }
 
   return (
-    <ErrorBoundary 
-      resetKey={errorResetKey} 
+    <ErrorBoundary
+      resetKey={errorResetKey}
       onReset={handleErrorReset}
     >
       <FullScreenLayout>
@@ -105,7 +108,7 @@ function ManufacturingLiveMonitor() {
             {!isEntryPath(location.pathname) && (
               <DataVHeader title={headerName} />
             )}
-            <Main $isEntry={!isEntryPath(location.pathname)}>
+            <Main $isEntry={isEntryPath(location.pathname)}>
               <Outlet />
             </Main>
           </Container>
@@ -116,3 +119,4 @@ function ManufacturingLiveMonitor() {
 }
 
 export default ManufacturingLiveMonitor
+
