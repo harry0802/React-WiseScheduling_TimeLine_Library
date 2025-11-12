@@ -188,8 +188,12 @@ $card-bg-weak:                #fafafa;`;
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="lg" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
-        <GoldBorderContainer sx={{ mb: 4, textAlign: 'center' }}>
+      <Container maxWidth="lg" sx={{ py: 6, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
+        <GoldBorderContainer sx={{
+          mb: 4,
+          textAlign: 'center',
+          clipPath: 'polygon(2rem 0, calc(100% - 2rem) 0, 100% 2rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 2rem 100%, 0 calc(100% - 2rem), 0 2rem)',
+        }}>
           <Typography
             variant="h3"
             component="h1"
@@ -206,7 +210,10 @@ $card-bg-weak:                #fafafa;`;
         </GoldBorderContainer>
 
         {/* 前言 */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -239,7 +246,10 @@ $card-bg-weak:                #fafafa;`;
         </CreamPaper>
 
         {/* 什麼是設計系統 */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -280,7 +290,10 @@ $card-bg-weak:                #fafafa;`;
         </CreamPaper>
 
         {/* 什麼是 Design Tokens */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -380,7 +393,10 @@ $card-bg-weak:                #fafafa;`;
         </CreamPaper>
 
         {/* 色彩命名整合守則 */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -549,6 +565,7 @@ $card-bg-weak:                #fafafa;`;
             border: `2px solid ${colors.border.light}`,
             borderLeft: `4px solid ${colors.accent.gold}`,
             borderRadius: 1,
+            clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
           }}
         >
           <Typography variant="h6" gutterBottom sx={{ color: colors.accent.gold, fontWeight: 600 }}>
@@ -571,7 +588,10 @@ $card-bg-weak:                #fafafa;`;
         </Box>
 
         {/* CSS Variables 範例 */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -621,7 +641,10 @@ $card-bg-weak:                #fafafa;`;
         </CreamPaper>
 
         {/* System Token 範例 */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -672,7 +695,10 @@ $card-bg-weak:                #fafafa;`;
         </CreamPaper>
 
         {/* Token 架構 */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -771,7 +797,10 @@ $card-bg-weak:                #fafafa;`;
         </CreamPaper>
 
         {/* CSS Variables vs ThemeProvider */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -900,6 +929,7 @@ $card-bg-weak:                #fafafa;`;
             border: `2px solid ${colors.border.light}`,
             borderLeft: `4px solid ${colors.accent.gold}`,
             borderRadius: 1,
+            clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
           }}
         >
           <Typography variant="h6" gutterBottom sx={{ color: colors.accent.gold, fontWeight: 600 }}>

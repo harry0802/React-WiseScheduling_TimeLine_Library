@@ -23,8 +23,12 @@ import { colors } from "../designTokens";
 const Contact = () => {
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="md" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
-        <GoldBorderContainer sx={{ mb: 4, textAlign: 'center' }}>
+      <Container maxWidth="md" sx={{ py: 6, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
+        <GoldBorderContainer sx={{
+          mb: 4,
+          textAlign: 'center',
+          clipPath: 'polygon(2rem 0, calc(100% - 2rem) 0, 100% 2rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 2rem 100%, 0 calc(100% - 2rem), 0 2rem)',
+        }}>
           <Typography
             variant="h3"
             component="h1"
@@ -46,7 +50,9 @@ const Contact = () => {
         <Grid container spacing={3}>
           {/* Social Links Section */}
           <Grid item xs={12}>
-            <CreamPaper elevation={2}>
+            <CreamPaper elevation={2} sx={{
+              clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+            }}>
               <Typography
                 variant="h5"
                 gutterBottom
@@ -106,7 +112,9 @@ const Contact = () => {
 
           {/* Contact Information Form Section */}
           <Grid item xs={12}>
-            <CreamPaper elevation={2}>
+            <CreamPaper elevation={2} sx={{
+              clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+            }}>
               <Typography
                 variant="h5"
                 gutterBottom
@@ -195,6 +203,7 @@ const Contact = () => {
                 border: `2px solid ${colors.border.light}`,
                 borderLeft: `4px solid ${colors.accent.gold}`,
                 borderRadius: 1,
+                clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
               }}
             >
               <Typography

@@ -65,9 +65,12 @@ const About = () => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="lg" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
+      <Container maxWidth="lg" sx={{ py: 6, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
         {/* Profile Header */}
-        <GoldBorderContainer sx={{ mb: 4 }}>
+        <GoldBorderContainer sx={{
+          mb: 4,
+          clipPath: 'polygon(2rem 0, calc(100% - 2rem) 0, 100% 2rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 2rem 100%, 0 calc(100% - 2rem), 0 2rem)',
+        }}>
           <CreamPaper elevation={0} sx={{ textAlign: "center" }}>
           {/* Profile Photo */}
           <Box
@@ -143,7 +146,10 @@ const About = () => {
         </GoldBorderContainer>
 
         {/* Summary Section */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -172,7 +178,10 @@ const About = () => {
         </CreamPaper>
 
         {/* Work Experience Section */}
-        <CreamPaper elevation={2} sx={{ mb: 3 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 3,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -380,7 +389,10 @@ const About = () => {
         </CreamPaper>
 
         {/* Skills Section */}
-        <GoldBorderContainer sx={{ mb: 3 }}>
+        <GoldBorderContainer sx={{
+          mb: 3,
+          clipPath: 'polygon(1.5rem 0, calc(100% - 1.5rem) 0, 100% 1.5rem, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 1.5rem 100%, 0 calc(100% - 1.5rem), 0 1.5rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
@@ -404,6 +416,7 @@ const About = () => {
                 sx={{
                   p: 2,
                   height: '100%',
+                  clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
                 }}
               >
                 <Typography
@@ -432,6 +445,7 @@ const About = () => {
                 sx={{
                   p: 2,
                   height: '100%',
+                  clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
                 }}
               >
                 <Typography
@@ -460,6 +474,7 @@ const About = () => {
                 sx={{
                   p: 2,
                   height: '100%',
+                  clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
                 }}
               >
                 <Typography
@@ -488,6 +503,7 @@ const About = () => {
                 sx={{
                   p: 2,
                   height: '100%',
+                  clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
                 }}
               >
                 <Typography
@@ -513,7 +529,9 @@ const About = () => {
         </GoldBorderContainer>
 
         {/* Core Strengths Section */}
-        <CreamPaper elevation={2}>
+        <CreamPaper elevation={2} sx={{
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom

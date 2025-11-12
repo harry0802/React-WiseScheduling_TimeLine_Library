@@ -103,30 +103,59 @@ const Home = () => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="lg" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
-        <GoldBorderContainer sx={{ mb: 4 }}>
-          <Box sx={{ textAlign: "center" }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          py: 6,
+          backgroundColor: colors.background.primary,
+          minHeight: '100vh'
+        }}
+      >
+        {/* Hero Section */}
+        <GoldBorderContainer
+          sx={{
+            mb: 6,
+            position: 'relative',
+            clipPath: 'polygon(2rem 0, calc(100% - 2rem) 0, 100% 2rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 2rem 100%, 0 calc(100% - 2rem), 0 2rem)',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: -2,
+              left: -2,
+              right: -2,
+              bottom: -2,
+              background: `linear-gradient(135deg, ${colors.accent.gold}40, transparent)`,
+              clipPath: 'polygon(2rem 0, calc(100% - 2rem) 0, 100% 2rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 2rem 100%, 0 calc(100% - 2rem), 0 2rem)',
+              zIndex: -1,
+            }
+          }}
+        >
+          <Box sx={{ textAlign: "center", py: 2 }}>
             <Typography
-              variant="h3"
+              variant="h2"
               component="h1"
               gutterBottom
               sx={{
                 fontWeight: 700,
                 color: colors.accent.gold,
-                mb: 2,
+                mb: 3,
+                letterSpacing: '0.02em',
+                textShadow: `0 2px 8px ${colors.accent.gold}30`,
               }}
             >
               林志翰 - 前端工程師作品集
             </Typography>
-            <GoldDivider />
+            <GoldDivider sx={{ width: '100px', height: '3px', mx: 'auto' }} />
             <Typography
-              variant="body1"
+              variant="h6"
               sx={{
                 color: colors.text.inverse,
-                lineHeight: 1.8,
-                maxWidth: 800,
+                lineHeight: 2,
+                maxWidth: 700,
                 mx: "auto",
-                mt: 2,
+                mt: 3,
+                fontWeight: 400,
+                opacity: 0.95,
               }}
             >
               歡迎來到我的個人作品集！這裡展示了我在智慧製造領域的專案經驗，
@@ -135,34 +164,64 @@ const Home = () => {
           </Box>
         </GoldBorderContainer>
 
-        <Grid container spacing={3}>
+        {/* Feature Cards Grid */}
+        <Grid container spacing={2}>
           {featureCards.map((card, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <CreamPaper
-                elevation={2}
+                elevation={0}
                 sx={{
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
+                  position: 'relative',
+                  overflow: 'hidden',
+                  clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: `0 6px 16px ${colors.accent.gold}25`,
+                    '& .card-icon': {
+                      transform: 'scale(1.08)',
+                    },
+                  },
                 }}
               >
-                <CardContent sx={{ flexGrow: 1 }}>
+                <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                  <Box
+                    className="card-icon"
+                    sx={{
+                      fontSize: "2rem",
+                      mb: 1,
+                      display: 'inline-block',
+                      transition: 'transform 0.3s ease',
+                    }}
+                  >
+                    {card.icon}
+                  </Box>
                   <Typography
-                    variant="h5"
+                    variant="subtitle1"
                     component="h2"
                     gutterBottom
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
                       color: colors.accent.gold,
-                      fontWeight: 600,
+                      fontWeight: 700,
+                      mb: 1,
+                      fontSize: '1.05rem',
+                      letterSpacing: '0.01em',
                     }}
                   >
-                    <span style={{ fontSize: "2rem" }}>{card.icon}</span>
                     {card.title}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: colors.text.primary }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: colors.text.primary,
+                      lineHeight: 1.6,
+                      minHeight: '2.8em',
+                      fontSize: '0.85rem',
+                    }}
+                  >
                     {card.description}
                   </Typography>
                 </CardContent>
@@ -171,6 +230,10 @@ const Home = () => {
                     component={Link}
                     to={card.link}
                     fullWidth
+                    sx={{
+                      py: 0.75,
+                      fontSize: '0.85rem',
+                    }}
                   >
                     {card.buttonText}
                   </CornerButton>

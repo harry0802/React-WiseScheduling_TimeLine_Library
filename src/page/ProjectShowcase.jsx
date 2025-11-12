@@ -13,6 +13,7 @@ const IntroSection = styled.div`
   );
   border-radius: 12px;
   border-left: 4px solid ${props => props.theme.colors.primary};
+  clip-path: polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem);
 
   h2 {
     color: ${props => props.theme.colors.primary};
@@ -39,6 +40,7 @@ const FeatureSection = styled.div`
   background: ${props => props.theme.colors.cardBackground};
   border-radius: 12px;
   box-shadow: ${props => props.theme.shadows.md};
+  clip-path: polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem);
 
   h3 {
     color: ${props => props.theme.colors.primary};
@@ -85,6 +87,7 @@ const TechStack = styled.div`
     text-align: center;
     font-weight: 600;
     color: ${props => props.theme.colors.text};
+    clip-path: polygon(0.5rem 0, calc(100% - 0.5rem) 0, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0 calc(100% - 0.5rem), 0 0.5rem);
   }
 `;
 
@@ -106,6 +109,7 @@ const Note = styled.div`
   background: ${props => props.theme.colors.primary}10;
   border-left: 4px solid ${props => props.theme.colors.primary};
   border-radius: 8px;
+  clip-path: polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem);
 
   h4 {
     color: ${props => props.theme.colors.primary};

@@ -122,8 +122,12 @@ const Timeline = () => {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Container maxWidth="lg" sx={{ py: 4, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
-        <GoldBorderContainer sx={{ mb: 4, textAlign: 'center' }}>
+      <Container maxWidth="lg" sx={{ py: 6, backgroundColor: colors.background.primary, minHeight: '100vh' }}>
+        <GoldBorderContainer sx={{
+          mb: 4,
+          textAlign: 'center',
+          clipPath: 'polygon(2rem 0, calc(100% - 2rem) 0, 100% 2rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 2rem 100%, 0 calc(100% - 2rem), 0 2rem)',
+        }}>
           <Typography
             variant="h3"
             component="h1"
@@ -139,7 +143,10 @@ const Timeline = () => {
           <GoldDivider />
         </GoldBorderContainer>
 
-        <CreamPaper elevation={2} sx={{ mb: 4 }}>
+        <CreamPaper elevation={2} sx={{
+          mb: 4,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             component="h2"
@@ -168,7 +175,10 @@ const Timeline = () => {
           {timelinePhases.map((phase, phaseIndex) => (
             <Box key={phaseIndex} sx={{ mb: phaseIndex < timelinePhases.length - 1 ? 6 : 0 }}>
               {/* Phase Header */}
-              <GoldBorderContainer sx={{ mb: 3 }}>
+              <GoldBorderContainer sx={{
+                mb: 3,
+                clipPath: 'polygon(1.5rem 0, calc(100% - 1.5rem) 0, 100% 1.5rem, 100% calc(100% - 1.5rem), calc(100% - 1.5rem) 100%, 1.5rem 100%, 0 calc(100% - 1.5rem), 0 1.5rem)',
+              }}>
                 <Typography
                   variant="h5"
                   sx={{
@@ -225,6 +235,7 @@ const Timeline = () => {
                         sx={{
                           p: 2.5,
                           borderLeft: `4px solid ${colors.accent.gold}`,
+                          clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
                         }}
                       >
                         <Typography
@@ -254,7 +265,10 @@ const Timeline = () => {
           ))}
         </Box>
 
-        <CreamPaper elevation={2} sx={{ mt: 4 }}>
+        <CreamPaper elevation={2} sx={{
+          mt: 4,
+          clipPath: 'polygon(1rem 0, calc(100% - 1rem) 0, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0 calc(100% - 1rem), 0 1rem)',
+        }}>
           <Typography
             variant="h5"
             gutterBottom
