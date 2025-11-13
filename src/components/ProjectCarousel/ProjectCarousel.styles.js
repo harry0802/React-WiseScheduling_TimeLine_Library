@@ -115,17 +115,23 @@ export const ProgressBarFill = styled.div`
   transition: height 0.1s ease-out;
 `
 
-//! =============== 部門標記樣式 ===============
+//! =============== 共用標記樣式 ===============
 
-export const DepartmentMarker = styled.div`
+// 基礎標記樣式（DRY 原則：提取共用樣式）
+const BaseMarker = styled.div`
   position: absolute;
   left: 0;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
   cursor: pointer;
-  z-index: 12;
   transition: all 0.2s ease;
+`
+
+//! =============== 部門標記樣式 ===============
+
+export const DepartmentMarker = styled(BaseMarker)`
+  transform: translateY(-50%);
+  z-index: 12;
 
   &:hover .marker-line {
     width: 14px;
@@ -217,14 +223,8 @@ export const MarkerSystem = styled.div`
 
 //! =============== 系統子標記樣式 ===============
 
-export const SystemMarker = styled.div`
-  position: absolute;
-  left: 0;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
+export const SystemMarker = styled(BaseMarker)`
   z-index: 11;
-  transition: all 0.2s ease;
 
   &:hover .system-line {
     width: 7px;

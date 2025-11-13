@@ -73,26 +73,21 @@ function useProjectCarousel(externalRef, onProgressChange, onSlideChange) {
     [emblaApi]
   )
 
-  // 滾動進度處理
+  // 🧠 滾動進度處理：直接更新 DOM 避免觸發 React 重渲染，提升性能
   const onScroll = useCallback(() => {
     if (!emblaApi) return
     const progress = emblaApi.scrollProgress()
 
-    // 🧠 直接更新 DOM（即時更新，不觸發 React 重渲染）
     if (progressRef.current) {
       progressRef.current.style.height = `${progress * 100}%`
     }
 
-    // 通知父組件進度變化
     onProgressChange?.(progress)
   }, [emblaApi, onProgressChange])
 
-  // 投影片選擇處理
   const onSelect = useCallback(() => {
     if (!emblaApi) return
     const newIndex = emblaApi.selectedScrollSnap()
-
-    // 通知父組件投影片切換
     onSlideChange?.(newIndex)
   }, [emblaApi, onSlideChange])
 
@@ -118,16 +113,15 @@ function useProjectCarousel(externalRef, onProgressChange, onSlideChange) {
 }
 
 //! =============== 3. 子組件 (CarouselSlides) ===============
-// ✨ 優化：將投影片渲染邏輯獨立出來，使其成為一個純粹的 UI 組件。
 
 /**
+ * 投影片渲染組件（純 UI 組件）
  * @param {{ slides: CarouselSlide[] }} props
  */
 const CarouselSlides = React.memo(({ slides }) => {
   return (
     <>
       {slides.map((slide, index) => {
-        // 支援彈性屬性名稱：pic/image 和 dec/description
         const imageUrl = slide.pic || slide.image || null
         const description = slide.dec || slide.description || null
 
@@ -135,10 +129,7 @@ const CarouselSlides = React.memo(({ slides }) => {
           <Slide key={slide.id || index}>
             <ImageContainer>
               {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt={description || '專案截圖'}
-                />
+                <img src={imageUrl} alt={description || '專案截圖'} />
               ) : (
                 <div className='placeholder'>
                   📸 圖片預留位置
@@ -155,62 +146,30 @@ const CarouselSlides = React.memo(({ slides }) => {
 })
 CarouselSlides.displayName = 'CarouselSlides'
 
-//! =============== 4. 子組件 (ProgressBarMarkers) ===============
-// ✨ 優化：將複雜的「標記」渲染邏輯獨立出來。
+//! =============== 4. 子組件 (DepartmentMarkerItem) ===============
 
 /**
+ * 部門標記項目組件
+ * 💡 設計決策：第一個系統合併到部門標記中顯示，避免標記重疊
+ *
  * @param {object} props
- * @param {Array} props.departmentPositions
- * @param {number} props.currentSlideIndex
- * @param {Function} props.onMarkerClick
- */
-const ProgressBarMarkers = React.memo(
-  ({ departmentPositions, currentSlideIndex, onMarkerClick }) => {
-    return (
-      <>
-        {departmentPositions.map((dept) => (
-          <DepartmentMarkerItem
-            key={dept.id}
-            department={dept}
-            currentSlideIndex={currentSlideIndex}
-            onMarkerClick={onMarkerClick}
-          />
-        ))}
-      </>
-    )
-  }
-)
-ProgressBarMarkers.displayName = 'ProgressBarMarkers'
-
-//! =============== 5. 子組件 (DepartmentMarkerItem) ===============
-// ✨ 優化：將「單一部門及其所有系統」的渲染和邏輯計算（活躍、重疊）
-//    封裝到最小單位，大幅降低主組件的認知負荷。
-
-/**
- * @param {object} props
- * @param {object} props.department
- * @param {number} props.currentSlideIndex
- * @param {Function} props.onMarkerClick
+ * @param {object} props.department - 部門數據
+ * @param {number} props.currentSlideIndex - 當前投影片索引
+ * @param {Function} props.onMarkerClick - 標記點擊回調
  */
 const DepartmentMarkerItem = React.memo(
   ({ department, currentSlideIndex, onMarkerClick }) => {
-    // 💡 1. 抓取第一個系統和「後續」的系統
     const firstSystem = department.systems?.[0]
-    const subsequentSystems = department.systems.slice(1) // 從索引 1 開始抓取
+    const subsequentSystems = department.systems?.slice(1) || []
 
-    // 如果這個部門沒有系統（理論上不該發生），則不渲染
-    if (!firstSystem) {
-      return null
-    }
+    if (!firstSystem) return null
 
-    // 💡 2. 部門標記的「活躍」狀態，現在由「整個部門」的範圍決定
     const isDeptActive =
       currentSlideIndex >= department.startIndex &&
       currentSlideIndex < department.startIndex + department.imageCount
 
     return (
       <React.Fragment>
-        {/* 部門標記 (合併了第一個系統) */}
         <DepartmentMarker
           style={{ top: `${department.percentage}%` }}
           onClick={() => onMarkerClick?.(department.startIndex)}
@@ -219,21 +178,17 @@ const DepartmentMarkerItem = React.memo(
             className={`marker-line ${isDeptActive ? 'active' : ''}`}
           />
           <MarkerLabelGroup>
-            {/* 顯示部門名稱 */}
             <MarkerLabel
               className={`marker-label ${isDeptActive ? 'active' : ''}`}
             >
               {department.shortTitle}
             </MarkerLabel>
-
-            {/* 💡 3. 直接在下方顯示「第一個系統」的名稱 */}
             <SystemLabel
               className={`system-label ${isDeptActive ? 'active' : ''}`}
               style={{
-                position: 'relative', // 覆蓋掉原本的 absolute
-                opacity: 0.8, // 讓它看起來像副標題
-                marginLeft: '0.5rem' // 稍微縮排
-                // 您可能需要根據 .styles 檔案微調樣式
+                position: 'relative',
+                opacity: 0.8,
+                marginLeft: '0.5rem'
               }}
             >
               {firstSystem.name}
@@ -241,21 +196,16 @@ const DepartmentMarkerItem = React.memo(
           </MarkerLabelGroup>
         </DepartmentMarker>
 
-        {/* 💡 4. 系統子標記 (只渲染「後續」的系統) */}
+        {/* 後續系統標記（無重疊問題） */}
         {subsequentSystems.map((system, sysIndex) => {
           const isSystemActive =
             currentSlideIndex >= system.startIndex &&
             currentSlideIndex < system.startIndex + system.imageCount
 
-          // 🧠 關鍵：
-          // 因為我們跳過了第一個系統，
-          // 這裡的 system.percentage 絕對不會和 department.percentage 相同。
-          // 所以「不再需要」isNearDepartment 和 adjustedTop 的重疊計算！
-
           return (
             <SystemMarker
-              key={`${department.id}-sys-${sysIndex + 1}`} // +1 保持 key 的獨特性
-              style={{ top: `${system.percentage}%` }} // 直接使用 percentage
+              key={`${department.id}-sys-${sysIndex + 1}`}
+              style={{ top: `${system.percentage}%` }}
               onClick={() => onMarkerClick?.(system.startIndex)}
             >
               <SystemLine
@@ -276,19 +226,17 @@ const DepartmentMarkerItem = React.memo(
   }
 )
 DepartmentMarkerItem.displayName = 'DepartmentMarkerItem'
-//! =============== 6. 主要組件 (ProjectCarousel) ===============
-// ✨ 優化：主組件現在非常乾淨，只負責「組合」和「傳遞 props」。
-//    其職責是：1. 呼叫 Hook。 2. 處理空狀態。 3. 組合子組件。
+//! =============== 5. 主要組件 (ProjectCarousel) ===============
 
 /**
  * 專案輪播組件
  * 🎯 支援垂直滾動、滑鼠滾輪操作、進度條顯示
  *
  * @param {object} props
- * @param {CarouselSlide[]} props.slides - 投影片資料陣列（從 page 傳入）
+ * @param {CarouselSlide[]} props.slides - 投影片資料陣列
  * @param {(progress: number) => void} [props.onProgressChange] - 滾動進度回調 (0-1)
  * @param {(index: number) => void} [props.onSlideChange] - 投影片切換回調
- * @param {boolean} [props.showProgress=true] - 是否顯示內建進度條
+ * @param {boolean} [props.showProgress=true] - 是否顯示進度條
  * @param {Array} [props.departmentPositions] - 部門位置資訊陣列
  * @param {number} [props.currentSlideIndex] - 當前投影片索引
  * @param {Function} [props.onDepartmentClick] - 部門點擊回調
@@ -306,14 +254,13 @@ const ProjectCarousel = React.forwardRef(
     },
     ref
   ) => {
-    // 1. 呼叫 Hook
     const { emblaRef, progressRef } = useProjectCarousel(
       ref,
       onProgressChange,
       onSlideChange
     )
 
-    // 2. 處理空狀態 (Guard Clause，提早返回)
+    // Guard Clause：提早返回空狀態
     if (!slides || slides.length === 0) {
       return (
         <CarouselContainer>
@@ -328,7 +275,6 @@ const ProjectCarousel = React.forwardRef(
       )
     }
 
-    // 3. 組合子組件
     return (
       <CarouselContainer>
         <Viewport ref={emblaRef}>
@@ -337,15 +283,17 @@ const ProjectCarousel = React.forwardRef(
           </Container>
         </Viewport>
 
-        {/* 內建進度條 */}
         {showProgress && (
           <ProgressBarContainer>
             <ProgressBarFill ref={progressRef} />
-            <ProgressBarMarkers
-              departmentPositions={departmentPositions}
-              currentSlideIndex={currentSlideIndex}
-              onMarkerClick={onDepartmentClick}
-            />
+            {departmentPositions.map((dept) => (
+              <DepartmentMarkerItem
+                key={dept.id}
+                department={dept}
+                currentSlideIndex={currentSlideIndex}
+                onMarkerClick={onDepartmentClick}
+              />
+            ))}
           </ProgressBarContainer>
         )}
       </CarouselContainer>
