@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { Typography } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import muiTheme from '../../styles/muiTheme'
-import { colors, typography } from '../../designTokens'
 import ProjectCarousel from '../ProjectCarousel'
 import {
   ShowcaseWrapper,
@@ -47,106 +46,116 @@ import {
  * @property {string[]} aboutContent - 關於區塊內容（陣列形式，每個元素為一段）
  */
 
-//! =============== 2. Custom Hook ===============
+//! =============== 2. 工具函數 ===============
 
 /**
- * 展示櫃狀態管理 Hook
- * @param {ShowcaseItem[]} items - 展示項目陣列（每個項目可包含 images 陣列）
+ * 從項目生成 slides 陣列
+ * 💡 提取為純函數，易於測試和理解
  */
-function useShowcaseGallery(items) {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+function generateSlidesFromItems(items) {
+  const allSlides = []
 
-  // 將 items 中的 images 陣列展開成單一 slides 陣列
-  // 每個 slide 包含圖片路徑和所屬類別資訊
-  const slides = useMemo(() => {
-    const allSlides = []
-    items.forEach((item) => {
-      // 支援新格式 (systems) 和舊格式 (images/pic)
-      if (item.systems && Array.isArray(item.systems)) {
-        // 新格式：包含 systems 陣列
-        item.systems.forEach((system, sysIndex) => {
-          system.images.forEach((imagePath, imgIndex) => {
-            allSlides.push({
-              id: `${item.id}-${sysIndex}-${imgIndex}`,
-              pic: imagePath,
-              categoryId: item.id,
-              categoryTitle: item.title,
-              categoryDec: item.dec,
-              categoryTechStack: item.techStack,
-              systemName: system.name
-            })
-          })
-        })
-      } else {
-        // 舊格式：直接使用 images 或 pic
-        const imageList = item.images || (item.pic ? [item.pic] : [])
-        imageList.forEach((imagePath, imgIndex) => {
+  items.forEach((item) => {
+    if (item.systems && Array.isArray(item.systems)) {
+      // 新格式：包含 systems 陣列
+      item.systems.forEach((system, sysIndex) => {
+        system.images.forEach((imagePath, imgIndex) => {
           allSlides.push({
-            id: `${item.id}-${imgIndex}`,
+            id: `${item.id}-${sysIndex}-${imgIndex}`,
             pic: imagePath,
             categoryId: item.id,
             categoryTitle: item.title,
             categoryDec: item.dec,
-            categoryTechStack: item.techStack
+            categoryTechStack: item.techStack,
+            systemName: system.name
           })
         })
-      }
-    })
-    return allSlides
-  }, [items])
-
-  // 計算每個部門和系統在進度條上的位置
-  const departmentPositions = useMemo(() => {
-    const positions = []
-    let currentIndex = 0
-
-    items.forEach((item) => {
-      // 提取部門簡稱
-      const titleParts = item.title.split('-')
-      const shortTitle = titleParts[0].trim()
-
-      const departmentStartIndex = currentIndex
-      const systems = []
-
-      // 處理系統位置
-      if (item.systems && Array.isArray(item.systems)) {
-        item.systems.forEach((system) => {
-          const systemImageCount = system.images.length
-          systems.push({
-            name: system.name,
-            startIndex: currentIndex,
-            imageCount: systemImageCount,
-            percentage: slides.length > 0 ? (currentIndex / slides.length) * 100 : 0
-          })
-          currentIndex += systemImageCount
-        })
-      } else {
-        // 舊格式
-        const imageCount = item.images?.length || (item.pic ? 1 : 0)
-        currentIndex += imageCount
-      }
-
-      const departmentImageCount = currentIndex - departmentStartIndex
-
-      positions.push({
-        id: item.id,
-        title: item.title,
-        shortTitle: shortTitle,
-        startIndex: departmentStartIndex,
-        imageCount: departmentImageCount,
-        percentage: slides.length > 0 ? (departmentStartIndex / slides.length) * 100 : 0,
-        systems: systems
       })
+    } else {
+      // 舊格式：直接使用 images 或 pic
+      const imageList = item.images || (item.pic ? [item.pic] : [])
+      imageList.forEach((imagePath, imgIndex) => {
+        allSlides.push({
+          id: `${item.id}-${imgIndex}`,
+          pic: imagePath,
+          categoryId: item.id,
+          categoryTitle: item.title,
+          categoryDec: item.dec,
+          categoryTechStack: item.techStack
+        })
+      })
+    }
+  })
+
+  return allSlides
+}
+
+/**
+ * 計算部門位置
+ * 💡 提取為純函數，降低 Hook 複雜度
+ */
+function calculateDepartmentPositions(items, slidesLength) {
+  const positions = []
+  let currentIndex = 0
+
+  items.forEach((item) => {
+    const titleParts = item.title.split('-')
+    const shortTitle = titleParts[0].trim()
+    const departmentStartIndex = currentIndex
+    const systems = []
+
+    if (item.systems && Array.isArray(item.systems)) {
+      item.systems.forEach((system) => {
+        const systemImageCount = system.images.length
+        systems.push({
+          name: system.name,
+          startIndex: currentIndex,
+          imageCount: systemImageCount,
+          percentage: slidesLength > 0 ? (currentIndex / slidesLength) * 100 : 0
+        })
+        currentIndex += systemImageCount
+      })
+    } else {
+      const imageCount = item.images?.length || (item.pic ? 1 : 0)
+      currentIndex += imageCount
+    }
+
+    const departmentImageCount = currentIndex - departmentStartIndex
+
+    positions.push({
+      id: item.id,
+      title: item.title,
+      shortTitle,
+      startIndex: departmentStartIndex,
+      imageCount: departmentImageCount,
+      percentage:
+        slidesLength > 0 ? (departmentStartIndex / slidesLength) * 100 : 0,
+      systems
     })
+  })
 
-    return positions
-  }, [items, slides.length])
+  return positions
+}
 
-  // 根據當前 slide 的 categoryId 找到對應的類別資訊
+//! =============== 3. Custom Hooks ===============
+
+/**
+ * 展示櫃狀態管理 Hook
+ * 💡 重構：拆分為專注的小 Hook，降低認知負荷
+ */
+function useShowcaseGallery(items) {
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+
+  const slides = useMemo(() => generateSlidesFromItems(items), [items])
+
+  const departmentPositions = useMemo(
+    () => calculateDepartmentPositions(items, slides.length),
+    [items, slides.length]
+  )
+
   const currentCategory = useMemo(() => {
     const currentSlide = slides[currentSlideIndex]
     if (!currentSlide) return items[0]
-
     return items.find((item) => item.id === currentSlide.categoryId) || items[0]
   }, [currentSlideIndex, slides, items])
 
@@ -163,7 +172,7 @@ function useShowcaseGallery(items) {
   }
 }
 
-//! =============== 3. 子組件 ===============
+//! =============== 4. 子組件 ===============
 
 /**
  * 頁首標題區塊
@@ -175,38 +184,32 @@ const GalleryHeader = React.memo(({ title, subtitle }) => (
     <TitleUnderline />
   </HeaderSection>
 ))
-
 GalleryHeader.displayName = 'GalleryHeader'
 
 /**
  * 項目詳情區塊
+ * 💡 添加 memo 優化：避免 currentCategory 變化時不必要的重渲染
  */
-const ItemDetails = ({ item }) => {
+const ItemDetails = React.memo(({ item }) => {
   return (
     <DetailsSection>
-      {/* 項目標題 */}
       <ProjectTitle>{item.title}</ProjectTitle>
-
-      {/* 項目描述 */}
       <ProjectDescription>{item.dec}</ProjectDescription>
 
-      {/* 技術棧標籤 */}
       {item.techStack && item.techStack.length > 0 && (
         <TechStackSection>
           <TechStackTitle>技術棧</TechStackTitle>
           <TechChipsContainer>
             {item.techStack.map((tech, index) => (
-              <StyledTechChip
-                key={index}
-                label={tech}
-              />
+              <StyledTechChip key={index} label={tech} />
             ))}
           </TechChipsContainer>
         </TechStackSection>
       )}
     </DetailsSection>
   )
-}
+})
+ItemDetails.displayName = 'ItemDetails'
 
 /**
  * 關於備註區塊
@@ -219,10 +222,9 @@ const AboutNote = React.memo(({ title, content }) => (
     ))}
   </AboutNoteSection>
 ))
-
 AboutNote.displayName = 'AboutNote'
 
-//! =============== 4. 主要組件 ===============
+//! =============== 5. 主要組件 ===============
 
 /**
  * 通用展示櫃組件
@@ -253,23 +255,17 @@ const ShowcaseGallery = ({
     currentSlideIndex
   } = useShowcaseGallery(items)
 
-  // 處理部門點擊跳轉
   const handleDepartmentClick = useCallback((startIndex) => {
-    if (carouselRef.current?.scrollToSlide) {
-      carouselRef.current.scrollToSlide(startIndex)
-    }
+    carouselRef.current?.scrollToSlide?.(startIndex)
   }, [])
 
-  // 驗證是否有項目
+  // Guard Clause：提早返回空狀態
   if (!items || items.length === 0) {
     return (
       <ThemeProvider theme={muiTheme}>
         <ShowcaseWrapper>
           <EmptyStateContainer>
-            <Typography
-              variant='h4'
-              color='white'
-            >
+            <Typography variant='h4' color='white'>
               沒有可展示的項目
             </Typography>
           </EmptyStateContainer>
@@ -282,15 +278,9 @@ const ShowcaseGallery = ({
     <ThemeProvider theme={muiTheme}>
       <ShowcaseWrapper>
         <MainContainer>
-          {/* 頁首標題 */}
-          <GalleryHeader
-            title={config.pageTitle}
-            subtitle={config.pageSubtitle}
-          />
+          <GalleryHeader title={config.pageTitle} subtitle={config.pageSubtitle} />
 
-          {/* 分屏佈局：左側輪播 + 右側詳情 */}
           <ContentGrid>
-            {/* 左側 - 輪播區 */}
             <CarouselGridItem>
               <CarouselBox>
                 <ProjectCarousel
@@ -305,21 +295,13 @@ const ShowcaseGallery = ({
               </CarouselBox>
             </CarouselGridItem>
 
-            {/* 右側 - 詳情區 */}
             <DetailsGridItem>
-              <ItemDetails
-                key={currentCategory.id}
-                item={currentCategory}
-              />
+              <ItemDetails key={currentCategory.id} item={currentCategory} />
             </DetailsGridItem>
           </ContentGrid>
 
-          {/* 底部關於區塊 */}
           {showAboutNote && (
-            <AboutNote
-              title={config.aboutTitle}
-              content={config.aboutContent}
-            />
+            <AboutNote title={config.aboutTitle} content={config.aboutContent} />
           )}
         </MainContainer>
       </ShowcaseWrapper>

@@ -7,7 +7,7 @@ export const borders = {
     thin: '1px',
     regular: '2px',
     medium: '4px',
-    thick: '6px',
+    thick: '6px'
   },
 
   // 邊框圓角
@@ -17,7 +17,7 @@ export const borders = {
     medium: '8px',
     large: '12px',
     xlarge: '16px',
-    round: '50%',
+    round: '50%'
   },
 
   // 預定義邊框樣式
@@ -32,8 +32,9 @@ export const borders = {
 
     // 左側強調邊框
     leftGold: '4px solid #d4af37',
-    leftGoldThick: '6px solid #d4af37',
+    leftGoldThick: '6px solid #d4af37'
   }
-};
+}
 
-export default borders;
+export default borders
+
