@@ -11,7 +11,56 @@ import { colors } from '../designTokens'
 import HexagonGrid from '../components/layout/HexagonGrid'
 import HexagonCard from '../components/card/HexagonCard'
 
-// 模擬一個假的 API 調用，用於激活 React Query
+//! =============== 2. 類型與介面定義 ===============
+//* 遵循 JSDoc 指南，統一定義此組件所使用的所有資料結構
+
+/**
+ * @typedef {object} AppInfo
+ * @property {string} name
+ * @property {string} version
+ * @property {string[]} features
+ */
+
+/**
+ * @typedef {object} PigModule
+ * @property {string} icon
+ * @property {string} title
+ * @property {string} description
+ * @property {string} link
+ * @property {string} buttonText
+ */
+
+/**
+ * @typedef {Object<string, PigModule>} PigSystemModules
+ */
+
+/**
+ * @typedef {object} FeatureCard
+ * @property {string} icon
+ * @property {string} title
+ * @property {string} description
+ * @property {string} link
+ * @property {string} buttonText
+ */
+
+/**
+ * @typedef {object} UseHomeDataReturn
+ * @property {AppInfo | undefined} appInfo
+ * @property {boolean} isLoading
+ * @property {string} pigSystemModule - 當前選中的模組 key
+ * @property {React.Dispatch<React.SetStateAction<string>>} setPigSystemModule - 設置模組的函數
+ * @property {PigModule} currentPigModule - 當前選中的模組物件
+ * @property {PigSystemModules} pigSystemModules - 所有的模組定義
+ * @property {FeatureCard[]} featureCards - 所有的功能卡片定義
+ */
+
+//! =============== 1. 設定與常量 ===============
+//* 包含模擬 API、靜態資料定義
+
+/**
+ * 模擬一個假的 API 調用，用於激活 React Query
+ * @returns {Promise<AppInfo>}
+ */
 const fetchAppInfo = async () => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -24,15 +73,144 @@ const fetchAppInfo = async () => {
   })
 }
 
-const Home = () => {
+/**
+ * 養豬場管理系統模組
+ * @type {PigSystemModules}
+ */
+const pigSystemModules = {
+  inventory: {
+    icon: '🐷',
+    title: '豬舍庫存管理',
+    description: '養豬場智慧管理系統 - 豬舍庫存即時追蹤與數據分析',
+    link: '/pig-house-inventory',
+    buttonText: '查看庫存'
+  },
+  breeding: {
+    icon: '🐖',
+    title: '種豬繁殖記錄',
+    description: '母豬繁殖週期管理與配種記錄追蹤系統',
+    link: '/sow-breeding-records',
+    buttonText: '查看記錄'
+  },
+  culling: {
+    icon: '🐗',
+    title: '公豬淘汰管理',
+    description: '公豬淘汰流程管理與決策支援系統',
+    link: '/culling-boar',
+    buttonText: '管理淘汰'
+  },
+  genotype: {
+    icon: '🧬',
+    title: '公豬基因型管理',
+    description: '公豬基因型數據管理與品種改良追蹤',
+    link: '/boargenotype',
+    buttonText: '查看基因型'
+  }
+}
+
+/**
+ * 功能卡片定義
+ * @type {FeatureCard[]}
+ */
+const featureCards = [
+  {
+    icon: '👨‍💻',
+    title: '關於我',
+    description: '前端工程師，專注於 React 生態系統與工業級系統開發',
+    link: '/about',
+    buttonText: '查看履歷'
+  },
+  {
+    icon: '📅',
+    title: '開發歷程',
+    description: '專案開發時程與技術演進歷程',
+    link: '/timeline',
+    buttonText: '查看開發歷程'
+  },
+  {
+    icon: '🤖',
+    title: '智慧排程系統',
+    description: '工業級生產排程管理，支援多區域即時調度與狀態追蹤',
+    link: '/wise-scheduling',
+    buttonText: '進入智慧排程'
+  },
+  {
+    icon: '📊',
+    title: '專案作品展示',
+    description: '科專_TIIP模具產業高階製造系統展示',
+    link: '/project-showcase',
+    buttonText: '查看專案詳情'
+  },
+  {
+    icon: '🏭',
+    title: '製造監控中心',
+    description: '多功能生產監控儀表板，包含 OEE 分析、進度追蹤等',
+    link: '/ManufacturingLiveMonitor',
+    buttonText: '進入監控中心'
+  },
+  {
+    icon: '🎨',
+    title: 'Design Token 推動',
+    description: '設計系統規範化，推動設計與開發協作效率提升',
+    link: '/design-token',
+    buttonText: '查看 Design Token'
+  },
+  {
+    icon: '📬',
+    title: '聯絡方式',
+    description: '歡迎聯繫討論專案合作或技術交流',
+    link: '/contact',
+    buttonText: '聯絡我'
+  }
+]
+
+//! =============== 3. 核心功能實作 ===============
+//* 包含核心的 Custom Hook 與主要的 React 組件
+
+/**
+ * 💡 核心邏輯 Hook (遵循現代 React 設計規範)
+ * @description 封裝 Home 頁面的所有業務邏輯、狀態管理和數據獲取。
+ * @returns {UseHomeDataReturn}
+ */
+function useHomeData() {
   const [pigSystemModule, setPigSystemModule] = useState('inventory')
 
-  // 使用 React Query 發起查詢，這將使 DevTools 顯示
+  // 使用 React Query 發起查詢
   const { data: appInfo, isLoading } = useQuery({
     queryKey: ['appInfo'],
     queryFn: fetchAppInfo
   })
 
+  // 🧠 派生狀態 (Derived State)
+  // 避免將可計算的狀態額外存入 state，直接在 render 前計算
+  const currentPigModule = pigSystemModules[pigSystemModule]
+
+  return {
+    appInfo,
+    isLoading,
+    pigSystemModule,
+    setPigSystemModule,
+    currentPigModule,
+    pigSystemModules, // 將常量透傳給組件
+    featureCards // 將常量透傳給組件
+  }
+}
+
+/**
+ * @description Home 頁面 - 作品集入口 (展示組件)
+ * 遵循「專業誠信 AI 協作助手」規範，使用 function 宣告主要組件
+ */
+function Home() {
+  const {
+    isLoading,
+    pigSystemModule,
+    setPigSystemModule,
+    currentPigModule,
+    pigSystemModules,
+    featureCards
+  } = useHomeData()
+
+  // 🛡️ 早期返回 (Guard Clause)，遵循「自我文檔代碼審查」的線性流程原則
   if (isLoading) {
     return (
       <ThemeProvider theme={muiTheme}>
@@ -49,92 +227,6 @@ const Home = () => {
       </ThemeProvider>
     )
   }
-
-  // 養豬場管理系統模組
-  const pigSystemModules = {
-    inventory: {
-      icon: '🐷',
-      title: '豬舍庫存管理',
-      description: '養豬場智慧管理系統 - 豬舍庫存即時追蹤與數據分析',
-      link: '/pig-house-inventory',
-      buttonText: '查看庫存'
-    },
-    breeding: {
-      icon: '🐖',
-      title: '種豬繁殖記錄',
-      description: '母豬繁殖週期管理與配種記錄追蹤系統',
-      link: '/sow-breeding-records',
-      buttonText: '查看記錄'
-    },
-    culling: {
-      icon: '🐗',
-      title: '公豬淘汰管理',
-      description: '公豬淘汰流程管理與決策支援系統',
-      link: '/culling-boar',
-      buttonText: '管理淘汰'
-    },
-    genotype: {
-      icon: '🧬',
-      title: '公豬基因型管理',
-      description: '公豬基因型數據管理與品種改良追蹤',
-      link: '/boargenotype',
-      buttonText: '查看基因型'
-    }
-  }
-
-  const currentPigModule = pigSystemModules[pigSystemModule]
-
-  const featureCards = [
-    {
-      icon: '👨‍💻',
-      title: '關於我',
-      description: '前端工程師，專注於 React 生態系統與工業級系統開發',
-      link: '/about',
-      buttonText: '查看履歷'
-    },
-    {
-      icon: '📅',
-      title: '開發歷程',
-      description: '專案開發時程與技術演進歷程',
-      link: '/timeline',
-      buttonText: '查看開發歷程'
-    },
-    {
-      icon: '🤖',
-      title: '智慧排程系統',
-      description: '工業級生產排程管理，支援多區域即時調度與狀態追蹤',
-      link: '/wise-scheduling',
-      buttonText: '進入智慧排程'
-    },
-    {
-      icon: '📊',
-      title: '專案作品展示',
-      description: '科專_TIIP模具產業高階製造系統展示',
-      link: '/project-showcase',
-      buttonText: '查看專案詳情'
-    },
-    {
-      icon: '🏭',
-      title: '製造監控中心',
-      description: '多功能生產監控儀表板，包含 OEE 分析、進度追蹤等',
-      link: '/ManufacturingLiveMonitor',
-      buttonText: '進入監控中心'
-    },
-    {
-      icon: '🎨',
-      title: 'Design Token 推動',
-      description: '設計系統規範化，推動設計與開發協作效率提升',
-      link: '/design-token',
-      buttonText: '查看 Design Token'
-    },
-    {
-      icon: '📬',
-      title: '聯絡方式',
-      description: '歡迎聯繫討論專案合作或技術交流',
-      link: '/contact',
-      buttonText: '聯絡我'
-    }
-  ]
 
   return (
     <ThemeProvider theme={muiTheme}>
