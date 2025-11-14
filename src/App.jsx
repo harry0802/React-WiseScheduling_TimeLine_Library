@@ -1,6 +1,7 @@
 import { createHashRouter, RouterProvider } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import AppLayout from './layouts/AppLayout'
+import PigSystemLayout from './layouts/PigSystemLayout'
 
 import Home from './page/Home'
 import Timeline from './page/Timeline'
@@ -9,6 +10,11 @@ import Contact from './page/Contact'
 import ProjectShowcase from './page/ProjectShowcase'
 import DesignToken from './page/DesignToken'
 import ErrorPage from './page/ErrorPage'
+// 養豬場管理系統頁面
+import Boargenotype from './pages/Boargenotype'
+import CullingBoar from './pages/CullingBoar'
+import PigHouseInventory from './pages/PigHouseInventory'
+import SowBreedingRecords from './pages/SowBreedingRecords'
 import LoadingSpinner from './components/LoadingSpinner'
 import ManufacturingLiveMonitor from './components/ManufacturingLiveMonitor/index.jsx'
 import LoadingWrapper from './components/ManufacturingLiveMonitor/components/Loading/index.jsx'
@@ -102,6 +108,16 @@ const router = createHashRouter([
       },
       // 捕捉所有不匹配的路徑
       { path: '*', element: <ErrorPage /> }
+    ]
+  },
+  {
+    element: <PigSystemLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      { path: 'boargenotype', element: <Boargenotype /> },
+      { path: 'culling-boar', element: <CullingBoar /> },
+      { path: 'pig-house-inventory', element: <PigHouseInventory /> },
+      { path: 'sow-breeding-records', element: <SowBreedingRecords /> },
     ]
   },
   {

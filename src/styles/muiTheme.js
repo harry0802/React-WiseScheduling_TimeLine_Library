@@ -1,6 +1,6 @@
-import { createTheme } from '@mui/material/styles';
-import { theme as styledTheme } from './theme';
-import { colors, typography, spacing, borders, effects } from '../designTokens';
+import { createTheme } from '@mui/material/styles'
+import { theme as styledTheme } from './theme'
+import { colors, typography, spacing, borders, effects } from '../designTokens'
 
 /**
  * MUI Theme Configuration
@@ -15,84 +15,84 @@ const muiTheme = createTheme({
       main: colors.accent.gold,
       dark: colors.accent.goldHover,
       light: colors.accent.goldLight,
-      contrastText: colors.text.inverse,
+      contrastText: colors.text.inverse
     },
     secondary: {
       main: styledTheme.colors.secondary,
-      contrastText: '#fff',
+      contrastText: '#fff'
     },
     error: {
-      main: colors.functional.error,
+      main: colors.functional.error
     },
     success: {
-      main: colors.functional.success,
+      main: colors.functional.success
     },
     warning: {
-      main: colors.functional.warning,
+      main: colors.functional.warning
     },
     info: {
-      main: colors.functional.info,
+      main: colors.functional.info
     },
     text: {
       primary: colors.text.primary,
       secondary: colors.text.secondary,
-      disabled: colors.text.tertiary,
+      disabled: colors.text.tertiary
     },
     background: {
       default: colors.background.primary,
-      paper: colors.background.surface,
+      paper: colors.background.surface
     },
-    divider: colors.border.light,
+    divider: colors.border.light
   },
   typography: {
     fontFamily: styledTheme.fonts.main,
     h1: {
       fontFamily: styledTheme.fonts.headings,
       fontSize: styledTheme.fontSizes['5xl'],
-      fontWeight: 700,
+      fontWeight: 700
     },
     h2: {
       fontFamily: styledTheme.fonts.headings,
       fontSize: styledTheme.fontSizes['4xl'],
-      fontWeight: 700,
+      fontWeight: 700
     },
     h3: {
       fontFamily: styledTheme.fonts.headings,
       fontSize: styledTheme.fontSizes['3xl'],
-      fontWeight: 600,
+      fontWeight: 600
     },
     h4: {
       fontFamily: styledTheme.fonts.headings,
       fontSize: styledTheme.fontSizes['2xl'],
-      fontWeight: 600,
+      fontWeight: 600
     },
     h5: {
       fontFamily: styledTheme.fonts.headings,
       fontSize: styledTheme.fontSizes.xl,
-      fontWeight: 600,
+      fontWeight: 600
     },
     h6: {
       fontFamily: styledTheme.fonts.headings,
       fontSize: styledTheme.fontSizes.lg,
-      fontWeight: 600,
+      fontWeight: 600
     },
     body1: {
       fontSize: styledTheme.fontSizes.base,
-      lineHeight: 1.8,
+      lineHeight: 1.8
     },
     body2: {
       fontSize: styledTheme.fontSizes.sm,
-      lineHeight: 1.8,
+      lineHeight: 1.8
     },
     button: {
       fontSize: styledTheme.fontSizes.base,
       fontWeight: 500,
-      textTransform: 'none',
-    },
+      textTransform: 'none'
+    }
   },
   spacing: 8, // 基礎間距單位 (8px)
   shape: {
-    borderRadius: 8,
+    borderRadius: 8
   },
   shadows: [
     'none',
@@ -119,7 +119,7 @@ const muiTheme = createTheme({
     styledTheme.shadows['2xl'],
     styledTheme.shadows['2xl'],
     styledTheme.shadows['2xl'],
-    styledTheme.shadows['2xl'],
+    styledTheme.shadows['2xl']
   ],
   breakpoints: {
     values: {
@@ -127,8 +127,8 @@ const muiTheme = createTheme({
       sm: parseInt(styledTheme.breakpoints.mobile),
       md: parseInt(styledTheme.breakpoints.tablet),
       lg: parseInt(styledTheme.breakpoints.desktop),
-      xl: parseInt(styledTheme.breakpoints.largeDesktop),
-    },
+      xl: parseInt(styledTheme.breakpoints.largeDesktop)
+    }
   },
   components: {
     MuiButton: {
@@ -138,9 +138,9 @@ const muiTheme = createTheme({
           padding: `${spacing.md} ${spacing.xl}`,
           textTransform: 'none',
           fontWeight: typography.fontWeight.semibold,
-          transition: effects.transitions.normal,
-        },
-      },
+          transition: effects.transitions.normal
+        }
+      }
     },
     MuiCard: {
       styleOverrides: {
@@ -149,18 +149,18 @@ const muiTheme = createTheme({
           boxShadow: effects.shadows.small,
           transition: effects.transitions.normal,
           '&:hover': {
-            boxShadow: effects.shadows.medium,
-          },
-        },
-      },
+            boxShadow: effects.shadows.medium
+          }
+        }
+      }
     },
     MuiPaper: {
       styleOverrides: {
         root: {
           borderRadius: borders.radius.small,
-          backgroundImage: 'none', // 移除 MUI 預設漸層
-        },
-      },
+          backgroundImage: 'none' // 移除 MUI 預設漸層
+        }
+      }
     },
     MuiTextField: {
       styleOverrides: {
@@ -169,27 +169,28 @@ const muiTheme = createTheme({
             borderRadius: borders.radius.small,
             backgroundColor: colors.background.surface,
             '& fieldset': {
-              borderColor: colors.border.light,
+              borderColor: colors.border.light
             },
             '&:hover fieldset': {
-              borderColor: colors.accent.gold,
+              borderColor: colors.accent.gold
             },
             '&.Mui-focused fieldset': {
-              borderColor: colors.accent.gold,
-            },
-          },
-        },
-      },
+              borderColor: colors.accent.gold
+            }
+          }
+        }
+      }
     },
     MuiChip: {
       styleOverrides: {
         root: {
           borderRadius: borders.radius.small,
-          fontWeight: typography.fontWeight.medium,
-        },
-      },
-    },
-  },
-});
+          fontWeight: typography.fontWeight.medium
+        }
+      }
+    }
+  }
+})
 
-export default muiTheme;
+export default muiTheme
+

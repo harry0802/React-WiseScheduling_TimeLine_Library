@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -8,6 +8,8 @@ import {
   CardActions,
   Grid,
   Box,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import muiTheme from "../styles/muiTheme";
@@ -33,6 +35,8 @@ const fetchAppInfo = async () => {
 };
 
 const Home = () => {
+  const [pigSystemModule, setPigSystemModule] = useState("inventory");
+
   // 使用 React Query 發起查詢，這將使 DevTools 顯示
   const { data: appInfo, isLoading } = useQuery({
     queryKey: ["appInfo"],
@@ -48,6 +52,40 @@ const Home = () => {
       </ThemeProvider>
     );
   }
+
+  // 養豬場管理系統模組
+  const pigSystemModules = {
+    inventory: {
+      icon: "🐷",
+      title: "豬舍庫存管理",
+      description: "養豬場智慧管理系統 - 豬舍庫存即時追蹤與數據分析",
+      link: "/pig-house-inventory",
+      buttonText: "查看庫存",
+    },
+    breeding: {
+      icon: "🐖",
+      title: "種豬繁殖記錄",
+      description: "母豬繁殖週期管理與配種記錄追蹤系統",
+      link: "/sow-breeding-records",
+      buttonText: "查看記錄",
+    },
+    culling: {
+      icon: "🐗",
+      title: "公豬淘汰管理",
+      description: "公豬淘汰流程管理與決策支援系統",
+      link: "/culling-boar",
+      buttonText: "管理淘汰",
+    },
+    genotype: {
+      icon: "🧬",
+      title: "公豬基因型管理",
+      description: "公豬基因型數據管理與品種改良追蹤",
+      link: "/boargenotype",
+      buttonText: "查看基因型",
+    },
+  };
+
+  const currentPigModule = pigSystemModules[pigSystemModule];
 
   const featureCards = [
     {
@@ -241,6 +279,133 @@ const Home = () => {
               </CreamPaper>
             </Grid>
           ))}
+
+          {/* 養豬場管理系統卡片 (可切換模組) */}
+          <Grid item xs={12} sm={6} md={4}>
+            <CreamPaper
+              elevation={0}
+              sx={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                position: 'relative',
+                overflow: 'hidden',
+                clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: `0 6px 16px ${colors.accent.gold}25`,
+                  '& .card-icon': {
+                    transform: 'scale(1.08)',
+                  },
+                },
+              }}
+            >
+              <CardContent sx={{ flexGrow: 1, p: 2 }}>
+                {/* 模組切換按鈕 */}
+                <Box sx={{ mb: 1.5 }}>
+                  <ToggleButtonGroup
+                    value={pigSystemModule}
+                    exclusive
+                    onChange={(e, newValue) => newValue && setPigSystemModule(newValue)}
+                    size="small"
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 0.5,
+                      '& .MuiToggleButtonGroup-grouped': {
+                        border: `1px solid ${colors.accent.gold}60`,
+                        borderRadius: '4px !important',
+                        margin: '2px',
+                        '&:not(:first-of-type)': {
+                          borderLeft: `1px solid ${colors.accent.gold}60`,
+                        },
+                      },
+                      '& .MuiToggleButton-root': {
+                        color: colors.text.primary,
+                        fontSize: '1.3rem',
+                        padding: '6px 10px',
+                        minWidth: 'auto',
+                        backgroundColor: `${colors.background.secondary}`,
+                        backdropFilter: 'blur(4px)',
+                        transition: 'all 0.3s ease',
+                        '&.Mui-selected': {
+                          backgroundColor: colors.accent.gold,
+                          color: colors.background.primary,
+                          boxShadow: `0 2px 8px ${colors.accent.gold}40, inset 0 1px 0 rgba(255,255,255,0.2)`,
+                          transform: 'scale(1.05)',
+                          '&:hover': {
+                            backgroundColor: colors.accent.gold,
+                            filter: 'brightness(1.1)',
+                          },
+                        },
+                        '&:hover': {
+                          backgroundColor: `${colors.accent.gold}20`,
+                          transform: 'translateY(-1px)',
+                          boxShadow: `0 2px 6px ${colors.accent.gold}20`,
+                        },
+                      },
+                    }}
+                  >
+                    <ToggleButton value="inventory">🐷</ToggleButton>
+                    <ToggleButton value="breeding">🐖</ToggleButton>
+                    <ToggleButton value="culling">🐗</ToggleButton>
+                    <ToggleButton value="genotype">🧬</ToggleButton>
+                  </ToggleButtonGroup>
+                </Box>
+
+                <Box
+                  className="card-icon"
+                  sx={{
+                    fontSize: "2rem",
+                    mb: 1,
+                    display: 'inline-block',
+                    transition: 'transform 0.3s ease',
+                  }}
+                >
+                  {currentPigModule.icon}
+                </Box>
+                <Typography
+                  variant="subtitle1"
+                  component="h2"
+                  gutterBottom
+                  sx={{
+                    color: colors.accent.gold,
+                    fontWeight: 700,
+                    mb: 1,
+                    fontSize: '1.05rem',
+                    letterSpacing: '0.01em',
+                  }}
+                >
+                  {currentPigModule.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: colors.text.primary,
+                    lineHeight: 1.6,
+                    minHeight: '2.8em',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  {currentPigModule.description}
+                </Typography>
+              </CardContent>
+              <CardActions sx={{ p: 2, pt: 0 }}>
+                <CornerButton
+                  component={Link}
+                  to={currentPigModule.link}
+                  fullWidth
+                  sx={{
+                    py: 0.75,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  {currentPigModule.buttonText}
+                </CornerButton>
+              </CardActions>
+            </CreamPaper>
+          </Grid>
         </Grid>
       </Container>
     </ThemeProvider>
