@@ -2,11 +2,13 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ['main']
+    branches: ['main', 'dev']
   workflow_dispatch:
 
 permissions:
-  contents: write # 改為 write 以允許推送到其他分支
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
@@ -19,9 +21,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci --legacy-peer-deps
 
       - name: Build
         run: npm run build
@@ -31,4 +34,6 @@ jobs:
         with:
           github_token: ${{ secrets.DEPLOY_SECRET }}
           publish_dir: ./dist
+          publish_branch: gh-pages
+          force_orphan: true
 

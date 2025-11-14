@@ -1,4 +1,4 @@
-import { createGlobalStyle } from "styled-components";
+import { createGlobalStyle } from 'styled-components'
 
 const GlobalStyles = createGlobalStyle`
   /* 使用更直覺的盒模型 */
@@ -108,6 +108,7 @@ const GlobalStyles = createGlobalStyle`
       padding: 0 1rem;
     }
   }
-`;
+`
 
-export default GlobalStyles;
+export default GlobalStyles
+
