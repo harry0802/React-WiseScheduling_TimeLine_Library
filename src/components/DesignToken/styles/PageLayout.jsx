@@ -44,7 +44,7 @@ export const PageHeader = styled.div`
   text-align: center;
   padding: ${({ theme }) => theme.spacing.xl} ${({ theme }) => theme.spacing.lg};
   background-color: ${colors.background.surface};
-  border: 2px solid ${colors.accent.gold};
+  border: 2px solid ${colors.accent.primary};
   clip-path: polygon(
     2rem 0,
     calc(100% - 2rem) 0,
@@ -77,7 +77,7 @@ export const PageHeader = styled.div`
 export const PageTitle = styled.h1`
   font-weight: 700;
   font-size: ${({ theme }) => theme.fontSizes['4xl']};
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   margin-bottom: ${({ theme }) => theme.spacing.md};
 
   @media (min-width: ${({ theme }) => theme.breakpoints.wide}) {
@@ -103,7 +103,7 @@ export const DividerLine = styled.hr`
   background: linear-gradient(
     to right,
     transparent,
-    ${colors.accent.gold},
+    ${colors.accent.primary},
     transparent
   );
   margin: ${({ theme }) => theme.spacing.md} 0;

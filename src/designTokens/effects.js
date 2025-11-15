@@ -19,15 +19,15 @@ export const effects = {
     large: '0 8px 16px rgba(0, 0, 0, 0.2)',
     xlarge: '0 12px 24px rgba(0, 0, 0, 0.25)',
 
-    // 金色光暈效果
-    goldGlow: '0 0 20px rgba(212, 175, 55, 0.3)',
-    goldGlowHover: '0 0 30px rgba(212, 175, 55, 0.5)',
+    // 藍色光暈效果
+    goldGlow: '0 0 20px rgba(21, 147, 235, 0.3)',
+    goldGlowHover: '0 0 30px rgba(21, 147, 235, 0.5)',
   },
 
   // 漸層
   gradients: {
     darkBackground: 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%)',
-    goldAccent: 'linear-gradient(135deg, #d4af37 0%, #c19a2e 100%)',
+    goldAccent: 'linear-gradient(135deg, #1593EB 0%, #0d7acc 100%)',
     creamSurface: 'linear-gradient(135deg, #f5f3f0 0%, #ede8e3 100%)',
   },
 

@@ -12,9 +12,9 @@ const muiTheme = createTheme({
   palette: {
     mode: 'dark', // 啟用深色模式
     primary: {
-      main: colors.accent.gold,
-      dark: colors.accent.goldHover,
-      light: colors.accent.goldLight,
+      main: colors.accent.primary,
+      dark: colors.accent.primaryHover,
+      light: colors.accent.primaryLight,
       contrastText: colors.text.inverse
     },
     secondary: {
@@ -172,10 +172,10 @@ const muiTheme = createTheme({
               borderColor: colors.border.light
             },
             '&:hover fieldset': {
-              borderColor: colors.accent.gold
+              borderColor: colors.accent.primary
             },
             '&.Mui-focused fieldset': {
-              borderColor: colors.accent.gold
+              borderColor: colors.accent.primary
             }
           }
         }

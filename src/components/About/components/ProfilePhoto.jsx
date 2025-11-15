@@ -29,7 +29,7 @@ const ProfilePhoto = ({ src, alt, size = 160 }) => {
         width: size,
         height: size,
         borderRadius: '50%',
-        border: `4px solid ${colors.accent.gold}`,
+        border: `4px solid ${colors.accent.primary}`,
         overflow: 'hidden',
         boxShadow: 3,
         background: colors.background.secondary,
@@ -59,7 +59,7 @@ const ProfilePhoto = ({ src, alt, size = 160 }) => {
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '4rem',
-            color: colors.accent.gold
+            color: colors.accent.primary
           }}
         >
           👤

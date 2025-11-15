@@ -20,7 +20,7 @@ const VerticalProgressBar = ({ progress = 0, orientation = 'vertical' }) => {
         position: 'relative',
         width: isVertical ? '2px' : '100%',
         height: isVertical ? '100%' : '2px',
-        backgroundColor: `${colors.accent.gold}30`, // 30% opacity background
+        backgroundColor: `${colors.accent.primary}30`, // 30% opacity background
         borderRadius: '1px',
         overflow: 'hidden',
       }}
@@ -33,9 +33,9 @@ const VerticalProgressBar = ({ progress = 0, orientation = 'vertical' }) => {
           [isVertical ? 'left' : 'top']: 0,
           width: isVertical ? '100%' : `${progress * 100}%`,
           height: isVertical ? `${progress * 100}%` : '100%',
-          backgroundColor: colors.accent.gold,
+          backgroundColor: colors.accent.primary,
           transition: 'all 0.3s ease',
-          boxShadow: `0 0 20px ${colors.accent.gold}80`,
+          boxShadow: `0 0 20px ${colors.accent.primary}80`,
         }}
       />
     </Box>

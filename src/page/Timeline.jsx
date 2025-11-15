@@ -134,7 +134,7 @@ const Timeline = () => {
             gutterBottom
             sx={{
               fontWeight: 700,
-              color: colors.accent.gold,
+              color: colors.accent.primary,
               mb: 2,
             }}
           >
@@ -152,7 +152,7 @@ const Timeline = () => {
             component="h2"
             gutterBottom
             sx={{
-              color: colors.accent.gold,
+              color: colors.accent.primary,
               fontWeight: 600,
               mt: 0,
               mb: 2,
@@ -182,7 +182,7 @@ const Timeline = () => {
                 <Typography
                   variant="h5"
                   sx={{
-                    color: colors.accent.gold,
+                    color: colors.accent.primary,
                     fontWeight: 700,
                     mb: 0.5,
                   }}
@@ -221,12 +221,12 @@ const Timeline = () => {
                       <TimelineDot
                         sx={{
                           borderWidth: 2,
-                          borderColor: colors.accent.gold,
+                          borderColor: colors.accent.primary,
                           backgroundColor: colors.background.primary,
                         }}
                       />
                       {itemIndex < phase.items.length - 1 && (
-                        <TimelineConnector sx={{ bgcolor: colors.accent.gold }} />
+                        <TimelineConnector sx={{ bgcolor: colors.accent.primary }} />
                       )}
                     </TimelineSeparator>
                     <TimelineContent sx={{ py: 1.5, px: 2 }}>
@@ -234,7 +234,7 @@ const Timeline = () => {
                         elevation={2}
                         sx={{
                           p: 2.5,
-                          borderLeft: `4px solid ${colors.accent.gold}`,
+                          borderLeft: `4px solid ${colors.accent.primary}`,
                           clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
                         }}
                       >
@@ -244,7 +244,7 @@ const Timeline = () => {
                           gutterBottom
                           sx={{
                             fontWeight: 600,
-                            color: colors.accent.gold,
+                            color: colors.accent.primary,
                             mb: 1,
                           }}
                         >
@@ -273,7 +273,7 @@ const Timeline = () => {
             variant="h5"
             gutterBottom
             sx={{
-              color: colors.accent.gold,
+              color: colors.accent.primary,
               fontWeight: 600,
               mb: 2,
             }}
@@ -288,8 +288,8 @@ const Timeline = () => {
                   sx={{
                     fontWeight: 500,
                     borderWidth: 2,
-                    borderColor: colors.accent.gold,
-                    color: colors.accent.gold,
+                    borderColor: colors.accent.primary,
+                    color: colors.accent.primary,
                     borderStyle: 'solid',
                     backgroundColor: 'transparent',
                   }}

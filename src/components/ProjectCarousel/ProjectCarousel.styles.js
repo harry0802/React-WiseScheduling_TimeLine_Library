@@ -110,7 +110,7 @@ export const ProgressBarContainer = styled.div`
     top: 0;
     width: 2px;
     height: 100%;
-    background-color: ${colors.accent.gold}30;
+    background-color: ${colors.accent.primary}30;
   }
 `
 
@@ -119,8 +119,8 @@ export const ProgressBarFill = styled.div`
   top: 0;
   left: 0;
   width: 2px;
-  background-color: ${colors.accent.gold};
-  box-shadow: 0 0 20px ${colors.accent.gold}80;
+  background-color: ${colors.accent.primary};
+  box-shadow: 0 0 20px ${colors.accent.primary}80;
   transition: height 0.1s ease-out;
 `
 
@@ -144,7 +144,7 @@ export const DepartmentMarker = styled(BaseMarker)`
 
   &:hover .marker-line {
     width: 14px;
-    box-shadow: 0 0 12px ${colors.accent.gold}cc;
+    box-shadow: 0 0 12px ${colors.accent.primary}cc;
   }
 
   &:hover .marker-label,
@@ -156,7 +156,7 @@ export const DepartmentMarker = styled(BaseMarker)`
 export const MarkerLine = styled.div`
   width: 8px;
   height: 2px;
-  background-color: ${colors.accent.gold};
+  background-color: ${colors.accent.primary};
   opacity: 0.6;
   transition: all 0.2s ease;
 
@@ -164,7 +164,7 @@ export const MarkerLine = styled.div`
     width: 12px;
     height: 3px;
     opacity: 1;
-    box-shadow: 0 0 8px ${colors.accent.gold}cc;
+    box-shadow: 0 0 8px ${colors.accent.primary}cc;
   }
 `
 
@@ -186,7 +186,7 @@ export const MarkerLabelGroup = styled.div`
 
 export const MarkerLabel = styled.div`
   font-size: 0.7rem;
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-weight: 400;
   letter-spacing: 0.05em;
   opacity: 0.6;
@@ -208,7 +208,7 @@ export const MarkerLabel = styled.div`
 
 export const MarkerSystem = styled.div`
   font-size: 0.55rem;
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-weight: 300;
   letter-spacing: 0.03em;
   opacity: 0.4;
@@ -234,7 +234,7 @@ export const SystemMarker = styled(BaseMarker)`
 
   &:hover .system-line {
     width: 7px;
-    box-shadow: 0 0 8px ${colors.accent.gold}99;
+    box-shadow: 0 0 8px ${colors.accent.primary}99;
   }
 
   &:hover .system-label {
@@ -245,7 +245,7 @@ export const SystemMarker = styled(BaseMarker)`
 export const SystemLine = styled.div`
   width: 5px;
   height: 1px;
-  background-color: ${colors.accent.gold};
+  background-color: ${colors.accent.primary};
   opacity: 0.4;
   transition: all 0.2s ease;
 
@@ -253,7 +253,7 @@ export const SystemLine = styled.div`
     width: 6px;
     height: 1.5px;
     opacity: 0.7;
-    box-shadow: 0 0 6px ${colors.accent.gold}99;
+    box-shadow: 0 0 6px ${colors.accent.primary}99;
   }
 `
 
@@ -270,7 +270,7 @@ export const SystemLabelGroup = styled.div`
 
 export const SystemLabel = styled.div`
   font-size: 0.5rem;
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-weight: 300;
   letter-spacing: 0.02em;
   opacity: 0.35;

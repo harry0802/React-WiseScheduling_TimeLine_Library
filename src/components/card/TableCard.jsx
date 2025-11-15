@@ -18,8 +18,8 @@ const TableCardWrapper = styled.div`
   line-height: 1.25rem;
   background: ${colors.background.secondary};
   border-radius: 8px;
-  border: 1px solid ${colors.accent.gold}40;
-  box-shadow: 0 2px 8px ${colors.accent.gold}20;
+  border: 1px solid ${colors.accent.primary}40;
+  box-shadow: 0 2px 8px ${colors.accent.primary}20;
 `;
 
 const TableCardHeader = styled.div`
@@ -33,7 +33,7 @@ const TableCardHeader = styled.div`
 `;
 
 const HeaderTitle = styled.h3`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-family: Roboto, sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
@@ -46,13 +46,13 @@ const StyledBaseButton = styled(BaseButton)`
   place-content: center center;
   width: 2.5rem;
   height: 2.5rem;
-  background-color: ${colors.accent.gold};
+  background-color: ${colors.accent.primary};
   color: ${colors.background.primary};
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 2px 6px ${colors.accent.gold}40;
+  box-shadow: 0 2px 6px ${colors.accent.primary}40;
 
   & > svg {
     align-self: center;
@@ -60,9 +60,9 @@ const StyledBaseButton = styled(BaseButton)`
   }
 
   &:hover {
-    background-color: ${colors.accent.gold};
+    background-color: ${colors.accent.primary};
     filter: brightness(1.1);
-    box-shadow: 0 4px 10px ${colors.accent.gold}60;
+    box-shadow: 0 4px 10px ${colors.accent.primary}60;
     transform: scale(1.05);
   }
 

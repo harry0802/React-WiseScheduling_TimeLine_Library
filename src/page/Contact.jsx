@@ -35,7 +35,7 @@ const Contact = () => {
             gutterBottom
             sx={{
               fontWeight: 700,
-              color: colors.accent.gold,
+              color: colors.accent.primary,
               mb: 2,
             }}
           >
@@ -57,7 +57,7 @@ const Contact = () => {
                 variant="h5"
                 gutterBottom
                 sx={{
-                  color: colors.accent.gold,
+                  color: colors.accent.primary,
                   fontWeight: 600,
                   mb: 3,
                 }}
@@ -77,11 +77,11 @@ const Contact = () => {
                     borderRadius: 2,
                     transition: "all 0.3s ease",
                     "&:hover": {
-                      borderColor: colors.accent.gold,
+                      borderColor: colors.accent.primary,
                     },
                   }}
                 >
-                  <GitHubIcon sx={{ color: colors.accent.gold, fontSize: 32 }} />
+                  <GitHubIcon sx={{ color: colors.accent.primary, fontSize: 32 }} />
                   <Box sx={{ flex: 1 }}>
                     <Typography
                       variant="subtitle2"
@@ -94,7 +94,7 @@ const Contact = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: colors.accent.gold,
+                        color: colors.accent.primary,
                         fontWeight: 600,
                         textDecoration: "none",
                         "&:hover": {
@@ -119,7 +119,7 @@ const Contact = () => {
                 variant="h5"
                 gutterBottom
                 sx={{
-                  color: colors.accent.gold,
+                  color: colors.accent.primary,
                   fontWeight: 600,
                   mb: 3,
                 }}
@@ -130,7 +130,7 @@ const Contact = () => {
               <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                    <EmailIcon sx={{ color: colors.accent.gold }} />
+                    <EmailIcon sx={{ color: colors.accent.primary }} />
                     <Typography variant="subtitle1" fontWeight={600} sx={{ color: colors.text.primary }}>
                       電子郵件
                     </Typography>
@@ -151,7 +151,7 @@ const Contact = () => {
 
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                    <PhoneIcon sx={{ color: colors.accent.gold }} />
+                    <PhoneIcon sx={{ color: colors.accent.primary }} />
                     <Typography variant="subtitle1" fontWeight={600} sx={{ color: colors.text.primary }}>
                       電話號碼
                     </Typography>
@@ -172,7 +172,7 @@ const Contact = () => {
 
                 <Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                    <LinkedInIcon sx={{ color: colors.accent.gold }} />
+                    <LinkedInIcon sx={{ color: colors.accent.primary }} />
                     <Typography variant="subtitle1" fontWeight={600} sx={{ color: colors.text.primary }}>
                       LinkedIn
                     </Typography>
@@ -201,7 +201,7 @@ const Contact = () => {
                 p: 2,
                 backgroundColor: colors.background.surfaceAlt,
                 border: `2px solid ${colors.border.light}`,
-                borderLeft: `4px solid ${colors.accent.gold}`,
+                borderLeft: `4px solid ${colors.accent.primary}`,
                 borderRadius: 1,
                 clipPath: 'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)',
               }}
@@ -210,7 +210,7 @@ const Contact = () => {
                 variant="subtitle1"
                 gutterBottom
                 sx={{
-                  color: colors.accent.gold,
+                  color: colors.accent.primary,
                   fontWeight: 700,
                 }}
               >

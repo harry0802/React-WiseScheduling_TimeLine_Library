@@ -1,38 +1,38 @@
 // Design Token - Colors
-// 日式高級餐廳風格配色系統
+// 現代簡約配色系統
 
 export const colors = {
   // 背景色彩
   background: {
-    primary: '#1a1a1a',       // 主要深色背景
-    secondary: '#2c2c2c',     // 次要深色背景
-    surface: '#f5f3f0',       // 米白色卡片表面
-    surfaceAlt: '#ede8e3',    // 替代米白色
+    primary: '#010D15',       // 主要深色背景
+    secondary: '#000000',     // 次要深色背景
+    surface: '#FFFFFF',       // 白色卡片表面
+    surfaceAlt: '#EFEFEF',    // 淺灰色替代背景
   },
 
   // 強調色彩
   accent: {
-    gold: '#d4af37',          // 金色 - 主要強調色
-    goldHover: '#c19a2e',     // 金色 hover 狀態
-    goldLight: '#e8d7a0',     // 淺金色
+    primary: '#1593EB',       // 藍色 - 主要強調色
+    primaryHover: '#0d7acc',  // 藍色 hover 狀態
+    primaryLight: '#6fb9f0',  // 淺藍色
   },
 
   // 邊框色彩
   border: {
-    gold: '#d4af37',          // 金色外框
-    light: '#d4d4d4',         // 淡灰色內框
-    medium: '#b0b0b0',        // 中灰色
-    dark: '#5a5a5a',          // 深灰色
+    primary: '#1593EB',       // 藍色外框
+    light: '#E0EBF0',         // 淡藍灰色內框
+    medium: '#EFEFEF',        // 淺灰色
+    dark: '#010D15',          // 深色
   },
 
   // 文字色彩
   text: {
-    primary: '#2c2c2c',       // 深色文字（淺色背景用）
-    secondary: '#5a5a5a',     // 次要深色文字
-    tertiary: '#8a8a8a',      // 三級深色文字
-    inverse: '#f5f5f5',       // 淺色文字（深色背景用）
-    inverseSecondary: '#e0e0e0', // 次要淺色文字
-    gold: '#d4af37',          // 金色標題/強調文字
+    primary: '#000000',       // 深色文字（淺色背景用）
+    secondary: '#010D15',     // 次要深色文字
+    tertiary: '#6a6a6a',      // 三級深色文字
+    inverse: '#FFFFFF',       // 淺色文字（深色背景用）
+    inverseSecondary: '#E0EBF0', // 次要淺色文字
+    accent: '#1593EB',        // 藍色標題/強調文字
   },
 
   // 功能色彩
@@ -40,7 +40,7 @@ export const colors = {
     success: '#4caf50',
     warning: '#ff9800',
     error: '#f44336',
-    info: '#2196f3',
+    info: '#1593EB',
   }
 };
 

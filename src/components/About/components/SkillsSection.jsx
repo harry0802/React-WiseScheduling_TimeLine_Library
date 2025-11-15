@@ -42,7 +42,7 @@ const SkillsSection = ({ skills }) => {
         variant="h5"
         gutterBottom
         sx={{
-          color: colors.accent.gold,
+          color: colors.accent.primary,
           fontWeight: 700,
           display: 'flex',
           alignItems: 'center',

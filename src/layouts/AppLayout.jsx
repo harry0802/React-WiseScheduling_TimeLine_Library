@@ -23,7 +23,7 @@ const Footer = styled.footer`
   color: #f5f5f5;
   padding: ${(props) => props.theme.spacing.md};
   text-align: center;
-  border-top: 1px solid #d4af37;
+  border-top: 1px solid #1593EB;
 `
 
 function AppLayout() {

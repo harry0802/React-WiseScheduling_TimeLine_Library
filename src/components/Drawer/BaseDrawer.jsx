@@ -58,9 +58,9 @@ const DrawerHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid ${colors.accent.gold}40;
+  border-bottom: 1px solid ${colors.accent.primary}40;
   background: ${colors.background.primary};
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-size: 20px;
   font-weight: 700;
 `;
@@ -85,8 +85,8 @@ const DrawerFooter = styled.div`
   gap: 1rem;
   z-index: 2;
   background: ${colors.background.primary};
-  border-top: 1px solid ${colors.accent.gold}40;
-  box-shadow: 0 -2px 8px ${colors.accent.gold}20;
+  border-top: 1px solid ${colors.accent.primary}40;
+  box-shadow: 0 -2px 8px ${colors.accent.primary}20;
 `;
 
 const CancelButton = styled.button`
@@ -96,22 +96,22 @@ const CancelButton = styled.button`
   border: 1px solid ${colors.border.primary};
 
   &:hover {
-    color: ${colors.accent.gold};
-    border-color: ${colors.accent.gold};
-    background: ${colors.accent.gold}10;
+    color: ${colors.accent.primary};
+    border-color: ${colors.accent.primary};
+    background: ${colors.accent.primary}10;
   }
 `;
 
 const ConfirmButton = styled.button`
   ${buttonStyles}
-  background: ${colors.accent.gold};
+  background: ${colors.accent.primary};
   color: ${colors.background.primary};
-  box-shadow: 0 2px 8px ${colors.accent.gold}40;
+  box-shadow: 0 2px 8px ${colors.accent.primary}40;
 
   &:hover {
-    background: ${colors.accent.gold};
+    background: ${colors.accent.primary};
     filter: brightness(1.1);
-    box-shadow: 0 4px 12px ${colors.accent.gold}60;
+    box-shadow: 0 4px 12px ${colors.accent.primary}60;
   }
 
   &:active {

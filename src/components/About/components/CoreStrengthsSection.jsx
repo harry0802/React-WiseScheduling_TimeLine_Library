@@ -30,7 +30,7 @@ const CoreStrengthsSection = ({ strengths }) => {
         variant="h5"
         gutterBottom
         sx={{
-          color: colors.accent.gold,
+          color: colors.accent.primary,
           fontWeight: 700,
           display: 'flex',
           alignItems: 'center',
@@ -45,7 +45,7 @@ const CoreStrengthsSection = ({ strengths }) => {
         {strengths.map((strength, index) => (
           <ListItem key={index} sx={{ py: 1 }}>
             <ListItemText
-              primary={<strong style={{ color: colors.accent.gold }}>{strength.title}：</strong>}
+              primary={<strong style={{ color: colors.accent.primary }}>{strength.title}：</strong>}
               secondary={strength.description}
               primaryTypographyProps={{ variant: 'body1' }}
               secondaryTypographyProps={{
