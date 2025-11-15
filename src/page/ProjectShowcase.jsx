@@ -12,7 +12,13 @@ const tiipProjectData = [
     id: 1,
     title: '生管部門 - 生產管理系統',
     dec: '整合計畫排程表、廠內報價系統、產品履歷BOM表、智慧成本分析與智慧排程等核心功能。\n\n提供完整的生產管理解決方案，從接單報價到排程執行，實現生產流程數位化與智慧化管理。',
-    techStack: ['React 18', 'TypeScript', 'Redux Toolkit', 'Vis-timeline', 'Material-UI'],
+    techStack: [
+      'React 18',
+      'TypeScript',
+      'Redux Toolkit',
+      'Vis-timeline',
+      'Material-UI'
+    ],
     systems: [
       {
         name: '計畫排程表',
@@ -95,7 +101,13 @@ const tiipProjectData = [
     id: 4,
     title: '成型部門 - 生產執行系統',
     dec: '包含機台保養表、模具管理、派工系統、機台狀態監控、績效儀表板、即時生產追蹤與全廠設備稼動率分析。\n\n提供現場人員完整的生產執行工具，從設備保養到生產追蹤，全面提升現場管理效率與設備利用率。',
-    techStack: ['React 18', 'Redux Toolkit', 'Recharts', 'Material-UI', 'Day.js'],
+    techStack: [
+      'React 18',
+      'Redux Toolkit',
+      'Recharts',
+      'Material-UI',
+      'Day.js'
+    ],
     systems: [
       {
         name: '機台保養表',
@@ -152,10 +164,7 @@ const showcaseConfig = {
   pageTitle: '專案展示',
   pageSubtitle: '科專_TIIP模具產業高階製造',
   aboutTitle: '關於此專案展示',
-  aboutContent: [
-    '這是一個工業級智慧製造管理系統，專為模具產業設計，整合生產排程、即時監控、數據分析等核心功能。',
-    '本專案採用現代化前端技術棧，注重使用者體驗與系統效能，成功協助工廠提升生產效率、優化資源調度。'
-  ]
+  aboutContent: []
 }
 
 //! =============== 主要組件 ===============
@@ -170,7 +179,7 @@ const ProjectShowcase = () => {
       items={tiipProjectData}
       config={showcaseConfig}
       showProgress={true}
-      showAboutNote={true}
+      showAboutNote={false}
     />
   )
 }

@@ -7,8 +7,14 @@ export const CarouselContainer = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
+  /* 💡 修正：恢復為 visible，讓桌面版標籤能正常顯示 */
   overflow: visible;
-  padding-right: 3rem;
+  padding-right: 3rem; /* 桌面端的標籤空間 */
+
+  /* 🎯 響應式：平板（900px）以下，標籤隱藏，縮小 padding */
+  @media (max-width: 900px) {
+    padding-right: 1.5rem; /* 只留下進度條和線條的空間 */
+  }
 `
 
 export const Viewport = styled.div`
@@ -66,8 +72,7 @@ export const ImageContainer = styled.div`
   img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    /* aspect-ratio: 21/9; */
+    object-fit: fill;
   }
 
   .placeholder {
@@ -169,7 +174,8 @@ export const MarkerLabelGroup = styled.div`
     margin-left: 4px;
   }
 
-  @media (max-width: 480px) {
+  /* 🎯 響應式：在 900px 以下統一隱藏文字標籤 */
+  @media (max-width: 900px) {
     display: none;
   }
 `
@@ -215,10 +221,6 @@ export const MarkerSystem = styled.div`
   @media (max-width: 768px) {
     font-size: 0.5rem;
   }
-
-  @media (max-width: 900px) {
-    display: none;
-  }
 `
 
 //! =============== 系統子標記樣式 ===============
@@ -255,6 +257,11 @@ export const SystemLabelGroup = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: 4px;
+
+  /* 🎯 響應式：在 900px 以下統一隱藏文字標籤 */
+  @media (max-width: 900px) {
+    display: none;
+  }
 `
 
 export const SystemLabel = styled.div`
@@ -272,10 +279,6 @@ export const SystemLabel = styled.div`
     opacity: 0.55;
     font-size: 0.75rem;
     font-weight: 400;
-  }
-
-  @media (max-width: 1200px) {
-    display: none;
   }
 `
 

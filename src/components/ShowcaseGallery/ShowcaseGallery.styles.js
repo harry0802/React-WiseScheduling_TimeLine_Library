@@ -10,13 +10,16 @@ export const ShowcaseWrapper = styled(Box)`
   display: flex;
   align-items: center;
   padding-top: 64px;
+  padding-bottom: 48px;
 
   @media (min-width: 900px) {
     padding-top: 80px;
+    padding-bottom: 64px;
   }
 
   @media (min-width: 1200px) {
     padding-top: 96px;
+    padding-bottom: 80px;
   }
 `
 
@@ -211,10 +214,11 @@ export const AboutNoteText = styled(Typography)`
 //! =============== 主容器佈局樣式 ===============
 
 export const MainContainer = styled(Box)`
-  width: calc(100% - 6rem);
+  width: 100%;
   padding: 0 16px;
 
   @media (min-width: 900px) {
+    width: calc(100% - 6rem);
     padding: 0 32px;
   }
 

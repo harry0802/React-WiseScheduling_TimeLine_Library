@@ -201,7 +201,10 @@ const ItemDetails = React.memo(({ item }) => {
           <TechStackTitle>技術棧</TechStackTitle>
           <TechChipsContainer>
             {item.techStack.map((tech, index) => (
-              <StyledTechChip key={index} label={tech} />
+              <StyledTechChip
+                key={index}
+                label={tech}
+              />
             ))}
           </TechChipsContainer>
         </TechStackSection>
@@ -265,7 +268,10 @@ const ShowcaseGallery = ({
       <ThemeProvider theme={muiTheme}>
         <ShowcaseWrapper>
           <EmptyStateContainer>
-            <Typography variant='h4' color='white'>
+            <Typography
+              variant='h4'
+              color='white'
+            >
               沒有可展示的項目
             </Typography>
           </EmptyStateContainer>
@@ -278,7 +284,10 @@ const ShowcaseGallery = ({
     <ThemeProvider theme={muiTheme}>
       <ShowcaseWrapper>
         <MainContainer>
-          <GalleryHeader title={config.pageTitle} subtitle={config.pageSubtitle} />
+          <GalleryHeader
+            title={config.pageTitle}
+            subtitle={config.pageSubtitle}
+          />
 
           <ContentGrid>
             <CarouselGridItem>
@@ -296,12 +305,18 @@ const ShowcaseGallery = ({
             </CarouselGridItem>
 
             <DetailsGridItem>
-              <ItemDetails key={currentCategory.id} item={currentCategory} />
+              <ItemDetails
+                key={currentCategory.id}
+                item={currentCategory}
+              />
             </DetailsGridItem>
           </ContentGrid>
 
           {showAboutNote && (
-            <AboutNote title={config.aboutTitle} content={config.aboutContent} />
+            <AboutNote
+              title={config.aboutTitle}
+              content={config.aboutContent}
+            />
           )}
         </MainContainer>
       </ShowcaseWrapper>

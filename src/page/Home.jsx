@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Container, Typography, Box } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
@@ -22,19 +22,6 @@ import HexagonCard from '../components/card/HexagonCard'
  */
 
 /**
- * @typedef {object} PigModule
- * @property {string} icon
- * @property {string} title
- * @property {string} description
- * @property {string} link
- * @property {string} buttonText
- */
-
-/**
- * @typedef {Object<string, PigModule>} PigSystemModules
- */
-
-/**
  * @typedef {object} FeatureCard
  * @property {string} icon
  * @property {string} title
@@ -47,10 +34,6 @@ import HexagonCard from '../components/card/HexagonCard'
  * @typedef {object} UseHomeDataReturn
  * @property {AppInfo | undefined} appInfo
  * @property {boolean} isLoading
- * @property {string} pigSystemModule - 當前選中的模組 key
- * @property {React.Dispatch<React.SetStateAction<string>>} setPigSystemModule - 設置模組的函數
- * @property {PigModule} currentPigModule - 當前選中的模組物件
- * @property {PigSystemModules} pigSystemModules - 所有的模組定義
  * @property {FeatureCard[]} featureCards - 所有的功能卡片定義
  */
 
@@ -71,41 +54,6 @@ const fetchAppInfo = async () => {
       })
     }, 500)
   })
-}
-
-/**
- * 養豬場管理系統模組
- * @type {PigSystemModules}
- */
-const pigSystemModules = {
-  inventory: {
-    icon: '🐷',
-    title: '豬舍庫存管理',
-    description: '養豬場智慧管理系統 - 豬舍庫存即時追蹤與數據分析',
-    link: '/pig-house-inventory',
-    buttonText: '查看庫存'
-  },
-  breeding: {
-    icon: '🐖',
-    title: '種豬繁殖記錄',
-    description: '母豬繁殖週期管理與配種記錄追蹤系統',
-    link: '/sow-breeding-records',
-    buttonText: '查看記錄'
-  },
-  culling: {
-    icon: '🐗',
-    title: '公豬淘汰管理',
-    description: '公豬淘汰流程管理與決策支援系統',
-    link: '/culling-boar',
-    buttonText: '管理淘汰'
-  },
-  genotype: {
-    icon: '🧬',
-    title: '公豬基因型管理',
-    description: '公豬基因型數據管理與品種改良追蹤',
-    link: '/boargenotype',
-    buttonText: '查看基因型'
-  }
 }
 
 /**
@@ -173,26 +121,16 @@ const featureCards = [
  * @returns {UseHomeDataReturn}
  */
 function useHomeData() {
-  const [pigSystemModule, setPigSystemModule] = useState('inventory')
-
   // 使用 React Query 發起查詢
   const { data: appInfo, isLoading } = useQuery({
     queryKey: ['appInfo'],
     queryFn: fetchAppInfo
   })
 
-  // 🧠 派生狀態 (Derived State)
-  // 避免將可計算的狀態額外存入 state，直接在 render 前計算
-  const currentPigModule = pigSystemModules[pigSystemModule]
-
   return {
     appInfo,
     isLoading,
-    pigSystemModule,
-    setPigSystemModule,
-    currentPigModule,
-    pigSystemModules, // 將常量透傳給組件
-    featureCards // 將常量透傳給組件
+    featureCards
   }
 }
 
@@ -203,10 +141,6 @@ function useHomeData() {
 function Home() {
   const {
     isLoading,
-    pigSystemModule,
-    setPigSystemModule,
-    currentPigModule,
-    pigSystemModules,
     featureCards
   } = useHomeData()
 
@@ -304,92 +238,7 @@ function Home() {
               link={card.link}
             />
           ))}
-
-          {/* 養豬場管理系統卡片 - 使用當前選中的模組 */}
-          <HexagonCard
-            icon={currentPigModule.icon}
-            title={currentPigModule.title}
-            description={currentPigModule.description}
-            link={currentPigModule.link}
-          />
         </HexagonGrid>
-
-        {/* 養豬場模組切換器 (放在網格下方) */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            mt: 4,
-            mb: 2
-          }}
-        >
-          <Box
-            sx={{
-              background: colors.background.secondary,
-              padding: 2,
-              borderRadius: 2,
-              border: `1px solid ${colors.accent.gold}40`
-            }}
-          >
-            <Typography
-              sx={{
-                color: colors.text.inverse,
-                fontSize: '0.9rem',
-                mb: 1,
-                textAlign: 'center'
-              }}
-            >
-              切換養豬場管理模組：
-            </Typography>
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 1,
-                flexWrap: 'wrap',
-                justifyContent: 'center'
-              }}
-            >
-              {Object.entries(pigSystemModules).map(([key, module]) => (
-                <Box
-                  key={key}
-                  onClick={() => setPigSystemModule(key)}
-                  sx={{
-                    cursor: 'pointer',
-                    padding: '8px 16px',
-                    borderRadius: 1,
-                    border: `1px solid ${colors.accent.gold}60`,
-                    background:
-                      pigSystemModule === key
-                        ? colors.accent.gold
-                        : `${colors.background.secondary}`,
-                    color:
-                      pigSystemModule === key
-                        ? colors.background.primary
-                        : colors.text.inverse,
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: `0 4px 8px ${colors.accent.gold}30`
-                    }
-                  }}
-                >
-                  <Box
-                    component='span'
-                    sx={{ fontSize: '1.5rem', mr: 0.5 }}
-                  >
-                    {module.icon}
-                  </Box>
-                  <Box
-                    component='span'
-                    sx={{ fontSize: '0.85rem', fontWeight: 600 }}
-                  >
-                    {module.title}
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-        </Box>
       </Container>
     </ThemeProvider>
   )
