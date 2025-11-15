@@ -295,7 +295,7 @@ const DesignToken = () => {
           <CenteredImage
             src={`${
               import.meta.env.BASE_URL
-            }images/desighToken/design-token-concept.png`}
+            }images/desighToken/design-token-concept.webp`}
             alt='Design Token 概念圖'
           />
         </ClippedCreamPaper>
@@ -311,7 +311,7 @@ const DesignToken = () => {
             <CenteredImage
               src={`${
                 import.meta.env.BASE_URL
-              }images/desighToken/token-architecture.png`}
+              }images/desighToken/token-architecture.webp`}
               alt='Token 架構示意圖'
               containerSx={{ mt: 2, mb: 3 }}
             />
@@ -569,7 +569,7 @@ const DesignToken = () => {
           <CenteredImage
             src={`${
               import.meta.env.BASE_URL
-            }images/desighToken/semantic-naming-example.png`}
+            }images/desighToken/semantic-naming-example.webp`}
             alt='語義化命名範例'
           />
           <Box sx={{ mt: 2 }}>
@@ -768,7 +768,7 @@ const DesignToken = () => {
                 <CenteredImage
                   src={`${
                     import.meta.env.BASE_URL
-                  }images/desighToken/css-variables-theme-comparison-1.png`}
+                  }images/desighToken/css-variables-theme-comparison-1.webp`}
                   alt='CSS Variables vs ThemeProvider 比較 1'
                   containerSx={{ mt: 0 }}
                 />
@@ -781,7 +781,7 @@ const DesignToken = () => {
                 <CenteredImage
                   src={`${
                     import.meta.env.BASE_URL
-                  }images/desighToken/css-variables-theme-comparison-2.png`}
+                  }images/desighToken/css-variables-theme-comparison-2.webp`}
                   alt='CSS Variables vs ThemeProvider 比較 2'
                   containerSx={{ mt: 0 }}
                 />
@@ -832,7 +832,7 @@ const DesignToken = () => {
               <img
                 src={`${
                   import.meta.env.BASE_URL
-                }images/desighToken/29A9DB76-9685-4DBF-AB0C-686375A98FBA.jpg`}
+                }images/desighToken/29A9DB76-9685-4DBF-AB0C-686375A98FBA.webp`}
                 alt='Design Token 實踐成果 1'
                 loading='lazy'
               />
@@ -841,7 +841,7 @@ const DesignToken = () => {
               <img
                 src={`${
                   import.meta.env.BASE_URL
-                }images/desighToken/B774639B-5C51-4F43-B4E0-1D517DEC7D0E.jpg`}
+                }images/desighToken/B774639B-5C51-4F43-B4E0-1D517DEC7D0E.webp`}
                 alt='Design Token 實踐成果 2'
                 loading='lazy'
               />

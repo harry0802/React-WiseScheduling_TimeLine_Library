@@ -63,40 +63,40 @@ const TIIP_PROJECT_DATA = [
     systems: [
       {
         name: '計畫排程表',
-        images: ['images/tiip/tiip-010-production-schedule.png']
+        images: ['images/tiip/tiip-010-production-schedule.webp']
       },
       {
         name: '廠內報價系統',
         images: [
-          'images/tiip/tiip-011-internal-quote-0.png',
-          'images/tiip/tiip-012-internal-quote-1.png',
-          'images/tiip/tiip-014-internal-quote-2.png'
+          'images/tiip/tiip-011-internal-quote-0.webp',
+          'images/tiip/tiip-012-internal-quote-1.webp',
+          'images/tiip/tiip-014-internal-quote-2.webp'
         ]
       },
       {
         name: '產品履歷BOM表',
         images: [
-          'images/tiip/tiip-016-product-bom-1.png',
-          'images/tiip/tiip-017-product-bom-2.png',
-          'images/tiip/tiip-021-product-bom-3.png'
+          'images/tiip/tiip-016-product-bom-1.webp',
+          'images/tiip/tiip-017-product-bom-2.webp',
+          'images/tiip/tiip-021-product-bom-3.webp'
         ]
       },
       {
         name: '智慧成本分析表',
-        images: ['images/tiip/tiip-022-cost-analysis.png']
+        images: ['images/tiip/tiip-022-cost-analysis.webp']
       },
       {
         name: '智慧排程',
         images: [
-          'images/tiip/tiip-023-smart-schedule-1.png',
-          'images/tiip/tiip-024-smart-schedule-2.png',
-          'images/tiip/tiip-026-smart-schedule-3.png',
-          'images/tiip/tiip-027-smart-schedule-4.png',
-          'images/tiip/tiip-028-smart-schedule-5.png',
-          'images/tiip/tiip-029-smart-schedule-6.png',
-          'images/tiip/tiip-030-smart-schedule-7.png',
-          'images/tiip/tiip-032-smart-schedule-8.png',
-          'images/tiip/tiip-033-smart-schedule-9.png'
+          'images/tiip/tiip-023-smart-schedule-1.webp',
+          'images/tiip/tiip-024-smart-schedule-2.webp',
+          'images/tiip/tiip-026-smart-schedule-3.webp',
+          'images/tiip/tiip-027-smart-schedule-4.webp',
+          'images/tiip/tiip-028-smart-schedule-5.webp',
+          'images/tiip/tiip-029-smart-schedule-6.webp',
+          'images/tiip/tiip-030-smart-schedule-7.webp',
+          'images/tiip/tiip-032-smart-schedule-8.webp',
+          'images/tiip/tiip-033-smart-schedule-9.webp'
         ]
       }
     ]
@@ -123,10 +123,10 @@ const TIIP_PROJECT_DATA = [
       {
         name: '即時品檢系統',
         images: [
-          'images/tiip/tiip-034-qc-inspection-1.png',
-          'images/tiip/tiip-035-qc-inspection-2.png',
-          'images/tiip/tiip-036-qc-inspection-3.png',
-          'images/tiip/tiip-037-qc-inspection-4.png'
+          'images/tiip/tiip-034-qc-inspection-1.webp',
+          'images/tiip/tiip-035-qc-inspection-2.webp',
+          'images/tiip/tiip-036-qc-inspection-3.webp',
+          'images/tiip/tiip-037-qc-inspection-4.webp'
         ]
       }
     ]
@@ -154,13 +154,13 @@ const TIIP_PROJECT_DATA = [
       {
         name: '業務報價系統',
         images: [
-          'images/tiip/tiip-038-sales-quote-1.png',
-          'images/tiip/tiip-039-sales-quote-2.png',
-          'images/tiip/tiip-040-sales-quote-3.png',
-          'images/tiip/tiip-041-sales-quote-4.png',
-          'images/tiip/tiip-042-sales-quote-5.png',
-          'images/tiip/tiip-043-sales-quote-6.png',
-          'images/tiip/tiip-044-sales-quote-7.png'
+          'images/tiip/tiip-038-sales-quote-1.webp',
+          'images/tiip/tiip-039-sales-quote-2.webp',
+          'images/tiip/tiip-040-sales-quote-3.webp',
+          'images/tiip/tiip-041-sales-quote-4.webp',
+          'images/tiip/tiip-042-sales-quote-5.webp',
+          'images/tiip/tiip-043-sales-quote-6.webp',
+          'images/tiip/tiip-044-sales-quote-7.webp'
         ]
       }
     ]
@@ -194,47 +194,47 @@ const TIIP_PROJECT_DATA = [
     systems: [
       {
         name: '機台保養表',
-        images: ['images/tiip/tiip-045-machine-maintenance.png']
+        images: ['images/tiip/tiip-045-machine-maintenance.webp']
       },
       {
         name: '模具保養表',
-        images: ['images/tiip/tiip-047-mold-maintenance.png']
+        images: ['images/tiip/tiip-047-mold-maintenance.webp']
       },
       {
         name: '派工系統',
         images: [
-          'images/tiip/tiip-048-dispatch-1.png',
-          'images/tiip/tiip-049-dispatch-2.png',
-          'images/tiip/tiip-050-dispatch-3.png'
+          'images/tiip/tiip-048-dispatch-1.webp',
+          'images/tiip/tiip-049-dispatch-2.webp',
+          'images/tiip/tiip-050-dispatch-3.webp'
         ]
       },
       {
         name: '機台狀態操作與保養紀錄',
         images: [
-          'images/tiip/tiip-053-machine-status-1.png',
-          'images/tiip/tiip-054-machine-status-2.png',
-          'images/tiip/tiip-055-machine-status-3.png',
-          'images/tiip/tiip-056-machine-status-4.png'
+          'images/tiip/tiip-053-machine-status-1.webp',
+          'images/tiip/tiip-054-machine-status-2.webp',
+          'images/tiip/tiip-055-machine-status-3.webp',
+          'images/tiip/tiip-056-machine-status-4.webp'
         ]
       },
       {
         name: '施工養護綜合保養',
-        images: ['images/tiip/tiip-058-comprehensive-maintenance.png']
+        images: ['images/tiip/tiip-058-comprehensive-maintenance.webp']
       },
       {
         name: '廠區績效儀表板',
         images: [
-          'images/tiip/tiip-059-performance-dashboard.png',
-          'images/tiip/tiip-060-performance-dashboard-2.png'
+          'images/tiip/tiip-059-performance-dashboard.webp',
+          'images/tiip/tiip-060-performance-dashboard-2.webp'
         ]
       },
       {
         name: '即時生產進度追蹤',
-        images: ['images/tiip/tiip-061-production-tracking.png']
+        images: ['images/tiip/tiip-061-production-tracking.webp']
       },
       {
         name: '全廠設備稼動率',
-        images: ['images/tiip/tiip-062-equipment-utilization.png']
+        images: ['images/tiip/tiip-062-equipment-utilization.webp']
       }
     ]
   }
