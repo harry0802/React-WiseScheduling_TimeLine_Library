@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { Icon } from '@iconify/react'
 import { colors } from '../../designTokens'
 
 /**
@@ -123,10 +124,19 @@ const CardBack = styled.div`
 `
 
 //! =============== 共用樣式：圖標 ===============
-const HexagonIcon = styled.div`
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
+const HexagonIconWrapper = styled.div`
   margin-bottom: 0.75rem;
   filter: drop-shadow(0 4px 8px ${colors.accent.gold}50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Iconify icon 大小與配色 */
+  svg {
+    width: clamp(2.5rem, 5vw, 3.5rem);
+    height: clamp(2.5rem, 5vw, 3.5rem);
+    color: ${colors.accent.gold};
+  }
 `
 
 //! =============== 共用樣式：標題 ===============
@@ -186,7 +196,7 @@ const HexagonBackground = styled.div`
 /**
  * 專業六角形卡片組件
  * @param {Object} props
- * @param {string} props.icon - 表情符號圖標
+ * @param {string} props.icon - Iconify icon 名稱
  * @param {string} props.title - 卡片標題
  * @param {string} props.description - 卡片詳細描述
  * @param {string} props.link - 路由連結
@@ -204,25 +214,18 @@ const HexagonCard = ({
       <InnerHexagon className='inner-hexagon'>
         <HexagonBackground />
 
-        {/* 正面：圖標 + 標題 (保持不變) */}
+        {/* 正面：圖標 + 標題 */}
         <CardFront className='card-front'>
-          <HexagonIcon className='hexagon-icon'>{icon}</HexagonIcon>
+          <HexagonIconWrapper className='hexagon-icon'>
+            <Icon icon={icon} />
+          </HexagonIconWrapper>
           <HexagonTitle>{title}</HexagonTitle>
         </CardFront>
 
-        {/* ✨ [核心修改] ✨ */}
-        {/* 背面：現在只顯示標題和描述 */}
+        {/* 背面：標題和描述 */}
         <CardBack className='card-back'>
-          {/*
-          <HexagonIcon style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
-            {icon}
-          </HexagonIcon>
-          */}
           <HexagonTitle style={{ fontSize: '0.95rem' }}>{title}</HexagonTitle>
           <HexagonDescription>{description}</HexagonDescription>
-          {/*
-          <HexagonButton>{buttonText}</HexagonButton>
-          */}
         </CardBack>
       </InnerHexagon>
     </OuterHexagon>

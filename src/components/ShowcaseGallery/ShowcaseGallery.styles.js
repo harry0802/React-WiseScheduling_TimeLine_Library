@@ -86,7 +86,7 @@ export const DetailsSection = styled(Box)`
   padding: 0 16px;
 
   @media (min-width: 1200px) {
-    padding: 0 0 0 64px;
+    padding: 0 0 0 32px;
     z-index: 999;
   }
 `
@@ -108,13 +108,12 @@ export const ProjectTitle = styled(Typography)`
   }
 `
 
-export const ProjectDescription = styled(Typography)`
+export const ProjectDescription = styled(Box)`
   color: rgba(255, 255, 255, 0.7);
-  line-height: 2;
+  line-height: 1.8;
   font-size: 0.95rem;
   font-weight: 300;
   margin-bottom: 32px;
-  white-space: pre-line;
   flex-grow: 1;
 
   @media (min-width: 900px) {
@@ -123,6 +122,75 @@ export const ProjectDescription = styled(Typography)`
 
   @media (min-width: 1200px) {
     font-size: 1.05rem;
+  }
+`
+
+//! =============== Markdown 元素樣式 ===============
+
+export const MarkdownStrong = styled.strong`
+  color: ${colors.accent.gold};
+  font-weight: ${typography.fontWeight.semibold};
+`
+
+export const MarkdownParagraph = styled.p`
+  margin-bottom: 1em;
+  line-height: 1.8;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`
+
+export const MarkdownOrderedList = styled.ol`
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+  list-style-type: decimal;
+
+  li {
+    margin-bottom: 0.5em;
+    line-height: 1.8;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+`
+
+export const MarkdownUnorderedList = styled.ul`
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+  list-style-type: disc;
+
+  li {
+    margin-bottom: 0.5em;
+    line-height: 1.8;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+`
+
+export const MarkdownCode = styled.code`
+  font-family: 'Courier New', Courier, monospace;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  color: ${colors.accent.gold};
+`
+
+export const MarkdownLink = styled.a`
+  color: ${colors.accent.gold};
+  font-weight: ${typography.fontWeight.semibold};
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid ${colors.accent.gold}40;
+
+  &:hover {
+    border-bottom-color: ${colors.accent.gold};
+    text-shadow: 0 0 8px ${colors.accent.gold}60;
   }
 `
 
@@ -166,6 +234,16 @@ export const StyledTechChip = styled(Chip)`
   &:hover {
     background-color: ${colors.accent.gold}30;
     box-shadow: 0 0 20px ${colors.accent.gold}40;
+  }
+
+  /* Icon 樣式 */
+  .MuiChip-icon {
+    margin-left: 8px;
+    color: ${colors.accent.gold};
+
+    @media (min-width: 900px) {
+      margin-left: 10px;
+    }
   }
 `
 
@@ -251,7 +329,7 @@ export const ContentGrid = styled(Box)`
   }
 
   @media (min-width: 1200px) {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 3fr 2fr;
     gap: 48px;
   }
 `
