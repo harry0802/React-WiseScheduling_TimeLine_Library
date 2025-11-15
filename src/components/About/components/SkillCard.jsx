@@ -33,7 +33,7 @@ const SkillCard = ({ title, skills }) => {
       <Typography
         variant="subtitle1"
         gutterBottom
-        sx={{ color: colors.accent.gold, fontWeight: 700 }}
+        sx={{ color: colors.accent.primary, fontWeight: 700 }}
       >
         {title}
       </Typography>

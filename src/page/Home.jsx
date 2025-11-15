@@ -136,7 +136,7 @@ function Home() {
               left: -2,
               right: -2,
               bottom: -2,
-              background: `linear-gradient(135deg, ${colors.accent.gold}40, transparent)`,
+              background: `linear-gradient(135deg, ${colors.accent.primary}40, transparent)`,
               clipPath:
                 'polygon(2rem 0, calc(100% - 2rem) 0, 100% 2rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 2rem 100%, 0 calc(100% - 2rem), 0 2rem)',
               zIndex: -1
@@ -150,10 +150,10 @@ function Home() {
               gutterBottom
               sx={{
                 fontWeight: 700,
-                color: colors.accent.gold,
+                color: colors.accent.primary,
                 mb: 3,
                 letterSpacing: '0.02em',
-                textShadow: `0 2px 8px ${colors.accent.gold}30`
+                textShadow: `0 2px 8px ${colors.accent.primary}30`
               }}
             >
               林志翰 - 前端工程師作品集

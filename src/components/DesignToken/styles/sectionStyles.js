@@ -16,7 +16,7 @@ import { borders } from '../../../designTokens/borders'
  * @type {Object}
  */
 export const sectionTitleStyle = {
-  color: colors.accent.gold,
+  color: colors.accent.primary,
   fontWeight: 600,
   mb: 2
 }
@@ -31,7 +31,7 @@ export const quoteBoxStyle = {
   backgroundColor: colors.background.surfaceAlt,
   border: `1px solid ${colors.border.light}`,
   borderRadius: borders.radius.small,
-  borderLeft: `4px solid ${colors.accent.gold}`,
+  borderLeft: `4px solid ${colors.accent.primary}`,
   fontStyle: 'italic'
 }
 
@@ -44,7 +44,7 @@ export const highlightBoxStyle = {
   mb: 3,
   backgroundColor: colors.background.surfaceAlt,
   border: `2px solid ${colors.border.light}`,
-  borderLeft: `4px solid ${colors.accent.gold}`,
+  borderLeft: `4px solid ${colors.accent.primary}`,
   borderRadius: borders.radius.medium,
   clipPath:
     'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)'
@@ -61,7 +61,7 @@ export const tokenCategoryCardStyle = {
   borderRadius: borders.radius.small,
   transition: 'all 0.3s ease',
   '&:hover': {
-    borderColor: colors.accent.gold,
+    borderColor: colors.accent.primary,
     transform: 'translateY(-2px)'
   }
 }

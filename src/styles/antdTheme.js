@@ -44,20 +44,20 @@ export const AntdThemeStyles = createGlobalStyle`
     transition: all 0.3s;
 
     &:hover {
-      border-color: ${colors.accent.gold} !important;
+      border-color: ${colors.accent.primary} !important;
       background: ${colors.background.primary} !important;
     }
 
     &:focus,
     &.ant-input-focused,
     &.ant-picker-focused {
-      border-color: ${colors.accent.gold} !important;
-      box-shadow: 0 0 0 2px ${colors.accent.gold}20 !important;
+      border-color: ${colors.accent.primary} !important;
+      box-shadow: 0 0 0 2px ${colors.accent.primary}20 !important;
       background: ${colors.background.primary} !important;
     }
 
     &:active {
-      border-color: ${colors.accent.gold} !important;
+      border-color: ${colors.accent.primary} !important;
       background: ${colors.background.primary} !important;
     }
 
@@ -78,8 +78,8 @@ export const AntdThemeStyles = createGlobalStyle`
     &:hover,
     &:focus,
     &.ant-input-number-focused {
-      border-color: ${colors.accent.gold} !important;
-      box-shadow: 0 0 0 2px ${colors.accent.gold}20 !important;
+      border-color: ${colors.accent.primary} !important;
+      box-shadow: 0 0 0 2px ${colors.accent.primary}20 !important;
     }
   }
 
@@ -100,11 +100,11 @@ export const AntdThemeStyles = createGlobalStyle`
       color: ${colors.text.secondary};
 
       &:hover {
-        color: ${colors.accent.gold};
+        color: ${colors.accent.primary};
       }
 
       &:active {
-        background: ${colors.accent.gold}20;
+        background: ${colors.accent.primary}20;
       }
     }
   }
@@ -124,13 +124,13 @@ export const AntdThemeStyles = createGlobalStyle`
     }
 
     &:hover .ant-select-selector {
-      border-color: ${colors.accent.gold} !important;
+      border-color: ${colors.accent.primary} !important;
     }
 
     &.ant-select-focused .ant-select-selector,
     &.ant-select-open .ant-select-selector {
-      border-color: ${colors.accent.gold} !important;
-      box-shadow: 0 0 0 2px ${colors.accent.gold}20 !important;
+      border-color: ${colors.accent.primary} !important;
+      box-shadow: 0 0 0 2px ${colors.accent.primary}20 !important;
     }
 
     .ant-select-selection-placeholder {
@@ -146,19 +146,19 @@ export const AntdThemeStyles = createGlobalStyle`
   /* Select 下拉選單面板 */
   .ant-select-dropdown {
     background: ${colors.background.secondary};
-    border: 1px solid ${colors.accent.gold}40;
+    border: 1px solid ${colors.accent.primary}40;
     border-radius: 8px;
-    box-shadow: 0 4px 12px ${colors.accent.gold}30;
+    box-shadow: 0 4px 12px ${colors.accent.primary}30;
 
     .ant-select-item {
       color: ${colors.text.inverse};
 
       &:hover {
-        background: ${colors.accent.gold}20;
+        background: ${colors.accent.primary}20;
       }
 
       &.ant-select-item-option-selected {
-        background: ${colors.accent.gold};
+        background: ${colors.accent.primary};
         color: ${colors.background.primary};
         font-weight: 600;
       }
@@ -169,20 +169,20 @@ export const AntdThemeStyles = createGlobalStyle`
   .ant-picker-dropdown {
     .ant-picker-panel-container {
       background: ${colors.background.secondary};
-      border: 1px solid ${colors.accent.gold}40;
+      border: 1px solid ${colors.accent.primary}40;
       border-radius: 8px;
-      box-shadow: 0 4px 12px ${colors.accent.gold}30;
+      box-shadow: 0 4px 12px ${colors.accent.primary}30;
     }
 
     .ant-picker-header {
-      color: ${colors.accent.gold};
+      color: ${colors.accent.primary};
       border-bottom: 1px solid ${colors.border.primary};
 
       button {
         color: ${colors.text.inverse};
 
         &:hover {
-          color: ${colors.accent.gold};
+          color: ${colors.accent.primary};
         }
       }
     }
@@ -196,16 +196,16 @@ export const AntdThemeStyles = createGlobalStyle`
         color: ${colors.text.inverse};
 
         &:hover .ant-picker-cell-inner {
-          background: ${colors.accent.gold}20;
+          background: ${colors.accent.primary}20;
         }
 
         &.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner {
-          background: ${colors.accent.gold};
+          background: ${colors.accent.primary};
           color: ${colors.background.primary};
         }
 
         &.ant-picker-cell-today .ant-picker-cell-inner::before {
-          border-color: ${colors.accent.gold};
+          border-color: ${colors.accent.primary};
         }
       }
     }
@@ -215,10 +215,10 @@ export const AntdThemeStyles = createGlobalStyle`
       background: ${colors.background.primary};
 
       .ant-picker-now-btn {
-        color: ${colors.accent.gold};
+        color: ${colors.accent.primary};
 
         &:hover {
-          color: ${colors.accent.gold};
+          color: ${colors.accent.primary};
           filter: brightness(1.2);
         }
       }
@@ -236,12 +236,12 @@ export const AntdThemeStyles = createGlobalStyle`
       }
 
       &:hover .ant-checkbox-inner {
-        border-color: ${colors.accent.gold};
+        border-color: ${colors.accent.primary};
       }
 
       &.ant-checkbox-checked .ant-checkbox-inner {
-        background: ${colors.accent.gold};
-        border-color: ${colors.accent.gold};
+        background: ${colors.accent.primary};
+        border-color: ${colors.accent.primary};
       }
     }
   }
@@ -257,15 +257,15 @@ export const AntdThemeStyles = createGlobalStyle`
       }
 
       &:hover .ant-radio-inner {
-        border-color: ${colors.accent.gold};
+        border-color: ${colors.accent.primary};
       }
 
       &.ant-radio-checked .ant-radio-inner {
-        border-color: ${colors.accent.gold};
+        border-color: ${colors.accent.primary};
         background: ${colors.background.primary};
 
         &::after {
-          background: ${colors.accent.gold};
+          background: ${colors.accent.primary};
         }
       }
     }
@@ -282,14 +282,14 @@ export const AntdThemeStyles = createGlobalStyle`
 
   /* ===== Button 按鈕樣式 (在表單中) ===== */
   .ant-btn-primary {
-    background: ${colors.accent.gold};
-    border-color: ${colors.accent.gold};
+    background: ${colors.accent.primary};
+    border-color: ${colors.accent.primary};
     color: ${colors.background.primary};
     font-weight: 500;
 
     &:hover {
-      background: ${colors.accent.gold};
-      border-color: ${colors.accent.gold};
+      background: ${colors.accent.primary};
+      border-color: ${colors.accent.primary};
       filter: brightness(1.1);
     }
 
@@ -312,11 +312,11 @@ export const AntdThemeStyles = createGlobalStyle`
     }
 
     ::-webkit-scrollbar-thumb {
-      background: ${colors.accent.gold}40;
+      background: ${colors.accent.primary}40;
       border-radius: 3px;
 
       &:hover {
-        background: ${colors.accent.gold}60;
+        background: ${colors.accent.primary}60;
       }
     }
   }

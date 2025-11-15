@@ -54,7 +54,7 @@ export const ContentSection = styled.section`
 export const SectionTitle = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes['2xl']};
   font-weight: 600;
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   margin-bottom: ${({ theme }) => theme.spacing.lg};
 
   @media (min-width: ${({ theme }) => theme.breakpoints.wide}) {
@@ -87,7 +87,7 @@ export const SubsectionTitle = styled.h3`
  */
 export const QuoteBox = styled.blockquote`
   background-color: ${colors.background.surfaceAlt};
-  border-left: 4px solid ${colors.accent.gold};
+  border-left: 4px solid ${colors.accent.primary};
   padding: ${({ theme }) => theme.spacing.lg};
   margin: ${({ theme }) => theme.spacing.xl} 0;
   font-style: italic;
@@ -105,7 +105,7 @@ export const HighlightBox = styled.div`
     ${colors.background.surface},
     ${colors.background.surfaceAlt}
   );
-  border: 2px solid ${colors.accent.gold};
+  border: 2px solid ${colors.accent.primary};
   border-radius: ${({ theme }) => theme.borderRadius.lg};
   padding: ${({ theme }) => theme.spacing.xl};
   margin: ${({ theme }) => theme.spacing['2xl']} 0;
@@ -118,7 +118,7 @@ export const HighlightBox = styled.div`
  */
 export const CodeInline = styled.code`
   background-color: ${colors.background.surfaceAlt};
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
   border-radius: ${({ theme }) => theme.borderRadius.sm};
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;

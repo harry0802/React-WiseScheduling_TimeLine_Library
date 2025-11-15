@@ -44,22 +44,22 @@ const OuterHexagon = styled(Link)`
   /* 白色邊框背景 */
   background: linear-gradient(
     135deg,
-    ${colors.accent.gold}dd,
-    ${colors.accent.gold}aa
+    ${colors.accent.primary}dd,
+    ${colors.accent.primary}aa
   );
   padding: 3px;
 
   /* 基礎陰影 */
-  box-shadow: 0 4px 8px ${colors.accent.gold}15,
-    0 2px 4px ${colors.accent.gold}10;
+  box-shadow: 0 4px 8px ${colors.accent.primary}15,
+    0 2px 4px ${colors.accent.primary}10;
 
   transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
     box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 
   /* Hover 效果 (只保留陰影和內部動畫，transform 由父層控制) */
   &:hover {
-    box-shadow: 0 12px 40px ${colors.accent.gold}30,
-      0 8px 16px ${colors.accent.gold}20, 0 4px 8px ${colors.accent.gold}15;
+    box-shadow: 0 12px 40px ${colors.accent.primary}30,
+      0 8px 16px ${colors.accent.primary}20, 0 4px 8px ${colors.accent.primary}15;
 
     .card-front {
       opacity: 0;
@@ -126,7 +126,7 @@ const CardBack = styled.div`
 //! =============== 共用樣式：圖標 ===============
 const HexagonIconWrapper = styled.div`
   margin-bottom: 0.75rem;
-  filter: drop-shadow(0 4px 8px ${colors.accent.gold}50);
+  filter: drop-shadow(0 4px 8px ${colors.accent.primary}50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -135,19 +135,19 @@ const HexagonIconWrapper = styled.div`
   svg {
     width: clamp(2.5rem, 5vw, 3.5rem);
     height: clamp(2.5rem, 5vw, 3.5rem);
-    color: ${colors.accent.gold};
+    color: ${colors.accent.primary};
   }
 `
 
 //! =============== 共用樣式：標題 ===============
 const HexagonTitle = styled.h3`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-size: clamp(0.9rem, 2vw, 1.1rem);
   font-weight: 700;
   margin: 0.5rem 0;
   letter-spacing: 0.03em;
   line-height: 1.3;
-  text-shadow: 0 2px 4px ${colors.accent.gold}30;
+  text-shadow: 0 2px 4px ${colors.accent.primary}30;
 `
 
 //! =============== 詳細描述 (僅背面顯示) ===============
@@ -165,8 +165,8 @@ const HexagonDescription = styled.p`
 const HexagonButton = styled.div`
   background: linear-gradient(
     135deg,
-    ${colors.accent.gold},
-    ${colors.accent.gold}cc
+    ${colors.accent.primary},
+    ${colors.accent.primary}cc
   );
   color: ${colors.background.primary};
   padding: 0.6rem 1.5rem;
@@ -174,12 +174,12 @@ const HexagonButton = styled.div`
   font-size: clamp(0.75rem, 1.5vw, 0.85rem);
   font-weight: 600;
   letter-spacing: 0.02em;
-  box-shadow: 0 4px 12px ${colors.accent.gold}40;
+  box-shadow: 0 4px 12px ${colors.accent.primary}40;
   transition: all 0.3s ease;
 
   &:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 16px ${colors.accent.gold}60;
+    box-shadow: 0 6px 16px ${colors.accent.primary}60;
   }
 `
 
@@ -187,7 +187,7 @@ const HexagonButton = styled.div`
 const HexagonBackground = styled.div`
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, ${colors.accent.gold}10, transparent);
+  background: linear-gradient(135deg, ${colors.accent.primary}10, transparent);
   clip-path: inherit;
   z-index: 0;
   pointer-events: none;

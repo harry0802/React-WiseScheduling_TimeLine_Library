@@ -10,8 +10,8 @@ const Nav = styled.nav`
   padding: 1.5rem 3rem;
   background-color: #2c2c2c;
   color: #f5f5f5;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.1);
-  border-bottom: 1px solid #d4af37;
+  box-shadow: 0 2px 8px rgba(21, 147, 235, 0.1);
+  border-bottom: 1px solid #1593EB;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -24,7 +24,7 @@ const NavBrand = styled.div`
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    color: #d4af37;
+    color: #1593EB;
     letter-spacing: 0.05em;
   }
 `
@@ -60,14 +60,14 @@ const StyledNavLink = styled(NavLink)`
   transition: all 0.3s ease;
 
   &:hover {
-    color: #d4af37;
-    background-color: rgba(212, 175, 55, 0.1);
+    color: #1593EB;
+    background-color: rgba(21, 147, 235, 0.1);
   }
 
   &.active {
-    color: #d4af37;
-    background-color: rgba(212, 175, 55, 0.15);
-    border-bottom: 2px solid #d4af37;
+    color: #1593EB;
+    background-color: rgba(21, 147, 235, 0.15);
+    border-bottom: 2px solid #1593EB;
   }
 `
 

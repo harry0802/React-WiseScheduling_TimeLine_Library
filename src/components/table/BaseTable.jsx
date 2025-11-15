@@ -26,9 +26,9 @@ const StyledTable = styled(Table)`
         &::before {
           display: none;
         }
-        color: ${colors.accent.gold} !important;
+        color: ${colors.accent.primary} !important;
         padding: 14px 16px;
-        border-bottom: 2px solid ${colors.accent.gold}60;
+        border-bottom: 2px solid ${colors.accent.primary}60;
         background: ${colors.background.primary} !important;
         border-right: 1px solid ${colors.border.primary};
         font-weight: 700;
@@ -37,21 +37,21 @@ const StyledTable = styled(Table)`
         letter-spacing: 0.5px;
 
         &:hover {
-          color: ${colors.accent.gold} !important;
+          color: ${colors.accent.primary} !important;
           background: ${colors.background.primary} !important;
         }
 
         .ant-table-column-sorter {
-          color: ${colors.accent.gold}60;
+          color: ${colors.accent.primary}60;
 
           &:hover {
-            color: ${colors.accent.gold};
+            color: ${colors.accent.primary};
           }
         }
 
         .ant-table-column-sorter-up.active,
         .ant-table-column-sorter-down.active {
-          color: ${colors.accent.gold};
+          color: ${colors.accent.primary};
         }
       }
 
@@ -95,12 +95,12 @@ const StyledTable = styled(Table)`
           > td {
             background: ${colors.background.primary} !important;
             background-image: linear-gradient(
-              ${colors.accent.gold}25,
-              ${colors.accent.gold}25
+              ${colors.accent.primary}25,
+              ${colors.accent.primary}25
             ) !important;
             color: ${colors.text.inverse} !important;
             cursor: pointer;
-            box-shadow: inset 0 0 0 1px ${colors.accent.gold}80;
+            box-shadow: inset 0 0 0 1px ${colors.accent.primary}80;
           }
         }
       }

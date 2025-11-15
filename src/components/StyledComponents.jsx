@@ -111,7 +111,7 @@ export const CornerButton = styled(Button)(({ theme }) => ({
   position: 'relative',
 
   '&:hover': {
-    backgroundColor: colors.accent.gold,
+    backgroundColor: colors.accent.primary,
     color: colors.text.inverse,
     boxShadow: effects.shadows.goldGlowHover,
     transform: 'translateY(-2px)',
@@ -139,19 +139,19 @@ export const GoldButton = styled(Button)(({ theme }) => ({
   transition: effects.transitions.normal,
 
   '&:hover': {
-    background: colors.accent.goldHover,
+    background: colors.accent.primaryHover,
     boxShadow: effects.shadows.goldGlowHover,
     transform: 'scale(1.05)',
   }
 }));
 
 /**
- * 輪廓按鈕 - 金色邊框
+ * 輪廓按鈕 - 藍色邊框
  */
 export const OutlineButton = styled(Button)(({ theme }) => ({
   backgroundColor: 'transparent',
-  color: colors.accent.gold,
-  border: `${borders.width.regular} solid ${colors.accent.gold}`,
+  color: colors.accent.primary,
+  border: `${borders.width.regular} solid ${colors.accent.primary}`,
   padding: `${spacing.md} ${spacing.xl}`,
   fontWeight: typography.fontWeight.semibold,
   textTransform: 'none',
@@ -159,32 +159,32 @@ export const OutlineButton = styled(Button)(({ theme }) => ({
   transition: effects.transitions.normal,
 
   '&:hover': {
-    backgroundColor: colors.accent.gold,
+    backgroundColor: colors.accent.primary,
     color: colors.text.inverse,
-    borderColor: colors.accent.goldHover,
+    borderColor: colors.accent.primaryHover,
   }
 }));
 
 // ================== 分隔線組件 ==================
 
 /**
- * 金色分隔線
+ * 藍色分隔線
  */
 export const GoldDivider = styled(Box)(({ theme }) => ({
   width: '60px',
   height: '4px',
-  backgroundColor: colors.accent.gold,
+  backgroundColor: colors.accent.primary,
   margin: `${spacing.md} auto`,
   borderRadius: borders.radius.small,
 }));
 
 /**
- * 金色分隔線 - 左對齊
+ * 藍色分隔線 - 左對齊
  */
 export const GoldDividerLeft = styled(Box)(({ theme }) => ({
   width: '60px',
   height: '4px',
-  backgroundColor: colors.accent.gold,
+  backgroundColor: colors.accent.primary,
   margin: `${spacing.md} 0`,
   borderRadius: borders.radius.small,
 }));
@@ -192,11 +192,11 @@ export const GoldDividerLeft = styled(Box)(({ theme }) => ({
 // ================== 徽章/標籤組件 ==================
 
 /**
- * 金色徽章
+ * 藍色徽章
  */
 export const GoldBadge = styled(Box)(({ theme }) => ({
   display: 'inline-block',
-  backgroundColor: colors.accent.gold,
+  backgroundColor: colors.accent.primary,
   color: colors.text.inverse,
   padding: `${spacing.xs} ${spacing.md}`,
   borderRadius: borders.radius.small,

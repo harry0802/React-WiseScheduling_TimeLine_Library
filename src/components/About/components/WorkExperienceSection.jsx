@@ -41,7 +41,7 @@ const AchievementsList = React.memo(({ achievements }) => (
       gutterBottom
       sx={{
         fontWeight: 600,
-        color: colors.accent.gold,
+        color: colors.accent.primary,
         display: 'flex',
         alignItems: 'center',
         gap: 0.5
@@ -51,7 +51,7 @@ const AchievementsList = React.memo(({ achievements }) => (
         sx={{
           width: 8,
           height: 8,
-          bgcolor: colors.accent.gold,
+          bgcolor: colors.accent.primary,
           borderRadius: '50%'
         }}
       />
@@ -65,7 +65,7 @@ const AchievementsList = React.memo(({ achievements }) => (
     <List
       dense
       sx={{
-        '& .MuiListItemText-primary': { color: colors.accent.gold },
+        '& .MuiListItemText-primary': { color: colors.accent.primary },
         '& .MuiListItemText-secondary': { color: colors.text.primary }
       }}
     >
@@ -107,7 +107,7 @@ const HighlightBox = React.memo(({ title, icon, contributions }) => (
       p: 2,
       backgroundColor: colors.background.surfaceAlt,
       border: `2px solid ${colors.border.light}`,
-      borderLeft: `4px solid ${colors.accent.gold}`,
+      borderLeft: `4px solid ${colors.accent.primary}`,
       borderRadius: 1
     }}
   >
@@ -115,7 +115,7 @@ const HighlightBox = React.memo(({ title, icon, contributions }) => (
       variant="subtitle1"
       gutterBottom
       sx={{
-        color: colors.accent.gold,
+        color: colors.accent.primary,
         fontWeight: 700
       }}
     >
@@ -161,7 +161,7 @@ const WorkExperienceSection = ({
         variant="h5"
         gutterBottom
         sx={{
-          color: colors.accent.gold,
+          color: colors.accent.primary,
           fontWeight: 700,
           display: 'flex',
           alignItems: 'center',

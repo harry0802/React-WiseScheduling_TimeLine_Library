@@ -88,7 +88,7 @@ const DesignToken = () => {
             variant='h3'
             component='h1'
             gutterBottom
-            sx={{ fontWeight: 700, color: colors.accent.gold, mb: 2 }}
+            sx={{ fontWeight: 700, color: colors.accent.primary, mb: 2 }}
           >
             Design Token 推動
           </Typography>
@@ -480,7 +480,7 @@ const DesignToken = () => {
         <Box sx={highlightBoxStyle}>
           <SubsectionTitle
             title='📦 重點'
-            sx={{ color: colors.accent.gold }}
+            sx={{ color: colors.accent.primary }}
           />
           <Box
             component='ul'
@@ -807,7 +807,7 @@ const DesignToken = () => {
         <Box sx={highlightBoxStyle}>
           <SubsectionTitle
             title='🚀 我的貢獻'
-            sx={{ color: colors.accent.gold }}
+            sx={{ color: colors.accent.primary }}
           />
           <Typography
             variant='body1'

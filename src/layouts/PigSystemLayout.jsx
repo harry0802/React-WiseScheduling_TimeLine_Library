@@ -23,17 +23,17 @@ const StyledLayout = styled(Layout)`
 const StyledSider = styled(Sider)`
   &.ant-layout-sider {
     background: ${colors.background.secondary};
-    border-right: 1px solid ${colors.accent.gold}40;
+    border-right: 1px solid ${colors.accent.primary}40;
 
     .ant-layout-sider-trigger {
       background: ${colors.background.secondary};
-      border-top: 1px solid ${colors.accent.gold}40;
-      color: ${colors.accent.gold};
+      border-top: 1px solid ${colors.accent.primary}40;
+      color: ${colors.accent.primary};
       transition: all 0.3s;
 
       &:hover {
-        background: ${colors.accent.gold}20;
-        color: ${colors.accent.gold};
+        background: ${colors.accent.primary}20;
+        color: ${colors.accent.primary};
       }
     }
   }
@@ -44,7 +44,7 @@ const SiderHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid ${colors.accent.gold}40;
+  border-bottom: 1px solid ${colors.accent.primary}40;
   padding: 0 16px;
   background: ${colors.background.primary};
   overflow: hidden;
@@ -66,13 +66,13 @@ const StyledMenu = styled(Menu)`
       font-weight: 500;
 
       &:hover {
-        background: ${colors.accent.gold}20;
-        color: ${colors.accent.gold} !important;
+        background: ${colors.accent.primary}20;
+        color: ${colors.accent.primary} !important;
       }
 
       &.ant-menu-item-selected {
         background: transparent;
-        color: ${colors.accent.gold};
+        color: ${colors.accent.primary};
         font-weight: 600;
 
         &::after {
@@ -80,7 +80,7 @@ const StyledMenu = styled(Menu)`
         }
 
         &:hover {
-          background: ${colors.accent.gold}20;
+          background: ${colors.accent.primary}20;
         }
       }
 
@@ -107,12 +107,12 @@ const PageHeader = styled.div`
   padding: 16px 24px;
   margin-bottom: 24px;
   border-radius: 8px;
-  border: 1px solid ${colors.accent.gold}40;
-  box-shadow: 0 2px 8px ${colors.accent.gold}20;
+  border: 1px solid ${colors.accent.primary}40;
+  box-shadow: 0 2px 8px ${colors.accent.primary}20;
 `
 
 const PageTitle = styled.h1`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-size: 26px;
   font-weight: 700;
   margin: 0;
@@ -142,7 +142,7 @@ const Breadcrumb = styled.div`
     font-weight: 500;
 
     &:hover {
-      color: ${colors.accent.gold};
+      color: ${colors.accent.primary};
       opacity: 1;
     }
   }
@@ -153,7 +153,7 @@ const Breadcrumb = styled.div`
   }
 
   span:last-child {
-    color: ${colors.accent.gold};
+    color: ${colors.accent.primary};
     font-weight: 600;
   }
 `
@@ -219,7 +219,7 @@ function PigSystemLayout() {
             {!collapsed && (
               <span
                 style={{
-                  color: colors.accent.gold,
+                  color: colors.accent.primary,
                   fontSize: 18,
                   fontWeight: 700,
                   display: 'flex',
@@ -251,7 +251,7 @@ function PigSystemLayout() {
                 <span className='separator'>/</span>
                 <span>養豬場管理系統</span>
                 <span className='separator'>/</span>
-                <span style={{ color: colors.accent.gold }}>
+                <span style={{ color: colors.accent.primary }}>
                   {pageInfo.title}
                 </span>
               </Breadcrumb>

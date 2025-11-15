@@ -16,7 +16,7 @@ import { colors } from '../../../../designTokens'
  */
 const InlineCode = styled.code`
   background-color: ${colors.background.surfaceAlt};
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;

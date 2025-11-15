@@ -8,7 +8,7 @@ import { colors } from '../../../../designTokens'
  * @description 外部連結的預設樣式配置
  */
 const defaultLinkStyle = {
-  color: colors.accent.gold,
+  color: colors.accent.primary,
   fontWeight: 600,
   textDecoration: 'none',
   '&:hover': {

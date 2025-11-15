@@ -22,17 +22,17 @@ export const borders = {
 
   // 預定義邊框樣式
   style: {
-    // 金色外框 - 用於主要容器
-    outerGold: '4px solid #d4af37',
-    outerGoldThick: '6px solid #d4af37',
+    // 藍色外框 - 用於主要容器
+    outerGold: '4px solid #1593EB',
+    outerGoldThick: '6px solid #1593EB',
 
     // 淡灰色內框 - 用於內部卡片
     innerLight: '2px solid #d4d4d4',
     innerMedium: '2px solid #b0b0b0',
 
     // 左側強調邊框
-    leftGold: '4px solid #d4af37',
-    leftGoldThick: '6px solid #d4af37'
+    leftGold: '4px solid #1593EB',
+    leftGoldThick: '6px solid #1593EB'
   }
 }
 

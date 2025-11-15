@@ -37,7 +37,7 @@ export const HeaderSection = styled(Box)`
 `
 
 export const TitleText = styled(Typography)`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-weight: 300;
   font-size: 2rem;
   letter-spacing: 0.15em;
@@ -74,7 +74,7 @@ export const SubtitleText = styled(Typography)`
 export const TitleUnderline = styled(Box)`
   width: 60px;
   height: 2px;
-  background-color: ${colors.accent.gold};
+  background-color: ${colors.accent.primary};
 `
 
 //! =============== 詳情區塊樣式 ===============
@@ -92,7 +92,7 @@ export const DetailsSection = styled(Box)`
 `
 
 export const ProjectTitle = styled(Typography)`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-family: serif;
   font-weight: 400;
   font-size: 1.75rem;
@@ -128,7 +128,7 @@ export const ProjectDescription = styled(Box)`
 //! =============== Markdown 元素樣式 ===============
 
 export const MarkdownStrong = styled.strong`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-weight: ${typography.fontWeight.semibold};
 `
 
@@ -177,20 +177,20 @@ export const MarkdownCode = styled.code`
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 0.9em;
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
 `
 
 export const MarkdownLink = styled.a`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-weight: ${typography.fontWeight.semibold};
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid ${colors.accent.gold}40;
+  border-bottom: 1px solid ${colors.accent.primary}40;
 
   &:hover {
-    border-bottom-color: ${colors.accent.gold};
-    text-shadow: 0 0 8px ${colors.accent.gold}60;
+    border-bottom-color: ${colors.accent.primary};
+    text-shadow: 0 0 8px ${colors.accent.primary}60;
   }
 `
 
@@ -201,7 +201,7 @@ export const TechStackSection = styled(Box)`
 `
 
 export const TechStackTitle = styled(Typography)`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-weight: ${typography.fontWeight.semibold};
   font-size: 1.125rem;
   margin-bottom: 16px;
@@ -219,9 +219,9 @@ export const TechChipsContainer = styled(Box)`
 `
 
 export const StyledTechChip = styled(Chip)`
-  background-color: ${colors.accent.gold}20;
-  border: 1px solid ${colors.accent.gold};
-  color: ${colors.accent.gold};
+  background-color: ${colors.accent.primary}20;
+  border: 1px solid ${colors.accent.primary};
+  color: ${colors.accent.primary};
   font-weight: ${typography.fontWeight.medium};
   font-size: 0.875rem;
   padding: 8px 12px;
@@ -232,14 +232,14 @@ export const StyledTechChip = styled(Chip)`
   }
 
   &:hover {
-    background-color: ${colors.accent.gold}30;
-    box-shadow: 0 0 20px ${colors.accent.gold}40;
+    background-color: ${colors.accent.primary}30;
+    box-shadow: 0 0 20px ${colors.accent.primary}40;
   }
 
   /* Icon 樣式 */
   .MuiChip-icon {
     margin-left: 8px;
-    color: ${colors.accent.gold};
+    color: ${colors.accent.primary};
 
     @media (min-width: 900px) {
       margin-left: 10px;
@@ -254,7 +254,7 @@ export const AboutNoteSection = styled(Box)`
   padding: 24px;
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
-  border-left: 3px solid ${colors.accent.gold};
+  border-left: 3px solid ${colors.accent.primary};
 
   @media (min-width: 900px) {
     margin-top: 64px;
@@ -267,7 +267,7 @@ export const AboutNoteSection = styled(Box)`
 `
 
 export const AboutNoteTitle = styled(Typography)`
-  color: ${colors.accent.gold};
+  color: ${colors.accent.primary};
   font-weight: ${typography.fontWeight.semibold};
   margin-bottom: 16px;
   letter-spacing: 0.05em;
