@@ -11,17 +11,17 @@ const createResponsiveTheme = () => {
   //* 主題變量定義，包含所有設計系統需要的值
   const theme = {
     colors: {
-      primary: "#61dafb",
-      primaryDark: "#21a6c9",
-      secondary: "#3a8589",
-      text: "#333333",
-      lightText: "#666666",
-      background: "#f9f9f9",
-      cardBackground: "#ffffff",
-      border: "#dddddd",
-      error: "#ff5252",
-      success: "#4caf50",
-      warning: "#ff9800",
+      primary: "#42a5f5",        // 明亮藍色 - 在深色背景上清晰
+      primaryDark: "#1976d2",    // 深藍色 hover
+      secondary: "#ff4081",      // 明亮粉紅 - 高對比笑點
+      text: "#ffffff",           // 白色文字 - 深色背景用
+      lightText: "#b0b0b0",      // 淺灰文字
+      background: "#1a1a1a",     // 深色背景
+      cardBackground: "#2c2c2c", // 深灰卡片背景
+      border: "#404040",         // 深灰邊框
+      error: "#ff5252",          // 明亮紅色錯誤
+      success: "#69f0ae",        // 明亮綠色成功
+      warning: "#ffab40",        // 明亮橙色警告
     },
     fonts: {
       main: "'Roboto', 'Helvetica', 'Arial', sans-serif",
