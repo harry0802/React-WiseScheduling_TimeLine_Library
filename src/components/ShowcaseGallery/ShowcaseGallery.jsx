@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react'
 import { Typography } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
+import ReactMarkdown from 'react-markdown'
+import { Icon } from '@iconify/react'
 import muiTheme from '../../styles/muiTheme'
 import ProjectCarousel from '../ProjectCarousel'
 import {
@@ -24,7 +26,13 @@ import {
   ContentGrid,
   CarouselGridItem,
   CarouselBox,
-  DetailsGridItem
+  DetailsGridItem,
+  MarkdownStrong,
+  MarkdownParagraph,
+  MarkdownOrderedList,
+  MarkdownUnorderedList,
+  MarkdownCode,
+  MarkdownLink
 } from './ShowcaseGallery.styles'
 
 //! =============== 1. 類型與介面定義 ===============
@@ -189,23 +197,89 @@ GalleryHeader.displayName = 'GalleryHeader'
 /**
  * 項目詳情區塊
  * 💡 添加 memo 優化：避免 currentCategory 變化時不必要的重渲染
+ * 💡 使用 ReactMarkdown 渲染 markdown 語法（支援 **bold**、列表等）
+ * 💡 支援系統名稱連結點擊跳轉到對應照片
  */
-const ItemDetails = React.memo(({ item }) => {
+const ItemDetails = React.memo(({ item, carouselRef, departmentPositions }) => {
+  // 創建自定義連結組件，處理系統跳轉
+  const CustomLink = useCallback(
+    ({ href, children, ...props }) => {
+      const handleClick = (e) => {
+        e.preventDefault()
+
+        // 檢查是否為系統跳轉連結（格式：#system-xxx）
+        if (href?.startsWith('#system-')) {
+          const systemName = decodeURIComponent(href.replace('#system-', ''))
+
+          // 在 departmentPositions 中查找對應系統的 startIndex
+          const currentDept = departmentPositions.find((dept) => dept.id === item.id)
+          if (currentDept?.systems) {
+            const targetSystem = currentDept.systems.find((sys) => sys.name === systemName)
+            if (targetSystem) {
+              carouselRef.current?.scrollToSlide?.(targetSystem.startIndex)
+            }
+          }
+        } else if (href) {
+          // 一般連結：在新視窗開啟
+          window.open(href, '_blank', 'noopener,noreferrer')
+        }
+      }
+
+      return (
+        <MarkdownLink
+          href={href}
+          onClick={handleClick}
+          {...props}
+        >
+          {children}
+        </MarkdownLink>
+      )
+    },
+    [item.id, departmentPositions, carouselRef]
+  )
+
   return (
     <DetailsSection>
       <ProjectTitle>{item.title}</ProjectTitle>
-      <ProjectDescription>{item.dec}</ProjectDescription>
+      <ProjectDescription>
+        <ReactMarkdown
+          components={{
+            strong: MarkdownStrong,
+            p: MarkdownParagraph,
+            ol: MarkdownOrderedList,
+            ul: MarkdownUnorderedList,
+            code: MarkdownCode,
+            a: CustomLink
+          }}
+        >
+          {item.dec}
+        </ReactMarkdown>
+      </ProjectDescription>
 
       {item.techStack && item.techStack.length > 0 && (
         <TechStackSection>
           <TechStackTitle>技術棧</TechStackTitle>
           <TechChipsContainer>
-            {item.techStack.map((tech, index) => (
-              <StyledTechChip
-                key={index}
-                label={tech}
-              />
-            ))}
+            {item.techStack.map((tech, index) => {
+              // 支援 string 或 { name, icon } 格式
+              const techName = typeof tech === 'string' ? tech : tech.name
+              const techIcon = typeof tech === 'object' ? tech.icon : null
+
+              return (
+                <StyledTechChip
+                  key={index}
+                  label={techName}
+                  icon={
+                    techIcon ? (
+                      <Icon
+                        icon={techIcon}
+                        width={20}
+                      />
+                    ) : undefined
+                  }
+                />
+              )
+            })}
           </TechChipsContainer>
         </TechStackSection>
       )}
@@ -308,6 +382,8 @@ const ShowcaseGallery = ({
               <ItemDetails
                 key={currentCategory.id}
                 item={currentCategory}
+                carouselRef={carouselRef}
+                departmentPositions={departmentPositions}
               />
             </DetailsGridItem>
           </ContentGrid>

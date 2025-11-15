@@ -92,12 +92,16 @@ export const ImageContainer = styled.div`
 
 export const ProgressBarContainer = styled.div`
   position: absolute;
-  right: 0;
+  right: 48px;
   top: 0;
   height: 100%;
   width: auto;
   min-width: 2px;
   z-index: 11;
+
+  @media (max-width: 1199px) {
+    right: 0;
+  }
 
   &::before {
     content: '';
