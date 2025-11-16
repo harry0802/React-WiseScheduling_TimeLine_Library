@@ -24,8 +24,12 @@ import {
   GoldBadge,
 } from '../components/StyledComponents';
 import { colors } from '../designTokens';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 const Timeline = () => {
+  // 設置頁面標題
+  useDocumentTitle('開發歷程');
+
   const timelinePhases = [
     {
       phase: '2025年6月',

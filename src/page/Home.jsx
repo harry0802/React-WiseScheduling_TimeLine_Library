@@ -11,6 +11,7 @@ import { colors } from '../designTokens'
 import HexagonGrid from '../components/layout/HexagonGrid'
 import HexagonCard from '../components/card/HexagonCard'
 import { HOME_FEATURE_CARDS } from '../constants/homeFeatureDefinitions'
+import useDocumentTitle from '../hooks/useDocumentTitle'
 
 //! =============== 2. 類型與介面定義 ===============
 //* 遵循 JSDoc 指南，統一定義此組件所使用的所有資料結構
@@ -93,6 +94,9 @@ function Home() {
     isLoading,
     featureCards
   } = useHomeData()
+
+  // 設置頁面標題
+  useDocumentTitle('首頁')
 
   // 🛡️ 早期返回 (Guard Clause)，遵循「自我文檔代碼審查」的線性流程原則
   if (isLoading) {

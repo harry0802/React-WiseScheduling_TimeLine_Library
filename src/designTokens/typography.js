@@ -4,8 +4,13 @@
 export const typography = {
   // 字體家族
   fontFamily: {
-    primary: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    primary:
+      '"Free HK Kai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    secondary:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     monospace: '"Courier New", Courier, monospace',
+    kai: '"Free HK Kai", serif',
+    edix: '"EDIX", serif'
   },
 
   // 字重
@@ -14,20 +19,20 @@ export const typography = {
     regular: 400,
     medium: 500,
     semibold: 600,
-    bold: 700,
+    bold: 700
   },
 
-  // 字號
+  // 字號 (針對 Free HK Kai 調整,視覺較小所以放大)
   fontSize: {
-    xs: '0.75rem',    // 12px
-    sm: '0.875rem',   // 14px
-    base: '1rem',     // 16px
-    lg: '1.125rem',   // 18px
-    xl: '1.25rem',    // 20px
-    '2xl': '1.5rem',  // 24px
-    '3xl': '1.875rem', // 30px
-    '4xl': '2.25rem', // 36px
-    '5xl': '3rem',    // 48px
+    xs: '0.875rem', // 14px
+    sm: '1rem', // 16px
+    base: '1.125rem', // 18px
+    lg: '1.25rem', // 20px
+    xl: '1.5rem', // 24px
+    '2xl': '1.75rem', // 28px
+    '3xl': '2.125rem', // 34px
+    '4xl': '2.5rem', // 40px
+    '5xl': '3.25rem' // 52px
   },
 
   // 行高
@@ -35,8 +40,9 @@ export const typography = {
     tight: 1.2,
     normal: 1.5,
     relaxed: 1.8,
-    loose: 2,
+    loose: 2
   }
-};
+}
 
-export default typography;
+export default typography
+

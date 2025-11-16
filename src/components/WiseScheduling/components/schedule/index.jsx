@@ -42,6 +42,9 @@ import dayjs from "dayjs";
 import "dayjs/locale/zh-tw";
 import moment from "moment";
 
+//* 自定義 Hook - 動態頁面標題
+import useDocumentTitle from "../../../../hooks/useDocumentTitle";
+
 //* 自定義組件 - 本專案核心組件
 import TimelineControls from "./TimelineControls";
 import DialogPortals from "./dialogs/DialogPortals";
@@ -489,6 +492,9 @@ function useQuickTimeSelector(handleStartTimeChange, handleEndTimeChange) {
  * - 批次處理數據更新減少重渲染
  */
 function DynamicTimeline() {
+  //! 設置頁面標題
+  useDocumentTitle('智慧排程系統');
+
   //! 語言初始化 - 確保中文顯示正確
   useLocaleInitialization();
 

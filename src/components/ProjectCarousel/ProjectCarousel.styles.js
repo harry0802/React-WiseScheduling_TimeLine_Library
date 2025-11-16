@@ -110,7 +110,12 @@ export const ProgressBarContainer = styled.div`
     top: 0;
     width: 2px;
     height: 100%;
-    background-color: ${colors.accent.primary}30;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.15),
+      rgba(21, 147, 235, 0.2),
+      rgba(255, 255, 255, 0.15)
+    );
   }
 `
 
@@ -119,8 +124,16 @@ export const ProgressBarFill = styled.div`
   top: 0;
   left: 0;
   width: 2px;
-  background-color: ${colors.accent.primary};
-  box-shadow: 0 0 20px ${colors.accent.primary}80;
+  background: linear-gradient(
+    to bottom,
+    ${colors.accent.primaryLight},
+    ${colors.accent.primary},
+    ${colors.accent.primaryLight}
+  );
+  box-shadow:
+    0 0 16px ${colors.accent.primary}ff,
+    0 0 32px ${colors.accent.primary}99,
+    0 0 48px ${colors.accent.primary}66;
   transition: height 0.1s ease-out;
 `
 
@@ -144,27 +157,37 @@ export const DepartmentMarker = styled(BaseMarker)`
 
   &:hover .marker-line {
     width: 14px;
-    box-shadow: 0 0 12px ${colors.accent.primary}cc;
+    box-shadow:
+      0 0 8px ${colors.accent.primaryLight}ff,
+      0 0 16px ${colors.accent.primary}cc;
   }
 
   &:hover .marker-label,
   &:hover .marker-system {
     opacity: 1;
+    color: ${colors.text.inverse};
   }
 `
 
 export const MarkerLine = styled.div`
   width: 8px;
   height: 2px;
-  background-color: ${colors.accent.primary};
-  opacity: 0.6;
+  background: linear-gradient(
+    to right,
+    ${colors.accent.primary},
+    ${colors.accent.primaryLight}
+  );
+  opacity: 0.8;
   transition: all 0.2s ease;
 
   &.active {
     width: 12px;
     height: 3px;
     opacity: 1;
-    box-shadow: 0 0 8px ${colors.accent.primary}cc;
+    background: ${colors.accent.primaryLight};
+    box-shadow:
+      0 0 8px ${colors.accent.primaryLight}ff,
+      0 0 16px ${colors.accent.primary}cc;
   }
 `
 
@@ -186,19 +209,24 @@ export const MarkerLabelGroup = styled.div`
 
 export const MarkerLabel = styled.div`
   font-size: 0.7rem;
-  color: ${colors.accent.primary};
+  color: ${colors.text.inverseSecondary};
   font-weight: 400;
   letter-spacing: 0.05em;
-  opacity: 0.6;
+  opacity: 0.85;
   transition: all 0.2s ease;
   white-space: nowrap;
   user-select: none;
   line-height: 1.2;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 
   &.active {
     font-weight: 600;
     opacity: 1;
     font-size: 0.75rem;
+    color: ${colors.text.inverse};
+    text-shadow:
+      0 0 8px ${colors.accent.primaryLight}99,
+      0 2px 4px rgba(0, 0, 0, 0.7);
   }
 
   @media (max-width: 768px) {
@@ -234,26 +262,36 @@ export const SystemMarker = styled(BaseMarker)`
 
   &:hover .system-line {
     width: 7px;
-    box-shadow: 0 0 8px ${colors.accent.primary}99;
+    box-shadow:
+      0 0 6px ${colors.accent.primaryLight}cc,
+      0 0 12px ${colors.accent.primary}66;
   }
 
   &:hover .system-label {
-    opacity: 0.8;
+    opacity: 0.9;
+    color: ${colors.text.inverseSecondary};
   }
 `
 
 export const SystemLine = styled.div`
   width: 5px;
   height: 1px;
-  background-color: ${colors.accent.primary};
-  opacity: 0.4;
+  background: linear-gradient(
+    to right,
+    ${colors.accent.primary}99,
+    ${colors.accent.primaryLight}99
+  );
+  opacity: 0.6;
   transition: all 0.2s ease;
 
   &.active {
     width: 6px;
     height: 1.5px;
-    opacity: 0.7;
-    box-shadow: 0 0 6px ${colors.accent.primary}99;
+    opacity: 0.9;
+    background: ${colors.accent.primaryLight};
+    box-shadow:
+      0 0 6px ${colors.accent.primaryLight}cc,
+      0 0 12px ${colors.accent.primary}66;
   }
 `
 
@@ -273,16 +311,21 @@ export const SystemLabel = styled.div`
   color: ${colors.accent.primary};
   font-weight: 300;
   letter-spacing: 0.02em;
-  opacity: 0.35;
+  opacity: 0.5;
   transition: all 0.2s ease;
   white-space: nowrap;
   user-select: none;
   line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 
   &.active {
-    opacity: 0.55;
+    opacity: 0.95;
     font-size: 0.75rem;
     font-weight: 400;
+    color: ${colors.text.inverse};
+    text-shadow:
+      0 0 6px ${colors.accent.primaryLight}66,
+      0 2px 4px rgba(0, 0, 0, 0.7);
   }
 `
 
