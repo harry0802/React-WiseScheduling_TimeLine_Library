@@ -24,8 +24,9 @@ const createResponsiveTheme = () => {
       warning: "#ffab40",        // 明亮橙色警告
     },
     fonts: {
-      main: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-      headings: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+      main: '"Free HK Kai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      headings: '"Free HK Kai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      system: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     },
     spacing: {
       xs: "0.25rem",
@@ -61,19 +62,19 @@ const createResponsiveTheme = () => {
       bigtv: "3440px", // 新增大型電視斷點
       tv50: "4096px", // 新增50吋電視斷點
     },
-    // 🧠 基礎字體大小 - 使用標準媒體查詢可擴展
+    // 🧠 基礎字體大小 - 針對 Free HK Kai 調整 (視覺較小,整體放大)
     fontSizes: {
-      xs: "0.75rem", // 12px @ 16px 基礎
-      sm: "0.875rem", // 14px
-      base: "1rem", // 16px
-      lg: "1.125rem", // 18px
-      xl: "1.25rem", // 20px
-      "2xl": "1.5rem", // 24px
-      "3xl": "1.875rem", // 30px
-      "4xl": "2.25rem", // 36px
-      "5xl": "3rem", // 48px
-      "6xl": "3.75rem", // 60px
-      "7xl": "4.5rem", // 72px
+      xs: "0.875rem", // 14px
+      sm: "1rem", // 16px
+      base: "1.125rem", // 18px
+      lg: "1.25rem", // 20px
+      xl: "1.5rem", // 24px
+      "2xl": "1.75rem", // 28px
+      "3xl": "2.125rem", // 34px
+      "4xl": "2.5rem", // 40px
+      "5xl": "3.25rem", // 52px
+      "6xl": "4rem", // 64px
+      "7xl": "4.75rem", // 76px
     },
   };
 

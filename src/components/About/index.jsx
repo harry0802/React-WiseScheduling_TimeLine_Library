@@ -15,6 +15,7 @@ import {
   coreStrengths
 } from './data/profileData'
 import { colors } from '../../designTokens'
+import useDocumentTitle from '../../hooks/useDocumentTitle'
 
 //! =============== 主要組件 (協調器) ===============
 
@@ -29,6 +30,9 @@ import { colors } from '../../designTokens'
  * - 照片左文字右的響應式佈局
  */
 const About = () => {
+  // 設置頁面標題
+  useDocumentTitle('關於我');
+
   return (
     <ThemeProvider theme={muiTheme}>
       <Container

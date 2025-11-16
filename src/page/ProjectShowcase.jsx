@@ -1,5 +1,6 @@
 import ShowcaseGallery from '../components/ShowcaseGallery'
 import { TECH_DEFINITIONS } from '../constants/techStackDefinitions'
+import useDocumentTitle from '../hooks/useDocumentTitle'
 
 //! =============== 1. Setup & Constants ===============
 
@@ -270,6 +271,9 @@ const SHOWCASE_CONFIG = {
  * <Route path="/project-showcase" element={<ProjectShowcase />} />
  */
 const ProjectShowcase = () => {
+  // 設置頁面標題
+  useDocumentTitle('專案展示');
+
   return (
     <ShowcaseGallery
       items={TIIP_PROJECT_DATA}

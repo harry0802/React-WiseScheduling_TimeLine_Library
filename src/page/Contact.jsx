@@ -19,8 +19,12 @@ import {
   GoldDivider,
 } from "../components/StyledComponents";
 import { colors } from "../designTokens";
+import useDocumentTitle from "../hooks/useDocumentTitle";
 
 const Contact = () => {
+  // 設置頁面標題
+  useDocumentTitle('聯絡方式');
+
   return (
     <ThemeProvider theme={muiTheme}>
       <Container maxWidth="md" sx={{ py: 6, backgroundColor: colors.background.primary, minHeight: '100vh' }}>

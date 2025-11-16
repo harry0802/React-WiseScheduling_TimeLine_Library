@@ -23,6 +23,7 @@ const GlobalStyles = createGlobalStyle`
     background-color: #1a1a1a;
     color: #f5f5f5;
     line-height: 1.5;
+    font-size: 1.125rem; /* 18px - 因為 Free HK Kai 視覺較小 */
     -webkit-font-smoothing: antialiased;
   }
 
