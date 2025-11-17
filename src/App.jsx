@@ -93,7 +93,7 @@ const router = createHashRouter([
       {
         path: 'dynamic-timeline',
         element: (
-          <Suspense fallback={<LoadingSpinner text='載入動態時間軸中...' />}>
+          <Suspense fallback={<LoadingSpinner />}>
             <DynamicTimeline />
           </Suspense>
         )
@@ -101,7 +101,7 @@ const router = createHashRouter([
       {
         path: 'wise-scheduling',
         element: (
-          <Suspense fallback={<LoadingSpinner text='載入智能排程系統中...' />}>
+          <Suspense fallback={<LoadingSpinner />}>
             <WiseScheduling />
           </Suspense>
         )
@@ -117,7 +117,7 @@ const router = createHashRouter([
       { path: 'boargenotype', element: <Boargenotype /> },
       { path: 'culling-boar', element: <CullingBoar /> },
       { path: 'pig-house-inventory', element: <PigHouseInventory /> },
-      { path: 'sow-breeding-records', element: <SowBreedingRecords /> },
+      { path: 'sow-breeding-records', element: <SowBreedingRecords /> }
     ]
   },
   {

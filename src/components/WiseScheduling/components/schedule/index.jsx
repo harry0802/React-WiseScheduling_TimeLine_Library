@@ -21,58 +21,52 @@
 //* 這個區塊包含所有專案配置，便於統一管理和維護
 
 //* 基礎 React Hooks - 核心狀態管理工具
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 
 //* UI 元件 - Material-UI 基礎組件
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
+import Box from '@mui/material/Box'
+import Paper from '@mui/material/Paper'
 
 //* 時間線核心庫 - vis-timeline 主要功能
-import { Timeline } from "vis-timeline/standalone";
-import "vis-timeline/styles/vis-timeline-graph2d.css";
+import { Timeline } from 'vis-timeline/standalone'
+import 'vis-timeline/styles/vis-timeline-graph2d.css'
 
 //* 時間處理庫 - 多語言日期處理
-import dayjs from "dayjs";
-import "dayjs/locale/zh-tw";
-import moment from "moment";
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-tw'
+import moment from 'moment'
 
 //* 自定義 Hook - 動態頁面標題
-import useDocumentTitle from "../../../../hooks/useDocumentTitle";
+import useDocumentTitle from '../../../../hooks/useDocumentTitle'
 
 //* 自定義組件 - 本專案核心組件
-import TimelineControls from "./TimelineControls";
-import DialogPortals from "./dialogs/DialogPortals";
+import TimelineControls from './TimelineControls'
+import DialogPortals from './dialogs/DialogPortals'
 
 //* 🎨 主題與全域樣式 - 工廠老人友善設計
-import { TimelineGlobalStyles } from "../../assets/schedule/TimelineGlobalStyles";
+import { TimelineGlobalStyles } from '../../assets/schedule/TimelineGlobalStyles'
 
 //* 🏗️ 樣式配置 - 組件外觀控制
-import { TimelineContainer } from "../../assets/schedule";
+import { TimelineContainer } from '../../assets/schedule'
 
 //* API 服務層 - 數據獲取與狀態管理
-import { useGetSmartScheduleQuery } from "../../services/schedule/smartSchedule";
-import { useGetMachinesQuery } from "../../services/machine/machineApi";
+import { useGetSmartScheduleQuery } from '../../services/schedule/smartSchedule'
+import { useGetMachinesQuery } from '../../services/machine/machineApi'
 
 //* 配置常量 - 系統設定與驗證規則
-import { momentLocaleConfig } from "../../configs/validations/schedule/timeline/timelineLocale";
-import { TIME_RANGES } from "../../configs/validations/schedule/timeline/timelineConfigs";
-import { MACHINE_CONFIG } from "../../configs/validations/schedule/constants";
+import { momentLocaleConfig } from '../../configs/validations/schedule/timeline/timelineLocale'
+import { TIME_RANGES } from '../../configs/validations/schedule/timeline/timelineConfigs'
+import { MACHINE_CONFIG } from '../../configs/validations/schedule/constants'
 
 //* 自定義 Hooks - 業務邏輯封裝
-import { useTimelineData } from "../../hooks/schedule/useTimelineData";
-import { useTimelineConfig } from "../../hooks/schedule/useTimelineConfig";
-import { useTimelineDialogs } from "../../hooks/schedule/useTimelineDialogs";
-import useTimeRange from "../../hooks/schedule/useTimeRange";
+import { useTimelineData } from '../../hooks/schedule/useTimelineData'
+import { useTimelineConfig } from '../../hooks/schedule/useTimelineConfig'
+import { useTimelineDialogs } from '../../hooks/schedule/useTimelineDialogs'
+import useTimeRange from '../../hooks/schedule/useTimeRange'
 
 //* 工具模組 - 通用功能函數
-import { setGroups } from "./DialogManager";
-import { getTimeWindow } from "../../utils/schedule/dateUtils";
+import { setGroups } from './DialogManager'
+import { getTimeWindow } from '../../utils/schedule/dateUtils'
 
 //! =============== 2. 類型與介面 ===============
 //* 定義所有資料結構和業務邏輯 Hook，幫助理解資料流向
@@ -93,13 +87,13 @@ import { getTimeWindow } from "../../utils/schedule/dateUtils";
 function useLocaleInitialization() {
   useEffect(() => {
     // 設定 dayjs 中文語系
-    dayjs.locale("zh-tw");
+    dayjs.locale('zh-tw')
 
     // 設定 moment 中文語系配置
     if (moment) {
-      moment.updateLocale("zh-tw", momentLocaleConfig);
+      moment.updateLocale('zh-tw', momentLocaleConfig)
     }
-  }, []);
+  }, [])
 }
 
 /**
@@ -130,31 +124,31 @@ function useLocaleInitialization() {
  * - area 參數為空時返回空陣列
  * - API 請求失敗時 scheduleList 為空陣列
  */
-function useAreaScheduleData(area = "A", startTime = null, endTime = null) {
+function useAreaScheduleData(area = 'A', startTime = null, endTime = null) {
   //! API 查詢 - 核心數據獲取
   const {
     isSuccess,
     isLoading,
-    data: scheduleData,
+    data: scheduleData
   } = useGetSmartScheduleQuery({
     productionArea: area,
     startTime,
-    endTime,
-  });
+    endTime
+  })
 
   //* 數據處理 - 過濾和轉換邏輯
   const scheduleList = useMemo(() => {
-    if (!scheduleData?.data) return [];
+    if (!scheduleData?.data) return []
 
     // 過濾指定區域的數據
-    return scheduleData.data.filter((item) => item.productionArea === area);
-  }, [scheduleData, area]);
+    return scheduleData.data.filter((item) => item.productionArea === area)
+  }, [scheduleData, area])
 
   return {
     isSuccess,
     isLoading,
-    scheduleList,
-  };
+    scheduleList
+  }
 }
 
 /**
@@ -172,27 +166,29 @@ function useAreaScheduleData(area = "A", startTime = null, endTime = null) {
  * - 保留原始數據供其他組件使用
  * - 自動處理載入狀態
  */
-function useAreaMachines(area = "A") {
+function useAreaMachines(area = 'A') {
   //! 機台數據獲取 - 系統設備資訊
-  const { isSuccess, isLoading, data: allArea } = useGetMachinesQuery();
+  const { isSuccess, isLoading, data: allArea } = useGetMachinesQuery()
 
   //* 區域過濾 - 指定區域機台篩選
   const filteredMachines = useMemo(() => {
-    console.log('[useAreaMachines] allArea 數據:', allArea);
+    console.log('[useAreaMachines] allArea 數據:', allArea)
     // 嘗試多種數據路徑以相容不同的 API 格式
-    const machines = allArea?.data || allArea || [];
-    console.log('[useAreaMachines] machines 陣列:', machines);
-    const filtered = machines.filter((machine) => machine.productionArea === area);
-    console.log('[useAreaMachines] 過濾後的機台:', filtered.length, '台');
-    return filtered;
-  }, [allArea, area]);
+    const machines = allArea?.data || allArea || []
+    console.log('[useAreaMachines] machines 陣列:', machines)
+    const filtered = machines.filter(
+      (machine) => machine.productionArea === area
+    )
+    console.log('[useAreaMachines] 過濾後的機台:', filtered.length, '台')
+    return filtered
+  }, [allArea, area])
 
   return {
     isSuccess,
     isLoading,
     allArea,
-    filteredMachines,
-  };
+    filteredMachines
+  }
 }
 
 //! =============== 3. 核心功能 ===============
@@ -219,19 +215,19 @@ function TimelinePaperComponent({ containerRef }) {
       ref={containerRef}
       elevation={1}
       sx={{
-        width: "100%",
+        width: '100%',
         flexGrow: 1,
-        minHeight: "600px",
+        minHeight: '600px',
         border: 1,
-        borderColor: "grey.200",
-        borderRadius: 1,
+        borderColor: 'grey.200',
+        borderRadius: 1
       }}
     />
-  );
+  )
 }
 
-const TimelinePaper = React.memo(TimelinePaperComponent);
-TimelinePaper.displayName = "TimelinePaper";
+const TimelinePaper = React.memo(TimelinePaperComponent)
+TimelinePaper.displayName = 'TimelinePaper'
 
 /**
  * @function useTimelineInitialization
@@ -257,17 +253,17 @@ function useTimelineInitialization({
   itemsDataRef,
   groups,
   getTimelineOptions,
-  handleEditItem,
+  handleEditItem
 }) {
   useEffect(() => {
     //? 初始化條件檢查 - 可能需要更嚴格的驗證
-    if (!containerRef.current || !itemsDataRef.current || !groups) return;
+    if (!containerRef.current || !itemsDataRef.current || !groups) return
 
     // 清空容器準備重新初始化
-    containerRef.current.innerHTML = "";
+    containerRef.current.innerHTML = ''
 
     // 獲取時間線配置選項
-    const options = getTimelineOptions();
+    const options = getTimelineOptions()
 
     //! 創建時間線實例 - 核心功能初始化
     timelineRef.current = new Timeline(
@@ -275,37 +271,37 @@ function useTimelineInitialization({
       itemsDataRef.current,
       groups,
       options
-    );
+    )
 
     //* 事件監聽設置 - 雙擊編輯功能
-    timelineRef.current.on("doubleClick", (properties) => {
-      if (!properties.item) return;
-      const item = itemsDataRef.current.get(properties.item);
+    timelineRef.current.on('doubleClick', (properties) => {
+      if (!properties.item) return
+      const item = itemsDataRef.current.get(properties.item)
       if (item) {
-        handleEditItem(item);
+        handleEditItem(item)
       }
-    });
+    })
 
     //TODO 調試接口 - 生產環境應移除
-    if (process.env.NODE_ENV === "development") {
-      window.timeline = timelineRef.current;
-      if (!window.app) window.app = {};
-      window.app.timelineData = itemsDataRef.current;
+    if (process.env.NODE_ENV === 'development') {
+      window.timeline = timelineRef.current
+      if (!window.app) window.app = {}
+      window.app.timelineData = itemsDataRef.current
     }
 
     //* DialogManager 同步 - 確保對話框正確顯示
     if (groups) {
-      setGroups(groups);
+      setGroups(groups)
     }
 
     //! 清理函數 - 防止記憶體洩漏
     return () => {
       if (timelineRef.current) {
-        timelineRef.current.destroy();
-        timelineRef.current = null;
+        timelineRef.current.destroy()
+        timelineRef.current = null
       }
-    };
-  }, [containerRef, itemsDataRef, groups, getTimelineOptions, handleEditItem]);
+    }
+  }, [containerRef, itemsDataRef, groups, getTimelineOptions, handleEditItem])
 }
 
 /**
@@ -325,24 +321,24 @@ function useMoveToNowHandler(timelineRef, timeRange, dialogMoveToNow) {
   return useCallback(() => {
     //! 優先策略 - 使用對話框提供的函數
     if (dialogMoveToNow) {
-      dialogMoveToNow();
-      return;
+      dialogMoveToNow()
+      return
     }
 
     //* 備用實現 - 直接操作時間線
-    if (!timelineRef.current) return;
+    if (!timelineRef.current) return
 
     try {
-      const timeWindow = getTimeWindow(timeRange, dayjs());
+      const timeWindow = getTimeWindow(timeRange, dayjs())
       timelineRef.current.setWindow(
         timeWindow.start.toDate(),
         timeWindow.end.toDate(),
         { animation: true }
-      );
+      )
     } catch (error) {
-      console.error("移動到當前時間失敗:", error);
+      console.error('移動到當前時間失敗:', error)
     }
-  }, [timeRange, dialogMoveToNow, timelineRef]);
+  }, [timeRange, dialogMoveToNow, timelineRef])
 }
 
 //! =============== 4. 工具函數 ===============
@@ -365,8 +361,8 @@ function useMoveToNowHandler(timelineRef, timeRange, dialogMoveToNow) {
  * - 使用 dayjs 確保格式一致性
  */
 function formatTimeForInput(isoString) {
-  if (!isoString) return "";
-  return dayjs(isoString).format("YYYY-MM-DDTHH:mm");
+  if (!isoString) return ''
+  return dayjs(isoString).format('YYYY-MM-DDTHH:mm')
 }
 
 /**
@@ -385,8 +381,8 @@ function formatTimeForInput(isoString) {
  * - 確保時間格式統一性
  */
 function handleTimeInputChange(inputValue, setter) {
-  const isoValue = dayjs(inputValue).toISOString();
-  setter(isoValue);
+  const isoValue = dayjs(inputValue).toISOString()
+  setter(isoValue)
 }
 
 /**
@@ -401,8 +397,8 @@ function handleTimeInputChange(inputValue, setter) {
 function createTimeRangeOptions() {
   return Object.entries(TIME_RANGES).map(([key, config]) => ({
     value: key,
-    label: config.label,
-  }));
+    label: config.label
+  }))
 }
 
 /**
@@ -417,8 +413,8 @@ function createTimeRangeOptions() {
 function createAreaOptions() {
   return MACHINE_CONFIG.AREAS.map((area) => ({
     value: area,
-    label: `${area}區`,
-  }));
+    label: `${area}區`
+  }))
 }
 
 /**
@@ -440,36 +436,36 @@ function createAreaOptions() {
 function useQuickTimeSelector(handleStartTimeChange, handleEndTimeChange) {
   return useCallback(
     (type) => {
-      const now = dayjs();
+      const now = dayjs()
 
       switch (type) {
-        case "today":
-          handleStartTimeChange(now.startOf("day").toISOString());
-          handleEndTimeChange(now.endOf("day").toISOString());
-          break;
-        case "week":
-          handleStartTimeChange(now.startOf("week").toISOString());
-          handleEndTimeChange(now.endOf("week").toISOString());
-          break;
-        case "month":
-          handleStartTimeChange(now.startOf("month").toISOString());
-          handleEndTimeChange(now.endOf("month").toISOString());
-          break;
-        case "default":
+        case 'today':
+          handleStartTimeChange(now.startOf('day').toISOString())
+          handleEndTimeChange(now.endOf('day').toISOString())
+          break
+        case 'week':
+          handleStartTimeChange(now.startOf('week').toISOString())
+          handleEndTimeChange(now.endOf('week').toISOString())
+          break
+        case 'month':
+          handleStartTimeChange(now.startOf('month').toISOString())
+          handleEndTimeChange(now.endOf('month').toISOString())
+          break
+        case 'default':
           const defaultStart = now
-            .subtract(1, "month")
-            .startOf("day")
-            .toISOString();
-          const defaultEnd = now.add(1, "month").endOf("day").toISOString();
-          handleStartTimeChange(defaultStart);
-          handleEndTimeChange(defaultEnd);
-          break;
+            .subtract(1, 'month')
+            .startOf('day')
+            .toISOString()
+          const defaultEnd = now.add(1, 'month').endOf('day').toISOString()
+          handleStartTimeChange(defaultStart)
+          handleEndTimeChange(defaultEnd)
+          break
         default:
-          break;
+          break
       }
     },
     [handleStartTimeChange, handleEndTimeChange]
-  );
+  )
 }
 
 /**
@@ -493,65 +489,65 @@ function useQuickTimeSelector(handleStartTimeChange, handleEndTimeChange) {
  */
 function DynamicTimeline() {
   //! 設置頁面標題
-  useDocumentTitle('智慧排程系統');
+  useDocumentTitle('智慧排程系統')
 
   //! 語言初始化 - 確保中文顯示正確
-  useLocaleInitialization();
+  useLocaleInitialization()
 
   //! 核心狀態管理 - 組件主要狀態
-  const containerRef = useRef(null);
-  const timelineRef = useRef(null);
-  const [timeRange, setTimeRange] = useState("day");
-  const [selectedArea, setSelectedArea] = useState("A");
-  const [timePanelExpanded, setTimePanelExpanded] = useState(false);
+  const containerRef = useRef(null)
+  const timelineRef = useRef(null)
+  const [timeRange, setTimeRange] = useState('day')
+  const [selectedArea, setSelectedArea] = useState('A')
+  const [timePanelExpanded, setTimePanelExpanded] = useState(false)
 
   //! 視圖中心保持狀態 - 時間範圍切換優化
-  const centerTimeRef = useRef(null);
-  const shouldRestoreCenter = useRef(false);
+  const centerTimeRef = useRef(null)
+  const shouldRestoreCenter = useRef(false)
 
   //* 時間範圍管理 - 自定義時間選擇
   const {
     timeRange: selectedTimeRange,
     formattedTimeRange,
     handleStartTimeChange,
-    handleEndTimeChange,
-  } = useTimeRange();
+    handleEndTimeChange
+  } = useTimeRange()
 
   //! 數據獲取 - API 數據層
   const { scheduleList } = useAreaScheduleData(
     selectedArea,
     formattedTimeRange.startTime,
     formattedTimeRange.endTime
-  );
-  const { filteredMachines } = useAreaMachines(selectedArea);
+  )
+  const { filteredMachines } = useAreaMachines(selectedArea)
 
   //* 業務邏輯 Hooks - 核心功能封裝
   const { itemsDataRef, groups } = useTimelineData(
     filteredMachines,
     scheduleList
-  );
-  const { getTimelineOptions } = useTimelineConfig(itemsDataRef, timeRange);
+  )
+  const { getTimelineOptions } = useTimelineConfig(itemsDataRef, timeRange)
   const {
     handleAddItem,
     handleEditItem,
-    handleMoveToNow: dialogMoveToNow,
+    handleMoveToNow: dialogMoveToNow
   } = useTimelineDialogs({
     itemsDataRef,
     groups,
     timelineRef,
-    timeRange,
-  });
+    timeRange
+  })
 
   //* 事件處理函數 - 用戶互動邏輯
   const handleMoveToNow = useMoveToNowHandler(
     timelineRef,
     timeRange,
     dialogMoveToNow
-  );
+  )
   const handleQuickTimeSelect = useQuickTimeSelector(
     handleStartTimeChange,
     handleEndTimeChange
-  );
+  )
 
   /**
    * @function handleTimeRangeChangeWithViewPreservation
@@ -569,33 +565,33 @@ function DynamicTimeline() {
       try {
         // 1. 保存當前視圖中心點
         if (timelineRef.current) {
-          const window = timelineRef.current.getWindow();
+          const window = timelineRef.current.getWindow()
           if (window && window.start && window.end) {
             const centerTime = new Date(
               (window.start.getTime() + window.end.getTime()) / 2
-            );
-            centerTimeRef.current = centerTime;
-            shouldRestoreCenter.current = true;
+            )
+            centerTimeRef.current = centerTime
+            shouldRestoreCenter.current = true
 
             // 調試日誌
-            if (process.env.NODE_ENV === "development") {
+            if (process.env.NODE_ENV === 'development') {
               console.log(
                 `[Timeline] 保存視圖中心: ${centerTime.toISOString()}, 切換到: ${newTimeRange}`
-              );
+              )
             }
           }
         }
 
         // 2. 更新時間範圍狀態
-        setTimeRange(newTimeRange);
+        setTimeRange(newTimeRange)
       } catch (error) {
-        console.warn("時間範圍切換失敗:", error);
+        console.warn('時間範圍切換失敗:', error)
         // 降級處理：直接切換時間範圍
-        setTimeRange(newTimeRange);
+        setTimeRange(newTimeRange)
       }
     },
     []
-  );
+  )
 
   //* 時間線初始化 - 核心組件設置
   useTimelineInitialization({
@@ -604,8 +600,8 @@ function DynamicTimeline() {
     itemsDataRef,
     groups,
     getTimelineOptions,
-    handleEditItem,
-  });
+    handleEditItem
+  })
 
   /**
    * @effect useTimelineViewPreservation
@@ -618,45 +614,45 @@ function DynamicTimeline() {
    * - 自動清理事件監聽器防止記憶體洩漏
    */
   useEffect(() => {
-    if (!timelineRef.current || !shouldRestoreCenter.current) return;
+    if (!timelineRef.current || !shouldRestoreCenter.current) return
 
     const handleTimelineChanged = () => {
       if (shouldRestoreCenter.current && centerTimeRef.current) {
         try {
           // 調試日誌
-          if (process.env.NODE_ENV === "development") {
+          if (process.env.NODE_ENV === 'development') {
             console.log(
               `[Timeline] 恢復視圖中心: ${centerTimeRef.current.toISOString()}`
-            );
+            )
           }
 
           // 使用動畫移動到保存的中心點
           timelineRef.current.moveTo(centerTimeRef.current, {
-            animation: { duration: 300, easingFunction: "easeInOutQuad" },
-          });
+            animation: { duration: 300, easingFunction: 'easeInOutQuad' }
+          })
 
           // 清理狀態
-          shouldRestoreCenter.current = false;
-          centerTimeRef.current = null;
+          shouldRestoreCenter.current = false
+          centerTimeRef.current = null
         } catch (error) {
-          console.warn("恢復視圖中心失敗:", error);
+          console.warn('恢復視圖中心失敗:', error)
           // 清理狀態即使失敗
-          shouldRestoreCenter.current = false;
-          centerTimeRef.current = null;
+          shouldRestoreCenter.current = false
+          centerTimeRef.current = null
         }
       }
-    };
+    }
 
     // 添加事件監聽器
-    timelineRef.current.on("changed", handleTimelineChanged);
+    timelineRef.current.on('changed', handleTimelineChanged)
 
     // 清理函數
     return () => {
       if (timelineRef.current) {
-        timelineRef.current.off("changed", handleTimelineChanged);
+        timelineRef.current.off('changed', handleTimelineChanged)
       }
-    };
-  }, [timeRange]); // 監聽 timeRange 變化
+    }
+  }, [timeRange]) // 監聽 timeRange 變化
 
   /**
    * @effect useComponentCleanup
@@ -670,18 +666,18 @@ function DynamicTimeline() {
   useEffect(() => {
     return () => {
       // 組件卸載時清理狀態
-      centerTimeRef.current = null;
-      shouldRestoreCenter.current = false;
+      centerTimeRef.current = null
+      shouldRestoreCenter.current = false
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("[Timeline] 組件卸載，清理視圖保持狀態");
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Timeline] 組件卸載，清理視圖保持狀態')
       }
-    };
-  }, []);
+    }
+  }, [])
 
   //* 選項數據 - UI 控制選項
-  const timeRangeOptions = createTimeRangeOptions();
-  const areaOptions = createAreaOptions();
+  const timeRangeOptions = createTimeRangeOptions()
+  const areaOptions = createAreaOptions()
 
   //! 主要渲染邏輯 - 組件 UI 結構
   return (
@@ -689,7 +685,7 @@ function DynamicTimeline() {
       {/* 🎨 全域時間線樣式 */}
       <TimelineGlobalStyles />
 
-      <Box sx={{ width: "100%", p: 4 }}>
+      <Box sx={{ width: '100%', p: 4 }}>
         <TimelineContainer>
           {/* 控制面板 - 用戶操作界面 */}
           <TimelineControls>
@@ -715,7 +711,7 @@ function DynamicTimeline() {
                   value={selectedArea}
                   onChange={setSelectedArea}
                   options={areaOptions}
-                  placeholder="選擇區域"
+                  placeholder='選擇區域'
                 />
                 {/* <TimelineControls.AddButton
                   onClick={() => handleAddItem(null, selectedArea)}
@@ -726,29 +722,29 @@ function DynamicTimeline() {
 
             {/* 時間詳細設定面板 - 進階時間控制 */}
             <TimelineControls.Panel
-              title="時間範圍設定"
+              title='時間範圍設定'
               expanded={timePanelExpanded}
               onToggle={setTimePanelExpanded}
               info={
                 formattedTimeRange.startTime && formattedTimeRange.endTime
                   ? `${dayjs(formattedTimeRange.startTime).format(
-                      "MM/DD"
-                    )} - ${dayjs(formattedTimeRange.endTime).format("MM/DD")}`
-                  : "預設範圍"
+                      'MM/DD'
+                    )} - ${dayjs(formattedTimeRange.endTime).format('MM/DD')}`
+                  : '預設範圍'
               }
             >
               <TimelineControls.Row>
                 {/* 精確時間輸入 */}
                 <TimelineControls.ButtonGroup>
                   <TimelineControls.TimeInput
-                    label="開始"
+                    label='開始'
                     value={formatTimeForInput(selectedTimeRange.startTime)}
                     onChange={(value) =>
                       handleTimeInputChange(value, handleStartTimeChange)
                     }
                   />
                   <TimelineControls.TimeInput
-                    label="結束"
+                    label='結束'
                     value={formatTimeForInput(selectedTimeRange.endTime)}
                     onChange={(value) =>
                       handleTimeInputChange(value, handleEndTimeChange)
@@ -759,22 +755,22 @@ function DynamicTimeline() {
                 {/* 快捷時間選擇 */}
                 <TimelineControls.ButtonGroup>
                   <TimelineControls.Button
-                    onClick={() => handleQuickTimeSelect("today")}
+                    onClick={() => handleQuickTimeSelect('today')}
                   >
                     今天
                   </TimelineControls.Button>
                   <TimelineControls.Button
-                    onClick={() => handleQuickTimeSelect("week")}
+                    onClick={() => handleQuickTimeSelect('week')}
                   >
                     本週
                   </TimelineControls.Button>
                   <TimelineControls.Button
-                    onClick={() => handleQuickTimeSelect("month")}
+                    onClick={() => handleQuickTimeSelect('month')}
                   >
                     本月
                   </TimelineControls.Button>
                   <TimelineControls.Button
-                    onClick={() => handleQuickTimeSelect("default")}
+                    onClick={() => handleQuickTimeSelect('default')}
                   >
                     預設範圍
                   </TimelineControls.Button>
@@ -791,10 +787,10 @@ function DynamicTimeline() {
         <DialogPortals />
       </Box>
     </>
-  );
+  )
 }
 
-export default DynamicTimeline;
+export default DynamicTimeline
 
 //* ========= 複雜邏輯解釋 =========
 // 組件架構說明：
@@ -849,3 +845,4 @@ export default DynamicTimeline;
  *   );
  * }
  */
+
