@@ -4,7 +4,12 @@ import Grid from '@mui/material/Grid2'
 import { useHeaderNameStore } from '../../slice/LayoutSlice'
 import RecentShippingPanel from './feature/RecentShippingPanel'
 import TodayShippingPanel from './feature/TodayShippingPanel'
+import useDocumentTitle from '../../../../hooks/useDocumentTitle'
+
 function DeliveryTrendAnalyzer() {
+  // 設置頁面標題
+  useDocumentTitle('交貨趨勢分析');
+
   const { setHeaderName } = useHeaderNameStore()
   useEffect(() => {
     setHeaderName('即時生產進度追蹤')

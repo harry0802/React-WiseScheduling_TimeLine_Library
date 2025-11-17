@@ -1,6 +1,7 @@
 // FactoryPerformanceDashboard/Index.jsx
 import React, { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
+import useDocumentTitle from '../../../../hooks/useDocumentTitle'
 
 //! =============== 1. 設定與常量 ===============
 //* 集中管理配置參數，便於統一調整
@@ -53,6 +54,9 @@ const ProgressBar = styled.div`
  * <FactoryPerformanceDashboard />
  */
 function FactoryPerformanceDashboard() {
+  // 設置頁面標題
+  useDocumentTitle('工廠績效儀表板');
+
   // 🧠 當前顯示的區域索引
   const [currentZoneIndex, setCurrentZoneIndex] = useState(0)
 

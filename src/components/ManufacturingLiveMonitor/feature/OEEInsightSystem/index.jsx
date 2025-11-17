@@ -6,8 +6,12 @@ import MachineOperationRate from './feature/MachineOperationRate'
 import MachineOperationSummary from './feature/MachineOperationSummary'
 import DowntimeFactors from './feature/DowntimeFactors'
 import MachineStatusDuration from './feature/MachineStatusDuration'
+import useDocumentTitle from '../../../../hooks/useDocumentTitle'
 
 function OEEInsightSystem() {
+  // 設置頁面標題
+  useDocumentTitle('OEE 深度分析');
+
   const { setHeaderName } = useHeaderNameStore()
   useEffect(() => {
     setHeaderName('全廠設備稼動分析')

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import styles from './styles.module.css'
 import DashboardEntryCar from './DashboardEntryCar'
+import useDocumentTitle from '../../../../hooks/useDocumentTitle'
 
 //! =============== 1. 設定與常量 ===============
 //* 定義系統模組及其配置
@@ -59,6 +60,9 @@ const SYSTEM_MODULES = [
  * @returns {JSX.Element} 渲染的模組導航頁或子路由內容
  */
 function DashboardEntry() {
+  // 設置頁面標題
+  useDocumentTitle('製造現場監控中心');
+
   const navigate = useNavigate()
   const location = useLocation()
   const [showDashboard, setShowDashboard] = useState(true)

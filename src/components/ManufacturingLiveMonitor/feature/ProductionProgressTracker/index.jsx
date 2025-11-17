@@ -5,7 +5,12 @@ import { useHeaderNameStore } from '../../slice/LayoutSlice'
 import DailyIncomingStock from './feature/DailyInComingStock'
 import NextThreeDaysIncomingStock from './feature/NextThreeDaysIncomingStock'
 import DailyProductionTasks from './feature/DailyProductionTasks'
+import useDocumentTitle from '../../../../hooks/useDocumentTitle'
+
 function ProductionProgressTracker() {
+  // 設置頁面標題
+  useDocumentTitle('生產進度追蹤');
+
   const { setHeaderName } = useHeaderNameStore()
   useEffect(() => {
     setHeaderName('即時生產進度追蹤')
