@@ -1,8 +1,30 @@
-# Harry's Portfolio - 前端工程師作品集
+# Harry's Frontend Engineering Portfolio - 前端工程師作品集
 
-> 一個展示智慧製造管理系統開發能力的作品集網站
+> 整合智慧製造排程、即時監控與資料視覺化的工業級前端解決方案
 
 🔗 **線上展示**: <https://harry0802.github.io/React-WiseScheduling_TimeLine_Library>
+
+---
+
+## 💡 核心亮點
+
+🔥 **4 種狀態管理方案並存整合**
+→ Redux Toolkit、RTK Query、React Query、Zustand 混合使用，展示複雜狀態管理架構能力
+
+🏭 **工業級甘特圖實作**
+→ vis-timeline 處理 1000+ 排程項目，使用 `useRef` + DataSet API 避免重渲染，實現流暢拖拽體驗
+
+🎨 **完整 Design Tokens 系統**
+→ 8px 基線網格 + 主題化 + 統一色彩系統，可維護性與一致性兼具
+
+⚡ **多層次效能優化**
+→ Code Splitting、Lazy Loading、useRef 避免昂貴重渲染、Memoization 策略
+
+📊 **複雜資料視覺化**
+→ OEE 監控儀表板、Recharts 圖表整合、即時資料更新、多區域生產監控
+
+🧩 **分層 Custom Hooks 架構**
+→ 資料層 → 業務邏輯層 → UI 交互層，清晰的關注點分離
 
 ---
 
@@ -105,21 +127,103 @@
 
 ## 🏗️ 架構設計
 
+### 系統架構圖
+
+```mermaid
+graph TB
+    subgraph "Entry Layer"
+        A[main.jsx]
+    end
+
+    subgraph "Application Layer"
+        B[App Router<br/>HashRouter]
+        C[Redux Store<br/>RTK + React Query]
+    end
+
+    subgraph "Layout Layer"
+        D[AppLayout + ErrorBoundary]
+        E[Navbar + Drawer]
+    end
+
+    subgraph "Page Layer"
+        F1[Home]
+        F2[WiseScheduling<br/>智慧排程]
+        F3[ManufacturingMonitor<br/>即時監控]
+        F4[ProjectShowcase<br/>專案展示]
+    end
+
+    subgraph "Component Layer"
+        G1[Timeline Component<br/>vis-timeline]
+        G2[OEE Dashboard<br/>Recharts]
+        G3[Carousel<br/>Embla]
+    end
+
+    subgraph "Business Logic Layer"
+        H1[Custom Hooks<br/>useTimelineData]
+        H2[RTK Query API<br/>scheduleApi]
+        H3[Data Transformers<br/>apiTransformers]
+    end
+
+    subgraph "Foundation Layer"
+        I1[Design Tokens<br/>colors, spacing]
+        I2[Styled Components<br/>Theme Provider]
+        I3[Utils & Validators]
+    end
+
+    A --> B
+    A --> C
+    B --> D
+    D --> E
+    D --> F1 & F2 & F3 & F4
+    F2 --> G1
+    F3 --> G2
+    F4 --> G3
+    G1 & G2 & G3 --> H1 & H2 & H3
+    H1 & H2 & H3 --> I1 & I2 & I3
+
+    style F2 fill:#1593EB,color:#fff
+    style G1 fill:#1593EB,color:#fff
+    style H1 fill:#1593EB,color:#fff
+```
+
 ### 目錄結構
 
 ```text
 src/
-├── components/          # 可複用組件
-│   ├── WiseScheduling/ # 智慧排程系統（最複雜模組）
-│   ├── ManufacturingLiveMonitor/
-│   └── ...
-├── page/               # 路由頁面組件
-├── hooks/              # 自訂 Hooks
-├── store/              # Redux 配置
-├── services/           # API 服務
-├── designTokens/       # 設計系統 Tokens
-├── layouts/            # 佈局組件
-└── constants/          # 常量配置
+├── components/                    # 可複用組件
+│   ├── WiseScheduling/           # 🏭 智慧排程系統（最複雜模組）
+│   │   ├── components/           #   - Schedule, MachineStatus, Dialogs
+│   │   ├── hooks/                #   - useTimelineData, useMachineStatus
+│   │   ├── utils/                #   - transformers, validators, dateUtils
+│   │   ├── services/             #   - RTK Query API slices
+│   │   └── configs/              #   - constants, validations
+│   ├── ManufacturingLiveMonitor/ # 📊 即時監控儀表板
+│   ├── ProjectCarousel/          # 🎠 垂直輪播組件
+│   ├── ShowcaseGallery/          # 🎨 專案展示畫廊
+│   ├── Navbar/                   # 🧭 響應式導航列
+│   └── HamburgerMenu/            # 🍔 動畫漢堡選單
+├── page/                         # 路由頁面組件
+│   ├── Home.jsx                  # 首頁
+│   ├── Timeline.jsx              # 時間軸展示
+│   ├── ProjectShowcase.jsx       # 專案集錦
+│   └── About.jsx                 # 關於頁面
+├── hooks/                        # 全局自訂 Hooks
+│   ├── useNavbarSelector.js      # Navbar 選擇器動畫
+│   └── usePageTitle.js           # 動態頁面標題
+├── store/                        # Redux 配置
+│   └── store.js                  # Redux Toolkit store
+├── services/                     # API 服務基礎配置
+│   └── apiSlice.js               # RTK Query base
+├── designTokens/                 # 🎨 Design System Tokens
+│   ├── colors.js                 # 色彩系統
+│   ├── spacing.js                # 8px 基線網格
+│   ├── typography.js             # 字體階層
+│   └── effects.js                # 陰影、過渡效果
+├── layouts/                      # 佈局組件
+│   └── AppLayout.jsx             # Error Boundary + Navbar
+├── styles/                       # 全局樣式
+│   └── SharedStyles.js           # 響應式斷點、mixins
+└── constants/                    # 常量配置
 ```
 
 ### 關鍵設計模式
