@@ -121,9 +121,11 @@ const StyledNavLink = styled(NavLink)`
   transition: all 0.3s ease;
   position: relative;
 
-  svg {
+  img {
     width: 20px;
     height: 20px;
+    display: block;
+    object-fit: contain;
   }
 
   &:hover {
@@ -262,10 +264,10 @@ const NavbarToggler = styled.button`
  * @type {NavItem[]}
  */
 const navItems = [
-  { to: '/', label: '首頁', icon: 'mdi:home' },
-  { to: '/timeline', label: '時間軸', icon: 'mdi:timeline-clock' },
-  { to: '/about', label: '關於', icon: 'mdi:account-circle' },
-  { to: '/contact', label: '聯絡', icon: 'mdi:email' }
+  { to: '/', label: '首頁', src: '/React-WiseScheduling_TimeLine_Library/Icon/hammer.png' },
+  { to: '/timeline', label: '時間軸', src: '/React-WiseScheduling_TimeLine_Library/Icon/bow-and-arrow.png' },
+  { to: '/about', label: '關於', src: '/React-WiseScheduling_TimeLine_Library/Icon/laser-sword.png' },
+  { to: '/contact', label: '聯絡', src: '/React-WiseScheduling_TimeLine_Library/Icon/aircraft.png' }
 ]
 
 //! =============== 3. Main Component ===============
@@ -344,7 +346,10 @@ const Navbar = () => {
           {navItems.map((item) => (
             <NavItem key={item.to}>
               <StyledNavLink to={item.to}>
-                <Icon icon={item.icon} />
+                <img
+                  src={item.src}
+                  alt={item.label}
+                />
                 {item.label}
               </StyledNavLink>
             </NavItem>
