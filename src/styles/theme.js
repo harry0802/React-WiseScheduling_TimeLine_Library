@@ -11,6 +11,7 @@ const createResponsiveTheme = () => {
   //* 主題變量定義，包含所有設計系統需要的值
   const theme = {
     colors: {
+      // 🔄 保留舊有屬性以向後兼容（平面結構）
       primary: "#42a5f5",        // 明亮藍色 - 在深色背景上清晰
       primaryDark: "#1976d2",    // 深藍色 hover
       secondary: "#ff4081",      // 明亮粉紅 - 高對比笑點
@@ -152,9 +153,65 @@ const createResponsiveTheme = () => {
     },
   };
 
-  // ✨ 返回完整主題，包含響應式字體大小信息
+  // 🎨 整合設計 tokens 結構（用於新組件如 LoadingSpinner）
+  const designTokenColors = {
+    // 背景色彩（設計 token 結構）
+    background: {
+      primary: '#010D15',       // 主要深色背景
+      secondary: '#000000',     // 次要深色背景
+      surface: '#FFFFFF',       // 白色卡片表面
+      surfaceAlt: '#EFEFEF',    // 淺灰色替代背景
+    },
+    // 強調色彩
+    accent: {
+      primary: '#1593EB',       // 藍色 - 主要強調色
+      primaryHover: '#0d7acc',  // 藍色 hover 狀態
+      primaryLight: '#6fb9f0',  // 淺藍色
+    },
+    // 邊框色彩
+    border: {
+      primary: '#1593EB',       // 藍色外框
+      light: '#E0EBF0',         // 淡藍灰色內框
+      medium: '#EFEFEF',        // 淺灰色
+      dark: '#010D15',          // 深色
+    },
+    // 文字色彩（設計 token 結構）
+    text: {
+      primary: '#000000',       // 深色文字（淺色背景用）
+      secondary: '#010D15',     // 次要深色文字
+      tertiary: '#6a6a6a',      // 三級深色文字
+      inverse: '#FFFFFF',       // 淺色文字（深色背景用）
+      inverseSecondary: '#E0EBF0', // 次要淺色文字
+      accent: '#1593EB',        // 藍色標題/強調文字
+    },
+  };
+
+  // 保留舊屬性名稱以向後兼容，同時添加新的嵌套結構
+  const mergedColors = {
+    // 🔄 舊的平面結構（向後兼容）
+    primary: theme.colors.primary,
+    primaryDark: theme.colors.primaryDark,
+    secondary: theme.colors.secondary,
+    text: theme.colors.text,              // 保留舊的 text="#ffffff" 字串
+    lightText: theme.colors.lightText,
+    background: theme.colors.background,  // 保留舊的 background="#1a1a1a" 字串
+    cardBackground: theme.colors.cardBackground,
+    border: theme.colors.border,          // 保留舊的 border="#404040" 字串
+    error: theme.colors.error,
+    success: theme.colors.success,
+    warning: theme.colors.warning,
+
+    // 🎨 新的嵌套結構（用於 LoadingSpinner 等新組件）
+    accent: designTokenColors.accent,
+    backgroundTokens: designTokenColors.background,  // 避免與舊 background 衝突
+    borderTokens: designTokenColors.border,          // 避免與舊 border 衝突
+    textTokens: designTokenColors.text,              // 避免與舊 text 衝突
+  };
+
+  // ✨ 返回完整主題，包含響應式字體大小信息和設計 tokens
   return {
     ...theme,
+    colors: mergedColors,
     responsiveFontSizes,
   };
 };
