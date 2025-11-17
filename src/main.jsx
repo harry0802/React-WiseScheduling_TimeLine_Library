@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+// ⚡ 只在開發環境載入 DevTools
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ThemeProvider } from 'styled-components'
 import { Provider } from 'react-redux'
@@ -9,6 +10,9 @@ import wiseSchedulingApiSlice from './components/WiseScheduling/services/apiSlic
 import App from './App.jsx'
 import theme from './styles/theme'
 import GlobalStyles from './styles/GlobalStyles'
+
+// 檢測是否為開發環境
+const isDevelopment = import.meta.env.DEV
 
 // 創建 QueryClient 實例
 const queryClient = new QueryClient({
@@ -37,7 +41,8 @@ createRoot(document.getElementById('root')).render(
         <ThemeProvider theme={theme}>
           <GlobalStyles />
           <App />
-          <ReactQueryDevtools />
+          {/* ⚡ 只在開發環境顯示 DevTools */}
+          {isDevelopment && <ReactQueryDevtools />}
         </ThemeProvider>
       </QueryClientProvider>
     </Provider>

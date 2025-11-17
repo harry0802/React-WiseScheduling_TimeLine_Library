@@ -44,19 +44,15 @@ import LoadingSpinner from '../components/LoadingSpinner'
 //* 包含模擬 API、靜態資料定義
 
 /**
- * 模擬一個假的 API 調用，用於激活 React Query
+ * ⚡ 靜態資料直接返回，無需模擬 API 延遲
  * @returns {Promise<AppInfo>}
  */
 const fetchAppInfo = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        name: '時間軸專案',
-        version: '1.0.0',
-        features: ['時間軸視覺化', '數據滑動器', '查詢功能']
-      })
-    }, 500)
-  })
+  return {
+    name: '時間軸專案',
+    version: '1.0.0',
+    features: ['時間軸視覺化', '數據滑動器', '查詢功能']
+  }
 }
 
 /**
