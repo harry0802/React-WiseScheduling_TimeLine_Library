@@ -3,13 +3,14 @@ import { lazy, Suspense } from 'react'
 import AppLayout from './layouts/AppLayout'
 import PigSystemLayout from './layouts/PigSystemLayout'
 
-import Home from './page/Home'
-import Timeline from './page/Timeline'
-import About from './page/About'
-import Contact from './page/Contact'
-import ProjectShowcase from './page/ProjectShowcase'
-import DesignToken from './page/DesignToken'
-import ErrorPage from './page/ErrorPage'
+// ⚡ 首頁和關鍵頁面使用 lazy load 減少初始 bundle
+const Home = lazy(() => import('./page/Home'))
+const Timeline = lazy(() => import('./page/Timeline'))
+const About = lazy(() => import('./page/About'))
+const Contact = lazy(() => import('./page/Contact'))
+const ProjectShowcase = lazy(() => import('./page/ProjectShowcase'))
+const DesignToken = lazy(() => import('./page/DesignToken'))
+import ErrorPage from './page/ErrorPage' // ErrorPage 需要立即可用
 // 養豬場管理系統頁面
 import Boargenotype from './pages/Boargenotype'
 import CullingBoar from './pages/CullingBoar'
@@ -22,25 +23,19 @@ import DashboardEntry from './components/ManufacturingLiveMonitor/components/Das
 // import FactoryPerformanceDashboard from './components/ManufacturingLiveMonitor/feature/FactoryPerformanceDashboard/Index.jsx'
 /**
  * @function lazyLoad
- * @description 簡單的延遲載入輔助函數，帶有可選的回調機制和延遲時間
+ * @description 簡單的延遲載入輔助函數，帶有可選的回調機制
+ * ⚡ 移除人為延遲以提升載入效能
  * @param {Function} importFn - 組件的動態導入函數
  * @param {Function} callback - 載入完成後的回調函數 (可選)
- * @param {number} delay - 延遲時間(毫秒) (可選)
  * @returns {React.LazyExoticComponent} 延遲載入的組件
  */
-const lazyLoad = (importFn, callback, delay = 1200) => {
+const lazyLoad = (importFn, callback) => {
   return lazy(() => {
-    return new Promise((resolve) => {
-      // 先延遲指定時間
-      setTimeout(() => {
-        // 然後執行實際的導入函數
-        importFn().then((module) => {
-          if (callback && typeof callback === 'function') {
-            callback(module)
-          }
-          resolve(module)
-        })
-      }, delay)
+    return importFn().then((module) => {
+      if (callback && typeof callback === 'function') {
+        callback(module)
+      }
+      return module
     })
   })
 }
@@ -84,12 +79,54 @@ const router = createHashRouter([
     element: <AppLayout />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <Home /> },
-      { path: 'timeline', element: <Timeline /> },
-      { path: 'about', element: <About /> },
-      { path: 'contact', element: <Contact /> },
-      { path: 'project-showcase', element: <ProjectShowcase /> },
-      { path: 'design-token', element: <DesignToken /> },
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <Home />
+          </Suspense>
+        )
+      },
+      {
+        path: 'timeline',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <Timeline />
+          </Suspense>
+        )
+      },
+      {
+        path: 'about',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <About />
+          </Suspense>
+        )
+      },
+      {
+        path: 'contact',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <Contact />
+          </Suspense>
+        )
+      },
+      {
+        path: 'project-showcase',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProjectShowcase />
+          </Suspense>
+        )
+      },
+      {
+        path: 'design-token',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <DesignToken />
+          </Suspense>
+        )
+      },
       {
         path: 'dynamic-timeline',
         element: (
