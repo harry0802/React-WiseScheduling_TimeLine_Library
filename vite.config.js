@@ -26,6 +26,10 @@ export default defineConfig(() => {
                         'vendor-date': ['dayjs', 'date-fns'],
                         // ⚠️ Moment.js 獨立打包（建議未來替換成 dayjs）
                         'vendor-moment': ['moment', 'moment-taiwan'],
+                        // ⚡ Ant Design 獨立打包
+                        'vendor-antd': ['antd'],
+                        // ⚡ Styled Components 獨立
+                        'vendor-styled': ['styled-components'],
                     }
                 }
             },
