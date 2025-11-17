@@ -15,6 +15,7 @@ import MachineStateTimeRatio from './feature/MachineStateTimeRatio'
 import EquipmentRiskModule from './feature/EquipmentRiskModule'
 import { useEffect } from 'react'
 import { useHeaderNameStore } from '../../slice/LayoutSlice'
+import useDocumentTitle from '../../../../hooks/useDocumentTitle'
 
 //! =============== 2. 樣式定義 ===============
 
@@ -23,6 +24,9 @@ import { useHeaderNameStore } from '../../slice/LayoutSlice'
  * @description 實時OEE監控元件，展示生產狀態和進度
  */
 function RealTimeOEEMonitor({ onChangeSectTitle }) {
+  // 設置頁面標題
+  useDocumentTitle('OEE 即時監控');
+
   const { setHeaderName } = useHeaderNameStore()
 
   // 靜態生產數據 (實際項目中應從API或狀態管理獲取)

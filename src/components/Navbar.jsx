@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
+import { Icon } from '@iconify/react'
 import { colors } from '../designTokens/colors'
 import { spacing } from '../designTokens/spacing'
+import useNavbarSelector, {
+  delayedSelectorUpdate
+} from '../hooks/useNavbarSelector'
 
 //! =============== 1. Styled Components ===============
 
@@ -42,11 +46,11 @@ const NavbarBrand = styled.div`
 
   .text {
     color: ${colors.text.inverse};
-    font-family: 'EDIX', 'Georgia', 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif;
+    font-family: 'EDIX', 'Georgia', 'Palatino Linotype', 'Book Antiqua',
+      'Times New Roman', serif;
     font-weight: 700;
     font-style: italic;
-    text-shadow:
-      2px 2px 4px rgba(0, 0, 0, 0.5),
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5),
       0 0 1px rgba(255, 255, 255, 0.3);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -58,10 +62,8 @@ const NavbarBrand = styled.div`
     font-weight: 900;
     font-size: 1.8rem;
     font-family: 'Arial Black', 'Arial', sans-serif;
-    text-shadow:
-      0 0 12px ${colors.accent.primary}ff,
-      0 0 20px ${colors.accent.primary}99,
-      2px 2px 6px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 0 12px ${colors.accent.primary}ff,
+      0 0 20px ${colors.accent.primary}99, 2px 2px 6px rgba(0, 0, 0, 0.7);
     transform: scale(1.1);
     display: inline-block;
   }
@@ -114,12 +116,14 @@ const StyledNavLink = styled(NavLink)`
   font-size: 15px;
   display: flex;
   align-items: center;
+  gap: 10px;
   padding: 20px 20px;
   transition: all 0.3s ease;
   position: relative;
 
-  i {
-    margin-right: 10px;
+  svg {
+    width: 20px;
+    height: 20px;
   }
 
   &:hover {
@@ -137,14 +141,17 @@ const StyledNavLink = styled(NavLink)`
 `
 
 const HoriSelector = styled.div`
-  display: inline-block;
+  display: ${(props) => (props.$width === 0 ? 'none' : 'inline-block')};
   position: absolute;
-  top: ${(props) => props.$top}px;
+  bottom: 0;
   left: ${(props) => props.$left}px;
   width: ${(props) => props.$width}px;
   height: ${(props) => props.$height}px;
-  transition-duration: 0.6s;
-  transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform: translateY(${(props) => -props.$top}px);
+  transition: ${(props) =>
+    props.$isInitialized
+      ? 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+      : 'none'};
   background: ${colors.background.surface};
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
@@ -157,6 +164,9 @@ const HoriSelector = styled.div`
     border-radius: 0;
     border-top-left-radius: 25px;
     border-bottom-left-radius: 25px;
+    transform: none;
+    top: ${(props) => props.$top}px;
+    bottom: auto;
   }
 `
 
@@ -240,64 +250,64 @@ const NavbarToggler = styled.button`
 
 //! =============== 2. Navigation Items Config ===============
 
+/**
+ * @typedef {Object} NavItem
+ * @property {string} to - Route path
+ * @property {string} label - Display text
+ * @property {string} icon - Iconify icon name
+ */
+
+/**
+ * Navigation menu items configuration
+ * @type {NavItem[]}
+ */
 const navItems = [
-  { to: '/', label: '首頁', icon: 'tachometer-alt' },
-  { to: '/timeline', label: '時間軸', icon: 'calendar-alt' },
-  { to: '/about', label: '關於', icon: 'address-book' },
-  { to: '/contact', label: '聯絡', icon: 'copy' }
+  { to: '/', label: '首頁', icon: 'mdi:home' },
+  { to: '/timeline', label: '時間軸', icon: 'mdi:timeline-clock' },
+  { to: '/about', label: '關於', icon: 'mdi:account-circle' },
+  { to: '/contact', label: '聯絡', icon: 'mdi:email' }
 ]
 
 //! =============== 3. Main Component ===============
 
+/**
+ * Navbar component with animated selector for active route
+ *
+ * @description
+ * Main navigation component featuring:
+ * - Animated selector that highlights the active navigation item
+ * - Responsive mobile menu with toggle
+ * - Smooth transitions and hover effects
+ * - Clickable brand logo for home navigation
+ *
+ * @component
+ * @example
+ * <Navbar />
+ */
 const Navbar = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const navMenuRef = useRef(null)
-  const [selectorStyle, setSelectorStyle] = useState({
-    top: 0,
-    left: 0,
-    width: 0,
-    height: 0
-  })
   const [isOpen, setIsOpen] = useState(false)
 
-  const updateSelector = () => {
-    if (!navMenuRef.current) return
+  // Use custom hook for selector positioning and animation
+  const { selectorStyle, isInitialized, updateSelector } = useNavbarSelector(
+    navMenuRef,
+    location.pathname
+  )
 
-    const activeItem = navMenuRef.current.querySelector('.active')
-    if (!activeItem) return
-
-    const activeParent = activeItem.parentElement
-    const rect = activeParent.getBoundingClientRect()
-
-    setSelectorStyle({
-      top: activeParent.offsetTop,
-      left: activeParent.offsetLeft,
-      width: rect.width,
-      height: rect.height
-    })
-  }
-
-  useEffect(() => {
-    // 初始化和路由變化時更新 selector
-    const timer = setTimeout(updateSelector, 100)
-    return () => clearTimeout(timer)
-  }, [location.pathname])
-
-  useEffect(() => {
-    // 視窗 resize 時更新
-    const handleResize = () => {
-      setTimeout(updateSelector, 100)
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
+  /**
+   * Handle mobile menu toggle
+   * Updates selector position after animation completes
+   */
   const handleToggle = () => {
     setIsOpen(!isOpen)
-    setTimeout(updateSelector, 300)
+    delayedSelectorUpdate(updateSelector)
   }
 
+  /**
+   * Navigate to home page when logo is clicked
+   */
   const handleLogoClick = () => {
     navigate('/')
   }
@@ -305,13 +315,17 @@ const Navbar = () => {
   return (
     <NavbarContainer>
       <NavbarBrand onClick={handleLogoClick}>
-        <span className="text">Harry&apos;s</span>
-        <span className="bracket">&lt;/&gt;</span>
-        <span className="text">Corner</span>
+        <span className='text'>Harry&apos;s</span>
+        <span className='bracket'>&lt;/&gt;</span>
+        <span className='text'>Corner</span>
       </NavbarBrand>
 
       <NavbarToggler onClick={handleToggle}>
-        <i className='fas fa-bars'></i>
+        <Icon
+          icon='mdi:menu'
+          width='24'
+          height='24'
+        />
       </NavbarToggler>
 
       <NavbarContent $isOpen={isOpen}>
@@ -321,6 +335,7 @@ const Navbar = () => {
             $left={selectorStyle.left}
             $width={selectorStyle.width}
             $height={selectorStyle.height}
+            $isInitialized={isInitialized}
           >
             <SelectorLeft />
             <SelectorRight />
@@ -329,7 +344,7 @@ const Navbar = () => {
           {navItems.map((item) => (
             <NavItem key={item.to}>
               <StyledNavLink to={item.to}>
-                <i className={`far fa-${item.icon}`}></i>
+                <Icon icon={item.icon} />
                 {item.label}
               </StyledNavLink>
             </NavItem>
