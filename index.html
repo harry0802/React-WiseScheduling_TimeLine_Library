@@ -4,9 +4,13 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/Icon/hexagon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preload" href="/fonts/Free-HK-Kai.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="preload" href="/fonts/EDIX.ttf" as="font" type="font/ttf" crossorigin />
-    <link rel="stylesheet" href="/fonts/fonts.css" />
+    <!-- ⚡ 使用 Google Fonts Noto Serif TC 替代 Free HK Kai (6.1MB → CDN 快取) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    <!-- ⚡ EDIX 字體仍使用本地（較小，20KB） -->
+    <link rel="stylesheet" href="/fonts/fonts.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="/fonts/fonts.css" /></noscript>
     <title>Harry's </> Corner</title>
     <!-- 處理從404頁面重定向的路徑 -->
     <script>

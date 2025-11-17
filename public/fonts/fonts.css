@@ -1,4 +1,6 @@
-/* 自訂字體 - Free HK Kai */
+/* 自訂字體 - Free HK Kai (後備，優先使用 Google Fonts Noto Serif TC) */
+/* 如果不需要可以註解掉以節省 6.1MB 下載 */
+/*
 @font-face {
   font-family: 'Free HK Kai';
   src: url('./Free-HK-Kai.ttf') format('truetype');
@@ -6,6 +8,7 @@
   font-style: normal;
   font-display: swap;
 }
+*/
 
 /* EDIX 字體 */
 @font-face {
