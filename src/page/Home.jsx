@@ -147,7 +147,7 @@ function Home() {
                   textShadow: `0 2px 8px ${colors.accent.primary}30`
                 }}
               >
-                林志翰 - 前端工程師作品集
+                智慧製造前端工程整合方案
               </Typography>
               <GoldDivider sx={{ width: '100px', height: '3px', mx: 'auto' }} />
               <Typography

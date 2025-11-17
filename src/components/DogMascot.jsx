@@ -131,8 +131,6 @@ const MascotContainer = styled.div`
 
 const DogContainer = styled.div`
   position: relative;
-  width: 280px;
-  height: 280px;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -1,47 +1,122 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback, memo } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { Icon } from '@iconify/react'
+import {
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  IconButton
+} from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { colors } from '../designTokens/colors'
 import { spacing } from '../designTokens/spacing'
+import { screenSizes } from '../styles/SharedStyles'
+import HamburgerMenu from './HamburgerMenu'
 import useNavbarSelector, {
   delayedSelectorUpdate
 } from '../hooks/useNavbarSelector'
 
-//! =============== 1. Styled Components ===============
+//! =============== 1. Types & Interfaces ===============
+
+/**
+ * @typedef {Object} NavItemConfig
+ * @property {string} to - Route path
+ * @property {string} label - Display text
+ * @property {string} src - Icon image path
+ */
+
+//! =============== 2. Constants & Configuration ===============
 
 const NAVBAR_BG = colors.background.primary
 
-const NavbarContainer = styled.nav`
-  overflow: hidden;
-  background: ${NAVBAR_BG};
-  padding: 0;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid ${colors.accent.primary}80;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/**
+ * Navigation menu items configuration
+ * @type {NavItemConfig[]}
+ */
+const navItems = [
+  {
+    to: '/',
+    label: '首頁',
+    src: '/React-WiseScheduling_TimeLine_Library/Icon/hammer.png'
+  },
+  {
+    to: '/timeline',
+    label: '時間軸',
+    src: '/React-WiseScheduling_TimeLine_Library/Icon/bow-and-arrow.png'
+  },
+  {
+    to: '/about',
+    label: '關於',
+    src: '/React-WiseScheduling_TimeLine_Library/Icon/laser-sword.png'
+  },
+  {
+    to: '/contact',
+    label: '聯絡',
+    src: '/React-WiseScheduling_TimeLine_Library/Icon/aircraft.png'
+  }
+]
 
-  @media (max-width: 991px) {
-    flex-direction: column;
-    align-items: stretch;
+//! =============== 3. Styled Components ===============
+
+const NavbarContainer = styled.nav`
+  /* Layout & Positioning */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+
+  /* Box Model */
+  padding: 0;
+
+  /* Visual Styles */
+  background: ${NAVBAR_BG};
+  border-bottom: 1px solid ${colors.accent.primary}80;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  /* Desktop Layout */
+  @media (min-width: ${screenSizes.desktop}) {
+    justify-content: space-between;
   }
 `
 
 const NavbarBrand = styled.div`
-  padding: ${spacing.xs} ${spacing.sm};
-  cursor: pointer;
-  transition: all 0.3s ease;
+  /* Layout & Positioning */
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 1.6rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Box Model */
+  padding: ${spacing.xs} ${spacing.sm};
+  gap: 4px;
+
+  /* Visual Styles */
+  font-size: 1.3rem;
   letter-spacing: 0.02em;
+
+  /* Effects */
+  transition: all 0.3s ease;
+
+  /* Other */
+  cursor: pointer;
   user-select: none;
 
   &:hover {
-    transform: scale(1.05);
+    transform: translateX(-50%) scale(1.05);
+  }
+
+  /* Desktop Layout */
+  @media (min-width: ${screenSizes.desktop}) {
+    position: static;
+    transform: none;
+
+    &:hover {
+      transform: scale(1.05);
+    }
   }
 
   .text {
@@ -50,81 +125,122 @@ const NavbarBrand = styled.div`
       'Times New Roman', serif;
     font-weight: 700;
     font-style: italic;
+    letter-spacing: 0.05em;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5),
       0 0 1px rgba(255, 255, 255, 0.3);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: 0.05em;
+  }
+
+  .mobile-only {
+    display: inline;
+  }
+
+  .desktop-only {
+    display: none;
   }
 
   .bracket {
     color: ${colors.accent.primary};
-    font-weight: 900;
-    font-size: 1.8rem;
     font-family: 'Arial Black', 'Arial', sans-serif;
+    font-weight: 900;
+    font-size: 1.5rem;
     text-shadow: 0 0 12px ${colors.accent.primary}ff,
       0 0 20px ${colors.accent.primary}99, 2px 2px 6px rgba(0, 0, 0, 0.7);
     transform: scale(1.1);
     display: inline-block;
   }
 
-  @media (max-width: 768px) {
-    font-size: 1.3rem;
-    gap: 4px;
+  /* Tablet & Desktop */
+  @media (min-width: ${screenSizes.tablet}) {
+    gap: 6px;
+    font-size: 1.6rem;
+
+    .mobile-only {
+      display: none;
+    }
+
+    .desktop-only {
+      display: inline;
+    }
 
     .bracket {
-      font-size: 1.5rem;
+      font-size: 1.8rem;
     }
   }
 `
 
 const NavbarContent = styled.div`
-  overflow: visible;
+  /* Layout & Positioning (Mobile First) */
+  display: none;
   position: relative;
+  overflow: visible;
 
-  @media (max-width: 991px) {
-    display: ${(props) => (props.$isOpen ? 'block' : 'none')};
+  /* Desktop Layout - 只在桌面版顯示 */
+  @media (min-width: ${screenSizes.desktop}) {
+    display: block;
   }
 `
 
 const NavMenu = styled.ul`
-  padding: 0;
-  margin: 0;
-  list-style: none;
+  /* Layout & Positioning (Mobile First) */
   display: flex;
+  flex-direction: column;
   position: relative;
 
-  @media (max-width: 991px) {
-    flex-direction: column;
+  /* Box Model */
+  padding: 0;
+  margin: 0;
+
+  /* Visual Styles */
+  list-style: none;
+
+  /* Desktop Layout */
+  @media (min-width: ${screenSizes.desktop}) {
+    flex-direction: row;
   }
 `
 
 const NavItem = styled.li`
-  list-style-type: none;
-  float: left;
+  /* Layout & Positioning (Mobile First) */
   position: relative;
+  float: none;
+
+  /* Visual Styles */
+  list-style-type: none;
+
+  /* Other */
   z-index: 2;
 
-  @media (max-width: 991px) {
-    float: none;
+  /* Desktop Layout */
+  @media (min-width: ${screenSizes.desktop}) {
+    float: left;
   }
 `
 
 const StyledNavLink = styled(NavLink)`
-  color: ${colors.text.inverseSecondary};
-  text-decoration: none;
-  font-size: 15px;
+  /* Layout & Positioning (Mobile First) */
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 20px 20px;
-  transition: all 0.3s ease;
   position: relative;
 
+  /* Box Model */
+  padding: 12px 30px;
+  gap: 10px;
+
+  /* Visual Styles */
+  color: ${colors.text.inverseSecondary};
+  font-size: 15px;
+  text-decoration: none;
+  background-color: transparent;
+
+  /* Effects */
+  transition: all 0.3s ease;
+
   img {
+    display: block;
     width: 20px;
     height: 20px;
-    display: block;
     object-fit: contain;
   }
 
@@ -134,143 +250,159 @@ const StyledNavLink = styled(NavLink)`
 
   &.active {
     color: ${colors.background.primary};
-    background-color: transparent;
   }
 
-  @media (max-width: 991px) {
-    padding: 12px 30px;
+  /* Desktop Layout */
+  @media (min-width: ${screenSizes.desktop}) {
+    padding: 20px 20px;
   }
 `
 
 const HoriSelector = styled.div`
+  /* Layout & Positioning (Mobile First) */
   display: ${(props) => (props.$width === 0 ? 'none' : 'inline-block')};
   position: absolute;
-  bottom: 0;
+  top: ${(props) => props.$top}px;
+  bottom: auto;
   left: ${(props) => props.$left}px;
+
+  /* Box Model */
   width: ${(props) => props.$width}px;
   height: ${(props) => props.$height}px;
-  transform: translateY(${(props) => -props.$top}px);
+  margin-top: 0;
+  margin-left: 10px;
+
+  /* Visual Styles */
+  background: ${colors.background.surface};
+  border-radius: 0;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  box-shadow: 0 -2px 10px ${colors.accent.primary}40;
+
+  /* Effects */
+  transform: none;
   transition: ${(props) =>
     props.$isInitialized
       ? 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
       : 'none'};
-  background: ${colors.background.surface};
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  box-shadow: 0 -2px 10px ${colors.accent.primary}40;
+
+  /* Other */
   z-index: 1;
 
-  @media (max-width: 991px) {
-    margin-top: 0;
-    margin-left: 10px;
+  /* Desktop Layout */
+  @media (min-width: ${screenSizes.desktop}) {
+    bottom: 0;
+    top: auto;
+    margin-left: 0;
     border-radius: 0;
-    border-top-left-radius: 25px;
-    border-bottom-left-radius: 25px;
-    transform: none;
-    top: ${(props) => props.$top}px;
-    bottom: auto;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    transform: translateY(${(props) => -props.$top}px);
   }
 `
 
 const SelectorLeft = styled.div`
+  /* Layout & Positioning (Mobile First) */
   position: absolute;
+  top: -25px;
+  left: auto;
+  right: 10px;
+
+  /* Box Model */
   width: 25px;
   height: 25px;
+
+  /* Visual Styles */
   background: ${colors.background.surface};
-  bottom: 0;
-  left: -25px;
 
   &:before {
     content: '';
     position: absolute;
+    top: -25px;
+    left: -25px;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
     background: ${NAVBAR_BG};
-    bottom: 0;
-    left: -25px;
+    border-radius: 50%;
   }
 
-  @media (max-width: 991px) {
-    top: -25px;
-    left: auto;
-    right: 10px;
+  /* Desktop Layout */
+  @media (min-width: ${screenSizes.desktop}) {
+    top: auto;
+    bottom: 0;
+    left: -25px;
+    right: auto;
 
     &:before {
-      left: -25px;
-      top: -25px;
+      top: auto;
+      bottom: 0;
     }
   }
 `
 
 const SelectorRight = styled.div`
+  /* Layout & Positioning (Mobile First) */
   position: absolute;
+  bottom: -25px;
+  right: 10px;
+
+  /* Box Model */
   width: 25px;
   height: 25px;
+
+  /* Visual Styles */
   background: ${colors.background.surface};
-  bottom: 0;
-  right: -25px;
 
   &:before {
     content: '';
     position: absolute;
+    bottom: -25px;
+    left: -25px;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
     background: ${NAVBAR_BG};
-    bottom: 0;
-    right: -25px;
+    border-radius: 50%;
   }
 
-  @media (max-width: 991px) {
-    bottom: -25px;
-    right: 10px;
+  /* Desktop Layout */
+  @media (min-width: ${screenSizes.desktop}) {
+    bottom: 0;
+    right: -25px;
 
     &:before {
-      bottom: -25px;
-      left: -25px;
+      bottom: 0;
+      left: auto;
+      right: -25px;
     }
   }
 `
 
 const NavbarToggler = styled.button`
+  /* Layout & Positioning (Mobile First) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Box Model */
+  padding: ${spacing.xs} ${spacing.sm};
+  margin-left: ${spacing.xs};
+
+  /* Visual Styles */
   background: transparent;
   border: none;
   color: white;
   font-size: 1.5rem;
-  cursor: pointer;
-  padding: 10px;
-  display: none;
 
-  @media (max-width: 991px) {
-    display: block;
-    position: absolute;
-    top: ${spacing.md};
-    right: ${spacing.md};
+  /* Other */
+  cursor: pointer;
+
+  /* Desktop Layout - 隱藏漢堡選單 */
+  @media (min-width: ${screenSizes.desktop}) {
+    display: none;
   }
 `
 
-//! =============== 2. Navigation Items Config ===============
-
-/**
- * @typedef {Object} NavItem
- * @property {string} to - Route path
- * @property {string} label - Display text
- * @property {string} icon - Iconify icon name
- */
-
-/**
- * Navigation menu items configuration
- * @type {NavItem[]}
- */
-const navItems = [
-  { to: '/', label: '首頁', src: '/React-WiseScheduling_TimeLine_Library/Icon/hammer.png' },
-  { to: '/timeline', label: '時間軸', src: '/React-WiseScheduling_TimeLine_Library/Icon/bow-and-arrow.png' },
-  { to: '/about', label: '關於', src: '/React-WiseScheduling_TimeLine_Library/Icon/laser-sword.png' },
-  { to: '/contact', label: '聯絡', src: '/React-WiseScheduling_TimeLine_Library/Icon/aircraft.png' }
-]
-
-//! =============== 3. Main Component ===============
+//! =============== 4. Main Component ===============
 
 /**
  * Navbar component with animated selector for active route
@@ -286,7 +418,7 @@ const navItems = [
  * @example
  * <Navbar />
  */
-const Navbar = () => {
+function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const navMenuRef = useRef(null)
@@ -302,63 +434,174 @@ const Navbar = () => {
    * Handle mobile menu toggle
    * Updates selector position after animation completes
    */
-  const handleToggle = () => {
-    setIsOpen(!isOpen)
+  const handleToggle = useCallback(() => {
+    setIsOpen((prevOpen) => !prevOpen)
     delayedSelectorUpdate(updateSelector)
-  }
+  }, [updateSelector])
 
   /**
    * Navigate to home page when logo is clicked
    */
-  const handleLogoClick = () => {
+  const handleLogoClick = useCallback(() => {
     navigate('/')
-  }
+  }, [navigate])
 
   return (
-    <NavbarContainer>
-      <NavbarBrand onClick={handleLogoClick}>
-        <span className='text'>Harry&apos;s</span>
-        <span className='bracket'>&lt;/&gt;</span>
-        <span className='text'>Corner</span>
-      </NavbarBrand>
+    <>
+      <NavbarContainer>
+        <NavbarToggler>
+          <HamburgerMenu
+            size='1.5rem'
+            color={colors.text.inverse}
+            checked={isOpen}
+            onChange={handleToggle}
+          />
+        </NavbarToggler>
 
-      <NavbarToggler onClick={handleToggle}>
-        <Icon
-          icon='mdi:menu'
-          width='24'
-          height='24'
-        />
-      </NavbarToggler>
+        <NavbarBrand onClick={handleLogoClick}>
+          <span className='text mobile-only'>H</span>
+          <span className='text desktop-only'>Harry&apos;s</span>
+          <span className='bracket'>&lt;/&gt;</span>
+          <span className='text desktop-only'>Corner</span>
+          <span className='text mobile-only'>C</span>
+        </NavbarBrand>
 
-      <NavbarContent $isOpen={isOpen}>
-        <NavMenu ref={navMenuRef}>
-          <HoriSelector
-            $top={selectorStyle.top}
-            $left={selectorStyle.left}
-            $width={selectorStyle.width}
-            $height={selectorStyle.height}
-            $isInitialized={isInitialized}
+        <NavbarContent>
+          <NavMenu ref={navMenuRef}>
+            <HoriSelector
+              $top={selectorStyle.top}
+              $left={selectorStyle.left}
+              $width={selectorStyle.width}
+              $height={selectorStyle.height}
+              $isInitialized={isInitialized}
+            >
+              <SelectorLeft />
+              <SelectorRight />
+            </HoriSelector>
+
+            {navItems.map((item) => (
+              <NavItem key={item.to}>
+                <StyledNavLink to={item.to}>
+                  <img
+                    src={item.src}
+                    alt={item.label}
+                  />
+                  {item.label}
+                </StyledNavLink>
+              </NavItem>
+            ))}
+          </NavMenu>
+        </NavbarContent>
+      </NavbarContainer>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor='right'
+        open={isOpen}
+        onClose={handleToggle}
+        sx={{
+          display: { xs: 'block', lg: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+            backgroundColor: colors.background.primary,
+            color: colors.text.inverse,
+            borderLeft: `2px solid ${colors.accent.primary}`
+          },
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.7)'
+          }
+        }}
+      >
+        {/* Drawer Header */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: spacing.md,
+            borderBottom: `1px solid ${colors.border.light}`
+          }}
+        >
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '1.3rem',
+              letterSpacing: '0.02em',
+              '& .text': {
+                color: colors.text.inverse,
+                fontFamily: '"EDIX", "Georgia", serif',
+                fontWeight: 700,
+                fontStyle: 'italic',
+                letterSpacing: '0.05em'
+              },
+              '& .bracket': {
+                color: colors.accent.primary,
+                fontFamily: '"Arial Black", "Arial", sans-serif',
+                fontWeight: 900,
+                fontSize: '1.5rem',
+                textShadow: `0 0 12px ${colors.accent.primary}ff`
+              }
+            }}
           >
-            <SelectorLeft />
-            <SelectorRight />
-          </HoriSelector>
+            <span className='text'>H</span>
+            <span className='bracket'>&lt;/&gt;</span>
+          </Box>
+          <IconButton
+            onClick={handleToggle}
+            sx={{ color: colors.text.inverse }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
 
+        {/* Menu Items */}
+        <List sx={{ padding: spacing.sm }}>
           {navItems.map((item) => (
-            <NavItem key={item.to}>
-              <StyledNavLink to={item.to}>
+            <ListItemButton
+              key={item.to}
+              onClick={() => {
+                navigate(item.to)
+              }}
+              sx={{
+                borderRadius: '8px',
+                marginBottom: spacing.xs,
+                padding: spacing.sm,
+                '&:hover': {
+                  backgroundColor: colors.accent.primary + '20'
+                },
+                '&.Mui-selected': {
+                  backgroundColor: colors.background.surface,
+                  color: colors.background.primary,
+                  '&:hover': {
+                    backgroundColor: colors.background.surface
+                  }
+                }
+              }}
+              selected={location.pathname === item.to}
+            >
+              <ListItemIcon sx={{ minWidth: 40 }}>
                 <img
                   src={item.src}
                   alt={item.label}
+                  style={{ width: 24, height: 24 }}
                 />
-                {item.label}
-              </StyledNavLink>
-            </NavItem>
+              </ListItemIcon>
+              <ListItemText
+                primary={item.label}
+                primaryTypographyProps={{
+                  fontSize: '15px',
+                  fontWeight: 500
+                }}
+              />
+            </ListItemButton>
           ))}
-        </NavMenu>
-      </NavbarContent>
-    </NavbarContainer>
+        </List>
+      </Drawer>
+    </>
   )
 }
 
-export default Navbar
+export default memo(Navbar)
 

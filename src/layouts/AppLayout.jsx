@@ -1,4 +1,3 @@
-import React from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 import Navbar from '../components/Navbar'
@@ -30,20 +29,12 @@ const Footer = styled.footer`
 
 const DogWrapper = styled.div`
   position: absolute;
+
+  bottom: 100%;
   left: 50%;
-  bottom: -30%;
   transform: translateX(-50%) scale(0.7);
   transform-origin: bottom center;
   z-index: 10;
-  @media (min-width: 479px) {
-    bottom: -30%;
-  }
-  @media (min-width: 768px) {
-    bottom: -10%;
-  }
-  @media (min-width: 1024px) {
-    bottom: 0%;
-  }
 `
 
 function AppLayout() {
