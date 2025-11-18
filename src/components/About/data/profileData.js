@@ -30,7 +30,8 @@ export const workExperience = {
       items: [
         '在時程內接續開發並完成 13 項功能，確保系統順利驗收',
         '優化既有程式碼庫，修復多個Bug，顯著提升系統穩定性',
-        '成功將專案由 Webpack 遷移至 Vite，改善了開發環境的啟動與熱更新速度'
+        '成功將專案由 Webpack 遷移至 Vite，改善了開發環境的啟動與熱更新速度',
+        '優化部署策略：主動將部署方案從 GitHub Pages 遷移至 Cloudflare Pages，實現全球 CDN 加速，並設計雙平台兼容架構，展現 DevOps 與 CI/CD 實戰能力'
       ]
     },
     {
@@ -92,7 +93,16 @@ export const skills = {
     'Zustand',
     'Redux'
   ],
-  tools: ['Git', 'npm', 'Obsidian', 'Excalidraw', 'Docker']
+  tools: [
+    'Git',
+    'npm',
+    'Vite',
+    'GitHub Actions',
+    'Cloudflare Pages',
+    'Obsidian',
+    'Excalidraw',
+    'Docker'
+  ]
 }
 
 //! =============== 5. 核心優勢 ===============
@@ -100,7 +110,8 @@ export const skills = {
 export const coreStrengths = [
   {
     title: '獨立開發能力',
-    description: '能夠獨立規劃專案架構、接手並完成功能開發，從設計到實作都能掌握'
+    description:
+      '能夠獨立規劃專案架構、接手並完成功能開發，從設計到實作都能掌握'
   },
   {
     title: '突破困難的決心',
@@ -120,3 +131,4 @@ export const coreStrengths = [
     description: '與 PM、設計師、後端工程師緊密合作，確保專案順利推進'
   }
 ]
+
