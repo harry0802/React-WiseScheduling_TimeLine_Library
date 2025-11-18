@@ -5,11 +5,11 @@ export const typography = {
   // 字體家族
   fontFamily: {
     primary:
-      '"Noto Serif TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      '"Free HK Kai", "Noto Serif TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     secondary:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     monospace: '"Courier New", Courier, monospace',
-    kai: '"Noto Serif TC", "Free HK Kai", serif', // Google Fonts 優先，Free HK Kai 後備
+    kai: '"Free HK Kai", "Noto Serif TC", serif', // Free HK Kai 優先，Noto Serif TC 後備
     edix: '"EDIX", serif'
   },
 
