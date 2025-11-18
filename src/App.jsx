@@ -1,4 +1,4 @@
-import { createHashRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import AppLayout from './layouts/AppLayout'
 
@@ -74,8 +74,8 @@ const WiseScheduling = lazyLoad(() =>
   import('./components/WiseScheduling/components/schedule/index.jsx')
 )
 
-// 使用 HashRouter 代替 BrowserRouter
-const router = createHashRouter([
+// 使用 BrowserRouter 以獲得更乾淨的 URL (Cloudflare Pages 原生支援)
+const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,

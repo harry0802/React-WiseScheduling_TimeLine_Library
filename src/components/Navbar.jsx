@@ -40,22 +40,22 @@ const navItems = [
   {
     to: '/',
     label: '首頁',
-    src: '/React-WiseScheduling_TimeLine_Library/Icon/hammer.png'
+    src: '/Icon/hammer.png'
   },
   {
     to: '/timeline',
     label: '時間軸',
-    src: '/React-WiseScheduling_TimeLine_Library/Icon/bow-and-arrow.png'
+    src: '/Icon/bow-and-arrow.png'
   },
   {
     to: '/about',
     label: '關於',
-    src: '/React-WiseScheduling_TimeLine_Library/Icon/laser-sword.png'
+    src: '/Icon/laser-sword.png'
   },
   {
     to: '/contact',
     label: '聯絡',
-    src: '/React-WiseScheduling_TimeLine_Library/Icon/aircraft.png'
+    src: '/Icon/aircraft.png'
   }
 ]
 
