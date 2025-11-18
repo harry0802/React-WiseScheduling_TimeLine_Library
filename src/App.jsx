@@ -1,7 +1,6 @@
 import { createHashRouter, RouterProvider } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import AppLayout from './layouts/AppLayout'
-import PigSystemLayout from './layouts/PigSystemLayout'
 
 // ⚡ 首頁和關鍵頁面使用 lazy load 減少初始 bundle
 const Home = lazy(() => import('./page/Home'))
@@ -11,11 +10,14 @@ const Contact = lazy(() => import('./page/Contact'))
 const ProjectShowcase = lazy(() => import('./page/ProjectShowcase'))
 const DesignToken = lazy(() => import('./page/DesignToken'))
 import ErrorPage from './page/ErrorPage' // ErrorPage 需要立即可用
-// 養豬場管理系統頁面
-import Boargenotype from './pages/Boargenotype'
-import CullingBoar from './pages/CullingBoar'
-import PigHouseInventory from './pages/PigHouseInventory'
-import SowBreedingRecords from './pages/SowBreedingRecords'
+
+// ⚡ Lazy load PigSystemLayout 避免初始加載 Ant Design (873KB)
+const PigSystemLayout = lazy(() => import('./layouts/PigSystemLayout'))
+// 養豬場管理系統頁面 - lazy load 避免初始加載
+const Boargenotype = lazy(() => import('./pages/Boargenotype'))
+const CullingBoar = lazy(() => import('./pages/CullingBoar'))
+const PigHouseInventory = lazy(() => import('./pages/PigHouseInventory'))
+const SowBreedingRecords = lazy(() => import('./pages/SowBreedingRecords'))
 import LoadingSpinner from './components/LoadingSpinner'
 import ManufacturingLiveMonitor from './components/ManufacturingLiveMonitor/index.jsx'
 import LoadingWrapper from './components/ManufacturingLiveMonitor/components/Loading/index.jsx'
@@ -148,13 +150,45 @@ const router = createHashRouter([
     ]
   },
   {
-    element: <PigSystemLayout />,
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <PigSystemLayout />
+      </Suspense>
+    ),
     errorElement: <ErrorPage />,
     children: [
-      { path: 'boargenotype', element: <Boargenotype /> },
-      { path: 'culling-boar', element: <CullingBoar /> },
-      { path: 'pig-house-inventory', element: <PigHouseInventory /> },
-      { path: 'sow-breeding-records', element: <SowBreedingRecords /> }
+      {
+        path: 'boargenotype',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <Boargenotype />
+          </Suspense>
+        )
+      },
+      {
+        path: 'culling-boar',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <CullingBoar />
+          </Suspense>
+        )
+      },
+      {
+        path: 'pig-house-inventory',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <PigHouseInventory />
+          </Suspense>
+        )
+      },
+      {
+        path: 'sow-breeding-records',
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <SowBreedingRecords />
+          </Suspense>
+        )
+      }
     ]
   },
   {

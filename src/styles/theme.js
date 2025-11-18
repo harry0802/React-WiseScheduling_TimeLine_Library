@@ -25,8 +25,8 @@ const createResponsiveTheme = () => {
       warning: "#ffab40",        // 明亮橙色警告
     },
     fonts: {
-      main: '"Free HK Kai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-      headings: '"Free HK Kai", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      main: '"Free HK Kai", "Noto Serif TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      headings: '"Free HK Kai", "Noto Serif TC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       system: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     },
     spacing: {
@@ -63,7 +63,7 @@ const createResponsiveTheme = () => {
       bigtv: "3440px", // 新增大型電視斷點
       tv50: "4096px", // 新增50吋電視斷點
     },
-    // 🧠 基礎字體大小 - 針對 Free HK Kai 調整 (視覺較小,整體放大)
+    // 🧠 基礎字體大小 (Google Fonts Noto Serif TC)
     fontSizes: {
       xs: "0.875rem", // 14px
       sm: "1rem", // 16px
