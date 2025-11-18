@@ -12,33 +12,6 @@
     <link rel="stylesheet" href="/fonts/fonts.css" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="/fonts/fonts.css" /></noscript>
     <title>Harry's </> Corner</title>
-    <!-- 處理從404頁面重定向的路徑 -->
-    <script>
-      (function() {
-        // 解析網址參數
-        var l = window.location;
-        if (l.search) {
-          var params = {};
-          var query = l.search.slice(1).split('&');
-          for (var i = 0; i < query.length; i++) {
-            var parts = query[i].split('=');
-            params[parts[0]] = parts[1];
-          }
-
-          // 如果有路徑參數，使用 history API 設置正確的 URL
-          if (params.p) {
-            var route = params.p;
-            var query = params.q ? ('?' + params.q) : '';
-            var hash = params.h ? ('#' + params.h) : '';
-            
-            var newUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-              l.pathname.split('?')[0] + route + query + hash;
-              
-            window.history.replaceState(null, null, newUrl);
-          }
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>

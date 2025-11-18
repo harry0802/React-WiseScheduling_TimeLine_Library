@@ -49,7 +49,7 @@ const TIIP_PROJECT_DATA = [
       '2. **[廠內報價系統](#system-廠內報價系統)**：主導複雜表單開發，使用 **React Hook Form + Zod** 處理多工序成本計算（成型/後製程/檢驗）。將計算邏輯模組化到獨立 Hook，用 Zustand 管理表單狀態，確保即時公式運算的準確性。\n' +
       '3. **UI/UX 設計與實作**：因設計資源有限，我主動承接「[智慧成本分析表](#system-智慧成本分析表)」與「[智慧排程](#system-智慧排程)」的介面設計，全程參與客戶需求訪談，確保功能符合實際操作需求。\n' +
       '4. **ERP 資料整合**：與後端協作串接凌越 ERP 的訂單、模具與料號資料，使用 RTK Query 管理 API 狀態與自動緩存。\n\n' +
-      '🔗 **[看作品 - 智慧排程系統](http://localhost:5173/React-WiseScheduling_TimeLine_Library/#/wise-scheduling)**',
+      '🔗 **[看作品 - 智慧排程系統](https://react-wisescheduling-timeline-library.pages.dev/wise-scheduling)**',
     techStack: [
       TECH_DEFINITIONS.REACT_18,
       TECH_DEFINITIONS.RTK_QUERY,
@@ -180,7 +180,7 @@ const TIIP_PROJECT_DATA = [
       '2. **[全廠績效儀表板](#system-廠區績效儀表板)**：**完全自主設計與開發**，在公司無任何設計資源的情況下，我獨立完成 UI/UX 設計、技術選型與實作。自行研究並選用開源套件 `@iimm/data-view-react` + **ECharts**，整合 **5 大子系統**（[廠區績效儀表板](#system-廠區績效儀表板)、即時 OEE、[即時生產進度追蹤](#system-即時生產進度追蹤)、交貨趨勢、OEE 洞察）建立全屏數據視覺化。DEMO 後獲得老闆與客戶高度肯定。實作臨時樣式機制，組件卸載時自動清理，避免影響其他頁面。\n' +
       '3. **[保養系統](#system-機台保養表)**：使用 Zustand 管理頭部參數狀態，RTK Query 處理 API，實作統一抽屜狀態管理與三級審核流程（檢查員/復檢員/核准者）。另有[模具保養表](#system-模具保養表)與[施工養護綜合保養](#system-施工養護綜合保養)系統。\n' +
       '4. **生產追蹤**：包含[派工系統](#system-派工系統)與[機台狀態操作與保養紀錄](#system-機台狀態操作與保養紀錄)，使用多層 Context Provider 架構管理複雜狀態（ProductionRecordProvider、ProcMaterialsProvider 等），搭配 Redux Slice 細分功能狀態。\n\n' +
-      '🔗 **[看作品 - 全廠績效儀表板](http://localhost:5173/React-WiseScheduling_TimeLine_Library/#/ManufacturingLiveMonitor)**',
+      '🔗 **[看作品 - 全廠績效儀表板](https://react-wisescheduling-timeline-library.pages.dev/ManufacturingLiveMonitor)**',
     techStack: [
       TECH_DEFINITIONS.REACT_18,
       TECH_DEFINITIONS.RTK_QUERY,

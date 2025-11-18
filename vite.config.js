@@ -1,8 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-export default defineConfig(() => {
-    const base = "/";
+export default defineConfig(({ mode }) => {
+    // Cloudflare Pages: 使用根路徑
+    // GitHub Pages: 使用子路徑
+    const base = mode === 'github-pages'
+        ? '/React-WiseScheduling_TimeLine_Library/'
+        : '/';
 
     return {
         base,

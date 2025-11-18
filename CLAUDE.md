@@ -30,7 +30,7 @@ npx cz                   # Use Commitizen for conventional commits
 **UI Framework:**
 
 - React 18.3.1 with concurrent features
-- React Router v6 with HashRouter (for GitHub Pages deployment)
+- React Router v6 with BrowserRouter (modern URL structure on Cloudflare Pages)
 - Dual styling system:
   - **Styled-Components**: Global theming, design tokens, responsive utilities
   - **Material-UI (MUI)**: Component library for complex UI (dialogs, pickers, tables)
@@ -321,9 +321,9 @@ Always use `injectEndpoints` pattern for new API endpoints.
 
 ## Important Technical Decisions
 
-### Why HashRouter?
+### Why BrowserRouter?
 
-Using `createHashRouter` instead of `createBrowserRouter` for GitHub Pages deployment compatibility. GitHub Pages doesn't support client-side routing without hash routing.
+Using `createBrowserRouter` for modern URL structure (no hash `#` in URLs). Cloudflare Pages natively supports client-side routing, making hash routing unnecessary. This provides cleaner URLs and better SEO.
 
 ### Why Dual State Management?
 
@@ -361,10 +361,10 @@ vis-timeline re-initialization is expensive. Using refs allows:
 
 ## Deployment
 
-- **Platform:** GitHub Pages
-- **Base path:** `/React-WiseScheduling_TimeLine_Library/` (configured in vite.config.js)
+- **Platform:** Cloudflare Pages
+- **Base path:** `/` (root path, configured in vite.config.js)
 - **Build output:** `dist/`
-- **Deploy:** Push to `gh-pages` branch (manual or CI/CD)
+- **Deploy:** Automatic deployment via GitHub integration (pushes to `dev` or `main` branch)
 
 ## Code Style Guidelines
 

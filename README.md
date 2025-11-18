@@ -2,7 +2,7 @@
 
 > 整合智慧製造排程、即時監控與資料視覺化的工業級前端解決方案
 
-🔗 **線上展示**: <https://harry0802.github.io/React-WiseScheduling_TimeLine_Library>
+🔗 **線上展示**: <https://react-wisescheduling-timeline-library.pages.dev>
 
 ---
 
@@ -34,7 +34,7 @@
 
 - **React 18.3.1** - Hooks、Concurrent Features
 - **Vite** - 快速開發伺服器與構建工具
-- **React Router v6** - Hash 路由（適配 GitHub Pages）
+- **React Router v6** - Browser 路由（現代化 URL 結構）
 
 ### 狀態管理
 
@@ -310,9 +310,9 @@ npx cz
 
 ## 🌐 部署
 
-- **平台**: GitHub Pages
-- **CI/CD**: 手動部署到 `gh-pages` 分支
-- **Base Path**: `/React-WiseScheduling_TimeLine_Library/`
+- **平台**: Cloudflare Pages
+- **CI/CD**: GitHub 整合自動部署
+- **Base Path**: `/` (根路徑)
 
 ---
 
@@ -321,7 +321,7 @@ npx cz
 (Harry Lin)
 
 - GitHub: [@harry0802](https://github.com/harry0802)
-- Portfolio: [線上作品集](https://harry0802.github.io/React-WiseScheduling_TimeLine_Library)
+- Portfolio: [線上作品集](https://react-wisescheduling-timeline-library.pages.dev)
 
 ---
 
