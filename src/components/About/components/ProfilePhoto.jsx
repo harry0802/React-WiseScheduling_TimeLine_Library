@@ -40,14 +40,16 @@ const ProfilePhoto = ({ src, alt, size = 160 }) => {
     >
       {hasValidSrc && !imageError ? (
         <Box
-          component="img"
+          component='img'
           src={src}
           alt={alt}
           onError={() => setImageError(true)}
           sx={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover'
+            objectFit: 'cover',
+            scale: 1.3,
+            objectPosition: 'bottom'
           }}
         />
       ) : (
@@ -72,3 +74,4 @@ const ProfilePhoto = ({ src, alt, size = 160 }) => {
 ProfilePhoto.displayName = 'ProfilePhoto'
 
 export default ProfilePhoto
+

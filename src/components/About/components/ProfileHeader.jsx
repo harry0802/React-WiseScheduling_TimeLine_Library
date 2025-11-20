@@ -1,7 +1,11 @@
 import React from 'react'
 import { Typography, Box, Grid } from '@mui/material'
 import ProfilePhoto from './ProfilePhoto'
-import { GoldBorderContainer, CreamPaper, GoldDivider } from '../../../components/StyledComponents'
+import {
+  GoldBorderContainer,
+  CreamPaper,
+  GoldDivider
+} from '../../../components/StyledComponents'
 import { colors } from '../../../designTokens'
 
 //! =============== 1. 類型定義 ===============
@@ -41,7 +45,11 @@ const ProfileHeader = ({
       }}
     >
       <CreamPaper elevation={0}>
-        <Grid container spacing={3} alignItems="center">
+        <Grid
+          container
+          spacing={3}
+          alignItems='center'
+        >
           {/* 左側：照片 */}
           <Grid
             item
@@ -60,18 +68,22 @@ const ProfileHeader = ({
           </Grid>
 
           {/* 右側：基本資訊 */}
-          <Grid item xs={12} md={8}>
+          <Grid
+            item
+            xs={12}
+            md={8}
+          >
             <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
               <Typography
-                variant="h3"
-                component="h1"
+                variant='h3'
+                component='h1'
                 gutterBottom
                 sx={{ fontWeight: 700, color: colors.text.primary }}
               >
                 {name}
               </Typography>
               <Typography
-                variant="h5"
+                variant='h5'
                 sx={{ color: colors.text.secondary, fontWeight: 600, mb: 2 }}
               >
                 {title}
@@ -88,3 +100,4 @@ const ProfileHeader = ({
 ProfileHeader.displayName = 'ProfileHeader'
 
 export default ProfileHeader
+

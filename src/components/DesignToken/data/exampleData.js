@@ -163,3 +163,132 @@ export const tokenCategories = [
   { category: 'zIndex/', description: '圖層順序' },
   { category: 'breakpoints/', description: '響應式斷點設定' }
 ]
+
+//! =============== 4. Figma → Emotion → MUI 架構專用範例 ===============
+
+// 定義層 (Primitives)：展示 theme.ts
+export const figmaThemeExample = `// 📄 src/styles/tokens/common/theme.ts
+// 直接對應設計師的 Figma Variables (Primitives)
+
+export const theme = {
+  colors: {
+    // 品牌色系：勿忘草藍
+    myosotis: {
+      300: '#8AC0E2',
+      600: '#688EA6',
+      800: '#4B6677',
+    },
+    // 輔助色系：暮光綠
+    twilight: {
+      300: '#90EAD8',
+      600: '#00FDCA',
+      800: '#01AD8A',
+    },
+    // 深色模式背景
+    lateAtNight: {
+      800: '#0C244B',
+      900: '#0C1421',
+    },
+    // ...其他色系 (Green, Red, Orange...)
+  },
+  // ...Typography, Spacing, Breakpoints
+};`
+
+// 語意層 (Semantics)：展示 color.ts
+export const semanticColorExample = `// 📄 src/styles/tokens/common/color.ts
+import { theme } from './theme';
+
+// 將原始 Figma 變數映射為語意化 Token
+export const color = {
+  // 品牌主色
+  primary: {
+    300: theme.colors.myosotis[300],
+    600: theme.colors.myosotis[600],
+  },
+  // 背景層級
+  surface: {
+    base: theme.colors.lateAtNight[900],
+    paper: theme.colors.lateAtNight[800],
+  },
+  // 功能狀態
+  success: {
+    main: theme.colors.green[600],
+  }
+};`
+
+// 注入層 (Emotion)：展示 variables.css.ts 與 GlobalStyles
+export const emotionGlobalStylesExample = `// 📄 src/styles/variables.css.ts
+import { color } from './tokens/common';
+
+// 自動生成 CSS Variables 字串
+const cssVariables = \`:root {
+  --color-bg-primary: \${color.primary[600]};
+  --color-bg-paper: \${color.surface.paper};
+  // ...其他自動生成的變數
+}\`;
+
+// 📄 src/styles/globalStyles.tsx
+import React from 'react';
+import { Global, css } from '@emotion/react';
+
+// 使用 Emotion 的 Global 組件注入 CSS 變數
+// 優勢：支援動態換膚，未來可輕鬆替換內容以適應不同商業品牌
+export const GlobalStyles: React.FC = () => {
+  return (
+    <Global
+      styles={css\`
+        \${cssVariables}
+      \`}
+    />
+  );
+};`
+
+// 整合層 (MUI)：展示 App.tsx
+export const muiThemeIntegrationExample = `// 📄 src/App.tsx
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { theme } from './styles/tokens/common/theme';
+
+// 將我們的 Design Token 映射至 MUI 的語意化系統
+const muiTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: theme.colors.myosotis[600], // 對應 Figma 變數
+      light: theme.colors.myosotis[300],
+      dark: theme.colors.myosotis[800],
+    },
+    secondary: {
+      main: theme.colors.twilight[600],
+    },
+    background: {
+      default: theme.colors.lateAtNight[900],
+      paper: theme.colors.lateAtNight[800],
+    },
+    // ...狀態色 (Success, Warning, Error)
+  },
+  // ...Typography, Breakpoints
+});
+
+function App() {
+  return (
+    <ThemeProvider theme={muiTheme}>
+      <GlobalStyles /> {/* Emotion 注入全域變數 */}
+      <CssBaseline />
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
+}`
+
+// 架構圖
+export const figmaArchitectureExample = `src/
+├── styles/
+│   ├── tokens/
+│   │   └── common/
+│   │       ├── theme.ts       # Figma Primitives (原始數值)
+│   │       ├── color.ts       # Semantic Mapping (語意映射)
+│   │       └── index.ts
+│   │
+│   ├── variables.css.ts       # 生成 CSS 變數定義字串
+│   └── globalStyles.tsx       # Emotion Global 注入組件
+│
+└── App.tsx                    # MUI Theme 整合入口`

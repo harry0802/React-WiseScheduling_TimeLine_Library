@@ -3,7 +3,7 @@
 export const personalInfo = {
   name: '林志翰',
   title: '前端工程師',
-  photo: '' // 留空將顯示預設 👤 圖示，之後可替換為實際照片路徑
+  photo: 'public/images/person/E1DCD153-172C-4B3F-8094-275BCCDF1D6C.webp' // 留空將顯示預設 👤 圖示，之後可替換為實際照片路徑
 }
 
 //! =============== 2. 摘要 ===============
@@ -30,8 +30,7 @@ export const workExperience = {
       items: [
         '在時程內接續開發並完成 13 項功能，確保系統順利驗收',
         '優化既有程式碼庫，修復多個Bug，顯著提升系統穩定性',
-        '成功將專案由 Webpack 遷移至 Vite，改善了開發環境的啟動與熱更新速度',
-        '優化部署策略：主動將部署方案從 GitHub Pages 遷移至 Cloudflare Pages，實現全球 CDN 加速，並設計雙平台兼容架構，展現 DevOps 與 CI/CD 實戰能力'
+        '成功將專案由 Webpack 遷移至 Vite，改善了開發環境的啟動與熱更新速度'
       ]
     },
     {

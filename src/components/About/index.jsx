@@ -31,12 +31,12 @@ import useDocumentTitle from '../../hooks/useDocumentTitle'
  */
 const About = () => {
   // 設置頁面標題
-  useDocumentTitle('關於我');
+  useDocumentTitle('關於我')
 
   return (
     <ThemeProvider theme={muiTheme}>
       <Container
-        maxWidth="lg"
+        maxWidth='lg'
         sx={{
           py: 6,
           backgroundColor: colors.background.primary,
@@ -70,3 +70,4 @@ const About = () => {
 }
 
 export default About
+

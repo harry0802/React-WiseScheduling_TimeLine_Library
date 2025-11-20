@@ -52,7 +52,7 @@ function AppLayout() {
         </ErrorBoundary>
       </Content>
       <Footer>
-        <p>© {new Date().getFullYear()} 時間軸專案. 保留所有權利.</p>
+        <p>© {new Date().getFullYear()} TIIP 模具產業高階製造系統 · Crafted with React</p>
         {isHomePage && (
           <DogWrapper>
             <DogMascot />

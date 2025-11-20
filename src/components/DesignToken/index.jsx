@@ -21,17 +21,18 @@ import { colors } from '../../designTokens'
 import ClippedCreamPaper from './styles/ClippedCreamPaper'
 import OctagonImage from './styles/OctagonImage'
 import {
-  highlightBoxStyle,
-  tokenCategoryCardStyle
+  highlightBoxStyle
 } from './styles/sectionStyles'
 import {
   namingExamples,
   scssExample,
   cssVariablesExample,
   systemTokenExample,
-  tokenStructureExample,
-  colorsObjectExample,
-  tokenCategories
+  figmaThemeExample,
+  semanticColorExample,
+  emotionGlobalStylesExample,
+  muiThemeIntegrationExample,
+  figmaArchitectureExample
 } from './data/exampleData'
 // 共用組件
 import CenteredImage from './components/shared/CenteredImage'
@@ -112,10 +113,9 @@ const DesignToken = () => {
               paragraph
             >
               <strong>1. 樣式的重複勞動：</strong>
-              設計稿中的佈局、文字、顏色等核心元素，需要前端工程師花費大量時間手動轉譯為程式碼。儘管近年來出現了如
-              Zeplin、藍湖等協作平台，可以自動生成部分 CSS
-              程式碼，但它們難以完全滿足 Web、iOS、Android
-              等多平台的代碼需求，跨平台的轉譯成本依然很高。
+              將設計稿中的佈局、文字與色彩等核心元素轉換為程式碼，長期消耗前端工程師大量精力。雖然
+              Figma 等協作平台已能輔助生成部分 CSS，但在面對 Web、iOS 與 Android
+              的多端統一需求時，這些工具仍難以自動解決平台間的語法差異，導致跨平台開發與維護成本居高不下。
             </Typography>
             <Typography
               variant='body1'
@@ -582,7 +582,7 @@ const DesignToken = () => {
         {/* Token 架構 */}
         <ClippedCreamPaper>
           <SectionTitle
-            title='CSS Design Tokens 在專案中的最佳實踐架構'
+            title='CSS Design Tokens 在專案中的實踐架構'
             showDivider={false}
           />
           <Typography
@@ -590,115 +590,148 @@ const DesignToken = () => {
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            在導入 Design Tokens
-            的過程中，建立一套清晰、可擴展的組織架構至關重要。這不僅能讓開發者快速找到並使用
-            Tokens，也為未來的設計系統自動化、主題切換等功能奠定堅實的基礎。
+            在雞舍專案中，我們建立了一套與設計團隊高度同步的 Design Token 系統。
+            這套系統的核心在於「設計協作」與「技術彈性」。
           </Typography>
-          <Typography
-            variant='body1'
-            sx={{ color: colors.text.primary }}
-            paragraph
-          >
-            以下介紹一種業界最為普遍且高效的 Token
-            管理架構，它結合了「按屬性分類」、「模組化管理」與「CSS
-            變數注入」的優點。
-          </Typography>
+          <Box sx={{ pl: 2, mb: 3 }}>
+            <Typography
+              variant='body1'
+              sx={{ color: colors.text.primary }}
+              paragraph
+            >
+              <strong>1. 與設計師深度協作 (Figma Variables)：</strong>
+              我們的 Token 定義並非憑空產生，而是直接對應設計師在 Figma 中維護的
+              Variables。這確保了設計稿 (Design) 與程式碼 (Code)
+              使用完全一致的語言，大幅降低了溝通成本。
+            </Typography>
+            <Typography
+              variant='body1'
+              sx={{ color: colors.text.primary }}
+              paragraph
+            >
+              <strong>2. 為商業合作佈局 (Emotion & White-labeling)：</strong>
+              考慮到未來專案可能面臨的「品牌替換 (White-labeling)」商業需求，
+              我們選擇使用 <strong>Emotion</strong> 來管理樣式。透過 CSS
+              Variables 的動態注入，我們可以在不修改組件程式碼的情況下，
+              快速為不同的商業合作夥伴切換整站的品牌主題色。
+            </Typography>
+          </Box>
+
           <ContentDivider />
-          <SubsectionTitle title='1. 核心原則：按設計屬性「大類型」拆分' />
-          <Typography
-            variant='body2'
-            sx={{ color: colors.text.primary }}
-            paragraph
-          >
-            第一步是將所有的 Design Tokens 按照其 CSS
-            屬性進行分類。這種方式非常直觀，完全對應設計師與開發者共同的認知模型。
-          </Typography>
-          <Typography
-            variant='body2'
-            sx={{ color: colors.text.primary }}
-            paragraph
-          >
-            常見的分類目錄如下：
-          </Typography>
-          <Grid
-            container
-            spacing={2}
-            sx={{ mb: 3 }}
-          >
-            {tokenCategories.map((item, index) => (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                key={index}
-              >
-                <Box sx={tokenCategoryCardStyle}>
-                  <Typography
-                    variant='subtitle1'
-                    sx={{ fontWeight: 600, fontFamily: 'monospace' }}
-                  >
-                    {item.category}
-                  </Typography>
-                  <Typography
-                    variant='body2'
-                    sx={{ color: colors.text.primary }}
-                  >
-                    {item.description}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-          <ContentDivider />
-          <SubsectionTitle title='2. 檔案與目錄的組織結構' />
-          <Typography
-            variant='body2'
-            sx={{ color: colors.text.primary }}
-            paragraph
-          >
-            基於上述分類，我們可以在專案中建立對應的檔案結構。推薦在 src/styles
-            或 src/theme 目錄下建立一個 tokens 資料夾來集中管理。
-          </Typography>
+          <SubsectionTitle title='1. 檔案結構：模組化管理' />
           <SyntaxHighlighter
             language='bash'
             style={vscDarkPlus}
           >
-            {tokenStructureExample}
+            {figmaArchitectureExample}
           </SyntaxHighlighter>
+
           <ContentDivider />
-          <SubsectionTitle title='3. 物件化的內部檔案結構' />
+          <SubsectionTitle title='2. 定義層：Figma Primitives (theme.ts)' />
           <Typography
             variant='body2'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            在每一個 Token 檔案內部，使用 JavaScript/TypeScript
-            物件來進行更細緻的分類，增加語義化並避免命名衝突。
-          </Typography>
-          <Typography
-            variant='body2'
-            sx={{ color: colors.text.primary }}
-            paragraph
-          >
-            以 colors.ts 為例：
+            這裡忠實還原了設計師在 Figma 中的原始變數定義，如{' '}
+            <InlineCode>myosotis</InlineCode> (品牌藍) 與{' '}
+            <InlineCode>twilight</InlineCode> (品牌綠)。
           </Typography>
           <SyntaxHighlighter
             language='typescript'
             style={vscDarkPlus}
           >
-            {colorsObjectExample}
+            {figmaThemeExample}
           </SyntaxHighlighter>
-          <Alert
-            severity='success'
-            sx={{ mt: 3 }}
+
+          <ContentDivider />
+          <SubsectionTitle title='3. 語意層：Semantic Mapping (color.ts)' />
+          <Typography
+            variant='body2'
+            sx={{ color: colors.text.primary }}
+            paragraph
           >
-            <Typography variant='body2'>
-              <strong>總結：</strong>採用「以設計屬性大類拆分 → 檔案模組化 →
-              物件結構化 → 統一出口管理 → 動態生成 CSS
-              Variables」的架構，是目前管理 Design Tokens 最穩健且主流的方式。
-            </Typography>
-          </Alert>
+            將原始顏色映射到具體的語意用途（如 primary, surface），讓開發者使用時只需關注「用途」而非「色碼」。
+          </Typography>
+          <SyntaxHighlighter
+            language='typescript'
+            style={vscDarkPlus}
+          >
+            {semanticColorExample}
+          </SyntaxHighlighter>
+
+          <ContentDivider />
+          <SubsectionTitle title='4. 注入層：Emotion Global Styles' />
+          <Typography
+            variant='body2'
+            sx={{ color: colors.text.primary }}
+            paragraph
+          >
+            利用 Emotion 的 <InlineCode>&lt;Global /&gt;</InlineCode>{' '}
+            組件將計算好的變數注入瀏覽器。這是實現「一鍵換膚」的關鍵技術點。
+          </Typography>
+          <SyntaxHighlighter
+            language='typescript'
+            style={vscDarkPlus}
+          >
+            {emotionGlobalStylesExample}
+          </SyntaxHighlighter>
+
+          <ContentDivider />
+          <SubsectionTitle title='5. 整合層：MUI Theme Integration' />
+          <Typography
+            variant='body2'
+            sx={{ color: colors.text.primary }}
+            paragraph
+          >
+            最後，將定義好的 Token 整合至 MUI
+            Theme，確保所有現成組件也能自動繼承最新的品牌設計規範。
+          </Typography>
+          <SyntaxHighlighter
+            language='typescript'
+            style={vscDarkPlus}
+          >
+            {muiThemeIntegrationExample}
+          </SyntaxHighlighter>
         </ClippedCreamPaper>
+
+        {/* 重點 */}
+        <Box sx={highlightBoxStyle}>
+          <SubsectionTitle
+            title='🚀 架構優勢總結'
+            sx={{ color: colors.accent.primary }}
+          />
+          <Box
+            component='ul'
+            sx={{ pl: 3 }}
+          >
+            <Typography
+              component='li'
+              variant='body2'
+              sx={{ color: colors.text.primary }}
+              paragraph
+            >
+              <strong>設計同步：</strong> 變數直接對應
+              Figma，消除設計與開發的溝通落差。
+            </Typography>
+            <Typography
+              component='li'
+              variant='body2'
+              sx={{ color: colors.text.primary }}
+              paragraph
+            >
+              <strong>商業彈性：</strong> 基於 Emotion 的架構，讓專案具備快速適應不同品牌識別 (CI) 的能力。
+            </Typography>
+            <Typography
+              component='li'
+              variant='body2'
+              sx={{ color: colors.text.primary }}
+              paragraph
+            >
+              <strong>開發一致：</strong> 透過 MUI Theme 封裝，開發者可直接使用語意化屬性，無需記憶色碼。
+            </Typography>
+          </Box>
+        </Box>
 
         {/* CSS Variables vs ThemeProvider */}
         <ClippedCreamPaper>
