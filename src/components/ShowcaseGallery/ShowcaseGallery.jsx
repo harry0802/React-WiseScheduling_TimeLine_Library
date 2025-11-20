@@ -207,8 +207,13 @@ const ItemDetails = React.memo(({ item, carouselRef, departmentPositions }) => {
       const handleClick = (e) => {
         e.preventDefault()
 
+        // 檢查是否為內部路由連結（格式：#route:/xxx）
+        if (href?.startsWith('#route:')) {
+          const route = href.replace('#route:', '')
+          window.open(route, '_blank', 'noopener,noreferrer')
+        }
         // 檢查是否為系統跳轉連結（格式：#system-xxx）
-        if (href?.startsWith('#system-')) {
+        else if (href?.startsWith('#system-')) {
           const systemName = decodeURIComponent(href.replace('#system-', ''))
 
           // 在 departmentPositions 中查找對應系統的 startIndex

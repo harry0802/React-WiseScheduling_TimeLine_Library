@@ -72,7 +72,7 @@ export const ImageContainer = styled.div`
   img {
     width: 100%;
     height: 100%;
-    object-fit: fill;
+    object-fit: contain;
   }
 
   .placeholder {
@@ -130,10 +130,8 @@ export const ProgressBarFill = styled.div`
     ${colors.accent.primary},
     ${colors.accent.primaryLight}
   );
-  box-shadow:
-    0 0 16px ${colors.accent.primary}ff,
-    0 0 32px ${colors.accent.primary}99,
-    0 0 48px ${colors.accent.primary}66;
+  box-shadow: 0 0 16px ${colors.accent.primary}ff,
+    0 0 32px ${colors.accent.primary}99, 0 0 48px ${colors.accent.primary}66;
   transition: height 0.1s ease-out;
 `
 
@@ -157,8 +155,7 @@ export const DepartmentMarker = styled(BaseMarker)`
 
   &:hover .marker-line {
     width: 14px;
-    box-shadow:
-      0 0 8px ${colors.accent.primaryLight}ff,
+    box-shadow: 0 0 8px ${colors.accent.primaryLight}ff,
       0 0 16px ${colors.accent.primary}cc;
   }
 
@@ -185,8 +182,7 @@ export const MarkerLine = styled.div`
     height: 3px;
     opacity: 1;
     background: ${colors.accent.primaryLight};
-    box-shadow:
-      0 0 8px ${colors.accent.primaryLight}ff,
+    box-shadow: 0 0 8px ${colors.accent.primaryLight}ff,
       0 0 16px ${colors.accent.primary}cc;
   }
 `
@@ -224,8 +220,7 @@ export const MarkerLabel = styled.div`
     opacity: 1;
     font-size: 0.75rem;
     color: ${colors.text.inverse};
-    text-shadow:
-      0 0 8px ${colors.accent.primaryLight}99,
+    text-shadow: 0 0 8px ${colors.accent.primaryLight}99,
       0 2px 4px rgba(0, 0, 0, 0.7);
   }
 
@@ -262,8 +257,7 @@ export const SystemMarker = styled(BaseMarker)`
 
   &:hover .system-line {
     width: 7px;
-    box-shadow:
-      0 0 6px ${colors.accent.primaryLight}cc,
+    box-shadow: 0 0 6px ${colors.accent.primaryLight}cc,
       0 0 12px ${colors.accent.primary}66;
   }
 
@@ -289,8 +283,7 @@ export const SystemLine = styled.div`
     height: 1.5px;
     opacity: 0.9;
     background: ${colors.accent.primaryLight};
-    box-shadow:
-      0 0 6px ${colors.accent.primaryLight}cc,
+    box-shadow: 0 0 6px ${colors.accent.primaryLight}cc,
       0 0 12px ${colors.accent.primary}66;
   }
 `
@@ -323,8 +316,7 @@ export const SystemLabel = styled.div`
     font-size: 0.75rem;
     font-weight: 400;
     color: ${colors.text.inverse};
-    text-shadow:
-      0 0 6px ${colors.accent.primaryLight}66,
+    text-shadow: 0 0 6px ${colors.accent.primaryLight}66,
       0 2px 4px rgba(0, 0, 0, 0.7);
   }
 `
