@@ -345,7 +345,15 @@ export const CarouselGridItem = styled(Box)`
 `
 
 export const CarouselBox = styled(Box)`
-  height: 710px;
+  height: 300px;
+
+  @media screen and (min-width: 900px) {
+    height: 400px;
+  }
+  @media screen and (min-width: 1200px) {
+    height: 600px;
+  }
+
   width: 100%;
 `
 
