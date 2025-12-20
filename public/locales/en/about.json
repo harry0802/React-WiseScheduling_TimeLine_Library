@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "title": "About Me"
+  },
+  "personal": {
+    "name": "Harry Lin",
+    "title": "Frontend Engineer"
+  },
+  "summary": {
+    "title": "Summary",
+    "paragraphs": [
+      "I am a passionate and learning-oriented Frontend Engineer. In my first job, I deeply realized that <strong>communication and teamwork</strong> are the core drivers of project success. I enjoy working closely with PMs, designers, and backend teammates. In startup challenges, I <strong>proactively propose solutions</strong> and help the team adopt new technologies and optimize workflows with management support.",
+      "Currently seeking the next stage to contribute my skills and continue growing."
+    ]
+  },
+  "work": {
+    "title": "Work Experience",
+    "company": "Twin Shoulder Co., Ltd.",
+    "position": "Frontend Engineer",
+    "duration": "1 year 3 months",
+    "overview": "During this period, I worked as a Frontend Engineer, collaborating with backend, UI/UX designers, and product managers. I enjoy sharing and communicating. Through team efforts, our project became the only successfully delivered project in the company and received recognition from the technical lead.",
+    "achievements": {
+      "title": "Key Achievements",
+      "manufacturing": {
+        "title": "Smart Manufacturing Project",
+        "items": [
+          "Delivered 13 features on schedule with 100% acceptance rate, ensuring successful system handover",
+          "Optimized codebase and resolved 50+ critical bugs, improving system stability by 40%",
+          "Migrated project from Webpack to Vite, achieving 83% faster dev startup and 85% faster HMR"
+        ]
+      },
+      "agriculture": {
+        "title": "Smart Agriculture Project",
+        "items": [
+          "Took over and planned new project architecture, including components, permissions, folder structure, API, and routing design",
+          "Migrated project to Vite and successfully introduced TypeScript, laying a solid foundation for future maintainability and stability"
+        ]
+      }
+    },
+    "contributions": {
+      "title": "Technical Contributions",
+      "designToken": {
+        "title": "Promoted Design Token Concept",
+        "description": "Observed potential pain points in design-dev workflow during collaboration and proactively proposed introducing Design Tokens to management. After gaining approval, I researched and collaborated with designers and management to establish a collaboration model that fits team needs. Hosted a sharing session to explain implementation from a frontend perspective, successfully piloted in the project, and improved design-dev collaboration efficiency."
+      },
+      "typescript": {
+        "title": "Introduced TypeScript",
+        "description": "To improve long-term project stability, I suggested introducing TypeScript in new projects to management. After gaining support, I successfully applied it to project development through self-learning."
+      },
+      "patterns": {
+        "title": "Knowledge Sharing",
+        "description": "Established comprehensive development and maintenance documentation for projects (including environment setup, architecture explanations, design patterns), ensuring complete preservation of technical details and reducing subsequent maintenance barriers."
+      }
+    },
+    "challenges": {
+      "title": "Challenges Overcome",
+      "design": {
+        "title": "Addressing Design Resource Shortage",
+        "description": "Under the challenge of limited design resources and tight client deadlines, I proactively took on partial page design work. I collected extensive design inspiration and open-source resources, completed pages without copyright infringement, ultimately gaining client approval and becoming an important part of the product demo."
+      },
+      "commercial": {
+        "title": "Overcoming Commercial Software Limitations",
+        "description": "To meet client customization needs for Gantt charts, under the situation of no budget for commercial solutions, I actively researched various open-source options. I finally found a highly flexible Gantt chart project, negotiated with PM to confirm feasibility, and successfully developed functionality that met acceptance standards."
+      }
+    }
+  },
+  "skills": {
+    "title": "Technical Skills",
+    "languages": {
+      "title": "Languages",
+      "items": ["TypeScript", "JavaScript (ES6+)"]
+    },
+    "frameworks": {
+      "title": "Frameworks",
+      "items": ["React", "Vue"]
+    },
+    "libraries": {
+      "title": "Libraries",
+      "items": [
+        "MUI",
+        "Ant Design",
+        "Day.js",
+        "Styled Components",
+        "Emotion",
+        "SCSS",
+        "Tailwind CSS",
+        "Zod",
+        "React Hook Form",
+        "Zustand",
+        "Redux"
+      ]
+    },
+    "tools": {
+      "title": "Tools",
+      "items": [
+        "Git",
+        "npm",
+        "Vite",
+        "GitHub Actions",
+        "Cloudflare Pages",
+        "Obsidian",
+        "Excalidraw",
+        "Docker"
+      ]
+    }
+  },
+  "strengths": {
+    "title": "Core Strengths",
+    "items": [
+      {
+        "title": "Independent Development Capability",
+        "description": "Able to independently plan project architecture, take over and complete feature development, mastering from design to implementation"
+      },
+      {
+        "title": "Determination to Overcome Difficulties",
+        "description": "Facing resource constraints and technical challenges, proactively find solutions and execute implementation"
+      },
+      {
+        "title": "Technology Advocate",
+        "description": "Not only focus on development, but also proactively propose technical improvement suggestions and help team adoption"
+      },
+      {
+        "title": "Continuous Learning",
+        "description": "Master new technologies through self-learning (such as TypeScript, Design Token) and share with the team"
+      },
+      {
+        "title": "Cross-functional Collaboration",
+        "description": "Work closely with PMs, designers, and backend engineers to ensure smooth project progress"
+      }
+    ]
+  }
+}
+

@@ -11,10 +11,12 @@ import {
   IconButton
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
+import { useTranslation } from 'react-i18next'
 import { colors } from '../designTokens/colors'
 import { spacing } from '../designTokens/spacing'
 import { screenSizes } from '../styles/SharedStyles'
 import HamburgerMenu from './HamburgerMenu'
+import LanguageSwitcher from './LanguageSwitcher'
 import useNavbarSelector, {
   delayedSelectorUpdate
 } from '../hooks/useNavbarSelector'
@@ -33,31 +35,35 @@ import useNavbarSelector, {
 const NAVBAR_BG = colors.background.primary
 
 /**
- * Navigation menu items configuration
- * @type {NavItemConfig[]}
+ * Custom hook for navigation items with i18n support
+ * @returns {NavItemConfig[]} Navigation items with translated labels
  */
-const navItems = [
-  {
-    to: '/',
-    label: '首頁',
-    src: '/Icon/hammer.png'
-  },
-  {
-    to: '/timeline',
-    label: '時間軸',
-    src: '/Icon/bow-and-arrow.png'
-  },
-  {
-    to: '/about',
-    label: '關於',
-    src: '/Icon/laser-sword.png'
-  },
-  {
-    to: '/contact',
-    label: '聯絡',
-    src: '/Icon/aircraft.png'
-  }
-]
+const useNavItems = () => {
+  const { t } = useTranslation('common')
+
+  return [
+    {
+      to: '/',
+      label: t('nav.home'),
+      src: '/Icon/hammer.png'
+    },
+    {
+      to: '/timeline',
+      label: t('nav.timeline'),
+      src: '/Icon/bow-and-arrow.png'
+    },
+    {
+      to: '/about',
+      label: t('nav.about'),
+      src: '/Icon/laser-sword.png'
+    },
+    {
+      to: '/contact',
+      label: t('nav.contact'),
+      src: '/Icon/aircraft.png'
+    }
+  ]
+}
 
 //! =============== 3. Styled Components ===============
 
@@ -67,6 +73,7 @@ const NavbarContainer = styled.nav`
   flex-direction: row;
   align-items: center;
   position: relative;
+  overflow: hidden;
 
   /* Box Model */
   padding: 0;
@@ -89,6 +96,7 @@ const NavbarBrand = styled.div`
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 10;
 
   /* Box Model */
   padding: ${spacing.xs} ${spacing.sm};
@@ -178,7 +186,10 @@ const NavbarContent = styled.div`
 
   /* Desktop Layout - 只在桌面版顯示 */
   @media (min-width: ${screenSizes.desktop}) {
-    display: block;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: flex-end;
   }
 `
 
@@ -187,6 +198,7 @@ const NavMenu = styled.ul`
   display: flex;
   flex-direction: column;
   position: relative;
+  z-index: 5;
 
   /* Box Model */
   padding: 0;
@@ -198,6 +210,9 @@ const NavMenu = styled.ul`
   /* Desktop Layout */
   @media (min-width: ${screenSizes.desktop}) {
     flex-direction: row;
+    flex: 1;
+    justify-content: space-around;
+    max-width: 600px;
   }
 `
 
@@ -419,10 +434,14 @@ const NavbarToggler = styled.button`
  * <Navbar />
  */
 function Navbar() {
+  const { t } = useTranslation('common')
   const location = useLocation()
   const navigate = useNavigate()
   const navMenuRef = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
+
+  // Get navigation items with i18n
+  const navItems = useNavItems()
 
   // Use custom hook for selector positioning and animation
   const { selectorStyle, isInitialized, updateSelector } = useNavbarSelector(
@@ -460,9 +479,9 @@ function Navbar() {
 
         <NavbarBrand onClick={handleLogoClick}>
           <span className='text mobile-only'>H</span>
-          <span className='text desktop-only'>Harry&apos;s</span>
+          <span className='text desktop-only'>{t('brand.name')}</span>
           <span className='bracket'>&lt;/&gt;</span>
-          <span className='text desktop-only'>Corner</span>
+          <span className='text desktop-only'>{t('brand.corner')}</span>
           <span className='text mobile-only'>C</span>
         </NavbarBrand>
 
@@ -491,6 +510,19 @@ function Navbar() {
               </NavItem>
             ))}
           </NavMenu>
+
+          {/* Language Switcher - 放在右側 */}
+          <Box
+            sx={{
+              display: { xs: 'none', md: 'flex' },
+              alignItems: 'center',
+              paddingRight: 2,
+              position: 'relative',
+              zIndex: 20
+            }}
+          >
+            <LanguageSwitcher />
+          </Box>
         </NavbarContent>
       </NavbarContainer>
 
@@ -548,12 +580,17 @@ function Navbar() {
             <span className='text'>H</span>
             <span className='bracket'>&lt;/&gt;</span>
           </Box>
-          <IconButton
-            onClick={handleToggle}
-            sx={{ color: colors.text.inverse }}
-          >
-            <CloseIcon />
-          </IconButton>
+
+          {/* Language Switcher & Close Button */}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <LanguageSwitcher />
+            <IconButton
+              onClick={handleToggle}
+              sx={{ color: colors.text.inverse }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </Box>
 
         {/* Menu Items */}

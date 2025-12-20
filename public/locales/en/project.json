@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "title": "Project Showcase",
+    "subtitle": "TIIP - Advanced Manufacturing for Mold Industry",
+    "documentTitle": "Project Showcase"
+  },
+  "about": {
+    "title": "About This Showcase",
+    "content": [
+      "This is an industrial-grade smart manufacturing management system designed specifically for the mold industry, integrating core functions such as production scheduling, real-time monitoring, and data analysis.",
+      "The project adopts modern frontend technology stack, focusing on user experience and system performance, successfully helping factories improve production efficiency and optimize resource allocation."
+    ]
+  },
+  "projects": {
+    "production": {
+      "id": 1,
+      "title": "Production Management - Manufacturing Execution System",
+      "description": "As the frontend engineer for this project, I was responsible for visualizing complex production management workflows and managing scheduling and cost analysis for **39 injection molding machines** across the facility.\n\n**My Core Contributions**:\n1. **[Smart Scheduling System](#system-Smart Scheduling)**: Customized the open-source `vis-timeline` Gantt chart with **840+ lines of industrial-grade code** to support real-time scheduling management across 4 production areas. Utilized `useRef` to prevent unnecessary re-renders, `useMemo` for data optimization, and implemented view center preservation.\n2. **[Internal Quote System](#system-Internal Quote System)**: Led complex form development using **React Hook Form + Zod** to handle multi-process cost calculations (molding/post-processing/inspection). Modularized calculation logic into dedicated Hooks and managed form state with Zustand to ensure real-time formula accuracy.\n3. **UI/UX Design & Implementation**: Due to limited design resources, I proactively took on interface design for the \"[Smart Cost Analysis](#system-Smart Cost Analysis)\" and \"[Smart Scheduling](#system-Smart Scheduling)\" systems, participating throughout client requirement interviews to ensure features met operational needs.\n4. **ERP Data Integration**: Collaborated with backend teams to integrate order, mold, and part number data from the Lingyue ERP system using RTK Query for API state management and automatic caching.\n\n🔗 **[View Project - Smart Scheduling System](#route:/wise-scheduling)**",
+      "systems": {
+        "schedule": "Production Schedule",
+        "quote": "Internal Quote System",
+        "bom": "Product BOM History",
+        "costAnalysis": "Smart Cost Analysis",
+        "smartSchedule": "Smart Scheduling"
+      }
+    },
+    "qualityControl": {
+      "id": 2,
+      "title": "Quality Control - Inspection Management System",
+      "description": "Developed a **paperless inspection system** for the quality control department to ensure data integrity and traceability.\n\n**Technical Implementation Highlights**:\n1. **Dual Authentication Architecture**: Implemented segregated verification workflows for QC personnel and production supervisors using React Router's nested routing design (`/:machineSN/:userType/dashboard`), ensuring all inspection records are traceable to specific operators.\n2. **Dynamic Form System**: Developed dynamic forms supporting \"First Article\", \"Last Article\", and \"IPQC Patrol\" inspections using **React Hook Form + Zod**, with real-time data submission to establish comprehensive digital quality records.\n3. **Layered Architecture Design**: Separated business logic (domain), UI (components), and state management (hooks) to improve code maintainability.",
+      "systems": {
+        "inspection": "Real-time QC Inspection"
+      }
+    },
+    "sales": {
+      "id": 3,
+      "title": "Sales Department - Quote Management System",
+      "description": "Developed a professional customer-facing quote system integrating customer management, order tracking, and quote history queries.\n\n**Technical Features**:\n1. **Shared Architecture with Internal Quote System**: Reused component library (ProcessCostAnalysis, ProcessForms, ProfitDashboard) while separating business logic through independent service layers (salesServices vs factoryServices). Sales system emphasizes profit display, while internal system focuses on process details.\n2. **Unified Calculation Logic**: Used `ComputationUtilsV1.js` to ensure frontend-backend calculation consistency, with **Zod** for data validation.\n3. **Intuitive User Interface**: Built consistent design system using Material-UI + styled-components to help sales teams generate quotes quickly and reduce customer response time.",
+      "systems": {
+        "quote": "Sales Quote System"
+      }
+    },
+    "manufacturing": {
+      "id": 4,
+      "title": "Manufacturing Department - Production Execution System",
+      "description": "Developed comprehensive production execution tools for on-site personnel, covering equipment maintenance, machine status monitoring, performance dashboards, real-time production tracking, and facility-wide utilization analysis.\n\n**Core Technical Implementation**:\n1. **Machine Status Management (Three-Layer Validation Architecture)**:\n   - UI Layer: StatusSlider provides frontend real-time validation\n   - Business Layer: useStatusManager Hook handles business logic\n   - Validator Layer: statusValidator ensures state transition rules (RUN/IDLE/TUNING/TESTING/OFFLINE)\n   Utilized `forwardRef` and `useImperativeHandle` to allow parent component control over form submission timing.\n2. **[Facility Performance Dashboard](#system-Performance Dashboard)**: **Fully self-designed and developed**. With no design resources available, I independently completed UI/UX design, technology selection, and implementation. Researched and selected open-source packages `@iimm/data-view-react` + **ECharts** to integrate **5 subsystems** ([Performance Dashboard](#system-Performance Dashboard), Real-time OEE, [Production Progress Tracking](#system-Production Progress Tracking), Delivery Trends, OEE Insights) for full-screen data visualization. Received high praise from management and clients after demo. Implemented temporary style mechanism with automatic cleanup on component unmount to prevent interference with other pages.\n3. **[Maintenance System](#system-Machine Maintenance)**: Used Zustand for header parameter state management and RTK Query for API handling, implementing unified drawer state management with three-level approval workflow (Inspector/Re-inspector/Approver). Also includes [Mold Maintenance](#system-Mold Maintenance) and [Comprehensive Maintenance](#system-Comprehensive Maintenance) systems.\n4. **Production Tracking**: Includes [Dispatch System](#system-Dispatch System) and [Machine Status & Maintenance Records](#system-Machine Status Operations), using multi-layer Context Provider architecture to manage complex state (ProductionRecordProvider, ProcMaterialsProvider, etc.) with Redux Slice for feature state separation.\n\n🔗 **[View Project - Facility Performance Dashboard](#route:/ManufacturingLiveMonitor)**",
+      "systems": {
+        "machineMaintenance": "Machine Maintenance",
+        "moldMaintenance": "Mold Maintenance",
+        "dispatch": "Dispatch System",
+        "machineStatus": "Machine Status Operations",
+        "comprehensiveMaintenance": "Comprehensive Maintenance",
+        "performanceDashboard": "Performance Dashboard",
+        "productionTracking": "Production Progress Tracking",
+        "equipmentUtilization": "Equipment Utilization"
+      }
+    },
+    "portfolio": {
+      "id": 5,
+      "title": "Personal Portfolio Website",
+      "description": "This portfolio website is itself a complete frontend project, demonstrating my continuous technical skill development after leaving my previous position.\n\n**Technical Highlights**:\n1. **Internationalization (i18n) Implementation**: Integrated **i18next + react-i18next** to enable Traditional Chinese/English bilingual switching, using namespace architecture to organize translation files, HTTP backend for dynamic language resource loading, and browser language detector for automatic user language detection.\n2. **Design System (Design Tokens)**: Established a comprehensive design token system defining colors, spacing, typography, borders, shadows, and other design specifications to ensure visual consistency across the entire site.\n3. **Responsive Design**: Utilized **Material-UI + Styled-Components** dual styling system, with MUI handling complex UI components and Styled-Components managing global theming and responsive utilities.\n4. **Modern Development Toolchain**: Adopted **Vite** build tool, **React Router v6** for routing management, and **React Hook Form + Zod** for form validation.\n5. **Deployment & CI/CD**: Deployed on **Cloudflare Pages** with integrated GitHub Actions for automated deployment workflows.\n\nThis project demonstrates my comprehensive understanding of frontend engineering, from architecture design, UI/UX implementation, internationalization support, to automated deployment capabilities.",
+      "systems": {
+        "home": "Home",
+        "about": "About Me",
+        "showcase": "Project Showcase",
+        "timeline": "Timeline",
+        "designToken": "Design Token System"
+      }
+    }
+  },
+  "ui": {
+    "techStack": "Tech Stack",
+    "noItems": "No items to showcase",
+    "showcase": "Showcase",
+    "worksShowcase": "Works Showcase",
+    "aboutShowcase": "About This Showcase",
+    "aboutDefault": "This is a showcase gallery component."
+  }
+}

@@ -2,6 +2,7 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Container, Typography, Box } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import muiTheme from '../styles/muiTheme'
 import {
   GoldBorderContainer,
@@ -27,10 +28,10 @@ import LoadingSpinner from '../components/LoadingSpinner'
 /**
  * @typedef {object} FeatureCard
  * @property {string} icon
- * @property {string} title
- * @property {string} description
+ * @property {string} title - 由 i18n 提供
+ * @property {string} description - 由 i18n 提供
  * @property {string} link
- * @property {string} buttonText
+ * @property {string} buttonText - 由 i18n 提供
  */
 
 /**
@@ -69,16 +70,41 @@ const fetchAppInfo = async () => {
  * @returns {UseHomeDataReturn}
  */
 function useHomeData() {
+  const { t } = useTranslation('home')
+
   // 使用 React Query 發起查詢
   const { data: appInfo, isLoading } = useQuery({
     queryKey: ['appInfo'],
     queryFn: fetchAppInfo
   })
 
+  // 將 translation 對應到 feature cards
+  const featureCards = HOME_FEATURE_CARDS.map((card, index) => {
+    const cardKeys = [
+      'about',
+      'timeline',
+      'moldIndustry',
+      'designToken',
+      'scheduling',
+      'monitoring',
+      'pigManagement',
+      'contact'
+    ]
+    const cardKey = cardKeys[index]
+
+    return {
+      icon: card.icon,
+      title: t(`cards.${cardKey}.title`),
+      description: t(`cards.${cardKey}.description`),
+      link: card.link,
+      buttonText: t(`cards.${cardKey}.button`)
+    }
+  })
+
   return {
     appInfo,
     isLoading,
-    featureCards: HOME_FEATURE_CARDS
+    featureCards
   }
 }
 
@@ -87,10 +113,11 @@ function useHomeData() {
  * 遵循「專業誠信 AI 協作助手」規範，使用 function 宣告主要組件
  */
 function Home() {
+  const { t } = useTranslation('home')
   const { isLoading, featureCards } = useHomeData()
 
   // 設置頁面標題
-  useDocumentTitle('首頁')
+  useDocumentTitle(t('meta.title'))
 
   // 🛡️ 早期返回 (Guard Clause)，遵循「自我文檔代碼審查」的線性流程原則
   if (isLoading) {
@@ -143,7 +170,7 @@ function Home() {
                   textShadow: `0 2px 8px ${colors.accent.primary}30`
                 }}
               >
-                智慧製造前端工程整合方案
+                {t('hero.title')}
               </Typography>
               <GoldDivider sx={{ width: '100px', height: '3px', mx: 'auto' }} />
               <Typography
@@ -158,8 +185,7 @@ function Home() {
                   opacity: 0.95
                 }}
               >
-                歡迎來到我的個人作品集！這裡展示了我在智慧製造領域的專案經驗，
-                包含生產排程系統、即時監控儀表板等工業級應用開發。
+                {t('hero.subtitle')}
               </Typography>
             </Box>
           </GoldBorderContainer>

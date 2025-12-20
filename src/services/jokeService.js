@@ -167,6 +167,72 @@ export const STATIC_JOKES = [
     setup: "有一天小明說：「老師，小安他人身攻擊我」",
     punchline: "老師：「那你可以用當歸反擊啊！」",
     type: "joke"
+  },
+  {
+    id: 29,
+    setup: "打電話給烏龜（猜蔬菜）",
+    punchline: "苦瓜（Call 龜）",
+    type: "joke"
+  },
+  {
+    id: 30,
+    setup: "你有沒有聽過「沒有和也沒有」的故事？",
+    punchline: "我也沒有",
+    type: "joke"
+  },
+  {
+    id: 31,
+    setup: "你知道西班牙跟葡萄牙中間隔了什麼嗎？",
+    punchline: "牙縫",
+    type: "joke"
+  },
+  {
+    id: 32,
+    setup: "為什麽小白兔不嫁給斑馬呢?",
+    punchline: "因為兔媽媽說紋身不是好孩子",
+    type: "joke"
+  },
+  {
+    id: 33,
+    setup: "開什麼品牌車子的人最有禮貌？",
+    punchline: "Nissan，因為他們常常Nissan往來",
+    type: "joke"
+  },
+  {
+    id: 34,
+    setup: "誰最會烤肉",
+    punchline: "老師，因為考的都沒有教（焦）",
+    type: "joke"
+  },
+  {
+    id: 35,
+    setup: "什麼水果最容易迷路呢？",
+    punchline: "榴槤，因為流連（榴槤）忘返",
+    type: "joke"
+  },
+  {
+    id: 36,
+    setup: "姊姊要生了！這樣我能獲得什麼？",
+    punchline: "成舅感",
+    type: "joke"
+  },
+  {
+    id: 37,
+    setup: "湖口跟林口暢聊了一個晚上，感嘆的說",
+    punchline: "「哇！我們真的有交流道欸」",
+    type: "joke"
+  },
+  {
+    id: 38,
+    setup: "書和筆誰是壞人？",
+    punchline: "書，害人之心「book有」",
+    type: "joke"
+  },
+  {
+    id: 39,
+    setup: "螃蟹為什麼橫著走？",
+    punchline: "有鉗（錢）",
+    type: "joke"
   }
 ];
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Container } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import muiTheme from '../../styles/muiTheme'
 import ProfileHeader from './components/ProfileHeader'
 import SummarySection from './components/SummarySection'
@@ -8,11 +9,11 @@ import WorkExperienceSection from './components/WorkExperienceSection'
 import SkillsSection from './components/SkillsSection'
 import CoreStrengthsSection from './components/CoreStrengthsSection'
 import {
-  personalInfo,
-  summary,
-  workExperience,
-  skills,
-  coreStrengths
+  usePersonalInfo,
+  useSummary,
+  useWorkExperience,
+  useSkills,
+  useCoreStrengths
 } from './data/profileData'
 import { colors } from '../../designTokens'
 import useDocumentTitle from '../../hooks/useDocumentTitle'
@@ -28,10 +29,20 @@ import useDocumentTitle from '../../hooks/useDocumentTitle'
  * - 資料與 UI 完全分離
  * - 每個區塊獨立組件化
  * - 照片左文字右的響應式佈局
+ * - 整合 i18n 支援多語言切換
  */
 const About = () => {
+  const { t } = useTranslation('about')
+
+  // 使用 Custom Hooks 取得翻譯後的資料
+  const personalInfo = usePersonalInfo()
+  const summary = useSummary()
+  const workExperience = useWorkExperience()
+  const skillsData = useSkills()
+  const coreStrengthsData = useCoreStrengths()
+
   // 設置頁面標題
-  useDocumentTitle('關於我')
+  useDocumentTitle(t('meta.title'))
 
   return (
     <ThemeProvider theme={muiTheme}>
@@ -49,9 +60,13 @@ const About = () => {
           photoSrc={personalInfo.photo}
         />
 
-        <SummarySection paragraphs={summary.paragraphs} />
+        <SummarySection
+          title={summary.title}
+          paragraphs={summary.paragraphs}
+        />
 
         <WorkExperienceSection
+          title={workExperience.title}
           company={workExperience.company}
           position={workExperience.position}
           duration={workExperience.duration}
@@ -61,9 +76,16 @@ const About = () => {
           challenges={workExperience.challenges}
         />
 
-        <SkillsSection skills={skills} />
+        <SkillsSection
+          title={skillsData.title}
+          categories={skillsData.categories}
+          skills={skillsData.skills}
+        />
 
-        <CoreStrengthsSection strengths={coreStrengths} />
+        <CoreStrengthsSection
+          title={coreStrengthsData.title}
+          strengths={coreStrengthsData.items}
+        />
       </Container>
     </ThemeProvider>
   )

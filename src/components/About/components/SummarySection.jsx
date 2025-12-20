@@ -8,6 +8,7 @@ import { colors } from '../../../designTokens'
 /**
  * @typedef {object} SummarySectionProps
  * @property {string[]} paragraphs - 摘要段落陣列
+ * @property {string} title - 區塊標題
  */
 
 //! =============== 2. 主要組件 ===============
@@ -17,7 +18,7 @@ import { colors } from '../../../designTokens'
  *
  * @param {SummarySectionProps} props
  */
-const SummarySection = ({ paragraphs }) => {
+const SummarySection = ({ paragraphs, title }) => {
   return (
     <ClippedCreamPaper elevation={2} clipSize="medium" sx={{ mb: 3 }}>
       <Typography
@@ -32,7 +33,7 @@ const SummarySection = ({ paragraphs }) => {
         }}
       >
         <span style={{ fontSize: '1.75rem' }}>💡</span>
-        摘要
+        {title}
       </Typography>
 
       {paragraphs.map((paragraph, index) => (

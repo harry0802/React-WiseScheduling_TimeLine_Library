@@ -153,7 +153,8 @@ const WorkExperienceSection = ({
   overview,
   achievements,
   technicalContributions,
-  challenges
+  challenges,
+  title
 }) => {
   return (
     <ClippedCreamPaper elevation={2} clipSize="medium" sx={{ mb: 3 }}>
@@ -169,7 +170,7 @@ const WorkExperienceSection = ({
         }}
       >
         <span style={{ fontSize: '1.75rem' }}>💼</span>
-        工作經歷
+        {title}
       </Typography>
 
       <Box sx={{ mt: 2 }}>

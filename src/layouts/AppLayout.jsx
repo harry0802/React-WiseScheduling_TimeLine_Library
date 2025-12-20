@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
+import { useTranslation } from 'react-i18next'
 import Navbar from '../components/Navbar'
 import ErrorBoundary from '../components/ErrorBoundary'
 import JokeWidget from '../components/JokeWidget'
@@ -38,6 +39,7 @@ const DogWrapper = styled.div`
 `
 
 function AppLayout() {
+  const { t } = useTranslation('common')
   const location = useLocation()
   // 用於當路由變更時重置錯誤邊界
   const resetKey = location.pathname
@@ -52,7 +54,7 @@ function AppLayout() {
         </ErrorBoundary>
       </Content>
       <Footer>
-        <p>© {new Date().getFullYear()} TIIP 模具產業高階製造系統 · Crafted with React</p>
+        <p>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
         {isHomePage && (
           <DogWrapper>
             <DogMascot />

@@ -1,0 +1,51 @@
+{
+  "hero": {
+    "title": "Smart Manufacturing Frontend Engineering Solutions",
+    "subtitle": "Welcome to my portfolio! Here I showcase my project experience in smart manufacturing, including production scheduling systems, real-time monitoring dashboards, and other industrial-grade applications."
+  },
+  "cards": {
+    "about": {
+      "title": "About Me",
+      "description": "Frontend Engineer specializing in React ecosystem and industrial systems",
+      "button": "View Resume"
+    },
+    "timeline": {
+      "title": "Development Journey",
+      "description": "Project timeline and technology evolution",
+      "button": "View Timeline"
+    },
+    "moldIndustry": {
+      "title": "Mold Industry System",
+      "description": "TIIP Mold Industry Advanced Manufacturing System Showcase",
+      "button": "View Project"
+    },
+    "designToken": {
+      "title": "Design Token Initiative",
+      "description": "Design system standardization to improve design-dev collaboration",
+      "button": "View Design Tokens"
+    },
+    "scheduling": {
+      "title": "Smart Scheduling System",
+      "description": "Industrial-grade production scheduling with multi-area real-time dispatching",
+      "button": "Enter Scheduling"
+    },
+    "monitoring": {
+      "title": "Manufacturing Monitoring Center",
+      "description": "Multi-functional production dashboard with OEE analysis and progress tracking",
+      "button": "Enter Monitor"
+    },
+    "pigManagement": {
+      "title": "Pig Farm Management System",
+      "description": "Livestock management system for tracking inventory and breeding records",
+      "button": "Enter System"
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Feel free to reach out for project collaboration or technical discussion",
+      "button": "Contact Me"
+    }
+  },
+  "meta": {
+    "title": "Home"
+  }
+}

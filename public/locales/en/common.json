@@ -1,0 +1,19 @@
+{
+  "nav": {
+    "home": "Home",
+    "timeline": "Timeline",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "brand": {
+    "name": "Harry's",
+    "corner": "Corner"
+  },
+  "language": {
+    "zh-TW": "繁體中文",
+    "en": "English"
+  },
+  "footer": {
+    "copyright": "© {{year}} TIIP Mold Manufacturing System · Crafted with React"
+  }
+}

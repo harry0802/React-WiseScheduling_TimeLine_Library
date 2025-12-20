@@ -13,6 +13,7 @@ import {
   Container
 } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import muiTheme from '../../styles/muiTheme'
@@ -24,7 +25,6 @@ import {
   highlightBoxStyle
 } from './styles/sectionStyles'
 import {
-  namingExamples,
   scssExample,
   cssVariablesExample,
   systemTokenExample,
@@ -42,6 +42,7 @@ import ExternalLink from './components/shared/ExternalLink'
 import SectionTitle from './components/shared/SectionTitle'
 import SubsectionTitle from './components/shared/SubsectionTitle'
 import QuoteBox from './components/shared/QuoteBox'
+import useDocumentTitle from '../../hooks/useDocumentTitle'
 
 //! =============== 1. Setup & Constants ===============
 
@@ -69,8 +70,14 @@ const headerClipPath =
  * - 提取 SideBanners 到獨立檔案
  * - 使用 theme 系統的響應式斷點
  * - 應用一致的 design tokens
+ * - 整合 i18n 支援多語言切換
  */
 const DesignToken = () => {
+  const { t } = useTranslation('designToken')
+
+  // 設置頁面標題
+  useDocumentTitle(t('meta.title'))
+
   return (
     <ThemeProvider theme={muiTheme}>
       <Container
@@ -91,20 +98,20 @@ const DesignToken = () => {
             gutterBottom
             sx={{ fontWeight: 700, color: colors.accent.primary, mb: 2 }}
           >
-            Design Token 推動
+            {t('meta.title')}
           </Typography>
           <GoldDivider />
         </GoldBorderContainer>
 
         {/* 前言 */}
         <ClippedCreamPaper>
-          <SectionTitle title='前言' />
+          <SectionTitle title={t('intro.title')} />
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            在前端開發的流程中，設計師與工程師的協作密不可分。理想情況是，設計師交付的視覺稿與交互稿，能被工程師以像素級的精準度實現。然而，在設計到開發的轉化過程中，往往存在著一些效率瓶頸：
+            {t('intro.paragraph1')}
           </Typography>
           <Box sx={{ pl: 2, mb: 2 }}>
             <Typography
@@ -112,33 +119,32 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              <strong>1. 樣式的重複勞動：</strong>
-              將設計稿中的佈局、文字與色彩等核心元素轉換為程式碼，長期消耗前端工程師大量精力。雖然
-              Figma 等協作平台已能輔助生成部分 CSS，但在面對 Web、iOS 與 Android
-              的多端統一需求時，這些工具仍難以自動解決平台間的語法差異，導致跨平台開發與維護成本居高不下。
+              <strong>{t('intro.painPoints.styleRepetition.title')}</strong>
+              {t('intro.painPoints.styleRepetition.content')}
             </Typography>
             <Typography
               variant='body1'
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              <strong>2. 更新不同步的困擾：</strong>
-              設計稿的迭代更新，無法即時反映在工程師的程式碼中。傳統流程下，工程師需要取得新的設計稿，透過肉眼比對或依賴標注來找出差異點，再手動修改程式碼。更麻煩的是，有時一個看似微小的改動（例如調整一個全域字體大小），可能會牽一髮而動全身，導致大範圍的程式碼重構。
+              <strong>{t('intro.painPoints.updateSync.title')}</strong>
+              {t('intro.painPoints.updateSync.content')}
             </Typography>
           </Box>
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary }}
           >
-            為了解決這些協作上的難題，<strong>設計系統 (Design System)</strong>{' '}
-            的概念應運而生。
+            {t('intro.conclusion')}
+            <strong>{t('intro.conclusion_bold')}</strong>{' '}
+            {t('intro.conclusion_suffix')}
           </Typography>
         </ClippedCreamPaper>
 
         {/* 什麼是設計系統 */}
         <ClippedCreamPaper>
           <SectionTitle
-            title='什麼是設計系統 (Design System)？'
+            title={t('sections.whatIsDesignSystem.title')}
             showDivider={false}
           />
           <Typography
@@ -146,35 +152,34 @@ const DesignToken = () => {
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            設計系統被譽為
-            <strong>「團隊的單一事實來源 (Single Source of Truth)」</strong>
-            ，它整合了所有設計與開發產品所需的元素。
+            {t('sections.whatIsDesignSystem.paragraph1')}
+            <strong>{t('sections.whatIsDesignSystem.paragraph1_bold')}</strong>
+            {t('sections.whatIsDesignSystem.paragraph1_suffix')}
           </Typography>
           <QuoteBox>
-            &quot;A Design System is the single source of truth which groups all
-            the elements that will allow the teams to design, realize and
-            develop a product.&quot;
+            {t('sections.whatIsDesignSystem.quote')}
           </QuoteBox>
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            在這個系統中，設計師將介面拆解為標準化的組件，並定義好每個組件的樣式、文字屬性、顏色色值等規範。開發者則可以依據這個系統來獲取所需的組件與規範，確保了雙方工作的高度一致性。
+            {t('sections.whatIsDesignSystem.paragraph2')}
           </Typography>
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary }}
           >
-            然而，一個靜態的規範庫如何真正解決前文提到的效率與同步問題呢？這就需要設計系統中的核心——
-            <strong>Design Tokens</strong>。
+            {t('sections.whatIsDesignSystem.paragraph3')}
+            <strong>{t('sections.whatIsDesignSystem.paragraph3_bold')}</strong>
+            {t('sections.whatIsDesignSystem.paragraph3_suffix')}
           </Typography>
         </ClippedCreamPaper>
 
         {/* 什麼是 Design Tokens */}
         <ClippedCreamPaper>
           <SectionTitle
-            title='什麼是 Design Tokens？'
+            title={t('sections.whatIsDesignToken.title')}
             showDivider={false}
           />
           <Typography
@@ -182,41 +187,43 @@ const DesignToken = () => {
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            我們可以將 Design Tokens 理解為
-            <strong>「設計系統中的視覺設計原子」</strong>。
+            {t('sections.whatIsDesignToken.paragraph1')}
+            <strong>{t('sections.whatIsDesignToken.paragraph1_bold')}</strong>
+            {t('sections.whatIsDesignToken.paragraph1_suffix')}
           </Typography>
           <QuoteBox>
-            &quot;Design tokens are the visual design atoms of the design
-            system.&quot;
+            {t('sections.whatIsDesignToken.quote')}
           </QuoteBox>
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            它的核心思想是：
+            {t('sections.whatIsDesignToken.paragraph2')}
             <strong>
-              將設計規範中最基礎的屬性（如顏色、間距、字體大小等）抽象化，並賦予其一個與平台無關的「名稱」（即
-              Token）
+              {t('sections.whatIsDesignToken.paragraph2_bold')}
             </strong>
-            。這個 Token 就如同一個前端開發者熟悉的「變數」。
+            {t('sections.whatIsDesignToken.paragraph2_suffix')}
           </Typography>
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            舉個例子：設計師決定品牌主色為 <InlineCode>#FF5733</InlineCode>
-            。在設計系統中，我們不直接記錄這個色值，而是創建一個名為{' '}
-            <InlineCode>color.brand.primary</InlineCode> 的 Token，並將其值設為{' '}
-            <InlineCode>#FF5733</InlineCode>。
+            {t('sections.whatIsDesignToken.example.intro')}{' '}
+            <InlineCode>{t('sections.whatIsDesignToken.example.intro_code')}</InlineCode>
+            {t('sections.whatIsDesignToken.example.intro_suffix')}{' '}
+            <InlineCode>{t('sections.whatIsDesignToken.example.token_name')}</InlineCode>{' '}
+            {t('sections.whatIsDesignToken.example.token_suffix')}{' '}
+            <InlineCode>{t('sections.whatIsDesignToken.example.token_value')}</InlineCode>
+            {t('sections.whatIsDesignToken.example.token_end')}
           </Typography>
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            這個 Token 接著可以被自動轉換成各個平台所需的格式：
+            {t('sections.whatIsDesignToken.platformConversion.title')}
           </Typography>
           <Box sx={{ mb: 2, pl: 2 }}>
             <Typography
@@ -224,17 +231,17 @@ const DesignToken = () => {
               component='div'
               sx={{ fontFamily: 'monospace', mb: 1 }}
             >
-              • <strong>Web (CSS):</strong>{' '}
-              <InlineCode>--color-brand-primary: #FF5733;</InlineCode>
+              • <strong>{t('sections.whatIsDesignToken.platformConversion.web')}</strong>{' '}
+              <InlineCode>{t('sections.whatIsDesignToken.platformConversion.webCode')}</InlineCode>
             </Typography>
             <Typography
               variant='body2'
               component='div'
               sx={{ fontFamily: 'monospace', mb: 1 }}
             >
-              • <strong>iOS (Swift):</strong>{' '}
+              • <strong>{t('sections.whatIsDesignToken.platformConversion.ios')}</strong>{' '}
               <InlineCode>
-                let colorBrandPrimary = UIColor(hex: &quot;#FF5733&quot;)
+                {t('sections.whatIsDesignToken.platformConversion.iosCode')}
               </InlineCode>
             </Typography>
             <Typography
@@ -242,10 +249,9 @@ const DesignToken = () => {
               component='div'
               sx={{ fontFamily: 'monospace' }}
             >
-              • <strong>Android (XML):</strong>{' '}
+              • <strong>{t('sections.whatIsDesignToken.platformConversion.android')}</strong>{' '}
               <InlineCode>
-                &lt;color
-                name=&quot;color_brand_primary&quot;&gt;#FF5733&lt;/color&gt;
+                {t('sections.whatIsDesignToken.platformConversion.androidCode')}
               </InlineCode>
             </Typography>
           </Box>
@@ -254,14 +260,14 @@ const DesignToken = () => {
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            前端工程師在開發時，不再需要手動複製色值，而是直接引用這個語義化的變數（Token）。
+            {t('sections.whatIsDesignToken.paragraph3')}
           </Typography>
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            這樣做的好處顯而易見：
+            {t('sections.whatIsDesignToken.benefits.title')}
           </Typography>
           <Box sx={{ pl: 2, mb: 2 }}>
             <Typography
@@ -269,19 +275,22 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              • <strong>解決了重複勞動</strong>
-              ：開發者只需引用變數，無需關心具體數值，也無需為不同平台手動轉換。
+              {t('sections.whatIsDesignToken.benefits.repetition.prefix')}
+              <strong>{t('sections.whatIsDesignToken.benefits.repetition.bold')}</strong>
+              {t('sections.whatIsDesignToken.benefits.repetition.content')}
             </Typography>
             <Typography
               variant='body1'
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              • <strong>解決了更新困擾</strong>：當設計師決定將品牌主色改為{' '}
-              <InlineCode>#C70039</InlineCode> 時，只需在設計系統中更新{' '}
-              <InlineCode>color.brand.primary</InlineCode> 這個 Token
-              的值。接著，所有平台的程式碼只需導入最新的 Token
-              檔案，所有使用到此顏色的地方就會自動更新，徹底告別了手動查找和修改的低效率。
+              {t('sections.whatIsDesignToken.benefits.update.prefix')}
+              <strong>{t('sections.whatIsDesignToken.benefits.update.bold')}</strong>
+              {t('sections.whatIsDesignToken.benefits.update.content')}{' '}
+              <InlineCode>{t('sections.whatIsDesignToken.benefits.update.newColor')}</InlineCode>{' '}
+              {t('sections.whatIsDesignToken.benefits.update.content_middle')}{' '}
+              <InlineCode>{t('sections.whatIsDesignToken.benefits.update.token')}</InlineCode>{' '}
+              {t('sections.whatIsDesignToken.benefits.update.content_suffix')}
             </Typography>
           </Box>
           <Typography
@@ -289,30 +298,29 @@ const DesignToken = () => {
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            總結來說，Design Tokens
-            將設計系統從一份靜態的說明文檔，轉變為一個動態、可同步的自動化橋樑，真正打通了設計與開發之間的壁壘，讓協作變得前所未有的高效與精準。
+            {t('sections.whatIsDesignToken.summary')}
           </Typography>
           <CenteredImage
             src={`${
               import.meta.env.BASE_URL
             }images/desighToken/design-token-concept.webp`}
-            alt='Design Token 概念圖'
+            alt={t('sections.whatIsDesignToken.imageAlt')}
           />
         </ClippedCreamPaper>
 
         {/* 色彩命名整合守則 */}
         <ClippedCreamPaper>
           <SectionTitle
-            title='🎯 一般系統專案色彩命名整合守則'
+            title={t('sections.colorNaming.title')}
             showDivider={false}
           />
           <Box sx={{ mb: 3 }}>
-            <SubsectionTitle title='1. 結構公式' />
+            <SubsectionTitle title={t('sections.colorNaming.structure.title')} />
             <CenteredImage
               src={`${
                 import.meta.env.BASE_URL
               }images/desighToken/token-architecture.webp`}
-              alt='Token 架構示意圖'
+              alt={t('sections.colorNaming.structure.imageAlt')}
               containerSx={{ mt: 2, mb: 3 }}
             />
             <Box
@@ -328,13 +336,13 @@ const DesignToken = () => {
                 variant='body1'
                 sx={{ fontWeight: 600 }}
               >
-                [元件類別]-[屬性]-[層次]-[狀態]
+                {t('sections.colorNaming.structure.formula')}
               </Typography>
               <Typography
                 variant='body2'
                 sx={{ color: colors.text.primary }}
               >
-                element-type-hierarchy-state
+                {t('sections.colorNaming.structure.formulaEn')}
               </Typography>
             </Box>
             <Box sx={{ mt: 2 }}>
@@ -343,48 +351,47 @@ const DesignToken = () => {
                 sx={{ color: colors.text.primary }}
                 component='div'
               >
-                • 元件類別（element）：button, input, card, modal, table ...
+                {t('sections.colorNaming.structure.breakdown.element')}
               </Typography>
               <Typography
                 variant='body2'
                 sx={{ color: colors.text.primary }}
                 component='div'
               >
-                • 屬性（type）：bg, text, icon, border
+                {t('sections.colorNaming.structure.breakdown.type')}
               </Typography>
               <Typography
                 variant='body2'
                 sx={{ color: colors.text.primary }}
                 component='div'
               >
-                • 層次（hierarchy）：primary, secondary,
-                Tertiary（可選，最常只用primary/secondary）
+                {t('sections.colorNaming.structure.breakdown.hierarchy')}
               </Typography>
               <Typography
                 variant='body2'
                 sx={{ color: colors.text.primary }}
                 component='div'
               >
-                • 狀態（state）：default, hover, active, disabled（沒有就省略）
+                {t('sections.colorNaming.structure.breakdown.state')}
               </Typography>
             </Box>
           </Box>
           <ContentDivider />
-          <SubsectionTitle title='2. 用法範例與說明' />
+          <SubsectionTitle title={t('sections.colorNaming.examples.title')} />
           <TableContainer>
             <Table size='small'>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>元件</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>類型</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>層次</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>狀態</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>命名範例</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>說明</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('sections.colorNaming.examples.tableHeaders.element')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('sections.colorNaming.examples.tableHeaders.type')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('sections.colorNaming.examples.tableHeaders.hierarchy')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('sections.colorNaming.examples.tableHeaders.state')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('sections.colorNaming.examples.tableHeaders.name')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('sections.colorNaming.examples.tableHeaders.description')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {namingExamples.map((row, index) => (
+                {t('sections.colorNaming.examples.data', { returnObjects: true }).map((row, index) => (
                   <TableRow key={index}>
                     <TableCell>{row.element}</TableCell>
                     <TableCell>{row.type}</TableCell>
@@ -412,7 +419,7 @@ const DesignToken = () => {
             </Table>
           </TableContainer>
           <ContentDivider />
-          <SubsectionTitle title='3. 命名精簡要點' />
+          <SubsectionTitle title={t('sections.colorNaming.simplification.title')} />
           <Box
             component='ul'
             sx={{ pl: 3 }}
@@ -423,8 +430,7 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              若沒必要，可省略沒用到的層（如 most 元件只有 primary，沒
-              secondary/weak 就不加）
+              {t('sections.colorNaming.simplification.point1')}
             </Typography>
             <Typography
               component='li'
@@ -432,19 +438,18 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              狀態常見 default、hover、active、disabled，沒用到時省略
+              {t('sections.colorNaming.simplification.point2')}
             </Typography>
             <Typography
               component='li'
               variant='body2'
               sx={{ color: colors.text.primary }}
             >
-              全域主題色、最關鍵顏色（如系統主色）可特別命名如 main-color 或
-              common-bg
+              {t('sections.colorNaming.simplification.point3')}
             </Typography>
           </Box>
           <ContentDivider />
-          <SubsectionTitle title='4. 實務應用' />
+          <SubsectionTitle title={t('sections.colorNaming.practicalUse.title')} />
           <SyntaxHighlighter
             language='scss'
             style={vscDarkPlus}
@@ -452,7 +457,7 @@ const DesignToken = () => {
             {scssExample}
           </SyntaxHighlighter>
           <ContentDivider />
-          <SubsectionTitle title='5. 持續擴充建議' />
+          <SubsectionTitle title={t('sections.colorNaming.expansion.title')} />
           <Box
             component='ul'
             sx={{ pl: 3 }}
@@ -463,15 +468,14 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              同型號可套用到 modal、badge 等其他常用元件
+              {t('sections.colorNaming.expansion.point1')}
             </Typography>
             <Typography
               component='li'
               variant='body2'
               sx={{ color: colors.text.primary }}
             >
-              真的需要 warning、success 等語意時，直接加屬性（如
-              button-bg-warning），否則不用勉強抽象語意
+              {t('sections.colorNaming.expansion.point2')}
             </Typography>
           </Box>
         </ClippedCreamPaper>
@@ -479,7 +483,7 @@ const DesignToken = () => {
         {/* 重點 */}
         <Box sx={highlightBoxStyle}>
           <SubsectionTitle
-            title='📦 重點'
+            title={t('sections.highlights.title')}
             sx={{ color: colors.accent.primary }}
           />
           <Box
@@ -492,7 +496,7 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              讓每個顏色變數一看就懂「用在哪裡、是什麼層、什麼狀態」
+              {t('sections.highlights.point1')}
             </Typography>
             <Typography
               component='li'
@@ -500,7 +504,7 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              適合團隊協作，免去彼此猜測
+              {t('sections.highlights.point2')}
             </Typography>
             <Typography
               component='li'
@@ -508,14 +512,14 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              留足擴充空間（選擇性加上 hierarchy或state）
+              {t('sections.highlights.point3')}
             </Typography>
             <Typography
               component='li'
               variant='body2'
               sx={{ color: colors.text.primary }}
             >
-              語意色/brand色可自選補充，不強求
+              {t('sections.highlights.point4')}
             </Typography>
           </Box>
         </Box>
@@ -523,7 +527,7 @@ const DesignToken = () => {
         {/* CSS Variables 範例 */}
         <ClippedCreamPaper>
           <SectionTitle
-            title='Color variable names in CSS'
+            title={t('sections.cssVariables.title')}
             showDivider={false}
           />
           <Alert
@@ -531,9 +535,7 @@ const DesignToken = () => {
             sx={{ mb: 2 }}
           >
             <Typography variant='body2'>
-              If I need different <strong>themes</strong> I tend to do the
-              latter. This gives me the opportunity to easily swap the colors of
-              my components when viewed in different color themes.
+              {t('sections.cssVariables.alertText')} <strong>{t('sections.cssVariables.alertBold')}</strong> {t('sections.cssVariables.alertSuffix')}
             </Typography>
           </Alert>
           <SyntaxHighlighter
@@ -543,13 +545,11 @@ const DesignToken = () => {
             {cssVariablesExample}
           </SyntaxHighlighter>
           <QuoteBox>
-            Separate the palette from the usage, and it will become much simpler
-            to change colors in the future, either by adding new colors to the
-            palette, or changing the theme of components and layout.
+            {t('sections.cssVariables.quote')}
           </QuoteBox>
           <Box sx={{ mt: 2 }}>
             <ExternalLink href='https://www.havardbrynjulfsen.design/writing/color-variable-names-in-css'>
-              → Color variable names in CSS
+              {t('sections.cssVariables.link')}
             </ExternalLink>
           </Box>
         </ClippedCreamPaper>
@@ -557,7 +557,7 @@ const DesignToken = () => {
         {/* System Token 範例 */}
         <ClippedCreamPaper>
           <SectionTitle
-            title='The Case Against Numbered Shades in Design Systems'
+            title={t('sections.systemToken.title')}
             showDivider={false}
           />
           <SyntaxHighlighter
@@ -570,11 +570,11 @@ const DesignToken = () => {
             src={`${
               import.meta.env.BASE_URL
             }images/desighToken/semantic-naming-example.webp`}
-            alt='語義化命名範例'
+            alt={t('sections.systemToken.imageAlt')}
           />
           <Box sx={{ mt: 2 }}>
             <ExternalLink href='https://uxdesign.cc/how-should-you-name-your-colors-in-a-design-system-3086513476df'>
-              → How to name colors in a Design System
+              {t('sections.systemToken.link')}
             </ExternalLink>
           </Box>
         </ClippedCreamPaper>
@@ -582,7 +582,7 @@ const DesignToken = () => {
         {/* Token 架構 */}
         <ClippedCreamPaper>
           <SectionTitle
-            title='CSS Design Tokens 在專案中的實踐架構'
+            title={t('sections.implementation.title')}
             showDivider={false}
           />
           <Typography
@@ -590,8 +590,7 @@ const DesignToken = () => {
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            在雞舍專案中，我們建立了一套與設計團隊高度同步的 Design Token 系統。
-            這套系統的核心在於「設計協作」與「技術彈性」。
+            {t('sections.implementation.intro')}
           </Typography>
           <Box sx={{ pl: 2, mb: 3 }}>
             <Typography
@@ -599,26 +598,23 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              <strong>1. 與設計師深度協作 (Figma Variables)：</strong>
-              我們的 Token 定義並非憑空產生，而是直接對應設計師在 Figma 中維護的
-              Variables。這確保了設計稿 (Design) 與程式碼 (Code)
-              使用完全一致的語言，大幅降低了溝通成本。
+              <strong>{t('sections.implementation.collaboration.title')}</strong>
+              {t('sections.implementation.collaboration.content')}
             </Typography>
             <Typography
               variant='body1'
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              <strong>2. 為商業合作佈局 (Emotion & White-labeling)：</strong>
-              考慮到未來專案可能面臨的「品牌替換 (White-labeling)」商業需求，
-              我們選擇使用 <strong>Emotion</strong> 來管理樣式。透過 CSS
-              Variables 的動態注入，我們可以在不修改組件程式碼的情況下，
-              快速為不同的商業合作夥伴切換整站的品牌主題色。
+              <strong>{t('sections.implementation.business.title')}</strong>
+              {t('sections.implementation.business.content')}{' '}
+              <strong>{t('sections.implementation.business.emotion')}</strong>{' '}
+              {t('sections.implementation.business.content_suffix')}
             </Typography>
           </Box>
 
           <ContentDivider />
-          <SubsectionTitle title='1. 檔案結構：模組化管理' />
+          <SubsectionTitle title={t('sections.implementation.fileStructure.title')} />
           <SyntaxHighlighter
             language='bash'
             style={vscDarkPlus}
@@ -627,15 +623,17 @@ const DesignToken = () => {
           </SyntaxHighlighter>
 
           <ContentDivider />
-          <SubsectionTitle title='2. 定義層：Figma Primitives (theme.ts)' />
+          <SubsectionTitle title={t('sections.implementation.primitives.title')} />
           <Typography
             variant='body2'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            這裡忠實還原了設計師在 Figma 中的原始變數定義，如{' '}
-            <InlineCode>myosotis</InlineCode> (品牌藍) 與{' '}
-            <InlineCode>twilight</InlineCode> (品牌綠)。
+            {t('sections.implementation.primitives.description')}{' '}
+            <InlineCode>{t('sections.implementation.primitives.myosotis')}</InlineCode>{' '}
+            {t('sections.implementation.primitives.myosotis_desc')}{' '}
+            <InlineCode>{t('sections.implementation.primitives.twilight')}</InlineCode>{' '}
+            {t('sections.implementation.primitives.twilight_desc')}
           </Typography>
           <SyntaxHighlighter
             language='typescript'
@@ -645,13 +643,13 @@ const DesignToken = () => {
           </SyntaxHighlighter>
 
           <ContentDivider />
-          <SubsectionTitle title='3. 語意層：Semantic Mapping (color.ts)' />
+          <SubsectionTitle title={t('sections.implementation.semantic.title')} />
           <Typography
             variant='body2'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            將原始顏色映射到具體的語意用途（如 primary, surface），讓開發者使用時只需關注「用途」而非「色碼」。
+            {t('sections.implementation.semantic.description')}
           </Typography>
           <SyntaxHighlighter
             language='typescript'
@@ -661,14 +659,15 @@ const DesignToken = () => {
           </SyntaxHighlighter>
 
           <ContentDivider />
-          <SubsectionTitle title='4. 注入層：Emotion Global Styles' />
+          <SubsectionTitle title={t('sections.implementation.injection.title')} />
           <Typography
             variant='body2'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            利用 Emotion 的 <InlineCode>&lt;Global /&gt;</InlineCode>{' '}
-            組件將計算好的變數注入瀏覽器。這是實現「一鍵換膚」的關鍵技術點。
+            {t('sections.implementation.injection.description')}{' '}
+            <InlineCode>{t('sections.implementation.injection.component')}</InlineCode>{' '}
+            {t('sections.implementation.injection.description_suffix')}
           </Typography>
           <SyntaxHighlighter
             language='typescript'
@@ -678,14 +677,13 @@ const DesignToken = () => {
           </SyntaxHighlighter>
 
           <ContentDivider />
-          <SubsectionTitle title='5. 整合層：MUI Theme Integration' />
+          <SubsectionTitle title={t('sections.implementation.integration.title')} />
           <Typography
             variant='body2'
             sx={{ color: colors.text.primary }}
             paragraph
           >
-            最後，將定義好的 Token 整合至 MUI
-            Theme，確保所有現成組件也能自動繼承最新的品牌設計規範。
+            {t('sections.implementation.integration.description')}
           </Typography>
           <SyntaxHighlighter
             language='typescript'
@@ -698,7 +696,7 @@ const DesignToken = () => {
         {/* 重點 */}
         <Box sx={highlightBoxStyle}>
           <SubsectionTitle
-            title='🚀 架構優勢總結'
+            title={t('sections.benefits.title')}
             sx={{ color: colors.accent.primary }}
           />
           <Box
@@ -711,8 +709,7 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              <strong>設計同步：</strong> 變數直接對應
-              Figma，消除設計與開發的溝通落差。
+              <strong>{t('sections.benefits.designSync.title')}</strong> {t('sections.benefits.designSync.content')}
             </Typography>
             <Typography
               component='li'
@@ -720,7 +717,7 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              <strong>商業彈性：</strong> 基於 Emotion 的架構，讓專案具備快速適應不同品牌識別 (CI) 的能力。
+              <strong>{t('sections.benefits.businessFlexibility.title')}</strong> {t('sections.benefits.businessFlexibility.content')}
             </Typography>
             <Typography
               component='li'
@@ -728,7 +725,7 @@ const DesignToken = () => {
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              <strong>開發一致：</strong> 透過 MUI Theme 封裝，開發者可直接使用語意化屬性，無需記憶色碼。
+              <strong>{t('sections.benefits.devConsistency.title')}</strong> {t('sections.benefits.devConsistency.content')}
             </Typography>
           </Box>
         </Box>
@@ -736,27 +733,28 @@ const DesignToken = () => {
         {/* CSS Variables vs ThemeProvider */}
         <ClippedCreamPaper>
           <SectionTitle
-            title='最後：使用變數有什麼好處'
+            title={t('sections.cssVsTheme.title')}
             showDivider={false}
           />
-          <SubsectionTitle title='CSS Variables vs ThemeProvider（React Context）本質差異與優劣' />
+          <SubsectionTitle title={t('sections.cssVsTheme.subtitle')} />
           <Box sx={{ mb: 2 }}>
             <Typography
               variant='body1'
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              • <strong>CSS Variables 是瀏覽器標準機制</strong>，變數儲存在 CSS
-              層級，且會依照 DOM 層級及 selector cascade 直接生效，不需 React
-              重新渲染。
+              {t('sections.cssVsTheme.cssVariables')}
+              <strong>{t('sections.cssVsTheme.cssVariablesBold')}</strong>
+              {t('sections.cssVsTheme.cssVariablesSuffix')}
             </Typography>
             <Typography
               variant='body1'
               sx={{ color: colors.text.primary }}
               paragraph
             >
-              • <strong>ThemeProvider 用 React Context 傳變數</strong>
-              ，改變主題狀態會導致所有消費該 Context 的元件重渲，影響效能。
+              {t('sections.cssVsTheme.themeProvider')}
+              <strong>{t('sections.cssVsTheme.themeProviderBold')}</strong>
+              {t('sections.cssVsTheme.themeProviderSuffix')}
             </Typography>
           </Box>
           <Alert
@@ -764,29 +762,30 @@ const DesignToken = () => {
             sx={{ mb: 2 }}
           >
             <Typography variant='body2'>
-              <strong>範例中展示：</strong>
+              <strong>{t('sections.cssVsTheme.alert.title')}</strong>
             </Typography>
             <Typography
               variant='body2'
               component='div'
             >
-              • 用 ThemeProvider 切換 Light/Dark，會讓所有 Emotion 組件重新渲染
+              {t('sections.cssVsTheme.alert.point1')}
             </Typography>
             <Typography
               variant='body2'
               component='div'
             >
-              • 用 CSS Variables（掛在{' '}
+              {t('sections.cssVsTheme.alert.point2')}{' '}
               <InlineCode>
-                &lt;body data-theme=&quot;dark|light&quot;&gt;
+                {t('sections.cssVsTheme.alert.point2_code')}
               </InlineCode>
-              ），只有切換 <InlineCode>&lt;body&gt;</InlineCode>{' '}
-              屬性，僅body改變樣式，子元件不會重渲，對效能更友善
+              {t('sections.cssVsTheme.alert.point2_middle')}{' '}
+              <InlineCode>{t('sections.cssVsTheme.alert.point2_body')}</InlineCode>{' '}
+              {t('sections.cssVsTheme.alert.point2_suffix')}
             </Typography>
           </Alert>
           <Box sx={{ mt: 3 }}>
             <SubsectionTitle
-              title='效能比較示意圖'
+              title={t('sections.cssVsTheme.performanceComparison')}
               sx={{ textAlign: 'center' }}
             />
             <Grid
@@ -802,7 +801,7 @@ const DesignToken = () => {
                   src={`${
                     import.meta.env.BASE_URL
                   }images/desighToken/css-variables-theme-comparison-1.webp`}
-                  alt='CSS Variables vs ThemeProvider 比較 1'
+                  alt={t('sections.cssVsTheme.image1Alt')}
                   containerSx={{ mt: 0 }}
                 />
               </Grid>
@@ -815,23 +814,23 @@ const DesignToken = () => {
                   src={`${
                     import.meta.env.BASE_URL
                   }images/desighToken/css-variables-theme-comparison-2.webp`}
-                  alt='CSS Variables vs ThemeProvider 比較 2'
+                  alt={t('sections.cssVsTheme.image2Alt')}
                   containerSx={{ mt: 0 }}
                 />
               </Grid>
             </Grid>
           </Box>
           <ContentDivider />
-          <SubsectionTitle title='研究文章' />
+          <SubsectionTitle title={t('sections.cssVsTheme.research.title')} />
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <ExternalLink href='https://www.epicreact.dev/css-variables'>
-              → Use CSS Variables instead of React Context
+              {t('sections.cssVsTheme.research.link1')}
             </ExternalLink>
             <ExternalLink href='https://www.havardbrynjulfsen.design/writing/color-variable-names-in-css'>
-              → Color variable names in CSS
+              {t('sections.cssVsTheme.research.link2')}
             </ExternalLink>
             <ExternalLink href='https://uxdesign.cc/how-should-you-name-your-colors-in-a-design-system-3086513476df'>
-              → How to name colors in a Design System
+              {t('sections.cssVsTheme.research.link3')}
             </ExternalLink>
           </Box>
         </ClippedCreamPaper>
@@ -839,16 +838,14 @@ const DesignToken = () => {
         {/* 我的貢獻 */}
         <Box sx={highlightBoxStyle}>
           <SubsectionTitle
-            title='🚀 我的貢獻'
+            title={t('sections.myContribution.title')}
             sx={{ color: colors.accent.primary }}
           />
           <Typography
             variant='body1'
             sx={{ color: colors.text.primary, mb: 3 }}
           >
-            在協作中觀察到設計與開發流程的潛在痛點，主動向主管提出導入 Design
-            Token
-            的構想。在獲得認可後，著手研究並協同設計師與主管三方共同擬定出一套符合團隊需求的協作模式，舉辦分享會從前端視角解說實作方式，成功在專案中試行，促進了設計與開發的協作效率。
+            {t('sections.myContribution.content')}
           </Typography>
 
           {/* 八角形圖片 */}
@@ -866,7 +863,7 @@ const DesignToken = () => {
                 src={`${
                   import.meta.env.BASE_URL
                 }images/desighToken/29A9DB76-9685-4DBF-AB0C-686375A98FBA.webp`}
-                alt='Design Token 實踐成果 1'
+                alt={t('sections.myContribution.image1Alt')}
                 loading='lazy'
               />
             </OctagonImage>
@@ -875,7 +872,7 @@ const DesignToken = () => {
                 src={`${
                   import.meta.env.BASE_URL
                 }images/desighToken/B774639B-5C51-4F43-B4E0-1D517DEC7D0E.webp`}
-                alt='Design Token 實踐成果 2'
+                alt={t('sections.myContribution.image2Alt')}
                 loading='lazy'
               />
             </OctagonImage>

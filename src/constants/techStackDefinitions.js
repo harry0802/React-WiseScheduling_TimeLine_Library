@@ -56,6 +56,9 @@ export const TECH_DEFINITIONS = {
   REACT_ROUTER: { name: 'React Router (巢狀路由)', icon: 'logos:react-router' },
   REACT_ROUTER_V6: { name: 'React Router v6', icon: 'logos:react-router' },
 
+  // ==================== Internationalization (i18n) ====================
+  I18N: { name: 'i18n', icon: 'material-icon-theme:folder-i18n' },
+
   // ==================== DevOps & Deployment ====================
   DOCKER: { name: 'Docker', icon: 'skill-icons:docker' },
   NGINX: { name: 'Nginx', icon: 'skill-icons:nginx' },

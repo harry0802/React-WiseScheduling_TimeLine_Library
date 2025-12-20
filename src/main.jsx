@@ -10,6 +10,8 @@ import wiseSchedulingApiSlice from './components/WiseScheduling/services/apiSlic
 import App from './App.jsx'
 import theme from './styles/theme'
 import GlobalStyles from './styles/GlobalStyles'
+// ⚡ Import i18n configuration
+import './i18n/config'
 
 // 檢測是否為開發環境
 const isDevelopment = import.meta.env.DEV

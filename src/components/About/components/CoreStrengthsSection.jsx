@@ -23,7 +23,7 @@ import { colors } from '../../../designTokens'
  *
  * @param {CoreStrengthsSectionProps} props
  */
-const CoreStrengthsSection = ({ strengths }) => {
+const CoreStrengthsSection = ({ strengths, title }) => {
   return (
     <ClippedCreamPaper elevation={2} clipSize="medium">
       <Typography
@@ -38,7 +38,7 @@ const CoreStrengthsSection = ({ strengths }) => {
         }}
       >
         <span style={{ fontSize: '1.75rem' }}>🎯</span>
-        核心優勢
+        {title}
       </Typography>
 
       <List>

@@ -1,0 +1,292 @@
+{
+  "meta": {
+    "title": "Design Token Initiative",
+    "pageDescription": "Design System and Design Token Implementation Guide"
+  },
+  "intro": {
+    "title": "Introduction",
+    "paragraph1": "In frontend development workflows, collaboration between designers and engineers is indispensable. Ideally, visual and interaction specifications delivered by designers should be implemented with pixel-perfect precision by engineers. However, several efficiency bottlenecks often exist in the design-to-development handoff:",
+    "painPoints": {
+      "styleRepetition": {
+        "title": "1. Repetitive Style Implementation:",
+        "content": "Converting core design elements such as layout, typography, and colors into code consistently consumes significant engineering resources. While collaboration platforms like Figma can assist in generating partial CSS, they still struggle to automatically resolve syntax differences across Web, iOS, and Android platforms, leading to high cross-platform development and maintenance costs."
+      },
+      "updateSync": {
+        "title": "2. Synchronization Challenges:",
+        "content": "Design iterations cannot be immediately reflected in engineering code. In traditional workflows, engineers must obtain updated design files, manually compare differences through visual inspection or relying on annotations, then update code accordingly. Even more problematic, seemingly minor changes (such as adjusting a global font size) can trigger cascading effects, requiring extensive code refactoring."
+      }
+    },
+    "conclusion": "To address these collaboration challenges, the concept of",
+    "conclusion_bold": "Design Systems",
+    "conclusion_suffix": "has emerged."
+  },
+  "sections": {
+    "whatIsDesignSystem": {
+      "title": "What is a Design System?",
+      "paragraph1": "A Design System is often referred to as the",
+      "paragraph1_bold": "\"Single Source of Truth for teams\"",
+      "paragraph1_suffix": ", consolidating all elements required for designing and developing products.",
+      "quote": "\"A Design System is the single source of truth which groups all the elements that will allow the teams to design, realize and develop a product.\"",
+      "paragraph2": "Within this system, designers decompose interfaces into standardized components and define specifications for each component's styling, typography, color values, etc. Developers can then reference this system to obtain required components and specifications, ensuring high consistency between both parties.",
+      "paragraph3": "However, how does a static specification library truly solve the efficiency and synchronization problems mentioned earlier? This requires the core of design systems—",
+      "paragraph3_bold": "Design Tokens",
+      "paragraph3_suffix": "."
+    },
+    "whatIsDesignToken": {
+      "title": "What are Design Tokens?",
+      "paragraph1": "Design Tokens can be understood as",
+      "paragraph1_bold": "\"visual design atoms of the design system\"",
+      "paragraph1_suffix": ".",
+      "quote": "\"Design tokens are the visual design atoms of the design system.\"",
+      "paragraph2": "The core concept is:",
+      "paragraph2_bold": "Abstract the most fundamental attributes in design specifications (such as colors, spacing, font sizes) and assign them platform-agnostic \"names\" (i.e., Tokens)",
+      "paragraph2_suffix": ". These Tokens function like \"variables\" familiar to frontend developers.",
+      "example": {
+        "intro": "For example: A designer decides the brand primary color is",
+        "intro_code": "#FF5733",
+        "intro_suffix": ". In the design system, instead of directly recording this color value, we create a Token named",
+        "token_name": "color.brand.primary",
+        "token_suffix": "and set its value to",
+        "token_value": "#FF5733",
+        "token_end": "."
+      },
+      "platformConversion": {
+        "title": "This Token can then be automatically converted to formats required by different platforms:",
+        "web": "Web (CSS):",
+        "webCode": "--color-brand-primary: #FF5733;",
+        "ios": "iOS (Swift):",
+        "iosCode": "let colorBrandPrimary = UIColor(hex: \"#FF5733\")",
+        "android": "Android (XML):",
+        "androidCode": "<color name=\"color_brand_primary\">#FF5733</color>"
+      },
+      "paragraph3": "During development, frontend engineers no longer need to manually copy color values; instead, they directly reference these semantic variables (Tokens).",
+      "benefits": {
+        "title": "The benefits are evident:",
+        "repetition": {
+          "prefix": "• ",
+          "bold": "Eliminates repetitive work",
+          "content": ": Developers only need to reference variables without worrying about specific values or manual platform conversions."
+        },
+        "update": {
+          "prefix": "• ",
+          "bold": "Solves update challenges",
+          "content": ": When a designer decides to change the brand primary color to",
+          "newColor": "#C70039",
+          "content_middle": ", only the",
+          "token": "color.brand.primary",
+          "content_suffix": "Token value needs updating in the design system. All platform codebases simply import the latest Token file, and every usage of this color updates automatically, completely eliminating manual search-and-replace inefficiency."
+        }
+      },
+      "summary": "In summary, Design Tokens transform design systems from static documentation into dynamic, synchronizable automation bridges, truly breaking down barriers between design and development, making collaboration unprecedentedly efficient and precise.",
+      "imageAlt": "Design Token Concept Diagram"
+    },
+    "colorNaming": {
+      "title": "🎯 Color Naming Integration Guidelines for System Projects",
+      "structure": {
+        "title": "1. Structural Formula",
+        "imageAlt": "Token Architecture Diagram",
+        "formula": "[Component]-[Property]-[Hierarchy]-[State]",
+        "formulaEn": "element-type-hierarchy-state",
+        "breakdown": {
+          "element": "• Component (element): button, input, card, modal, table ...",
+          "type": "• Property (type): bg, text, icon, border",
+          "hierarchy": "• Hierarchy: primary, secondary, tertiary (optional, most commonly only primary/secondary)",
+          "state": "• State: default, hover, active, disabled (omit if unused)"
+        }
+      },
+      "examples": {
+        "title": "2. Usage Examples and Descriptions",
+        "tableHeaders": {
+          "element": "Component",
+          "type": "Type",
+          "hierarchy": "Hierarchy",
+          "state": "State",
+          "name": "Naming Example",
+          "description": "Description"
+        },
+        "data": [
+          {
+            "element": "button",
+            "type": "bg",
+            "hierarchy": "primary",
+            "state": "default",
+            "name": "button-bg-primary-default",
+            "description": "Primary button default background"
+          },
+          {
+            "element": "button",
+            "type": "bg",
+            "hierarchy": "primary",
+            "state": "hover",
+            "name": "button-bg-primary-hover",
+            "description": "Primary button hover background"
+          },
+          {
+            "element": "button",
+            "type": "bg",
+            "hierarchy": "secondary",
+            "state": "disabled",
+            "name": "button-bg-secondary-disabled",
+            "description": "Secondary button disabled background"
+          },
+          {
+            "element": "input",
+            "type": "border",
+            "hierarchy": "primary",
+            "state": "focus",
+            "name": "input-border-primary-focus",
+            "description": "Input field focus primary border"
+          },
+          {
+            "element": "card",
+            "type": "bg",
+            "hierarchy": "weak",
+            "state": "",
+            "name": "card-bg-weak",
+            "description": "Card subtle background"
+          },
+          {
+            "element": "text",
+            "type": "",
+            "hierarchy": "secondary",
+            "state": "",
+            "name": "text-secondary",
+            "description": "Secondary text color"
+          }
+        ]
+      },
+      "simplification": {
+        "title": "3. Naming Simplification Guidelines",
+        "point1": "If unnecessary, omit unused hierarchy levels (e.g., if most components only have primary without secondary/weak, don't add them)",
+        "point2": "Common states include default, hover, active, disabled; omit if unused",
+        "point3": "Global theme colors and critical colors (like system primary) can use special names like main-color or common-bg"
+      },
+      "practicalUse": {
+        "title": "4. Practical Application"
+      },
+      "expansion": {
+        "title": "5. Continuous Expansion Recommendations",
+        "point1": "The same pattern can be applied to other common components like modal, badge, etc.",
+        "point2": "Only add semantic attributes (like button-bg-warning) when truly needed for warning, success states; don't force semantic abstraction unnecessarily"
+      }
+    },
+    "highlights": {
+      "title": "📦 Key Points",
+      "point1": "Each color variable should be immediately clear about \"where it's used, what hierarchy, what state\"",
+      "point2": "Suitable for team collaboration, eliminating guesswork",
+      "point3": "Leave room for expansion (optionally add hierarchy or state)",
+      "point4": "Semantic/brand colors can be supplemented optionally, not required"
+    },
+    "cssVariables": {
+      "title": "Color variable names in CSS",
+      "alertText": "If I need different",
+      "alertBold": "themes",
+      "alertSuffix": "I tend to do the latter. This gives me the opportunity to easily swap the colors of my components when viewed in different color themes.",
+      "quote": "Separate the palette from the usage, and it will become much simpler to change colors in the future, either by adding new colors to the palette, or changing the theme of components and layout.",
+      "link": "→ Color variable names in CSS"
+    },
+    "systemToken": {
+      "title": "The Case Against Numbered Shades in Design Systems",
+      "imageAlt": "Semantic Naming Example",
+      "link": "→ How to name colors in a Design System"
+    },
+    "implementation": {
+      "title": "CSS Design Tokens Implementation Architecture in Projects",
+      "intro": "In our poultry farm project, we established a Design Token system highly synchronized with the design team. This system's core lies in \"design collaboration\" and \"technical flexibility.\"",
+      "collaboration": {
+        "title": "1. Deep Collaboration with Designers (Figma Variables):",
+        "content": "Our Token definitions aren't created arbitrarily but directly correspond to Variables maintained by designers in Figma. This ensures Design and Code use completely consistent language, significantly reducing communication costs."
+      },
+      "business": {
+        "title": "2. Business Partnership Strategy (Emotion & White-labeling):",
+        "content": "Considering potential \"white-labeling\" business requirements, we chose",
+        "emotion": "Emotion",
+        "content_suffix": "for style management. Through dynamic CSS Variables injection, we can quickly switch the entire site's brand theme for different business partners without modifying component code."
+      },
+      "fileStructure": {
+        "title": "1. File Structure: Modular Management"
+      },
+      "primitives": {
+        "title": "2. Definition Layer: Figma Primitives (theme.ts)",
+        "description": "This faithfully reproduces the original variable definitions from Figma, such as",
+        "myosotis": "myosotis",
+        "myosotis_desc": "(brand blue) and",
+        "twilight": "twilight",
+        "twilight_desc": "(brand green)."
+      },
+      "semantic": {
+        "title": "3. Semantic Layer: Semantic Mapping (color.ts)",
+        "description": "Maps primitive colors to specific semantic purposes (like primary, surface), allowing developers to focus on \"purpose\" rather than \"color codes\" during usage."
+      },
+      "injection": {
+        "title": "4. Injection Layer: Emotion Global Styles",
+        "description": "Utilizes Emotion's",
+        "component": "<Global />",
+        "description_suffix": "component to inject computed variables into the browser. This is the key technical point for implementing \"one-click theming.\""
+      },
+      "integration": {
+        "title": "5. Integration Layer: MUI Theme Integration",
+        "description": "Finally, integrate defined Tokens into MUI Theme, ensuring all ready-made components automatically inherit the latest brand design specifications."
+      }
+    },
+    "benefits": {
+      "title": "🚀 Architecture Benefits Summary",
+      "designSync": {
+        "title": "Design Synchronization:",
+        "content": "Variables directly correspond to Figma, eliminating design-development communication gaps."
+      },
+      "businessFlexibility": {
+        "title": "Business Flexibility:",
+        "content": "Emotion-based architecture enables projects to rapidly adapt to different brand identities (CI)."
+      },
+      "devConsistency": {
+        "title": "Development Consistency:",
+        "content": "Through MUI Theme encapsulation, developers can directly use semantic properties without memorizing color codes."
+      }
+    },
+    "cssVsTheme": {
+      "title": "Finally: Benefits of Using Variables",
+      "subtitle": "CSS Variables vs ThemeProvider (React Context) - Fundamental Differences and Trade-offs",
+      "cssVariables": "• ",
+      "cssVariablesBold": "CSS Variables are browser-native mechanisms",
+      "cssVariablesSuffix": ", variables are stored at the CSS level and take effect directly according to DOM hierarchy and selector cascade, without requiring React re-renders.",
+      "themeProvider": "• ",
+      "themeProviderBold": "ThemeProvider uses React Context to pass variables",
+      "themeProviderSuffix": ", changing theme state causes all components consuming that Context to re-render, impacting performance.",
+      "alert": {
+        "title": "Examples demonstrate:",
+        "point1": "• Using ThemeProvider to switch Light/Dark causes all Emotion components to re-render",
+        "point2": "• Using CSS Variables (attached to",
+        "point2_code": "<body data-theme=\"dark|light\">",
+        "point2_middle": "), only switches",
+        "point2_body": "<body>",
+        "point2_suffix": "attribute, only body changes styles, child components don't re-render, more performance-friendly"
+      },
+      "performanceComparison": "Performance Comparison Diagram",
+      "image1Alt": "CSS Variables vs ThemeProvider Comparison 1",
+      "image2Alt": "CSS Variables vs ThemeProvider Comparison 2",
+      "research": {
+        "title": "Research Articles",
+        "link1": "→ Use CSS Variables instead of React Context",
+        "link2": "→ Color variable names in CSS",
+        "link3": "→ How to name colors in a Design System"
+      }
+    },
+    "myContribution": {
+      "title": "🚀 My Contribution",
+      "content": "After observing potential pain points in the design-development workflow during collaboration, I proactively proposed implementing Design Tokens to management. Upon approval, I conducted research and collaborated with designers and management to establish a workflow suited to team needs, held sharing sessions to explain implementation from a frontend perspective, successfully piloted the system in projects, and improved design-development collaboration efficiency.",
+      "image1Alt": "Design Token Implementation Achievement 1",
+      "image2Alt": "Design Token Implementation Achievement 2"
+    }
+  },
+  "codeComments": {
+    "scssExample": "SCSS Variables Example",
+    "cssVariablesExample": "CSS Variables Example",
+    "systemTokenExample": "System-level Token Example",
+    "figmaThemeExample": "Figma Theme Definition Example",
+    "semanticColorExample": "Semantic Color Example",
+    "emotionGlobalStylesExample": "Emotion Global Styles Injection Example",
+    "muiThemeIntegrationExample": "MUI Theme Integration Example",
+    "figmaArchitectureExample": "Figma Architecture Example"
+  }
+}

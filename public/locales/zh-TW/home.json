@@ -1,0 +1,51 @@
+{
+  "hero": {
+    "title": "智慧製造前端工程整合方案",
+    "subtitle": "歡迎來到我的個人作品集!這裡展示了我在智慧製造領域的專案經驗,包含生產排程系統、即時監控儀表板等工業級應用開發。"
+  },
+  "cards": {
+    "about": {
+      "title": "關於我",
+      "description": "前端工程師,專注於 React 生態系統與工業級系統開發",
+      "button": "查看履歷"
+    },
+    "timeline": {
+      "title": "開發歷程",
+      "description": "專案開發時程與技術演進歷程",
+      "button": "查看開發歷程"
+    },
+    "moldIndustry": {
+      "title": "模具產業系統",
+      "description": "科專_TIIP模具產業高階製造系統展示",
+      "button": "查看專案詳情"
+    },
+    "designToken": {
+      "title": "Design Token 推動",
+      "description": "設計系統規範化,推動設計與開發協作效率提升",
+      "button": "查看 Design Token"
+    },
+    "scheduling": {
+      "title": "智慧排程系統",
+      "description": "工業級生產排程管理,支援多區域即時調度與狀態追蹤",
+      "button": "進入智慧排程"
+    },
+    "monitoring": {
+      "title": "製造監控中心",
+      "description": "多功能生產監控儀表板,包含 OEE 分析、進度追蹤等",
+      "button": "進入監控中心"
+    },
+    "pigManagement": {
+      "title": "養豬場管理系統",
+      "description": "豬隻飼養管理系統,追蹤豬舍庫存與飼養記錄",
+      "button": "進入管理系統"
+    },
+    "contact": {
+      "title": "聯絡方式",
+      "description": "歡迎聯繫討論專案合作或技術交流",
+      "button": "聯絡我"
+    }
+  },
+  "meta": {
+    "title": "首頁"
+  }
+}

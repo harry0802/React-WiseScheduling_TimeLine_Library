@@ -19,23 +19,14 @@ import { colors } from '../../../designTokens'
  * @property {Skills} skills - 技能資料
  */
 
-//! =============== 2. 常數 ===============
-
-const SKILL_CATEGORIES = [
-  { key: 'languages', title: '語言' },
-  { key: 'frameworks', title: '框架' },
-  { key: 'libraries', title: '函式庫' },
-  { key: 'tools', title: '工具' }
-]
-
-//! =============== 3. 主要組件 ===============
+//! =============== 2. 主要組件 ===============
 
 /**
  * 技能總覽區塊組件
  *
  * @param {SkillsSectionProps} props
  */
-const SkillsSection = ({ skills }) => {
+const SkillsSection = ({ skills, title, categories }) => {
   return (
     <ClippedGoldContainer clipSize="mediumLarge" sx={{ mb: 3 }}>
       <Typography
@@ -51,11 +42,11 @@ const SkillsSection = ({ skills }) => {
         }}
       >
         <span style={{ fontSize: '1.75rem' }}>🛠️</span>
-        技能總覽
+        {title}
       </Typography>
 
       <Grid container spacing={3}>
-        {SKILL_CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <Grid key={category.key} item xs={12} sm={6} md={3}>
             <SkillCard title={category.title} skills={skills[category.key]} />
           </Grid>

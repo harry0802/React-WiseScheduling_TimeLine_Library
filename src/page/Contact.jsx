@@ -10,6 +10,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import GitHubIcon from '@mui/icons-material/GitHub'
 import CodeIcon from '@mui/icons-material/Code'
 import EmailIcon from '@mui/icons-material/Email'
+import { useTranslation } from 'react-i18next'
 import muiTheme from '../styles/muiTheme'
 import {
   CreamPaper,
@@ -20,8 +21,10 @@ import { colors } from '../designTokens'
 import useDocumentTitle from '../hooks/useDocumentTitle'
 
 const Contact = () => {
+  const { t } = useTranslation('contact')
+
   // 設置頁面標題
-  useDocumentTitle('聯絡方式')
+  useDocumentTitle(t('meta.title'))
 
   return (
     <ThemeProvider theme={muiTheme}>
@@ -51,14 +54,14 @@ const Contact = () => {
               mb: 2
             }}
           >
-            聯絡方式
+            {t('header.title')}
           </Typography>
           <GoldDivider />
           <Typography
             variant='body1'
             sx={{ color: colors.text.inverse, mt: 2 }}
           >
-            歡迎透過以下方式與我聯繫，我很樂意與您討論工作合作或技術交流的機會。
+            {t('header.subtitle')}
           </Typography>
         </GoldBorderContainer>
 
@@ -87,7 +90,7 @@ const Contact = () => {
                   mb: 3
                 }}
               >
-                社群連結
+                {t('sections.social.title')}
               </Typography>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -115,7 +118,7 @@ const Contact = () => {
                       variant='subtitle2'
                       sx={{ mb: 0.5, color: colors.text.secondary }}
                     >
-                      GitHub
+                      {t('sections.social.github.label')}
                     </Typography>
                     <MuiLink
                       href='https://github.com/harry0802'
@@ -130,7 +133,7 @@ const Contact = () => {
                         }
                       }}
                     >
-                      github.com/harry0802
+                      {t('sections.social.github.url')}
                     </MuiLink>
                   </Box>
                 </Box>
@@ -159,7 +162,7 @@ const Contact = () => {
                       variant='subtitle2'
                       sx={{ mb: 0.5, color: colors.text.secondary }}
                     >
-                      GitLab
+                      {t('sections.social.gitlab.label')}
                     </Typography>
                     <MuiLink
                       href='https://gitlab.com/f2eharry.two.shoulder'
@@ -174,7 +177,7 @@ const Contact = () => {
                         }
                       }}
                     >
-                      Harry Lin@f2eharry.two.shoulder
+                      {t('sections.social.gitlab.url')}
                     </MuiLink>
                   </Box>
                 </Box>
@@ -182,7 +185,7 @@ const Contact = () => {
             </CreamPaper>
           </Grid>
 
-          {/* Contact Information Form Section */}
+          {/* Contact Information Section */}
           <Grid
             item
             xs={12}
@@ -203,7 +206,7 @@ const Contact = () => {
                   mb: 3
                 }}
               >
-                聯絡資訊
+                {t('sections.info.title')}
               </Typography>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -226,7 +229,7 @@ const Contact = () => {
                       variant='subtitle2'
                       sx={{ mb: 0.5, color: colors.text.secondary }}
                     >
-                      電子郵件
+                      {t('sections.info.email.label')}
                     </Typography>
                     <MuiLink
                       href='mailto:fdd89632@gmail.com'
@@ -239,48 +242,13 @@ const Contact = () => {
                         }
                       }}
                     >
-                      fdd89632@gmail.com
+                      {t('sections.info.email.address')}
                     </MuiLink>
                   </Box>
                 </Box>
               </Box>
             </CreamPaper>
           </Grid>
-
-          {/* Note Section */}
-          {/* <Grid
-            item
-            xs={12}
-          >
-            <Box
-              sx={{
-                p: 2,
-                backgroundColor: colors.background.surfaceAlt,
-                border: `2px solid ${colors.border.light}`,
-                borderLeft: `4px solid ${colors.accent.primary}`,
-                borderRadius: 1,
-                clipPath:
-                  'polygon(0.75rem 0, calc(100% - 0.75rem) 0, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.75rem 100%, 0 calc(100% - 0.75rem), 0 0.75rem)'
-              }}
-            >
-              <Typography
-                variant='subtitle1'
-                gutterBottom
-                sx={{
-                  color: colors.accent.primary,
-                  fontWeight: 700
-                }}
-              >
-                📝 提示
-              </Typography>
-              <Typography
-                variant='body2'
-                sx={{ color: colors.text.primary }}
-              >
-                歡迎透過以上方式與我聯繫，期待與您交流！
-              </Typography>
-            </Box>
-          </Grid> */}
         </Grid>
       </Container>
     </ThemeProvider>
@@ -288,4 +256,3 @@ const Contact = () => {
 }
 
 export default Contact
-

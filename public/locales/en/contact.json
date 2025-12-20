@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "title": "Contact"
+  },
+  "header": {
+    "title": "Contact Me",
+    "subtitle": "Feel free to reach out through the following channels. I'm happy to discuss work collaboration or technical exchange opportunities."
+  },
+  "sections": {
+    "social": {
+      "title": "Social Links",
+      "github": {
+        "label": "GitHub",
+        "url": "github.com/harry0802"
+      },
+      "gitlab": {
+        "label": "GitLab",
+        "url": "Harry Lin@f2eharry.two.shoulder"
+      }
+    },
+    "info": {
+      "title": "Contact Information",
+      "email": {
+        "label": "Email",
+        "address": "fdd89632@gmail.com"
+      }
+    }
+  }
+}

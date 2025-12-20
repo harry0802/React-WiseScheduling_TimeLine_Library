@@ -3,6 +3,7 @@ import { Typography } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import ReactMarkdown from 'react-markdown'
 import { Icon } from '@iconify/react'
+import { useTranslation } from 'react-i18next'
 import muiTheme from '../../styles/muiTheme'
 import ProjectCarousel from '../ProjectCarousel'
 import {
@@ -200,7 +201,7 @@ GalleryHeader.displayName = 'GalleryHeader'
  * 💡 使用 ReactMarkdown 渲染 markdown 語法（支援 **bold**、列表等）
  * 💡 支援系統名稱連結點擊跳轉到對應照片
  */
-const ItemDetails = React.memo(({ item, carouselRef, departmentPositions }) => {
+const ItemDetails = React.memo(({ item, carouselRef, departmentPositions, t }) => {
   // 創建自定義連結組件，處理系統跳轉
   const CustomLink = useCallback(
     ({ href, children, ...props }) => {
@@ -263,7 +264,7 @@ const ItemDetails = React.memo(({ item, carouselRef, departmentPositions }) => {
 
       {item.techStack && item.techStack.length > 0 && (
         <TechStackSection>
-          <TechStackTitle>技術棧</TechStackTitle>
+          <TechStackTitle>{t('ui.techStack')}</TechStackTitle>
           <TechChipsContainer>
             {item.techStack.map((tech, index) => {
               // 支援 string 或 { name, icon } 格式
@@ -296,7 +297,7 @@ ItemDetails.displayName = 'ItemDetails'
 /**
  * 關於備註區塊
  */
-const AboutNote = React.memo(({ title, content }) => (
+const AboutNote = React.memo(({ title, content, t }) => (
   <AboutNoteSection>
     <AboutNoteTitle>{title}</AboutNoteTitle>
     {content.map((paragraph, index) => (
@@ -327,6 +328,7 @@ const ShowcaseGallery = ({
   showProgress = true,
   showAboutNote = true
 }) => {
+  const { t } = useTranslation('project')
   const carouselRef = React.useRef(null)
 
   const {
@@ -351,7 +353,7 @@ const ShowcaseGallery = ({
               variant='h4'
               color='white'
             >
-              沒有可展示的項目
+              {t('ui.noItems')}
             </Typography>
           </EmptyStateContainer>
         </ShowcaseWrapper>
@@ -389,6 +391,7 @@ const ShowcaseGallery = ({
                 item={currentCategory}
                 carouselRef={carouselRef}
                 departmentPositions={departmentPositions}
+                t={t}
               />
             </DetailsGridItem>
           </ContentGrid>
@@ -397,6 +400,7 @@ const ShowcaseGallery = ({
             <AboutNote
               title={config.aboutTitle}
               content={config.aboutContent}
+              t={t}
             />
           )}
         </MainContainer>

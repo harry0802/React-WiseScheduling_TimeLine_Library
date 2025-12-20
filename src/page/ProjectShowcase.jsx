@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import ShowcaseGallery from '../components/ShowcaseGallery'
 import { TECH_DEFINITIONS } from '../constants/techStackDefinitions'
 import useDocumentTitle from '../hooks/useDocumentTitle'
@@ -28,230 +29,209 @@ import useDocumentTitle from '../hooks/useDocumentTitle'
  */
 
 //! =============== 2. Types & Interfaces ===============
-
-/**
- * TIIP 專案展示資料配置
- * 🎯 設計原則：
- * - 強調具體貢獻與技術挑戰
- * - 提供可量化成果數據
- * - 適用於技術面試展示
- *
- * @type {ProjectItem[]}
- */
-const TIIP_PROJECT_DATA = [
-  {
-    id: 1,
-    title: '生管部門 - 生產管理系統',
-    dec:
-      '我擔任此專案的前端工程師，負責將複雜的生產管理流程視覺化，管理全廠 **39 台射出成型機** 的生產排程與成本分析。\n\n' +
-      '**我的核心貢獻**：\n' +
-      '1. **[智慧排程系統](#system-智慧排程)**：客製化開源 `vis-timeline` 甘特圖，實作 **840+ 行工業級程式碼**，支援 4 個生產區域的即時排程管理。使用 `useRef` 避免重複渲染、`useMemo` 優化數據處理，並實現視圖中心保持機制。\n' +
-      '2. **[廠內報價系統](#system-廠內報價系統)**：主導複雜表單開發，使用 **React Hook Form + Zod** 處理多工序成本計算（成型/後製程/檢驗）。將計算邏輯模組化到獨立 Hook，用 Zustand 管理表單狀態，確保即時公式運算的準確性。\n' +
-      '3. **UI/UX 設計與實作**：因設計資源有限，我主動承接「[智慧成本分析表](#system-智慧成本分析表)」與「[智慧排程](#system-智慧排程)」的介面設計，全程參與客戶需求訪談，確保功能符合實際操作需求。\n' +
-      '4. **ERP 資料整合**：與後端協作串接凌越 ERP 的訂單、模具與料號資料，使用 RTK Query 管理 API 狀態與自動緩存。\n\n' +
-      '🔗 **[看作品 - 智慧排程系統](#route:/wise-scheduling)**',
-    techStack: [
-      TECH_DEFINITIONS.REACT_18,
-      TECH_DEFINITIONS.RTK_QUERY,
-      TECH_DEFINITIONS.VIS_TIMELINE,
-      TECH_DEFINITIONS.MATERIAL_UI,
-      TECH_DEFINITIONS.REACT_HOOK_FORM,
-      TECH_DEFINITIONS.ZOD,
-      TECH_DEFINITIONS.ZUSTAND,
-      TECH_DEFINITIONS.DOCKER,
-      TECH_DEFINITIONS.NGINX
-    ],
-    systems: [
-      {
-        name: '計畫排程表',
-        images: ['images/tiip/tiip-010-production-schedule.webp']
-      },
-      {
-        name: '廠內報價系統',
-        images: [
-          'images/tiip/tiip-011-internal-quote-0.webp',
-          'images/tiip/tiip-012-internal-quote-1.webp',
-          'images/tiip/tiip-014-internal-quote-2.webp'
-        ]
-      },
-      {
-        name: '產品履歷BOM表',
-        images: [
-          'images/tiip/tiip-016-product-bom-1.webp',
-          'images/tiip/tiip-017-product-bom-2.webp',
-          'images/tiip/tiip-021-product-bom-3.webp'
-        ]
-      },
-      {
-        name: '智慧成本分析表',
-        images: ['images/tiip/tiip-022-cost-analysis.webp']
-      },
-      {
-        name: '智慧排程',
-        images: [
-          'images/tiip/tiip-023-smart-schedule-1.webp',
-          'images/tiip/tiip-024-smart-schedule-2.webp',
-          'images/tiip/tiip-026-smart-schedule-3.webp',
-          'images/tiip/tiip-027-smart-schedule-4.webp',
-          'images/tiip/tiip-028-smart-schedule-5.webp',
-          'images/tiip/tiip-029-smart-schedule-6.webp',
-          'images/tiip/tiip-030-smart-schedule-7.webp',
-          'images/tiip/tiip-032-smart-schedule-8.webp',
-          'images/tiip/tiip-033-smart-schedule-9.webp'
-        ]
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: '品管部門 - 品質檢驗系統',
-    dec:
-      '開發品管部門的**無紙化檢驗系統**，確保檢驗數據的完整性與可追溯性。\n\n' +
-      '**技術實作重點**：\n' +
-      '1. **雙重身份驗證架構**：實作品管人員與產線班長的分權驗證流程，使用 React Router 的巢狀路由設計 (`/:machineSN/:userType/dashboard`)，確保所有檢驗紀錄可精確追溯到操作者。\n' +
-      '2. **動態表單系統**：使用 **React Hook Form + Zod** 開發支援「首件」、「末件」、「IPQC 巡檢」的動態表單，即時回傳檢驗數據，建立完整的數位品質履歷。\n' +
-      '3. **分層架構設計**：將業務邏輯 (domain)、UI (components)、狀態管理 (hooks) 分層，提高程式碼可維護性。',
-    techStack: [
-      TECH_DEFINITIONS.REACT_HOOK_FORM,
-      TECH_DEFINITIONS.ZOD,
-      TECH_DEFINITIONS.MATERIAL_UI,
-      TECH_DEFINITIONS.RTK_QUERY,
-      TECH_DEFINITIONS.DAYJS,
-      TECH_DEFINITIONS.REACT_ROUTER,
-      TECH_DEFINITIONS.DOCKER
-    ],
-    systems: [
-      {
-        name: '即時品檢系統',
-        images: [
-          'images/tiip/tiip-034-qc-inspection-1.webp',
-          'images/tiip/tiip-035-qc-inspection-2.webp',
-          'images/tiip/tiip-036-qc-inspection-3.webp',
-          'images/tiip/tiip-037-qc-inspection-4.webp'
-        ]
-      }
-    ]
-  },
-  {
-    id: 3,
-    title: '業務部門 - 業務報價系統',
-    dec:
-      '開發面向客戶的專業報價系統，整合客戶管理、訂單追蹤、報價歷史查詢等功能。\n\n' +
-      '**技術特點**：\n' +
-      '1. **與廠內報價系統共享架構**：複用相同的組件庫（ProcessCostAnalysis、ProcessForms、ProfitDashboard），但透過獨立的服務層 (salesServices vs factoryServices) 區分業務邏輯。業務系統重視利潤展示，廠內系統重視製程細節。\n' +
-      '2. **統一計算邏輯**：使用 `ComputationUtilsV1.js` 確保前後端計算一致性，搭配 **Zod** 驗證資料正確性。\n' +
-      '3. **直覺操作介面**：使用 Material-UI + styled-components 建立一致的設計系統，協助業務團隊快速生成報價單，縮短客戶回應時間。',
-    techStack: [
-      TECH_DEFINITIONS.REACT_18,
-      TECH_DEFINITIONS.MATERIAL_UI,
-      TECH_DEFINITIONS.STYLED_COMPONENTS,
-      TECH_DEFINITIONS.ZOD,
-      TECH_DEFINITIONS.RTK_QUERY,
-      TECH_DEFINITIONS.DAYJS,
-      TECH_DEFINITIONS.DOCKER,
-      TECH_DEFINITIONS.NGINX
-    ],
-    systems: [
-      {
-        name: '業務報價系統',
-        images: [
-          'images/tiip/tiip-038-sales-quote-1.webp',
-          'images/tiip/tiip-039-sales-quote-2.webp',
-          'images/tiip/tiip-040-sales-quote-3.webp',
-          'images/tiip/tiip-041-sales-quote-4.webp',
-          'images/tiip/tiip-042-sales-quote-5.webp',
-          'images/tiip/tiip-043-sales-quote-6.webp',
-          'images/tiip/tiip-044-sales-quote-7.webp'
-        ]
-      }
-    ]
-  },
-  {
-    id: 4,
-    title: '成型部門 - 生產執行系統',
-    dec:
-      '開發現場人員的完整生產執行工具，涵蓋設備保養、機台狀態監控、績效儀表板、即時生產追蹤與全廠稼動率分析。\n\n' +
-      '**核心技術實作**：\n' +
-      '1. **機台狀態管理（三層驗證架構）**：\n' +
-      '   - UI 層：StatusSlider 提供前端即時驗證\n' +
-      '   - Business 層：useStatusManager Hook 處理業務邏輯\n' +
-      '   - Validator 層：statusValidator 確保狀態轉換規則（RUN/IDLE/TUNING/TESTING/OFFLINE）\n' +
-      '   使用 `forwardRef` 和 `useImperativeHandle` 讓父組件控制表單提交時機。\n' +
-      '2. **[全廠績效儀表板](#system-廠區績效儀表板)**：**完全自主設計與開發**，在公司無任何設計資源的情況下，我獨立完成 UI/UX 設計、技術選型與實作。自行研究並選用開源套件 `@iimm/data-view-react` + **ECharts**，整合 **5 大子系統**（[廠區績效儀表板](#system-廠區績效儀表板)、即時 OEE、[即時生產進度追蹤](#system-即時生產進度追蹤)、交貨趨勢、OEE 洞察）建立全屏數據視覺化。DEMO 後獲得老闆與客戶高度肯定。實作臨時樣式機制，組件卸載時自動清理，避免影響其他頁面。\n' +
-      '3. **[保養系統](#system-機台保養表)**：使用 Zustand 管理頭部參數狀態，RTK Query 處理 API，實作統一抽屜狀態管理與三級審核流程（檢查員/復檢員/核准者）。另有[模具保養表](#system-模具保養表)與[施工養護綜合保養](#system-施工養護綜合保養)系統。\n' +
-      '4. **生產追蹤**：包含[派工系統](#system-派工系統)與[機台狀態操作與保養紀錄](#system-機台狀態操作與保養紀錄)，使用多層 Context Provider 架構管理複雜狀態（ProductionRecordProvider、ProcMaterialsProvider 等），搭配 Redux Slice 細分功能狀態。\n\n' +
-      '🔗 **[看作品 - 全廠績效儀表板](#route:/ManufacturingLiveMonitor)**',
-    techStack: [
-      TECH_DEFINITIONS.REACT_18,
-      TECH_DEFINITIONS.RTK_QUERY,
-      TECH_DEFINITIONS.ECHARTS,
-      TECH_DEFINITIONS.DATA_VIEW_REACT,
-      TECH_DEFINITIONS.MATERIAL_UI,
-      TECH_DEFINITIONS.ZOD,
-      TECH_DEFINITIONS.ZUSTAND,
-      TECH_DEFINITIONS.DAYJS,
-      TECH_DEFINITIONS.NGINX
-    ],
-    systems: [
-      {
-        name: '機台保養表',
-        images: ['images/tiip/tiip-045-machine-maintenance.webp']
-      },
-      {
-        name: '模具保養表',
-        images: ['images/tiip/tiip-047-mold-maintenance.webp']
-      },
-      {
-        name: '派工系統',
-        images: [
-          'images/tiip/tiip-048-dispatch-1.webp',
-          'images/tiip/tiip-049-dispatch-2.webp',
-          'images/tiip/tiip-050-dispatch-3.webp'
-        ]
-      },
-      {
-        name: '機台狀態操作與保養紀錄',
-        images: [
-          'images/tiip/tiip-053-machine-status-1.webp',
-          'images/tiip/tiip-054-machine-status-2.webp',
-          'images/tiip/tiip-055-machine-status-3.webp',
-          'images/tiip/tiip-056-machine-status-4.webp'
-        ]
-      },
-      {
-        name: '施工養護綜合保養',
-        images: ['images/tiip/tiip-058-comprehensive-maintenance.webp']
-      },
-      {
-        name: '廠區績效儀表板',
-        images: [
-          'images/tiip/tiip-059-performance-dashboard.webp',
-          'images/tiip/tiip-060-performance-dashboard-2.webp'
-        ]
-      },
-      {
-        name: '即時生產進度追蹤',
-        images: ['images/tiip/tiip-061-production-tracking.webp']
-      },
-      {
-        name: '全廠設備稼動率',
-        images: ['images/tiip/tiip-062-equipment-utilization.webp']
-      }
-    ]
-  }
-]
-/**
- * 展示櫃配置
- * @type {ShowcaseConfiguration}
- */
-const SHOWCASE_CONFIG = {
-  pageTitle: '專案展示',
-  pageSubtitle: '科專_TIIP模具產業高階製造',
-  aboutTitle: '關於此專案展示',
-  aboutContent: [] // 當前版本禁用 About Note
-}
+// 原本的靜態資料已移至 i18n translation 檔案 (public/locales/*/project.json)
 
 //! =============== 3. Core Functionality ===============
+
+/**
+ * Custom Hook: 從 i18n 載入專案資料
+ * @returns {object} TIIP_PROJECT_DATA 和 SHOWCASE_CONFIG
+ */
+const useProjectData = () => {
+  const { t } = useTranslation('project')
+
+  // 從 i18n 載入 4 個專案資料
+  const projects = t('projects', { returnObjects: true })
+
+  // 將 translation 資料轉換為組件需要的格式
+  const TIIP_PROJECT_DATA = [
+    {
+      id: projects.production.id,
+      title: projects.production.title,
+      dec: projects.production.description,
+      techStack: [
+        TECH_DEFINITIONS.REACT_18,
+        TECH_DEFINITIONS.RTK_QUERY,
+        TECH_DEFINITIONS.VIS_TIMELINE,
+        TECH_DEFINITIONS.MATERIAL_UI,
+        TECH_DEFINITIONS.REACT_HOOK_FORM,
+        TECH_DEFINITIONS.ZOD,
+        TECH_DEFINITIONS.ZUSTAND,
+        TECH_DEFINITIONS.I18N,
+        TECH_DEFINITIONS.DOCKER,
+        TECH_DEFINITIONS.NGINX
+      ],
+      systems: [
+        {
+          name: projects.production.systems.schedule,
+          images: ['images/tiip/tiip-010-production-schedule.webp']
+        },
+        {
+          name: projects.production.systems.quote,
+          images: [
+            'images/tiip/tiip-011-internal-quote-0.webp',
+            'images/tiip/tiip-012-internal-quote-1.webp',
+            'images/tiip/tiip-014-internal-quote-2.webp'
+          ]
+        },
+        {
+          name: projects.production.systems.bom,
+          images: [
+            'images/tiip/tiip-016-product-bom-1.webp',
+            'images/tiip/tiip-017-product-bom-2.webp',
+            'images/tiip/tiip-021-product-bom-3.webp'
+          ]
+        },
+        {
+          name: projects.production.systems.costAnalysis,
+          images: ['images/tiip/tiip-022-cost-analysis.webp']
+        },
+        {
+          name: projects.production.systems.smartSchedule,
+          images: [
+            'images/tiip/tiip-023-smart-schedule-1.webp',
+            'images/tiip/tiip-024-smart-schedule-2.webp',
+            'images/tiip/tiip-026-smart-schedule-3.webp',
+            'images/tiip/tiip-027-smart-schedule-4.webp',
+            'images/tiip/tiip-028-smart-schedule-5.webp',
+            'images/tiip/tiip-029-smart-schedule-6.webp',
+            'images/tiip/tiip-030-smart-schedule-7.webp',
+            'images/tiip/tiip-032-smart-schedule-8.webp',
+            'images/tiip/tiip-033-smart-schedule-9.webp'
+          ]
+        }
+      ]
+    },
+    {
+      id: projects.qualityControl.id,
+      title: projects.qualityControl.title,
+      dec: projects.qualityControl.description,
+      techStack: [
+        TECH_DEFINITIONS.REACT_HOOK_FORM,
+        TECH_DEFINITIONS.ZOD,
+        TECH_DEFINITIONS.MATERIAL_UI,
+        TECH_DEFINITIONS.RTK_QUERY,
+        TECH_DEFINITIONS.DAYJS,
+        TECH_DEFINITIONS.REACT_ROUTER,
+        TECH_DEFINITIONS.DOCKER
+      ],
+      systems: [
+        {
+          name: projects.qualityControl.systems.inspection,
+          images: [
+            'images/tiip/tiip-034-qc-inspection-1.webp',
+            'images/tiip/tiip-035-qc-inspection-2.webp',
+            'images/tiip/tiip-036-qc-inspection-3.webp',
+            'images/tiip/tiip-037-qc-inspection-4.webp'
+          ]
+        }
+      ]
+    },
+    {
+      id: projects.sales.id,
+      title: projects.sales.title,
+      dec: projects.sales.description,
+      techStack: [
+        TECH_DEFINITIONS.REACT_18,
+        TECH_DEFINITIONS.MATERIAL_UI,
+        TECH_DEFINITIONS.STYLED_COMPONENTS,
+        TECH_DEFINITIONS.ZOD,
+        TECH_DEFINITIONS.RTK_QUERY,
+        TECH_DEFINITIONS.DAYJS,
+        TECH_DEFINITIONS.DOCKER,
+        TECH_DEFINITIONS.NGINX
+      ],
+      systems: [
+        {
+          name: projects.sales.systems.quote,
+          images: [
+            'images/tiip/tiip-038-sales-quote-1.webp',
+            'images/tiip/tiip-039-sales-quote-2.webp',
+            'images/tiip/tiip-040-sales-quote-3.webp',
+            'images/tiip/tiip-041-sales-quote-4.webp',
+            'images/tiip/tiip-042-sales-quote-5.webp',
+            'images/tiip/tiip-043-sales-quote-6.webp',
+            'images/tiip/tiip-044-sales-quote-7.webp'
+          ]
+        }
+      ]
+    },
+    {
+      id: projects.manufacturing.id,
+      title: projects.manufacturing.title,
+      dec: projects.manufacturing.description,
+      techStack: [
+        TECH_DEFINITIONS.REACT_18,
+        TECH_DEFINITIONS.RTK_QUERY,
+        TECH_DEFINITIONS.ECHARTS,
+        TECH_DEFINITIONS.DATA_VIEW_REACT,
+        TECH_DEFINITIONS.MATERIAL_UI,
+        TECH_DEFINITIONS.ZOD,
+        TECH_DEFINITIONS.ZUSTAND,
+        TECH_DEFINITIONS.DAYJS,
+        TECH_DEFINITIONS.NGINX
+      ],
+      systems: [
+        {
+          name: projects.manufacturing.systems.machineMaintenance,
+          images: ['images/tiip/tiip-045-machine-maintenance.webp']
+        },
+        {
+          name: projects.manufacturing.systems.moldMaintenance,
+          images: ['images/tiip/tiip-047-mold-maintenance.webp']
+        },
+        {
+          name: projects.manufacturing.systems.dispatch,
+          images: [
+            'images/tiip/tiip-048-dispatch-1.webp',
+            'images/tiip/tiip-049-dispatch-2.webp',
+            'images/tiip/tiip-050-dispatch-3.webp'
+          ]
+        },
+        {
+          name: projects.manufacturing.systems.machineStatus,
+          images: [
+            'images/tiip/tiip-053-machine-status-1.webp',
+            'images/tiip/tiip-054-machine-status-2.webp',
+            'images/tiip/tiip-055-machine-status-3.webp',
+            'images/tiip/tiip-056-machine-status-4.webp'
+          ]
+        },
+        {
+          name: projects.manufacturing.systems.comprehensiveMaintenance,
+          images: ['images/tiip/tiip-058-comprehensive-maintenance.webp']
+        },
+        {
+          name: projects.manufacturing.systems.performanceDashboard,
+          images: [
+            'images/tiip/tiip-059-performance-dashboard.webp',
+            'images/tiip/tiip-060-performance-dashboard-2.webp'
+          ]
+        },
+        {
+          name: projects.manufacturing.systems.productionTracking,
+          images: ['images/tiip/tiip-061-production-tracking.webp']
+        },
+        {
+          name: projects.manufacturing.systems.equipmentUtilization,
+          images: ['images/tiip/tiip-062-equipment-utilization.webp']
+        }
+      ]
+    }
+  ]
+
+  const meta = t('meta', { returnObjects: true })
+  const about = t('about', { returnObjects: true })
+
+  const SHOWCASE_CONFIG = {
+    pageTitle: meta.title,
+    pageSubtitle: meta.subtitle,
+    aboutTitle: about.title,
+    aboutContent: about.content
+  }
+
+  return { TIIP_PROJECT_DATA, SHOWCASE_CONFIG }
+}
 
 /**
  * TIIP 專案展示頁面組件
@@ -271,8 +251,11 @@ const SHOWCASE_CONFIG = {
  * <Route path="/project-showcase" element={<ProjectShowcase />} />
  */
 const ProjectShowcase = () => {
+  const { t } = useTranslation('project')
+  const { TIIP_PROJECT_DATA, SHOWCASE_CONFIG } = useProjectData()
+
   // 設置頁面標題
-  useDocumentTitle('專案展示');
+  useDocumentTitle(t('meta.documentTitle'))
 
   return (
     <ShowcaseGallery
