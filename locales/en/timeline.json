@@ -1,0 +1,279 @@
+{
+  "meta": {
+    "title": "Development Timeline"
+  },
+  "intro": {
+    "title": "Project Overview",
+    "subtitle": "Development Timeline Overview",
+    "paragraph1": "TIIP Mold Industry Advanced Manufacturing System development timeline, documenting the complete development process from August 2024 to July 2025. Covering core functional modules including material management, quality assurance system, intelligent cost analysis, business quotation system, machine maintenance, WiseScheduling intelligent scheduling, and manufacturing monitoring center.",
+    "paragraph2": "The development process evolved from basic CRUD functionality to complex scheduling visualization, real-time monitoring, and API integration. Utilizing modern technology stack such as React ecosystem, Material-UI, Redux Toolkit, and Zod validation, with emphasis on code quality, component reusability, and system maintainability, achieving industrial-grade frontend application development standards."
+  },
+  "phases": {
+    "2024-08": {
+      "phase": "August 2024",
+      "phaseTitle": "Foundation Module Development",
+      "items": [
+        {
+          "date": "2024-08",
+          "title": "Material Management System and Notification Mechanism",
+          "description": "Built material management page logic, implemented row selection and checkbox functionality, refactored notification logic into custom hook to enhance reusability"
+        },
+        {
+          "date": "2024-08",
+          "title": "Process and Material Code Maintenance CRUD Completion",
+          "description": "Implemented complete CRUD operations for process and material code maintenance, established API integration logic, optimized data validation and error handling"
+        },
+        {
+          "date": "2024-08",
+          "title": "Product Information Management and Work Order System Integration",
+          "description": "Added product information page data integration, integrated process and mold information display, implemented process information filtering for Long-Ting work order system"
+        }
+      ]
+    },
+    "2024-09": {
+      "phase": "September 2024",
+      "phaseTitle": "Quality Assurance System Development",
+      "items": [
+        {
+          "date": "2024-09",
+          "title": "Application Architecture and Style System Refactoring",
+          "description": "Refactored React application structure, optimized global style management, enhanced code organization and maintainability"
+        },
+        {
+          "date": "2024-09",
+          "title": "QA System Page Development and API Integration",
+          "description": "Implemented QMS production inspection components, completed QA system API integration, integrated product data into quality assurance dashboard"
+        },
+        {
+          "date": "2024-09",
+          "title": "QA, Work Order, and BOM System Bug Fixes",
+          "description": "Fixed critical errors in quality assurance system, work order system, and machine production order details, ensuring stable system operation"
+        }
+      ]
+    },
+    "2024-10": {
+      "phase": "October 2024",
+      "phaseTitle": "Intelligent Cost Analysis System",
+      "items": [
+        {
+          "date": "2024-10",
+          "title": "Business Quotation System UI and Cost Analysis",
+          "description": "Built intelligent cost analysis and business quotation system interface, implemented material and processing cost analysis for each process"
+        },
+        {
+          "date": "2024-10",
+          "title": "Business Form System and Data Processing Implementation",
+          "description": "Developed business form system, completed form data processing logic, refactored quotation system architecture to improve code quality"
+        },
+        {
+          "date": "2024-10",
+          "title": "Business Quotation System Form and Table Development Completion",
+          "description": "Completed business quotation system form logic, developed Table components, integrated real-time quality inspection system data with custom refresh functionality"
+        }
+      ]
+    },
+    "2024-11": {
+      "phase": "November 2024",
+      "phaseTitle": "Quotation System Refactoring and Amount Calculation",
+      "items": [
+        {
+          "date": "2024-11",
+          "title": "Business Quotation System Amount Calculation Logic Implementation",
+          "description": "Established in-house molding process amount logic architecture, completed complex amount calculation system, achieved automated cost calculation"
+        },
+        {
+          "date": "2024-11",
+          "title": "Quotation System Refactoring to Align with API Data Structure",
+          "description": "Refactored business and in-house quotation system according to API format, adjusted Table and Form architecture to match backend data structure"
+        },
+        {
+          "date": "2024-11",
+          "title": "API Integration and Dynamic Form Functionality Completion",
+          "description": "Completed business quotation system API integration, developed dynamic form functionality, integrated Zod form validation library to enhance data accuracy"
+        }
+      ]
+    },
+    "2024-12": {
+      "phase": "December 2024",
+      "phaseTitle": "Quotation System Optimization and Maintenance System",
+      "items": [
+        {
+          "date": "2024-12",
+          "title": "Quotation System Validation and User Experience Optimization",
+          "description": "Completed business quotation system testing, added elegant animation effects, implemented real-time validation feedback and error reason display functionality"
+        },
+        {
+          "date": "2024-12",
+          "title": "Business and In-house Quotation API System Integration",
+          "description": "Refactored and integrated business quotation and in-house quotation API, optimized API request frequency, enhanced product detail supplementation functionality"
+        },
+        {
+          "date": "2024-12",
+          "title": "Machine and Mold Maintenance System Development",
+          "description": "Built maintenance system header time machine selection UI, configured Table external function connection, completed machine and mold maintenance functionality"
+        }
+      ]
+    },
+    "2025-01": {
+      "phase": "January 2025",
+      "phaseTitle": "Intelligent Cost Table and Data Grid Optimization",
+      "items": [
+        {
+          "date": "2025-01",
+          "title": "Intelligent Cost Table Design and API Integration",
+          "description": "Designed intelligent cost Table architecture, completed API integration, fixed backend ID update issues to ensure data synchronization"
+        },
+        {
+          "date": "2025-01",
+          "title": "ReceiptTable getRowId Processing Logic Optimization",
+          "description": "Fixed ReceiptTable getRowId logic to handle parent-child row structure, updated multiple search configuration and sorting parameters"
+        }
+      ]
+    },
+    "2025-02": {
+      "phase": "February 2025",
+      "phaseTitle": "WiseScheduling Intelligent Scheduling System Launch",
+      "items": [
+        {
+          "date": "2025-02",
+          "title": "WiseScheduling Page and Machine Status Board Establishment",
+          "description": "Developed WiseScheduling page architecture, implemented interactive machine status management and dynamic status tracking functionality"
+        },
+        {
+          "date": "2025-02",
+          "title": "Machine Status Component and Form Validation Architecture Refactoring",
+          "description": "Refactored WiseScheduling machine status components, improved form validation and schema handling, optimized component structure and styling"
+        },
+        {
+          "date": "2025-02",
+          "title": "Timeline Gantt Chart Implementation for Schedule Visualization",
+          "description": "Developed timeline Gantt chart functionality, achieved production schedule visualization, refactored MachineSelect component to optimize machine status management"
+        }
+      ]
+    },
+    "2025-03": {
+      "phase": "March 2025",
+      "phaseTitle": "WiseScheduling API Service and Form System",
+      "items": [
+        {
+          "date": "2025-03",
+          "title": "WiseScheduling Service Layer API Implementation Completion",
+          "description": "Implemented WiseScheduling API service module, established machine status API architecture, completed form validation logic"
+        },
+        {
+          "date": "2025-03",
+          "title": "Machine Status Management Module and Validation Logic Refactoring",
+          "description": "Optimized machine status management component structure, refactored form processing logic, unified status management and constant validation architecture"
+        },
+        {
+          "date": "2025-03",
+          "title": "Maintenance System Form and Status Processing Refactoring",
+          "description": "Refactored maintenance system form components, enhanced form processing logic and status management, updated status component path structure"
+        }
+      ]
+    },
+    "2025-04": {
+      "phase": "April 2025",
+      "phaseTitle": "UI Optimization and Production Detail Page Improvement",
+      "items": [
+        {
+          "date": "2025-04",
+          "title": "ReceiptTable and DataGrid Styling Fixes",
+          "description": "Fixed ReceiptTable header and data alignment issues, disabled virtualization feature, improved DataGrid background color and scrollbar appearance"
+        },
+        {
+          "date": "2025-04",
+          "title": "Production Detail Page Styling and Interaction Optimization",
+          "description": "Updated production detail page styling, adjusted button and table display, enhanced page visual consistency and user experience"
+        },
+        {
+          "date": "2025-04",
+          "title": "Custom Hooks and Data Processing Functions Addition",
+          "description": "Added custom Hooks for production detail page, improved data processing functions, adjusted button structure to enhance usability"
+        }
+      ]
+    },
+    "2025-05": {
+      "phase": "May 2025",
+      "phaseTitle": "Timeline Dynamic Scheduling System Refactoring",
+      "items": [
+        {
+          "date": "2025-05",
+          "title": "DynamicTimeline Component and Hooks Refactoring",
+          "description": "Refactored DynamicTimeline component architecture, developed new Timeline management hooks, improved data processing logic"
+        },
+        {
+          "date": "2025-05",
+          "title": "Scheduling Service and Error Handling Mechanism Optimization",
+          "description": "Removed smart scheduling service filter conditions, optimized scheduling data processing logic, enhanced error handling and data transformation capabilities"
+        },
+        {
+          "date": "2025-05",
+          "title": "Rigorous Status Transition Validation System Implementation",
+          "description": "Updated status terminology from '製立單' to '製令單', implemented rigorous status transition validation, refactored scheduling components and utility functions"
+        }
+      ]
+    },
+    "2025-06": {
+      "phase": "June 2025",
+      "phaseTitle": "Manufacturing Monitoring API Service Integration",
+      "items": [
+        {
+          "date": "2025-06",
+          "title": "Manufacturing Live Monitoring API Service Implementation",
+          "description": "Developed Manufacturing Live Monitor API service, integrated Claude AI commands, enhanced OEE monitoring functionality"
+        },
+        {
+          "date": "2025-06",
+          "title": "Real-time Machine Data Integration and Mock Data Removal",
+          "description": "Integrated real-time machine data into the system, removed mock data, integrated real API data into RealTimeOEEMonitor dashboard"
+        },
+        {
+          "date": "2025-06",
+          "title": "Dashboard Component and Data Processing Refactoring",
+          "description": "Refactored dashboard components to improve data processing, implemented production area templates, enhanced OEE dashboard functionality and visualization"
+        }
+      ]
+    },
+    "2025-07": {
+      "phase": "July 2025",
+      "phaseTitle": "System Optimization and Style Standardization",
+      "items": [
+        {
+          "date": "2025-07",
+          "title": "Real-time API Data Integration and Production Area Templates",
+          "description": "Integrated real-time API data into monitoring dashboard, implemented production area template functionality, enhanced OEE analysis system"
+        },
+        {
+          "date": "2025-07",
+          "title": "ProductionRecord UI and Component Styling Optimization",
+          "description": "Enhanced ProductionRecord UI styling and layout, extracted QMS Action component styles, unified code formatting standards"
+        },
+        {
+          "date": "2025-07",
+          "title": "API Service Layer Refactoring and UI Component Optimization",
+          "description": "Comprehensively refactored API service layer architecture, optimized UI component performance, updated machine status mapping logic and removed debug logs"
+        }
+      ]
+    }
+  },
+  "techStack": {
+    "title": "Technology Stack",
+    "items": [
+      "React 18",
+      "TypeScript",
+      "React Router",
+      "Redux Toolkit",
+      "Styled Components",
+      "Material-UI",
+      "Ant Design",
+      "React Query",
+      "React Hook Form",
+      "Zod",
+      "Vis-timeline",
+      "Recharts",
+      "Day.js",
+      "Zustand"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "title": "聯絡方式"
+  },
+  "header": {
+    "title": "聯絡方式",
+    "subtitle": "歡迎透過以下方式與我聯繫,我很樂意與您討論工作合作或技術交流的機會。"
+  },
+  "sections": {
+    "social": {
+      "title": "社群連結",
+      "github": {
+        "label": "GitHub",
+        "url": "github.com/harry0802"
+      },
+      "gitlab": {
+        "label": "GitLab",
+        "url": "Harry Lin@f2eharry.two.shoulder"
+      }
+    },
+    "info": {
+      "title": "聯絡資訊",
+      "email": {
+        "label": "電子郵件",
+        "address": "fdd89632@gmail.com"
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>字體測試</title>
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <style>
+    body { padding: 40px; background: #1a1a1a; color: #f5f5f5; }
+    .test { font-size: 48px; margin: 20px 0; }
+    .kai { font-family: "Free HK Kai", serif; }
+    .fallback { font-family: serif; }
+  </style>
+</head>
+<body>
+  <h1>字體載入測試</h1>
+  <div class="test kai">智慧排程系統 - Free HK Kai</div>
+  <div class="test fallback">智慧排程系統 - 系統預設</div>
+
+  <script>
+    document.fonts.ready.then(() => {
+      const loaded = document.fonts.check('1em "Free HK Kai"');
+      console.log('Free HK Kai 載入狀態:', loaded);
+      alert(loaded ? '✅ 字體已載入' : '❌ 字體未載入');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "title": "專案展示",
+    "subtitle": "科專_TIIP模具產業高階製造",
+    "documentTitle": "專案展示"
+  },
+  "about": {
+    "title": "關於此專案展示",
+    "content": [
+      "這是一個工業級智慧製造管理系統，專為模具產業設計，整合生產排程、即時監控、數據分析等核心功能。",
+      "本專案採用現代化前端技術棧，注重使用者體驗與系統效能，成功協助工廠提升生產效率、優化資源調度。"
+    ]
+  },
+  "projects": {
+    "production": {
+      "id": 1,
+      "title": "生管部門 - 生產管理系統",
+      "description": "我擔任此專案的前端工程師，負責將複雜的生產管理流程視覺化，管理全廠 **39 台射出成型機** 的生產排程與成本分析。\n\n**我的核心貢獻**：\n1. **[智慧排程系統](#system-智慧排程)**：客製化開源 `vis-timeline` 甘特圖，實作 **840+ 行工業級程式碼**，支援 4 個生產區域的即時排程管理。使用 `useRef` 避免重複渲染、`useMemo` 優化數據處理，並實現視圖中心保持機制。\n2. **[廠內報價系統](#system-廠內報價系統)**：主導複雜表單開發，使用 **React Hook Form + Zod** 處理多工序成本計算（成型/後製程/檢驗）。將計算邏輯模組化到獨立 Hook，用 Zustand 管理表單狀態，確保即時公式運算的準確性。\n3. **UI/UX 設計與實作**：因設計資源有限，我主動承接「[智慧成本分析表](#system-智慧成本分析表)」與「[智慧排程](#system-智慧排程)」的介面設計，全程參與客戶需求訪談，確保功能符合實際操作需求。\n4. **ERP 資料整合**：與後端協作串接凌越 ERP 的訂單、模具與料號資料，使用 RTK Query 管理 API 狀態與自動緩存。\n\n🔗 **[看作品 - 智慧排程系統](#route:/wise-scheduling)**",
+      "systems": {
+        "schedule": "計畫排程表",
+        "quote": "廠內報價系統",
+        "bom": "產品履歷BOM表",
+        "costAnalysis": "智慧成本分析表",
+        "smartSchedule": "智慧排程"
+      }
+    },
+    "qualityControl": {
+      "id": 2,
+      "title": "品管部門 - 品質檢驗系統",
+      "description": "開發品管部門的**無紙化檢驗系統**，確保檢驗數據的完整性與可追溯性。\n\n**技術實作重點**：\n1. **雙重身份驗證架構**：實作品管人員與產線班長的分權驗證流程，使用 React Router 的巢狀路由設計 (`/:machineSN/:userType/dashboard`)，確保所有檢驗紀錄可精確追溯到操作者。\n2. **動態表單系統**：使用 **React Hook Form + Zod** 開發支援「首件」、「末件」、「IPQC 巡檢」的動態表單，即時回傳檢驗數據，建立完整的數位品質履歷。\n3. **分層架構設計**：將業務邏輯 (domain)、UI (components)、狀態管理 (hooks) 分層，提高程式碼可維護性。",
+      "systems": {
+        "inspection": "即時品檢系統"
+      }
+    },
+    "sales": {
+      "id": 3,
+      "title": "業務部門 - 業務報價系統",
+      "description": "開發面向客戶的專業報價系統，整合客戶管理、訂單追蹤、報價歷史查詢等功能。\n\n**技術特點**：\n1. **與廠內報價系統共享架構**：複用相同的組件庫（ProcessCostAnalysis、ProcessForms、ProfitDashboard），但透過獨立的服務層 (salesServices vs factoryServices) 區分業務邏輯。業務系統重視利潤展示，廠內系統重視製程細節。\n2. **統一計算邏輯**：使用 `ComputationUtilsV1.js` 確保前後端計算一致性，搭配 **Zod** 驗證資料正確性。\n3. **直覺操作介面**：使用 Material-UI + styled-components 建立一致的設計系統，協助業務團隊快速生成報價單，縮短客戶回應時間。",
+      "systems": {
+        "quote": "業務報價系統"
+      }
+    },
+    "manufacturing": {
+      "id": 4,
+      "title": "成型部門 - 生產執行系統",
+      "description": "開發現場人員的完整生產執行工具，涵蓋設備保養、機台狀態監控、績效儀表板、即時生產追蹤與全廠稼動率分析。\n\n**核心技術實作**：\n1. **機台狀態管理（三層驗證架構）**：\n   - UI 層：StatusSlider 提供前端即時驗證\n   - Business 層：useStatusManager Hook 處理業務邏輯\n   - Validator 層：statusValidator 確保狀態轉換規則（RUN/IDLE/TUNING/TESTING/OFFLINE）\n   使用 `forwardRef` 和 `useImperativeHandle` 讓父組件控制表單提交時機。\n2. **[全廠績效儀表板](#system-廠區績效儀表板)**：**完全自主設計與開發**，在公司無任何設計資源的情況下，我獨立完成 UI/UX 設計、技術選型與實作。自行研究並選用開源套件 `@iimm/data-view-react` + **ECharts**，整合 **5 大子系統**（[廠區績效儀表板](#system-廠區績效儀表板)、即時 OEE、[即時生產進度追蹤](#system-即時生產進度追蹤)、交貨趨勢、OEE 洞察）建立全屏數據視覺化。DEMO 後獲得老闆與客戶高度肯定。實作臨時樣式機制，組件卸載時自動清理，避免影響其他頁面。\n3. **[保養系統](#system-機台保養表)**：使用 Zustand 管理頭部參數狀態，RTK Query 處理 API，實作統一抽屜狀態管理與三級審核流程（檢查員/復檢員/核准者）。另有[模具保養表](#system-模具保養表)與[施工養護綜合保養](#system-施工養護綜合保養)系統。\n4. **生產追蹤**：包含[派工系統](#system-派工系統)與[機台狀態操作與保養紀錄](#system-機台狀態操作與保養紀錄)，使用多層 Context Provider 架構管理複雜狀態（ProductionRecordProvider、ProcMaterialsProvider 等），搭配 Redux Slice 細分功能狀態。\n\n🔗 **[看作品 - 全廠績效儀表板](#route:/ManufacturingLiveMonitor)**",
+      "systems": {
+        "machineMaintenance": "機台保養表",
+        "moldMaintenance": "模具保養表",
+        "dispatch": "派工系統",
+        "machineStatus": "機台狀態操作與保養紀錄",
+        "comprehensiveMaintenance": "施工養護綜合保養",
+        "performanceDashboard": "廠區績效儀表板",
+        "productionTracking": "即時生產進度追蹤",
+        "equipmentUtilization": "全廠設備稼動率"
+      }
+    },
+    "portfolio": {
+      "id": 5,
+      "title": "個人作品集網站",
+      "description": "此作品集網站本身即是一個完整的前端專案，展示我在離職後持續精進技術能力的成果。\n\n**技術特色**：\n1. **國際化 (i18n) 實作**：整合 **i18next + react-i18next** 實現繁體中文/英文雙語切換，採用 namespace 架構組織翻譯檔案，使用 HTTP backend 動態載入語言資源，搭配 browser language detector 自動偵測使用者語系。\n2. **設計系統 (Design Token)**：建立完整的設計標記系統，定義顏色、間距、字體、邊框、陰影等設計規範，確保整站視覺一致性。\n3. **響應式設計**：使用 **Material-UI + Styled-Components** 雙樣式系統，MUI 處理複雜 UI 組件，Styled-Components 處理全域主題與響應式工具。\n4. **現代化開發工具鏈**：採用 **Vite** 建置工具、**React Router v6** 路由管理、**React Hook Form + Zod** 表單驗證。\n5. **部署與 CI/CD**：使用 **Cloudflare Pages** 部署，整合 GitHub Actions 自動化部署流程。\n\n此專案展現我對前端工程的全方位理解，從架構設計、UI/UX 實作、國際化支援到自動化部署的完整能力。",
+      "systems": {
+        "home": "首頁",
+        "about": "關於我",
+        "showcase": "專案展示",
+        "timeline": "時間軸",
+        "designToken": "設計標記系統"
+      }
+    }
+  },
+  "ui": {
+    "techStack": "技術棧",
+    "noItems": "沒有可展示的項目",
+    "showcase": "展示櫃",
+    "worksShowcase": "作品展示",
+    "aboutShowcase": "關於此展示",
+    "aboutDefault": "這是一個展示櫃組件。"
+  }
+}

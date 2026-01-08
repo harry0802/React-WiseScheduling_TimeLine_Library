@@ -1,0 +1,18 @@
+/* 自訂字體 - Free HK Kai */
+@font-face {
+  font-family: 'Free HK Kai';
+  src: url('./Free-HK-Kai.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* EDIX 字體 */
+@font-face {
+  font-family: 'EDIX';
+  src: url('./EDIX.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
