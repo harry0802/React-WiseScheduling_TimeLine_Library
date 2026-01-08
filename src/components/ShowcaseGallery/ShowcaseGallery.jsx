@@ -64,7 +64,10 @@ import {
 function generateSlidesFromItems(items) {
   const allSlides = []
 
-  items.forEach((item) => {
+  // Filter out any null/undefined items first
+  const validItems = items.filter(item => item && item.id)
+
+  validItems.forEach((item) => {
     if (item.systems && Array.isArray(item.systems)) {
       // 新格式：包含 systems 陣列
       item.systems.forEach((system, sysIndex) => {
@@ -164,8 +167,9 @@ function useShowcaseGallery(items) {
 
   const currentCategory = useMemo(() => {
     const currentSlide = slides[currentSlideIndex]
-    if (!currentSlide) return items[0]
-    return items.find((item) => item.id === currentSlide.categoryId) || items[0]
+    const fallbackCategory = items[0] || { id: 0, title: '', dec: '', techStack: [] }
+    if (!currentSlide) return fallbackCategory
+    return items.find((item) => item.id === currentSlide.categoryId) || fallbackCategory
   }, [currentSlideIndex, slides, items])
 
   const handleSlideChange = useCallback((index) => {

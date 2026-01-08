@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // ⚡ 只在開發環境載入 DevTools
@@ -42,7 +42,9 @@ createRoot(document.getElementById('root')).render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
           <GlobalStyles />
-          <App />
+          <Suspense fallback={<div />}>
+            <App />
+          </Suspense>
           {/* ⚡ 只在開發環境顯示 DevTools */}
           {isDevelopment && <ReactQueryDevtools />}
         </ThemeProvider>

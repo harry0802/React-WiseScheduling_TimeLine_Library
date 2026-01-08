@@ -76,7 +76,7 @@ i18n
     // React-specific options
     react: {
       // Use Suspense for async loading
-      useSuspense: false // 設為 false 避免初始化問題
+      useSuspense: true
     }
   })
 
